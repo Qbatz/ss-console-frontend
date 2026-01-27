@@ -23,7 +23,7 @@ const Verify : React.FC = () => {
         const accountsServer = searchParams.get('accounts-server')
         console.log(code)
 
-        axios.get('http://localhost:8080/v2/agents/verify', {
+        axios.get('https://ssconsole.qbatz.com/v2/agents/verify', {
             params: {
                 code: code,
                 location: location,
