@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Index from './components/Login/Index'
 import Verify from './components/Login/Verify';
 import Home from './components/dashboard/Home';
+import Proprietors from './components/ProprietorsScreen/Proprietors';
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
        
       <Route path='/verify' element={<Verify />} />
       <Route path='/home' element={<Home />} />
+      <Route path="/proprietors" element={<Proprietors />} />
     </Routes>
     </Router>
     

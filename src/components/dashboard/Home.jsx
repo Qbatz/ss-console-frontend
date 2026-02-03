@@ -1,37 +1,17 @@
-// import React from "react"
-
-// const Home: React.FC = () => {
-
-//     const loginAction = async () => {
-//     // const response = await axios.get("http://localhost:8080/login/authorize")
-//     window.location.href = "http://localhost:8080/login/authorize"
-//     // window.location.href = "https://accounts.zoho.com/oauth/v2/auth?response_type=code&client_id=1000.YLXF17CNZ2C016LL4WVTAQ8FRC6VWB&scope=email&redirect_uri=http://localhost:5173/verify"
-//   }
-  
-//     return  <div style={{flex: 1, backgroundColor: 'white'}}>
-//       <div style={{backgroundColor: 'red', paddingLeft: 10, paddingRight: 10, paddingTop: 5, paddingBottom: 5}} >
-//         <label>This is home page</label>
-//       </div>
-//     </div>
-// }
-
-// export default Home
-
 import React from "react";
+import DashboardLayout from "../SidebarScreen/SidebarLayout";
 
 const Home = () => {
-      const loginAction = async () => {
-    // const response = await axios.get("http://localhost:8080/login/authorize")
-    window.location.href = "http://localhost:8080/login/authorize"
-    // window.location.href = "https://accounts.zoho.com/oauth/v2/auth?response_type=code&client_id=1000.YLXF17CNZ2C016LL4WVTAQ8FRC6VWB&scope=email&redirect_uri=http://localhost:5173/verify"
-  }
-
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="bg-red-500 px-6 py-4 text-white rounded-lg">
-        This is home page
+   <DashboardLayout>
+      <h1 className="text-2xl font-semibold mb-6">
+        Home Screen
+      </h1>
+
+      <div className="bg-white p-6 rounded-2xl shadow-sm">
+        This is Home page content.
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
