@@ -47,7 +47,7 @@ const Verify : React.FC = () => {
     }, [])
 
     return <div>
-        <label style={{color: 'black'}}>Veryfying page</label>
+        <label style={{color: 'black'}}>focus on your goal</label>
         {
             error && <label>You do not having the access to the portal</label>
         }
