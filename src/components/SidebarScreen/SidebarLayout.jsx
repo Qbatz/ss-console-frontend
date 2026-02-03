@@ -12,10 +12,16 @@ const DashboardLayout = ({ children }) => {
 
 
       {/* ================= TOPBAR (FULL WIDTH) ================= */}
-      <div className="h-[60px] bg-white border-b border-gray-200 flex items-center justify-between px-6 md:px-10 shrink-0">
+      <div className="h-[50px] bg-white border-b border-gray-200 flex items-center justify-between px-6 md:px-10 shrink-0 pb-2">
 
         {/* Left - Logo */}
         <div className="flex items-center gap-2">
+            <button
+    className="md:hidden text-2xl"
+    onClick={() => setSidebarOpen(true)}
+  >
+    ☰
+  </button>
           <img src={SsIcon} className="h-7" />
           <span className="text-blue-600 font-semibold text-lg">
             Smartstay
@@ -58,21 +64,37 @@ const DashboardLayout = ({ children }) => {
       <div className="flex flex-1 overflow-hidden">
 
         {/* Sidebar */}
-        <div className="w-[240px] bg-white border-r border-gray-200 pt-6 px-4 hidden md:block">
+      {/* Sidebar */}
+<div
+  className={`
+    fixed md:static top-0 left-0 h-full w-[240px] bg-white border-r border-gray-200 pt-6 px-4
+    transform transition-transform duration-300 z-40
+    ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+  `}
+>
 
-          <div className="space-y-1 text-gray-600 text-sm">
+  {/* Close button (mobile only) */}
+  <div className="md:hidden flex justify-end mb-4">
+    <button onClick={() => setSidebarOpen(false)}>✕</button>
+  </div>
 
-          <SidebarItem title="Home" count="35" to="/home" />
-<SidebarItem title="Proprietors" count="04" to="/proprietors" />
+  <div className="space-y-1 text-gray-600 text-sm">
+    <SidebarItem title="Home" count="35" to="/home" />
+    <SidebarItem title="Proprietors" count="04" to="/proprietors" />
+    <SidebarItem title="Properties" count="05" />
+    <SidebarItem title="Subscriptions" count="05" />
+    <SidebarItem title="Billings" />
+    <SidebarItem title="Support Tickets" count="2" />
+    <SidebarItem title="CRM Dashboard" count="2" />
+  </div>
+</div>
 
-            <SidebarItem title="Properties" count="05" />
-            <SidebarItem title="Subscriptions" count="05" />
-            <SidebarItem title="Billings" />
-            <SidebarItem title="Support Tickets" count="2" />
-            <SidebarItem title="CRM Dashboard" count="2" />
-
-          </div>
-        </div>
+{sidebarOpen && (
+  <div
+    className="fixed inset-0 bg-black/30 md:hidden z-30"
+    onClick={() => setSidebarOpen(false)}
+  />
+)}
 
         {/* Scrollable Content */}
        <div className="flex-1 overflow-y-auto px-6 py-6 md:px-2 bg-white scrollbar-hide pb-14">
