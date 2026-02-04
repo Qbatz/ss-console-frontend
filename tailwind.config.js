@@ -1,19 +1,13 @@
-/** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
-     
-    
       fontFamily: {
-        gilroy: ["Gilroy", "sans-serif"],
-        montserrat: ['Montserrat', 'sans-serif'],
+        inter: ["Inter", "sans-serif"],
+              gilroy: ["Gilroy", "sans-serif"],
+
       },
     },
   },
   plugins: [],
 };
-

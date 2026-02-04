@@ -7,6 +7,7 @@ import LoginImg from "../../assets/LoginImg.png";
 import WelcomeImg from "../../assets/WlcomeImg.png";
 import AccessRestricted from "../../assets/AccessResticted.png";
 
+
 const Verify = () => {
 
   const navigate = useNavigate();
@@ -29,7 +30,14 @@ const Verify = () => {
   })
   .then((response) => {
     if (response.status === 200) {
-      navigate("/home");
+      console.log("response", response.data);
+      
+       const accessToken = response.data; // direct string
+
+    localStorage.setItem("access_token", accessToken);
+
+    navigate("/home");
+
     }
   })
   .catch((err) => {
