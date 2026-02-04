@@ -116,11 +116,11 @@ const Proprietors = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <button className="flex-1 border rounded-md py-2 hover:bg-gray-50 transition">
+          <button className="flex-1 border rounded-md py-2 hover:bg-gray-50 transition bg-white">
             View Campaign
           </button>
 
-          <button className="flex-1 border border-red-300 text-red-500 rounded-md py-2 hover:bg-red-50 transition">
+          <button className="flex-1 border border-red-300 text-red-500 rounded-md py-2 hover:bg-red-50 transition bg-white">
             Check Failed Logs
           </button>
         </div>
