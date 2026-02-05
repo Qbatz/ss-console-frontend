@@ -11,10 +11,10 @@ const DashboardLayout = ({ children }) => {
     <div className="h-screen flex flex-col bg-white overflow-hidden">
 
 
-      {/* ================= TOPBAR (FULL WIDTH) ================= */}
+      
       <div className="h-[50px] bg-white border-b border-gray-200 flex items-center justify-between px-6 md:px-10 shrink-0 pb-2">
 
-        {/* Left - Logo */}
+     
         <div className="flex items-center gap-2">
             <button
     className="md:hidden text-2xl"
@@ -22,7 +22,7 @@ const DashboardLayout = ({ children }) => {
   >
     ☰
   </button>
-          <img src={SsIcon} className="h-7" />
+          <img src={SsIcon} className="h-6" />
           <span className="text-blue-600 font-semibold text-lg">
             Smartstay
           </span>
@@ -34,7 +34,7 @@ const DashboardLayout = ({ children }) => {
             <input
               type="text"
               placeholder='Try search "where did my user come from"'
-              className="w-full border border-gray-200 rounded-full pl-5 pr-20 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-200 rounded-full pl-5 pr-20 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-600 text-sm font-medium">
               Search
@@ -81,11 +81,13 @@ const DashboardLayout = ({ children }) => {
   <div className="space-y-1 text-gray-600 text-sm">
     <SidebarItem title="Home" count="35" to="/home" />
     <SidebarItem title="Proprietors" count="04" to="/proprietors" />
-    <SidebarItem title="Properties" count="05" />
-    <SidebarItem title="Subscriptions" count="05" />
-    <SidebarItem title="Billings" />
-    <SidebarItem title="Support Tickets" count="2" />
-    <SidebarItem title="CRM Dashboard" count="2" />
+    <SidebarItem title="Properties" count="05" to="/properties"/>
+    <SidebarItem title="Subscriptions" count="05" to="/subscription"/>
+    <SidebarItem title="Billings" to ="/billing"/>
+    <SidebarItem title="Support Tickets" count="2" to="/supportTicket"/>
+    <SidebarItem title="CRM Dashboard" count="2" to="/crmDashboard"/>
+    <SidebarItem title="roles" count="2" to="/roles" />
+    <SidebarItem title="IAM-Admin User" count="2" to="/iam-admin-user"/>
   </div>
 </div>
 
@@ -97,7 +99,7 @@ const DashboardLayout = ({ children }) => {
 )}
 
         {/* Scrollable Content */}
-       <div className="flex-1 overflow-y-auto px-6 py-6 md:px-2 bg-white scrollbar-hide pb-14">
+       <div className="flex-1 overflow-y-auto px-6 py-2 md:px-2 bg-white scrollbar-hide pb-14">
         <div className="w-full">
           {children}
           </div>
