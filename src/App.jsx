@@ -60,6 +60,13 @@ import Proprietors from './components/ProprietorsScreen/Proprietors';
 import Roles from './components/RoleScreen/RoleList';
 import IamAdminUser from './components/AdminUser/AdminUserList';
 import { RoleProvider } from './Context/RoleContext';
+import Properties from './components/PropertiesScreen/Properties';
+import Subscription from './components/SubscriptionScreen/subscription';
+import Billing from './components/BillingScreen/Billing';
+import SupportTicket from './components/SupportTicketScreen/SupportTicket';
+import CRMDashboard from './components/CRMDashboardScreen/CRMDashboard';
+import {HostelProvider} from "./Context/HostelListContext"
+
 
 function App() {
 
@@ -81,7 +88,9 @@ function App() {
           element={
             <PrivateRoute>
               <RoleProvider>
+                <HostelProvider>
                 <Home />
+                </HostelProvider>
               </RoleProvider>
             </PrivateRoute>
           }
@@ -91,9 +100,13 @@ function App() {
           path="/proprietors"
           element={
             <PrivateRoute>
+              
               <RoleProvider>
+                 <HostelProvider>
                 <Proprietors />
+                </HostelProvider>
               </RoleProvider>
+              
             </PrivateRoute>
           }
         />
@@ -104,8 +117,11 @@ function App() {
           element={
             <PrivateRoute>
               <RoleProvider>
+                <HostelProvider>
                 <IamAdminUser />
+                </HostelProvider>
               </RoleProvider>
+              
             </PrivateRoute>
           }
         />
@@ -115,11 +131,74 @@ function App() {
           element={
             <PrivateRoute>
               <RoleProvider>
+                 <HostelProvider>
                 <Roles />
+                </HostelProvider>
               </RoleProvider>
             </PrivateRoute>
           }
         />
+          <Route
+          path="/properties"
+          element={
+            <PrivateRoute>
+              <RoleProvider>
+                <HostelProvider>
+                <Properties />
+                </HostelProvider>
+              </RoleProvider>
+            </PrivateRoute>
+          }
+        />
+           <Route
+          path="/subscription"
+          element={
+            <PrivateRoute>
+              <RoleProvider>
+                <HostelProvider>
+                <Subscription />
+                </HostelProvider>
+              </RoleProvider>
+            </PrivateRoute>
+          }
+        />
+         <Route
+          path="/billing"
+          element={
+            <PrivateRoute>
+              <RoleProvider>
+                 <HostelProvider>
+                <Billing />
+                </HostelProvider>
+              </RoleProvider>
+            </PrivateRoute>
+          }
+        />
+         <Route
+          path="/supportTicket"
+          element={
+            <PrivateRoute>
+              <RoleProvider>
+                  <HostelProvider>
+                <SupportTicket />
+                </HostelProvider>
+              </RoleProvider>
+            </PrivateRoute>
+          }
+        />
+         <Route
+          path="/crmDashboard"
+          element={
+            <PrivateRoute>
+              <RoleProvider>
+                <HostelProvider>
+                <CRMDashboard />
+                </HostelProvider>
+              </RoleProvider>
+            </PrivateRoute>
+          }
+        />
+
 
       </Routes>
     </Router>

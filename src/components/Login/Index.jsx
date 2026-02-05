@@ -55,7 +55,7 @@ const Index = () => {
   };
 
   return (
-  <div className="min-h-screen bg-[#f4f6f9] flex flex-col relative overflow-hidden">
+  <div className="min-h-screen flex flex-col relative overflow-hidden">
  
        {/* Top Left Logo */}
        <div className="absolute top-6 left-6">

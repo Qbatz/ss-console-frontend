@@ -81,11 +81,11 @@ const DashboardLayout = ({ children }) => {
   <div className="space-y-1 text-gray-600 text-sm">
     <SidebarItem title="Home" count="35" to="/home" />
     <SidebarItem title="Proprietors" count="04" to="/proprietors" />
-    <SidebarItem title="Properties" count="05" />
-    <SidebarItem title="Subscriptions" count="05" />
-    <SidebarItem title="Billings" />
-    <SidebarItem title="Support Tickets" count="2" />
-    <SidebarItem title="CRM Dashboard" count="2" />
+    <SidebarItem title="Properties" count="05" to="/properties"/>
+    <SidebarItem title="Subscriptions" count="05" to="/subscription"/>
+    <SidebarItem title="Billings" to ="/billing"/>
+    <SidebarItem title="Support Tickets" count="2" to="/supportTicket"/>
+    <SidebarItem title="CRM Dashboard" count="2" to="/crmDashboard"/>
     <SidebarItem title="roles" count="2" to="/roles" />
     <SidebarItem title="IAM-Admin User" count="2" to="/iam-admin-user"/>
   </div>
@@ -99,7 +99,7 @@ const DashboardLayout = ({ children }) => {
 )}
 
         {/* Scrollable Content */}
-       <div className="flex-1 overflow-y-auto px-6 py-6 md:px-2 bg-white scrollbar-hide pb-14">
+       <div className="flex-1 overflow-y-auto px-6 py-2 md:px-2 bg-white scrollbar-hide pb-14">
         <div className="w-full">
           {children}
           </div>
