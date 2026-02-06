@@ -1,7 +1,6 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  // baseURL: "https://ssconsole.qbatz.com",
   baseURL: "https://ssconsoledevapi.qbatz.com",
 });
 
