@@ -51,7 +51,7 @@ const Index = () => {
   // }, []);
 
   const loginAction = () => {
-    window.location.href = "https://ssconsole.qbatz.com/v2/agents/authorize";
+    window.location.href = "https://ssconsoledevapi.qbatz.com/v2/agents/authorize";
   };
 
   return (
