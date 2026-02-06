@@ -25,7 +25,7 @@ const Verify = () => {
   const idToken = searchParams.get("id_token");
   const accountsServer = searchParams.get("accounts-server");
 
-  axios.get("https://ssconsole.qbatz.com/v2/agents/verify", {
+  axios.get("https://ssconsoledevapi.qbatz.com/v2/agents/verify", {
     params: { code, location, accountsServer, idToken }
   })
   .then((response) => {
@@ -83,7 +83,7 @@ return (
        <button
   onClick={() => {
     shouldShowError(false);
-    window.location.href = "https://ssconsole.qbatz.com/v2/agents/authorize";
+    window.location.href = "https://ssconsoledevapi.qbatz.com/v2/agents/authorize";
   }}
   className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition"
 >
