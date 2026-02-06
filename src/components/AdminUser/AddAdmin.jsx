@@ -1,17 +1,13 @@
 import React,{useState,useEffect} from "react";
 import DownArrow from "../../assets/dropdownImg.png"
 import { useRole } from "../../Context/RoleContext";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import Toast from "../SuccessModal/ToastDesign";
 
 
 const AddAdmin = ({ isOpen, onClose }) => {
   const { agentRoles,getAgentRoles,createAdmin} = useRole();
-    const roles = [
-  "Super Admin",
-  "Support Agent",
-  "Billing Manager",
-  "Property Manager",
-  "test","test1","test2"
-];
+ 
 useEffect(() => {
   getAgentRoles();
 }, []);
@@ -21,6 +17,11 @@ const [openDropdown, setOpenDropdown] = useState(false);
  const [openDept, setOpenDept] = useState(false);
   const [selectedDept, setSelectedDept] = useState("");
   const [email, setEmail] = useState("");
+  const [modalType, setModalType] = useState("success");
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [message, setMessage] = useState("");
+    const [ticketLink, setTicketLink] = useState("");
+
 
   const departments = [
     "Operations",
@@ -43,7 +44,7 @@ const [openDropdown, setOpenDropdown] = useState(false);
   const payload = {
     emailId: email,
      roleId: Number(selectedRole.id),
-     ticketLink:"https://sprints.zoho.in/workspace/s3remoticatechnologies#P24/itemdetails/I4"
+    ticketLink: ticketLink
   };
 
   console.log("FINAL PAYLOAD 👉", payload);
@@ -51,19 +52,27 @@ const [openDropdown, setOpenDropdown] = useState(false);
   const res = await createAdmin(payload);
 
   if (res.success) {
-    onClose();
-    setEmail("");
-    setSelectedRole(null);
+   
+        setModalType("success");
+      setMessage(res?.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+        onClose();
+       
+      }, 800);
   }
 };
 
   return (
+    <>
     <div
       className={`fixed inset-0 z-50 transition ${
         isOpen ? "visible" : "invisible"
       }`}
     >
-      {/* Overlay */}
+      
       <div
         onClick={onClose}
         className={`absolute inset-0 bg-black/40 transition-opacity ${
@@ -71,13 +80,13 @@ const [openDropdown, setOpenDropdown] = useState(false);
         }`}
       />
 
-      {/* Slide Panel */}
+   
       <div
         className={`absolute right-0 top-0 h-full w-full sm:w-[420px] bg-white shadow-xl transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        {/* Header */}
+       
         <div className="flex justify-between items-start px-6 py-4 border-b">
           <div>
             <h2 className="text-lg font-semibold font-inter">
@@ -95,11 +104,11 @@ const [openDropdown, setOpenDropdown] = useState(false);
           </button>
         </div>
 
-        {/* Body */}
+      
         <div className="px-6 py-5 space-y-5 text-sm">
 
-          {/* Full Name */}
-          <div>
+         
+          {/* <div>
           <label className="block w-full text-left text-sm font-medium pb-1">
   Full Name <span className="text-red-500">*</span>
 </label>
@@ -108,9 +117,9 @@ const [openDropdown, setOpenDropdown] = useState(false);
               placeholder="Enter full name"
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
             />
-          </div>
+          </div> */}
 
-          {/* Email */}
+        
           <div>
             <label className="block w-full text-left text-sm font-medium pb-1">
               Email Address <span className="text-red-500">*</span>
@@ -124,15 +133,15 @@ const [openDropdown, setOpenDropdown] = useState(false);
             />
           </div>
 
-          {/* Department */}
+         
          
             
- <div className="relative">
+ {/* <div className="relative">
   <label className="block w-full text-left text-sm font-medium pb-1">
     Department <span className="text-red-500">*</span>
   </label>
 
-  {/* Input Box */}
+ 
   <div
     onClick={() => setOpenDept(!openDept)}
     className="w-full border rounded-lg px-3 py-2 bg-white cursor-pointer flex justify-between items-center"
@@ -143,7 +152,7 @@ const [openDropdown, setOpenDropdown] = useState(false);
    <img src={DownArrow} alt="down" className="w-4 h-4 object-contain"/>
   </div>
 
-  {/* Dropdown */}
+
   {openDept && (
     <div className="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
       {departments.map((dept, i) => (
@@ -160,7 +169,7 @@ const [openDropdown, setOpenDropdown] = useState(false);
       ))}
     </div>
   )}
-</div>
+</div> */}
 
 
          
@@ -224,7 +233,19 @@ const [openDropdown, setOpenDropdown] = useState(false);
 
 
 </div>
+<div>
+          <label className="block w-full text-left text-sm font-medium pb-1">
+  Ticket Link <span className="text-red-500">*</span>
+</label>
+           <input
+  type="text"
+  value={ticketLink}
+  onChange={(e) => setTicketLink(e.target.value)}
+  placeholder="Enter Ticket Link"
+  className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+/>
 
+          </div>
         </div>
 
         {/* Footer */}
@@ -242,6 +263,7 @@ const [openDropdown, setOpenDropdown] = useState(false);
         </div>
       </div>
     </div>
+    </>
   );
 };
 

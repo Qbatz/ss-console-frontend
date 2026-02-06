@@ -25,7 +25,7 @@ const Verify = () => {
   const idToken = searchParams.get("id_token");
   const accountsServer = searchParams.get("accounts-server");
 
-  axios.get("https://ssconsole.qbatz.com/v2/agents/verify", {
+  axios.get("https://ssconsoledevapi.qbatz.com/v2/agents/verify", {
     params: { code, location, accountsServer, idToken }
   })
   .then((response) => {
