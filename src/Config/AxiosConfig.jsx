@@ -1,8 +1,8 @@
 import axios from "axios";
+import ConfigV2 from "./ConfigV2";
 
 const axiosInstance = axios.create({
-  // baseURL: "https://ssconsole.qbatz.com",
-  baseURL: "https://ssconsoledevapi.qbatz.com",
+  baseURL: ConfigV2.apiBaseUrl,
 });
 
 // Attach token automatically

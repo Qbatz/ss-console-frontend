@@ -66,6 +66,7 @@ import Billing from './components/BillingScreen/Billing';
 import SupportTicket from './components/SupportTicketScreen/SupportTicket';
 import CRMDashboard from './components/CRMDashboardScreen/CRMDashboard';
 import {HostelProvider} from "./Context/HostelListContext"
+import Login from './components/internalLogin/Login';
 
 
 function App() {
@@ -79,7 +80,7 @@ function App() {
     <Router>
       <Routes>
 
-       
+        <Route path='/internal/login' element={<Login />} />
         <Route path="/" element={<Index />} />
         <Route path="/verify" element={<Verify />} />
 

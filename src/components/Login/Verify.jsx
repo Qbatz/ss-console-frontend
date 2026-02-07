@@ -83,7 +83,7 @@ return (
        <button
   onClick={() => {
     shouldShowError(false);
-    window.location.href = "https://ssconsole.qbatz.com/v2/agents/authorize";
+    window.location.href = "https://ssconsoledevapi.qbatz.com/v2/agents/authorize";
   }}
   className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition"
 >
