@@ -141,8 +141,8 @@ const getErrorMessage = (error) => {
 
     const res = await api.post("/v2/admin", payload);
 
-    if (res.status === 200 || res.status === 201) {
-      return { success: true, data: res.data };
+    if (res?.status === 200 || res?.status === 201) {
+      return { success: true, data: res.data , message: "Created Successfully" };
     }
   
 
