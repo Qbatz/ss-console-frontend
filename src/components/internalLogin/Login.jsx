@@ -22,7 +22,7 @@ const Login = () => {
     }
 
     const verifyToken = () => {
-        axios.get(  "http://localhost:8080/v2/admin/", {
+      axios.get(`${ConfigV2.apiBaseUrl}/v2/admin/`, {
             headers: {
                 'Authorization': 'Bearer ' + token
             }

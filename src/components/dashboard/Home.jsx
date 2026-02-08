@@ -5,7 +5,7 @@ const Home = () => {
   return (
    <DashboardLayout>
       <h1 className="text-2xl font-semibold mb-6">
-        Home Screen
+        Home Scree
       </h1>
 
       <div className="bg-white p-6 rounded-2xl shadow-sm">
