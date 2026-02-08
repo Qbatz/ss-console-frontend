@@ -14,27 +14,55 @@ export const HostelProvider = ({ children }) => {
     "Something went wrong";
 
   // ✅ GET /v2/hostels
-  const getHostels = async () => {
-    try {
-      setLoading(true);
-      setErrorMsg("");
+  // const getHostels = async () => {
+  //   try {
+  //     setLoading(true);
+  //     setErrorMsg("");
 
-      const res = await api.get("/v2/hostels");
+  //     const res = await api.get("/v2/hostels");
 
-      if (res.status === 200) {
-        setHostels(res.data || []);
-        return { success: true, data: res.data };
+  //     if (res.status === 200) {
+  //       setHostels(res.data || []);
+  //       return { success: true, data: res.data };
+  //     }
+
+  //     return { success: false };
+  //   } catch (error) {
+  //     const msg = getErrorMessage(error);
+  //     setErrorMsg(msg);
+  //     return { success: false, message: msg };
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const getHostels = async (page = 0, size = 10, hostelName = "") => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await api.get("/v2/hostels", {
+      params: {
+        page,
+        size,
+        hostelName
       }
+    });
 
-      return { success: false };
-    } catch (error) {
-      const msg = getErrorMessage(error);
-      setErrorMsg(msg);
-      return { success: false, message: msg };
-    } finally {
-      setLoading(false);
+    if (res.status === 200) {
+      setHostels(res.data || {});
+      return { success: true, data: res.data };
     }
-  };
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <HostelContext.Provider
