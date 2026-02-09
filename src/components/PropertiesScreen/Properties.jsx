@@ -3,36 +3,102 @@ import AddBtn from "../../assets/add.png"
 import Search from "../../assets/Search.png";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { useHostel } from "../../Context/HostelListContext";
+import Circle from "../../assets/menucircle.png"
 
 const Properties = () => {
   const { hostels, getHostels, loading } = useHostel();
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [statusFilter, setStatusFilter] = useState("");
-
-
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      getHostels(page, pageSize, searchText);
-    }, 500);
-
-    return () => clearTimeout(delay);
-  }, [page, pageSize, searchText]);
+  const isStatusFiltering = statusFilter !== "";
 
 
   // useEffect(() => {
-  //   getHostels();
-  // }, []);
+  //   const delay = setTimeout(() => {
+  //     getHostels(page, pageSize, searchText);
+  //   }, 500);
+
+  //   return () => clearTimeout(delay);
+  // }, [page, pageSize, searchText]);
   useEffect(() => {
-    getHostels(page, pageSize, searchText);
-  }, [page, pageSize, searchText]);
+
+    const delay = setTimeout(() => {
+
+      if (statusFilter) {
+        // Active / Inactive → Fetch all once
+        getHostels(0, 100000, "");
+      } else {
+        // All + Search → Backend pagination
+        getHostels(page - 1, pageSize, searchText);
+      }
+
+    }, 300);
+
+    return () => clearTimeout(delay);
+
+  }, [page, pageSize, searchText, statusFilter]);
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter, searchText, pageSize]);
+
+
+  console.log("page", page);
+  // let filteredData = hostels?.hostels || [];
+
+
+
+  let displayData = [];
+  let totalPages = 1;
+
+  if (statusFilter) {
+
+    let filtered = hostels?.hostels || [];
+
+    filtered = filtered.filter(item =>
+      statusFilter === "active"
+        ? item.subscriptionIsActive
+        : !item.subscriptionIsActive
+    );
+
+    totalPages = Math.ceil(filtered.length / pageSize);
+
+    displayData = filtered.slice(
+      (page - 1) * pageSize,
+      page * pageSize
+    );
+
+  } else {
+
+    displayData = hostels?.hostels || [];
+
+    if (hostels?.totalPages) {
+      totalPages = hostels.totalPages;
+    } else if (hostels?.totalHostels) {
+      totalPages = Math.ceil(hostels.totalHostels / pageSize);
+    } else {
+      totalPages = 1;
+    }
+
+  }
+
+  const isNextDisabled = page >= totalPages || totalPages === 0;
+
+
+
 
   console.log("hostels", hostels)
 
+
   return (
     <DashboardLayout>
-      <div className="p-2 h-[calc(100vh-80px)] flex flex-col overflow-hidden">
+
+      <div className="flex flex-col h-full min-h-0">
+
+
+
+
+
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-xl font-semibold font-Inter">Properties</h1>
@@ -102,7 +168,7 @@ const Properties = () => {
               value={searchText}
               onChange={(e) => {
                 setSearchText(e.target.value);
-                setPage(0);
+                setPage(1);
               }}
               className="pl-9 pr-4 py-2 border rounded-lg text-sm font-medium leading-[150%] w-56"
             />
@@ -111,146 +177,144 @@ const Properties = () => {
 
 
 
-        <div className="bg-white rounded-xl shadow-sm border flex-1 flex flex-col overflow-hidden">
+
+        <div className="bg-white rounded-xl shadow-sm border flex flex-col max-h-[calc(100vh-230px)]">
 
 
-
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto pb-5">
 
             <table className="w-full text-sm text-left border-collapse">
 
               <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0 z-10">
                 <tr>
-                  <th className="px-4 py-3">ID</th>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3 whitespace-nowrap">Region / City</th>
-                  <th className="px-4 py-3 whitespace-nowrap">Sub Plan</th>
-                  <th className="px-4 py-3 whitespace-nowrap">Created On</th>
-                  <th className="px-4 py-3 whitespace-nowrap">Last Action</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+                  <th className="px-4 py-3 text-xs">ID</th>
+                  <th className="px-4 py-3 text-xs">Hostel Name</th>
+                  <th className="px-4 py-3 whitespace-nowrap text-xs">Name</th>
+                  <th className="px-4 py-3 whitespace-nowrap text-xs">Sub Plan</th>
+                  <th className="px-4 py-3 whitespace-nowrap text-xs">Created On</th>
+                  <th className="px-4 py-3 whitespace-nowrap text-xs">Last Action</th>
+                  <th className="px-4 py-3 text-xs">Status</th>
+                  <th className="px-4 py-3 text-center text-xs">Actions</th>
                 </tr>
               </thead>
 
               <tbody className="divide-y">
-                {/* {hostels?.hostels?.map((item, index) => ( */}
-                {hostels?.hostels
-                  ?.filter((item) => {
-                    if (statusFilter === "") return true;
-                    if (statusFilter === "active") return item.subscriptionIsActive;
-                    if (statusFilter === "inactive") return !item.subscriptionIsActive;
-                    return true;
-                  })
-                  ?.map((item, index) => (
 
-                    <tr key={item.hostelId} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">{index + 1}</td>
-                      <td className="px-4 py-3 text-blue-600 font-medium">
-                        {item.hostelName}
-                      </td>
-                      <td className="px-4 py-3">
-                        {item.ownerInfo?.fullName}
-                      </td>
-                      <td className="px-4 py-3">
-                        {item.hostelPlan?.currentPlan}
-                      </td>
-                      <td className="px-4 py-3">
-                        {item.joinedOn}
-                      </td>
-                      <td className="px-4 py-3">
-                        {item.expiredOn}
-                      </td>
+                {displayData?.map((item, index) => (
 
-                      <td className="px-4 py-3">
+                  <tr key={item.hostelId} className="hover:bg-gray-50 text-[12px]">
+                    <td className="px-4 py-1">{(page - 1) * pageSize + index + 1}</td>
+                    <td className="px-4 py-1 text-blue-600 font-medium">
+                      {item.hostelName}
+                    </td>
+                    <td className="px-4 py-1 whitespace-nowrap">
+                      {item.ownerInfo?.fullName}
+                    </td>
+                    <td className="px-4 py-1">
+                      {item.hostelPlan?.currentPlan}
+                    </td>
+                    <td className="px-4 py-1">
+                      {item.joinedOn}
+                    </td>
+                    <td className="px-4 py-1">
+                      {item.expiredOn}
+                    </td>
+
+                    <td className="px-4 py-1 text-center">
+                      <span
+                        className={`flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap w-fit ${item.subscriptionIsActive
+                          ? "bg-green-100 text-green-600"
+                          : "bg-red-100 text-red-600"
+                          }`}
+                      >
                         <span
-                          className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap w-fit ${item.subscriptionIsActive
-                              ? "bg-green-100 text-green-600"
-                              : "bg-red-100 text-red-600"
+                          className={`w-2 h-2 rounded-full ${item.subscriptionIsActive
+                            ? "bg-green-500"
+                            : "bg-red-500"
                             }`}
-                        >
-                          <span
-                            className={`w-2 h-2 rounded-full ${item.subscriptionIsActive
-                                ? "bg-green-500"
-                                : "bg-red-500"
-                              }`}
-                          ></span>
-                          {item.subscriptionIsActive ? "Active" : "Inactive"}
-                        </span>
-                      </td>
+                        ></span>
+                        {item.subscriptionIsActive ? "Active" : "Inactive"}
+                      </span>
+                    </td>
 
-                      <td className="px-4 py-3 text-right">⋮</td>
-                    </tr>
-                  ))}
+                    <td className="px-4 py-1 text-end"> <img
+                      src={Circle}
+                      alt="circle"
+                      className=" w-5 h-5 "
+                    /></td>
+                  </tr>
+                ))}
               </tbody>
 
             </table>
           </div>
 
 
-          <div className="flex justify-between items-center px-4 py-3 text-sm border-t bg-white">
 
-
-            <span className="text-gray-600">
-              Total Record Count :{" "}
-              <span className="text-blue-600 font-medium">
-                {hostels?.totalElements ?? 0}
-              </span>
-            </span>
-
-
-            <div className="flex items-center gap-4">
-
-
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setPage(0);
-                }}
-                className="border rounded-md px-2 py-1 text-sm"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-
-
-              <button
-                disabled={page === 0}
-                onClick={() => setPage((prev) => prev - 1)}
-                className="text-gray-500 disabled:opacity-40"
-              >
-                &#8249;
-              </button>
-
-
-              <span className="border px-3 py-1 rounded-md bg-gray-100">
-                {(hostels?.currentPage ?? 0) + 1}
-              </span>
-
-              <span className="text-gray-500">
-                {page * pageSize + 1} -{" "}
-                {Math.min(
-                  (page + 1) * pageSize,
-                  hostels?.totalElements ?? 0
-                )}
-              </span>
-
-
-              <button
-                disabled={hostels?.last}
-                onClick={() => setPage((prev) => prev + 1)}
-                className="text-gray-500 disabled:opacity-40"
-              >
-                &#8250;
-              </button>
-
-            </div>
-          </div>
 
 
         </div>
+        <div className="flex justify-between items-center px-4 py-3 pt-4 text-sm border-t bg-white">
 
+
+          <span className="text-gray-600">
+            Total Record Count :{" "}
+            <span className="text-blue-600 font-medium">
+              {/* {hostels?.totalElements ?? 0} */}
+              {hostels?.totalHostels}
+            </span>
+          </span>
+
+
+          <div className="flex items-center gap-4">
+
+
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              className="border rounded-md px-2 py-1 text-sm"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+
+
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((prev) => prev - 1)}
+              className="text-gray-500 disabled:opacity-40"
+            >
+              &#8249;
+            </button>
+
+
+            <span className="border px-3 py-1 rounded-md bg-gray-100">
+              {/* {(hostels?.currentPage ?? 0) + 1} */}
+              {page}
+            </span>
+
+            <span className="text-gray-500">
+              {(page - 1) * pageSize + 1} -{" "}
+              {Math.min(page * pageSize, hostels?.totalHostels ?? 0)}
+
+            </span>
+
+
+            <button
+              // disabled={hostels?.last}
+              disabled={isNextDisabled}
+              onClick={() => setPage((prev) => prev + 1)}
+              className="text-gray-500 disabled:opacity-40"
+            >
+              &#8250;
+            </button>
+
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );
