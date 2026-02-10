@@ -190,6 +190,8 @@ const Properties = () => {
                   <th className="px-4 py-3 text-xs">ID</th>
                   <th className="px-4 py-3 text-xs">Hostel Name</th>
                   <th className="px-4 py-3 whitespace-nowrap text-xs">Name</th>
+                   <th className="px-4 py-3 whitespace-nowrap text-xs">Mobile.No</th>
+                    <th className="px-4 py-3 whitespace-nowrap text-xs">Addres</th>
                   <th className="px-4 py-3 whitespace-nowrap text-xs">Sub Plan</th>
                   <th className="px-4 py-3 whitespace-nowrap text-xs">Created On</th>
                   <th className="px-4 py-3 whitespace-nowrap text-xs">Last Action</th>
@@ -209,6 +211,12 @@ const Properties = () => {
                     </td>
                     <td className="px-4 py-1 whitespace-nowrap">
                       {item.ownerInfo?.fullName}
+                    </td>
+                      <td className="px-4 py-1 whitespace-nowrap">
+                      {item.ownerInfo?.mobile}
+                    </td>
+                      <td className="px-4 py-1 whitespace-nowrap">
+                      {item?.fullAddress}
                     </td>
                     <td className="px-4 py-1">
                       {item.hostelPlan?.currentPlan}
