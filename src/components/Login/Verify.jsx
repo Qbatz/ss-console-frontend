@@ -6,6 +6,7 @@ import SsIcon from "../../assets/SsIcon.png";
 import LoginImg from "../../assets/LoginImg.png";
 import WelcomeImg from "../../assets/WlcomeImg.png";
 import AccessRestricted from "../../assets/AccessResticted.png";
+import ConfigV2 from "../../Config/ConfigV2";
 
 
 const Verify = () => {
@@ -25,7 +26,7 @@ const Verify = () => {
   const idToken = searchParams.get("id_token");
   const accountsServer = searchParams.get("accounts-server");
 
-  axios.get("https://ssconsoledevapi.qbatz.com/v2/agents/verify", {
+  axios.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
     params: { code, location, accountsServer, idToken }
   })
   .then((response) => {
@@ -83,7 +84,7 @@ return (
        <button
   onClick={() => {
     shouldShowError(false);
-    window.location.href = "https://ssconsoledevapi.qbatz.com/v2/agents/authorize";
+    window.location.href = ConfigV2.apiBaseUrl + "/v2/agents/authorize";
   }}
   className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition"
 >
