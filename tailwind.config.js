@@ -2,10 +2,14 @@ export default {
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
-      fontFamily: {
-        inter: ["Inter", "sans-serif"],
-        gilroy: ["Gilroy", "sans-serif"],
-      },
+   theme: {
+  extend: {},
+  fontFamily: {
+    sans: ['Inter', 'sans-serif'],
+    gilroy: ['Gilroy', 'sans-serif'],
+  },
+},
+
       keyframes: {
         fadeIn: {
           "0%": { opacity: "0", transform: "translateY(10px)" },

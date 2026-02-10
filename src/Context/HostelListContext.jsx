@@ -35,7 +35,7 @@ export const HostelProvider = ({ children }) => {
   //     setLoading(false);
   //   }
   // };
-  const getHostels = async (page, size = 10, hostelName = "") => {
+  const getHostels = async (page = 1, size = 10, hostelName = "") => {
   try {
     setLoading(true);
     setErrorMsg("");
