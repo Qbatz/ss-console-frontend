@@ -25,6 +25,7 @@ import SsIcon from "../../assets/SsIcon.png";
 import LoginImg from "../../assets/LoginImg.png";
 import WelcomeImg from "../../assets/WlcomeImg.png";
 import AccessRestricted from "../../assets/AccessResticted.png";
+import ConfigV2 from "../../Config/ConfigV2";
 
 const Index = () => {
   //   useEffect(() => {
@@ -51,7 +52,7 @@ const Index = () => {
   // }, []);
 
   const loginAction = () => {
-    window.location.href = "https://ssconsoledevapi.qbatz.com/v2/agents/authorize";
+    window.location.href = ConfigV2.apiBaseUrl + "/v2/agents/authorize";
   };
 
   return (
