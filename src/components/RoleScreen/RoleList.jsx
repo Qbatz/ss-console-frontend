@@ -28,11 +28,11 @@ const Roles = () => {
     <DashboardLayout>
 
       {/* Page Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-gray-200 mb-6">
-        <h2 className="text-lg font-semibold text-gray-800">Roles</h2>
+      <div className="flex items-center justify-between pb-3 border-b border-gray-200 mb-6 p-3 ">
+        <h2 className="text-lg font-semibold text-gray-800 font-sans">Roles</h2>
 
         <button className="flex items-center gap-2 text-blue-600 font-medium text-sm" onClick={() => setOpen(true)}>
-          <span className="bg-blue-600 text-white w-5 h-5 flex items-center justify-center rounded-md text-xs">
+          <span className="bg-blue-600 text-white w-5 h-5 flex items-center justify-center rounded-md text-xs font-sans">
             +
           </span>
           Create Role
@@ -52,39 +52,42 @@ const Roles = () => {
 
             <thead className="bg-gray-50 text-xs text-gray-500 uppercase sticky top-0 z-10">
               <tr>
-                <th className="px-6 py-3 text-left">Role Name</th>
-                <th className="px-6 py-3 text-left">Description</th>
-                <th className="px-6 py-3 text-center">Users Count</th>
-                <th className="px-6 py-3 text-left">Created On</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                <th className="px-4 py-3 text-xs whitespace-nowrap text-left font-sans">
+                  Role Name
+                </th>
+
+                <th className="px-4 py-3 text-xs whitespace-nowrap font-sans">Description</th>
+                <th className="px-4 py-3 text-xs whitespace-nowrap font-sans">Users Count</th>
+                <th className="px-4 py-3 text-xs whitespace-nowrap font-sans">Created On</th>
+                <th className="px-4 py-3 text-xs whitespace-nowrap font-sans">Actions</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-gray-200">
 
               {paginatedData?.map((role, index) => (
-                <tr key={index} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-1 font-medium text-gray-800 text-start">
+                <tr key={index} className="hover:bg-gray-50 transition text-[12px]">
+                  <td className="px-6 py-1 font-medium text-gray-800 text-start font-sans">
                     {role.name}
                   </td>
 
-                  <td className="px-6 py-1 text-gray-600">
+                  <td className="px-6 py-1 text-gray-600 font-sans">
                     {/* {role.description} */}
                     test
                   </td>
 
-                  <td className="px-6 py-1 text-center">
-                    <span className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-xs">
+                  <td className="px-6 py-1 text-center font-sans">
+                    <span className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-xs font-sans">
                       👥 {role.users}
                     </span>
                   </td>
 
-                  <td className="px-6 py-1 text-gray-600">
+                  <td className="px-6 py-1 text-gray-600 font-sans">
                     {/* {role.created} */}
                     09-02-2026
                   </td>
 
-                  <td className="px-6 py-1 text-center relative">
+                  <td className="px-6 py-1 text-center relative font-sans">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -103,8 +106,8 @@ const Roles = () => {
                       <div
                         onClick={(e) => e.stopPropagation()}
                         className={`absolute right-6 w-32 bg-white border rounded-lg shadow-lg z-20 ${index >= agentRoles.length - 2
-                            ? "bottom-8"
-                            : "top-8"
+                          ? "bottom-8"
+                          : "top-8"
                           }`}
                       >
                         <button
