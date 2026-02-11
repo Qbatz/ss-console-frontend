@@ -21,26 +21,18 @@ const Properties = () => {
 
   //   return () => clearTimeout(delay);
   // }, [page, pageSize, searchText]);
-  useEffect(() => {
+ useEffect(() => {
+  const delay = setTimeout(() => {
+    getHostels(page, pageSize, searchText);
+  }, 300);
 
-    const delay = setTimeout(() => {
+  return () => clearTimeout(delay);
+}, [page, pageSize, searchText]);
 
-      if (statusFilter) {
-        // Active / Inactive → Fetch all once
-        getHostels(0, 100000, "");
-      } else {
-        // All + Search → Backend pagination
-        getHostels(page - 1, pageSize, searchText);
-      }
 
-    }, 300);
+ 
 
-    return () => clearTimeout(delay);
 
-  }, [page, pageSize, searchText, statusFilter]);
-  useEffect(() => {
-    setPage(1);
-  }, [statusFilter, searchText, pageSize]);
 
 
   console.log("page", page);
@@ -48,8 +40,9 @@ const Properties = () => {
 
 
 
-  let displayData = [];
-  let totalPages = 1;
+let displayData = hostels?.hostels || [];
+let totalPages = hostels?.totalPages || 1;
+let totalRecords = hostels?.totalHostels || 0;
 
   if (statusFilter) {
 
@@ -82,7 +75,7 @@ const Properties = () => {
 
   }
 
-  const isNextDisabled = page >= totalPages || totalPages === 0;
+ const isNextDisabled = page >= totalPages - 1;
 
 
 
@@ -128,7 +121,9 @@ const Properties = () => {
         </div>
 
 
-        <div className="flex flex-wrap justify-between items-center gap-2 mb-4 font-inter">
+        <div className="sticky top-0 z-20 bg-white pb-4">
+  <div className="flex flex-wrap justify-between items-center gap-2 font-inter">
+
 
           <div className="flex gap-3">
 
@@ -140,8 +135,8 @@ const Properties = () => {
               className="border rounded-lg px-3 py-2 text-xs font-medium text-gray-700"
             >
               <option value="">All</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              {/* <option value="active">Active</option>
+              <option value="inactive">Inactive</option> */}
             </select>
 
 
@@ -173,12 +168,14 @@ const Properties = () => {
               className="pl-9 pr-4 py-2 border rounded-lg text-sm font-medium leading-[150%] w-56"
             />
           </div>
+          </div>
         </div>
 
 
 
 
-        <div className="bg-white rounded-xl shadow-sm border flex flex-col max-h-[calc(100vh-230px)]">
+     <div className="bg-white rounded-xl shadow-sm border flex flex-col h-[calc(100vh-230px)]">
+
 
 
           <div className="flex-1 overflow-y-auto pb-5">
@@ -205,8 +202,9 @@ const Properties = () => {
                 {displayData?.map((item, index) => (
 
                   <tr key={item.hostelId} className="hover:bg-gray-50 text-[12px]">
-                    <td className="px-4 py-1">{(page - 1) * pageSize + index + 1}</td>
-                    <td className="px-4 py-1 text-blue-600 font-medium">
+                    <td className="px-4 py-1">{(page - 1) * pageSize + index + 1}
+</td>
+                    <td className="px-4 py-1 text-blue-600 font-medium whitespace-nowrap">
                       {item.hostelName}
                     </td>
                     <td className="px-4 py-1 whitespace-nowrap">
@@ -262,67 +260,67 @@ const Properties = () => {
 
 
         </div>
-        <div className="flex justify-between items-center px-4 py-3 pt-4 text-sm border-t bg-white">
+        <div className="flex justify-between items-center px-4 py-3 text-sm border-t bg-white">
 
+  {/* Total Count */}
+  <span className="text-gray-600">
+    Total Record Count :{" "}
+    <span className="text-blue-600 font-medium">
+      {pageSize}
+    </span>
+  </span>
 
-          <span className="text-gray-600">
-            Total Record Count :{" "}
-            <span className="text-blue-600 font-medium">
-              {/* {hostels?.totalElements ?? 0} */}
-              {hostels?.totalHostels}
-            </span>
-          </span>
+  {/* Pagination Controls */}
+  <div className="flex items-center gap-4">
 
+    {/* Page Size */}
+    <select
+      value={pageSize}
+      onChange={(e) => {
+        setPageSize(Number(e.target.value));
+        setPage(1);
+      }}
+      className="border rounded-md px-2 py-1 text-sm"
+    >
+      <option value={10}>10</option>
+      <option value={20}>20</option>
+      <option value={50}>50</option>
+    </select>
 
-          <div className="flex items-center gap-4">
+    {/* Prev */}
+    <button
+  disabled={page === 1}
+  onClick={() => setPage((prev) => prev - 1)}
+>
+  &#8249;
+</button>
 
+    {/* Current Page */}
+    <span className="border px-3 py-1 rounded-md bg-gray-100">
+      {page}
+    </span>
 
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPage(1);
-              }}
-              className="border rounded-md px-2 py-1 text-sm"
-            >
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
+    {/* Range */}
+    <span className="text-gray-500">
+      {totalRecords === 0
+        ? "0 - 0"
+        : `${page * pageSize + 1} - ${Math.min(
+            (page + 1) * pageSize,
+            totalRecords
+          )}`}
+    </span>
 
+    {/* Next */}
+   <button
+  disabled={page >= totalPages}
+  onClick={() => setPage((prev) => prev + 1)}
+>
+  &#8250;
+</button>
 
-            <button
-              disabled={page === 1}
-              onClick={() => setPage((prev) => prev - 1)}
-              className="text-gray-500 disabled:opacity-40"
-            >
-              &#8249;
-            </button>
+  </div>
+</div>
 
-
-            <span className="border px-3 py-1 rounded-md bg-gray-100">
-              {/* {(hostels?.currentPage ?? 0) + 1} */}
-              {page}
-            </span>
-
-            <span className="text-gray-500">
-              {(page - 1) * pageSize + 1} -{" "}
-              {Math.min(page * pageSize, hostels?.totalHostels ?? 0)}
-
-            </span>
-
-
-            <button
-              // disabled={hostels?.last}
-              disabled={isNextDisabled}
-              onClick={() => setPage((prev) => prev + 1)}
-              className="text-gray-500 disabled:opacity-40"
-            >
-              &#8250;
-            </button>
-
-          </div>
-        </div>
       </div>
     </DashboardLayout>
   );
