@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { RoleProvider } from "../Context/RoleContext";
 import { HostelProvider } from "../Context/HostelListContext";
-
+import { SubscriptionProvider } from "../Context/SubscriptionContext";
 import Home from "../components/dashboard/Home";
 import Proprietors from "../components/ProprietorsScreen/Proprietors";
 import Roles from "../components/RoleScreen/RoleList";
@@ -23,6 +23,7 @@ const PrivateRoutesScreen = () => {
     <PrivateRoute>
       <RoleProvider>
         <HostelProvider>
+          <SubscriptionProvider>
           <Routes>
             <Route path="/home" element={<Home />} />
             <Route path="/proprietors" element={<Proprietors />} />
@@ -35,6 +36,7 @@ const PrivateRoutesScreen = () => {
             <Route path="/crmDashboard" element={<CRMDashboard />} />
             <Route path="/manage-plans" element={<ManagePlans />} />
           </Routes>
+          </SubscriptionProvider>
         </HostelProvider>
       </RoleProvider>
     </PrivateRoute>
