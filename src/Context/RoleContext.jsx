@@ -42,6 +42,7 @@
 // export const useRole = () => useContext(RoleContext);
 import React, { createContext, useContext, useEffect, useState } from "react";
 import api from "../Config/AxiosConfig";
+import axiosInstance from "../Config/AxiosConfig";
 
 const RoleContext = createContext(null);
 
@@ -73,7 +74,7 @@ const getErrorMessage = (error) => {
   const fetchModules = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/v2/modules");
+      const res = await axiosInstance.get("/v2/modules");
 
       if (res.status === 200) {
         setModules(res.data || []);
@@ -89,7 +90,7 @@ const getErrorMessage = (error) => {
   const getAgentRoles = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/v2/agent-role");
+      const res = await axiosInstance.get("/v2/agent-role");
 
       if (res.status === 200) {
         setAgentRoles(res.data || []);
@@ -118,7 +119,7 @@ const getErrorMessage = (error) => {
       setLoading(true);
       setErrorMsg("");
 
-      const res = await api.post("/v2/agent-role", payload);
+      const res = await axiosInstance.post("/v2/agent-role", payload);
 
       if (res.status === 200 || res.status === 201) {
         await getAgentRoles(); // refresh list
@@ -139,7 +140,7 @@ const getErrorMessage = (error) => {
     setLoading(true);
     setErrorMsg("");
 
-    const res = await api.post("/v2/admin", payload);
+    const res = await axiosInstance.post("/v2/admin", payload);
 
     if (res?.status === 200 || res?.status === 201) {
       return { success: true, data: res.data , message: "Created Successfully" };
@@ -165,7 +166,7 @@ const updateAgentRole = async (roleId, payload) => {
     setLoading(true);
     setErrorMsg("");
 
-    const res = await api.put(`/v2/agent-role/${roleId}`, payload);
+    const res = await axiosInstance.put(`/v2/agent-role/${roleId}`, payload);
 
     if (res.status === 200) {
       await getAgentRoles(); // refresh list

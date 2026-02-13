@@ -8,6 +8,7 @@ import Money from "../../assets/MoneyRecive.png"
 import { useSubscription } from "../../Context/SubscriptionContext";
 import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import noteAdd from "../../assets/noteadd.png";
 
 const Properties = () => {
   const { hostels, getHostels, loading } = useHostel();
@@ -243,7 +244,7 @@ const end = Math.min(page * pageSize, totalRecords);
                   <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0 z-10">
                     <tr>
                       <th className="px-4 py-3 text-xs">ID</th>
-                      <th className="px-4 py-3 text-xs whitespace-nowrap">Hostel Name</th>
+                      {/* <th className="px-4 py-3 text-xs whitespace-nowrap">Hostel Name</th> */}
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Name</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Mobile.No</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Addres</th>
@@ -262,18 +263,64 @@ const end = Math.min(page * pageSize, totalRecords);
                       <tr key={item.hostelId} className="hover:bg-gray-50 text-[12px]">
                         <td className="px-4 py-1">{(page - 1) * pageSize + index + 1}
                         </td>
-                        <td className="px-4 py-1 text-blue-600 font-medium whitespace-nowrap">
+                        {/* <td className="px-4 py-1 text-blue-600 font-medium whitespace-nowrap">
                           {item.hostelName}
                         </td>
                         <td className="px-4 py-1 whitespace-nowrap">
                           {item.ownerInfo?.fullName}
-                        </td>
+                        </td> */}
+ <td className="px-4 py-3">
+  <div className="flex items-center gap-3 relative group">
+
+    <div className="w-9 h-9 flex items-center justify-center 
+                    rounded-full bg-gray-200 text-gray-600 
+                    text-sm font-semibold uppercase">
+      {item.initials || "NA"}
+    </div>
+
+    <div className="flex flex-col">
+      <span className="text-gray-900 font-semibold">
+        {item.hostelName}
+      </span>
+
+      <div className="absolute left-0 top-full mt-2 hidden group-hover:block 
+                      bg-white shadow-xl border rounded-lg px-4 py-2 
+                      text-sm text-gray-700 z-[9999] whitespace-nowrap">
+        {item.fullAddress}
+      </div>
+
+      <span className="text-gray-500 text-xs">
+        {item.ownerInfo?.fullName}
+      </span>
+    </div>
+
+  </div>
+</td>
+
+
+
                         <td className="px-4 py-1 whitespace-nowrap">
                           {item.ownerInfo?.mobile}
                         </td>
-                        <td className="px-4 py-1 whitespace-nowrap">
-                          {item?.fullAddress}
-                        </td>
+                        {/* <td className="px-4 py-1 whitespace-nowrap">
+                          {item?.city},{item?.state}
+                        </td> */}
+   <td className="px-4  whitespace-nowrap relative group">
+  <span className="cursor-pointer">
+    {item?.city}, {item?.state}
+  </span>
+
+  {/* Tooltip */}
+ <div className="absolute left-0 top-full  hidden group-hover:block 
+                bg-white shadow-xl border rounded-lg px-4 py-1 
+                text-sm text-gray-700 z-[999] whitespace-nowrap">
+  {item.fullAddress}
+</div>
+
+</td>
+
+
+
                         <td className="px-4 py-1">
                           {item.hostelPlan?.currentPlan}
                         </td>
@@ -302,7 +349,13 @@ const end = Math.min(page * pageSize, totalRecords);
                         </td>
 
                         <td className="px-4 py-1 text-end">
-                          <div className="flex items-center justify-end gap-3">
+                          <div className="flex items-center justify-end gap-1">
+                             <img
+                              src={noteAdd}
+                             
+                              alt="noteAdd"
+                              className="w-5 h-5 cursor-pointer"
+                            />
                             <img
                               src={Circle}
                               alt="circle"

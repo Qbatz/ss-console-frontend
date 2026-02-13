@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import api from "../Config/AxiosConfig";
+import axiosInstance from "../Config/AxiosConfig";
 
 const HostelContext = createContext(null);
 
@@ -40,7 +41,7 @@ export const HostelProvider = ({ children }) => {
     setLoading(true);
     setErrorMsg("");
 
-    const res = await api.get("/v2/hostels", {
+    const res = await axiosInstance.get("/v2/hostels", {
       params: {
         page,
         size,
