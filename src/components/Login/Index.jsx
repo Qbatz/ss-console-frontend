@@ -27,7 +27,10 @@ import WelcomeImg from "../../assets/WlcomeImg.png";
 import AccessRestricted from "../../assets/AccessResticted.png";
 import ConfigV2 from "../../Config/ConfigV2";
 
+
+
 const Index = () => {
+  const navigate = useNavigate();
   //   useEffect(() => {
 
   //   if (calledRef.current) return;
@@ -54,6 +57,7 @@ const Index = () => {
   const loginAction = () => {
     window.location.href = ConfigV2.apiBaseUrl + "/v2/agents/authorize";
   };
+
 
   return (
   <div className="min-h-screen flex flex-col relative overflow-hidden">
