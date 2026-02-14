@@ -181,6 +181,46 @@ const updateAgentRole = async (roleId, payload) => {
     setLoading(false);
   }
 };
+const getAgentRoleById = async (roleId) => {
+  try {
+    setLoading(true);
+
+    const res = await api.get(`/v2/agent-role/${roleId}`);
+
+    if (res.status === 200) {
+      return { success: true, data: res.data };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
+
+const deleteAgentRole = async (roleId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await api.delete(`/v2/agent-role/${roleId}`);
+
+    if (res.status === 200 || res.status === 204) {
+      await getAgentRoles(); // refresh list after delete
+      return { success: true, message: "Deleted Successfully" };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <RoleContext.Provider
@@ -190,7 +230,7 @@ const updateAgentRole = async (roleId, payload) => {
         loading,
         errorMsg,
         fetchModules,
-        getAgentRoles,createAgentRole,createAdmin,updateAgentRole
+        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole
       }}
     >
       {children}
