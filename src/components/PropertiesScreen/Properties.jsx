@@ -263,7 +263,13 @@ const end = Math.min(page * pageSize, totalRecords);
                         <td className="px-4 py-1">{(page - 1) * pageSize + index + 1}
                         </td>
                         <td className="px-4 py-1 text-blue-600 font-medium whitespace-nowrap">
-                          {item.hostelName}
+                          <div className="flex flex-row">
+                            <div className="bg-black">
+                            <label className="color-white">T</label>
+                            </div>
+                            <div>{item.hostelName}</div>
+                          </div>
+                          
                         </td>
                         <td className="px-4 py-1 whitespace-nowrap">
                           {item.ownerInfo?.fullName}
