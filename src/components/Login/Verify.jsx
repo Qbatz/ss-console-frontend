@@ -7,6 +7,7 @@ import LoginImg from "../../assets/LoginImg.png";
 import WelcomeImg from "../../assets/WlcomeImg.png";
 import AccessRestricted from "../../assets/AccessResticted.png";
 import ConfigV2 from "../../Config/ConfigV2";
+import axiosInstance from "../../Config/AxiosConfig";
 
 
 const Verify = () => {
@@ -26,16 +27,17 @@ const Verify = () => {
   const idToken = searchParams.get("id_token");
   const accountsServer = searchParams.get("accounts-server");
 
-  axios.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
+  axiosInstance.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
     params: { code, location, accountsServer, idToken }
   })
   .then((response) => {
     if (response.status === 200) {
       console.log("response", response.data);
       
-       const accessToken = response.data; // direct string
+       const accessToken = response.data;
 
     localStorage.setItem("access_token", accessToken);
+ 
 
     navigate("/home");
 

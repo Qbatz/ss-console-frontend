@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import api from "../Config/AxiosConfig";
+import axiosInstance from "../Config/AxiosConfig";
 
 const SubscriptionContext = createContext(null);
 
@@ -29,7 +30,7 @@ console.log("errorMsg",errorMsg)
       setLoading(true);
       setErrorMsg("");
 
-      const res = await api.post(
+      const res = await axiosInstance.post(
         `/v2/subscription/${hostelId}`,
         payload
       );

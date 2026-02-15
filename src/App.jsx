@@ -57,6 +57,7 @@ import Index from './components/Login/Index'
 import Verify from './components/Login/Verify';
 import Login from './components/internalLogin/Login';
 import PrivateRoutesScreen from './RoutesScreen/PrivateRoutes';
+// import "./axiosSetup";
 
 function App() {
 
