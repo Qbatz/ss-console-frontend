@@ -15,6 +15,9 @@ const CreateRoleModal = ({ isOpen, onClose,selectedRole }) => {
   const [permissionError,setPermissionError] = useState("")
    const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [initialRoleName, setInitialRoleName] = useState("");
+const [initialPermissions, setInitialPermissions] = useState([]);
+
   const [message, setMessage] = useState("");
   console.log("permissions",permissions)
   const roleInputRef = useRef(null);
@@ -30,9 +33,32 @@ const handleClose = () => {
   onClose();
 };
 
+// useEffect(() => {
+//   if (selectedRole) {
+//     setRoleName(selectedRole.name || "");
+
+//     if (selectedRole.rolesPermissionDetails) {
+//       const formattedPermissions =
+//         selectedRole.rolesPermissionDetails.map((p) => ({
+//           moduleId: p.moduleId,
+//           canRead: p.canRead || false,
+//           canWrite: p.canWrite || false,
+//           canUpdate: p.canUpdate || false,
+//           canDelete: p.canDelete || false,
+//         }));
+
+//       setPermissions(formattedPermissions);
+//     }
+//   } else {
+//     setRoleName("");
+//     setPermissions([]);
+//   }
+// }, [selectedRole]);
+
 useEffect(() => {
   if (selectedRole) {
     setRoleName(selectedRole.name || "");
+    setInitialRoleName(selectedRole.name || "");
 
     if (selectedRole.rolesPermissionDetails) {
       const formattedPermissions =
@@ -45,12 +71,18 @@ useEffect(() => {
         }));
 
       setPermissions(formattedPermissions);
+      setInitialPermissions(formattedPermissions);
     }
   } else {
     setRoleName("");
     setPermissions([]);
+    setInitialRoleName("");
+    setInitialPermissions([]);
   }
 }, [selectedRole]);
+
+
+
 const handlePermissionChange = (moduleId, field, value) => {
   setPermissions((prev) => {
     const existing = prev.find((p) => p.moduleId === moduleId);
@@ -201,6 +233,30 @@ const handleCreate = async () => {
 
   hasError = true;
 }
+if (selectedRole) {
+  const isNameSame = roleName === initialRoleName;
+
+  const isPermissionSame =
+    JSON.stringify(
+      [...permissions].sort((a, b) => a.moduleId - b.moduleId)
+    ) ===
+    JSON.stringify(
+      [...initialPermissions].sort((a, b) => a.moduleId - b.moduleId)
+    );
+
+  if (isNameSame && isPermissionSame) {
+    setModalType("error");
+    setMessage("No changes detected.");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+    return; // 🚫 stop API call
+  }
+}
+
 
   if (hasError) return;
 
@@ -278,23 +334,30 @@ const handleCreate = async () => {
 
   return (
     <>
- <Toast
+
+
+   <div
+      className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
+        isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+      }`}
+      onClick={handleClose}
+    />
+      {/* {showSuccess && (
+    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
+      <Toast
         show={showSuccess}
         message={message}
         type={modalType}
-
       />
-      <div
-        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-          }`}
-        onClick={handleClose}
-      />
+    </div>
+  )} */}
 
 
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[480px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-      >
+      className={`fixed top-0 right-0 h-full w-full sm:w-[480px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
+        isOpen ? "translate-x-0" : "translate-x-full"
+      } flex flex-col`}
+    >
         {/* Header */}
         <div className="flex justify-between items-start px-6 py-4 border-b">
           <div>
@@ -311,7 +374,15 @@ const handleCreate = async () => {
             ✕
           </button>
         </div>
-
+{showSuccess && (
+        <div className="px-6 pt-4">
+          <Toast
+            show={showSuccess}
+            message={message}
+            type={modalType}
+          />
+        </div>
+      )}
         {/* Body */}
         <div className="p-6 space-y-6 overflow-y-auto h-[calc(100%-130px)]">
 
