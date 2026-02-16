@@ -2,13 +2,13 @@ export default {
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
-   theme: {
-  extend: {},
-  fontFamily: {
-    sans: ['Inter', 'sans-serif'],
-    gilroy: ['Gilroy', 'sans-serif'],
-  },
-},
+      theme: {
+        extend: {},
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          gilroy: ['Gilroy', 'sans-serif'],
+        },
+      },
 
       keyframes: {
         fadeIn: {
@@ -20,6 +20,7 @@ export default {
         fadeIn: "fadeIn 0.25s ease-out",
       },
     },
+    
   },
   plugins: [],
 };

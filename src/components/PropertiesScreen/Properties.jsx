@@ -41,18 +41,18 @@ const Properties = () => {
   //   return () => clearTimeout(delay);
   // }, [page, pageSize, searchText]);
 
-useEffect(() => {
-  const fetchData = async () => {
-    await getHostels(page, pageSize, searchText);
+  useEffect(() => {
+    const fetchData = async () => {
+      await getHostels(page, pageSize, searchText);
 
-    // Only first time loader stop
-    if (isFirstLoad) {
-      setIsFirstLoad(false);
-    }
-  };
+      // Only first time loader stop
+      if (isFirstLoad) {
+        setIsFirstLoad(false);
+      }
+    };
 
-  fetchData();
-}, [page, pageSize, searchText]);
+    fetchData();
+  }, [page, pageSize, searchText]);
 
 
 
@@ -63,26 +63,26 @@ useEffect(() => {
   // let filteredData = hostels?.hostels || [];
 
 
-let displayData = hostels?.hostels || [];
+  let displayData = hostels?.hostels || [];
 
-if (statusFilter) {
-  displayData = displayData.filter(item =>
-    statusFilter === "active"
-      ? item.subscriptionIsActive
-      : !item.subscriptionIsActive
-  );
-}
+  if (statusFilter) {
+    displayData = displayData.filter(item =>
+      statusFilter === "active"
+        ? item.subscriptionIsActive
+        : !item.subscriptionIsActive
+    );
+  }
 
-// 🔥 Always calculate based on displayed data
-let totalRecords =
-  searchText.trim() !== "" || statusFilter !== ""
-    ? displayData.length
-    : hostels?.totalHostels || 0;
+  // 🔥 Always calculate based on displayed data
+  let totalRecords =
+    searchText.trim() !== "" || statusFilter !== ""
+      ? displayData.length
+      : hostels?.totalHostels || 0;
 
-let totalPages = Math.ceil(totalRecords / pageSize) || 1;
+  let totalPages = Math.ceil(totalRecords / pageSize) || 1;
 
-const start = totalRecords === 0 ? 0 : (page - 1) * pageSize + 1;
-const end = Math.min(page * pageSize, totalRecords);
+  const start = totalRecords === 0 ? 0 : (page - 1) * pageSize + 1;
+  const end = Math.min(page * pageSize, totalRecords);
 
 
   const isNextDisabled = page >= totalPages - 1;
@@ -134,13 +134,13 @@ const end = Math.min(page * pageSize, totalRecords);
           type={modalType}
 
         />
-        {isFirstLoad  && (
+        {isFirstLoad && (
           <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
             <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
 
-        {!isFirstLoad  && (
+        {!isFirstLoad && (
 
 
           <div className="flex flex-col h-full min-h-0">
@@ -233,7 +233,7 @@ const end = Math.min(page * pageSize, totalRecords);
 
             {/* <div className="bg-white rounded-xl shadow-sm border flex flex-col h-[calc(100vh-230px)]"> */}
 
-<div className="bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col max-h-[calc(100vh-230px)]">
+            <div className="bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col max-h-[calc(100vh-230px)]">
 
 
               <div className="flex-1 overflow-y-auto pb-5">
@@ -248,7 +248,7 @@ const end = Math.min(page * pageSize, totalRecords);
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Name</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Mobile.No</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Addres</th>
-                      <th className="px-4 py-3 whitespace-nowrap text-xs">Sub Plan</th>
+                      {/* <th className="px-4 py-3 whitespace-nowrap text-xs">Sub Plan</th> */}
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Created On</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Last Action</th>
                       <th className="px-4 py-3 text-xs">Status</th>
@@ -263,8 +263,19 @@ const end = Math.min(page * pageSize, totalRecords);
                       <tr key={item.hostelId} className="hover:bg-gray-50 text-[12px]">
                         <td className="px-4 py-1">{(page - 1) * pageSize + index + 1}
                         </td>
-                        {/* <td className="px-4 py-1 text-blue-600 font-medium whitespace-nowrap">
-                          {item.hostelName}
+                        <td className="py-1 text-blue-600 font-medium whitespace-nowrap">
+                            <div className="flex flex-row items-center">
+                              <div className="flex bg-ss-white border-[1px] rounded-full w-3 h-3 items-center justify-center" >
+                                <label className="color-white text-[8px]">T</label>
+                              </div>
+                              <div className="ml-[5px]">
+                                <label className="text-[14px]">
+                                  {item.hostelName}
+                                </label>
+                              </div>
+                            </div>
+
+
                         </td>
                         <td className="px-4 py-1 whitespace-nowrap">
                           {item.ownerInfo?.fullName}
@@ -323,12 +334,12 @@ const end = Math.min(page * pageSize, totalRecords);
 
                         <td className="px-4 py-1">
                           {item.hostelPlan?.currentPlan}
-                        </td>
+                        </td> */}
                         <td className="px-4 py-1">
                           {item.joinedOn}
                         </td>
                         <td className="px-4 py-1">
-                          {item.expiredOn}
+                          {item.lastUpdateDate} {item.lastUpdateTime}
                         </td>
 
                         <td className="px-4 py-1 text-center">
@@ -410,12 +421,12 @@ const end = Math.min(page * pageSize, totalRecords);
                 </select>
 
                 {/* Prev */}
-               <button
-  disabled={page <= 1}
-  onClick={() => setPage(prev => prev - 1)}
->
-  &#8249;
-</button>
+                <button
+                  disabled={page <= 1}
+                  onClick={() => setPage(prev => prev - 1)}
+                >
+                  &#8249;
+                </button>
 
                 {/* Current Page */}
                 <span className="border px-3 py-1 rounded-md bg-gray-100">
@@ -424,17 +435,17 @@ const end = Math.min(page * pageSize, totalRecords);
 
                 {/* Range */}
                 <span className="text-gray-500">
-  {start} - {end}
-</span>
+                  {start} - {end}
+                </span>
 
 
                 {/* Next */}
-     <button
-  disabled={page >= totalPages || totalPages === 0}
-  onClick={() => setPage(prev => prev + 1)}
->
-  &#8250;
-</button>
+                <button
+                  disabled={page >= totalPages || totalPages === 0}
+                  onClick={() => setPage(prev => prev + 1)}
+                >
+                  &#8250;
+                </button>
 
 
               </div>
