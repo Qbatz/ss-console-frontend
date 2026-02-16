@@ -5,63 +5,26 @@ const axiosInstance = axios.create({
   baseURL: ConfigV2.apiBaseUrl,
 });
 
+// Attach token automatically
+axiosInstance.interceptors.request.use(
+  (config) => {
 
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
+    const mockToken = localStorage.getItem("mock_token");
+    const normalToken = localStorage.getItem("access_token");
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+    // 🔥 Priority logic
+    const tokenToUse = mockToken || normalToken;
 
-  return config;
-});
+    console.log("TOKEN USED:", tokenToUse);
 
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-
-    const originalRequest = error.config;
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
-
-      originalRequest._retry = true;
-
-      const refreshToken = localStorage.getItem("refresh_token");
-
-      if (!refreshToken) {
-        logout();
-        return Promise.reject(error);
-      }
-
-      try {
-        const res = await axios.post(
-          ConfigV2.apiBaseUrl + "/v2/agents/refresh",
-          { refresh_token: refreshToken }
-        );
-
-        const newAccessToken = res.data.access_token;
-
-        localStorage.setItem("access_token", newAccessToken);
-
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-        return axiosInstance(originalRequest);
-
-      } catch (refreshError) {
-        logout();
-        return Promise.reject(refreshError);
-      }
+    if (tokenToUse) {
+      config.headers.Authorization = `Bearer ${tokenToUse}`;
     }
 
-    return Promise.reject(error);
-  }
+    return config;
+  },
+  (error) => Promise.reject(error)
 );
 
-function logout() {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
-  window.location.href = "/";
-}
 
 export default axiosInstance;

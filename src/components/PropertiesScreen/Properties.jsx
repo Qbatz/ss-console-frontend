@@ -269,7 +269,7 @@ const end = Math.min(page * pageSize, totalRecords);
                         <td className="px-4 py-1 whitespace-nowrap">
                           {item.ownerInfo?.fullName}
                         </td> */}
- <td className="px-4 py-3">
+ <td className="px-4 py-1">
   <div className="flex items-center gap-3 relative group">
 
     <div className="w-9 h-9 flex items-center justify-center 
@@ -284,7 +284,7 @@ const end = Math.min(page * pageSize, totalRecords);
       </span>
 
       <div className="absolute left-0 top-full mt-2 hidden group-hover:block 
-                      bg-white shadow-xl border rounded-lg px-4 py-2 
+                      bg-white shadow-xl border rounded-lg px-4 py-1 
                       text-sm text-gray-700 z-[9999] whitespace-nowrap">
         {item.fullAddress}
       </div>
