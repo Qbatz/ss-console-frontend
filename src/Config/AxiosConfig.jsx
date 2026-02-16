@@ -55,23 +55,48 @@ axiosInstance.interceptors.request.use(
 
 
 
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+// console.log("error",error)
+//     if (error?.response?.status === 401) {
+
+//       const mockToken = localStorage.getItem("mock_token");
+//       const normalToken = localStorage.getItem("access_token");
+
+      
+//       localStorage.removeItem("mock_token");
+//       localStorage.removeItem("access_token");
+
+//       if (mockToken) {
+//         window.location.replace("/internal/login");
+//       } else if (normalToken) {
+//         window.location.replace("/");
+//       } else {
+//         window.location.replace("/");
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-console.log("error",error)
-    if (error?.response?.status === 401) {
+
+    const status = error?.response?.status;
+
+    if (status === 401 || status === 500) {
 
       const mockToken = localStorage.getItem("mock_token");
       const normalToken = localStorage.getItem("access_token");
 
-      
       localStorage.removeItem("mock_token");
       localStorage.removeItem("access_token");
 
       if (mockToken) {
         window.location.replace("/internal/login");
-      } else if (normalToken) {
-        window.location.replace("/");
       } else {
         window.location.replace("/");
       }
@@ -80,6 +105,8 @@ console.log("error",error)
     return Promise.reject(error);
   }
 );
+
+
 
 
 export default axiosInstance;

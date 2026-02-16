@@ -91,8 +91,8 @@ const Login = () => {
         navigate("/home");
       }
     } catch (err) {
-      console.log(err);
-      alert("Invalid token");
+      console.log("err1234567",err);
+      
     }
   };
 
@@ -107,18 +107,19 @@ const Login = () => {
       setLoading(true);
 
       const res = await axios.get(
-        `${ConfigV2.apiBaseUrl}/v2/agents/mock-agent-login`,
-        {
-          params: { email: email }
-        }
-      );
+  `${ConfigV2.apiBaseUrl}/v2/agents/mock-agent-login`,
+  { params: { email } }
+);
 
-      if (res.status === 200) {
-        const mockToken = res.data;
-console.log("mockToken",mockToken)
-        localStorage.setItem("access_token", mockToken);
-        navigate("/home");
-      }
+if (res.status === 200) {
+  const mockToken = res.data;
+
+  localStorage.setItem("mock_token", mockToken);
+   localStorage.setItem("login_time", Date.now());
+
+  navigate("/home");
+}
+
 
     } catch (err) {
       console.log(err);
