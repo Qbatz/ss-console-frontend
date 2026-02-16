@@ -5,3 +5,5 @@ node_modules/.vite/deps/_metadata.json
 node_modules/.vite/deps
 
 package-lock.json
+dist
+/dist

@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-
 /* -------------------- */
 /* Gilroy Font */
 /* -------------------- */
@@ -31,6 +30,4 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
-@theme {
-  --color-ss-blue: oklch(0.72 0.11 178);
-}
+
