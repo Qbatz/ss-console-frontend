@@ -65,22 +65,22 @@ const Subscription = () => {
        
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
 
-          <div className="bg-white p-5 rounded-xl shadow-sm border">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
             <p className="text-gray-500 text-sm font-gilroy">Active Properties</p>
             <h2 className="text-2xl font-bold mt-2">45</h2>
           </div>
 
-          <div className="bg-white p-5 rounded-xl shadow-sm border">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
             <p className="text-gray-500 text-sm font-gilroy">Expired Properties</p>
             <h2 className="text-2xl font-bold mt-2">24</h2>
           </div>
 
-          <div className="bg-white p-5 rounded-xl shadow-sm border">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
             <p className="text-gray-500 text-sm font-gilroy">Basic</p>
             <h2 className="text-2xl font-bold mt-2">12</h2>
           </div>
 
-          <div className="bg-white p-5 rounded-xl shadow-sm border">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
             <p className="text-gray-500 text-sm font-gilroy">Trial</p>
             <h2 className="text-2xl font-bold mt-2">09</h2>
           </div>
@@ -91,18 +91,18 @@ const Subscription = () => {
         <div className="mb-4 bg-white py-3">
           <div className="flex justify-between items-center">
             <div className="flex gap-3">
-              <select className="border px-3 py-1 rounded-lg text-xs font-sans">
+              <select className="border border-gray-300 px-3 py-1 rounded-lg text-xs font-sans">
                 <option>All</option>
                 <option>Active</option>
                 <option>Expired</option>
               </select>
 
-              <select className="border px-3 py-2 rounded-lg text-xs font-sans">
+              <select className="border border-gray-300 px-3 py-2 rounded-lg text-xs font-sans">
                 <option>This Month</option>
                 <option>Last Month</option>
               </select>
 
-              <button className="border px-4 py-2 rounded-lg text-xs font-sans">
+              <button className="border border-gray-300 px-4 py-2 rounded-lg text-xs font-sans">
                 Filter
               </button>
             </div>
@@ -110,13 +110,13 @@ const Subscription = () => {
             <input
               type="text"
               placeholder="Search..."
-              className="border px-4 py-2 rounded-lg text-sm w-64"
+              className="border border-gray-300 px-4 py-2 rounded-lg text-sm w-64"
             />
           </div>
         </div>
 
 
-        <div className="bg-white rounded-xl shadow-sm border">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-300">
 
           <div className="max-h-[320px] overflow-y-auto">
 
@@ -136,7 +136,7 @@ const Subscription = () => {
                 </tr>
               </thead>
 
-              <tbody className="divide-y">
+               <tbody className="divide-y divide-gray-200">
                 {[...Array(10)].map((_, i) => (
                   <tr key={i} className="hover:bg-gray-50 text-[12px] font-Inter">
                     <td className="px-4 py-2">SM7626</td>

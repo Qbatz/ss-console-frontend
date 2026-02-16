@@ -1,7 +1,8 @@
-import React,{useState} from "react";
+import React,{useState,useEffect} from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import Search from "../../assets/Search.png";
 import AddAdmin from "./AddAdmin";
+import { useRole } from "../../Context/RoleContext";
 
 const users = [
   {
@@ -39,7 +40,24 @@ const users = [
 ];
 
 const IamAdminUser = () => {
+  const { getAdminDetails,loading} = useRole();
+ 
+  const [admin, setAdmin] = useState(null);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchAdmin = async () => {
+      const res = await getAdminDetails();
+
+      if (res.success) {
+        setAdmin(res.data);
+      } else {
+        console.log(res.message);
+      }
+    };
+
+    fetchAdmin();
+  }, []);
   return (
     <DashboardLayout>
       <div className="w-full px-4 md:px-6  space-y-6">
