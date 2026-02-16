@@ -1,3 +1,4 @@
+import React,{useEffect} from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { RoleProvider } from "../Context/RoleContext";
 import { HostelProvider } from "../Context/HostelListContext";
@@ -13,12 +14,18 @@ import SupportTicket from "../components/SupportTicketScreen/SupportTicket";
 import CRMDashboard from "../components/CRMDashboardScreen/CRMDashboard";
 import ManagePlans from "../components/SubscriptionScreen/ManagePlans ";
 
+import { useNavigate } from "react-router-dom";
+
+
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("access_token");
   return token ? children : <Navigate to="/" replace />;
 };
 
 const PrivateRoutesScreen = () => {
+   const navigate = useNavigate();
+
+  
   return (
     <PrivateRoute>
       <RoleProvider>
