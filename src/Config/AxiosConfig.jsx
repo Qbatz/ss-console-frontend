@@ -1,3 +1,34 @@
+// import axios from "axios";
+// import ConfigV2 from "./ConfigV2";
+
+// const axiosInstance = axios.create({
+//   baseURL: ConfigV2.apiBaseUrl,
+// });
+
+// // Attach token automatically
+// axiosInstance.interceptors.request.use(
+//   (config) => {
+
+//     const mockToken = localStorage.getItem("mock_token");
+//     const normalToken = localStorage.getItem("access_token");
+
+//     // 🔥 Priority logic
+//     const tokenToUse = mockToken || normalToken;
+
+//     console.log("TOKEN USED:", tokenToUse);
+
+//     if (tokenToUse) {
+//       config.headers.Authorization = `Bearer ${tokenToUse}`;
+//     }
+
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
+
+
+// export default axiosInstance;
+
 import axios from "axios";
 import ConfigV2 from "./ConfigV2";
 
@@ -6,51 +37,68 @@ const axiosInstance = axios.create({
 });
 
 
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const mockToken = localStorage.getItem("mock_token");
+    const normalToken = localStorage.getItem("access_token");
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+    const tokenToUse = mockToken || normalToken;
 
-  return config;
-});
+    if (tokenToUse) {
+      config.headers.Authorization = `Bearer ${tokenToUse}`;
+    }
 
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+
+
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+// console.log("error",error)
+//     if (error?.response?.status === 401) {
+
+//       const mockToken = localStorage.getItem("mock_token");
+//       const normalToken = localStorage.getItem("access_token");
+
+      
+//       localStorage.removeItem("mock_token");
+//       localStorage.removeItem("access_token");
+
+//       if (mockToken) {
+//         window.location.replace("/internal/login");
+//       } else if (normalToken) {
+//         window.location.replace("/");
+//       } else {
+//         window.location.replace("/");
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
 
 axiosInstance.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  (error) => {
 
-    const originalRequest = error.config;
+    const status = error?.response?.status;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (status === 401 || status === 500) {
 
-      originalRequest._retry = true;
+      const mockToken = localStorage.getItem("mock_token");
+      const normalToken = localStorage.getItem("access_token");
 
-      const refreshToken = localStorage.getItem("refresh_token");
+      localStorage.removeItem("mock_token");
+      localStorage.removeItem("access_token");
 
-      if (!refreshToken) {
-        logout();
-        return Promise.reject(error);
-      }
-
-      try {
-        const res = await axios.post(
-          ConfigV2.apiBaseUrl + "/v2/agents/refresh",
-          { refresh_token: refreshToken }
-        );
-
-        const newAccessToken = res.data.access_token;
-
-        localStorage.setItem("access_token", newAccessToken);
-
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-        return axiosInstance(originalRequest);
-
-      } catch (refreshError) {
-        logout();
-        return Promise.reject(refreshError);
+      if (mockToken) {
+        window.location.replace("/internal/login");
+      } else {
+        window.location.replace("/");
       }
     }
 
@@ -58,10 +106,7 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-function logout() {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
-  window.location.href = "/";
-}
+
+
 
 export default axiosInstance;

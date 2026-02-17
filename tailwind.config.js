@@ -2,12 +2,9 @@ export default {
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
-      theme: {
-        extend: {},
-        fontFamily: {
-          sans: ['Inter', 'sans-serif'],
-          gilroy: ['Gilroy', 'sans-serif'],
-        },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        gilroy: ['Gilroy', 'sans-serif'],
       },
 
       keyframes: {
@@ -16,11 +13,11 @@ export default {
           "100%": { opacity: "1", transform: "translateY(0px)" },
         },
       },
-      animation: {
-        fadeIn: "fadeIn 0.25s ease-out",
-      },
+
+     animation: {
+  fadeIn: "fadeIn 0.25s ease-out",
+},
     },
-    
   },
   plugins: [],
 };

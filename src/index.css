@@ -1,25 +1,23 @@
+/* ✅ ALL IMPORTS MUST BE FIRST */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
 
-/* -------------------- */
-/* Gilroy Font */
-/* -------------------- */
 
+/* Fonts */
 @font-face {
   font-family: 'Gilroy';
   src: url('/fonts/Gilroy-Regular.woff2') format('woff2');
   font-weight: 400;
-  font-display: swap;
 }
 
 @font-face {
   font-family: 'Gilroy';
   src: url('/fonts/Gilroy-SemiBold.woff2') format('woff2');
   font-weight: 600;
-  font-display: swap;
 }
 
-/* Layout Reset */
 
+/* Layout */
 html, body, #root {
   height: 100%;
   margin: 0;
@@ -31,3 +29,10 @@ body {
 }
 
 
+/* Tailwind theme */
+@theme {
+  --font-gilroy: "Gilroy", sans-serif;
+
+  --color-ss-blue: oklch(0.4818 0.2377 265.7);
+  --color-ss-white: oklch(1 0 0);
+}

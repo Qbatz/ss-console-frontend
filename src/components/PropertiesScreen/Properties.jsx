@@ -59,7 +59,7 @@ const Properties = () => {
 
 
 
-  console.log("page", page);
+  console.log("hostels", hostels);
   // let filteredData = hostels?.hostels || [];
 
 
@@ -161,24 +161,24 @@ const Properties = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mb-6">
-              <div className="bg-white p-5 rounded-xl shadow-sm border">
+              <div className="bg-white p-5 rounded-xl shadow-sm border-gray-300">
                 <p className="text-gray-500 text-xs font-Gilroy">Total Properties</p>
                 <h2 className="text-2xl font-bold text-base mt-1 font-Gilroy">{hostels?.totalHostels}</h2>
               </div>
 
-              <div className="bg-white p-5 rounded-xl shadow-sm border">
+              <div className="bg-white p-5 rounded-xl shadow-sm border-gray-300">
                 <p className="text-gray-500 text-sm">Active Properties</p>
                 <h2 className="text-2xl text-base font-bold mt-1">{hostels?.activeHostels}</h2>
               </div>
 
-              <div className="bg-white p-5 rounded-xl shadow-sm border">
+              <div className="bg-white p-5 rounded-xl shadow-sm border-gray-300">
                 <p className="text-gray-500 text-sm">InActive Properties</p>
                 <h2 className="text-2xl text-base font-bold mt-1">{hostels?.inactiveHostels}</h2>
               </div>
             </div>
 
 
-            <div className="sticky top-0 z-20 bg-white pb-4">
+                 <div className="sticky top-0 z-20 bg-white pb-4">
               <div className="flex flex-wrap justify-between items-center gap-2 font-inter">
 
 
@@ -189,20 +189,20 @@ const Properties = () => {
                     onChange={(e) => {
                       setStatusFilter(e.target.value);
                     }}
-                    className="border rounded-lg px-3 py-2 text-xs font-medium text-gray-700"
+                    className="border rounded-lg px-3 py-2 text-xs font-medium text-gray-700  border border-gray-300" 
                   >
                     <option value="">All</option>
                     {/* <option value="active">Active</option>
               <option value="inactive">Inactive</option> */}
                   </select>
 
-
+{/* 
                   <select className="border rounded-lg px-3 py-2 text-xs font-medium leading-[150%] text-gray-700">
                     <option className="text-[#1E45E1] font-medium font-inter ">This Month</option>
                     <option>Last Month</option>
-                  </select>
+                  </select> */}
 
-                  <button className="border px-4 py-2 rounded-lg text-xs font-medium leading-[150%] text-gray-700 font-inter">
+                  <button className="border px-4 py-2 rounded-lg text-xs font-medium leading-[150%] text-gray-700 font-inter border border-gray-300">
                     Filter
                   </button>
 
@@ -222,7 +222,7 @@ const Properties = () => {
                       setSearchText(e.target.value);
                       setPage(1);
                     }}
-                    className="pl-9 pr-4 py-2 border rounded-lg text-sm font-medium leading-[150%] w-56"
+                    className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm font-medium leading-[150%] w-56"
                   />
                 </div>
               </div>
@@ -233,21 +233,23 @@ const Properties = () => {
 
             {/* <div className="bg-white rounded-xl shadow-sm border flex flex-col h-[calc(100vh-230px)]"> */}
 
-            <div className="bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col max-h-[calc(100vh-230px)]">
+            {/* <div className="bg-white rounded-xl shadow-sm border-gray-600 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]"> */}
 
+<div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]">
 
               <div className="flex-1 overflow-y-auto pb-5">
 
                 <table className="w-full text-sm text-left">
 
 
-                  <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0 z-10">
+                  <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-10 border-b border-gray-300">
+
                     <tr>
                       <th className="px-4 py-3 text-xs">ID</th>
                       {/* <th className="px-4 py-3 text-xs whitespace-nowrap">Hostel Name</th> */}
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Name</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Mobile.No</th>
-                      <th className="px-4 py-3 whitespace-nowrap text-xs">Addres</th>
+                      <th className="px-4 py-3 whitespace-nowrap text-xs">Address</th>
                       {/* <th className="px-4 py-3 whitespace-nowrap text-xs">Sub Plan</th> */}
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Created On</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Last Action</th>
@@ -256,14 +258,15 @@ const Properties = () => {
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-gray-200">
+
 
                     {displayData?.map((item, index) => (
 
                       <tr key={item.hostelId} className="hover:bg-gray-50 text-[12px]">
                         <td className="px-4 py-1">{(page - 1) * pageSize + index + 1}
                         </td>
-                        <td className="py-1 text-blue-600 font-medium whitespace-nowrap">
+                        {/* <td className="py-1 text-blue-600 font-medium whitespace-nowrap">
                             <div className="flex flex-row items-center">
                               <div className="flex bg-ss-white border-[1px] rounded-full w-3 h-3 items-center justify-center" >
                                 <label className="color-white text-[8px]">T</label>
@@ -276,11 +279,43 @@ const Properties = () => {
                             </div>
 
 
-                        </td>
-                        <td className="px-4 py-1 whitespace-nowrap">
-                          {item.ownerInfo?.fullName}
                         </td> */}
- <td className="px-4 py-3">
+                        <td className="px-4 py-1">
+  <div className="flex items-center gap-3 relative group">
+
+    {/* Small T Circle */}
+    <div className="flex border rounded-full w-5 h-5 items-center justify-center text-[9px] font-medium text-gray-600">
+      T
+    </div>
+
+    {/* Initial Circle */}
+    <div className="w-9 h-9 flex items-center justify-center 
+                    rounded-full bg-gray-200 text-gray-600 
+                    text-sm font-semibold uppercase">
+      {item.initials || "NA"}
+    </div>
+
+    {/* Text Section */}
+    <div className="flex flex-col whitespace-nowrap">
+      <span className="text-gray-900 font-semibold">
+        {item.hostelName}
+      </span>
+
+      {/* Tooltip */}
+     
+
+      <span className="text-gray-500 text-xs whitespace-nowrap">
+        {item.ownerInfo?.fullName}
+      </span>
+    </div>
+
+  </div>
+</td>
+
+                        {/* <td className="px-4 py-1 whitespace-nowrap">
+                          {item.ownerInfo?.fullName}
+                        </td>  */}
+ {/* <td className="px-4 py-3">
   <div className="flex items-center gap-3 relative group">
 
     <div className="w-9 h-9 flex items-center justify-center 
@@ -306,7 +341,7 @@ const Properties = () => {
     </div>
 
   </div>
-</td>
+</td> */}
 
 
 
@@ -332,9 +367,9 @@ const Properties = () => {
 
 
 
-                        <td className="px-4 py-1">
+                        {/* <td className="px-4 py-1">
                           {item.hostelPlan?.currentPlan}
-                        </td> */}
+                        </td>  */}
                         <td className="px-4 py-1">
                           {item.joinedOn}
                         </td>
@@ -393,7 +428,7 @@ const Properties = () => {
 
 
             </div>
-            <div className="flex justify-between items-center px-4 py-1 text-sm border-t bg-white">
+            <div className="flex justify-between items-center px-4 py-1 text-sm  bg-white">
 
               {/* Total Count */}
               <span className="text-gray-600">
