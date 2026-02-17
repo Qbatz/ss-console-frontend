@@ -194,7 +194,7 @@ const handleConfirmDelete = async () => {
 
 
 
-      <div className="flex justify-between items-center px-4 py-3 border-t bg-white text-sm">
+      <div className="flex justify-between items-center px-4 py-3  bg-white text-sm">
 
 
         <span className="text-gray-600">

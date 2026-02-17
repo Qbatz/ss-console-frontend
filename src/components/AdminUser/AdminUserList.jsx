@@ -58,12 +58,15 @@ const IamAdminUser = () => {
 
     fetchAdmin();
   }, []);
+  console.log("admin",admin)
+  const adminList = Array.isArray(admin) ? admin : [admin];
+
   return (
     <DashboardLayout>
       <div className="w-full px-4 md:px-6  space-y-6">
 
        
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b pb-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b  border-gray-200 pb-4">
           <h2 className="text-xl font-semibold text-gray-800">
             IAM- Admin User
           </h2>
@@ -81,7 +84,7 @@ const IamAdminUser = () => {
 
         
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <select className="border rounded-lg px-3 py-2 text-sm bg-white w-full md:w-auto">
+          <select className="border  border-gray-200 rounded-lg px-3 py-2 text-sm bg-white w-full md:w-auto">
             <option>All</option>
             <option>Active</option>
             <option>Inactive</option>
@@ -91,7 +94,7 @@ const IamAdminUser = () => {
             <input
               type="text"
               placeholder="Search..."
-              className="w-full border rounded-lg pl-4 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border  border-gray-200 rounded-lg pl-4 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <span className="absolute right-3 top-2.5 text-gray-400 text-sm">
              <img src={Search} alt="Search"
@@ -101,56 +104,57 @@ const IamAdminUser = () => {
         </div>
 
         {/* Table Section */}
-        <div className="bg-white border rounded-xl overflow-hidden shadow-sm">
+ <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm relative">
 
-          <div className="overflow-x-auto">
-
-            {/* Table Header */}
-            <div className="min-w-[900px] grid grid-cols-7 bg-gray-50 text-xs font-semibold text-gray-500 px-6 py-3 border-b">
-              <div>NAME</div>
-              <div>EMAIL</div>
-              <div>ROLE</div>
-              <div>LAST ACTION</div>
-              <div>CREATED ON</div>
-              <div>STATUS</div>
-              <div className="text-right">ACTIONS</div>
-            </div>
-
-            {/* Table Rows */}
-            {users.map((user, index) => (
-              <div
-                key={index}
-                className="min-w-[900px] grid grid-cols-7 px-6 py-4 text-sm border-b last:border-b-0 items-center hover:bg-gray-50 transition"
-              >
-                <div className="text-blue-600 font-medium cursor-pointer">
-                  {user.name}
-                </div>
-
-                <div className="text-gray-600 truncate">
-                  {user.email}
-                </div>
-
-                <div>{user.role}</div>
-
-                <div>{user.lastAction}</div>
-
-                <div>{user.createdOn}</div>
-
-                <div>
-                  <span className="inline-flex items-center gap-2 bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-medium">
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                    {user.status}
-                  </span>
-                </div>
-
-                <div className="text-right cursor-pointer text-gray-500 hover:text-gray-700">
-                  ⋮
-                </div>
-              </div>
-            ))}
-
+  {loading && (
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
-        </div>
+  )}
+
+  <div className="overflow-x-auto">
+    <table className="min-w-full text-sm">
+
+      <thead className="bg-gray-50 text-xs font-semibold text-gray-500">
+        <tr>
+          <th className="px-6 py-3 text-left">NAME</th>
+          <th className="px-6 py-3 text-left">EMAIL</th>
+          <th className="px-6 py-3 text-left">ROLE</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {adminList?.length > 0 ? (
+          adminList.map((user, index) => (
+            <tr key={index} className="border-b last:border-0 hover:bg-gray-50">
+              <td className="px-6 py-3 text-blue-600 font-medium">
+                {user?.fullName}
+              </td>
+              <td className="px-6 py-3 text-gray-600">
+                {user?.emailId}
+              </td>
+              <td className="px-6 py-3">
+                {user?.role || "N/A"}
+              </td>
+            </tr>
+          ))
+        ) : (
+          !loading && (
+            <tr>
+              <td colSpan="3" className="text-center py-6 text-gray-400">
+                No Admin Found
+              </td>
+            </tr>
+          )
+        )}
+      </tbody>
+
+    </table>
+  </div>
+</div>
+
+
+
 
       </div>
       <AddAdmin isOpen={open} onClose={() => setOpen(false)} />

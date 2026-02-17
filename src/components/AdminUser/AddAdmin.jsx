@@ -122,7 +122,7 @@ const AddAdmin = ({ isOpen, onClose }) => {
             }`}
         >
 
-          <div className="flex justify-between items-start px-6 py-4 border-b">
+          <div className="flex justify-between items-start px-6 py-4 border-b border-gray-300">
             <div>
               <h2 className="text-lg font-semibold font-inter">
                 Add New Admin User
@@ -159,7 +159,7 @@ const AddAdmin = ({ isOpen, onClose }) => {
                   setEmailError("");
                 }}
                 placeholder="Eg: admin@smartstay.com"
-                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
             {emailError && (
@@ -174,7 +174,7 @@ const AddAdmin = ({ isOpen, onClose }) => {
 
               <div
                 onClick={() => setOpenDropdown(!openDropdown)}
-                className="w-full border rounded-lg px-3 py-2 flex justify-between items-center cursor-pointer bg-white"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 flex justify-between items-center cursor-pointer bg-white"
               >
                 <span className={selectedRole ? "text-gray-800" : "text-gray-400"}>
                   {selectedRole?.name || "Select role"}
@@ -224,7 +224,7 @@ const AddAdmin = ({ isOpen, onClose }) => {
                   setTicketLinkError("");
                 }}
                 placeholder="Enter Ticket Link"
-                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
               />
               {ticketLinkError && (
                 <ErrorMessage message={ticketLinkError} type="error" />
@@ -233,7 +233,7 @@ const AddAdmin = ({ isOpen, onClose }) => {
           </div>
 
 
-          <div className="absolute bottom-0 w-full px-6 py-4 border-t bg-white flex justify-end gap-3">
+          <div className="absolute bottom-0 w-full px-6 py-4 border-t border-gray-300 bg-white flex justify-end gap-3">
             <button
               onClick={onClose}
               className="px-4 py-2 border rounded-lg text-sm"

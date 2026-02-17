@@ -359,7 +359,7 @@ if (selectedRole) {
       } flex flex-col`}
     >
         {/* Header */}
-        <div className="flex justify-between items-start px-6 py-4 border-b">
+        <div className="flex justify-between items-start px-6 py-4 border-b border-gray-300">
           <div>
             <h2 className="text-[15px] font-semibold font-inter text-start">{selectedRole ? "Edit Role" : "Create New Role"}
 </h2>
@@ -387,7 +387,7 @@ if (selectedRole) {
         <div className="p-6 space-y-6 overflow-y-auto h-[calc(100%-130px)]">
 
           {/* Basic Details */}
-          <div className="border rounded-xl p-6 space-y-5">
+          <div className="border border-gray-300 rounded-xl p-6 space-y-5">
             <h3 className="text-base font-semibold flex items-center gap-2">
               <img src={RoleImg} alt="Role"
                 className="w-5 h-5 object-contain" /> Basic Role Details
@@ -431,13 +431,13 @@ if (selectedRole) {
           </div>
   
 
-          <div className="border rounded-xl p-5">
+          <div className="border border-gray-300 rounded-xl p-5">
             <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
               <img src={Lock} alt="Lock"
                 className="w-5 h-5 object-contain" /> Permissions
             </h3>
 
-            <div className="grid grid-cols-6 text-xs font-medium text-gray-500 mb-3">
+            <div className="grid grid-cols-6 text-xs font-medium text-gray-500 mb-3  border-gray-300">
               <div>Module</div>
               <div className="text-center">View</div>
               <div className="text-center">Add</div>
@@ -449,7 +449,7 @@ if (selectedRole) {
             {modules.map((mod, index) => (
               <div
                 key={index}
-                className="grid grid-cols-6 items-center py-2 border-t text-sm"
+                className="grid grid-cols-6 items-center py-2 border-t border-gray-300 text-sm"
               >
                 <div>{mod.moduleName}</div>
                 <div className="flex justify-center" ref={permissionRef}>
@@ -533,7 +533,7 @@ if (selectedRole) {
         </div>
      
         {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50">
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-300 bg-gray-50">
           <button
             onClick={handleClose}
             className="px-4 py-2 text-sm border rounded-lg"
