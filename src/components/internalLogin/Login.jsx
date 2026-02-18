@@ -98,36 +98,37 @@ const Login = () => {
 
   
   const handleMockLogin = async () => {
-    if (!email) {
-      alert("Email is required");
-      return;
+  if (!email) {
+    alert("Email is required");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const res = await axios.get(
+      `${ConfigV2.apiBaseUrl}/v2/agents/mock-agent-login`,
+      { params: { email } }
+    );
+
+    if (res.status === 200) {
+      const mockToken = res.data;
+
+      localStorage.setItem("mock_token", mockToken);
+      console.log("mock_token",mockToken)
+      localStorage.setItem("login_time", Date.now());
+
+      navigate("/home", { replace: true });
     }
 
-    try {
-      setLoading(true);
+  } catch (err) {
+    console.log(err);
+    alert("Mock login failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
-      const res = await axios.get(
-  `${ConfigV2.apiBaseUrl}/v2/agents/mock-agent-login`,
-  { params: { email } }
-);
-
-if (res.status === 200) {
-  const mockToken = res.data;
-
-  localStorage.setItem("mock_token", mockToken);
-   localStorage.setItem("login_time", Date.now());
-
-  navigate("/home");
-}
-
-
-    } catch (err) {
-      console.log(err);
-      alert("Mock login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="flex flex-col h-full pt-[100px] items-center">

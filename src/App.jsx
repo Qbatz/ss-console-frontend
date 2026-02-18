@@ -14,23 +14,23 @@ function TokenWatcher() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token =
-      localStorage.getItem("mock_token") ||
-      localStorage.getItem("access_token");
+
+    const token = localStorage.getItem("access_token");
 
     if (!token) return;
 
     try {
+
+      if (!token.includes(".")) return; // mock safe
+
       const payload = JSON.parse(atob(token.split(".")[1]));
       const exp = payload.exp * 1000;
-      console.log("exp",exp)
 
       if (Date.now() > exp) {
 
-        localStorage.removeItem("mock_token");
         localStorage.removeItem("access_token");
-
         navigate("/internal/login");
+
       }
 
     } catch (err) {
@@ -41,6 +41,7 @@ function TokenWatcher() {
 
   return null;
 }
+
 
 
 function App() {
