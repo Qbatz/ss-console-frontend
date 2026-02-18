@@ -13,12 +13,15 @@ import Billing from "../components/BillingScreen/Billing";
 import SupportTicket from "../components/SupportTicketScreen/SupportTicket";
 import CRMDashboard from "../components/CRMDashboardScreen/CRMDashboard";
 import ManagePlans from "../components/SubscriptionScreen/ManagePlans ";
+import { OwnersProvider } from "../Context/OwnersContext";
 
 import { useNavigate } from "react-router-dom";
 
 
 const PrivateRoute = ({ children }) => {
-  const token = localStorage.getItem("access_token");
+const token =
+  localStorage.getItem("access_token") ||
+  localStorage.getItem("mock_token");
   return token ? children : <Navigate to="/" replace />;
 };
 
@@ -31,6 +34,7 @@ const PrivateRoutesScreen = () => {
       <RoleProvider>
         <HostelProvider>
           <SubscriptionProvider>
+            <OwnersProvider>
           <Routes>
             <Route path="/home" element={<Home />} />
             <Route path="/proprietors" element={<Proprietors />} />
@@ -43,6 +47,7 @@ const PrivateRoutesScreen = () => {
             <Route path="/crmDashboard" element={<CRMDashboard />} />
             <Route path="/manage-plans" element={<ManagePlans />} />
           </Routes>
+          </OwnersProvider>
           </SubscriptionProvider>
         </HostelProvider>
       </RoleProvider>
