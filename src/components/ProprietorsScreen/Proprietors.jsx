@@ -1,137 +1,310 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
+import swap from "../../assets/arrowswap.png";
+import { useOwners } from "../../Context/OwnersContext";
 
 const Proprietors = () => {
- return (
+
+  const { owners, totalItems, totalPages, loading, getOwners } = useOwners();
+
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(10);
+  
+  const [search, setSearch] = useState("");
+const [debouncedSearch, setDebouncedSearch] = useState("");
+const [sortBy, setSortBy] = useState("JOINING_DATE");
+const [direction, setDirection] = useState("desc");
+
+
+console.log("owners",owners)
+
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedSearch(search);
+  }, 400);
+
+  return () => clearTimeout(timer);
+}, [search]);
+
+useEffect(() => {
+  getOwners({
+    page: page - 1,
+    size,
+    name: debouncedSearch,
+    sortBy,
+    direction
+  });
+}, [page, size, debouncedSearch, sortBy, direction]);
+const handleSort = (key) => {
+  if (sortBy === key) {
+    setDirection(prev => (prev === "asc" ? "desc" : "asc"));
+  } else {
+    setSortBy(key);
+    setDirection("asc");
+  }
+  setPage(1);
+};
+
+
+  return (
     <DashboardLayout>
 
-      
-     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-10 bg-gray-50 p-6 rounded-2xl">
-        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition">
-          <p className="text-sm text-gray-500">Total Tickets</p>
-          <h2 className="text-3xl font-semibold mt-2">186</h2>
-          <p className="text-green-500 text-sm mt-3">
-            ↑ 8.5% Up from yesterday
-          </p>
-        </div>
+      <div className="p-4 space-y-4">
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition">
-          <p className="text-sm text-gray-500">Active Proprietors</p>
-          <h2 className="text-3xl font-semibold mt-2">287</h2>
-          <p className="text-green-500 text-sm mt-3">↑ 8.5%</p>
-        </div>
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold">Proprietors</h2>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition">
-          <p className="text-sm text-gray-500">Occupancy Rate</p>
-          <h2 className="text-3xl font-semibold mt-2">67%</h2>
-          <p className="text-red-500 text-sm mt-3">↓ 8.5%</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition">
-          <p className="text-sm text-gray-500">Active Systems</p>
-          <h2 className="text-3xl font-semibold mt-2">42</h2>
-          <p className="text-green-500 text-sm mt-3">↑ 8.5%</p>
-        </div>
-
-      </div>
-
-
-     
-      <h2 className="text-lg md:text-xl font-semibold mb-4">
-        Communication Performance (Notify Hub)
-      </h2>
-
-      <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm mb-6">
-
-       
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-
-          <div>
-            <h3 className="font-medium text-base md:text-lg">
-              Message Delivery Status
-            </h3>
-            <p className="text-sm text-gray-500">
-              Communication delivery status across channels
-            </p>
-          </div>
-
-          <div className="flex gap-3">
-            <button className="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm">
-              Email
-            </button>
-            <button className="border px-4 py-1.5 rounded-md text-sm">
-              SMS
-            </button>
-          </div>
-
-        </div>
-
-      
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-          <div className="bg-gray-50 p-6 rounded-xl">
-            <p className="text-sm text-gray-500">Sent</p>
-            <h3 className="text-2xl font-semibold mt-2">12,456</h3>
-          </div>
-
-          <div className="bg-green-50 p-6 rounded-xl">
-            <p className="text-sm text-gray-500">Delivered</p>
-            <h3 className="text-2xl font-semibold mt-2 text-green-600">
-              11,892
-            </h3>
-            <p className="text-sm text-green-500 mt-2">
-              ✓ Successfully delivered
-            </p>
-          </div>
-
-          <div className="bg-red-50 p-6 rounded-xl">
-            <p className="text-sm text-gray-500">Failed</p>
-            <h3 className="text-2xl font-semibold mt-2 text-red-600">
-              564
-            </h3>
-            <p className="text-sm text-red-500 mt-2">
-              ✕ Delivery failed
-            </p>
-          </div>
-
-        </div>
-
-      </div>
-
-
-     
-     <div className="bg-indigo-50 p-6 md:p-8 rounded-2xl shadow-sm">
-
-
-        <p className="text-sm text-gray-500 mb-2">Latest Campaign</p>
-
-        <h3 className="font-medium mb-6 text-base md:text-lg">
-          Monthly Billing Reminder - October 2025
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-6">
-          <p>Sent Date: Oct 28, 2025</p>
-          <p>Recipients: 287</p>
-          <p className="text-green-600">Delivery Rate: 96%</p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4">
-          <button className="flex-1 border rounded-md py-2 hover:bg-gray-50 transition bg-white">
-            View Campaign
-          </button>
-
-          <button className="flex-1 border border-red-300 text-red-500 rounded-md py-2 hover:bg-red-50 transition bg-white">
-            Check Failed Logs
+          <button className="text-blue-600 flex items-center gap-1 text-sm font-medium">
+            ➕ Add Proprietor
           </button>
         </div>
 
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+          <div className="border border-gray-300 rounded-xl p-4 bg-white">
+            <p className="text-gray-500 text-sm">Total Proprietors</p>
+            <p className="text-xl font-semibold mt-1">{totalItems}</p>
+          </div>
+
+          <div className="border border-gray-300 rounded-xl p-4 bg-white">
+            <p className="text-gray-500 text-sm">Active</p>
+            <p className="text-xl font-semibold mt-1">--</p>
+          </div>
+
+        </div>
+
+
+        {/* Filter Row */}
+        <div className="flex justify-between items-center">
+
+          <div className="flex gap-2">
+            <select className="border border-gray-300 rounded-md px-3 py-2 text-[14px]">
+              <option>All</option>
+            </select>
+
+            <button className="border border-gray-300 px-3 py-2 rounded-md text-[14px]">
+              Filter
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+           <button
+  onClick={() => {
+    setPage(1);
+    getOwners(0, size, search);
+  }}
+  className="bg-blue-600 text-white p-2 rounded-md"
+>
+  ⟳
+</button>
+
+
+     <input
+  type="text"
+  placeholder="Search..."
+  value={search}
+  onChange={(e) => {
+    setPage(1);
+    setSearch(e.target.value);
+  }}
+  className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+/>
+
+
+          </div>
+
+        </div>
+
+
+        {/* Table Card */}
+        <div className="bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col">
+
+          <div className="max-h-[350px] overflow-y-auto">
+
+            <table className="min-w-full text-sm">
+
+            <thead className="bg-gray-50 sticky top-0 z-10">
+  <tr>
+
+    <th className="px-4 py-3  text-[12px] font-semibold text-left">
+      <div className="flex items-center gap-1 cursor-pointer"
+           onClick={() => handleSort("JOINING_DATE")}>
+        ID
+        <img src={swap} className="w-3 h-3" />
       </div>
-<div className="mt-6">
-  <button className="w-full bg-white border border-gray-200 rounded-xl py-3 text-sm font-medium hover:bg-gray-50 transition flex items-center justify-center gap-2">
-    View All Campaigns
-    <span>→</span>
-  </button>
-</div>
+    </th>
+
+    <th className="px-4 py-3 text-left text-[12px] font-semibold">
+      <div className="flex items-center gap-1 cursor-pointer"
+           onClick={() => handleSort("OWNER_NAME")}>
+        Name
+        <img src={swap} className="w-3 h-3" />
+      </div>
+    </th>
+
+    <th className="px-4 py-3 text-left text-[12px] font-semibold">
+      <div className="flex items-center gap-1">
+        Mail
+        <img src={swap} className="w-3 h-3" />
+      </div>
+    </th>
+
+    <th className="px-4 py-3 text-left text-[12px] font-semibold">
+      <div className="flex items-center gap-1">
+        Mobile
+        <img src={swap} className="w-3 h-3" />
+      </div>
+    </th>
+
+    <th className="px-4 py-3 text-left text-[12px] font-semibold">
+      <div className="flex items-center gap-1 cursor-pointer"
+           onClick={() => handleSort("HOSTEL_COUNT")}>
+        Props
+        <img src={swap} className="w-3 h-3" />
+      </div>
+    </th>
+
+    {/* <th className="px-4 py-3 text-left text-[12px] font-semibold">
+      Plan Status
+    </th> */}
+
+    <th className="px-4 py-3 text-left text-[12px] font-semibold">
+      <div className="flex items-center gap-1 cursor-pointer"
+           onClick={() => handleSort("LATEST_ACTIVITY")}>
+        Last Action
+        <img src={swap} className="w-3 h-3" />
+      </div>
+    </th>
+
+    {/* <th className="px-4 py-3 text-left text-[12px] font-semibold">
+      Status
+    </th> */}
+
+    <th className="px-4 py-3 text-left text-[12px] font-semibold">
+      Actions
+    </th>
+
+  </tr>
+</thead>
+
+
+
+              <tbody>
+
+                {loading ? (
+                  <tr>
+                    <td colSpan="9" className="text-center py-6">
+                      Loading...
+                    </td>
+                  </tr>
+                ) : owners?.map((item, i) => (
+
+                  <tr key={i} className="border-b border-gray-300 hover:bg-gray-50">
+
+                    <td className="px-4 py-1 text-[12px] text-left">
+                      {item.ownerId?.slice(0,6)}
+                    </td>
+
+                    <td className="px-4 py-1 text-blue-600 text-[12px] text-left">
+                      {item.fullName}
+                    </td>
+
+                    <td className="px-4 py-1 text-[12px] text-left">
+                      -
+                    </td>
+
+                    <td className="px-4 py-1 text-[12px] text-left">
+                      {item.mobileNo}
+                    </td>
+
+                    <td className="px-4 py-1 text-blue-600 text-[12px] text-left">
+                      {item.noOfProperties}
+                    </td>
+
+                    {/* <td className="px-4 py-1 text-[12px]">
+                      Active
+                    </td> */}
+
+                    <td className="px-4 py-1 text-[12px] text-left">
+                      {item.lastActivityDate} {item.lastActivityTime}
+                    </td>
+
+                    {/* <td className="px-4 py-1 text-[12px]">
+                      <span className="text-green-600 font-medium">
+                        Active
+                      </span>
+                    </td> */}
+
+                    <td className="px-4 py-1">⋮</td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center px-4 py-3 border-t border-gray-300 text-sm">
+
+            <span className="text-gray-600">
+              Total Record Count :
+              <span className="text-blue-600 font-medium"> {size}</span>
+            </span>
+
+            <div className="flex items-center gap-3">
+
+             <select
+  value={size}
+onChange={(e) => {
+  setSize(Number(e.target.value));
+  setPage(1);
+}}
+  className="border rounded-md px-2 py-1 text-sm"
+>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+
+
+   <button
+  disabled={page === 1}
+  onClick={() => setPage(p => p - 1)}
+  className="text-gray-500 disabled:opacity-40"
+>
+  &#8249;
+</button>
+
+<span className="border px-3 py-1 rounded-md bg-gray-100">
+  {page}
+</span>
+
+<button
+  disabled={page === totalPages}
+  onClick={() => setPage(p => p + 1)}
+  className="text-gray-500 disabled:opacity-40"
+>
+  &#8250;
+</button>
+
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
     </DashboardLayout>
   );
 };
