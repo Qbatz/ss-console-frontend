@@ -12,7 +12,7 @@ export const OwnersProvider = ({ children }) => {
   
 
   const getOwners = async ({
-    page = 0,
+    page = 1,
     size = 10,
     name = "",
     isPropertiesExpired,
@@ -48,6 +48,43 @@ export const OwnersProvider = ({ children }) => {
       setLoading(false);
     }
   };
+const changeOwnerPassword = async (payload) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.post(
+      "/v2/owners/change-password",
+      payload
+    );
+
+    if (res?.status === 200 || res?.status === 201) {
+      return {
+        success: true,
+        data: res.data,
+        message: res.data?.message || "Password changed successfully",
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg =
+      error?.response?.data?.message ||
+      error?.response?.data ||
+      "Failed to change password";
+
+    console.log("CHANGE PASSWORD ERROR 👉", msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <OwnersContext.Provider
@@ -56,7 +93,7 @@ export const OwnersProvider = ({ children }) => {
         totalItems,
         totalPages,
         loading,
-        getOwners
+        getOwners,changeOwnerPassword
       }}
       
     >

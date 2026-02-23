@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef  } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import RoleImg from "../../assets/RoleImg.png";
 import Lock from "../../assets/lock.png"
 import { useRole } from "../../Context/RoleContext";
@@ -6,90 +6,91 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 
 
-const CreateRoleModal = ({ isOpen, onClose,selectedRole }) => {
-  const { modules, loading, agentRoles, getAgentRoles, createAgentRole,updateAgentRole } = useRole();
+const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
+  const { modules, loading, agentRoles, getAgentRoles, createAgentRole, updateAgentRole } = useRole();
   console.log("selectedRole", selectedRole)
   const [roleName, setRoleName] = useState("");
   const [permissions, setPermissions] = useState([]);
-  const [rolenameError,setRoleNameError] = useState("")
-  const [permissionError,setPermissionError] = useState("")
-   const [modalType, setModalType] = useState("success");
+  const [rolenameError, setRoleNameError] = useState("")
+  const [permissionError, setPermissionError] = useState("")
+  const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
-  const [initialRoleName, setInitialRoleName] = useState("");
-const [initialPermissions, setInitialPermissions] = useState([]);
-
   const [message, setMessage] = useState("");
-  console.log("permissions",permissions)
+  const [initialRoleName, setInitialRoleName] = useState("");
+  const [initialPermissions, setInitialPermissions] = useState([]);
+
+
+  console.log("permissions", permissions)
   const roleInputRef = useRef(null);
-const permissionRef = useRef(null);
-const resetForm = () => {
-  setRoleName("");
-  setPermissions([]);
-  setRoleNameError("");
-  setPermissionError("");
-};
-const handleClose = () => {
-  resetForm();
-  onClose();
-};
-
-// useEffect(() => {
-//   if (selectedRole) {
-//     setRoleName(selectedRole.name || "");
-
-//     if (selectedRole.rolesPermissionDetails) {
-//       const formattedPermissions =
-//         selectedRole.rolesPermissionDetails.map((p) => ({
-//           moduleId: p.moduleId,
-//           canRead: p.canRead || false,
-//           canWrite: p.canWrite || false,
-//           canUpdate: p.canUpdate || false,
-//           canDelete: p.canDelete || false,
-//         }));
-
-//       setPermissions(formattedPermissions);
-//     }
-//   } else {
-//     setRoleName("");
-//     setPermissions([]);
-//   }
-// }, [selectedRole]);
-
-useEffect(() => {
-  if (selectedRole) {
-    setRoleName(selectedRole.name || "");
-    setInitialRoleName(selectedRole.name || "");
-
-    if (selectedRole.rolesPermissionDetails) {
-      const formattedPermissions =
-        selectedRole.rolesPermissionDetails.map((p) => ({
-          moduleId: p.moduleId,
-          canRead: p.canRead || false,
-          canWrite: p.canWrite || false,
-          canUpdate: p.canUpdate || false,
-          canDelete: p.canDelete || false,
-        }));
-
-      setPermissions(formattedPermissions);
-      setInitialPermissions(formattedPermissions);
-    }
-  } else {
+  const permissionRef = useRef(null);
+  const resetForm = () => {
     setRoleName("");
     setPermissions([]);
-    setInitialRoleName("");
-    setInitialPermissions([]);
-  }
-}, [selectedRole]);
+    setRoleNameError("");
+    setPermissionError("");
+  };
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  // useEffect(() => {
+  //   if (selectedRole) {
+  //     setRoleName(selectedRole.name || "");
+
+  //     if (selectedRole.rolesPermissionDetails) {
+  //       const formattedPermissions =
+  //         selectedRole.rolesPermissionDetails.map((p) => ({
+  //           moduleId: p.moduleId,
+  //           canRead: p.canRead || false,
+  //           canWrite: p.canWrite || false,
+  //           canUpdate: p.canUpdate || false,
+  //           canDelete: p.canDelete || false,
+  //         }));
+
+  //       setPermissions(formattedPermissions);
+  //     }
+  //   } else {
+  //     setRoleName("");
+  //     setPermissions([]);
+  //   }
+  // }, [selectedRole]);
+
+  useEffect(() => {
+    if (selectedRole) {
+      setRoleName(selectedRole.name || "");
+      setInitialRoleName(selectedRole.name || "");
+
+      if (selectedRole.rolesPermissionDetails) {
+        const formattedPermissions =
+          selectedRole.rolesPermissionDetails.map((p) => ({
+            moduleId: p.moduleId,
+            canRead: p.canRead || false,
+            canWrite: p.canWrite || false,
+            canUpdate: p.canUpdate || false,
+            canDelete: p.canDelete || false,
+          }));
+
+        setPermissions(formattedPermissions);
+        setInitialPermissions(formattedPermissions);
+      }
+    } else {
+      setRoleName("");
+      setPermissions([]);
+      setInitialRoleName("");
+      setInitialPermissions([]);
+    }
+  }, [selectedRole]);
 
 
 
-const handlePermissionChange = (moduleId, field, value) => {
-  setPermissions((prev) => {
-    const existing = prev.find((p) => p.moduleId === moduleId);
+  const handlePermissionChange = (moduleId, field, value) => {
+    setPermissions((prev) => {
+      const existing = prev.find((p) => p.moduleId === moduleId);
 
-    let updatedPermission = existing
-      ? { ...existing }
-      : {
+      let updatedPermission = existing
+        ? { ...existing }
+        : {
           moduleId,
           canRead: false,
           canWrite: false,
@@ -97,82 +98,82 @@ const handlePermissionChange = (moduleId, field, value) => {
           canDelete: false,
         };
 
-    updatedPermission[field] = value;
+      updatedPermission[field] = value;
 
-    // Rule 1: if Add/Edit/Delete checked → auto enable View
-    if (
-  (field === "canUpdate" || field === "canDelete") &&
-  value === true
-) {
-  updatedPermission.canRead = true;
-}
+      // Rule 1: if Add/Edit/Delete checked → auto enable View
+      if (
+        (field === "canUpdate" || field === "canDelete") &&
+        value === true
+      ) {
+        updatedPermission.canRead = true;
+      }
 
-    // Rule 2: if View unchecked → disable all
-    if (field === "canRead" && value === false) {
-      updatedPermission.canWrite = false;
-      updatedPermission.canUpdate = false;
-      updatedPermission.canDelete = false;
-    }
+      // Rule 2: if View unchecked → disable all
+      if (field === "canRead" && value === false) {
+        updatedPermission.canWrite = false;
+        updatedPermission.canUpdate = false;
+        updatedPermission.canDelete = false;
+      }
 
-    const newPermissions = [
-      ...prev.filter((p) => p.moduleId !== moduleId),
-      updatedPermission,
-    ];
+      const newPermissions = [
+        ...prev.filter((p) => p.moduleId !== moduleId),
+        updatedPermission,
+      ];
 
-    // 🔥 VERY IMPORTANT
-    // Remove module if all permissions are false
-    return newPermissions.filter(
-      (p) =>
-        p.canRead ||
-        p.canWrite ||
-        p.canUpdate ||
-        p.canDelete
-    );
-  });
-  setPermissionError("")
-};
+      // 🔥 VERY IMPORTANT
+      // Remove module if all permissions are false
+      return newPermissions.filter(
+        (p) =>
+          p.canRead ||
+          p.canWrite ||
+          p.canUpdate ||
+          p.canDelete
+      );
+    });
+    setPermissionError("")
+  };
 
 
-// const handlePermissionChange = (moduleId, field, value) => {
-//   setPermissions((prev) => {
-//     const existing = prev.find((p) => p.moduleId === moduleId);
+  // const handlePermissionChange = (moduleId, field, value) => {
+  //   setPermissions((prev) => {
+  //     const existing = prev.find((p) => p.moduleId === moduleId);
 
-//     let updatedPermission = existing
-//       ? { ...existing }
-//       : {
-//           moduleId,
-//           canRead: false,
-//           canWrite: false,
-//           canUpdate: false,
-//           canDelete: false,
-//         };
+  //     let updatedPermission = existing
+  //       ? { ...existing }
+  //       : {
+  //           moduleId,
+  //           canRead: false,
+  //           canWrite: false,
+  //           canUpdate: false,
+  //           canDelete: false,
+  //         };
 
-//     updatedPermission[field] = value;
+  //     updatedPermission[field] = value;
 
-//     // 🔥 RULE 1:
-//     // If Add/Edit/Delete checked → auto enable View
-//     if (
-//       field !== "canRead" &&
-//       value === true
-//     ) {
-//       updatedPermission.canRead = true;
-//     }
+  //     // 🔥 RULE 1:
+  //     // If Add/Edit/Delete checked → auto enable View
+  //     if (
+  //       field !== "canRead" &&
+  //       value === true
+  //     ) {
+  //       updatedPermission.canRead = true;
+  //     }
 
-//     // 🔥 RULE 2:
-//     // If View unchecked → disable all
-//     if (field === "canRead" && value === false) {
-//       updatedPermission.canWrite = false;
-//       updatedPermission.canUpdate = false;
-//       updatedPermission.canDelete = false;
-//     }
+  //     // 🔥 RULE 2:
+  //     // If View unchecked → disable all
+  //     if (field === "canRead" && value === false) {
+  //       updatedPermission.canWrite = false;
+  //       updatedPermission.canUpdate = false;
+  //       updatedPermission.canDelete = false;
+  //     }
 
-//     return [
-//       ...prev.filter((p) => p.moduleId !== moduleId),
-//       updatedPermission,
-//     ];
-//   });
- 
-// };
+  //     return [
+  //       ...prev.filter((p) => p.moduleId !== moduleId),
+  //       updatedPermission,
+  //     ];
+  //   });
+
+  // };
 
   // const handlePermissionChange = (moduleId, field, value) => {
   //   setPermissions((prev) => {
@@ -201,107 +202,107 @@ const handlePermissionChange = (moduleId, field, value) => {
   useEffect(() => {
     getAgentRoles();
   }, []);
-const handleCreate = async () => {
-  let hasError = false;
+  const handleCreate = async () => {
+    let hasError = false;
 
-  setRoleNameError("");
-  setPermissionError("");
+    setRoleNameError("");
+    setPermissionError("");
 
-  if (!roleName.trim()) {
-    setRoleNameError("Role name is required");
-    setTimeout(() => {
-    roleInputRef.current?.focus(); 
-    roleInputRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
-  }, 0);
+    if (!roleName.trim()) {
+      setRoleNameError("Role name is required");
+      setTimeout(() => {
+        roleInputRef.current?.focus();
+        roleInputRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 0);
 
-  hasError = true;
-}
+      hasError = true;
+    }
 
- if (!permissions.length) {
-  setPermissionError("Select at least one permission");
+    if (!permissions.length) {
+      setPermissionError("Select at least one permission");
 
-  setTimeout(() => {
-    permissionRef.current?.focus(); 
-    permissionRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
-  }, 0);
+      setTimeout(() => {
+        permissionRef.current?.focus();
+        permissionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 0);
 
-  hasError = true;
-}
-if (selectedRole) {
-  const isNameSame = roleName === initialRoleName;
+      hasError = true;
+    }
+    if (selectedRole) {
+      const isNameSame = roleName === initialRoleName;
 
-  const isPermissionSame =
-    JSON.stringify(
-      [...permissions].sort((a, b) => a.moduleId - b.moduleId)
-    ) ===
-    JSON.stringify(
-      [...initialPermissions].sort((a, b) => a.moduleId - b.moduleId)
-    );
+      const isPermissionSame =
+        JSON.stringify(
+          [...permissions].sort((a, b) => a.moduleId - b.moduleId)
+        ) ===
+        JSON.stringify(
+          [...initialPermissions].sort((a, b) => a.moduleId - b.moduleId)
+        );
 
-  if (isNameSame && isPermissionSame) {
-    setModalType("error");
-    setMessage("No changes detected.");
-    setShowSuccess(true);
+      if (isNameSame && isPermissionSame) {
+        setModalType("error");
+        setMessage("No changes detected.");
+        setShowSuccess(true);
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
 
-    return; // 🚫 stop API call
-  }
-}
+        return; // 🚫 stop API call
+      }
+    }
 
 
-  if (hasError) return;
+    if (hasError) return;
 
-  const payload = {
-    roleName,
-    isActive: true,
-    permissionList: permissions,
-  };
+    const payload = {
+      roleName,
+      isActive: true,
+      permissionList: permissions,
+    };
 
-  let res;
+    let res;
 
-  if (selectedRole) {
-    res = await updateAgentRole(selectedRole.id, payload);
-  } else {
-    res = await createAgentRole(payload);
-  }
+    if (selectedRole) {
+      res = await updateAgentRole(selectedRole.id, payload);
+    } else {
+      res = await createAgentRole(payload);
+    }
 
-  if (res.success) {
+    if (res.success) {
 
-     setModalType("success");
+      setModalType("success");
       setMessage(res.data);
       setShowSuccess(true);
 
       setTimeout(() => {
         setShowSuccess(false);
         handleClose();
-       
-      }, 800);
-   
-    
-  }
 
-  else {
-   
-  setRoleNameError(res.message);
-   setTimeout(() => {
-    roleInputRef.current?.focus();
-    roleInputRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
-  }, 0);
-  
+      }, 800);
+
+
     }
-};
+
+    else {
+
+      setRoleNameError(res.message);
+      setTimeout(() => {
+        roleInputRef.current?.focus();
+        roleInputRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 0);
+
+    }
+  };
 
 
 
@@ -336,12 +337,11 @@ if (selectedRole) {
     <>
 
 
-   <div
-      className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
-        isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-      }`}
-      onClick={handleClose}
-    />
+      <div
+        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
+        onClick={handleClose}
+      />
       {/* {showSuccess && (
     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
       <Toast
@@ -354,15 +354,14 @@ if (selectedRole) {
 
 
       <div
-      className={`fixed top-0 right-0 h-full w-full sm:w-[480px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
-        isOpen ? "translate-x-0" : "translate-x-full"
-      } flex flex-col`}
-    >
+        className={`fixed top-0 right-0 h-full w-full sm:w-[480px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"
+          } flex flex-col`}
+      >
         {/* Header */}
         <div className="flex justify-between items-start px-6 py-4 border-b border-gray-300">
           <div>
             <h2 className="text-[15px] font-semibold font-inter text-start">{selectedRole ? "Edit Role" : "Create New Role"}
-</h2>
+            </h2>
             <p className="text-sm text-gray-500">
               Fill in the details to create a new admin user
             </p>
@@ -374,15 +373,15 @@ if (selectedRole) {
             ✕
           </button>
         </div>
-{showSuccess && (
-        <div className="px-6 pt-4">
-          <Toast
-            show={showSuccess}
-            message={message}
-            type={modalType}
-          />
-        </div>
-      )}
+        {showSuccess && (
+          <div className="px-6 pt-4">
+            <Toast
+              show={showSuccess}
+              message={message}
+              type={modalType}
+            />
+          </div>
+        )}
         {/* Body */}
         <div className="p-6 space-y-6 overflow-y-auto h-[calc(100%-130px)]">
 
@@ -399,22 +398,22 @@ if (selectedRole) {
                 Role Name <span className="text-red-500">*</span>
               </label>
 
-         <input
-  ref={roleInputRef}
-  type="text"
-  placeholder="e.g., Super Admin, Accountant"
-  value={roleName}
-  onChange={(e) => {
-    setRoleName(e.target.value);
-    setRoleNameError("");
-  }}
-  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-/>
+              <input
+                ref={roleInputRef}
+                type="text"
+                placeholder="e.g., Super Admin, Accountant"
+                value={roleName}
+                onChange={(e) => {
+                  setRoleName(e.target.value);
+                  setRoleNameError("");
+                }}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              />
 
             </div>
-             {rolenameError && (
-          <ErrorMessage message={rolenameError} type="error" />
-        )}
+            {rolenameError && (
+              <ErrorMessage message={rolenameError} type="error" />
+            )}
 
             {/* Role Description */}
             <div className="flex flex-col gap-1">
@@ -429,7 +428,7 @@ if (selectedRole) {
               />
             </div>
           </div>
-  
+
 
           <div className="border border-gray-300 rounded-xl p-5">
             <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
@@ -453,70 +452,70 @@ if (selectedRole) {
               >
                 <div>{mod.moduleName}</div>
                 <div className="flex justify-center" ref={permissionRef}>
-                 <input
-  type="checkbox"
-  checked={
-    permissions.find(p => p.moduleId === mod.moduleId)?.canRead || false
-  }
-  onChange={(e) =>
-    handlePermissionChange(
-      mod.moduleId,
-      "canRead",
-      e.target.checked
-    )
-  }
-/>
+                  <input
+                    type="checkbox"
+                    checked={
+                      permissions.find(p => p.moduleId === mod.moduleId)?.canRead || false
+                    }
+                    onChange={(e) =>
+                      handlePermissionChange(
+                        mod.moduleId,
+                        "canRead",
+                        e.target.checked
+                      )
+                    }
+                  />
 
                 </div>
 
                 <div className="flex justify-center">
-                 <input
-  type="checkbox"
-  checked={
-    permissions.find(p => p.moduleId === mod.moduleId)?.canWrite || false
-  }
-  onChange={(e) =>
-    handlePermissionChange(
-      mod.moduleId,
-      "canWrite",
-      e.target.checked
-    )
-  }
-/>
+                  <input
+                    type="checkbox"
+                    checked={
+                      permissions.find(p => p.moduleId === mod.moduleId)?.canWrite || false
+                    }
+                    onChange={(e) =>
+                      handlePermissionChange(
+                        mod.moduleId,
+                        "canWrite",
+                        e.target.checked
+                      )
+                    }
+                  />
 
                 </div>
 
                 <div className="flex justify-center">
-                 <input
-  type="checkbox"
-  checked={
-    permissions.find(p => p.moduleId === mod.moduleId)?.canUpdate || false
-  }
-  onChange={(e) =>
-    handlePermissionChange(
-      mod.moduleId,
-      "canUpdate",
-      e.target.checked
-    )
-  }
-/>
+                  <input
+                    type="checkbox"
+                    checked={
+                      permissions.find(p => p.moduleId === mod.moduleId)?.canUpdate || false
+                    }
+                    onChange={(e) =>
+                      handlePermissionChange(
+                        mod.moduleId,
+                        "canUpdate",
+                        e.target.checked
+                      )
+                    }
+                  />
 
                 </div>
 
                 <div className="flex justify-center">
-                 <input
-  type="checkbox"
-  checked={
-    permissions.find(p => p.moduleId === mod.moduleId)?.canDelete || false
-  }
-  onChange={(e) =>
-    handlePermissionChange(
-      mod.moduleId,
-      "canDelete",
-      e.target.checked
-    )
-  }
-/>
+                  <input
+                    type="checkbox"
+                    checked={
+                      permissions.find(p => p.moduleId === mod.moduleId)?.canDelete || false
+                    }
+                    onChange={(e) =>
+                      handlePermissionChange(
+                        mod.moduleId,
+                        "canDelete",
+                        e.target.checked
+                      )
+                    }
+                  />
 
                 </div>
 
@@ -526,12 +525,12 @@ if (selectedRole) {
               </div>
             ))}
           </div>
-        {permissionError && (
-          <ErrorMessage message={permissionError} type="error" />
-        )}
+          {permissionError && (
+            <ErrorMessage message={permissionError} type="error" />
+          )}
 
         </div>
-     
+
         {/* Footer */}
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-300 bg-gray-50">
           <button

@@ -9,42 +9,62 @@ const Proprietors = () => {
 
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
-  
+  const [expiryFilter, setExpiryFilter] = useState("ALL");
   const [search, setSearch] = useState("");
-const [debouncedSearch, setDebouncedSearch] = useState("");
-const [sortBy, setSortBy] = useState("JOINING_DATE");
-const [direction, setDirection] = useState("desc");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sortBy, setSortBy] = useState("JOINING_DATE");
+  const [direction, setDirection] = useState("desc");
 
 
-console.log("owners",owners)
+  console.log("owners", owners)
 
 
-useEffect(() => {
-  const timer = setTimeout(() => {
-    setDebouncedSearch(search);
-  }, 400);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
 
-  return () => clearTimeout(timer);
-}, [search]);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-useEffect(() => {
-  getOwners({
-    page: page - 1,
-    size,
-    name: debouncedSearch,
-    sortBy,
-    direction
-  });
-}, [page, size, debouncedSearch, sortBy, direction]);
-const handleSort = (key) => {
-  if (sortBy === key) {
-    setDirection(prev => (prev === "asc" ? "desc" : "asc"));
-  } else {
-    setSortBy(key);
-    setDirection("asc");
-  }
-  setPage(1);
-};
+  useEffect(() => {
+    const filters = getFilterParams();
+
+    getOwners({
+      page,
+      size,
+      name: debouncedSearch,
+      sortBy,
+      direction,
+      ...filters
+    });
+  }, [page, size, debouncedSearch, sortBy, direction, expiryFilter]);
+
+
+  const getFilterParams = () => {
+    if (expiryFilter === "EXPIRED") {
+      return { isPropertiesExpired: true, isAboutToExpire: undefined };
+    }
+
+    if (expiryFilter === "ABOUT_TO_EXPIRE") {
+      return { isPropertiesExpired: undefined, isAboutToExpire: true };
+    }
+
+    return { isPropertiesExpired: undefined, isAboutToExpire: undefined };
+  };
+
+
+  console.log("page", page);
+  console.log("owners", owners);
+  const handleSort = (key) => {
+    if (sortBy === key) {
+      setDirection(prev => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(key);
+      setDirection("asc");
+    }
+    setPage(1);
+  };
 
 
   return (
@@ -85,6 +105,18 @@ const handleSort = (key) => {
             <select className="border border-gray-300 rounded-md px-3 py-2 text-[14px]">
               <option>All</option>
             </select>
+            <select
+              value={expiryFilter}
+              onChange={(e) => {
+                setPage(1);
+                setExpiryFilter(e.target.value);
+              }}
+              className="border border-gray-300 px-3 py-2 rounded-lg text-xs font-sans"
+            >
+              <option value="ALL">ALL</option>
+              <option value="EXPIRED">isProperties expired</option>
+              <option value="ABOUT_TO_EXPIRE">About to expire</option>
+            </select>
 
             <button className="border border-gray-300 px-3 py-2 rounded-md text-[14px]">
               Filter
@@ -92,27 +124,39 @@ const handleSort = (key) => {
           </div>
 
           <div className="flex items-center gap-2">
-           <button
-  onClick={() => {
-    setPage(1);
-    getOwners(0, size, search);
-  }}
-  className="bg-blue-600 text-white p-2 rounded-md"
->
-  ⟳
-</button>
+            <button
+              onClick={() => {
+                setPage(1);
+
+                const filters = getFilterParams();
+
+                getOwners({
+                  page: 1,
+                  size,
+                  name: search,
+                  sortBy,
+                  direction,
+                  ...filters
+                });
+              }}
 
 
-     <input
-  type="text"
-  placeholder="Search..."
-  value={search}
-  onChange={(e) => {
-    setPage(1);
-    setSearch(e.target.value);
-  }}
-  className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-/>
+              className="bg-blue-600 text-white p-2 rounded-md"
+            >
+              ⟳
+            </button>
+
+
+            <input
+              type="text"
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => {
+                setPage(1);
+                setSearch(e.target.value);
+              }}
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+            />
 
 
           </div>
@@ -127,69 +171,69 @@ const handleSort = (key) => {
 
             <table className="min-w-full text-sm">
 
-            <thead className="bg-gray-50 sticky top-0 z-10">
-  <tr>
+              <thead className="bg-gray-50 sticky top-0 z-10">
+                <tr>
 
-    <th className="px-4 py-3  text-[12px] font-semibold text-left">
-      <div className="flex items-center gap-1 cursor-pointer"
-           onClick={() => handleSort("JOINING_DATE")}>
-        ID
-        <img src={swap} className="w-3 h-3" />
-      </div>
-    </th>
+                  <th className="px-4 py-3  text-[12px] font-semibold text-left">
+                    <div className="flex items-center gap-1 cursor-pointer"
+                      onClick={() => handleSort("JOINING_DATE")}>
+                      ID
+                      <img src={swap} className="w-3 h-3" />
+                    </div>
+                  </th>
 
-    <th className="px-4 py-3 text-left text-[12px] font-semibold">
-      <div className="flex items-center gap-1 cursor-pointer"
-           onClick={() => handleSort("OWNER_NAME")}>
-        Name
-        <img src={swap} className="w-3 h-3" />
-      </div>
-    </th>
+                  <th className="px-4 py-3 text-left text-[12px] font-semibold">
+                    <div className="flex items-center gap-1 cursor-pointer"
+                      onClick={() => handleSort("OWNER_NAME")}>
+                      Name
+                      <img src={swap} className="w-3 h-3" />
+                    </div>
+                  </th>
 
-    <th className="px-4 py-3 text-left text-[12px] font-semibold">
-      <div className="flex items-center gap-1">
-        Mail
-        <img src={swap} className="w-3 h-3" />
-      </div>
-    </th>
+                  <th className="px-4 py-3 text-left text-[12px] font-semibold">
+                    <div className="flex items-center gap-1">
+                      Mail
+                      <img src={swap} className="w-3 h-3" />
+                    </div>
+                  </th>
 
-    <th className="px-4 py-3 text-left text-[12px] font-semibold">
-      <div className="flex items-center gap-1">
-        Mobile
-        <img src={swap} className="w-3 h-3" />
-      </div>
-    </th>
+                  <th className="px-4 py-3 text-left text-[12px] font-semibold">
+                    <div className="flex items-center gap-1">
+                      Mobile
+                      <img src={swap} className="w-3 h-3" />
+                    </div>
+                  </th>
 
-    <th className="px-4 py-3 text-left text-[12px] font-semibold">
-      <div className="flex items-center gap-1 cursor-pointer"
-           onClick={() => handleSort("HOSTEL_COUNT")}>
-        Props
-        <img src={swap} className="w-3 h-3" />
-      </div>
-    </th>
+                  <th className="px-4 py-3 text-left text-[12px] font-semibold">
+                    <div className="flex items-center gap-1 cursor-pointer"
+                      onClick={() => handleSort("HOSTEL_COUNT")}>
+                      Props
+                      <img src={swap} className="w-3 h-3" />
+                    </div>
+                  </th>
 
-    {/* <th className="px-4 py-3 text-left text-[12px] font-semibold">
+                  {/* <th className="px-4 py-3 text-left text-[12px] font-semibold">
       Plan Status
     </th> */}
 
-    <th className="px-4 py-3 text-left text-[12px] font-semibold">
-      <div className="flex items-center gap-1 cursor-pointer"
-           onClick={() => handleSort("LATEST_ACTIVITY")}>
-        Last Action
-        <img src={swap} className="w-3 h-3" />
-      </div>
-    </th>
+                  <th className="px-4 py-3 text-left text-[12px] font-semibold">
+                    <div className="flex items-center gap-1 cursor-pointer"
+                      onClick={() => handleSort("LATEST_ACTIVITY")}>
+                      Last Action
+                      <img src={swap} className="w-3 h-3" />
+                    </div>
+                  </th>
 
-    {/* <th className="px-4 py-3 text-left text-[12px] font-semibold">
+                  {/* <th className="px-4 py-3 text-left text-[12px] font-semibold">
       Status
     </th> */}
 
-    <th className="px-4 py-3 text-left text-[12px] font-semibold">
-      Actions
-    </th>
+                  <th className="px-4 py-3 text-left text-[12px] font-semibold">
+                    Actions
+                  </th>
 
-  </tr>
-</thead>
+                </tr>
+              </thead>
 
 
 
@@ -198,7 +242,9 @@ const handleSort = (key) => {
                 {loading ? (
                   <tr>
                     <td colSpan="9" className="text-center py-6">
-                      Loading...
+                      <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+                        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
                     </td>
                   </tr>
                 ) : owners?.map((item, i) => (
@@ -206,7 +252,7 @@ const handleSort = (key) => {
                   <tr key={i} className="border-b border-gray-300 hover:bg-gray-50">
 
                     <td className="px-4 py-1 text-[12px] text-left">
-                      {item.ownerId?.slice(0,6)}
+                      {item.ownerId?.slice(0, 6)}
                     </td>
 
                     <td className="px-4 py-1 text-blue-600 text-[12px] text-left">
@@ -230,7 +276,8 @@ const handleSort = (key) => {
                     </td> */}
 
                     <td className="px-4 py-1 text-[12px] text-left">
-                      {item.lastActivityDate} {item.lastActivityTime}
+                      {item.lastActivityDate}
+                      {/* {item.lastActivityTime} */}
                     </td>
 
                     {/* <td className="px-4 py-1 text-[12px]">
@@ -262,39 +309,37 @@ const handleSort = (key) => {
 
             <div className="flex items-center gap-3">
 
-             <select
-  value={size}
-onChange={(e) => {
-  setSize(Number(e.target.value));
-  setPage(1);
-}}
-  className="border rounded-md px-2 py-1 text-sm"
->
+              <select
+                value={size}
+                onChange={(e) => {
+                  setSize(Number(e.target.value));
+                  setPage(1);
+                }}
+                className="border rounded-md px-2 py-1 text-sm"
+              >
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
               </select>
 
 
-   <button
-  disabled={page === 1}
-  onClick={() => setPage(p => p - 1)}
-  className="text-gray-500 disabled:opacity-40"
->
-  &#8249;
-</button>
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage(p => p - 1)}
+              >
+                &#8249;
+              </button>
 
-<span className="border px-3 py-1 rounded-md bg-gray-100">
-  {page}
-</span>
+              <span className="border px-3 py-1 rounded-md bg-gray-100">
+                {page}
+              </span>
 
-<button
-  disabled={page === totalPages}
-  onClick={() => setPage(p => p + 1)}
-  className="text-gray-500 disabled:opacity-40"
->
-  &#8250;
-</button>
+              <button
+                disabled={page >= totalPages}
+                onClick={() => setPage(p => p + 1)}
+              >
+                &#8250;
+              </button>
 
 
             </div>
