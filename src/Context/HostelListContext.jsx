@@ -63,6 +63,33 @@ export const HostelProvider = ({ children }) => {
     setLoading(false);
   }
 };
+// GET /v2/hostels/{hostelId}
+const getHostelById = async (hostelId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(`/v2/hostels/${hostelId}`, {
+      params: {
+        hostelId: hostelId   // ✅ swagger-ku match
+      }
+    });
+
+    if (res.status === 200) {
+      return { success: true, data: res.data };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
+
 
 
   return (
@@ -71,7 +98,7 @@ export const HostelProvider = ({ children }) => {
         hostels,
         loading,
         errorMsg,
-        getHostels,
+        getHostels,getHostelById
       }}
     >
       {children}

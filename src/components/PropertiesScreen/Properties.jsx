@@ -9,9 +9,11 @@ import { useSubscription } from "../../Context/SubscriptionContext";
 import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import noteAdd from "../../assets/noteadd.png";
+import { useNavigate } from "react-router-dom";
+
 
 const Properties = () => {
-  const { hostels, getHostels, loading } = useHostel();
+  const { hostels, getHostels, loading,getHostelById } = useHostel();
   const { createSubscription, errorMsg } = useSubscription();
   const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState("");
@@ -23,6 +25,9 @@ const Properties = () => {
   const [message, setMessage] = useState("");
   const [isPageChange, setIsPageChange] = useState(false);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [hostelDetails,setHostelDetails] = useState("")
+  const navigate = useNavigate();
+
 
 
 
@@ -86,6 +91,18 @@ const Properties = () => {
 
 
   const isNextDisabled = page >= totalPages - 1;
+const handlePropertyClick = async (item) => {
+
+  const res = await getHostelById(item.hostelId);
+console.log("res",res)
+  if (res?.success) {
+
+    navigate("/property-overview", {
+      state: { hostelData: res.data }
+    });
+
+  }
+};
 
 
   const handleCreateSubscription = async (hostelId) => {
@@ -151,7 +168,7 @@ const Properties = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-xl font-semibold font-Inter">Properties</h1>
+              <h1 className="text-xl font-semibold font-sans">Properties</h1>
 
               <button className="flex items-center gap-2 text-blue-600 px-4 py-2 rounded-lg text-sm hover:bg-blue-700 font-Inter">
                 <img src={AddBtn} alt="add" className="w-4 h-4 object-contain" />
@@ -249,7 +266,7 @@ const Properties = () => {
                       {/* <th className="px-4 py-3 text-xs whitespace-nowrap">Hostel Name</th> */}
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Name</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Mobile.No</th>
-                      <th className="px-4 py-3 whitespace-nowrap text-xs">Address</th>
+                      {/* <th className="px-4 py-3 whitespace-nowrap text-xs">Expiry On</th> */}
                       {/* <th className="px-4 py-3 whitespace-nowrap text-xs">Sub Plan</th> */}
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Created On</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Last Action</th>
@@ -280,7 +297,7 @@ const Properties = () => {
 
 
                         </td> */}
-                        <td className="px-4 py-1">
+ <td className="px-4 py-1">
   <div className="flex items-center gap-3 relative group">
 
     {/* Small T Circle */}
@@ -296,17 +313,26 @@ const Properties = () => {
     </div>
 
     {/* Text Section */}
-    <div className="flex flex-col whitespace-nowrap">
+    <div
+      className="flex flex-col whitespace-nowrap cursor-pointer"
+      onClick={() => handlePropertyClick(item)}
+    >
       <span className="text-gray-900 font-semibold">
         {item.hostelName}
       </span>
 
-      {/* Tooltip */}
-     
-
       <span className="text-gray-500 text-xs whitespace-nowrap">
         {item.ownerInfo?.fullName}
       </span>
+    </div>
+
+    {/* ✅ Tooltip */}
+    <div
+      className="absolute left-0 top-full mt-2 hidden group-hover:block
+                 bg-white shadow-lg border border-gray-200 rounded-lg
+                 px-3 py-2 text-xs text-gray-700 z-50 whitespace-nowrap"
+    >
+      {item.fullAddress || "No Address"}
     </div>
 
   </div>
@@ -348,23 +374,24 @@ const Properties = () => {
                         <td className="px-4 py-1 whitespace-nowrap">
                           {item.ownerInfo?.mobile}
                         </td>
-                        {/* <td className="px-4 py-1 whitespace-nowrap">
-                          {item?.city},{item?.state}
-                        </td> */}
-   <td className="px-4  whitespace-nowrap relative group">
+                      
+   {/* <td className="px-4  whitespace-nowrap relative group">
   <span className="cursor-pointer">
     {item?.city}, {item?.state}
   </span>
 
-  {/* Tooltip */}
+ 
  <div className="absolute left-0 top-full  hidden group-hover:block 
                 bg-white shadow-xl border rounded-lg px-4 py-1 
                 text-sm text-gray-700 z-[999] whitespace-nowrap">
   {item.fullAddress}
 </div>
 
-</td>
+</td> */}
+  {/* <td className="px-4  whitespace-nowrap relative group">
+ test
 
+</td> */}
 
 
                         {/* <td className="px-4 py-1">

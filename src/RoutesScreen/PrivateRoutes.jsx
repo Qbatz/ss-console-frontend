@@ -14,7 +14,7 @@ import SupportTicket from "../components/SupportTicketScreen/SupportTicket";
 import CRMDashboard from "../components/CRMDashboardScreen/CRMDashboard";
 import ManagePlans from "../components/SubscriptionScreen/ManagePlans ";
 import { OwnersProvider } from "../Context/OwnersContext";
-
+import PropertyOverview from "../components/PropertiesScreen/PropertyOverview"
 import { useNavigate } from "react-router-dom";
 
 
@@ -46,6 +46,7 @@ const PrivateRoutesScreen = () => {
             <Route path="/supportTicket" element={<SupportTicket />} />
             <Route path="/crmDashboard" element={<CRMDashboard />} />
             <Route path="/manage-plans" element={<ManagePlans />} />
+             <Route path="/property-overview" element={<PropertyOverview/>} />
           </Routes>
           </OwnersProvider>
           </SubscriptionProvider>
