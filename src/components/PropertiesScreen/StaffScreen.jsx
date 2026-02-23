@@ -6,9 +6,23 @@ import Toast from "../../components/SuccessModal/ToastDesign";
 import Eye from "../../assets/eye.png";
 import EyeClose from "../../assets/EyeIcon.png"
 
+
 const StaffScreen = ({ hostelData }) => {
   const masters = hostelData?.masters || [];
   const staffs = hostelData?.staffs || [];
+  const owner = hostelData?.ownerInfo;
+
+const mastersList = [
+  {
+    fullName: owner?.fullName,
+    email: owner?.email,
+    mobileNo: owner?.mobile,
+    updatedAt: "—",
+    userId: owner?.ownerId,
+    isOwner: true,
+  },
+  ...(masters || []),
+];
   const { changeOwnerPassword } = useOwners();
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
 const [showResetModal, setShowResetModal] = useState(false);
@@ -124,11 +138,35 @@ const handleChangePassword = async () => {
               {/* HEADER */}
               <thead className="bg-[#F1F3F7] text-gray-600 sticky top-0 z-10">
                 <tr>
-                  <th className="px-4 py-3 text-left">USER NAME</th>
-                  <th className="px-4 py-3 text-left">MAIL</th>
-                  <th className="px-4 py-3 text-left">MOBILE NO</th>
-                  <th className="px-4 py-3 text-left">PROFILE LAST UPDATED</th>
-                  <th className="px-4 py-3 text-right">ACTIONS</th>
+                  {/* <th className="px-4 py-3 text-left">USER NAME</th> */}
+                    <th className="px-4 py-3 text-left">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                          USER NAME
+                          <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
+                        </div>
+                      </th>
+                  {/* <th className="px-4 py-3 text-left">MAIL</th> */}
+                   <th className="px-4 py-3 text-left">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                          Mail
+                          <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
+                        </div>
+                      </th>
+                  {/* <th className="px-4 py-3 text-left">MOBILE NO</th> */}
+                    <th className="px-4 py-3 text-left">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                          MOBILE NO
+                          <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
+                        </div>
+                      </th>
+                  {/* <th className="px-4 py-3 text-left">PROFILE LAST UPDATED</th> */}
+                    <th className="px-4 py-3 text-left">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                         PROFILE LAST UPDATED
+                          <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
+                        </div>
+                      </th>
+                  <th className="px-4 py-3 text-right font-semibold text-[12px] uppercase text-[#6B7280] font-inter">ACTIONS</th>
                 </tr>
               </thead>
 
@@ -142,25 +180,25 @@ const handleChangePassword = async () => {
                     </td>
                   </tr>
                 ) : (
-                  masters.map((item, i) => (
+                 mastersList.map((item, i) => (
                     <tr key={i} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium text-left">
+                      <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.fullName || item.firstName}
                       </td>
 
-                      <td className="px-4 py-3 text-left">
+                      <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.email || "N/A"}
                       </td>
 
-                      <td className="px-4 py-3 text-left">
+                      <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.mobileNo || "N/A"}
                       </td>
 
-                      <td className="px-4 py-3 text-left">
+                      <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.updatedAt || "—"}
                       </td>
 
-                    <td className="px-4 py-3 text-left relative">
+                    <td className="px-4 py-2 text-left font-medium text-[12px] relative">
   <div className="flex justify-end gap-3">
 
     <button className="text-gray-400 hover:text-gray-600">
@@ -234,11 +272,33 @@ const handleChangePassword = async () => {
               {/* HEADER */}
               <thead className="bg-[#F1F3F7] text-gray-600 sticky top-0 z-10">
                 <tr>
-                  <th className="px-4 py-3 text-left">USER NAME</th>
-                  <th className="px-4 py-3 text-left">ROLE ASSIGN</th>
-                  <th className="px-4 py-3 text-left">MAIL</th>
-                  <th className="px-4 py-3 text-left">MOBILE NO</th>
-                  <th className="px-4 py-3 text-right">ACTIONS</th>
+                  {/* <th className="px-4 py-3 text-left">USER NAME</th> */}
+                   <th className="px-4 py-3 text-left">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                         USER NAME
+                          <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
+                        </div>
+                      </th>
+                  {/* <th className="px-4 py-3 text-left">ROLE ASSIGN</th> */}
+                   <th className="px-4 py-3 text-left">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                        ROLE ASSIGN
+                          <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
+                        </div>
+                      </th>
+                   <th className="px-4 py-3 text-left">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                      Mail
+                          <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
+                        </div>
+                      </th>
+                   <th className="px-4 py-3 text-left">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                       Mobile number
+                          <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
+                        </div>
+                      </th>
+                  <th className="px-4 py-3 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">ACTIONS</th>
                 </tr>
               </thead>
 
@@ -255,23 +315,23 @@ const handleChangePassword = async () => {
                   staffs.map((item, i) => (
                     <tr key={i} className="hover:bg-gray-50">
 
-                      <td className="px-4 py-3 font-medium text-left">
+                      <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.fullName || item.firstName}
                       </td>
 
-                      <td className="px-4 py-3 text-left">
+                      <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.role || "—"}
                       </td>
 
-                      <td className="px-4 py-3 text-left">
+                      <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.email || "N/A"}
                       </td>
 
-                      <td className="px-4 py-3 text-left">
+                      <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.mobileNo || "N/A"}
                       </td>
 
-                      <td className="px-4 py-3 text-left">
+                      <td className="px-4 py-2 text-left font-medium text-[12px]">
                         <div className="flex justify-end gap-3">
                           <button className="text-gray-400 hover:text-gray-600">
                             ⧉
@@ -302,19 +362,19 @@ const handleChangePassword = async () => {
       className="bg-white rounded-xl w-full max-w-lg p-6 shadow-lg"
       onClick={(e) => e.stopPropagation()}
     >
-      <h2 className="text-lg font-semibold text-gray-800 mb-2">
+      <h2 className="text-lg font-semibold text-gray-800 mb-2 text-left">
         Reset Password for {selectedUser?.fullName}
       </h2>
 
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-gray-500 mb-6  text-left">
         This will generate a new temporary password and invalidate the
         current login credentials.
       </p>
 
       {/* Current Password */}
       <div className="mb-6 text-left">
-        <label className="text-sm font-medium">
-          New Password  <span className="text-red">*</span>
+        <label className="text-left font-medium text-[12px]">
+          New Password  <span className="text-red-500">*</span>
         </label>
 
         <div className="relative">
@@ -354,8 +414,8 @@ const handleChangePassword = async () => {
                 <ErrorMeesage message={newPasswordError} type="error" />
               )}
       <div className="mb-4 text-left">
-        <label className="text-sm font-medium">
-          Confirm Password  <span className="text-red">*</span>
+        <label className="text-left font-medium text-[12px]">
+          Confirm Password  <span className="text-red-500">*</span>
         </label>
 
         <div className="relative">
