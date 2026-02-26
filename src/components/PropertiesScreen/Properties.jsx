@@ -268,7 +268,7 @@ console.log("res",res)
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Mobile.No</th>
                       {/* <th className="px-4 py-3 whitespace-nowrap text-xs">Expiry On</th> */}
                       {/* <th className="px-4 py-3 whitespace-nowrap text-xs">Sub Plan</th> */}
-                      <th className="px-4 py-3 whitespace-nowrap text-xs">Created On</th>
+                      <th className="px-4 py-3 whitespace-nowrap text-xs">Expiry On</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Last Action</th>
                       <th className="px-4 py-3 text-xs">Status</th>
                       <th className="px-4 py-3 text-center text-xs">Actions</th>
@@ -398,7 +398,7 @@ console.log("res",res)
                           {item.hostelPlan?.currentPlan}
                         </td>  */}
                         <td className="px-4 py-1">
-                          {item.joinedOn}
+                          {item.expiredOn || "----"}
                         </td>
                         <td className="px-4 py-1">
                           {item.lastUpdateDate} {item.lastUpdateTime}

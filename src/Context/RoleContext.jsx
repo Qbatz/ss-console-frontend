@@ -50,6 +50,7 @@ export const RoleProvider = ({ children }) => {
   const [agentRoles, setAgentRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [agents, setAgents] = useState([]);
 
 const getErrorMessage = (error) => {
   if (error?.response?.data) {
@@ -241,7 +242,27 @@ const getAdminDetails = async () => {
     setLoading(false);
   }
 };
+const getAllAgents = async () => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
 
+    const res = await api.get("/v2/admin/get-all-agents");
+
+    if (res.status === 200) {
+      setAgents(res.data || []);
+      return { success: true, data: res.data };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <RoleContext.Provider
@@ -251,7 +272,7 @@ const getAdminDetails = async () => {
         loading,
         errorMsg,
         fetchModules,
-        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails
+        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents
       }}
     >
       {children}

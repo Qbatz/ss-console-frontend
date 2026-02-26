@@ -19,7 +19,16 @@ const PropertyOverview = () => {
   const [activeTab, setActiveTab] = useState("tenants");
   const location = useLocation();
   const navigate = useNavigate();
-
+  const loginType = localStorage.getItem("login_type");
+const isMockUser = loginType === "mock";
+const tabs = [
+  "tenants",
+  "subscriptions",
+  "Product Support",
+  "staffs",
+  ...(isMockUser ? [] : ["invoices"]),
+  "activity"
+];
   const hostelData = location.state?.hostelData;
   console.log("hostelData", hostelData)
 
