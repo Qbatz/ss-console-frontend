@@ -173,7 +173,7 @@ const handleChangePassword = async () => {
               {/* BODY */}
               <tbody className="divide-y divide-gray-200">
 
-                {masters.length === 0 ? (
+                {(!owner && masters.length === 0) ? (
                   <tr>
                     <td colSpan={5} className="text-center py-6 text-gray-400">
                       No Masters Found
