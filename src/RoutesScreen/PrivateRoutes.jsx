@@ -19,10 +19,14 @@ import { useNavigate } from "react-router-dom";
 
 
 const PrivateRoute = ({ children }) => {
-const token =
+// const token =
+//   localStorage.getItem("access_token") ||
+//   localStorage.getItem("mock_token");
+  const token =
   localStorage.getItem("access_token") ||
   localStorage.getItem("mock_token");
-  return token ? children : <Navigate to="/" replace />;
+
+return token ? children : <Navigate to="/internal/login" replace />;
 };
 
 const PrivateRoutesScreen = () => {

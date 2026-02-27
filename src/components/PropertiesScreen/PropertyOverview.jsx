@@ -17,6 +17,7 @@ import swap from "../../assets/arrowswap.png";
 
 const PropertyOverview = () => {
   const [activeTab, setActiveTab] = useState("tenants");
+  const [showSharing, setShowSharing] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const loginType = localStorage.getItem("login_type");
@@ -183,7 +184,7 @@ const tabs = [
   <div className="px-2 lg:px-4">
     <div className="flex items-center gap-1">
       <p className="text-xs text-gray-500">Rooms & Beds</p>
-      <img src={ViewImg} className="w-3.5 h-3.5 opacity-70" />
+      <img src={ViewImg} className="w-3.5 h-3.5 opacity-70"   onClick={() => setShowSharing(true)}/>
     </div>
 
     <p className="text-lg font-semibold mt-1">
@@ -353,6 +354,106 @@ const tabs = [
         </div>
 
       </div>
+      {showSharing && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 relative">
+
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+         Detailed Sharing Breakdown
+        </h2>
+
+        <button
+          onClick={() => setShowSharing(false)}
+          className="text-gray-400 hover:text-gray-600 text-xl"
+        >
+          ✕
+        </button>
+      </div>
+
+
+      {/* 1 Sharing */}
+      <div className="border rounded-xl p-4 mb-4">
+        <div className="flex justify-between mb-2">
+          <p className="font-semibold">1-Sharing</p>
+          <span className="text-sm text-gray-500">2 Rooms Available</span>
+        </div>
+
+        <div className="grid grid-cols-3 text-sm">
+          <div>
+            <p className="text-gray-500">Rooms</p>
+            <p className="font-semibold text-lg">7</p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">Total Beds</p>
+            <p className="font-semibold text-lg">7</p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">Occupied</p>
+            <p className="font-semibold text-lg text-green-600">5</p>
+          </div>
+        </div>
+      </div>
+
+
+      {/* 2 Sharing */}
+      <div className="border rounded-xl p-4 mb-4">
+        <div className="flex justify-between mb-2">
+          <p className="font-semibold">2-Sharing</p>
+          <span className="text-sm text-gray-500">1 Room Available</span>
+        </div>
+
+        <div className="grid grid-cols-3 text-sm">
+          <div>
+            <p className="text-gray-500">Rooms</p>
+            <p className="font-semibold text-lg">5</p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">Total Beds</p>
+            <p className="font-semibold text-lg">10</p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">Occupied</p>
+            <p className="font-semibold text-lg text-green-600">8</p>
+          </div>
+        </div>
+      </div>
+
+
+      {/* 3 Sharing */}
+      <div className="border rounded-xl p-4">
+        <div className="flex justify-between mb-2">
+          <p className="font-semibold">3-Sharing</p>
+          <span className="text-sm text-gray-500">2 Rooms Available</span>
+        </div>
+
+        <div className="grid grid-cols-3 text-sm">
+          <div>
+            <p className="text-gray-500">Rooms</p>
+            <p className="font-semibold text-lg">12</p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">Total Beds</p>
+            <p className="font-semibold text-lg">36</p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">Occupied</p>
+            <p className="font-semibold text-lg text-green-600">30</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };

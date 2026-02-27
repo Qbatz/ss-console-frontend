@@ -275,177 +275,152 @@ console.log("res",res)
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-gray-200">
+                 <tbody className="divide-y divide-gray-200">
 
+  {loading ? (
+    [...Array(pageSize || 8)].map((_, index) => (
+      <tr key={index} className="animate-pulse">
 
-                    {displayData?.map((item, index) => (
+        {/* ID */}
+        <td className="px-4 py-2">
+          <div className="h-4 w-6 bg-gray-200 rounded"></div>
+        </td>
 
-                      <tr key={item.hostelId} className="hover:bg-gray-50 text-[12px]">
-                        <td className="px-4 py-1">{(page - 1) * pageSize + index + 1}
-                        </td>
-                        {/* <td className="py-1 text-blue-600 font-medium whitespace-nowrap">
-                            <div className="flex flex-row items-center">
-                              <div className="flex bg-ss-white border-[1px] rounded-full w-3 h-3 items-center justify-center" >
-                                <label className="color-white text-[8px]">T</label>
-                              </div>
-                              <div className="ml-[5px]">
-                                <label className="text-[14px]">
-                                  {item.hostelName}
-                                </label>
-                              </div>
-                            </div>
+        {/* Name */}
+        <td className="px-4 py-2">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
+            <div className="w-9 h-9 bg-gray-200 rounded-full"></div>
 
+            <div className="flex flex-col gap-2">
+              <div className="h-4 w-32 bg-gray-200 rounded"></div>
+              <div className="h-3 w-20 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </td>
 
-                        </td> */}
- <td className="px-4 py-1">
-  <div className="flex items-center gap-3 relative group">
+        {/* Mobile */}
+        <td className="px-4 py-2">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </td>
 
-    {/* Small T Circle */}
-    <div className="flex border rounded-full w-5 h-5 items-center justify-center text-[9px] font-medium text-gray-600">
-      T
-    </div>
+        {/* Expiry */}
+        <td className="px-4 py-2">
+          <div className="h-4 w-20 bg-gray-200 rounded"></div>
+        </td>
 
-    {/* Initial Circle */}
-    <div className="w-9 h-9 flex items-center justify-center 
-                    rounded-full bg-gray-200 text-gray-600 
-                    text-sm font-semibold uppercase">
-      {item.initials || "NA"}
-    </div>
+        {/* Last Action */}
+        <td className="px-4 py-2">
+          <div className="h-4 w-28 bg-gray-200 rounded"></div>
+        </td>
 
-    {/* Text Section */}
-    <div
-      className="flex flex-col whitespace-nowrap cursor-pointer"
-      onClick={() => handlePropertyClick(item)}
-    >
-      <span className="text-gray-900 font-semibold">
-        {item.hostelName}
-      </span>
+        {/* Status */}
+        <td className="px-4 py-2">
+          <div className="h-5 w-16 bg-gray-200 rounded-full"></div>
+        </td>
 
-      <span className="text-gray-500 text-xs whitespace-nowrap">
-        {item.ownerInfo?.fullName}
-      </span>
-    </div>
+        {/* Actions */}
+        <td className="px-4 py-2 text-end">
+          <div className="flex justify-end gap-2">
+            <div className="w-5 h-5 bg-gray-200 rounded"></div>
+            <div className="w-5 h-5 bg-gray-200 rounded"></div>
+            <div className="w-5 h-5 bg-gray-200 rounded"></div>
+          </div>
+        </td>
 
-    {/* ✅ Tooltip */}
-    <div
-      className="absolute left-0 top-full mt-2 hidden group-hover:block
-                 bg-white shadow-lg border border-gray-200 rounded-lg
-                 px-3 py-2 text-xs text-gray-700 z-50 whitespace-nowrap"
-    >
-      {item.fullAddress || "No Address"}
-    </div>
+      </tr>
+    ))
+  ) : (
+    displayData?.map((item, index) => (
 
-  </div>
-</td>
+      <tr key={item.hostelId} className="hover:bg-gray-50 text-[12px]">
 
-                        {/* <td className="px-4 py-1 whitespace-nowrap">
-                          {item.ownerInfo?.fullName}
-                        </td>  */}
- {/* <td className="px-4 py-3">
-  <div className="flex items-center gap-3 relative group">
+        <td className="px-4 py-1">
+          {(page - 1) * pageSize + index + 1}
+        </td>
 
-    <div className="w-9 h-9 flex items-center justify-center 
-                    rounded-full bg-gray-200 text-gray-600 
-                    text-sm font-semibold uppercase">
-      {item.initials || "NA"}
-    </div>
+        {/* YOUR ORIGINAL ROW CONTENT — unchanged */}
+        <td className="px-4 py-1">
+          <div className="flex items-center gap-3 relative group">
 
-    <div className="flex flex-col">
-      <span className="text-gray-900 font-semibold">
-        {item.hostelName}
-      </span>
+            <div className="flex border rounded-full w-5 h-5 items-center justify-center text-[9px] font-medium text-gray-600">
+              T
+            </div>
 
-      <div className="absolute left-0 top-full mt-2 hidden group-hover:block 
-                      bg-white shadow-xl border rounded-lg px-4 py-2 
-                      text-sm text-gray-700 z-[9999] whitespace-nowrap">
-        {item.fullAddress}
-      </div>
+            <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 text-sm font-semibold uppercase">
+              {item.initials || "NA"}
+            </div>
 
-      <span className="text-gray-500 text-xs">
-        {item.ownerInfo?.fullName}
-      </span>
-    </div>
+            <div
+              className="flex flex-col whitespace-nowrap cursor-pointer"
+              onClick={() => handlePropertyClick(item)}
+            >
+              <span className="text-gray-900 font-semibold">
+                {item.hostelName}
+              </span>
 
-  </div>
-</td> */}
+              <span className="text-gray-500 text-xs whitespace-nowrap">
+                {item.ownerInfo?.fullName}
+              </span>
+            </div>
 
+            <div className="absolute left-0 top-full mt-2 hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 z-50 whitespace-nowrap">
+              {item.fullAddress || "No Address"}
+            </div>
 
+          </div>
+        </td>
 
-                        <td className="px-4 py-1 whitespace-nowrap">
-                          {item.ownerInfo?.mobile}
-                        </td>
-                      
-   {/* <td className="px-4  whitespace-nowrap relative group">
-  <span className="cursor-pointer">
-    {item?.city}, {item?.state}
-  </span>
+        <td className="px-4 py-1 whitespace-nowrap">
+          {item.ownerInfo?.mobile}
+        </td>
 
- 
- <div className="absolute left-0 top-full  hidden group-hover:block 
-                bg-white shadow-xl border rounded-lg px-4 py-1 
-                text-sm text-gray-700 z-[999] whitespace-nowrap">
-  {item.fullAddress}
-</div>
+        <td className="px-4 py-1">
+          {item.expiredOn || "----"}
+        </td>
 
-</td> */}
-  {/* <td className="px-4  whitespace-nowrap relative group">
- test
+        <td className="px-4 py-1">
+          {item.lastUpdateDate} {item.lastUpdateTime}
+        </td>
 
-</td> */}
+        <td className="px-4 py-1 text-center">
+          <span
+            className={`flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap w-fit ${
+              item.subscriptionIsActive
+                ? "bg-green-100 text-green-600"
+                : "bg-red-100 text-red-600"
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                item.subscriptionIsActive
+                  ? "bg-green-500"
+                  : "bg-red-500"
+              }`}
+            ></span>
+            {item.subscriptionIsActive ? "Active" : "Inactive"}
+          </span>
+        </td>
 
+        <td className="px-4 py-1 text-end">
+          <div className="flex items-center justify-end gap-1">
+            <img src={noteAdd} alt="noteAdd" className="w-5 h-5 cursor-pointer" />
+            <img src={Circle} alt="circle" className="w-5 h-5 cursor-pointer" />
+            <img
+              src={Money}
+              onClick={() => handleCreateSubscription(item)}
+              alt="money"
+              className="w-5 h-5 cursor-pointer"
+            />
+          </div>
+        </td>
 
-                        {/* <td className="px-4 py-1">
-                          {item.hostelPlan?.currentPlan}
-                        </td>  */}
-                        <td className="px-4 py-1">
-                          {item.expiredOn || "----"}
-                        </td>
-                        <td className="px-4 py-1">
-                          {item.lastUpdateDate} {item.lastUpdateTime}
-                        </td>
+      </tr>
 
-                        <td className="px-4 py-1 text-center">
-                          <span
-                            className={`flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap w-fit ${item.subscriptionIsActive
-                              ? "bg-green-100 text-green-600"
-                              : "bg-red-100 text-red-600"
-                              }`}
-                          >
-                            <span
-                              className={`w-2 h-2 rounded-full ${item.subscriptionIsActive
-                                ? "bg-green-500"
-                                : "bg-red-500"
-                                }`}
-                            ></span>
-                            {item.subscriptionIsActive ? "Active" : "Inactive"}
-                          </span>
-                        </td>
+    ))
+  )}
 
-                        <td className="px-4 py-1 text-end">
-                          <div className="flex items-center justify-end gap-1">
-                             <img
-                              src={noteAdd}
-                             
-                              alt="noteAdd"
-                              className="w-5 h-5 cursor-pointer"
-                            />
-                            <img
-                              src={Circle}
-                              alt="circle"
-                              className="w-5 h-5 cursor-pointer"
-                            />
-                            <img
-                              src={Money}
-                              onClick={() => handleCreateSubscription(item)}
-                              alt="money"
-                              className="w-5 h-5 cursor-pointer"
-                            />
-                          </div>
-                        </td>
-
-                      </tr>
-                    ))}
-                  </tbody>
+</tbody>
 
                 </table>
               </div>
