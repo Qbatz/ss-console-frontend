@@ -18,6 +18,7 @@ import swap from "../../assets/arrowswap.png";
 const PropertyOverview = () => {
   const [activeTab, setActiveTab] = useState("tenants");
   const [showSharing, setShowSharing] = useState(false);
+  const [showBillingRule, setShowBillingRule] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const loginType = localStorage.getItem("login_type");
@@ -208,7 +209,7 @@ const tabs = [
   <div className="px-2 lg:px-4">
     <div className="flex items-center gap-1">
       <p className="text-xs text-gray-500">Total Invoices</p>
-      <img src={ViewImg} className="w-3.5 h-3.5 opacity-70" />
+      <img src={ViewImg} className="w-3.5 h-3.5 opacity-70"  onClick={() => setShowBillingRule(true)}/>
     </div>
 
     <p className="text-lg font-semibold mt-1">0</p>
@@ -449,6 +450,46 @@ const tabs = [
             <p className="font-semibold text-lg text-green-600">30</p>
           </div>
         </div>
+      </div>
+
+    </div>
+  </div>
+  
+)}
+{showBillingRule && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+
+    <div className="bg-white rounded-xl w-[360px] shadow-lg p-6 relative">
+
+      {/* Close */}
+      <button
+        onClick={() => setShowBillingRule(false)}
+        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+      >
+        ✕
+      </button>
+
+      <h2 className="text-lg font-semibold text-gray-800 mb-3">
+        Billing Rule
+      </h2>
+
+      <div className="border-t pt-4 space-y-4">
+
+        <div className="flex justify-between">
+          <span className="text-gray-500">Billing Start Date</span>
+          <span className="font-semibold text-gray-800">{hostelData?.billingRules[0]?.billingStartDate}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="text-gray-500">Bill Due Days</span>
+          <span className="font-semibold text-gray-800">{hostelData?.billingRules[0]?.billDueDays}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="text-gray-500">Notice Period</span>
+          <span className="font-semibold text-gray-800">{hostelData?.billingRules[0]?.noticePeriod}</span>
+        </div>
+
       </div>
 
     </div>
