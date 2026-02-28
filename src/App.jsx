@@ -8,7 +8,7 @@ import Login from './components/internalLogin/Login';
 import PrivateRoutesScreen from './RoutesScreen/PrivateRoutes';
 
 
-// ✅ Token Expiry Checker Component
+
 function TokenWatcher() {
 
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ function TokenWatcher() {
 
     try {
 
-      if (!token.includes(".")) return; // mock safe
+      if (!token.includes(".")) return;
 
       const payload = JSON.parse(atob(token.split(".")[1]));
       const exp = payload.exp * 1000;
@@ -49,7 +49,7 @@ function App() {
   return (
     <Router>
 
-      {/* ✅ Token Auto Check */}
+     
       <TokenWatcher />
 
       <Routes>

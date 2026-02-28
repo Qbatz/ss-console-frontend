@@ -237,62 +237,89 @@ const Proprietors = () => {
 
 
 
-              <tbody>
+             <tbody>
 
-                {loading ? (
-                  <tr>
-                    <td colSpan="9" className="text-center py-6">
-                      <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-                        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : owners?.map((item, i) => (
+  {loading ? (
+    [...Array(6)].map((_, i) => (
+      <tr key={i} className="border-b border-gray-300 animate-pulse">
 
-                  <tr key={i} className="border-b border-gray-300 hover:bg-gray-50">
+        {/* Owner ID */}
+        <td className="px-4 py-2">
+          <div className="h-4 w-16 bg-gray-200 rounded"></div>
+        </td>
 
-                    <td className="px-4 py-1 text-[12px] text-left">
-                      {item.ownerId?.slice(0, 6)}
-                    </td>
+        {/* Name */}
+        <td className="px-4 py-2">
+          <div className="h-4 w-28 bg-gray-200 rounded"></div>
+        </td>
 
-                    <td className="px-4 py-1 text-blue-600 text-[12px] text-left">
-                      {item.fullName}
-                    </td>
+        {/* Email / Placeholder */}
+        <td className="px-4 py-2">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </td>
 
-                    <td className="px-4 py-1 text-[12px] text-left">
-                      -
-                    </td>
+        {/* Mobile */}
+        <td className="px-4 py-2">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </td>
 
-                    <td className="px-4 py-1 text-[12px] text-left">
-                      {item.mobileNo}
-                    </td>
+        {/* Properties */}
+        <td className="px-4 py-2">
+          <div className="h-4 w-12 bg-gray-200 rounded"></div>
+        </td>
 
-                    <td className="px-4 py-1 text-blue-600 text-[12px] text-left">
-                      {item.noOfProperties}
-                    </td>
+        {/* Last Activity */}
+        <td className="px-4 py-2">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </td>
 
-                    {/* <td className="px-4 py-1 text-[12px]">
-                      Active
-                    </td> */}
+        {/* Actions */}
+        <td className="px-4 py-2">
+          <div className="h-4 w-6 bg-gray-200 rounded"></div>
+        </td>
 
-                    <td className="px-4 py-1 text-[12px] text-left">
-                      {item.lastActivityDate}
-                      {/* {item.lastActivityTime} */}
-                    </td>
+      </tr>
+    ))
+  ) : (
+    owners?.map((item, i) => (
 
-                    {/* <td className="px-4 py-1 text-[12px]">
-                      <span className="text-green-600 font-medium">
-                        Active
-                      </span>
-                    </td> */}
+      <tr key={i} className="border-b border-gray-300 hover:bg-gray-50">
 
-                    <td className="px-4 py-1">⋮</td>
+        {/* <td className="px-4 py-1 text-[12px] text-left">
+          {item.ownerId?.slice(0, 6)}
+        </td> */}
+          <td className="px-4 py-1">
+          {(page - 1) * size + i + 1}
+        </td>
 
-                  </tr>
+        <td className="px-4 py-1 text-blue-600 text-[12px] text-left">
+          {item.fullName}
+        </td>
 
-                ))}
+        <td className="px-4 py-1 text-[12px] text-left">
+          -
+        </td>
 
-              </tbody>
+        <td className="px-4 py-1 text-[12px] text-left">
+          {item.mobileNo}
+        </td>
+
+        <td className="px-4 py-1 text-blue-600 text-[12px] text-left">
+          {item.noOfProperties}
+        </td>
+
+        <td className="px-4 py-1 text-[12px] text-left">
+          {item.lastActivityDate}
+        </td>
+
+        <td className="px-4 py-1">⋮</td>
+
+      </tr>
+
+    ))
+  )}
+
+</tbody>
 
             </table>
 
