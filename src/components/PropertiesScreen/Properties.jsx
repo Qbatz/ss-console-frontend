@@ -267,7 +267,7 @@ console.log("res",res)
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Name</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Mobile.No</th>
                       {/* <th className="px-4 py-3 whitespace-nowrap text-xs">Expiry On</th> */}
-                      {/* <th className="px-4 py-3 whitespace-nowrap text-xs">Sub Plan</th> */}
+                      <th className="px-4 py-3 whitespace-nowrap text-xs">subActiveDays</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Expiry On</th>
                       <th className="px-4 py-3 whitespace-nowrap text-xs">Last Action</th>
                       <th className="px-4 py-3 text-xs">Status</th>
@@ -373,6 +373,9 @@ console.log("res",res)
 
         <td className="px-4 py-1 whitespace-nowrap">
           {item.ownerInfo?.mobile}
+        </td>
+        <td className="px-4 py-1">
+          {item.noOfdaysSubscriptionActive || "----"}
         </td>
 
         <td className="px-4 py-1">
