@@ -67,12 +67,17 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const host = window.location.hostname;
 
-  useEffect(() => {
-    if (window.location.hostname !== "localhost") {
-      navigate("/");
-    }
-  }, []);
+const isLocal = host === "localhost";
+const isDev = host.includes("consoledev");   
+const isProd = !isLocal && !isDev;
+
+ useEffect(() => {
+  if (isProd) {
+    navigate("/");
+  }
+}, []);
 
   // 🔹 Normal Token Login
   const verifyToken = async () => {
@@ -135,52 +140,52 @@ const Login = () => {
 
       <div className="flex flex-col gap-6 w-[800px]">
 
-        {/* 🔹 Token Login */}
-        <div className="flex flex-col gap-3">
-          <h2 className="font-semibold text-lg">Token Login</h2>
+  {/* 🔹 Token Login → Only Local */}
+  {isLocal && (
+    <div className="flex flex-col gap-3">
+      <h2 className="font-semibold text-lg">Token Login</h2>
 
-          <textarea
-            className="border p-3 rounded-lg"
-            style={{ height: 150 }}
-            placeholder="Enter your token here"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-          />
+      <textarea
+        className="border p-3 rounded-lg"
+        style={{ height: 150 }}
+        placeholder="Enter your token here"
+        value={token}
+        onChange={(e) => setToken(e.target.value)}
+      />
 
-          <button
-            onClick={verifyToken}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md"
-          >
-            Sign in with Token
-          </button>
-        </div>
+      <button
+        onClick={verifyToken}
+        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md"
+      >
+        Sign in with Token
+      </button>
+    </div>
+  )}
 
-        {/* 🔹 Email Mock Login */}
-        <div className="flex flex-col gap-3">
-          <h2 className="font-semibold text-lg">Mock Agent Login</h2>
+  {/* 🔹 Email Login → Local + Dev */}
+  {(isLocal || isDev) && (
+    <div className="flex flex-col gap-3">
+      <h2 className="font-semibold text-lg">Mock Agent Login</h2>
 
-          <input
-            type="email"
-            placeholder="Enter agent email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="border p-3 rounded-lg"
-          />
+      <input
+        type="email"
+        placeholder="Enter agent email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="border p-3 rounded-lg"
+      />
 
-          <button
-            onClick={handleMockLogin}
-            disabled={loading}
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md flex items-center justify-center"
-          >
-            {loading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              "Login with Email"
-            )}
-          </button>
-        </div>
+      <button
+        onClick={handleMockLogin}
+        disabled={loading}
+        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md"
+      >
+        Login with Email
+      </button>
+    </div>
+  )}
 
-      </div>
+</div>
 
     </div>
   );
