@@ -1,6 +1,7 @@
 import React from "react";
 
 const OverviewSubscriptions = ({hostelData}) => {
+  const currentSub = hostelData?.currentSubscription;
   console.log("hostelData",hostelData)
   return (
     <div className="px-5 py-4 space-y-8">
@@ -27,7 +28,7 @@ const OverviewSubscriptions = ({hostelData}) => {
               </tr>
             </thead>
 
-            <tbody className="divide-y">
+            {/* <tbody className="divide-y">
 
               <tr className="hover:bg-gray-50">
                 <td className="px-4 py-2 text-left font-medium text-[12px]">N/A</td>
@@ -41,7 +42,58 @@ const OverviewSubscriptions = ({hostelData}) => {
                 <td className="px-4 py-2 text-center font-medium text-[12px]">⋮</td>
               </tr>
 
-            </tbody>
+            </tbody> */}
+            <tbody className="divide-y">
+
+  {currentSub ? (
+    <tr className="hover:bg-gray-50">
+
+      <td className="px-4 py-2 text-left font-medium text-[12px]">
+        {currentSub.planName || "N/A"}
+      </td>
+
+      <td className="px-4 py-2 text-left font-medium text-[12px]">
+        {currentSub.planStartsAt} - {currentSub.planEndsAt}
+      </td>
+
+      <td className="px-4 py-2 text-left font-medium text-[12px]">
+        ₹ {currentSub.planAmount ?? 0}
+      </td>
+
+      <td className="px-4 py-2 text-left font-medium text-[12px]">
+        {currentSub.planEndsAt || "N/A"}
+      </td>
+
+      <td className="px-4 py-2 text-left font-medium text-[12px]">
+        ---
+      </td>
+
+      <td className="px-4 py-2 text-left font-medium text-[12px]">
+        <span
+          className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+            hostelData?.subscriptionStatus?.toLowerCase() === "active"
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-700"
+          }`}
+        >
+          {hostelData?.subscriptionStatus || "N/A"}
+        </span>
+      </td>
+
+      <td className="px-4 py-2 text-center font-medium text-[12px]">
+        ⋮
+      </td>
+
+    </tr>
+  ) : (
+    <tr>
+      <td colSpan={7} className="text-center py-6 text-gray-400">
+        No Current Subscription
+      </td>
+    </tr>
+  )}
+
+</tbody>
           </table>
 
         </div>
@@ -73,21 +125,49 @@ const OverviewSubscriptions = ({hostelData}) => {
         </tr>
       </thead>
 
-      <tbody className="divide-y">
-        {hostelData?.subscriptions?.map((sub) => (
-          <tr key={sub.subscriptionId}>
-            <td className="px-4 py-3">{sub.planName}</td>
-            <td className="px-4 py-3">
-              {sub.planStartsAt} - {sub.planEndsAt}
-            </td>
-            <td className="px-4 py-2 text-left font-medium text-[12px]">₹ {sub.planAmount}</td>
-            <td className="px-4 py-2 text-left font-medium text-[12px]">{sub.planEndsAt}</td>
-            <td className="px-4 py-2 text-left font-medium text-[12px]">---</td>
-            <td className="px-4 py-2 text-left font-medium text-[12px]">Active</td>
-            <td className="px-4 py-2 text-center font-medium text-[12px]">⋮</td>
-          </tr>
-        ))}
-      </tbody>
+   <tbody className="divide-y">
+
+  {hostelData?.subscriptions && hostelData.subscriptions.length > 0 ? (
+    hostelData.subscriptions.map((sub) => (
+      <tr key={sub.subscriptionId} className="hover:bg-gray-50">
+
+        <td className="px-4 py-3">{sub.planName || "N/A"}</td>
+
+        <td className="px-4 py-3">
+          {sub.planStartsAt || "N/A"} - {sub.planEndsAt || "N/A"}
+        </td>
+
+        <td className="px-4 py-2 text-left font-medium text-[12px]">
+          ₹ {sub.planAmount ?? 0}
+        </td>
+
+        <td className="px-4 py-2 text-left font-medium text-[12px]">
+          {sub.planEndsAt || "N/A"}
+        </td>
+
+        <td className="px-4 py-2 text-left font-medium text-[12px]">
+          ---
+        </td>
+
+        <td className="px-4 py-2 text-left font-medium text-[12px]">
+          Active
+        </td>
+
+        <td className="px-4 py-2 text-center font-medium text-[12px]">
+          ⋮
+        </td>
+
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan={7} className="text-center py-6 text-gray-400">
+        No Data Found
+      </td>
+    </tr>
+  )}
+
+</tbody>
 
     </table>
 

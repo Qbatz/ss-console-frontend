@@ -8,7 +8,7 @@ import Toast from "../SuccessModal/ToastDesign";
 
 const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
   const { modules, loading, agentRoles, getAgentRoles, createAgentRole, updateAgentRole } = useRole();
-  console.log("selectedRole", selectedRole)
+  console.log("modules", modules)
   const [roleName, setRoleName] = useState("");
   const [permissions, setPermissions] = useState([]);
   const [rolenameError, setRoleNameError] = useState("")
