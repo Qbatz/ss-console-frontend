@@ -37,6 +37,7 @@ const Verify = () => {
        const accessToken = response.data;
 
     localStorage.setItem("access_token", accessToken);
+    localStorage.setItem("login_type", "normal");
  
 
     navigate("/home");

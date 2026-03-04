@@ -93,6 +93,7 @@ const Login = () => {
 
       if (res.status === 200) {
         localStorage.setItem("access_token", token);
+        localStorage.setItem("login_type", "internal");
         navigate("/home");
       }
     } catch (err) {
@@ -119,6 +120,7 @@ const Login = () => {
         console.log("mockToken", mockToken)
         localStorage.setItem("mock_token", mockToken);
         localStorage.setItem("login_time", Date.now());
+        localStorage.setItem("login_type", "mock");
 
         navigate("/home", { replace: true });
       }

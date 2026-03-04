@@ -90,6 +90,30 @@ const getHostelById = async (hostelId) => {
   }
 };
 
+// POST /v2/hostels/hard-reset/{hostelId}
+const hardResetHostel = async (hostelId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      `/v2/hostels/hard-reset/${hostelId}`
+    );
+
+    if (res.status === 200) {
+      return { success: true, message: "Hostel Hard Reset Successful" };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   return (
@@ -98,7 +122,7 @@ const getHostelById = async (hostelId) => {
         hostels,
         loading,
         errorMsg,
-        getHostels,getHostelById
+        getHostels,getHostelById,hardResetHostel
       }}
     >
       {children}

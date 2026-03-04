@@ -14,6 +14,7 @@ import StaffScreen from "./StaffScreen";
 import InvoicesScreen from "./InvoicesScreen";
 import PropertyActive from "./ActiveScreen";
 import swap from "../../assets/arrowswap.png";
+import PropertyAmenities from "./PropertyAmenities";
 
 const PropertyOverview = () => {
   const [activeTab, setActiveTab] = useState("tenants");
@@ -21,16 +22,10 @@ const PropertyOverview = () => {
   const [showBillingRule, setShowBillingRule] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const loginType = localStorage.getItem("login_type");
-  const isMockUser = loginType === "mock";
-  const tabs = [
-    "tenants",
-    "subscriptions",
-    "Product Support",
-    "staffs",
-    ...(isMockUser ? [] : ["invoices"]),
-    "activity"
-  ];
+
+const loginType = localStorage.getItem("login_type");
+const showInvoices = loginType === "normal";
+
  
   const hostelData = location.state?.hostelData;
   console.log("hostelData", hostelData)
@@ -254,7 +249,15 @@ const PropertyOverview = () => {
 
             <div className="flex gap-6 border-b border-[#E6E8F0] overflow-x-auto">
 
-              {["tenants", "subscriptions", "Product Support", "staffs", "invoices", "activity"]
+            {[
+  "tenants",
+  "subscriptions",
+  "Product Support",
+  "staffs",
+  ...(showInvoices ? ["invoices"] : []),
+  "activity",
+  "Amenities"
+]
                 .map(tab => (
                   <button
                     key={tab}
@@ -396,6 +399,9 @@ const PropertyOverview = () => {
           )}
           {activeTab === "activity" && (
             <PropertyActive hostelData={hostelData} />
+          )}
+           {activeTab === "Amenities" && (
+            <PropertyAmenities hostelData={hostelData} />
           )}
 
         </div>
