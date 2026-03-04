@@ -86,7 +86,9 @@ const getErrorMessage = (error) => {
     }
   };
 
- 
+ useEffect(() => {
+  fetchModules();
+}, []);
   const getAgentRoles = async () => {
     try {
       setLoading(true);
