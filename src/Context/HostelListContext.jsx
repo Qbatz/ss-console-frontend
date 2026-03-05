@@ -8,6 +8,7 @@ export const HostelProvider = ({ children }) => {
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [accessError,setAccessError] = useState("")
 
   const getErrorMessage = (error) =>
     error?.response?.data?.message ||
@@ -48,16 +49,18 @@ export const HostelProvider = ({ children }) => {
         hostelName
       }
     });
-
+console.log("res",res)
     if (res.status === 200) {
       setHostels(res.data);
       return { success: true, data: res.data };
     }
 
     return { success: false };
-  } catch (error) {
+  } 
+  catch (error) {
     const msg = getErrorMessage(error);
     setErrorMsg(msg);
+    setAccessError(msg)
     return { success: false, message: msg };
   } finally {
     setLoading(false);
@@ -106,7 +109,8 @@ const hardResetHostel = async (hostelId) => {
 
     return { success: false };
 
-  } catch (error) {
+  }
+   catch (error) {
     const msg = getErrorMessage(error);
     setErrorMsg(msg);
     return { success: false, message: msg };
@@ -122,7 +126,7 @@ const hardResetHostel = async (hostelId) => {
         hostels,
         loading,
         errorMsg,
-        getHostels,getHostelById,hardResetHostel
+        getHostels,getHostelById,hardResetHostel,accessError
       }}
     >
       {children}

@@ -10,11 +10,12 @@ import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import noteAdd from "../../assets/noteadd.png";
 import { useNavigate } from "react-router-dom";
+import LoginImg from "../../assets/LoginImg.png";
 
 
 const Properties = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel } = useHostel();
-  const { createSubscription, errorMsg } = useSubscription();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel,errorMsg,accessError } = useHostel();
+  const { createSubscription } = useSubscription();
   const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState("");
   const [pageSize, setPageSize] = useState(10);
@@ -38,8 +39,8 @@ const [tooltip, setTooltip] = useState({
   y: 0,
 });
   
-console.log("Typed Value:", noteText);
-console.log("Selected Hostel ID:", selectedHostel?.hostelId);
+console.log("Typed Value:", errorMsg);
+console.log("Selected Hostel ID:", accessError);
 
   // useEffect(() => {
   //   const delay = setTimeout(() => {
@@ -56,20 +57,36 @@ console.log("Selected Hostel ID:", selectedHostel?.hostelId);
   //   return () => clearTimeout(delay);
   // }, [page, pageSize, searchText]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await getHostels(page, pageSize, searchText);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     await getHostels(page, pageSize, searchText);
 
-      // Only first time loader stop
-      if (isFirstLoad) {
-        setIsFirstLoad(false);
-      }
-    };
+  //     // Only first time loader stop
+  //     if (isFirstLoad) {
+  //       setIsFirstLoad(false);
+  //     }
+  //   };
 
-    fetchData();
-  }, [page, pageSize, searchText]);
+  //   fetchData();
+  // }, [page, pageSize, searchText]);
 
+const [debouncedSearch, setDebouncedSearch] = useState(searchText);
 
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedSearch(searchText);
+  }, 2000);
+
+  return () => clearTimeout(timer);
+}, [searchText]);
+
+useEffect(() => {
+  getHostels(page, pageSize, debouncedSearch);
+
+  if (isFirstLoad) {
+    setIsFirstLoad(false);
+  }
+}, [page, pageSize, debouncedSearch]);
 
 
 
@@ -211,7 +228,27 @@ console.log("Selected Hostel ID:", selectedHostel?.hostelId);
     <>
 
       <DashboardLayout>
-        <Toast
+
+        {accessError === "Access Restricted" ? (
+
+  <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+    
+    <img 
+      src={LoginImg} 
+      alt="Access Restricted" 
+      className="w-64 object-contain"
+    />
+
+    <p className="text-red-600 text-lg font-medium">
+      {accessError}
+    </p>
+
+  </div>
+
+) : (
+
+ <>
+ <Toast
           show={showSuccess}
           message={message}
           type={modalType}
@@ -355,7 +392,7 @@ console.log("Selected Hostel ID:", selectedHostel?.hostelId);
             Expiry On
           </th>
 
-          <th className="px-4 py-3 w-[200px] whitespace-nowrap">
+          <th className="px-1 py-3 w-[100px] whitespace-nowrap">
             Last Action
           </th>
 
@@ -500,9 +537,22 @@ console.log("Selected Hostel ID:", selectedHostel?.hostelId);
           {item.expiredOn || "----"}
         </td>
 
-        <td className="px-4 py-2 whitespace-nowrap">
-          {item.lastUpdateDate} {item.lastUpdateTime}
-        </td>
+       {/* <td className="px-1 py-2">
+  <div className="flex flex-col">
+    <span>{item.lastUpdateDate}</span>
+    <span>{item.lastUpdateTime}</span>
+  </div>
+</td> */}
+<td className="px-1 py-2">
+  {item.lastUpdateDate || item.lastUpdateTime ? (
+    <div className="flex flex-col">
+      <span>{item.lastUpdateDate || "----"}</span>
+      <span>{item.lastUpdateTime || "----"}</span>
+    </div>
+  ) : (
+    "----"
+  )}
+</td>
 
         <td className="px-4 py-2 text-center">
           <span
@@ -635,6 +685,10 @@ console.log("Selected Hostel ID:", selectedHostel?.hostelId);
         )
 
         }
+ </>
+  
+)}
+        
         {showNoteModal && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 

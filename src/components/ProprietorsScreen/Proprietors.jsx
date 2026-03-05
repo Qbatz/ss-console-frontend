@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import swap from "../../assets/arrowswap.png";
 import { useOwners } from "../../Context/OwnersContext";
+import LoginImg from "../../assets/LoginImg.png";
 
 const Proprietors = () => {
 
-  const { owners, totalItems, totalPages, loading, getOwners } = useOwners();
+  const { owners, totalItems, totalPages, loading, getOwners,accessError} = useOwners();
 
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
@@ -69,6 +70,24 @@ const Proprietors = () => {
 
   return (
     <DashboardLayout>
+
+           {accessError === "Access Restricted" ? (
+      
+        <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+          
+          <img 
+            src={LoginImg} 
+            alt="Access Restricted" 
+            className="w-64 object-contain"
+          />
+      
+          <p className="text-red-600 text-lg font-medium">
+            {accessError}
+          </p>
+      
+        </div>
+      
+      ) : (
 
       <div className="p-4 space-y-4">
 
@@ -376,7 +395,7 @@ const Proprietors = () => {
         </div>
 
       </div>
-
+      )}
     </DashboardLayout>
   );
 };
