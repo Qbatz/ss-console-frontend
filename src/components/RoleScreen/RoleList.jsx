@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import CreateRoleModal from "./CreateRoleModal";
 import { useRole } from "../../Context/RoleContext";
-import Circle from "../../assets/menucircle.png"
+import Circle from "../../assets/menucircle.png";
+import LoginImg from "../../assets/LoginImg.png";
 const Roles = () => {
-  const { agentRoles, getAgentRoles,getAgentRoleById,loading,deleteAgentRole} = useRole();
+  const { agentRoles, getAgentRoles,getAgentRoleById,loading,deleteAgentRole,errorMsg,accessError} = useRole();
   console.log("agentRoles", agentRoles)
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
@@ -16,7 +17,7 @@ const Roles = () => {
   const [deleteRole, setDeleteRole] = useState(null);
 const [deleteLoading, setDeleteLoading] = useState(false);
 
-
+console.log("accessError",accessError)
   useEffect(() => {
   getAgentRoles();
 }, []);
@@ -77,7 +78,24 @@ const handleConfirmDelete = async () => {
   return (
     <DashboardLayout>
 
-      
+         {accessError === "Access Restricted" ? (
+            
+              <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+                
+                <img 
+                  src={LoginImg} 
+                  alt="Access Restricted" 
+                  className="w-64 object-contain"
+                />
+            
+                <p className="text-red-600 text-lg font-medium">
+                  {accessError}
+                </p>
+            
+              </div>
+            
+            ) : (
+   <>
       <div className="flex items-center justify-between pb-3 border-b border-gray-200 mb-6 p-3 ">
         <h2 className="text-lg font-semibold text-gray-800 font-sans">Roles</h2>
 
@@ -89,7 +107,7 @@ const handleConfirmDelete = async () => {
         </button>
       </div>
 
-      {/* Table Box */}
+     
 
 
     <div className="bg-white rounded-xl border border-gray-200 max-h-[350px] flex flex-col overflow-hidden">
@@ -297,7 +315,8 @@ const handleConfirmDelete = async () => {
   </div>
 )}
 
-
+   </>
+            )}
     </DashboardLayout>
   );
 };

@@ -9,8 +9,13 @@ export const OwnersProvider = ({ children }) => {
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [accessError,setAccessError] = useState("")
   
-
+  const getErrorMessage = (error) =>
+    error?.response?.data?.message ||
+    error?.response?.data ||
+    "Something went wrong";
+    
   const getOwners = async ({
     page = 1,
     size = 10,
@@ -41,10 +46,21 @@ export const OwnersProvider = ({ children }) => {
         setTotalItems(res.data.totalItems || 0);
         setTotalPages(res.data.totalPages || 0);
       }
+      console.log("res",res)
 
-    } catch (err) {
-      console.log(err);
-    } finally {
+    } 
+    // catch (err) {
+    //   console.log(err);
+    //   console.log("err",err)
+    // } 
+     catch (error) {
+    const msg = getErrorMessage(error);
+   
+    setAccessError(msg)
+    console.log("accessError",accessError)
+    return { success: false, message: msg };
+  }
+    finally {
       setLoading(false);
     }
   };
@@ -92,7 +108,7 @@ const changeOwnerPassword = async (payload) => {
         owners,
         totalItems,
         totalPages,
-        loading,
+        loading,accessError,
         getOwners,changeOwnerPassword
       }}
       

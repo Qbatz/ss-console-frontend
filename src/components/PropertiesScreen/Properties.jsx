@@ -10,11 +10,12 @@ import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import noteAdd from "../../assets/noteadd.png";
 import { useNavigate } from "react-router-dom";
+import LoginImg from "../../assets/LoginImg.png";
 
 
 const Properties = () => {
-  const { hostels, getHostels, loading, getHostelById } = useHostel();
-  const { createSubscription, errorMsg } = useSubscription();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel,errorMsg,accessError } = useHostel();
+  const { createSubscription } = useSubscription();
   const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState("");
   const [pageSize, setPageSize] = useState(10);
@@ -26,10 +27,20 @@ const Properties = () => {
   const [isPageChange, setIsPageChange] = useState(false);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [hostelDetails, setHostelDetails] = useState("")
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const [selectedHostel, setSelectedHostel] = useState(null);
+  const [hostelerror , setHostelError] = useState("")
+  const [noteText, setNoteText] = useState("");
   const navigate = useNavigate();
-
-
-
+const [tooltip, setTooltip] = useState({
+  visible: false,
+  text: "",
+  x: 0,
+  y: 0,
+});
+  
+console.log("Typed Value:", errorMsg);
+console.log("Selected Hostel ID:", accessError);
 
   // useEffect(() => {
   //   const delay = setTimeout(() => {
@@ -46,20 +57,36 @@ const Properties = () => {
   //   return () => clearTimeout(delay);
   // }, [page, pageSize, searchText]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await getHostels(page, pageSize, searchText);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     await getHostels(page, pageSize, searchText);
 
-      // Only first time loader stop
-      if (isFirstLoad) {
-        setIsFirstLoad(false);
-      }
-    };
+  //     // Only first time loader stop
+  //     if (isFirstLoad) {
+  //       setIsFirstLoad(false);
+  //     }
+  //   };
 
-    fetchData();
-  }, [page, pageSize, searchText]);
+  //   fetchData();
+  // }, [page, pageSize, searchText]);
 
+const [debouncedSearch, setDebouncedSearch] = useState(searchText);
 
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedSearch(searchText);
+  }, 2000);
+
+  return () => clearTimeout(timer);
+}, [searchText]);
+
+useEffect(() => {
+  getHostels(page, pageSize, debouncedSearch);
+
+  if (isFirstLoad) {
+    setIsFirstLoad(false);
+  }
+}, [page, pageSize, debouncedSearch]);
 
 
 
@@ -136,7 +163,63 @@ const Properties = () => {
       }, 1000);
     }
   };
+  const handleHardReset = async () => {
+  if (!selectedHostel?.hostelId) return;
 
+  const enteredId = noteText.trim();
+
+  
+  if (!enteredId) {
+    setHostelError("Please Enter Hostel ID");
+    return;
+  }
+
+  
+  const res = await hardResetHostel(enteredId);
+
+  if (res?.success) {
+    setModalType("success");
+    setMessage(res?.message);
+    getHostels(page, pageSize, searchText);
+
+    setShowNoteModal(false);
+    setShowSuccess(true);
+    setNoteText("");
+    setHostelError("");
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+  } else {
+    setHostelError(res?.message || "Please Enter Valid Hostel ID");
+  }
+};
+  // const handleHardReset = async () => {
+  //   if (!selectedHostel?.hostelId) return;
+
+  //   const enteredId = noteText.trim();
+  //   const actualId = selectedHostel.hostelId;
+
+   
+  //   const res = await hardResetHostel(enteredId);
+
+  //   if (res?.success) {
+  //     setModalType("success");
+  //     setMessage(res?.message);
+  //     getHostels(page, pageSize, searchText);
+  //     setShowNoteModal(false);
+  //     setShowSuccess(true);
+  //     setNoteText("");
+
+  //   setTimeout(() => {
+  //     setShowSuccess(false);
+  //   }, 1500);
+      
+  //   } else {
+  //     setHostelError(res?.message || "Please Enter Valid Hostel ID")
+  //   }
+  // };
 
   console.log("hostels", hostels)
 
@@ -145,7 +228,27 @@ const Properties = () => {
     <>
 
       <DashboardLayout>
-        <Toast
+
+        {accessError === "Access Restricted" ? (
+
+  <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+    
+    <img 
+      src={LoginImg} 
+      alt="Access Restricted" 
+      className="w-64 object-contain"
+    />
+
+    <p className="text-red-600 text-lg font-medium">
+      {accessError}
+    </p>
+
+  </div>
+
+) : (
+
+ <>
+ <Toast
           show={showSuccess}
           message={message}
           type={modalType}
@@ -252,160 +355,235 @@ const Properties = () => {
 
             {/* <div className="bg-white rounded-xl shadow-sm border-gray-600 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]"> */}
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]">
 
-              <div className="flex-1 overflow-y-auto pb-5">
+  <div className="flex-1 overflow-x-auto overflow-y-auto">
 
-                <table className="w-full text-sm text-left">
+    <table className="w-max min-w-full table-fixed text-sm text-left">
 
+     
+      <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-40">
 
-                  <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-10 border-b border-gray-300">
+        <tr>
 
-                    <tr>
-                      <th className="px-4 py-3 text-xs">ID</th>
-                      {/* <th className="px-4 py-3 text-xs whitespace-nowrap">Hostel Name</th> */}
-                      <th className="px-4 py-3 whitespace-nowrap text-xs">Name</th>
-                      <th className="px-4 py-3 whitespace-nowrap text-xs">Mobile.No</th>
-                      {/* <th className="px-4 py-3 whitespace-nowrap text-xs">Expiry On</th> */}
-                      <th className="px-4 py-3 whitespace-nowrap text-xs">subActiveDays</th>
-                      <th className="px-4 py-3 whitespace-nowrap text-xs">Expiry On</th>
-                      <th className="px-4 py-3 whitespace-nowrap text-xs">Last Action</th>
-                      <th className="px-4 py-3 text-xs">Status</th>
-                      <th className="px-4 py-3 text-center text-xs">Actions</th>
-                    </tr>
-                  </thead>
+          {/* Sticky ID */}
+          <th className="px-4 py-3 sticky left-0 bg-[#F8F9FF] z-50 w-[80px]">
+            ID
+          </th>
 
-                  <tbody className="divide-y divide-gray-200">
+          {/* Sticky Name */}
+          <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">
+            Name
+          </th>
 
-                    {loading ? (
-                      [...Array(pageSize || 8)].map((_, index) => (
-                        <tr key={index} className="animate-pulse">
+          <th className="px-4 py-3 w-[150px] whitespace-nowrap">
+            Mobile.No
+          </th>
 
-                          {/* ID */}
-                          <td className="px-4 py-2">
-                            <div className="h-4 w-6 bg-gray-200 rounded"></div>
-                          </td>
+          <th className="px-4 py-3 w-[150px] whitespace-nowrap">
+            Created On
+          </th>
 
-                          {/* Name */}
-                          <td className="px-4 py-2">
-                            <div className="flex items-center gap-3">
-                              <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
-                              <div className="w-9 h-9 bg-gray-200 rounded-full"></div>
+          <th className="px-4 py-3 w-[150px] whitespace-nowrap">
+            SubActiveDays
+          </th>
 
-                              <div className="flex flex-col gap-2">
-                                <div className="h-4 w-32 bg-gray-200 rounded"></div>
-                                <div className="h-3 w-20 bg-gray-200 rounded"></div>
-                              </div>
-                            </div>
-                          </td>
+          <th className="px-4 py-3 w-[150px] whitespace-nowrap">
+            Expiry On
+          </th>
 
-                          {/* Mobile */}
-                          <td className="px-4 py-2">
-                            <div className="h-4 w-24 bg-gray-200 rounded"></div>
-                          </td>
+          <th className="px-1 py-3 w-[100px] whitespace-nowrap">
+            Last Action
+          </th>
 
-                          {/* Expiry */}
-                          <td className="px-4 py-2">
-                            <div className="h-4 w-20 bg-gray-200 rounded"></div>
-                          </td>
+          <th className="px-4 py-3 w-[120px] text-center">
+            Status
+          </th>
 
-                          {/* Last Action */}
-                          <td className="px-4 py-2">
-                            <div className="h-4 w-28 bg-gray-200 rounded"></div>
-                          </td>
+          <th className="px-4 py-3 w-[120px] text-center">
+            Actions
+          </th>
 
-                          {/* Status */}
-                          <td className="px-4 py-2">
-                            <div className="h-5 w-16 bg-gray-200 rounded-full"></div>
-                          </td>
+        </tr>
+      </thead>
 
-                          {/* Actions */}
-                          <td className="px-4 py-2 text-end">
-                            <div className="flex justify-end gap-2">
-                              <div className="w-5 h-5 bg-gray-200 rounded"></div>
-                              <div className="w-5 h-5 bg-gray-200 rounded"></div>
-                              <div className="w-5 h-5 bg-gray-200 rounded"></div>
-                            </div>
-                          </td>
+      {/* ================= BODY ================= */}
+     
+<tbody className="divide-y divide-gray-200">
 
-                        </tr>
-                      ))
-                    ) : (
-                      displayData?.map((item, index) => (
+  {loading ? (
 
-                        <tr key={item.hostelId} className="hover:bg-gray-50 text-[12px]">
+    [...Array(pageSize || 8)].map((_, index) => (
+      <tr key={index} className="animate-pulse">
 
-                          <td className="px-4 py-1">
-                            {(page - 1) * pageSize + index + 1}
-                          </td>
+        {/* Sticky ID */}
+        <td className="px-4 py-2 sticky left-0 bg-white z-30 w-[80px]">
+          <div className="h-4 w-6 bg-gray-200 rounded"></div>
+        </td>
 
-                          {/* YOUR ORIGINAL ROW CONTENT — unchanged */}
-                          <td className="px-4 py-1">
-                            <div className="flex items-center gap-3 relative group">
+        {/* Sticky Name */}
+        <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px]">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+            <div className="flex flex-col gap-2">
+              <div className="h-4 w-28 bg-gray-200 rounded"></div>
+              <div className="h-3 w-20 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </td>
 
-                              <div className="flex border rounded-full w-5 h-5 items-center justify-center text-[9px] font-medium text-gray-600">
-                                T
-                              </div>
+        <td className="px-4 py-2">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </td>
 
-                              <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 text-sm font-semibold uppercase">
-                                {item.initials || "NA"}
-                              </div>
+        <td className="px-4 py-2">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </td>
 
-                              <div
-                                className="flex flex-col whitespace-nowrap cursor-pointer"
-                                onClick={() => handlePropertyClick(item)}
-                              >
-                                <span className="text-gray-900 font-semibold">
-                                  {item.hostelName}
-                                </span>
+        <td className="px-4 py-2">
+          <div className="h-4 w-16 bg-gray-200 rounded"></div>
+        </td>
 
-                                <span className="text-gray-500 text-xs whitespace-nowrap">
-                                  {item.ownerInfo?.fullName}
-                                </span>
-                              </div>
+        <td className="px-4 py-2">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </td>
 
-                              <div className="absolute left-0 top-full mt-2 hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 z-50 whitespace-nowrap">
-                                {item.fullAddress || "No Address"}
-                              </div>
+        <td className="px-4 py-2">
+          <div className="h-4 w-32 bg-gray-200 rounded"></div>
+        </td>
 
-                            </div>
-                          </td>
+        <td className="px-4 py-2 text-center">
+          <div className="h-6 w-20 bg-gray-200 rounded-full mx-auto"></div>
+        </td>
 
-                          <td className="px-4 py-1 whitespace-nowrap">
-                            {item.ownerInfo?.mobile}
-                          </td>
-                          <td className="px-4 py-1">
-                            {item.noOfdaysSubscriptionActive || "----"}
-                          </td>
+        <td className="px-4 py-2 text-center">
+          <div className="flex justify-center gap-3">
+            <div className="w-5 h-5 bg-gray-200 rounded"></div>
+            <div className="w-5 h-5 bg-gray-200 rounded"></div>
+            <div className="w-5 h-5 bg-gray-200 rounded"></div>
+          </div>
+        </td>
 
-                          <td className="px-4 py-1">
-                            {item.expiredOn || "----"}
-                          </td>
+      </tr>
+    ))
 
-                          <td className="px-4 py-1">
-                            {item.lastUpdateDate} {item.lastUpdateTime}
-                          </td>
+  ) : (
 
-                          <td className="px-4 py-1 text-center">
-                            <span
-                              className={`flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap w-fit ${item.subscriptionIsActive
-                                  ? "bg-green-100 text-green-600"
-                                  : "bg-red-100 text-red-600"
-                                }`}
-                            >
-                              <span
-                                className={`w-2 h-2 rounded-full ${item.subscriptionIsActive
-                                    ? "bg-green-500"
-                                    : "bg-red-500"
-                                  }`}
-                              ></span>
-                              {item.subscriptionIsActive ? "Active" : "Inactive"}
-                            </span>
-                          </td>
+    displayData?.map((item, index) => (
 
-                          <td className="px-4 py-1 text-end">
-                            <div className="flex items-center justify-end gap-1">
-                              <img src={noteAdd} alt="noteAdd" className="w-5 h-5 cursor-pointer" />
+      <tr key={item.hostelId} className="group hover:bg-gray-50 text-[13px]">
+
+        {/* Sticky ID */}
+        <td className="px-4 py-2 sticky left-0 bg-white z-30 w-[80px] group-hover:bg-gray-50">
+          {(page - 1) * pageSize + index + 1}
+        </td>
+
+        {/* Sticky Name */}
+        <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] group-hover:bg-gray-50">
+
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onMouseEnter={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setTooltip({
+                visible: true,
+                text: item.fullAddress || "No Address",
+                x: rect.left,
+                y: rect.bottom + 6,
+              });
+            }}
+            onMouseLeave={() =>
+              setTooltip((prev) => ({ ...prev, visible: false }))
+            }
+          >
+
+            <div className="flex border rounded-full w-5 h-5 items-center justify-center text-[9px] font-medium text-gray-600">
+              T
+            </div>
+
+            <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 text-sm font-semibold uppercase">
+              {item.initials || "NA"}
+            </div>
+
+            <div
+              className="flex flex-col truncate"
+              onClick={() => handlePropertyClick(item)}
+            >
+              <span className="text-gray-900 font-semibold truncate">
+                {item.hostelName}
+              </span>
+              <span className="text-gray-500 text-xs truncate">
+                {item.ownerInfo?.fullName}
+              </span>
+            </div>
+
+          </div>
+
+        </td>
+
+        <td className="px-4 py-2 whitespace-nowrap">
+          {item.ownerInfo?.mobile}
+        </td>
+
+        <td className="px-4 py-2 whitespace-nowrap">
+          {item?.joinedOn}
+        </td>
+
+        <td className="px-4 py-2">
+          {item.noOfdaysSubscriptionActive || "----"}
+        </td>
+
+        <td className="px-4 py-2">
+          {item.expiredOn || "----"}
+        </td>
+
+       {/* <td className="px-1 py-2">
+  <div className="flex flex-col">
+    <span>{item.lastUpdateDate}</span>
+    <span>{item.lastUpdateTime}</span>
+  </div>
+</td> */}
+<td className="px-1 py-2">
+  {item.lastUpdateDate || item.lastUpdateTime ? (
+    <div className="flex flex-col">
+      <span>{item.lastUpdateDate || "----"}</span>
+      <span>{item.lastUpdateTime || "----"}</span>
+    </div>
+  ) : (
+    "----"
+  )}
+</td>
+
+        <td className="px-4 py-2 text-center">
+          <span
+            className={`flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap w-fit mx-auto ${
+              item.subscriptionIsActive
+                ? "bg-green-100 text-green-600"
+                : "bg-red-100 text-red-600"
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                item.subscriptionIsActive
+                  ? "bg-green-500"
+                  : "bg-red-500"
+              }`}
+            ></span>
+            {item.subscriptionIsActive ? "Active" : "Inactive"}
+          </span>
+        </td>
+
+        <td className="px-4 py-2 text-center">
+          <div className="flex items-center justify-center gap-2">
+            <img
+                                src={noteAdd}
+                                alt="noteAdd"
+                                className="w-5 h-5 cursor-pointer"
+                                onClick={() => {
+                                  setSelectedHostel(item);
+                                  setShowNoteModal(true);
+                                }}
+                              />
                               <img src={Circle} alt="circle" className="w-5 h-5 cursor-pointer" />
                               <img
                                 src={Money}
@@ -413,24 +591,38 @@ const Properties = () => {
                                 alt="money"
                                 className="w-5 h-5 cursor-pointer"
                               />
-                            </div>
-                          </td>
+          </div>
+        </td>
 
-                        </tr>
+      </tr>
 
-                      ))
-                    )}
+    ))
 
-                  </tbody>
-
-                </table>
-              </div>
+  )}
 
 
+      </tbody>
 
+    </table>
 
+    {/* ================= TOOLTIP ================= */}
+    {tooltip.visible && (
+      <div
+        className="fixed bg-white shadow-lg border border-gray-200 
+        rounded-lg px-3 py-2 text-xs text-gray-700 
+        z-[9999] max-w-[400px] break-words"
+        style={{
+          left: tooltip.x,
+          top: tooltip.y,
+        }}
+      >
+        {tooltip.text}
+      </div>
+    )}
 
-            </div>
+  </div>
+
+</div>
             <div className="flex justify-between items-center px-4 py-1 text-sm  bg-white">
 
               {/* Total Count */}
@@ -493,6 +685,63 @@ const Properties = () => {
         )
 
         }
+ </>
+  
+)}
+        
+        {showNoteModal && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+
+
+              <button
+                onClick={() => {
+                  setShowNoteModal(false);
+                  setNoteText("");
+                }}
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 text-left">
+                Enter Hostel ID
+              </h2>
+
+              <div className="space-y-4">
+
+                {/* Input */}
+                <input
+                  type="text"
+                  placeholder="Enter Hostel ID"
+                  value={noteText}
+                  onChange={(e) =>
+                  {
+                    setNoteText(e.target.value)
+                    setHostelError("")
+                  }
+                   }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                />
+
+ {hostelerror && (
+              <ErrorMessage message={hostelerror} type="error" />
+            )}
+
+                {/* Button */}
+                <button
+                  onClick={handleHardReset}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition"
+                >
+                  Submit
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+        )}
       </DashboardLayout>
     </>
   );
