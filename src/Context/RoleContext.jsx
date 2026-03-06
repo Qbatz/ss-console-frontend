@@ -51,6 +51,7 @@ export const RoleProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [agents, setAgents] = useState([]);
+  const [accessError,setAccessError] = useState("")
 
 const getErrorMessage = (error) => {
   if (error?.response?.data) {
@@ -86,7 +87,9 @@ const getErrorMessage = (error) => {
     }
   };
 
- 
+ useEffect(() => {
+  fetchModules();
+}, []);
   const getAgentRoles = async () => {
     try {
       setLoading(true);
@@ -101,6 +104,7 @@ const getErrorMessage = (error) => {
     } catch (error) {
       const msg = getErrorMessage(error);
       setErrorMsg(msg);
+      setAccessError(msg)
       return { success: false, message: msg };
     } finally {
       setLoading(false);
@@ -258,6 +262,7 @@ const getAllAgents = async () => {
   } catch (error) {
     const msg = getErrorMessage(error);
     setErrorMsg(msg);
+    setAccessError(msg)
     return { success: false, message: msg };
   } finally {
     setLoading(false);
@@ -272,7 +277,7 @@ const getAllAgents = async () => {
         loading,
         errorMsg,
         fetchModules,
-        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents
+        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError
       }}
     >
       {children}

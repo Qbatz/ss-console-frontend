@@ -4,6 +4,7 @@ import Search from "../../assets/Search.png";
 import AddAdmin from "./AddAdmin";
 import { useRole } from "../../Context/RoleContext";
 import swap from "../../assets/arrowswap.png";
+import LoginImg from "../../assets/LoginImg.png";
 
 const users = [
   {
@@ -41,7 +42,7 @@ const users = [
 ];
 
 const IamAdminUser = () => {
-  const { getAdminDetails,loading,agents,getAllAgents} = useRole();
+  const { getAdminDetails,loading,agents,getAllAgents,accessError} = useRole();
  
   const [admin, setAdmin] = useState(null);
   const [open, setOpen] = useState(false);
@@ -63,11 +64,29 @@ getAllAgents()
 
     fetchAdmin();
   }, []);
-  console.log("admin",admin)
+  console.log("accessError",accessError)
   const adminList = Array.isArray(admin) ? admin : [admin];
 
   return (
     <DashboardLayout>
+       {accessError === "Access Restricted" ? (
+                  
+                    <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+                      
+                      <img 
+                        src={LoginImg} 
+                        alt="Access Restricted" 
+                        className="w-64 object-contain"
+                      />
+                  
+                      <p className="text-red-600 text-lg font-medium">
+                        {accessError}
+                      </p>
+                  
+                    </div>
+                  
+                  ) : (
+      <>
       <div className="w-full px-4 md:px-6  space-y-6">
 
        
@@ -221,6 +240,8 @@ getAllAgents()
 
       </div>
       <AddAdmin isOpen={open} onClose={() => setOpen(false)} />
+      </>
+                  )}
 
     </DashboardLayout>
   );

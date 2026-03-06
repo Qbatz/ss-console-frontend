@@ -6,7 +6,7 @@ const ProductSupport = ({hostelData}) => {
 <div className="bg-white border border-[#E6E8F0] rounded-xl overflow-hidden">
 
   {/* FIXED HEIGHT */}
-  <div className="h-[320px] flex flex-col">
+  <div className="h-[200px] flex flex-col">
 
     {/* TABLE HEADER */}
     <table className="w-full text-sm border-b border-gray-200">
@@ -30,7 +30,7 @@ const ProductSupport = ({hostelData}) => {
       <table className="w-full text-sm">
         <tbody className="divide-y divide-gray-200">
 
-          {Array.from({ length: 20 }).map((_, i) => (
+          {/* {Array.from({ length: 20 }).map((_, i) => (
             <tr key={i} className="hover:bg-gray-50">
               <td className="px-4 py-3 text-blue-600">#TKT10{i}</td>
               <td className="px-4 py-3">20 Oct 2025</td>
@@ -41,7 +41,12 @@ const ProductSupport = ({hostelData}) => {
               <td className="px-4 py-3">Unassigned</td>
               <td className="px-4 py-3">⋮</td>
             </tr>
-          ))}
+          ))} */}
+           <tr>
+      <td colSpan={5} className="text-center py-6 text-gray-400">
+        No Data Found
+      </td>
+    </tr>
 
         </tbody>
       </table>
