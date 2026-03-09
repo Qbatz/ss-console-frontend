@@ -74,7 +74,7 @@ const getHostelById = async (hostelId) => {
 
     const res = await axiosInstance.get(`/v2/hostels/${hostelId}`, {
       params: {
-        hostelId: hostelId   // ✅ swagger-ku match
+        hostelId: hostelId   
       }
     });
 
@@ -94,13 +94,40 @@ const getHostelById = async (hostelId) => {
 };
 
 // POST /v2/hostels/hard-reset/{hostelId}
-const hardResetHostel = async (hostelId) => {
+// const hardResetHostel = async (hostelId) => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.post(
+//       `/v2/hostels/hard-reset/${hostelId}`
+//     );
+
+//     if (res.status === 200) {
+//       return { success: true, message: "Hostel Hard Reset Successful" };
+//     }
+
+//     return { success: false };
+
+//   }
+//    catch (error) {
+//     const msg = getErrorMessage(error);
+//     setErrorMsg(msg);
+//     return { success: false, message: msg };
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+const hardResetHostel = async (hostelId, typedHostelId) => {
   try {
     setLoading(true);
     setErrorMsg("");
 
     const res = await axiosInstance.post(
-      `/v2/hostels/hard-reset/${hostelId}`
+      `/v2/hostels/hard-reset/${hostelId}`,
+      {
+        hostelId: typedHostelId
+      }
     );
 
     if (res.status === 200) {
@@ -109,8 +136,7 @@ const hardResetHostel = async (hostelId) => {
 
     return { success: false };
 
-  }
-   catch (error) {
+  } catch (error) {
     const msg = getErrorMessage(error);
     setErrorMsg(msg);
     return { success: false, message: msg };
@@ -118,7 +144,6 @@ const hardResetHostel = async (hostelId) => {
     setLoading(false);
   }
 };
-
 
   return (
     <HostelContext.Provider

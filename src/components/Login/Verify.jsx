@@ -18,7 +18,43 @@ const Verify = () => {
   const [error, shouldShowError] = useState(false);
   const calledRef = useRef(false);
 
- useEffect(() => {
+//  useEffect(() => {
+//   if (calledRef.current) return;
+//   calledRef.current = true;
+
+//   const code = searchParams.get("code");
+//   const location = searchParams.get("location");
+//   const idToken = searchParams.get("id_token");
+//   const accountsServer = searchParams.get("accounts-server");
+
+//   axiosInstance.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
+//     params: { code, location, accountsServer, idToken }
+//   })
+//   .then((response) => {
+//     if (response.status === 200) {
+//       console.log("response", response.data);
+      
+//        const accessToken = response.data;
+
+//     // localStorage.setItem("access_token", accessToken);
+//     localStorage.removeItem("mock_token");
+// localStorage.setItem("access_token", accessToken);
+// localStorage.setItem("login_type", "normal");
+ 
+
+//     navigate("/home");
+
+//     }
+//   })
+//   .catch((err) => {
+//     console.log("Verification failed:", err);
+//     shouldShowError(true);
+//   });
+
+// }, []);
+
+useEffect(() => {
+
   if (calledRef.current) return;
   calledRef.current = true;
 
@@ -27,22 +63,22 @@ const Verify = () => {
   const idToken = searchParams.get("id_token");
   const accountsServer = searchParams.get("accounts-server");
 
-  axiosInstance.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
+  axios.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
     params: { code, location, accountsServer, idToken }
   })
   .then((response) => {
+
     if (response.status === 200) {
-      console.log("response", response.data);
-      
-       const accessToken = response.data;
 
-    localStorage.setItem("access_token", accessToken);
-    localStorage.setItem("login_type", "normal");
- 
+      const accessToken = response.data;
 
-    navigate("/home");
+      localStorage.removeItem("mock_token");
+      localStorage.setItem("access_token", accessToken);
+      localStorage.setItem("login_type", "normal");
 
+      navigate("/home");
     }
+
   })
   .catch((err) => {
     console.log("Verification failed:", err);
@@ -50,8 +86,6 @@ const Verify = () => {
   });
 
 }, []);
-
-
 
 return (
 <>
