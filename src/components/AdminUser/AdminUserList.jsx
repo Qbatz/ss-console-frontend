@@ -6,43 +6,10 @@ import { useRole } from "../../Context/RoleContext";
 import swap from "../../assets/arrowswap.png";
 import LoginImg from "../../assets/LoginImg.png";
 
-const users = [
-  {
-    name: "Arjun Kumar",
-    email: "arjun.kumar5@gmail.com",
-    role: "Co Admin",
-    lastAction: "2025 Sep 21 14:20",
-    createdOn: "2025 Oct 01",
-    status: "Active",
-  },
-  {
-    name: "Susi",
-    email: "susee@gmail.com",
-    role: "Support Agent",
-    lastAction: "2025 Sep 21 14:20",
-    createdOn: "2025 Sep 01",
-    status: "Active",
-  },
-  {
-    name: "Christopher",
-    email: "christopher77@gmail.com",
-    role: "Support Agent",
-    lastAction: "2025 Sep 21 14:20",
-    createdOn: "2025 Aug 21",
-    status: "Active",
-  },
-  {
-    name: "Priya Rahul",
-    email: "priya95@gmail.com",
-    role: "Billing Manager",
-    lastAction: "2025 Sep 22 09:40",
-    createdOn: "2025 Feb 21",
-    status: "Active",
-  },
-];
+
 
 const IamAdminUser = () => {
-  const { getAdminDetails,loading,agents,getAllAgents,accessError} = useRole();
+  const { getAdminDetails,loading,agents,getAllAgents,accessError,deactivateAgent } = useRole();
  
   const [admin, setAdmin] = useState(null);
   const [open, setOpen] = useState(false);
@@ -66,6 +33,17 @@ getAllAgents()
   }, []);
   console.log("accessError",accessError)
   const adminList = Array.isArray(admin) ? admin : [admin];
+  const handleDeactivate = async (agentId) => {
+
+  const res = await deactivateAgent(agentId);
+
+  if (res.success) {
+    alert(res.message);
+  } else {
+    alert(res.message);
+  }
+
+};
 
   return (
     <DashboardLayout>
@@ -215,9 +193,12 @@ getAllAgents()
                 </span>
               </td> */}
 
-              <td className="px-1 py-4 text-gray-500 cursor-pointer">
-                ⋮
-              </td>
+             <td
+  className="px-1 py-4 text-gray-500 cursor-pointer"
+  onClick={() => handleDeactivate(user.agentId)}
+>
+  ⋮
+</td>
             </tr>
           ))
         ) : (

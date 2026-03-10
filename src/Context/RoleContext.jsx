@@ -268,6 +268,29 @@ const getAllAgents = async () => {
     setLoading(false);
   }
 };
+const deactivateAgent = async (agentId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await api.put(`/v2/admin/deactivate-agent/${agentId}`);
+
+    if (res.status === 200) {
+      await getAllAgents(); // refresh list
+      return { success: true, message: "Agent Deactivated Successfully" };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <RoleContext.Provider
@@ -277,7 +300,7 @@ const getAllAgents = async () => {
         loading,
         errorMsg,
         fetchModules,
-        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError
+        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError,deactivateAgent
       }}
     >
       {children}

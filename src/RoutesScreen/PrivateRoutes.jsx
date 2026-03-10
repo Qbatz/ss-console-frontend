@@ -16,6 +16,7 @@ import ManagePlans from "../components/SubscriptionScreen/ManagePlans ";
 import { OwnersProvider } from "../Context/OwnersContext";
 import PropertyOverview from "../components/PropertiesScreen/PropertyOverview"
 import { useNavigate } from "react-router-dom";
+import ProprietorsOverview from "../components/ProprietorsScreen/ProprietorsOverview";
 
 
 const PrivateRoute = ({ children }) => {
@@ -47,6 +48,7 @@ const PrivateRoutesScreen = () => {
             <Route path="/crmDashboard" element={<CRMDashboard />} />
             <Route path="/manage-plans" element={<ManagePlans />} />
              <Route path="/property-overview" element={<PropertyOverview/>} />
+              <Route path="/ProprietorsOverview" element={<ProprietorsOverview/>} />
           </Routes>
           </OwnersProvider>
           </SubscriptionProvider>
