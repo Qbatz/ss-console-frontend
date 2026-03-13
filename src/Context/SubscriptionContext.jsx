@@ -53,13 +53,48 @@ console.log("errorMsg",errorMsg)
       setLoading(false);
     }
   };
+const getSubscriptions = async (page = 1, size = 10, hostelName = "") => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
 
+    const res = await axiosInstance.get("/v2/subscription", {
+      params: {
+        page,
+        size,
+        hostelName
+      }
+    });
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <SubscriptionContext.Provider
       value={{
         loading,
         errorMsg,
-        createSubscription,
+        createSubscription,getSubscriptions
       }}
     >
       {children}

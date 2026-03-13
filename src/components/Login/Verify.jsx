@@ -8,17 +8,54 @@ import WelcomeImg from "../../assets/WlcomeImg.png";
 import AccessRestricted from "../../assets/AccessResticted.png";
 import ConfigV2 from "../../Config/ConfigV2";
 import axiosInstance from "../../Config/AxiosConfig";
-
+import { useRole } from "../../Context/RoleContext";
 
 const Verify = () => {
-
+ const {adminDetails, getAdminDetails,
+        agentRoles, getAgentRoles,getAgentRoleById,deleteAgentRole,errorMsg,accessError} = useRole();
   const navigate = useNavigate();
   const hash = window.location.hash.substring(1);
   const [searchParams] = useSearchParams(hash);
   const [error, shouldShowError] = useState(false);
   const calledRef = useRef(false);
 
- useEffect(() => {
+//  useEffect(() => {
+//   if (calledRef.current) return;
+//   calledRef.current = true;
+
+//   const code = searchParams.get("code");
+//   const location = searchParams.get("location");
+//   const idToken = searchParams.get("id_token");
+//   const accountsServer = searchParams.get("accounts-server");
+
+//   axiosInstance.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
+//     params: { code, location, accountsServer, idToken }
+//   })
+//   .then((response) => {
+//     if (response.status === 200) {
+//       console.log("response", response.data);
+      
+//        const accessToken = response.data;
+
+//     // localStorage.setItem("access_token", accessToken);
+//     localStorage.removeItem("mock_token");
+// localStorage.setItem("access_token", accessToken);
+// localStorage.setItem("login_type", "normal");
+ 
+
+//     navigate("/home");
+
+//     }
+//   })
+//   .catch((err) => {
+//     console.log("Verification failed:", err);
+//     shouldShowError(true);
+//   });
+
+// }, []);
+
+useEffect(() => {
+
   if (calledRef.current) return;
   calledRef.current = true;
 
@@ -27,22 +64,30 @@ const Verify = () => {
   const idToken = searchParams.get("id_token");
   const accountsServer = searchParams.get("accounts-server");
 
-  axiosInstance.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
+  axios.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
     params: { code, location, accountsServer, idToken }
   })
-  .then((response) => {
+  .then(async(response) => {
+
     if (response.status === 200) {
-      console.log("response", response.data);
-      
-       const accessToken = response.data;
 
-    localStorage.setItem("access_token", accessToken);
-    localStorage.setItem("login_type", "normal");
- 
+      const accessToken = response.data;
 
-    navigate("/home");
+      localStorage.removeItem("mock_token");
+      localStorage.setItem("access_token", accessToken);
+      localStorage.setItem("login_type", "normal");
 
+               const adminRes = await getAdminDetails();
+      if (adminRes?.success) {
+        const roleId = adminRes?.data?.roleId;
+
+        navigate(`/home/${roleId}`, { replace: true });
+
+      }
+
+      // navigate("/home");
     }
+
   })
   .catch((err) => {
     console.log("Verification failed:", err);
@@ -50,8 +95,6 @@ const Verify = () => {
   });
 
 }, []);
-
-
 
 return (
 <>

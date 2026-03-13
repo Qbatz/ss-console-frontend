@@ -1,10 +1,30 @@
 import React from "react";
+import LoginImg from "../../assets/LoginImg.png";
+import { usePermission } from "../../Utils/permissionHelper";
 
 const PropertyAmenities = ({ hostelData }) => {
-
+ const { canRead, canWrite, canUpdate, canDelete } =
+      usePermission("Amenities");
   const amenities = hostelData?.amenities || [];
 
   return (
+    <>
+    {canRead === false ? (
+      <div className="flex flex-col items-center justify-center h-[350px] gap-4">
+    
+        <img
+          src={LoginImg}
+          alt="Access Restricted"
+          className="w-64 object-contain"
+        />
+    
+        <p className="text-red-600 text-lg font-medium">
+          Access Restricted
+        </p>
+    
+      </div>
+    
+    ) : (
   <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-[300px] overflow-auto">
 
   <table className="w-full text-sm text-left">
@@ -12,9 +32,9 @@ const PropertyAmenities = ({ hostelData }) => {
     {/* HEADER */}
     <thead className="bg-gray-100 text-gray-600 sticky top-0 z-20">
       <tr>
-        <th className="px-4 py-2 bg-gray-100 uppercase">ID</th>
-        <th className="px-4 py-2 bg-gray-100 uppercase">Amenity Name</th>
-        <th className="px-4 py-2 bg-gray-100 uppercase">Amount</th>
+        <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">ID</th>
+        <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Amenity Name</th>
+        <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Amount</th>
         {/* <th className="px-4 py-2 bg-gray-100">Pro Rate</th> */}
       </tr>
     </thead>
@@ -25,15 +45,15 @@ const PropertyAmenities = ({ hostelData }) => {
         amenities.map((item, index) => (
           <tr key={item.amenityId}  className="hover:bg-gray-50 border-b border-gray-300">
 
-            <td className="px-4 py-2">
+            <td className="px-4 py-2 text-left font-medium text-[12px]">
               {index + 1}
             </td>
 
-            <td className="px-4 py-2 font-medium text-gray-800">
+            <td className="px-4 py-2 text-left font-medium text-[12px]">
               {item.amenityName}
             </td>
 
-            <td className="px-4 py-2">
+            <td className="px-4 py-2 text-left font-medium text-[12px]">
               ₹ {item.amenityAmount}
             </td>
 
@@ -55,6 +75,8 @@ const PropertyAmenities = ({ hostelData }) => {
   </table>
 
 </div>
+    )}
+</>
   );
 };
 

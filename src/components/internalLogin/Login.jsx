@@ -60,9 +60,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ConfigV2 from "../../Config/ConfigV2";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import { useRole } from "../../Context/RoleContext";
 
 const Login = () => {
-
+      const {adminDetails, getAdminDetails,
+        agentRoles, getAgentRoles,getAgentRoleById,deleteAgentRole,errorMsg,accessError} = useRole();
+  
   const [token, setToken] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -80,27 +84,61 @@ const Login = () => {
   }, []);
 
   // 🔹 Normal Token Login
-  const verifyToken = async () => {
-    try {
-      const res = await axios.get(
-        `${ConfigV2.apiBaseUrl}/v2/admin/`,
-        {
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        }
-      );
+  // const verifyToken = async () => {
+  //   try {
+  //     const res = await axios.get(
+  //       `${ConfigV2.apiBaseUrl}/v2/admin/`,
+  //       {
+  //         headers: {
+  //           Authorization: "Bearer " + token,
+  //         },
+  //       }
+  //     );
 
-      if (res.status === 200) {
-        localStorage.setItem("access_token", token);
-        localStorage.setItem("login_type", "internal");
-        navigate("/home");
+  //     if (res.status === 200) {
+  //       localStorage.setItem("access_token", token);
+  //       localStorage.setItem("login_type", "internal");
+  //      const adminRes = await getAdminDetails();
+  //     if (adminRes?.success) {
+  //       const roleId = adminRes?.data?.roleId;
+
+  //       navigate(`/home/${roleId}`, { replace: true });
+
+  //     }
+
+  //     }
+  //   } catch (err) {
+  //     console.log("err1234567", err);
+
+  //   }
+  // };
+
+const verifyToken = async () => {
+  try {
+
+    const res = await axios.get(
+      `${ConfigV2.apiBaseUrl}/v2/admin/`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
       }
-    } catch (err) {
-      console.log("err1234567", err);
+    );
+
+    if (res.status === 200) {
+
+      localStorage.setItem("access_token", token);
+
+      const roleId = res.data.roleId;
+
+      navigate(`/home/${roleId}`, { replace: true });
 
     }
-  };
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const handleMockLogin = async () => {
     if (!email) {
@@ -122,7 +160,16 @@ const Login = () => {
         localStorage.setItem("login_time", Date.now());
         localStorage.setItem("login_type", "mock");
 
-        navigate("/home", { replace: true });
+           const adminRes = await getAdminDetails();
+      if (adminRes?.success) {
+        const roleId = adminRes?.data?.roleId;
+
+        navigate(`/home/${roleId}`, { replace: true });
+
+      }
+
+
+        // navigate("/home", { replace: true });
       }
 
     } catch (err) {
@@ -132,6 +179,9 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+
+
   //   const handleMockLogin = async () => {
   //   if (!email) {
   //     alert("Email is required");

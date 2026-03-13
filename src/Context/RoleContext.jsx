@@ -52,6 +52,8 @@ export const RoleProvider = ({ children }) => {
   const [errorMsg, setErrorMsg] = useState("");
   const [agents, setAgents] = useState([]);
   const [accessError,setAccessError] = useState("")
+  const [adminPermissions, setAdminPermissions] = useState([]);
+  const [adminDetails, setAdminDetails] = useState(null);
 
 const getErrorMessage = (error) => {
   if (error?.response?.data) {
@@ -89,6 +91,7 @@ const getErrorMessage = (error) => {
 
  useEffect(() => {
   fetchModules();
+    getAdminDetails();   
 }, []);
   const getAgentRoles = async () => {
     try {
@@ -116,6 +119,8 @@ const getErrorMessage = (error) => {
     const token = localStorage.getItem("access_token");
     if (token) {
       fetchModules();
+     
+        getAdminDetails();   
     }
   }, []);
   const createAgentRole = async (payload) => {
@@ -234,8 +239,13 @@ const getAdminDetails = async () => {
     const res = await api.get("/v2/admin/");
 
     if (res.status === 200) {
-      return { success: true, data: res.data };
+      setAdminPermissions(res.data.permissions || []);
+      setAdminDetails(res.data); 
+       console.log("addmi",adminPermissions)
+      return { success: true, data: res.data};
+     
     }
+   
 
     return { success: false };
   } catch (error) {
@@ -268,6 +278,29 @@ const getAllAgents = async () => {
     setLoading(false);
   }
 };
+const deactivateAgent = async (agentId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await api.put(`/v2/admin/deactivate-agent/${agentId}`);
+
+    if (res.status === 200) {
+      await getAllAgents(); // refresh list
+      return { success: true, message: "Agent Deactivated Successfully" };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <RoleContext.Provider
@@ -276,8 +309,9 @@ const getAllAgents = async () => {
         agentRoles,
         loading,
         errorMsg,
+        adminDetails,  
         fetchModules,
-        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError
+        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError,deactivateAgent, adminPermissions,
       }}
     >
       {children}

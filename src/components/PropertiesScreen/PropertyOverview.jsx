@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import OverviewSubscriptions from "./OverviewSubscription";
-import { useLocation, useNavigate } from "react-router-dom";
+import {useParams, useLocation, useNavigate } from "react-router-dom";
 import Mobile from "../../assets/mobile.png";
 import locationImg from "../../assets/location.png";
 import Arrow from "../../assets/maximize.png";
@@ -15,11 +15,28 @@ import InvoicesScreen from "./InvoicesScreen";
 import PropertyActive from "./ActiveScreen";
 import swap from "../../assets/arrowswap.png";
 import PropertyAmenities from "./PropertyAmenities";
-
+import { useHostel } from "../../Context/HostelListContext";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import Toast from "../SuccessModal/ToastDesign";
+import { usePermission } from "../../Utils/permissionHelper";
+import LoginImg from "../../assets/LoginImg.png";
 const PropertyOverview = () => {
+    const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError } = useHostel();
+  const { canRead, canWrite, canUpdate, canDelete } =
+      usePermission("Tenants");
+      
+      const { canWrite: canResetWrite } = usePermission("Reset hostel");
+      console.log("canWrite",canRead)
   const [activeTab, setActiveTab] = useState("tenants");
   const [showSharing, setShowSharing] = useState(false);
   const [showBillingRule, setShowBillingRule] = useState(false);
+   const [modalType, setModalType] = useState("success");
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [message, setMessage] = useState("");
+     const [showNoteModal, setShowNoteModal] = useState(false);
+     
+      const [hostelerror, setHostelError] = useState("")
+      const [noteText, setNoteText] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -30,10 +47,51 @@ const showInvoices = loginType === "normal";
   const hostelData = location.state?.hostelData;
   console.log("hostelData", hostelData)
 
-  if (!hostelData) return <div className="p-5">Loading...</div>;
+  const handleHardReset = async () => {
 
+    if (!hostelData.hostelId) return;
+
+    const enteredId = noteText.trim();
+
+    if (!enteredId) {
+      setHostelError("Please Enter Hostel ID");
+      return;
+    }
+
+    const res = await hardResetHostel(
+hostelData.hostelId,
+      enteredId
+    );
+
+    if (res?.success) {
+      setModalType("success");
+      setMessage(res?.message);
+      
+
+      setShowNoteModal(false);
+      setShowSuccess(true);
+      setNoteText("");
+      setHostelError("");
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
+    } else {
+      setHostelError(res?.message || "Please Enter Valid Hostel ID");
+    }
+  };
+
+  if (!hostelData) return <div className="p-5">Loading...</div>;
+ 
   return (
     <DashboardLayout>
+       <Toast
+              show={showSuccess}
+              message={message}
+              type={modalType}
+
+            />
       <div className="pl-2 pr-2 min-h-screen">
 
 
@@ -83,7 +141,7 @@ const showInvoices = loginType === "normal";
               </span>
 
               {/* Menu */}
-              <img src={ViewImg} width={18} height={18} />
+              <img src={ViewImg} width={18} height={18}   />
               <div className="text-gray-400 cursor-pointer text-xl">⋮</div>
             </div>
 
@@ -91,7 +149,7 @@ const showInvoices = loginType === "normal";
 
 
           {/* Bottom Info Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 mt-6">
 
             {/* Mobile */}
             <div className="flex items-start gap-3">
@@ -166,14 +224,33 @@ const showInvoices = loginType === "normal";
                   </span> */}
                 </p>
               </div>
+             
             </div>
+ <div className="flex items-start gap-3">
 
+
+     <button
+  disabled={!canResetWrite}
+  onClick={() => {
+    if (canResetWrite === true) {
+      setShowNoteModal(true);
+    }
+  }}
+  className={`px-3 py-[2px] rounded text-[12px] font-medium 
+  ${canResetWrite === true
+    ? "bg-blue-600 hover:bg-blue-700 text-white cursor-pointer" 
+    : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
+>
+  Reset
+</button>
+             
+            </div>
           </div>
 
         </div>
 
 
-        {activeTab === "tenants" && (
+       
           <div className="bg-white border border-gray-300 rounded-xl p-4 mt-4">
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:divide-x lg:divide-gray-200">
@@ -238,7 +315,7 @@ const showInvoices = loginType === "normal";
 
             </div>
           </div>
-        )}
+       
 
 
         <div className="bg-white rounded-xl mt-4 flex flex-col">
@@ -254,7 +331,7 @@ const showInvoices = loginType === "normal";
   "subscriptions",
   "Product Support",
   "staffs",
-  ...(showInvoices ? ["invoices"] : []),
+  "invoices",
   "activity",
   "Amenities"
 ]
@@ -273,7 +350,7 @@ const showInvoices = loginType === "normal";
             </div>
 
 
-            <div className="flex items-center gap-3 pb-3 lg:pb-4">
+            {/* <div className="flex items-center gap-3 pb-3 lg:pb-4">
 
               <input
                 placeholder="Search..."
@@ -284,11 +361,12 @@ const showInvoices = loginType === "normal";
                 <option>Active</option>
               </select>
 
-            </div>
+            </div> */}
           </div>
 
 
           {activeTab === "tenants" && (
+             canRead === true ? (
             <div className="overflow-x-auto">
 
 
@@ -382,6 +460,22 @@ const showInvoices = loginType === "normal";
 
               </div>
             </div>
+             ) : (
+
+    <div className="flex flex-col items-center justify-center py-10">
+      <img
+        src={LoginImg}
+        alt="Access Restricted"
+        className="w-48 mb-3"
+      />
+
+      <p className="text-red-500 font-medium">
+        Access Restricted
+      </p>
+    </div>
+
+  )
+
           )}
 
 
@@ -629,6 +723,65 @@ const showInvoices = loginType === "normal";
           </div>
         </div>
       )}
+        {showNoteModal && (
+                <div
+                  className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+                  onClick={() => {
+                    setShowNoteModal(false);
+                    setNoteText("");
+                    setHostelError("");
+                  }}
+                >
+      
+                  <div
+                    className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+      
+                    <button
+                      onClick={() => {
+                        setShowNoteModal(false);
+                        setNoteText("");
+                        setHostelError("");
+                      }}
+                      className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                    >
+                      ✕
+                    </button>
+      
+                    <h2 className="text-lg font-semibold text-gray-800 mb-4 text-left ">
+                      Enter Hostel ID <span className="text-red-400">*</span>
+                    </h2>
+      
+                    <div className="space-y-4">
+      
+                      <input
+                        type="text"
+                        placeholder="Enter Hostel ID"
+                        value={noteText}
+                        onChange={(e) => {
+                          setNoteText(e.target.value);
+                          setHostelError("");
+                        }}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                      />
+      
+                      {hostelerror && (
+                        <ErrorMessage message={hostelerror} type="error" />
+                      )}
+      
+                      <button
+                        onClick={handleHardReset}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition"
+                      >
+                        Submit
+                      </button>
+      
+                    </div>
+      
+                  </div>
+                </div>
+              )}
     </DashboardLayout>
   );
 };

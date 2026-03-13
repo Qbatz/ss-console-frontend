@@ -102,6 +102,113 @@ const changeOwnerPassword = async (payload) => {
   }
 };
 
+const getOwnerById = async (ownerId) => {
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.get(`/v2/owners/${ownerId}`);
+
+    if (res.status === 200) {
+      return { success: true, data: res.data };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+    return { success: false, message: msg };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const getTenantSummary = async ({
+  page = 0,
+  size = 10,
+  tenantName = ""
+} = {}) => {
+
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.get("/v2/tenants/tenant-summary", {
+      params: {
+        page,
+        size,
+        tenantName
+      }
+    });
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+ setAccessError(msg)
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
+const updateOwnerEmail = async (ownerId, payload) => {
+
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.put(
+      `/v2/owners/${ownerId}`,
+      payload
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data,
+        message: "Email updated successfully"
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
+
   return (
     <OwnersContext.Provider
       value={{
@@ -109,7 +216,7 @@ const changeOwnerPassword = async (payload) => {
         totalItems,
         totalPages,
         loading,accessError,
-        getOwners,changeOwnerPassword
+        getOwners,changeOwnerPassword,getOwnerById,getTenantSummary,updateOwnerEmail
       }}
       
     >

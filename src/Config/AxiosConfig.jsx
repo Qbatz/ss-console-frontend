@@ -4,13 +4,17 @@ import ConfigV2 from "./ConfigV2";
 const axiosInstance = axios.create({
   baseURL: ConfigV2.apiBaseUrl,
 });
-
 axiosInstance.interceptors.request.use((config) => {
 
-  const mockToken = localStorage.getItem("mock_token");
-  const normalToken = localStorage.getItem("access_token");
+  const loginType = localStorage.getItem("login_type");
 
-  const token = mockToken || normalToken;
+  let token = null;
+
+  if (loginType === "mock") {
+    token = localStorage.getItem("mock_token");
+  } else {
+    token = localStorage.getItem("access_token");
+  }
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -18,6 +22,19 @@ axiosInstance.interceptors.request.use((config) => {
 
   return config;
 });
+// axiosInstance.interceptors.request.use((config) => {
+
+//   const mockToken = localStorage.getItem("mock_token");
+//   const normalToken = localStorage.getItem("access_token");
+
+//   const token = mockToken || normalToken;
+
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+
+//   return config;
+// });
 
 
 axiosInstance.interceptors.response.use(

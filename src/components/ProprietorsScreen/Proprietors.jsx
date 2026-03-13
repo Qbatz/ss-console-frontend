@@ -3,11 +3,12 @@ import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import swap from "../../assets/arrowswap.png";
 import { useOwners } from "../../Context/OwnersContext";
 import LoginImg from "../../assets/LoginImg.png";
+import { useNavigate } from "react-router-dom";
 
 const Proprietors = () => {
 
-  const { owners, totalItems, totalPages, loading, getOwners,accessError} = useOwners();
-
+  const { owners, totalItems, totalPages, loading, getOwners,accessError,getOwnerById} = useOwners();
+ const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
   const [expiryFilter, setExpiryFilter] = useState("ALL");
@@ -66,7 +67,19 @@ const Proprietors = () => {
     }
     setPage(1);
   };
+const handleOwnerClick = async (item) => {
 
+  const res = await getOwnerById(item.ownerId);
+
+  if (res?.success) {
+
+     navigate(`/ProprietorsOverview/${item.ownerId}`, {
+      state: { ownerData: res.data }
+    });
+
+  }
+
+};
 
   return (
     <DashboardLayout>
@@ -311,9 +324,15 @@ const Proprietors = () => {
           {(page - 1) * size + i + 1}
         </td>
 
-        <td className="px-4 py-1 text-blue-600 text-[12px] text-left">
+        {/* <td className="px-4 py-1 text-blue-600 text-[12px] text-left">
           {item.fullName}
-        </td>
+        </td> */}
+    <td
+  className="px-4 py-1 text-blue-600 text-[12px] text-left cursor-pointer hover:underline"
+  onClick={() => handleOwnerClick(item)}
+>
+  {item.fullName}
+</td>
 
         <td className="px-4 py-1 text-[12px] text-left">
           -
