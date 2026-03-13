@@ -5,14 +5,24 @@ import { useNavigate } from "react-router-dom";
 import SubscriptionsTab from "./SubscriptionTab";
 import ProductSupportTab from "./ProductSupportTab ";
 import ActivityLogsTab from "./ActivityLogsTab ";
-import Arrow from "../../assets/arrow-up.png"
+import Arrow from "../../assets/arrow-up.png";
+import { useOwners } from "../../Context/OwnersContext";
+import Toast from "../SuccessModal/ToastDesign";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
 const ProprietorsOverview = () => {
 const navigate = useNavigate();
  const location = useLocation();
  const ownerData = location.state?.ownerData;
+    const { owners, totalItems, totalPages, loading, getOwners,accessError,getOwnerById,updateOwnerEmail} = useOwners();
   
 
   const [activeTab, setActiveTab] = useState("properties");
+  const [showEmailModal, setShowEmailModal] = useState(false);
+const [newEmail, setNewEmail] = useState("");
+const [emailError,setEmailError] = useState("")
+const [modalType, setModalType] = useState("success");
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [message, setMessage] = useState("");
 console.log("ownerData",ownerData)
 const formatDateTime = (date, time) => {
   if (!date) return "-";
@@ -23,9 +33,67 @@ const formatDateTime = (date, time) => {
     day: "2-digit"
   }) + " " + (time || "");
 };
+
+const handleEmailUpdate = async () => {
+
+  if (!newEmail) {
+    setEmailError("Email is required");
+    return;
+  }
+
+  // optional email format check
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(newEmail)) {
+    setEmailError("Enter valid email");
+    return;
+  }
+
+  setEmailError("");
+
+  const res = await updateOwnerEmail(ownerData?.ownerId, {
+    newEmail: newEmail
+  });
+
+  if (res.success) {
+     setModalType("success");
+      setMessage(res?.message);
+      setShowSuccess(true);
+      
+      setTimeout(() => {
+        setShowSuccess(false);
+        setShowEmailModal(false);
+        setNewEmail("");
+      }, 1500);
+
+  } else {
+    alert(res.message);
+  }
+
+};
+// const handleEmailUpdate = async () => {
+
+//   const res = await updateOwnerEmail(ownerData?.ownerId, {
+//     newEmail: newEmail
+//   });
+
+//   if (res.success) {
+//     alert("Email updated successfully");
+//     setShowEmailModal(false);
+//     setNewEmail("");
+//   } else {
+//     alert(res.message);
+//   }
+
+// };
   return (
     <DashboardLayout>
+ <Toast
+              show={showSuccess}
+              message={message}
+              type={modalType}
 
+            />
       <div className="p-6 space-y-6">
 
       
@@ -84,16 +152,11 @@ const formatDateTime = (date, time) => {
       </p>
     </div>
 
-    <div>
-      <p className="text-gray-900 text-left">Plan Status</p>
-      <p className="font-medium text-gray-500 text-left">Active</p>
-    </div>
+    <button className="text-gray-900 border rounded border-gray-300   text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white cursor-pointer "  onClick={() => setShowEmailModal(true)}>
+  Change Email
+</button>
 
-    <div>
-      <p className="text-gray-900 text-left">Status</p>
-       <p className="font-medium text-gray-500 text-left">Active</p>
-
-    </div>
+   
 
   </div>
 
@@ -152,7 +215,7 @@ const formatDateTime = (date, time) => {
   </div>
 
   {/* Search + Filter */}
-  <div className="flex items-center gap-3">
+  {/* <div className="flex items-center gap-3">
 
     <div className="relative">
       <input
@@ -167,7 +230,7 @@ const formatDateTime = (date, time) => {
       <option>This Month</option>
     </select>
 
-  </div>
+  </div> */}
 
 </div>
         {/* Tab Content */}
@@ -186,7 +249,7 @@ const formatDateTime = (date, time) => {
         <th className="px-4 py-3 text-left whitespace-nowrap font-semibold text-[12px] uppercase text-[#6B7280] font-inter">REGION / CITY</th>
         <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">SUB PLAN</th>
         <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">ADDED ON</th>
-        <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">ACTIONS</th>
+        {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">ACTIONS</th> */}
       </tr>
     </thead>
 
@@ -206,7 +269,7 @@ const formatDateTime = (date, time) => {
             </td>
 
             <td className="px-4 py-3 text-left font-medium text-[12px]">
-             N/A
+            {property?.hostelType}
             </td>
 
             <td className="px-4 py-3 text-left font-medium text-[12px]">
@@ -221,9 +284,9 @@ const formatDateTime = (date, time) => {
               {property.createdAt}
             </td>
 
-            <td className="px-4 py-3 text-left font-medium text-[12px]">
+            {/* <td className="px-4 py-3 text-left font-medium text-[12px]">
               ⋮
-            </td>
+            </td> */}
 
           </tr>
 
@@ -250,6 +313,67 @@ const formatDateTime = (date, time) => {
         {activeTab === "logs" && <ActivityLogsTab activities={ownerData}/>}
 
       </div>
+ {showEmailModal && (
+  <div
+    className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
+    onClick={() => {
+      setShowEmailModal(false);
+      setEmailError("");
+      setNewEmail("");
+    }}
+  >
+
+    {/* Modal Box */}
+    <div
+      className="bg-white rounded-xl shadow-lg w-[400px] p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      <h2 className="text-lg font-semibold mb-4 text-left">
+        Change Email
+      </h2>
+
+      <input
+        type="email"
+        placeholder="Enter new email"
+        value={newEmail}
+        onChange={(e) => {
+          setNewEmail(e.target.value);
+          setEmailError("");
+        }}
+        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm mb-2"
+      />
+
+      {emailError && (
+        <ErrorMessage message={emailError} type="error" />
+      )}
+
+      <div className="flex justify-end gap-3 mt-4">
+
+        <button
+          onClick={() => {
+            setShowEmailModal(false);
+            setEmailError("");
+            setNewEmail("");
+          }}
+          className="px-4 py-2 text-sm border rounded-md"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleEmailUpdate}
+          className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          Save
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
 
     </DashboardLayout>
   );

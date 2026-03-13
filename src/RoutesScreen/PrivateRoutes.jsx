@@ -17,6 +17,7 @@ import { OwnersProvider } from "../Context/OwnersContext";
 import PropertyOverview from "../components/PropertiesScreen/PropertyOverview"
 import { useNavigate } from "react-router-dom";
 import ProprietorsOverview from "../components/ProprietorsScreen/ProprietorsOverview";
+import TenantsList from "../components/TenantsList/TenantAllLists";
 
 
 const PrivateRoute = ({ children }) => {
@@ -37,18 +38,21 @@ const PrivateRoutesScreen = () => {
           <SubscriptionProvider>
             <OwnersProvider>
           <Routes>
-            <Route path="/home" element={<Home />} />
-            <Route path="/proprietors" element={<Proprietors />} />
-            <Route path="/iam-admin-user" element={<IamAdminUser />} />
-            <Route path="/roles" element={<Roles />} />
-            <Route path="/properties" element={<Properties />} />
-            <Route path="/subscription" element={<Subscription />} />
-            <Route path="/billing" element={<Billing />} />
-            <Route path="/supportTicket" element={<SupportTicket />} />
-            <Route path="/crmDashboard" element={<CRMDashboard />} />
-            <Route path="/manage-plans" element={<ManagePlans />} />
-             <Route path="/property-overview" element={<PropertyOverview/>} />
-              <Route path="/ProprietorsOverview" element={<ProprietorsOverview/>} />
+            <Route path="/home/:roleId" element={<Home />} />
+            <Route path="/proprietors/:roleId" element={<Proprietors />} />
+            <Route path="/iam-admin-user/:roleId" element={<IamAdminUser />} />
+            <Route path="/roles/:roleId" element={<Roles />} />
+            <Route path="/properties/:roleId" element={<Properties />} />
+            <Route path="/subscription/:roleId" element={<Subscription />} />
+            <Route path="/billing/:roleId" element={<Billing />} />
+            <Route path="/supportTicket/:roleId" element={<SupportTicket />} />
+            <Route path="/crmDashboard/:roleId" element={<CRMDashboard />} />
+            <Route path="/manage-plans/:roleId" element={<ManagePlans />} />
+             {/* <Route path="/property-overview" element={<PropertyOverview/>} /> */}
+             <Route path="/property-overview/:hostelId" element={<PropertyOverview/>} />
+              {/* <Route path="/ProprietorsOverview" element={<ProprietorsOverview/>} /> */}
+              <Route path="/ProprietorsOverview/:ownerId" element={<ProprietorsOverview/>} />
+              <Route path="/tenantList" element={<TenantsList/>} />
           </Routes>
           </OwnersProvider>
           </SubscriptionProvider>

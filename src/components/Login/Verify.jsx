@@ -8,10 +8,11 @@ import WelcomeImg from "../../assets/WlcomeImg.png";
 import AccessRestricted from "../../assets/AccessResticted.png";
 import ConfigV2 from "../../Config/ConfigV2";
 import axiosInstance from "../../Config/AxiosConfig";
-
+import { useRole } from "../../Context/RoleContext";
 
 const Verify = () => {
-
+ const {adminDetails, getAdminDetails,
+        agentRoles, getAgentRoles,getAgentRoleById,deleteAgentRole,errorMsg,accessError} = useRole();
   const navigate = useNavigate();
   const hash = window.location.hash.substring(1);
   const [searchParams] = useSearchParams(hash);
@@ -66,7 +67,7 @@ useEffect(() => {
   axios.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
     params: { code, location, accountsServer, idToken }
   })
-  .then((response) => {
+  .then(async(response) => {
 
     if (response.status === 200) {
 
@@ -76,7 +77,15 @@ useEffect(() => {
       localStorage.setItem("access_token", accessToken);
       localStorage.setItem("login_type", "normal");
 
-      navigate("/home");
+               const adminRes = await getAdminDetails();
+      if (adminRes?.success) {
+        const roleId = adminRes?.data?.roleId;
+
+        navigate(`/home/${roleId}`, { replace: true });
+
+      }
+
+      // navigate("/home");
     }
 
   })
