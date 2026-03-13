@@ -73,7 +73,7 @@ const handleOwnerClick = async (item) => {
 
   if (res?.success) {
 
-    navigate("/ProprietorsOverview", {
+     navigate(`/ProprietorsOverview/${item.ownerId}`, {
       state: { ownerData: res.data }
     });
 

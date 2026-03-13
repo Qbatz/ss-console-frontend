@@ -1,12 +1,35 @@
 import React from "react";
+import { usePermission } from "../../Utils/permissionHelper";
+import LoginImg from "../../assets/LoginImg.png";
 
 const OverviewSubscriptions = ({hostelData}) => {
+   const { canRead, canWrite, canUpdate, canDelete } =
+        usePermission("Subscriptions");
   const currentSub = hostelData?.currentSubscription;
   console.log("hostelData",hostelData)
   return (
+    <>
+    {canRead === false ? (
+    
+      <div className="flex flex-col items-center justify-center h-[350px] gap-4">
+    
+        <img
+          src={LoginImg}
+          alt="Access Restricted"
+          className="w-64 object-contain"
+        />
+    
+        <p className="text-red-600 text-lg font-medium">
+          Access Restricted
+        </p>
+    
+      </div>
+    
+    ) : (
+       
     <div className="px-5 py-4 space-y-8">
 
-      {/* Current Section */}
+    
       <div>
         <h3 className="text-sm font-semibold text-gray-700 mb-3 text-left">
           Current
@@ -204,6 +227,8 @@ const OverviewSubscriptions = ({hostelData}) => {
       </div> */}
 
     </div>
+    )}
+    </>
   );
 };
 

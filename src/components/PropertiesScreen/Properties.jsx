@@ -11,11 +11,14 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import noteAdd from "../../assets/noteadd.png";
 import { useNavigate } from "react-router-dom";
 import LoginImg from "../../assets/LoginImg.png";
-
+import { usePermission } from "../../Utils/permissionHelper";
 
 const Properties = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError } = useHostel();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError,deleteHostelExpense  } = useHostel();
   const { createSubscription } = useSubscription();
+  const { canRead, canWrite, canUpdate, canDelete } =
+    usePermission("Hostels");
+    console.log("canRead",canRead)
   const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState("");
   const [pageSize, setPageSize] = useState(10);
@@ -31,6 +34,10 @@ const Properties = () => {
   const [selectedHostel, setSelectedHostel] = useState(null);
   const [hostelerror, setHostelError] = useState("")
   const [noteText, setNoteText] = useState("");
+  const [openMenu, setOpenMenu] = useState(null);
+  const [showResetModal, setShowResetModal] = useState(false);
+const [selectedHostelId, setSelectedHostelId] = useState(null);
+const [menuError,setMenuError] = useState("")
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState({
     visible: false,
@@ -97,8 +104,7 @@ const Properties = () => {
     const res = await getHostelById(item.hostelId);
     console.log("res", res)
     if (res?.success) {
-
-      navigate("/property-overview", {
+   navigate(`/property-overview/${item.hostelId}`, {
         state: { hostelData: res.data }
       });
 
@@ -126,11 +132,11 @@ const Properties = () => {
 
       }, 1000);
     } else {
-
+ setMenuError(res.message)
       setModalType("error");
       setMessage(res.message);
       setShowSuccess(true);
-
+      
       setTimeout(() => {
         setShowSuccess(false);
 
@@ -230,14 +236,37 @@ const Properties = () => {
   // };
 
   console.log("hostels", hostels)
+const handleResetExpense = async () => {
 
+  const res = await deleteHostelExpense(selectedHostelId);
+
+  if (res?.success) {
+
+    setModalType("success");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    getHostels(page, pageSize, searchText);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+      setShowResetModal(false)
+    }, 1500);
+
+  } else {
+
+   setMenuError(res.message);
+  }
+
+  
+};
 
   return (
     <>
 
       <DashboardLayout>
 
-        {accessError === "Access Restricted" ? (
+        {isFirstLoad && (canRead === false || accessError === "Access Restricted") ? (
 
           <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
@@ -590,13 +619,48 @@ const Properties = () => {
                                     //   setShowNoteModal(true);
                                     // }}
                                   />
-                                  <img src={Circle} alt="circle" className="w-5 h-5 cursor-pointer" />
-                                  <img
+                                  {/* <img src={Circle} alt="circle" className="w-5 h-5 cursor-pointer" /> */}
+                                  <div className="relative">
+  <img
+    src={Circle}
+    alt="circle"
+    className="w-5 h-5 cursor-pointer"
+    onClick={() =>
+      setOpenMenu(openMenu === item.hostelId ? null : item.hostelId)
+    }
+  />
+
+  {openMenu === item.hostelId && (
+    <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+
+     <button
+  onClick={() => {
+    setSelectedHostelId(item.hostelId);
+    setShowResetModal(true);
+    setOpenMenu(false)
+  }}
+  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+>
+  Reset Expense
+</button>
+
+    </div>
+  )}
+</div>
+                                  {/* <img
                                     src={Money}
                                     onClick={() => handleCreateSubscription(item)}
                                     alt="money"
                                     className="w-5 h-5 cursor-pointer"
-                                  />
+                                  /> */}
+                                  <img
+  src={Money}
+  onClick={() => {
+    if (canWrite === true) handleCreateSubscription(item);
+  }}
+  alt="money"
+  className={`w-5 h-5 ${canWrite === true ? "cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
+/>
                                 </div>
                               </td>
 
@@ -753,6 +817,56 @@ const Properties = () => {
             </div>
           </div>
         )} */}
+        {showResetModal && (
+  <div
+    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+   onClick={() => {
+  setShowResetModal(false);
+  setOpenMenu(false);
+  setMenuError("")
+}}
+  >
+    <div
+      className="bg-white rounded-2xl shadow-xl w-[420px] p-8 text-center"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      <h2 className="text-xl font-semibold mb-3">
+        Reset Expense?
+      </h2>
+
+      <p className="text-gray-500 mb-8">
+        Are you sure you want to reset this expense?
+      </p>
+ {menuError && (
+        <ErrorMessage message={menuError} type="error" />
+      )}
+      <div className="flex justify-center gap-4 mt-1">
+
+        <button
+          // onClick={() => setShowResetModal(false)}
+          onClick={() => {
+  setShowResetModal(false);
+  setOpenMenu(false);
+  setMenuError("")
+}}
+          className="px-6 py-3 border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleResetExpense}
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Delete
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
       </DashboardLayout>
     </>
   );

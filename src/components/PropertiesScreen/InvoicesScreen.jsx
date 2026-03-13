@@ -1,15 +1,36 @@
 import React, { useState } from "react";
 import Share from "../../assets/share.png";
+import LoginImg from "../../assets/LoginImg.png";
+import { usePermission } from "../../Utils/permissionHelper";
 
 const InvoicesScreen = () => {
-
+const { canRead, canWrite, canUpdate, canDelete } =
+      usePermission("Invoices");
   const [step, setStep] = useState("restricted"); 
   // restricted → verify → table
 
   return (
+    <>
+    {canRead === false ? (
+    
+      <div className="flex flex-col items-center justify-center h-[350px] gap-4">
+    
+        <img
+          src={LoginImg}
+          alt="Access Restricted"
+          className="w-64 object-contain"
+        />
+    
+        <p className="text-red-600 text-lg font-medium">
+          Access Restricted
+        </p>
+    
+      </div>
+    
+    ) : (
     <div className="py-10">
 
-      {/* ================= STEP 1 ================= */}
+      
       {step === "restricted" && (
         <div className="flex items-center justify-center py-16">
 
@@ -46,7 +67,7 @@ const InvoicesScreen = () => {
       )}
 
 
-      {/* ================= STEP 2 OTP ================= */}
+      
       {step === "verify" && (
         <div className="flex items-center justify-center py-16">
 
@@ -94,7 +115,7 @@ const InvoicesScreen = () => {
       )}
 
 
-      {/* ================= STEP 3 TABLE ================= */}
+     
       {step === "table" && (
         <div className="bg-white border border-[#E6E8F0] rounded-xl p-4">
 
@@ -134,6 +155,8 @@ const InvoicesScreen = () => {
       )}
 
     </div>
+    )}
+    </>
   );
 };
 

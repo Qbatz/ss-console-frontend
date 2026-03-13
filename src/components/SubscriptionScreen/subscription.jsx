@@ -1,11 +1,63 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { useNavigate } from "react-router-dom";
+import { useSubscription } from "../../Context/SubscriptionContext";
+import { useRole } from "../../Context/RoleContext";
 
 const Subscription = () => {
+  const { getSubscriptions } = useSubscription();
+   const {adminDetails, agentRoles, getAgentRoles,getAgentRoleById,loading,deleteAgentRole,errorMsg,accessError} = useRole();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("subscriptions");
+  const [subscriptions,setSubscriptions] = useState([]);
+const [page,setPage] = useState(1);
+const [size,setSize] = useState(10);
+const [search,setSearch] = useState("");
+const [debouncedSearch, setDebouncedSearch] = useState(search);
+const [totalItems,setTotalItems] = useState(0);
+const [totalPages,setTotalPages] = useState(0);
 
+
+const fetchSubscriptions = async (pageNo = 1, searchText = "") => {
+
+ 
+
+  const res = await getSubscriptions(pageNo, size, searchText);
+
+  if (res.success) {
+    setSubscriptions(res.data.content || []);
+    setTotalItems(res.data.totalItems || 0);
+    setTotalPages(res.data.totalPages || 0);
+  }
+
+};
+// const fetchSubscriptions = async (pageNo = 1, searchText = "") => {
+
+//   const res = await getSubscriptions(pageNo, size, searchText);
+
+//   if(res.success){
+
+//     setSubscriptions(res.data.content || []);
+//     setTotalItems(res.data.totalItems || 0);
+//     setTotalPages(res.data.totalPages || 0);
+
+//   }
+
+// };
+const start = totalItems === 0 ? 0 : (page - 1) * size + 1;
+const end = Math.min(page * size, totalItems);
+useEffect(() => {
+
+  const timer = setTimeout(() => {
+    setDebouncedSearch(search);
+  }, 500);   // 500ms delay
+
+  return () => clearTimeout(timer);
+
+}, [search]);
+useEffect(() => {
+  fetchSubscriptions(page, debouncedSearch);
+}, [page, size, debouncedSearch]);
   return (
     <DashboardLayout>
       <div className="p-6 pt-1">
@@ -50,7 +102,7 @@ const Subscription = () => {
 
             {/* RIGHT SIDE BUTTON */}
             <button
-              onClick={() => navigate("/manage-plans")}
+              onClick={() => navigate(`/manage-plans/${adminDetails?.roleId}`)}
               className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit"
             >
               Manage Plans
@@ -109,6 +161,11 @@ const Subscription = () => {
 
             <input
               type="text"
+               value={search}
+     onChange={(e)=>{
+  setSearch(e.target.value);
+  setPage(1);
+}}
               placeholder="Search..."
               className="border border-gray-300 px-4 py-2 rounded-lg text-sm w-64"
             />
@@ -136,22 +193,59 @@ const Subscription = () => {
                 </tr>
               </thead>
 
-               <tbody className="divide-y divide-gray-200">
-                {[...Array(10)].map((_, i) => (
-                  <tr key={i} className="hover:bg-gray-50 text-[12px] font-Inter">
-                    <td className="px-4 py-2">SM7626</td>
-                    <td className="px-4 py-2 text-blue-600">
-                      Laksha Ladies Hostel
-                    </td>
-                    <td className="px-4 py-2">Anish Raj</td>
-                    <td className="px-4 py-2 text-green-600">Active</td>
-                    <td className="px-4 py-2">Premium</td>
-                    <td className="px-4 py-2">02-Oct-2025</td>
-                    <td className="px-4 py-2">01-Nov-2025</td>
-                    <td className="px-4 py-2 text-center">⋮</td>
-                  </tr>
-                ))}
-              </tbody>
+              <tbody className="divide-y divide-gray-200">
+
+{subscriptions.length > 0 ? (
+
+subscriptions.map((item,index)=>(
+<tr key={item.subscriptionId} className="hover:bg-gray-50 text-[12px]">
+
+<td className="px-4 py-2">
+{(page-1)*size + index + 1}
+</td>
+
+<td className="px-4 py-2 text-blue-600">
+{item.hostelName}
+</td>
+
+<td className="px-4 py-2">
+{item.ownerName}
+</td>
+
+<td className="px-4 py-2">
+{item.status}
+</td>
+
+<td className="px-4 py-2">
+{item.planName}
+</td>
+
+<td className="px-4 py-2">
+{item.planStartsAt}
+</td>
+
+<td className="px-4 py-2">
+{item.planEndsAt}
+</td>
+
+<td className="px-4 py-2 text-center">
+⋮
+</td>
+
+</tr>
+))
+
+) : (
+
+<tr>
+<td colSpan="8" className="text-center py-6 text-gray-400">
+No Data Found
+</td>
+</tr>
+
+)}
+
+</tbody>
 
             </table>
 
@@ -168,22 +262,50 @@ const Subscription = () => {
 
 
         {/* Footer Pagination */}
-        <div className="flex justify-between items-center mt-4 text-sm">
+    <div className="flex justify-between items-center px-4 py-3 text-sm">
 
-          <span className="font-small font-sans text-sm">
-            Total Record Count : <span className="text-blue-600">69</span>
+          <span>
+            Total Record Count :{" "}
+            <span className="text-blue-600">{size}</span>
           </span>
 
           <div className="flex items-center gap-4">
-            <select className="border px-2 py-1 rounded-md font-sans text-xs">
-              <option>20</option>
-              <option>50</option>
+
+            <select
+              value={size}
+              onChange={(e) => {
+                setSize(Number(e.target.value));
+                setPage(1);
+              }}
+              className="border rounded px-2 py-1"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
             </select>
 
-            <span className="font-sans text-xs">1 - 10</span>
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              ◀
+            </button>
 
-            <button className="font-sans text-xs">{"<"}</button>
-            <button className="font-sans text-xs">{">"}</button>
+            <span className="border px-3 py-1 rounded bg-gray-50">
+              {page}
+            </span>
+
+            <button
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              ▶
+            </button>
+
+            <span className="text-gray-400">
+              {start} - {end}
+            </span>
+
           </div>
 
         </div>

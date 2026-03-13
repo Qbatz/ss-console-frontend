@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import OverviewSubscriptions from "./OverviewSubscription";
-import { useLocation, useNavigate } from "react-router-dom";
+import {useParams, useLocation, useNavigate } from "react-router-dom";
 import Mobile from "../../assets/mobile.png";
 import locationImg from "../../assets/location.png";
 import Arrow from "../../assets/maximize.png";
@@ -18,9 +18,15 @@ import PropertyAmenities from "./PropertyAmenities";
 import { useHostel } from "../../Context/HostelListContext";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
+import { usePermission } from "../../Utils/permissionHelper";
+import LoginImg from "../../assets/LoginImg.png";
 const PropertyOverview = () => {
     const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError } = useHostel();
-  
+  const { canRead, canWrite, canUpdate, canDelete } =
+      usePermission("Tenants");
+      
+      const { canWrite: canResetWrite } = usePermission("Reset hostel");
+      console.log("canWrite",canRead)
   const [activeTab, setActiveTab] = useState("tenants");
   const [showSharing, setShowSharing] = useState(false);
   const [showBillingRule, setShowBillingRule] = useState(false);
@@ -223,12 +229,18 @@ hostelData.hostelId,
  <div className="flex items-start gap-3">
 
 
-       <button
-  className="px-3 py-[2px] bg-blue-600 text-white rounded text-[12px] font-medium hover:bg-blue-700 cursor-pointer"
-onClick={() => {
-                                     
-                                      setShowNoteModal(true);
-                                    }}>
+     <button
+  disabled={!canResetWrite}
+  onClick={() => {
+    if (canResetWrite === true) {
+      setShowNoteModal(true);
+    }
+  }}
+  className={`px-3 py-[2px] rounded text-[12px] font-medium 
+  ${canResetWrite === true
+    ? "bg-blue-600 hover:bg-blue-700 text-white cursor-pointer" 
+    : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
+>
   Reset
 </button>
              
@@ -238,7 +250,7 @@ onClick={() => {
         </div>
 
 
-        {activeTab === "tenants" && (
+       
           <div className="bg-white border border-gray-300 rounded-xl p-4 mt-4">
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:divide-x lg:divide-gray-200">
@@ -303,7 +315,7 @@ onClick={() => {
 
             </div>
           </div>
-        )}
+       
 
 
         <div className="bg-white rounded-xl mt-4 flex flex-col">
@@ -319,7 +331,7 @@ onClick={() => {
   "subscriptions",
   "Product Support",
   "staffs",
-  ...(showInvoices ? ["invoices"] : []),
+  "invoices",
   "activity",
   "Amenities"
 ]
@@ -338,7 +350,7 @@ onClick={() => {
             </div>
 
 
-            <div className="flex items-center gap-3 pb-3 lg:pb-4">
+            {/* <div className="flex items-center gap-3 pb-3 lg:pb-4">
 
               <input
                 placeholder="Search..."
@@ -349,11 +361,12 @@ onClick={() => {
                 <option>Active</option>
               </select>
 
-            </div>
+            </div> */}
           </div>
 
 
           {activeTab === "tenants" && (
+             canRead === true ? (
             <div className="overflow-x-auto">
 
 
@@ -447,6 +460,22 @@ onClick={() => {
 
               </div>
             </div>
+             ) : (
+
+    <div className="flex flex-col items-center justify-center py-10">
+      <img
+        src={LoginImg}
+        alt="Access Restricted"
+        className="w-48 mb-3"
+      />
+
+      <p className="text-red-500 font-medium">
+        Access Restricted
+      </p>
+    </div>
+
+  )
+
           )}
 
 

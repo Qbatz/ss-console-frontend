@@ -52,6 +52,8 @@ export const RoleProvider = ({ children }) => {
   const [errorMsg, setErrorMsg] = useState("");
   const [agents, setAgents] = useState([]);
   const [accessError,setAccessError] = useState("")
+  const [adminPermissions, setAdminPermissions] = useState([]);
+  const [adminDetails, setAdminDetails] = useState(null);
 
 const getErrorMessage = (error) => {
   if (error?.response?.data) {
@@ -89,6 +91,7 @@ const getErrorMessage = (error) => {
 
  useEffect(() => {
   fetchModules();
+    getAdminDetails();   
 }, []);
   const getAgentRoles = async () => {
     try {
@@ -116,6 +119,8 @@ const getErrorMessage = (error) => {
     const token = localStorage.getItem("access_token");
     if (token) {
       fetchModules();
+     
+        getAdminDetails();   
     }
   }, []);
   const createAgentRole = async (payload) => {
@@ -234,8 +239,13 @@ const getAdminDetails = async () => {
     const res = await api.get("/v2/admin/");
 
     if (res.status === 200) {
-      return { success: true, data: res.data };
+      setAdminPermissions(res.data.permissions || []);
+      setAdminDetails(res.data); 
+       console.log("addmi",adminPermissions)
+      return { success: true, data: res.data};
+     
     }
+   
 
     return { success: false };
   } catch (error) {
@@ -299,8 +309,9 @@ const deactivateAgent = async (agentId) => {
         agentRoles,
         loading,
         errorMsg,
+        adminDetails,  
         fetchModules,
-        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError,deactivateAgent
+        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError,deactivateAgent, adminPermissions,
       }}
     >
       {children}

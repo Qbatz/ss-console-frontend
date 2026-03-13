@@ -3,9 +3,15 @@ import SsIcon from "../../assets/SsIcon.png";
 import mailImg from "../../assets/Mail.png";
 import notificationImg from "../../assets/Bell.png";
 import { NavLink } from "react-router-dom";
+import { useRole } from "../../Context/RoleContext";
 
 const DashboardLayout = ({ children }) => {
+
+    const {adminDetails, agentRoles, getAgentRoles,getAgentRoleById,loading,deleteAgentRole,errorMsg,accessError} = useRole();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  console.log("adminDetails",adminDetails);
+  
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden">
@@ -79,15 +85,33 @@ const DashboardLayout = ({ children }) => {
   </div>
 
   <div className="space-y-1 text-gray-600 text-sm">
-    <SidebarItem title="Home" count="35" to="/home" />
-    <SidebarItem title="Proprietors" count="04" to="/proprietors" />
-    <SidebarItem title="Properties" count="05" to="/properties"/>
+    {/* <SidebarItem title="Home" count="35"  to={`/home/${adminDetails?.roleId}`} />
+    <SidebarItem title="Proprietors" count="04" to={`/proprietors/${adminDetails?.roleId}`} />
+    <SidebarItem title="Properties" count="05" to={`/properties/${adminDetails?.roleId}`}/>
     <SidebarItem title="Subscriptions" count="05" to="/subscription"/>
     <SidebarItem title="Billings" to ="/billing"/>
     <SidebarItem title="Support Tickets" count="2" to="/supportTicket"/>
     <SidebarItem title="CRM Dashboard" count="2" to="/crmDashboard"/>
     <SidebarItem title="roles" count="2" to="/roles" />
-    <SidebarItem title="IAM-Admin User" count="2" to="/iam-admin-user"/>
+    <SidebarItem title="IAM-Admin User" count="2" to="/iam-admin-user"/> */}
+    <SidebarItem title="Home" count="35" to={`/home/${adminDetails?.roleId}`} />
+
+<SidebarItem title="Proprietors" count="04" to={`/proprietors/${adminDetails?.roleId}`} />
+
+<SidebarItem title="Properties" count="05" to={`/properties/${adminDetails?.roleId}`} />
+
+<SidebarItem title="Subscriptions" count="05" to={`/subscription/${adminDetails?.roleId}`} />
+
+<SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} />
+
+<SidebarItem title="Support Tickets" count="2" to={`/supportTicket/${adminDetails?.roleId}`} />
+
+<SidebarItem title="CRM Dashboard" count="2" to={`/crmDashboard/${adminDetails?.roleId}`} />
+
+<SidebarItem title="roles" count="2" to={`/roles/${adminDetails?.roleId}`} />
+
+<SidebarItem title="IAM-Admin User" count="2" to={`/iam-admin-user/${adminDetails?.roleId}`} />
+ <SidebarItem title="Tenants" to ="/tenantList"/>
   </div>
 </div>
 

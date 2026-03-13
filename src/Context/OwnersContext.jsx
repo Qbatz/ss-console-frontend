@@ -124,6 +124,90 @@ const getOwnerById = async (ownerId) => {
     setLoading(false);
   }
 };
+const getTenantSummary = async ({
+  page = 0,
+  size = 10,
+  tenantName = ""
+} = {}) => {
+
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.get("/v2/tenants/tenant-summary", {
+      params: {
+        page,
+        size,
+        tenantName
+      }
+    });
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+ setAccessError(msg)
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
+const updateOwnerEmail = async (ownerId, payload) => {
+
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.put(
+      `/v2/owners/${ownerId}`,
+      payload
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data,
+        message: "Email updated successfully"
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
 
   return (
     <OwnersContext.Provider
@@ -132,7 +216,7 @@ const getOwnerById = async (ownerId) => {
         totalItems,
         totalPages,
         loading,accessError,
-        getOwners,changeOwnerPassword,getOwnerById
+        getOwners,changeOwnerPassword,getOwnerById,getTenantSummary,updateOwnerEmail
       }}
       
     >

@@ -144,14 +144,89 @@ const hardResetHostel = async (hostelId, typedHostelId) => {
     setLoading(false);
   }
 };
+const deleteHostelExpense = async (hostelId) => {
+  try {
 
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.delete(
+      `/v2/hostels/expense/${hostelId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        message: "Expense deleted successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const getHostelActivities = async (
+  hostelId,
+  page = 1,
+  size = 10,
+  name = ""
+) => {
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.get(
+      `/v2/hostels/activities/${hostelId}`,
+      {
+        params: {
+          page,
+          size,
+          name
+        }
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <HostelContext.Provider
       value={{
         hostels,
         loading,
         errorMsg,
-        getHostels,getHostelById,hardResetHostel,accessError
+        getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities
       }}
     >
       {children}
