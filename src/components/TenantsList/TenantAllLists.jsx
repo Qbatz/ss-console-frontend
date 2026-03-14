@@ -10,10 +10,10 @@ import Edit from "../../assets/editicon.png";
 
 const TenantsList = () => {
 
-  const { getTenantSummary, accessError } = useOwners();
+  const { getTenantSummary, deleteTenant, accessError } = useOwners();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenant Summary");
-  // const menuRef = useRef(null);
+  const menuRef = useRef(null);
   const [tenants, setTenants] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [page, setPage] = useState(1);
@@ -46,7 +46,23 @@ const TenantsList = () => {
     fetchData();
 
   }, [page, size, search]);
+useEffect(() => {
 
+  const handleClickOutside = (event) => {
+
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setOpenMenu(null);
+    }
+
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+
+}, []);
 
   // useEffect(() => {
   //   const handleClickOutside = (event) => {
@@ -67,6 +83,38 @@ const TenantsList = () => {
     setShowEditModal(true);
     setOpenMenu(null);
   };
+  const handleDeleteTenant = async () => {
+
+  if (!selectedTenant) return;
+
+  const res = await deleteTenant(
+    selectedTenant.hostelId,
+    selectedTenant.customerId,
+    phone
+  );
+
+  if (res?.success) {
+
+    setShowEditModal(false);
+    setPhone("");
+
+    // refresh list
+    const refresh = await getTenantSummary({
+      page,
+      size,
+      tenantName: search
+    });
+
+    if (refresh?.success) {
+      setTenants(refresh.data.content || []);
+      setTotalItems(refresh.data.totalItems || 0);
+      setTotalPages(refresh.data.totalPages || 0);
+    }
+
+  } else {
+    alert(res?.message || "Delete failed");
+  }
+};
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -262,20 +310,25 @@ const TenantsList = () => {
                             <img src={Circle} alt="circle" className="w-5 h-5" />
                           </button>
 
-                          {openMenu === index && (
-                            <div
-                              onClick={(e) => e.stopPropagation()}
-                              className="absolute right-13 mt-2 w-28 bg-white border rounded-lg border-gray-300 shadow-lg z-20"
-                            >
-                              <button
-                                className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-sky-100 cursor-pointer border-black"
-                                onClick={() => handleEdit(item)}
-                              >
-                                <img src={Edit} alt="Edit" className="w-4 h-4" />
-                                Edit
-                              </button>
-                            </div>
-                          )}
+                         {openMenu === index && (
+  <div
+    ref={menuRef}
+    onClick={(e) => e.stopPropagation()}
+    className="absolute right-19 mt-2 w-28 bg-white border rounded-lg border-gray-300 shadow-lg z-20"
+  >
+
+    <button
+      disabled={canDelete === false}
+      onClick={() => canDelete === true && handleEdit(item)}
+      className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm 
+      ${canDelete ? "hover:bg-sky-100 cursor-pointer" : "text-gray-400 cursor-not-allowed"}`}
+    >
+      <img src={Edit} alt="Edit" className="w-4 h-4" />
+      Delete
+    </button>
+
+  </div>
+)}
                         </div>
 
                       </td>
@@ -387,14 +440,11 @@ const TenantsList = () => {
               />
 
               <button
-                onClick={() => {
-                  console.log("Phone:", phone, "ID:", selectedTenant?.customerId);
-                  setShowEditModal(false);
-                }}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition"
-              >
-                Submit
-              </button>
+  onClick={handleDeleteTenant}
+  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition"
+>
+  Submit
+</button>
 
             </div>
 
