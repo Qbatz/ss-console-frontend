@@ -208,6 +208,44 @@ const updateOwnerEmail = async (ownerId, payload) => {
   }
 
 };
+const deleteTenant = async (hostelId, customerId, tenantMobile) => {
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.delete(
+      `/v2/tenants/${hostelId}/${customerId}`,
+      {
+        data: {
+          tenantMobile: tenantMobile
+        }
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        message: res.data?.message || "Tenant deleted successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
 
   return (
     <OwnersContext.Provider
@@ -216,7 +254,7 @@ const updateOwnerEmail = async (ownerId, payload) => {
         totalItems,
         totalPages,
         loading,accessError,
-        getOwners,changeOwnerPassword,getOwnerById,getTenantSummary,updateOwnerEmail
+        getOwners,changeOwnerPassword,getOwnerById,getTenantSummary,updateOwnerEmail,deleteTenant   
       }}
       
     >

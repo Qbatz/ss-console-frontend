@@ -9,9 +9,16 @@ import {
 } from "lucide-react";
 import Billingperiod from "../../assets/BillingPeriod.png"
 import { useHostel } from "../../Context/HostelListContext";
+import Circle from "../../assets/menucircle.png";
+import Toast from "../SuccessModal/ToastDesign";
+
 
 const RecurringBill = ({ hostelData }) => {
     const { getRecurringHostels, generateRecurringInvoice } = useHostel();
+    const [reccuringData, setReccuringData] = useState([])
+    const [modalType, setModalType] = useState("success");
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [message, setMessage] = useState("");
     useEffect(() => {
         fetchRecurring();
     }, []);
@@ -20,31 +27,54 @@ const RecurringBill = ({ hostelData }) => {
         const res = await getRecurringHostels(0, 10, "", "TODAY");
 
         if (res?.success) {
-            console.log("Recurring Data", res.data);
+            console.log("Recurring Data", res.data.hostelList);
+            setReccuringData(res.data.hostelList)
         }
     };
 
-
+    console.log("reccuringData", reccuringData)
     const [showModal, setShowModal] = useState(false);
     const [confirm, setConfirm] = useState(false);
-    const handleGenerate = async () => {
+    const handleGenerateRow = async (item) => {
 
         const res = await generateRecurringInvoice(
-            hostelData.hostelId,
-            1
+            item.hostelId,
+            item.recurringDay
         );
 
         if (res?.success) {
-            alert("Recurring invoices generated successfully");
-            setShowModal(false);
+
+            // alert("Recurring invoice generated");
+            setModalType("success");
+            setMessage(res?.message);
+            setShowSuccess(true);
+            setTimeout(() => {
+                setShowSuccess(false);
+            }, 1500);
+            fetchRecurring();
+
         } else {
-            alert(res?.message || "Failed");
+
+            setMessage(res?.message);
+            setModalType("error");
+
+            setShowSuccess(true);
+            setTimeout(() => {
+                setShowSuccess(false);
+            }, 1500);
+
         }
+
     };
     return (
         <div className="p-6 space-y-6">
 
-            {/* Top Cards */}
+             <Toast
+              show={showSuccess}
+              message={message}
+              type={modalType}
+
+            />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
                 <div className="border border-gray-200 rounded-xl p-4 bg-white">
@@ -148,7 +178,7 @@ const RecurringBill = ({ hostelData }) => {
                 </div>
 
                 <button
-                    onClick={() => setShowModal(true)}
+                    // onClick={() => setShowModal(true)}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 text-sm text-gray-500 text-[12px]  font-sans"
                 >
                     Generate Recurring Manually
@@ -172,22 +202,83 @@ const RecurringBill = ({ hostelData }) => {
                                 <th className="px-4 py-3 text-left uppercase">Invoices Generated</th>
                                 <th className="px-4 py-3 text-left uppercase">Triggered By</th>
                                 <th className="px-4 py-3 text-left uppercase">Status</th>
+                                <th className="px-4 py-3 text-left uppercase">Action</th>
                             </tr>
                         </thead>
 
                         <tbody className="divide-y divide-gray-200">
 
-                            <tr>
-                                <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">March 2026</td>
-                                <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">Mar 2 → Apr 1</td>
-                                <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">-</td>
-                                <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">-</td>
-                                <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">-</td>
-                                <td className="p-3 text-red-500">Not Generated</td>
-                            </tr>
+                            {reccuringData?.length > 0 ? (
+
+                                reccuringData.map((item, index) => (
+
+                                    <tr key={item.hostelId || index}>
+
+                                        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+                                            {item.recurringCreatedAtDate || "-"}
+                                        </td>
+
+                                        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+                                            Day {item.recurringDay || "-"}
+                                        </td>
+
+                                        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+                                            {item.recurringMode || "-"}
+                                        </td>
+
+                                        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+                                            -
+                                        </td>
+
+                                        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+                                            {item.createdBy || "System"}
+                                        </td>
+
+                                        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+
+                                            {item.recurringStatus ? (
+
+                                                <span className="text-green-600 font-medium">
+                                                    Generated
+                                                </span>
+
+                                            ) : (
+
+                                                <span className="text-red-500 font-medium">
+                                                    Not Generated
+                                                </span>
+
+                                            )}
+
+                                        </td>
+
+                                        <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap relative">
+                                            <div className="flex items-center gap-3" >
+                                                <button
+                                                    onClick={() => handleGenerateRow(item)}
+                                                    className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                                                >
+                                                    <img src={Circle} alt="circle" className="w-5 h-5" />
+                                                </button>
 
 
+                                            </div>
 
+                                        </td>
+
+                                    </tr>
+
+                                ))
+
+                            ) : (
+
+                                <tr>
+                                    <td colSpan="6" className="text-center py-6 text-gray-400">
+                                        No Data Found
+                                    </td>
+                                </tr>
+
+                            )}
 
                         </tbody>
 
@@ -292,11 +383,11 @@ const RecurringBill = ({ hostelData }) => {
                             </button>
 
                             <button
-                                onClick={handleGenerate}
+                                // onClick={handleGenerate}
                                 disabled={!confirm}
                                 className={`px-4 py-2 rounded-lg text-sm text-white ${confirm
-                                        ? "bg-blue-600 hover:bg-blue-700"
-                                        : "bg-gray-300 cursor-not-allowed"
+                                    ? "bg-blue-600 hover:bg-blue-700"
+                                    : "bg-gray-300 cursor-not-allowed"
                                     }`}
                             >
                                 Generate Recurring
