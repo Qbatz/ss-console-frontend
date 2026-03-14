@@ -1,270 +1,406 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { useOwners } from "../../Context/OwnersContext";
 import LoginImg from "../../assets/LoginImg.png";
 import { usePermission } from "../../Utils/permissionHelper";
+import Search from "../../assets/Search.png";
+import Arrow from "../../assets/arrow-right.png";
+import Circle from "../../assets/menucircle.png";
+import Edit from "../../assets/editicon.png";
 
 const TenantsList = () => {
 
-  const { getTenantSummary,accessError } = useOwners();
- const { canRead, canWrite, canUpdate, canDelete } =
+  const { getTenantSummary, accessError } = useOwners();
+  const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenant Summary");
+  // const menuRef = useRef(null);
   const [tenants, setTenants] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
   const [search, setSearch] = useState("");
-const [totalPages, setTotalPages] = useState(0);
-console.log("accessError",accessError)
-useEffect(() => {
+  const [totalPages, setTotalPages] = useState(0);
+  const [openMenu, setOpenMenu] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedTenant, setSelectedTenant] = useState(null);
+  const [phone, setPhone] = useState("");
+  console.log("accessError", accessError)
+  useEffect(() => {
 
-  const fetchData = async () => {
+    const fetchData = async () => {
 
-    const res = await getTenantSummary({
-      page,
-      size,
-      tenantName: search
-    });
+      const res = await getTenantSummary({
+        page,
+        size,
+        tenantName: search
+      });
 
-    if (res.success) {
-      setTenants(res.data.content || []);
-      setTotalItems(res.data.totalItems || 0);
-      setTotalPages(res.data.totalPages || 0);
-    }
+      if (res.success) {
+        setTenants(res.data.content || []);
+        setTotalItems(res.data.totalItems || 0);
+        setTotalPages(res.data.totalPages || 0);
+      }
 
+    };
+
+    fetchData();
+
+  }, [page, size, search]);
+
+
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (menuRef.current && !menuRef.current.contains(event.target)) {
+  //       setOpenMenu(null);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
+  const handleEdit = (item) => {
+    setSelectedTenant(item);
+    setPhone(item.mobile);
+    setShowEditModal(true);
+    setOpenMenu(null);
   };
 
-  fetchData();
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "BOOKED":
+        return "text-sky-700 bg-sky-100";
 
-}, [page, size, search]);
+      case "CANCELLED_BOOKING":
+        return "text-red-700 bg-red-100";
 
-// useEffect(() => {
+      case "CHECK_IN":
+        return "text-emerald-700 bg-emerald-100";
 
-//   const fetchData = async () => {
+      case "SETTLEMENT_GENERATED":
+        return "text-orange-700 bg-orange-200";
 
-//     const res = await getTenantSummary({
-//       page,
-//       size,
-//       tenantName: ""
-//     });
+      case "INACTIVE":
+        return "text-yellow-700 bg-yellow-200";
 
-//     if (res.success) {
+      case "NOTICE":
+        return "text-rose-700 bg-rose-200";
 
-//       setTenants(res.data.content || []);
-//       setTotalItems(res.data.totalItems || 0);
-//       setTotalPages(res.data.totalPages || 0);
+      case "VACATED":
+        return "text-red-700 bg-red-200";
 
-//     }
 
-//   };
+      default:
+        return "text-gray-600 bg-gray-100";
+    }
+  };
 
-//   fetchData();
 
-// }, [page, size]);
-const start = (page - 1) * size + 1;
-const end = Math.min(page * size, totalItems);
+  const start = (page - 1) * size + 1;
+  const end = Math.min(page * size, totalItems);
 
   return (
 
     <DashboardLayout>
       {(canRead === false || accessError === "Access Restricted") ? (
-      
+
         <div className="flex flex-col items-center justify-center h-[350px] gap-4">
-      
+
           <img
             src={LoginImg}
             alt="Access Restricted"
             className="w-64 object-contain"
           />
-      
+
           <p className="text-red-600 text-lg font-medium">
             Access Restricted
           </p>
-      
+
         </div>
-      
+
       ) : (
-         
-<>
 
-      <h1 className="text-xl font-semibold mb-6 text-left">
-        Tenants
-      </h1>
-<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <>
 
-          <div className="border border-gray-300 rounded-xl p-4 bg-white">
-            <p className="text-gray-500 text-sm">Total Proprietors</p>
-            <p className="text-xl font-semibold mt-1">{totalItems}</p>
+          <h1 className="text-xl font-semibold mb-6 text-left">
+            Tenants Summary
+          </h1>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+            <div className="border border-gray-300 rounded-xl p-4 bg-white">
+              <p className="text-gray-500 text-sm">Total Proprietors</p>
+              <p className="text-xl font-semibold mt-1">{totalItems}</p>
+            </div>
+
+
+
           </div>
 
-         
 
-        </div>
+          {/* Filter Row */}
+          <div className="flex justify-end items-center">
 
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setPage(1);
+                }}
+                className="bg-blue-600 text-white p-2 rounded-md cursor-pointer"
+              >
+                ⟳
+              </button>
+              <div className="relative">
+                <img
+                  src={Search}
+                  alt="Search"
+                  className="absolute left-3 top-2.5 w-4 h-4"
+                />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => {
+                    setPage(1);
+                    setSearch(e.target.value);
+                  }}
+                  placeholder=" Search..."
+                  className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm font-medium leading-[150%] w-56"
 
-        {/* Filter Row */}
-      <div className="flex justify-end items-center">
+                />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col mt-4">
 
-  <div className="flex items-center gap-2">
-    <button
-  onClick={() => {
-    setSearch("");
-    setPage(1);
-  }}
-  className="bg-blue-600 text-white p-2 rounded-md"
->
-  ⟳
-</button>
+            <div className="max-h-[350px] overflow-y-auto">
 
-    <input
-      type="text"
-      value={search}
-  onChange={(e) => {
-    setPage(1);
-    setSearch(e.target.value);
-  }}
-      placeholder="Search..."
-      className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-    />
+              <table className="min-w-full text-sm">
 
-  </div>
+                {/* <thead className="bg-gray-50 sticky top-0 z-10"> */}
+                <thead className="bg-[#F5F7FB] text-black-500 text-xs sticky top-0">
+                  <tr>
+                    <th className="px-4 py-3 text-left">ID</th>
+                    <th className="px-4 py-3 text-left">Name</th>
+                    <th className="px-4 py-3 text-left">Mobile</th>
+                    <th className="px-4 py-3 text-left">Hostel</th>
+                    <th className="px-4 py-3 text-left">Status</th>
+                    <th className="px-4 py-3 text-left">Payable</th>
+                    <th className="px-4 py-3 text-left">Paid</th>
+                    <th className="px-4 py-3 text-left">Due</th>
+                    <th className="px-4 py-3 text-left">Action</th>
+                  </tr>
+                </thead>
 
-</div>
-        <div className="bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col mt-4">
+                <tbody>
 
-          <div className="max-h-[350px] overflow-y-auto">
+                  {/* {tenants.map((item, i) => ( */}
+                  {tenants.map((item, index) => (
+                    <tr key={item.customerId} className="border-b border-gray-300 hover:bg-gray-50 text-left whitespace-nowrap">
+                      <td className="px-4 py-1">
+                        {(page - 1) * size + index + 1}
+                      </td>
 
-        <table className="min-w-full text-sm">
+                      <td className="px-6 py-1 flex items-center gap-3 text-left">
 
-              <thead className="bg-gray-50 sticky top-0 z-10">
-              <tr>
-                <th className="px-6 py-3 text-left">ID</th>
-                 <th className="px-6 py-3 text-left">Name</th>
-                <th className="px-6 py-3 text-left">Mobile</th>
-                <th className="px-6 py-3 text-left">Hostel</th>
-                <th className="px-6 py-3 text-left">Status</th>
-                <th className="px-6 py-3 text-left">Payable</th>
-                <th className="px-6 py-3 text-left">Paid</th>
-                <th className="px-6 py-3 text-left">Due</th>
-              </tr>
-            </thead>
+                        {item.profilePic ? (
+                          <img
+                            src={item.profilePic}
+                            alt={item.fullName}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                            {item.initials}
+                          </div>
+                        )}
 
-            <tbody>
+                        {item.fullName}
 
-              {tenants.map((item,i) => (
+                      </td>
 
-                <tr key={item.customerId} className="border-b border-gray-300 hover:bg-gray-50">
-<td className="px-4 py-1">
-          {(page - 1) * size + i + 1}
-        </td>
-                 
-                  <td className="px-6 py-1 flex items-center gap-3">
+                      <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
+                        {item.mobile}
+                      </td>
 
-  {item.profilePic ? (
-    <img
-      src={item.profilePic}
-      alt={item.fullName}
-      className="w-8 h-8 rounded-full object-cover"
-    />
-  ) : (
-    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-      {item.initials}
-    </div>
-  )}
+                      <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
+                        {item.hostelName}
+                      </td>
 
-  {item.fullName}
-
-</td>
-
-                  <td className="px-6 py-1">
-                    {item.mobile}
-                  </td>
-
-                  <td className="px-6 py-1">
-                    {item.hostelName}
-                  </td>
-
-                  <td className="px-6 py-1">
+                      {/* <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
                     {item.currentStatus}
-                  </td>
+                  </td> */}
+                      <td className="px-4 py-2 text-left whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(item.currentStatus)}`}>
+                          {item.currentStatus}
+                        </span>
+                      </td>
 
-                  <td className="px-6 py-1">
-                    ₹{item.payableAmount}
-                  </td>
+                      <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
+                        ₹{item.payableAmount}
+                      </td>
 
-                  <td className="px-6 py-1">
-                    ₹{item.paidAmount ?? 0}
-                  </td>
+                      <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
+                        ₹{item.paidAmount ?? 0}
+                      </td>
 
-                  <td className="px-6 py-1">
-                    ₹{item.dueAmount}
-                  </td>
+                      <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
+                        ₹{item.dueAmount}
+                      </td>
 
-                </tr>
 
-              ))}
+                      <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap relative">
+                        <div className="flex items-center gap-3" >
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenu(openMenu === index ? null : index);
+                            }}
+                            className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                          >
+                            <img src={Circle} alt="circle" className="w-5 h-5" />
+                          </button>
 
-            </tbody>
+                          {openMenu === index && (
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className="absolute right-13 mt-2 w-28 bg-white border rounded-lg border-gray-300 shadow-lg z-20"
+                            >
+                              <button
+                                className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-sky-100 cursor-pointer border-black"
+                                onClick={() => handleEdit(item)}
+                              >
+                                <img src={Edit} alt="Edit" className="w-4 h-4" />
+                                Edit
+                              </button>
+                            </div>
+                          )}
+                        </div>
 
-          </table>
+                      </td>
+
+                    </tr>
+
+                  ))}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between px-6 py-3 border-t text-sm text-gray-500 border-gray-300 ">
+
+              <span>
+                Total Record Count : <span className="text-blue-600">{size}</span>
+              </span>
+
+              <div className="flex items-center gap-4">
+
+                {/* Page size */}
+                <select
+                  value={size}
+                  onChange={(e) => {
+                    setSize(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  className="border rounded px-2 py-1 text-sm cursor-pointer"
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+
+                {/* Prev */}
+                <button
+                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                  disabled={page === 1}
+                  className="px-2 text-gray-600 disabled:opacity-40 cursor-pointer"
+                >
+                  <img src={Arrow} alt="Arrow" className="w-4 h-4" />
+                </button>
+
+
+                <span className="border px-2 py-1 rounded bg-gray-50 cursor-pointer">
+                  {page}
+                </span>
+
+                <button
+                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={page >= totalPages}
+                  className="px-2 text-gray-600 disabled:opacity-40 cursor-pointer"
+                >
+                  <img src={Arrow} alt="Arrow" className="w-4 h-4 rotate-180" />
+                </button>
+
+                {/* Showing range */}
+                <span className="text-gray-400">
+                  {start} - {end}
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+        </>
+      )}
+
+      {showEditModal && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+          onClick={() => {
+            setShowEditModal(false);
+            setPhone("");
+          }}
+        >
+
+          <div
+            className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+
+            <button
+              onClick={() => {
+                setShowEditModal(false);
+                setPhone("");
+              }}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+
+            <h2 className="text-lg font-semibold text-gray-800 mb-4 text-left">
+             Phone Number <span className="text-red-400">*</span>
+            </h2>
+
+            <div className="space-y-4">
+
+              <input
+                type="text"
+                placeholder="Enter Phone Number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              />
+
+              <button
+                onClick={() => {
+                  console.log("Phone:", phone, "ID:", selectedTenant?.customerId);
+                  setShowEditModal(false);
+                }}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition"
+              >
+                Submit
+              </button>
+
+            </div>
+
+          </div>
 
         </div>
-
-        {/* Footer */}
-       <div className="flex items-center justify-between px-6 py-3 border-t text-sm text-gray-500">
-
-  <span>
-    Total Record Count : <span className="text-blue-600">{size}</span>
-  </span>
-
-  <div className="flex items-center gap-4">
-
-    {/* Page size */}
-    <select
-      value={size}
-      onChange={(e) => {
-        setSize(Number(e.target.value));
-        setPage(1);
-      }}
-      className="border rounded px-2 py-1 text-sm"
-    >
-      <option value={10}>10</option>
-      <option value={20}>20</option>
-      <option value={50}>50</option>
-    </select>
-
-    {/* Prev */}
-   <button
-  onClick={() => setPage((p) => Math.max(p - 1, 1))}
-  disabled={page === 1}
-  className="px-2 text-gray-600 disabled:opacity-40"
->
-  ◀
-</button>
-
-<span className="border px-2 py-1 rounded bg-gray-50">
-  {page}
-</span>
-
-<button
-  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-  disabled={page >= totalPages}
-  className="px-2 text-gray-600 disabled:opacity-40"
->
-  ▶
-</button>
-
-    {/* Showing range */}
-    <span className="text-gray-400">
-      {start} - {end}
-    </span>
-
-  </div>
-
-</div>
-
-      </div>
-</>
       )}
     </DashboardLayout>
   );
