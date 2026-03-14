@@ -37,6 +37,7 @@ const Roles = () => {
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
+
   const handleEditClick = async (role) => {
     try {
       const response = await getAgentRoleById(role.id);
