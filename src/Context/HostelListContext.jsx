@@ -220,13 +220,90 @@ const getHostelActivities = async (
     setLoading(false);
   }
 };
+const getRecurringHostels = async (
+  page = 0,
+  size = 10,
+  hostelName = "",
+  filterBy = "TODAY"
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get("/v2/hostels/recurring", {
+      params: {
+        page,
+        size,
+        hostelName,
+        filterBy
+      }
+    });
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const generateRecurringInvoice = async (hostelId, inputDay) => {
+  try {
+
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      `/v2/hostels/recurring/${hostelId}`,
+      {
+        inputDay: inputDay
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <HostelContext.Provider
       value={{
         hostels,
         loading,
         errorMsg,
-        getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities
+        getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice
       }}
     >
       {children}

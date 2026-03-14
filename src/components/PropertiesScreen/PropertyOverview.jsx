@@ -20,6 +20,7 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import { usePermission } from "../../Utils/permissionHelper";
 import LoginImg from "../../assets/LoginImg.png";
+import ReccuringBill from "./ReccuringBill";
 const PropertyOverview = () => {
     const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError } = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
@@ -318,12 +319,11 @@ hostelData.hostelId,
        
 
 
-        <div className="bg-white rounded-xl mt-4 flex flex-col">
+        <div className="bg-white rounded-xl pt-4 flex flex-col">
 
 
           {/* <div className="flex flex-col lg:flex-row lg:items-center justify-between px-4 lg:px-5 pt-4 gap-3"> */}
-          <div className="sticky top-0 z-20 bg-white flex flex-col lg:flex-row lg:items-center justify-between px-4 lg:px-5 pt-4 gap-3 ">
-
+<div className="sticky top-0 z-40 bg-white flex flex-col lg:flex-row lg:items-center justify-between px-4 lg:px-5 py-0 gap-3 border-b border-gray-200">
             <div className="flex gap-6 border-b border-[#E6E8F0] overflow-x-auto">
 
             {[
@@ -333,7 +333,8 @@ hostelData.hostelId,
   "staffs",
   "invoices",
   "activity",
-  "Amenities"
+  "Amenities",
+  "Billing Control"
 ]
                 .map(tab => (
                   <button
@@ -497,6 +498,10 @@ hostelData.hostelId,
            {activeTab === "Amenities" && (
             <PropertyAmenities hostelData={hostelData} />
           )}
+           {activeTab === "Billing Control" && (
+            <ReccuringBill hostelData={hostelData} />
+          )}
+
 
         </div>
 
