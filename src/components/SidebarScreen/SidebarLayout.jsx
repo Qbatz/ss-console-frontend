@@ -123,7 +123,7 @@ const DashboardLayout = ({ children }) => {
 )}
 
         {/* Scrollable Content */}
-       <div className="flex-1 overflow-y-auto px-6 py-2 md:px-2 bg-white scrollbar-hide pb-14">
+       <div className="flex-1 overflow-y-auto px-6 mt-1 md:px-2 bg-white scrollbar-hide pb-14">
         <div className="w-full">
           {children}
           </div>
@@ -148,7 +148,7 @@ const SidebarItem = ({ title, count, to }) => (
   >
     <span>{title}</span>
     {count && (
-      <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
+      <span className="text-xs bg-gray-100 px-2  rounded-full">
         {count}
       </span>
     )}
