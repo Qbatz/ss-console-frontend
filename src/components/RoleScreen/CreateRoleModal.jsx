@@ -353,10 +353,15 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
   )} */}
 
 
-      <div
+      {/* <div
         className={`fixed top-0 right-0 h-full w-full sm:w-[480px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"
           } flex flex-col`}
-      >
+      > */}
+      <div
+  className={`fixed top-0 right-0 h-full w-full sm:w-[560px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
+    isOpen ? "translate-x-0" : "translate-x-full"
+  } flex flex-col`}
+>
         {/* Header */}
         <div className="flex justify-between items-start px-6 py-4 border-b border-gray-300">
           <div>
@@ -436,8 +441,8 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
                 className="w-5 h-5 object-contain" /> Permissions
             </h3>
 
-            <div className="grid grid-cols-6 text-xs font-medium text-gray-500 mb-3  border-gray-300">
-              <div>Module</div>
+            <div className="grid grid-cols-6 text-xs font-medium text-black-500 mb-3  border-gray-300">
+              <div className="text-left">Module</div>
               <div className="text-center">View</div>
               <div className="text-center">Add</div>
               <div className="text-center">Edit</div>
@@ -446,10 +451,13 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
             </div>
 
             {modules.map((mod, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-6 items-center py-2 border-t border-gray-300 text-sm"
-              >
+              // <div
+              //   key={index}
+              //   className="grid grid-cols-6 items-center py-2 border-t border-gray-300 text-sm"
+              // >
+              <div 
+              key={index}
+              className="grid grid-cols-6 gap-4 text-xs font-medium text-black-500 mb-3 border-gray-300 text-left">
                 <div>{mod.moduleName}</div>
                 <div className="flex justify-center" ref={permissionRef}>
                   <input
@@ -519,8 +527,8 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
 
                 </div>
 
-                <div className="text-center text-blue-600 cursor-pointer text-xs">
-                  More +
+                <div className="text-center text-blue-600 cursor-pointer text-xs  whitespace-nowrap">
+                  More+
                 </div>
               </div>
             ))}

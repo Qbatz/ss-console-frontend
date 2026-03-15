@@ -119,30 +119,30 @@ useEffect(() => {
 
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
             <p className="text-gray-500 text-sm font-gilroy">Active Properties</p>
-            <h2 className="text-2xl font-bold mt-2">45</h2>
+            <h2 className="text-2xl font-bold mt-2">0</h2>
           </div>
 
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
             <p className="text-gray-500 text-sm font-gilroy">Expired Properties</p>
-            <h2 className="text-2xl font-bold mt-2">24</h2>
+            <h2 className="text-2xl font-bold mt-2">0</h2>
           </div>
 
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
             <p className="text-gray-500 text-sm font-gilroy">Basic</p>
-            <h2 className="text-2xl font-bold mt-2">12</h2>
+            <h2 className="text-2xl font-bold mt-2">0</h2>
           </div>
 
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
             <p className="text-gray-500 text-sm font-gilroy">Trial</p>
-            <h2 className="text-2xl font-bold mt-2">09</h2>
+            <h2 className="text-2xl font-bold mt-2">0</h2>
           </div>
 
         </div>
 
        
         <div className="mb-4 bg-white py-3">
-          <div className="flex justify-between items-center">
-            <div className="flex gap-3">
+          <div className="flex justify-end items-center">
+            {/* <div className="flex gap-3">
               <select className="border border-gray-300 px-3 py-1 rounded-lg text-xs font-sans">
                 <option>All</option>
                 <option>Active</option>
@@ -157,7 +157,7 @@ useEffect(() => {
               <button className="border border-gray-300 px-4 py-2 rounded-lg text-xs font-sans">
                 Filter
               </button>
-            </div>
+            </div> */}
 
             <input
               type="text"
