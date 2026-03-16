@@ -44,7 +44,7 @@ const RecurringBill = ({ hostelData }) => {
 
         if (res?.success) {
 
-            // alert("Recurring invoice generated");
+            
             setModalType("success");
             setMessage(res?.message);
             setShowSuccess(true);
@@ -53,7 +53,8 @@ const RecurringBill = ({ hostelData }) => {
             }, 1500);
             fetchRecurring();
 
-        } else {
+        } 
+        else {
 
             setMessage(res?.message);
             setModalType("error");
