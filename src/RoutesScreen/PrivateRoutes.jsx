@@ -18,6 +18,7 @@ import PropertyOverview from "../components/PropertiesScreen/PropertyOverview"
 import { useNavigate } from "react-router-dom";
 import ProprietorsOverview from "../components/ProprietorsScreen/ProprietorsOverview";
 import TenantsList from "../components/TenantsList/TenantAllLists";
+import RecurringInvoice from "../components/RecurringMonitor/RecurringInvoice";
 
 
 const PrivateRoute = ({ children }) => {
@@ -53,6 +54,7 @@ const PrivateRoutesScreen = () => {
               {/* <Route path="/ProprietorsOverview" element={<ProprietorsOverview/>} /> */}
               <Route path="/ProprietorsOverview/:ownerId" element={<ProprietorsOverview/>} />
               <Route path="/tenantList" element={<TenantsList/>} />
+                 <Route path="/Recurring-Bill/:roleId" element={<RecurringInvoice />} />
           </Routes>
           </OwnersProvider>
           </SubscriptionProvider>
