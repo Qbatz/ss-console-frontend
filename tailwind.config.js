@@ -7,6 +7,10 @@ export default {
         gilroy: ['Gilroy', 'sans-serif'],
       },
 
+      colors: {
+        primarySoft: "#1E45E10D",
+      },
+
       keyframes: {
         fadeIn: {
           "0%": { opacity: "0", transform: "translateY(10px)" },
@@ -14,9 +18,9 @@ export default {
         },
       },
 
-     animation: {
-  fadeIn: "fadeIn 0.25s ease-out",
-},
+      animation: {
+        fadeIn: "fadeIn 0.25s ease-out",
+      },
     },
   },
   plugins: [],
