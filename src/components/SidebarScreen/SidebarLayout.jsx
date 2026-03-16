@@ -103,7 +103,7 @@ const DashboardLayout = ({ children }) => {
 <SidebarItem title="Subscriptions" count="05" to={`/subscription/${adminDetails?.roleId}`} />
 
 <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} />
-
+<SidebarItem title="Recurring Monitor" count="2" to={`/Recurring-Bill/${adminDetails?.roleId}`} />
 <SidebarItem title="Support Tickets" count="2" to={`/supportTicket/${adminDetails?.roleId}`} />
 
 <SidebarItem title="CRM Dashboard" count="2" to={`/crmDashboard/${adminDetails?.roleId}`} />
@@ -112,6 +112,7 @@ const DashboardLayout = ({ children }) => {
 
 <SidebarItem title="IAM-Admin User" count="2" to={`/iam-admin-user/${adminDetails?.roleId}`} />
  <SidebarItem title="Tenants" to ="/tenantList"/>
+ 
   </div>
 </div>
 
