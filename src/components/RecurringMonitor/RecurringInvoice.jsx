@@ -4,6 +4,7 @@ import Arrow from "../../assets/arrow-right.png";
 import { useHostel } from "../../Context/HostelListContext";
 import Toast from "../SuccessModal/ToastDesign";
 import Search from "../../assets/Search.png";
+
 const RecurringInvoice = () => {
 const { getRecurringHostels,generateRecurringInvoice } = useHostel();
 const [search,setSearch] = useState("");
