@@ -3,12 +3,18 @@ import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { useNavigate } from "react-router-dom";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import { useRole } from "../../Context/RoleContext";
+import DemoRequests from "./DemoRequest";
+import LoginImg from "../../assets/LoginImg.png";
+import { usePermission } from "../../Utils/permissionHelper";
 
 const Subscription = () => {
-  const { getSubscriptions } = useSubscription();
-   const {adminDetails, agentRoles, getAgentRoles,getAgentRoleById,loading,deleteAgentRole,errorMsg,accessError} = useRole();
+  const { getSubscriptions,loading,errorMsg } = useSubscription();
+    const { canRead, canWrite, canUpdate, canDelete } =
+        usePermission("Subscriptions");
+      console.log("errorMsg", errorMsg)
+   const {adminDetails, agentRoles, getAgentRoles,getAgentRoleById,deleteAgentRole,accessError} = useRole();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("subscriptions");
+  const [activeTab, setActiveTab] = useState("demo");
   const [subscriptions,setSubscriptions] = useState([]);
 const [page,setPage] = useState(1);
 const [size,setSize] = useState(10);
@@ -77,6 +83,15 @@ useEffect(() => {
 
               {/* Tabs */}
               <div className="flex gap-6 text-sm font-medium font-inter">
+                 <button
+                  onClick={() => setActiveTab("demo")}
+                  className={`text-[13px] pb-2 ${activeTab === "demo"
+                      ? "text-blue-600 border-b-2 border-blue-600"
+                      : "text-gray-500"
+                    }`}
+                >
+                  Demo Requests
+                </button>
                 <button
                   onClick={() => setActiveTab("subscriptions")}
                   className={`text-[13px] pb-2 ${activeTab === "subscriptions"
@@ -87,15 +102,7 @@ useEffect(() => {
                   Subscriptions
                 </button>
 
-                <button
-                  onClick={() => setActiveTab("demo")}
-                  className={`text-[13px] pb-2 ${activeTab === "demo"
-                      ? "text-blue-600 border-b-2 border-blue-600"
-                      : "text-gray-500"
-                    }`}
-                >
-                  Demo Requests
-                </button>
+               
               </div>
 
             </div>
@@ -114,8 +121,27 @@ useEffect(() => {
 
 
 
-       
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+      {activeTab === "subscriptions" && (
+            <>
+             { (canRead === false || errorMsg === "Access Restricted")? (
+                  
+                    <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+                      
+                      <img 
+                        src={LoginImg} 
+                        alt="Access Restricted" 
+                        className="w-64 object-contain"
+                      />
+                  
+                      <p className="text-red-600 text-lg font-medium">
+                        {accessError}
+                      </p>
+                  
+                    </div>
+                  
+                  ) : (
+                    <>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
 
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
             <p className="text-gray-500 text-sm font-gilroy">Active Properties</p>
@@ -138,7 +164,7 @@ useEffect(() => {
           </div>
 
         </div>
-
+                 
        
         <div className="mb-4 bg-white py-3">
           <div className="flex justify-end items-center">
@@ -193,55 +219,96 @@ useEffect(() => {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-200">
+   <tbody className="divide-y divide-gray-200">
 
-{subscriptions.length > 0 ? (
+{loading ? (
 
-subscriptions.map((item,index)=>(
-<tr key={item.subscriptionId} className="hover:bg-gray-50 text-[12px]">
+  // 🔥 Skeleton Loader
+  Array.from({ length: size }).map((_, i) => (
+    <tr key={i} className="animate-pulse text-[12px]">
 
-<td className="px-4 py-2">
-{(page-1)*size + index + 1}
-</td>
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-6"></div>
+      </td>
 
-<td className="px-4 py-2 text-blue-600">
-{item.hostelName}
-</td>
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-24"></div>
+      </td>
 
-<td className="px-4 py-2">
-{item.ownerName}
-</td>
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-20"></div>
+      </td>
 
-<td className="px-4 py-2">
-{item.status}
-</td>
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-16"></div>
+      </td>
 
-<td className="px-4 py-2">
-{item.planName}
-</td>
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-20"></div>
+      </td>
 
-<td className="px-4 py-2">
-{item.planStartsAt}
-</td>
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-24"></div>
+      </td>
 
-<td className="px-4 py-2">
-{item.planEndsAt}
-</td>
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-24"></div>
+      </td>
 
-<td className="px-4 py-2 text-center">
-⋮
-</td>
+      <td className="px-4 py-2 text-center">
+        <div className="h-4 bg-gray-200 rounded w-6 mx-auto"></div>
+      </td>
 
-</tr>
-))
+    </tr>
+  ))
+
+) : subscriptions.length > 0 ? (
+
+  subscriptions.map((item,index)=>(
+    <tr key={item.subscriptionId} className="hover:bg-gray-50 text-[12px]">
+
+      <td className="px-4 py-2">
+        {(page-1)*size + index + 1}
+      </td>
+
+      <td className="px-4 py-2 text-blue-600">
+        {item.hostelName}
+      </td>
+
+      <td className="px-4 py-2">
+        {item.ownerName}
+      </td>
+
+      <td className="px-4 py-2">
+        {item.status}
+      </td>
+
+      <td className="px-4 py-2">
+        {item.planName}
+      </td>
+
+      <td className="px-4 py-2">
+        {item.planStartsAt}
+      </td>
+
+      <td className="px-4 py-2">
+        {item.planEndsAt}
+      </td>
+
+      <td className="px-4 py-2 text-center">
+        ⋮
+      </td>
+
+    </tr>
+  ))
 
 ) : (
 
-<tr>
-<td colSpan="8" className="text-center py-6 text-gray-400">
-No Data Found
-</td>
-</tr>
+  <tr>
+    <td colSpan="8" className="text-center py-6 text-gray-400">
+      No Data Found
+    </td>
+  </tr>
 
 )}
 
@@ -309,7 +376,14 @@ No Data Found
           </div>
 
         </div>
-
+        </>
+        )}
+            </>
+          )}
+      
+{activeTab === "demo" && (
+  <DemoRequests/>
+)}
       </div>
     </DashboardLayout>
   );

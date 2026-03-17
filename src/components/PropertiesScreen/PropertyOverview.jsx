@@ -334,7 +334,7 @@ hostelData.hostelId,
   "invoices",
   "activity",
   "Amenities",
-  "Billing Control"
+  // "Billing Control"
 ]
                 .map(tab => (
                   <button
@@ -379,7 +379,7 @@ hostelData.hostelId,
                     <tr>
 
                       <th className="px-4 py-3 text-left">
-                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-sans">
                           ID
                           <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
                         </div>
@@ -393,21 +393,21 @@ hostelData.hostelId,
                       </th>
 
                       <th className="px-4 py-3 text-left">
-                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-sans">
                           Mail
                           <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
                         </div>
                       </th>
 
                       <th className="px-4 py-3 text-left">
-                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-sans">
                           Mobile No
                           <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
                         </div>
                       </th>
 
                       <th className="px-4 py-3 text-left">
-                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-sans">
                           Status
                           <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
                         </div>

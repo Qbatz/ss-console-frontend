@@ -1,18 +1,24 @@
-import React, { useState,useEffect } from "react";
+import React, { useState,useEffect,useRef  } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import Arrow from "../../assets/arrow-right.png";
 import { useHostel } from "../../Context/HostelListContext";
 import Toast from "../SuccessModal/ToastDesign";
 import Search from "../../assets/Search.png";
+import { usePermission } from "../../Utils/permissionHelper";
+import LoginImg from "../../assets/LoginImg.png";
 
 const RecurringInvoice = () => {
-const { getRecurringHostels,generateRecurringInvoice } = useHostel();
+const { getRecurringHostels,generateRecurringInvoice,loading ,errorMsg} = useHostel();
+  const { canRead, canWrite, canUpdate, canDelete } =
+         usePermission("Recurring");
+         console.log("errorMsg",errorMsg)
 const [search,setSearch] = useState("");
-  
+  const dropdownRef = useRef(null);
   const [data,setData] = useState([]);
   console.log("data",data)
 const [filterOptions,setFilterOptions] = useState([]);
 const [filter,setFilter] = useState("TODAY");
+console.log("filter",filter)
  const [modalType, setModalType] = useState("success");
     const [showSuccess, setShowSuccess] = useState(false);
     const [message, setMessage] = useState("");
@@ -23,6 +29,7 @@ const [size,setSize] = useState(10);
 const [totalItems,setTotalItems] = useState(0);
 const [totalPages,setTotalPages] = useState(0);
 const [openFilter, setOpenFilter] = useState(false);
+const [tooltip, setTooltip] = useState(null);
 
 const fetchRecurring = async () => {
 
@@ -45,6 +52,19 @@ const fetchRecurring = async () => {
 // useEffect(()=>{
 //   fetchRecurring();
 // },[page,size,filter,search]);
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setOpenFilter(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 useEffect(()=>{
 
   const delay = setTimeout(()=>{
@@ -104,20 +124,40 @@ useEffect(()=>{
   return (
 
     <DashboardLayout>
+       {(errorMsg === false || errorMsg === "Access Restricted") ? (
+            
+              <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+                
+                <img 
+                  src={LoginImg} 
+                  alt="Access Restricted" 
+                  className="w-64 object-contain"
+                />
+            
+                <p className="text-red-600 text-lg font-medium">
+                  {errorMsg}
+                </p>
+            
+              </div>
+            
+            ) : (
+      
+      <>
+      
   <Toast
               show={showSuccess}
               message={message}
               type={modalType}
 
             />
-      {/* Title */}
+    
       <div className="border-b border-gray-300 mb-6 pb-2">
   <h1 className="text-xl font-semibold text-left">
     Recurring Monitor
   </h1>
 </div>
 
-      {/* Cards */}
+     
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 
         <div className="border border-gray-200 rounded-xl p-4 bg-white">
@@ -144,7 +184,7 @@ useEffect(()=>{
       {/* Filters */}
       <div className="flex justify-between items-center mb-4">
 
-     <div className="relative w-40">
+     <div ref={dropdownRef} className="relative w-40">
 
   <button
     onClick={() => setOpenFilter(!openFilter)}
@@ -155,7 +195,6 @@ useEffect(()=>{
   </button>
 
   {openFilter && (
-
     <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50 max-h-40 overflow-y-auto">
 
       {filterOptions.map((item) => (
@@ -166,7 +205,7 @@ useEffect(()=>{
             setPage(1);
             setOpenFilter(false);
           }}
-          className={`px-3 py-2 text-sm cursor-pointer hover:bg-grey-300 hover:text-black
+          className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
           ${filter === item.key ? "bg-blue-600 text-white" : ""}`}
         >
           {item.label}
@@ -174,7 +213,6 @@ useEffect(()=>{
       ))}
 
     </div>
-
   )}
 
 </div>
@@ -222,12 +260,13 @@ useEffect(()=>{
                 <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">Mobile No</th>
                 <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">Name</th>
                 <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">Region / City</th>
+                 <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">Recurring mode</th>
                 <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">Status</th>
                 <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">Actions</th>
               </tr>
             </thead>
 
-           <tbody className="divide-y divide-gray-200">
+           {/* <tbody className="divide-y divide-gray-200">
 
 {data.length > 0 ? (
 
@@ -236,7 +275,7 @@ data.map((item,index)=>(
 <tr key={item.hostelId}>
 
 <td className="px-4 py-3">
-{/* {index+1} */}
+
  {(page - 1) * size + index + 1}
 </td>
 
@@ -252,8 +291,22 @@ data.map((item,index)=>(
 {item.initials}
 </td>
 
+
+<td
+  className="px-4 py-2 text-left font-medium text-[12px]"
+  onMouseEnter={(e) => {
+  setTooltip({
+    text: item.fullAddress,
+    x: e.clientX,
+    y: e.clientY
+  });
+}}
+  onMouseLeave={() => setTooltip(null)}
+>
+  {item.city} , {item.state}
+</td>
 <td className="px-4 py-2 text-left font-medium text-[12px]">
-{item.city} , {item.state}
+{item.recurringMode}
 </td>
 
 <td className="px-4 py-2 text-left font-medium text-[12px]">
@@ -304,9 +357,117 @@ No Data Found
 
 )}
 
+</tbody> */}
+<tbody className="divide-y divide-gray-200">
+
+{loading ? (
+
+  // 🔥 Skeleton Loader
+  Array.from({ length: size }).map((_, i) => (
+    <tr key={i} className="animate-pulse">
+      {Array.from({ length: 8 }).map((_, j) => (
+        <td key={j} className="px-4 py-3">
+          <div className="h-3 bg-gray-200 rounded w-full"></div>
+        </td>
+      ))}
+    </tr>
+  ))
+
+) : data.length > 0 ? (
+
+  data.map((item, index) => (
+    <tr key={item.hostelId}>
+      <td className="px-4 py-3">
+        {(page - 1) * size + index + 1}
+      </td>
+
+      <td className="px-4 py-2 text-left font-medium text-[12px]">
+        {item.hostelName}
+      </td>
+
+      <td className="px-4 py-2 text-left font-medium text-[12px]">
+        {item.mobile}
+      </td>
+
+      <td className="px-4 py-2 text-left font-medium text-[12px]">
+        {item.initials}
+      </td>
+
+      <td
+       className="px-4 py-2 text-left font-medium text-[12px]"
+        onMouseEnter={(e) => {
+          setTooltip({
+            text: item.fullAddress,
+            x: e.clientX,
+            y: e.clientY
+          });
+        }}
+        onMouseLeave={() => setTooltip(null)}
+      >
+        {item.city} , {item.state}
+      </td>
+
+      <td className="px-4 py-2 text-left font-medium text-[12px]">
+        {item.recurringMode}
+      </td>
+
+      <td className="px-4 py-2 text-left font-medium text-[12px]">
+        {item.recurringStatus ? (
+          <span className="text-green-600 bg-green-100 px-2 py-1 rounded-full text-xs">
+            Generated
+          </span>
+        ) : (
+          <span className="text-red-600 bg-red-100 px-2 py-1 rounded-full text-xs">
+            Not Generated
+          </span>
+        )}
+      </td>
+
+      <td className="px-4 py-2 text-left font-medium text-[12px]">
+        <button
+           disabled={item.recurringStatus || filter === "UP_COMING"}
+          onClick={() => handleGenerate(item)}
+          className={`px-3 py-1 rounded-lg text-xs text-white
+          ${item.recurringStatus || filter === "UP_COMING"
+            ? "bg-gray-400"
+            : "bg-blue-600 hover:bg-blue-700"
+          }`}
+        >
+          Generate
+        </button>
+      </td>
+    </tr>
+  ))
+
+) : (
+
+  <tr>
+    <td colSpan="8" className="text-center py-6 text-gray-400">
+      No Data Found
+    </td>
+  </tr>
+
+)}
+
 </tbody>
 
           </table>
+  {tooltip && (
+  <div
+    className="fixed z-[99999] pointer-events-none"
+    style={{
+      top: tooltip.y + 5,
+      left: tooltip.x + 10
+    }}
+  >
+    <div className="bg-white text-gray-600 text-xs rounded-xl px-4 py-3 shadow-lg border border-gray-200 max-w-xs break-words">
+      {tooltip.text}
+    </div>
+
+    {/* Arrow */}
+    <div className="w-3 h-3 bg-white rotate-45 ml-4 -mt-1 border-l border-b border-gray-200"></div>
+  </div>
+)}
 
         </div>
 
@@ -368,7 +529,8 @@ No Data Found
           </div>
 
         </div>
-
+</>
+            )}
     </DashboardLayout>
   );
 };

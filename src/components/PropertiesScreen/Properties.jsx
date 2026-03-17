@@ -38,6 +38,7 @@ const Properties = () => {
   const [showResetModal, setShowResetModal] = useState(false);
   const [selectedHostelId, setSelectedHostelId] = useState(null);
   const [menuError, setMenuError] = useState("")
+  
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState({
     visible: false,
