@@ -277,7 +277,7 @@ const generateRecurringInvoice = async (hostelId, inputDay) => {
     if (res.status === 200) {
       return {
         success: true,
-        data: res.data
+        data: res.data || "Recurring Generated Successfully"
       };
     }
 
