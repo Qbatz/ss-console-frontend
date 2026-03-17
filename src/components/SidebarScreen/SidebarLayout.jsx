@@ -4,6 +4,16 @@ import mailImg from "../../assets/Mail.png";
 import notificationImg from "../../assets/Bell.png";
 import { NavLink } from "react-router-dom";
 import { useRole } from "../../Context/RoleContext";
+import Home from "../../assets/home.png";
+import Users from "../../assets/users.png";
+import Buildings from "../../assets/buildings.png";
+import Subscription from "../../assets/subscriptions.png";
+import Billings from "../../assets/billings.png";
+import Recurring  from "../../assets/recurringmonitor.png";
+import Support from "../../assets/supportticket.png";
+import Dashbord from "../../assets/spacedashboard.png";
+import Roles from "../../assets/roles.png";
+import Admin from "../../assets/adminuser.png";
 
 const DashboardLayout = ({ children }) => {
 
@@ -84,34 +94,42 @@ const DashboardLayout = ({ children }) => {
     <button onClick={() => setSidebarOpen(false)}>✕</button>
   </div>
 
-  <div className="space-y-1 text-gray-600 text-sm">
-    {/* <SidebarItem title="Home" count="35"  to={`/home/${adminDetails?.roleId}`} />
-    <SidebarItem title="Proprietors" count="04" to={`/proprietors/${adminDetails?.roleId}`} />
-    <SidebarItem title="Properties" count="05" to={`/properties/${adminDetails?.roleId}`}/>
-    <SidebarItem title="Subscriptions" count="05" to="/subscription"/>
-    <SidebarItem title="Billings" to ="/billing"/>
-    <SidebarItem title="Support Tickets" count="2" to="/supportTicket"/>
-    <SidebarItem title="CRM Dashboard" count="2" to="/crmDashboard"/>
-    <SidebarItem title="roles" count="2" to="/roles" />
-    <SidebarItem title="IAM-Admin User" count="2" to="/iam-admin-user"/> */}
-    <SidebarItem title="Home" count="35" to={`/home/${adminDetails?.roleId}`} />
+  <div className="space-y-2 text-gray-600 text-sm landing-7 ">
 
-<SidebarItem title="Proprietors" count="04" to={`/proprietors/${adminDetails?.roleId}`} />
 
-<SidebarItem title="Properties" count="05" to={`/properties/${adminDetails?.roleId}`} />
+    <SidebarItem title="Home" count="35" to={`/home/${adminDetails?.roleId}`} activeIcon={Home}
+  inactiveIcon={Home} />
 
-<SidebarItem title="Subscriptions" count="05" to={`/subscription/${adminDetails?.roleId}`} />
+<SidebarItem  title="Proprietors" count="04" to={`/proprietors/${adminDetails?.roleId}`} activeIcon={Users}
+  inactiveIcon={Users} />
 
-<SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} />
-<SidebarItem title="Recurring Monitor" count="2" to={`/Recurring-Bill/${adminDetails?.roleId}`} />
-<SidebarItem title="Support Tickets" count="2" to={`/supportTicket/${adminDetails?.roleId}`} />
+<SidebarItem title="Properties" count="05" to={`/properties/${adminDetails?.roleId}`}activeIcon={Buildings}
+  inactiveIcon={Buildings} />
 
-<SidebarItem title="CRM Dashboard" count="2" to={`/crmDashboard/${adminDetails?.roleId}`} />
+<SidebarItem title="Subscriptions" count="05" to={`/subscription/${adminDetails?.roleId}`}activeIcon={Subscription}
+  inactiveIcon={Subscription} />
 
-<SidebarItem title="roles" count="2" to={`/roles/${adminDetails?.roleId}`} />
+<SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`}activeIcon={Billings}
+  inactiveIcon={Billings} />
 
-<SidebarItem title="IAM-Admin User" count="2" to={`/iam-admin-user/${adminDetails?.roleId}`} />
- <SidebarItem title="Tenants" to ="/tenantList"/>
+<SidebarItem title="Recurring Monitor" count="2" to={`/Recurring-Bill/${adminDetails?.roleId}`}activeIcon={Recurring}
+  inactiveIcon={Recurring} />
+
+  <SidebarItem title="Tenants Summary" to ="/tenantList"activeIcon={Users}
+  inactiveIcon={Users}/>
+
+<SidebarItem title="Support Tickets" count="2" to={`/supportTicket/${adminDetails?.roleId}`}activeIcon={Support}
+  inactiveIcon={Support} />
+
+<SidebarItem title="CRM Dashboard" count="2" to={`/crmDashboard/${adminDetails?.roleId}`}activeIcon={Dashbord}
+  inactiveIcon={Dashbord} />
+
+
+<SidebarItem title="IAM-Admin User" count="2" to={`/iam-admin-user/${adminDetails?.roleId}`} activeIcon={Admin}
+  inactiveIcon={Admin}/>
+
+  <SidebarItem title="roles" count="2" to={`/roles/${adminDetails?.roleId}`}activeIcon={Roles}
+  inactiveIcon={Roles} />
  
   </div>
 </div>
@@ -135,7 +153,30 @@ const DashboardLayout = ({ children }) => {
   );
 };
 
-const SidebarItem = ({ title, count, to }) => (
+// const SidebarItem = ({ img,title, count, to }) => (
+//   <NavLink
+//     to={to}
+//     className={({ isActive }) =>
+//       `flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition
+//       ${
+//         isActive
+//           ? "bg-blue-50 text-blue-600 font-medium"
+//           : "hover:bg-gray-100 text-gray-600"
+//       }`
+//     }
+//   >
+//     <span>{title}</span>
+//     {count && (
+//       <span className="text-xs bg-gray-100 px-2  rounded-full">
+//         {count}
+//       </span>
+//     )}
+
+//   </NavLink>
+
+// );
+
+const SidebarItem = ({ title, count, to, activeIcon, inactiveIcon }) => (
   <NavLink
     to={to}
     className={({ isActive }) =>
@@ -147,14 +188,24 @@ const SidebarItem = ({ title, count, to }) => (
       }`
     }
   >
-    <span>{title}</span>
-    {count && (
-      <span className="text-xs bg-gray-100 px-2  rounded-full">
-        {count}
-      </span>
+    {({ isActive }) => (
+      <>
+        <div className="flex items-center gap-5">
+          <img
+            src={isActive ? activeIcon : inactiveIcon}
+            className="w-5 h-5"
+          />
+          <span className="whitespace-nowrap">{title}</span>
+        </div>
+
+        {count && (
+          <span className="text-xs bg-gray-100 px-2 rounded-full text-blue-500">
+            {count}
+          </span>
+        )}
+      </>
     )}
   </NavLink>
 );
-
 
 export default DashboardLayout;
