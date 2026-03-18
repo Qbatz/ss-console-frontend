@@ -16,8 +16,17 @@ const IamAdminUser = () => {
 
   const [admin, setAdmin] = useState(null);
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   console.log("agents", agents)
+
+  useEffect(() => {
+    const handleClickOutside = () => setMenuOpen(null);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     getAllAgents()
@@ -186,7 +195,8 @@ const IamAdminUser = () => {
                       {agents?.length > 0 ? (
                         agents.map((user, index) => (
                           <tr
-                            key={index}
+                            // key={index}
+                            key={user.agentId}
                             className="border-b last:border-0 hover:bg-gray-50 border-gray-300"
                           >
                             <td className="px-4 py-1 text-left font-semibold text-xs whitespace-nowrap text-blue-700">
@@ -216,11 +226,41 @@ const IamAdminUser = () => {
                 </span>
               </td> */}
 
-                            <td
+                            {/* <td
                               className="px-1 py-4 text-gray-500 cursor-pointer"
-                              onClick={() => handleDeactivate(user.agentId)}
+                            onClick={() => handleDeactivate(user.agentId)}
                             >
                               ⋮
+                            </td> */}
+                            <td className="px-1 py-4  relative">
+
+                              <span
+                                className="cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setMenuOpen(menuOpen === user.agentId ? null : user.agentId);
+                                }}
+                              >
+                                ⋮
+                              </span>
+
+                              {menuOpen === user.agentId && (
+                                <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+
+                                  <button
+                                    onClick={() => {
+                                      setSelectedUser(user);
+                                      setConfirmOpen(true);
+                                      setMenuOpen(null);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                  >
+                                    Deactivate
+                                  </button>
+
+                                </div>
+                              )}
+
                             </td>
                           </tr>
                         ))
@@ -240,7 +280,51 @@ const IamAdminUser = () => {
               </div>
             </div>
 
+            {confirmOpen && (
+              <div
+                className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]"
+                onClick={() => setConfirmOpen(false)}
+              >
+                <div
+                  className="bg-white rounded-xl w-[400px] p-6"
+                  onClick={(e) => e.stopPropagation()}
+                >
 
+
+                  <h2 className="text-xl font-semibold mb-4 text-left">
+                    Deactivate User
+                  </h2>
+
+
+                  <p className="text-sm text-gray-800 mb-6 text-left">
+                    Are you sure you want to deactivate this admin user?
+                  </p>
+
+                  {/* Buttons */}
+                  <div className="flex justify-end gap-3">
+
+                    <button
+                      onClick={() => setConfirmOpen(false)}
+                      className="px-4 py-2 border rounded-lg"
+                    >
+                      No
+                    </button>
+
+                    <button
+                      onClick={() => { 
+                        handleDeactivate(selectedUser.agentId);
+                        setConfirmOpen(false);
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                    >
+                      Yes
+                    </button>
+
+                  </div>
+
+                </div>
+              </div>
+            )}
 
           </div>
           <AddAdmin isOpen={open} onClose={() => setOpen(false)} />
