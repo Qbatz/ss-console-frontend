@@ -1,6 +1,10 @@
 import React from "react";
+import { usePermission } from "../../Utils/permissionHelper";
 
 const SubscriptionsTab = ({ properties }) => {
+   const { canRead, canWrite, canUpdate, canDelete } =
+      usePermission("Subscriptions");
+    console.log("canRead", canRead)
 
   return (
     <div className="overflow-x-auto">

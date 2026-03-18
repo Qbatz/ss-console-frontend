@@ -69,10 +69,21 @@ const DashboardLayout = ({ children }) => {
 
           <img src={notificationImg} className="w-[18px] h-[18px]" />
 
-          <img
+          {/* <img
             src="https://i.pravatar.cc/40"
             className="w-8 h-8 rounded-full object-cover"
-          />
+          /> */}
+      {adminDetails?.profilePic ? (
+  <img
+    src={adminDetails.profilePic}
+    className="w-8 h-8 rounded-full object-cover"
+    alt="profile"
+  />
+) : (
+  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold">
+    {adminDetails?.initials || "NA"}
+  </div>
+)}
         </div>
       </div>
 

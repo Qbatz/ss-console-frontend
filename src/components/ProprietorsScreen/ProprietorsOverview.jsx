@@ -9,9 +9,12 @@ import Arrow from "../../assets/arrow-up.png";
 import { useOwners } from "../../Context/OwnersContext";
 import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import { usePermission } from "../../Utils/permissionHelper";
 const ProprietorsOverview = () => {
 const navigate = useNavigate();
  const location = useLocation();
+  const { canRead, canWrite, canUpdate, canDelete } =
+          usePermission("Owners");
  const ownerData = location.state?.ownerData;
     const { owners, totalItems, totalPages, loading, getOwners,accessError,getOwnerById,updateOwnerEmail} = useOwners();
   
@@ -67,7 +70,7 @@ const handleEmailUpdate = async () => {
       }, 1500);
 
   } else {
-    alert(res.message);
+    setEmailError(res.message);
   }
 
 };
@@ -152,7 +155,15 @@ const handleEmailUpdate = async () => {
       </p>
     </div>
 
-    <button className="text-gray-900 border rounded border-gray-300   text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white cursor-pointer "  onClick={() => setShowEmailModal(true)}>
+    <button
+  onClick={() => setShowEmailModal(true)}
+  disabled={canWrite === false}
+  className={`px-4 py-2 text-[12px] font-medium rounded border
+  ${canWrite
+    ? "bg-blue-600 hover:bg-blue-700 text-white border-blue-600 cursor-pointer"
+    : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
+  }`}
+>
   Change Email
 </button>
 

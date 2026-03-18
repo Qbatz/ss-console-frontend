@@ -4,11 +4,14 @@ import swap from "../../assets/arrowswap.png";
 import { useOwners } from "../../Context/OwnersContext";
 import LoginImg from "../../assets/LoginImg.png";
 import { useNavigate } from "react-router-dom";
+import { usePermission } from "../../Utils/permissionHelper";
 
 const Proprietors = () => {
 
   const { owners, totalItems, totalPages, loading, getOwners,accessError,getOwnerById} = useOwners();
  const navigate = useNavigate();
+  const { canRead, canWrite, canUpdate, canDelete } =
+         usePermission("Owners");
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
   const [expiryFilter, setExpiryFilter] = useState("ALL");
@@ -84,7 +87,7 @@ const handleOwnerClick = async (item) => {
   return (
     <DashboardLayout>
 
-           {accessError === "Access Restricted" ? (
+           {(canRead === false || accessError === "Access Restricted") ? (
       
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
           
@@ -134,9 +137,9 @@ const handleOwnerClick = async (item) => {
         <div className="flex justify-between items-center">
 
           <div className="flex gap-2">
-            <select className="border border-gray-300 rounded-md px-3 py-2 text-[14px]">
+            {/* <select className="border border-gray-300 rounded-md px-3 py-2 text-[14px]">
               <option>All</option>
-            </select>
+            </select> */}
             <select
               value={expiryFilter}
               onChange={(e) => {
@@ -150,9 +153,9 @@ const handleOwnerClick = async (item) => {
               <option value="ABOUT_TO_EXPIRE">About to expire</option>
             </select>
 
-            <button className="border border-gray-300 px-3 py-2 rounded-md text-[14px]">
+            {/* <button className="border border-gray-300 px-3 py-2 rounded-md text-[14px]">
               Filter
-            </button>
+            </button> */}
           </div>
 
           <div className="flex items-center gap-2">

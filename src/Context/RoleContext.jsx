@@ -301,6 +301,26 @@ const deactivateAgent = async (agentId) => {
     setLoading(false);
   }
 };
+const assignStaff = async (demoRequestId, agentId) => {
+  try {
+    const res = await api.put(
+      `/v2/demo-request/assign/${demoRequestId}`,
+      {
+        agentId: agentId
+      }
+    );
+
+    if (res.status === 200) {
+      return { success: true };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    return { success: false, message: msg };
+  }
+};
 
   return (
     <RoleContext.Provider
@@ -311,7 +331,7 @@ const deactivateAgent = async (agentId) => {
         errorMsg,
         adminDetails,  
         fetchModules,
-        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError,deactivateAgent, adminPermissions,
+        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError,deactivateAgent, adminPermissions,assignStaff
       }}
     >
       {children}

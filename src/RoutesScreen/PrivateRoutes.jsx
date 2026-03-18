@@ -21,6 +21,8 @@ import TenantsList from "../components/TenantsList/TenantAllLists";
 import RecurringInvoice from "../components/RecurringMonitor/RecurringInvoice";
 
 
+
+
 const PrivateRoute = ({ children }) => {
 const token =
   localStorage.getItem("access_token") ||
@@ -55,6 +57,8 @@ const PrivateRoutesScreen = () => {
               <Route path="/ProprietorsOverview/:ownerId" element={<ProprietorsOverview/>} />
               <Route path="/tenantList" element={<TenantsList/>} />
                  <Route path="/Recurring-Bill/:roleId" element={<RecurringInvoice />} />
+                <Route path="/subscriptions" element={<Subscription />} />
+
           </Routes>
           </OwnersProvider>
           </SubscriptionProvider>
