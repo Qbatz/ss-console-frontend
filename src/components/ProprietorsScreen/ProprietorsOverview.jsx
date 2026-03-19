@@ -10,6 +10,7 @@ import { useOwners } from "../../Context/OwnersContext";
 import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import { usePermission } from "../../Utils/permissionHelper";
+import { useHostel } from "../../Context/HostelListContext";
 const ProprietorsOverview = () => {
 const navigate = useNavigate();
  const location = useLocation();
@@ -17,6 +18,7 @@ const navigate = useNavigate();
           usePermission("Owners");
  const ownerData = location.state?.ownerData;
     const { owners, totalItems, totalPages, loading, getOwners,accessError,getOwnerById,updateOwnerEmail} = useOwners();
+    const { hostels, getHostels, getHostelById, hardResetHostel, errorMsg, deleteHostelExpense } = useHostel();
   
 
   const [activeTab, setActiveTab] = useState("properties");
@@ -36,6 +38,17 @@ const formatDateTime = (date, time) => {
     day: "2-digit"
   }) + " " + (time || "");
 };
+ const handlePropertyClick = async (item) => {
+
+    const res = await getHostelById(item.hostelId);
+    console.log("res", res)
+    if (res?.success) {
+      navigate(`/property-overview/${item.hostelId}`, {
+        state: { hostelData: res.data }
+      });
+
+    }
+  };
 
 const handleEmailUpdate = async () => {
 
@@ -275,9 +288,14 @@ const handleEmailUpdate = async () => {
 
             <td className="px-4 py-3 text-left font-medium text-[12px]">{index + 1}</td>
 
-            <td className="px-4 py-3 text-left font-medium text-[12px]">
-              {property.hostelName}
-            </td>
+           <td className="px-4 py-3 text-left font-medium text-[12px]">
+  <span
+    className="text-blue-600 cursor-pointer hover:underline"
+    onClick={() => handlePropertyClick(property)}
+  >
+    {property.hostelName}
+  </span>
+</td>
 
             <td className="px-4 py-3 text-left font-medium text-[12px]">
             {property?.hostelType}

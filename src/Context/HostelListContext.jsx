@@ -154,7 +154,7 @@ const deleteHostelExpense = async (hostelId) => {
       `/v2/hostels/expense/${hostelId}`
     );
 
-    if (res.status === 200) {
+    if (res.status === 200 || res.status === 204) {
       return {
         success: true,
         message: "Expense deleted successfully"

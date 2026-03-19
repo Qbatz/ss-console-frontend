@@ -117,12 +117,39 @@ const getDemoRequests = async (page = 1, size = 10, name = "") => {
     setLoading(false);
   }
 };
+const getAgentsDropdown = async () => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get("/v2/admin/agents-dropdown");
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+        message: "Updated Successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return { success: false, message: msg };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <SubscriptionContext.Provider
       value={{
         loading,
         errorMsg,
-        createSubscription,getSubscriptions,getDemoRequests
+        createSubscription,getSubscriptions,getDemoRequests,getAgentsDropdown
       }}
     >
       {children}
