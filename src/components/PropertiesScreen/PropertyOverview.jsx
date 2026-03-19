@@ -21,8 +21,11 @@ import Toast from "../SuccessModal/ToastDesign";
 import { usePermission } from "../../Utils/permissionHelper";
 import LoginImg from "../../assets/LoginImg.png";
 import ReccuringBill from "./ReccuringBill";
+import { useOwners } from "../../Context/OwnersContext";
 const PropertyOverview = () => {
     const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError } = useHostel();
+      const { owners, totalItems, totalPages, getOwners,getOwnerById} = useOwners();
+    
   const { canRead, canWrite, canUpdate, canDelete } =
       usePermission("Tenants");
       
@@ -82,6 +85,19 @@ hostelData.hostelId,
       setHostelError(res?.message || "Please Enter Valid Hostel ID");
     }
   };
+  const handleOwnerClick = async (item) => {
+
+  const res = await getOwnerById(item.ownerInfo.ownerId);
+
+  if (res?.success) {
+
+     navigate(`/ProprietorsOverview/${item.ownerInfo.ownerId}`, {
+      state: { ownerData: res.data }
+    });
+
+  }
+
+};
 
   if (!hostelData) return <div className="p-5">Loading...</div>;
  
@@ -118,13 +134,13 @@ hostelData.hostelId,
               </div>
 
               <div>
-                <h2 className="text-[24px] font-semibold text-gray-900 text-left font-sans">
+                <h2 className="text-[24px] font-semibold text-gray-900 text-left font-sans" >
                   {hostelData.hostelName}
                 </h2>
 
                 <p className="text-sm text-gray-500 flex items-center gap-1">
                   {hostelData.hostelId} |
-                  <span className="text-[#2563EB] cursor-pointer">
+                  <span className="text-blue-600 cursor-pointer hover:underline" onClick={() => handleOwnerClick(hostelData)}>
                     {hostelData.ownerInfo?.fullName}
                   </span>
 
