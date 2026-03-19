@@ -10,6 +10,8 @@ const Billing = () => {
           Billing
         </h1>
 
+        
+
         <div className="text-blue-500 text-[12px] rounded-xl bg-[#F8F9FF] p-2 pr-3 ">
           <button 
           className="flex items-center gap-2">
