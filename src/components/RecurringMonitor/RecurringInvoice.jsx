@@ -7,9 +7,14 @@ import Search from "../../assets/Search.png";
 import { usePermission } from "../../Utils/permissionHelper";
 import LoginImg from "../../assets/LoginImg.png";
 import Circle from "../../assets/menucircle.png";
-
+import OwnerImg from "../../assets/ownerimg.png";
+import call from "../../assets/call.png";
+import location from "../../assets/locationGrey.png";
+import team from "../../assets/team.png";
+import refreshWhite from "../../assets/refreshWhite.png";
+import refresh from "../../assets/RefreshButton.png"
 const RecurringInvoice = () => {
-  const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg } = useHostel();
+  const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId } = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Recurring");
   console.log("errorMsg", errorMsg)
@@ -23,16 +28,38 @@ const RecurringInvoice = () => {
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
-const [showDetailsModal, setShowDetailsModal] = useState(false);
-const [selectedItem, setSelectedItem] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
-
+  const [recurringDetails, setRecurringDetails] = useState(null);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [openFilter, setOpenFilter] = useState(false);
   const [tooltip, setTooltip] = useState(null);
+  const [historyPage, setHistoryPage] = useState(0);
+  const [historySize, setHistorySize] = useState(5);
+  const [historyTotalPages, setHistoryTotalPages] = useState(0);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkReason, setBulkReason] = useState("");
+  const [bulkDesc, setBulkDesc] = useState("");
+  const [confirmBulk, setConfirmBulk] = useState(false);
+  const handleSelect = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((i) => i !== id)
+        : [...prev, id]
+    );
+  };
 
+  const handleSelectAll = () => {
+    if (selectedIds.length === data.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(data.map((item) => item.hostelId));
+    }
+  };
   const fetchRecurring = async () => {
 
     const res = await getRecurringHostels(
@@ -67,6 +94,34 @@ const [selectedItem, setSelectedItem] = useState(null);
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  const handleOpenDetails = async (item, page = 0) => {
+    setSelectedItem(item);
+    console.log("setSelectedItem", selectedItem)
+    setShowDetailsModal(true);
+
+    const res = await getRecurringByHostelId(
+      item.hostelId,
+      page,
+      historySize
+    );
+
+    if (res?.success) {
+      setRecurringDetails(res.data);
+      setHistoryTotalPages(res.data.totalPages || 1);
+      setHistoryPage(page);
+    }
+  };
+  //   const handleOpenDetails = async (item) => {
+  //     console.log("item",item)
+  //   setSelectedItem(item);
+  //   setShowDetailsModal(true);
+
+  //   const res = await getRecurringByHostelId(item.hostelId);
+
+  //   if (res?.success) {
+  //     setRecurringDetails(res.data);
+  //   }
+  // };
   useEffect(() => {
 
     const delay = setTimeout(() => {
@@ -167,30 +222,29 @@ const [selectedItem, setSelectedItem] = useState(null);
               <p className="text-xl font-semibold mt-1">{totalItems}</p>
             </div>
 
-            {/* <div className="border border-gray-200 rounded-xl p-4 bg-white">
-          <p className="text-sm text-gray-500">Recurring Pending</p>
-          <p className="text-xl font-semibold mt-1">98</p>
-        </div>
+            <div className="border border-gray-200 rounded-xl p-4 bg-white">
+              <p className="text-sm text-gray-500">Recurring Pending</p>
+              <p className="text-xl font-semibold mt-1">0</p>
+            </div>
 
-        <div className="border border-gray-200 rounded-xl p-4 bg-white">
-          <p className="text-sm text-gray-500">Subscription Expired</p>
-          <p className="text-xl font-semibold mt-1">₹1,24,000</p>
-        </div> */}
+            <div className="border border-gray-200 rounded-xl p-4 bg-white">
+              <p className="text-sm text-gray-500">Subscription Expired</p>
+              <p className="text-xl font-semibold mt-1">0</p>
+            </div>
 
           </div>
 
           <p className="text-xs text-blue-500 mb-4 text-left">
             Based upon last 30 Days
           </p>
-
-          {/* Filters */}
-          <div className="flex justify-between items-center mb-4">
+          {/* 
+                   <div className="flex justify-between items-center mb-4">
 
             <div ref={dropdownRef} className="relative w-40">
 
               <button
                 onClick={() => setOpenFilter(!openFilter)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center cursor-pointer"
               >
                 {filterOptions.find(f => f.key === filter)?.label || "today"}
                 <span>▾</span>
@@ -218,16 +272,7 @@ const [selectedItem, setSelectedItem] = useState(null);
               )}
 
             </div>
-            {/* 
-       <input
-  value={search}
-  onChange={(e)=>{
-    setSearch(e.target.value);
-    setPage(1);
-  }}
-  placeholder="Search Tenants..."
-  className="border border-gray-300 rounded-lg px-4 py-2 text-sm w-56"
-/> */}
+  
             <div className="relative">
               <img
                 src={Search}
@@ -246,128 +291,166 @@ const [selectedItem, setSelectedItem] = useState(null);
               />
             </div>
 
+          </div> */}
+          <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
+
+            {/* LEFT SIDE */}
+            <div className="flex items-center gap-2 flex-wrap">
+
+              {/* All Properties */}
+              <button className="border border-blue-500 text-blue-600 px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
+                All Properties ▾
+              </button>
+
+              {/* This Month */}
+              <div ref={dropdownRef} className="relative w-40">
+
+                <button
+                  onClick={() => setOpenFilter(!openFilter)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center cursor-pointer"
+                >
+                  {filterOptions.find(f => f.key === filter)?.label || "today"}
+                  <span>▾</span>
+                </button>
+
+                {openFilter && (
+                  <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50 max-h-40 overflow-y-auto">
+
+                    {filterOptions.map((item) => (
+                      <div
+                        key={item.key}
+                        onClick={() => {
+                          setFilter(item.key);
+                          setPage(1);
+                          setOpenFilter(false);
+                        }}
+                        className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
+          ${filter === item.key ? "bg-blue-600 text-white" : ""}`}
+                      >
+                        {item.label}
+                      </div>
+                    ))}
+
+                  </div>
+                )}
+
+              </div>
+
+              {/* Cycle */}
+              <button className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
+                ⚙ Cycle: 2 → 1
+              </button>
+
+            </div>
+
+            {/* RIGHT SIDE */}
+            <div className="flex items-center gap-2">
+
+              {/* Refresh */}
+              <button
+                onClick={fetchRecurring}
+                className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 cursor-pointer"
+              >
+                ⟳
+              </button>
+
+              {/* Search */}
+              <div className="relative">
+                <img
+                  src={Search}
+                  className="absolute left-3 top-2.5 w-4 h-4"
+                />
+                <input
+                  type="text"
+                  placeholder="Search Properties..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm w-56"
+                />
+              </div>
+
+            </div>
           </div>
 
-          {/* Table */}
+          {selectedIds.length > 0 && (
+            <div className="flex justify-between items-center bg-blue-50 border border-blue-200 px-4 py-2 rounded-lg mb-3">
+
+              {/* LEFT */}
+              <div className="flex items-center gap-3 text-sm">
+
+                <input
+                  type="checkbox"
+                  checked={selectedIds.length === data.length}
+                  onChange={handleSelectAll}
+                />
+
+                <span className="text-blue-600 font-medium">
+                  {selectedIds.length} properties selected
+                </span>
+
+                <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs">
+                  Cycle: 2 → 1
+                </span>
+
+                <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">
+                  Recurring: All
+                </span>
+
+              </div>
+
+              {/* RIGHT */}
+              <div className="flex items-center gap-2">
+
+                <button
+                  onClick={() => setShowBulkModal(true)}
+                  className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 cursor-pointer"
+
+                >
+                  ⟳ Bulk Generate Recurring
+                </button>
+
+                <button
+                  onClick={() => setSelectedIds([])}
+                  className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm cursor-pointer"
+                >
+                  ✕ Clear
+                </button>
+
+              </div>
+
+            </div>
+          )}
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
 
-            <div className="max-h-[400px] overflow-y-auto">
+            <div className="max-h-[400px]  overflow-x-auto overflow-y-auto">
 
-              <table className="w-full text-sm">
+              <table className="w-max min-w-full table-fixed text-sm text-left">
 
-                <thead className="bg-gray-50 sticky top-0">
+                <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-40">
                   <tr>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">ID</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Property</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Mobile No</th>
+                    <th className="px-4 py-3 sticky left-0 bg-[#F8F9FF] z-50 w-[80px]">ID</th>
+                    <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">Property</th>
+                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Mobile No</th>
                     {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Sub Status</th> */}
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Recurring Status</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Region / City</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Billing Cycle</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Recurring mode</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Tenant Count</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Sub Status</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Actions</th>
+                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring Status</th>
+                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Region / City</th>
+                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Billing Cycle</th>
+                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring mode</th>
+                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Tenant Count</th>
+                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Sub Status</th>
+                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
 
-                {/* <tbody className="divide-y divide-gray-200">
 
-{data.length > 0 ? (
-
-data.map((item,index)=>(
-
-<tr key={item.hostelId}>
-
-<td className="px-4 py-3">
-
- {(page - 1) * size + index + 1}
-</td>
-
-<td className="px-4 py-2 text-left font-medium text-[12px]">
-{item.hostelName}
-</td>
-
-<td className="px-4 py-2 text-left font-medium text-[12px]">
-{item.mobile}
-</td>
-
-<td className="px-4 py-2 text-left font-medium text-[12px]">
-{item.initials}
-</td>
-
-
-<td
-  className="px-4 py-2 text-left font-medium text-[12px]"
-  onMouseEnter={(e) => {
-  setTooltip({
-    text: item.fullAddress,
-    x: e.clientX,
-    y: e.clientY
-  });
-}}
-  onMouseLeave={() => setTooltip(null)}
->
-  {item.city} , {item.state}
-</td>
-<td className="px-4 py-2 text-left font-medium text-[12px]">
-{item.recurringMode}
-</td>
-
-<td className="px-4 py-2 text-left font-medium text-[12px]">
-
-{item.recurringStatus ?
-
-<span className="text-green-600 text-xs bg-green-100 px-2 py-1 rounded-full">
-Generated
-</span>
-
-:
-
-<span className="text-red-600 text-xs bg-red-100 px-2 py-1 rounded-full">
-Not Generated
-</span>
-
-}
-
-</td>
-
-<td className="px-4 py-2 text-left font-medium text-[12px]">
-
-<button
-  disabled={item.recurringStatus}
-  onClick={() => handleGenerate(item)}
-  className={`px-3 py-1 rounded-lg text-xs text-white
-  ${item.recurringStatus
-    ? "bg-gray-400 cursor-not-allowed"
-    : "bg-blue-600 hover:bg-blue-700"
-  }`}
->
-  Generate
-</button>
-
-</td>
-
-</tr>
-
-))
-
-) : (
-
-<tr>
-<td colSpan="7" className="text-center py-6 text-gray-400">
-No Data Found
-</td>
-</tr>
-
-)}
-
-</tbody> */}
                 <tbody className="divide-y divide-gray-200">
 
                   {loading ? (
 
-                    // 🔥 Skeleton Loader
+
                     Array.from({ length: size }).map((_, i) => (
                       <tr key={i} className="animate-pulse">
                         {Array.from({ length: 8 }).map((_, j) => (
@@ -382,14 +465,37 @@ No Data Found
 
                     data.map((item, index) => (
                       <tr key={item.hostelId}>
-                        <td className="px-4 py-3">
+                        {/* <td className="px-4 py-3">
                           {(page - 1) * size + index + 1}
+                        </td> */}
+                        {/* <td className="px-4 py-3 flex items-center gap-2">
+  <input
+    type="checkbox"
+    checked={selectedIds.includes(item.hostelId)}
+    onChange={() => handleSelect(item.hostelId)}
+  />
+
+  <span>
+    {(page - 1) * size + index + 1}
+  </span>
+</td> */}
+                        <td className="px-4 py-2 sticky left-0 bg-white z-30 w-[80px] group-hover:bg-gray-50 flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(item.hostelId)}
+                            onChange={() => handleSelect(item.hostelId)}
+                            disabled={item.recurringStatus}
+                            className={item.recurringStatus ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+
+                          />
+
+                          <span>
+                            {(page - 1) * size + index + 1}
+                          </span>
                         </td>
 
-                        {/* <td className="px-4 py-2 text-left font-medium text-[12px]">
-        {item.hostelName}
-      </td> */}
-                        <td className="px-4 py-2 whitespace-nowrap">
+
+                        <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] group-hover:bg-gray-50">
                           <div className="flex items-center gap-3">
 
                             {/* Avatar */}
@@ -452,7 +558,7 @@ No Data Found
                           Billing Cycle
                         </td>
                         <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                          {item.recurringMode}
+                          {item.recurringMode || "----"}
                         </td>
                         <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                           Tenant Count
@@ -483,30 +589,36 @@ No Data Found
                           </button>
                         </td> */}
                         <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-  {!item.recurringStatus ? (
-    <button
-      // disabled={filter === "UP_COMING"}
-      // onClick={() => handleGenerate(item)}
-      onClick={() => {
-  setSelectedItem(item);
-  setShowDetailsModal(true);
-}}
-      className="px-3 py-1 rounded-lg text-xs text-white bg-blue-600 hover:bg-blue-700"
-        
-    >
-      Generate
-    </button>
-  ) : (
-    <button
-      onClick={() => {
-        console.log("View Details", item);
-      }}
-      className="px-3 py-1 rounded-lg text-xs border border-gray-300 text-blue-600 bg-white hover:bg-gray-50 flex items-center gap-1"
-    >
-      👁 View Details
-    </button>
-  )}
-</td>
+                          {!item.recurringStatus ? (
+                            <button
+                              // disabled={filter === "UP_COMING"}
+                              // onClick={() => handleGenerate(item)}
+                              // onClick={() => {
+                              //   setSelectedItem(item);
+                              //   setShowDetailsModal(true);
+                              // }}
+                              //                               onClick={() => {
+                              //   setSelectedItem(item);
+                              //   setShowDetailsModal(true);
+
+
+                              //   getRecurringByHostelId(item.hostelId);
+                              // }}
+                              onClick={() => handleOpenDetails(item)}
+                              className="px-3 py-1 rounded-lg text-xs text-white bg-blue-600 hover:bg-blue-700"
+
+                            >
+                              Generate
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleOpenDetails(item)}
+                              className="px-3 py-1 rounded-lg text-xs border border-gray-300 text-blue-600 bg-white hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
+                            >
+                              👁 View Details
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))
 
@@ -600,164 +712,521 @@ No Data Found
             </div>
 
           </div>
- {showDetailsModal && selectedItem && (
-  <div className="fixed inset-0 z-[9999] flex justify-end">
+          {showDetailsModal && selectedItem && (
+            <div className="fixed inset-0 z-[9999] flex justify-end">
 
-    {/* Overlay */}
-      <div
-    className="fixed inset-0 bg-black/10 backdrop-blur-[0px]"
-    onClick={() => setShowDetailsModal(false)}
-  ></div>
 
-    {/* RIGHT SIDE FLOATING DRAWER */}
-    <div className="relative z-[10000] flex items-center">
-    <div className="w-[420px] h-[calc(100%-40px)] my-5 mr-5 bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
+              <div
+                className="fixed inset-0 bg-black/10 backdrop-blur-[0px]"
+                onClick={() => setShowDetailsModal(false)}
+              ></div>
 
-        {/* HEADER (fixed) */}
-        <div className="flex justify-between items-start p-5 border-b">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-semibold">
-              {selectedItem.initials}
-            </div>
 
-            <div>
-              <p className="font-semibold text-sm">
-                {selectedItem.hostelName}
-              </p>
-              <p className="text-xs text-gray-500">
-                {selectedItem.hostelId}
-              </p>
-            </div>
-          </div>
+              <div className="relative z-[10000] flex items-center">
+                <div className="w-[420px] h-[calc(100%-40px)] my-5 mr-5 bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
 
-          <button onClick={() => setShowDetailsModal(false)}>✕</button>
-        </div>
 
-        {/* BODY (scroll only here) */}
-        <div className="flex-1 overflow-y-auto p-5 text-xs">
+                  <div className="flex justify-between items-start p-5 border-b border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-semibold">
+                        {selectedItem.initials}
+                      </div>
 
-          {/* PROPERTY INFO */}
-          <div className="mb-4 space-y-2">
-            <p className="font-semibold text-gray-500 text-[11px]">
-              PROPERTY INFO
-            </p>
+                      <div className="text-left">
+                        <p className="font-semibold text-sm">
+                          {selectedItem.hostelName}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {selectedItem.hostelId}
+                        </p>
+                      </div>
+                    </div>
 
-            <p>📍 {selectedItem.city}, {selectedItem.state}</p>
-            <p>📞 {selectedItem.mobile}</p>
-            <p>👤 {selectedItem.ownerInfo?.fullName}</p>
-            <p>👥 Active Tenants: 42</p>
-          </div>
+                    <button className="cursor-pointer" onClick={() => setShowDetailsModal(false)}>✕</button>
+                  </div>
 
-          {/* BILLING CARD */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-4">
-            <p className="text-gray-500 text-[11px] mb-2 font-semibold">
-              BILLING RULE
-            </p>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-gray-400">Billing Method</p>
-                <p className="font-medium">Monthly Recurring</p>
+                  <div className="flex-1 overflow-y-auto p-5 text-xs">
+
+
+                    {/* <div className="mb-4 space-y-2">
+                      <p className="font-semibold text-gray-500 text-[11px]">
+                        PROPERTY INFO
+                      </p>
+
+                      <p><img src={location} className="w-4 h-4"/> {selectedItem.city}, {selectedItem.state}</p>
+                      <p> <img src={call} className="w-4 h-4"/> {selectedItem.mobile}</p>
+                      <p><img src={OwnerImg} className="w-4 h-4"/> {selectedItem.ownerInfo?.fullName}</p>
+                      <p><img src={team} className="w-4 h-4"/> Active Tenants: 42</p>
+                    </div> */}
+                    <div className="mb-4">
+                      <p className="font-semibold text-gray-400 text-[11px] mb-3 text-left">
+                        PROPERTY INFO
+                      </p>
+
+                      <div className="space-y-3 text-[13px]">
+
+                        {/* Location */}
+                        <div className="flex items-center gap-3">
+                          <img src={location} className="w-4 h-4 opacity-60" />
+                          <span className="text-gray-500 w-28 text-left">Location</span>
+                          <span className="font-medium text-gray-800 text-left">
+                            {selectedItem.city}, {selectedItem.state}
+                          </span>
+                        </div>
+
+                        {/* Mobile */}
+                        <div className="flex items-center gap-3">
+                          <img src={call} className="w-4 h-4 opacity-60" />
+                          <span className="text-gray-500 w-28 text-left">Mobile</span>
+                          <span className="font-medium text-gray-800 text-left">
+                            {selectedItem.mobile}
+                          </span>
+                        </div>
+
+                        {/* Owner */}
+                        <div className="flex items-center gap-3">
+                          <img src={OwnerImg} className="w-4 h-4 opacity-60" />
+                          <span className="text-gray-500 w-28 text-left">Owner</span>
+                          <span className="font-medium text-gray-800 text-left">
+                            {selectedItem.ownerInfo?.fullName}
+                          </span>
+                        </div>
+
+                        {/* Active Tenants */}
+                        <div className="flex items-center gap-3">
+                          <img src={team} className="w-4 h-4 opacity-60" />
+                          <span className="text-gray-500 w-28 text-left">Active Tenants</span>
+                          <span className="font-medium text-gray-800 text-left">
+                            N/A
+                          </span>
+                        </div>
+
+                      </div>
+                    </div>
+
+
+                    {/* <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                      <p className="text-gray-500 text-[11px] mb-2 font-semibold">
+                        BILLING RULE
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-gray-400">Billing Method</p>
+                          <p className="font-medium">Monthly Recurring</p>
+                        </div>
+
+                        <div>
+                          <p className="text-gray-400">Billing Cycle</p>
+                          <p className="font-medium">2 → 1</p>
+                        </div>
+
+                        <div>
+                          <p className="text-gray-400">Current Period</p>
+                          <p className="font-medium">Apr 2 → May 1</p>
+                        </div>
+
+                        <div>
+                          <p className="text-gray-400">Next Recurring</p>
+                          <p className="font-medium">May 1, 2026</p>
+                        </div>
+                      </div>
+                    </div> */}
+                    <div className="bg-[#F7F8FA] border border-gray-200 rounded-xl p-5 mb-4">
+
+                      <p className="text-gray-400 text-[11px] font-semibold tracking-wide mb-4 text-left">
+                        BILLING RULE
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-y-5 gap-x-10 text-[13px] text-left">
+
+                        {/* Billing Method */}
+                        <div>
+                          <p className="text-gray-400 mb-1">Billing Method</p>
+                          <p className="font-medium text-gray-800">Monthly Recurring</p>
+                        </div>
+
+                        {/* Billing Cycle */}
+                        <div>
+                          <p className="text-gray-400 mb-1">Billing Cycle</p>
+                          <p className="font-medium text-gray-800">2 → 1</p>
+                        </div>
+
+                        {/* Current Period */}
+                        <div>
+                          <p className="text-gray-400 mb-1">Current Period</p>
+                          <p className="font-medium text-gray-800">Apr 2 → May 1</p>
+                        </div>
+
+                        {/* Next Recurring */}
+                        <div>
+                          <p className="text-gray-400 mb-1">Next Recurring</p>
+                          <p className="font-medium text-gray-800">May 1, 2026</p>
+                        </div>
+
+                        {/* Last Recurring (NEW row like design) */}
+                        <div>
+                          <p className="text-gray-400 mb-1">Last Recurring</p>
+                          <p className="font-medium text-gray-800">Apr 1, 2026</p>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {/* STATUS BADGES */}
+                    <div className="flex gap-2 mb-3">
+
+                      {/* Subscription Status */}
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full
+      ${selectedItem?.isSubscriptionActive
+                            ? "bg-green-100 text-green-600"
+                            : "bg-red-100 text-red-600"
+                          }`}
+                      >
+                        {selectedItem?.isSubscriptionActive ? "Active" : "Expired"}
+                      </span>
+
+                      {/* Recurring Status */}
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full
+      ${selectedItem?.recurringStatus
+                            ? "bg-green-100 text-green-600"
+                            : "bg-yellow-100 text-yellow-600"
+                          }`}
+                      >
+                        {selectedItem?.recurringStatus ? "Generated" : "Pending"}
+                      </span>
+
+                    </div>
+
+                    {/* ALERT */}
+                    {!selectedItem.recurringStatus && (
+                      <div className="bg-orange-100 text-orange-600 text-xs p-3 rounded-lg mb-4 text-left">
+                        Recurring invoices were not generated for this property.
+                        Subscription is expired.
+                      </div>
+                    )}
+
+                    {/* HISTORY TABLE */}
+                    <div>
+                      <p className="text-gray-500 text-[11px] font-semibold mb-2 text-left">
+                        RECURRING HISTORY — LAST 5 MONTHS
+                      </p>
+
+                      <div className="border border-gray-300 rounded-lg overflow-hidden">
+                        <table className="w-full text-xs">
+                          <thead className="bg-gray-50 text-gray-500">
+                            <tr>
+                              <th className="p-2 text-left">Month</th>
+                              <th className="p-2 text-left">Cycle</th>
+                              <th className="p-2 text-left">Inv</th>
+                              <th className="p-2 text-left">By</th>
+                              <th className="p-2 text-left">Status</th>
+                            </tr>
+                          </thead>
+
+                          <tbody>
+                            {recurringDetails?.recurringHistory?.length > 0 ? (
+                              recurringDetails.recurringHistory.map((item) => (
+                                <tr key={item.trackerId}>
+
+                                  <td className="p-2">
+                                    {item.recurringCreatedAtDate}
+                                  </td>
+
+                                  <td className="p-2">
+                                    {item.creationMonth - 1} → {item.creationMonth}
+                                  </td>
+
+                                  <td className="p-2">
+                                    {item.trackerId}
+                                  </td>
+
+                                  <td className="p-2">
+                                    {item.createdBy || "System"}
+                                  </td>
+
+                                  <td className="p-2">
+                                    <span
+                                      className={`px-2 py-1 rounded-full text-xs
+              ${item.recurringMode === "AUTOMATIC"
+                                          ? "bg-green-100 text-green-600"
+                                          : "bg-blue-100 text-blue-600"
+                                        }`}
+                                    >
+                                      {item.recurringMode}
+                                    </span>
+                                  </td>
+
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan="5" className="text-center py-4 text-gray-400">
+                                  No History Found
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+
+                      </div>
+                      {recurringDetails?.totalItems > historySize && (
+                        <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
+
+                          {/* Left - Total Count */}
+                          <span>
+                            Total Record Count :
+                            <span className="text-blue-600 ml-1">
+                              {recurringDetails?.totalItems || 0}
+                            </span>
+                          </span>
+
+                          {/* Right Controls */}
+                          <div className="flex items-center gap-3">
+
+                            {/* Page Size */}
+                            <select
+                              value={historySize}
+                              onChange={(e) => {
+                                const newSize = Number(e.target.value);
+                                setHistorySize(newSize);
+                                handleOpenDetails(selectedItem, 0);
+                              }}
+                              className="border rounded px-2 py-1 text-xs"
+                            >
+                              <option value={5}>5</option>
+                              <option value={10}>10</option>
+                              <option value={20}>20</option>
+                            </select>
+
+                            {/* Prev */}
+                            <button
+                              onClick={() =>
+                                handleOpenDetails(selectedItem, Math.max(historyPage - 1, 0))
+                              }
+                              disabled={historyPage === 0}
+                              className="px-1 disabled:opacity-40"
+                            >
+                              <img src={Arrow} className="w-3 h-3" />
+                            </button>
+
+                            {/* Current Page */}
+                            <span className="border px-2 py-1 rounded bg-gray-50 text-black">
+                              {historyPage + 1}
+                            </span>
+
+                            {/* Next */}
+                            <button
+                              onClick={() =>
+                                handleOpenDetails(
+                                  selectedItem,
+                                  Math.min(historyPage + 1, historyTotalPages - 1)
+                                )
+                              }
+                              disabled={historyPage >= historyTotalPages - 1}
+                              className="px-1 disabled:opacity-40"
+                            >
+                              <img src={Arrow} className="w-3 h-3 rotate-180" />
+                            </button>
+
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                  </div>
+
+                  {/* FOOTER (fixed bottom) */}
+                  {/* <div className="p-4 border-t flex justify-between">
+                    <button
+                      onClick={() => setShowDetailsModal(false)}
+                      className="px-4 py-2 border rounded-lg text-sm"
+                    >
+                      Close
+                    </button>
+
+                    <button
+                      onClick={() => handleGenerate(selectedItem)}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
+                    >
+                      🔄 Generate Recurring
+                    </button>
+                  </div> */}
+                  {!selectedItem?.isSubscriptionActive && !selectedItem?.recurringStatus && (
+                    <div className="p-4 border-t border-gray-300 flex justify-end gap-2">
+
+                      <button
+                        onClick={() => setShowDetailsModal(false)}
+                        className="px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                      >
+                        Close
+                      </button>
+
+                      {/* Show only if BOTH are false */}
+
+                      <button
+                        onClick={() => handleGenerate(selectedItem)}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg text-[12px] flex items-center gap-2"
+                      >
+                        <img src={refreshWhite} className="w-4 h-4" />
+                        Generate Recurring
+                      </button>
+
+
+                    </div>
+                  )}
+                </div>
               </div>
-
-              <div>
-                <p className="text-gray-400">Billing Cycle</p>
-                <p className="font-medium">2 → 1</p>
-              </div>
-
-              <div>
-                <p className="text-gray-400">Current Period</p>
-                <p className="font-medium">Apr 2 → May 1</p>
-              </div>
-
-              <div>
-                <p className="text-gray-400">Next Recurring</p>
-                <p className="font-medium">May 1, 2026</p>
-              </div>
-            </div>
-          </div>
-
-          {/* STATUS BADGES */}
-          <div className="flex gap-2 mb-3">
-            <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-600">
-              Expired
-            </span>
-            <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-600">
-              Pending
-            </span>
-          </div>
-
-          {/* ALERT */}
-          {!selectedItem.recurringStatus && (
-            <div className="bg-orange-100 text-orange-600 text-xs p-3 rounded-lg mb-4">
-              Recurring invoices were not generated for this property.
-              Subscription is expired.
             </div>
           )}
+        </>
+      )}
+      {showBulkModal && (
+        <div className="fixed inset-0 z-[9999] flex justify-end">
 
-          {/* HISTORY TABLE */}
-          <div>
-            <p className="text-gray-500 text-[11px] font-semibold mb-2">
-              RECURRING HISTORY — LAST 5 MONTHS
-            </p>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black/20"
+            onClick={() => setShowBulkModal(false)}
+          ></div>
 
-            <div className="border rounded-lg overflow-hidden">
-              <table className="w-full text-xs">
-                <thead className="bg-gray-50 text-gray-500">
-                  <tr>
-                    <th className="p-2 text-left">Month</th>
-                    <th className="p-2 text-left">Cycle</th>
-                    <th className="p-2 text-left">Inv</th>
-                    <th className="p-2 text-left">By</th>
-                    <th className="p-2 text-left">Status</th>
-                  </tr>
-                </thead>
+          {/* RIGHT DRAWER */}
+          <div className="relative z-[10000] flex items-center">
+            <div className="w-[520px] h-[calc(100%-40px)] my-5 mr-5 bg-white rounded-xl shadow-xl border border-gray-300 flex flex-col animate-slideIn">
 
-                <tbody>
-                  <tr className="bg-yellow-50">
-                    <td className="p-2">May 2026</td>
-                    <td className="p-2">Apr → May</td>
-                    <td className="p-2">42</td>
-                    <td className="p-2">Admin</td>
-                    <td className="p-2 text-yellow-600">Pending</td>
-                  </tr>
+              {/* HEADER */}
+              <div className="flex justify-between items-center p-5 border-b border-gray-300">
+                <h2 className="text-lg font-semibold flex items-center gap-2 text-left">
+                  <img src={refresh} className="w-5 h-5" /> Bulk Generate Recurring
+                </h2>
+                <button onClick={() => setShowBulkModal(false)}>✕</button>
+              </div>
 
-                  <tr>
-                    <td className="p-2">Apr 2026</td>
-                    <td className="p-2">Mar → Apr</td>
-                    <td className="p-2">40</td>
-                    <td className="p-2">System</td>
-                    <td className="p-2 text-green-600">Generated</td>
-                  </tr>
-                </tbody>
-              </table>
+              {/* BODY */}
+              <div className="flex-1 overflow-y-auto p-5 text-sm">
+
+                <p className="text-gray-500 mb-4 text-left">
+                  Generate recurring invoices for selected properties. Bulk action applies
+                  to properties with the same billing cycle.
+                </p>
+
+                {/* SUMMARY */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
+
+                  <div className="border border-gray-200 rounded-lg p-3 text-left">
+                    <p className="text-gray-400 text-xs">Properties</p>
+                    <p className="font-semibold text-lg">{selectedIds.length}</p>
+                    <p className="text-xs text-gray-400">Selected</p>
+                  </div>
+
+                  <div className="border border-gray-200 rounded-lg p-3 text-left">
+                    <p className="text-gray-400 text-xs">Billing Cycle</p>
+                    <p className="font-semibold text-lg">2 → 1</p>
+                    <p className="text-xs text-gray-400">Common</p>
+                  </div>
+
+                  <div className="border border-gray-200 rounded-lg p-3 text-left">
+                    <p className="text-gray-400 text-xs">Total Tenants</p>
+                    <p className="font-semibold text-lg">
+                      {
+                        data.filter(d => selectedIds.includes(d.hostelId)).length * 25
+                      }
+                    </p>
+                    <p className="text-xs text-gray-400">Invoices</p>
+                  </div>
+
+                </div>
+
+                {/* PROPERTY LIST */}
+                <div className="border border-gray-200 rounded-lg p-3 mb-4 max-h-[160px] overflow-y-auto">
+                  <p className="text-xs text-gray-400 mb-2 text-left">
+                    PROPERTIES TO BE PROCESSED
+                  </p>
+
+                  {data
+                    .filter(d => selectedIds.includes(d.hostelId))
+                    .map((item) => (
+                      <div key={item.hostelId} className="flex justify-between py-1">
+                        <span>{item.hostelName}</span>
+                        <span className="text-gray-400 text-xs">-- tenants</span>
+                      </div>
+                    ))}
+                </div>
+
+                {/* REASON */}
+                <div className="mb-3">
+                  <p className="text-sm mb-1 text-left">
+                    Reason <span className="text-red-500">*</span>
+                  </p>
+                  <select
+                    value={bulkReason}
+                    onChange={(e) => setBulkReason(e.target.value)}
+                    className="w-full border  border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    <option value="">Select a reason</option>
+                    <option value="manual">Manual</option>
+                    <option value="retry">Retry</option>
+                  </select>
+                </div>
+
+                {/* DESCRIPTION */}
+                <div className="mb-3 text-left">
+                  <p className="text-sm mb-1">Description</p>
+                  <textarea
+                    value={bulkDesc}
+                    onChange={(e) => setBulkDesc(e.target.value)}
+                    className="w-full border  border-gray-300 rounded-lg px-3 py-2"
+                    placeholder="Explain why..."
+                  />
+                </div>
+
+                {/* ALERT */}
+                <div className="bg-orange-100 text-orange-600 text-xs p-3 rounded-lg mb-3">
+                  This will create invoices for {selectedIds.length} properties
+                </div>
+
+                {/* CONFIRM */}
+                <div className="flex items-center gap-2 mb-4">
+                  <input
+                    type="checkbox"
+                    checked={confirmBulk}
+                    onChange={(e) => setConfirmBulk(e.target.checked)}
+                  />
+                  <span>
+                    I confirm generating recurring invoices manually
+                  </span>
+                </div>
+
+              </div>
+
+              {/* FOOTER */}
+              <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
+                <button
+                  onClick={() => setShowBulkModal(false)}
+                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  disabled={!confirmBulk || !bulkReason}
+                  className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2
+    ${confirmBulk && bulkReason
+                      ? "bg-blue-600 hover:bg-blue-700"
+                      : "bg-gray-300 cursor-not-allowed"
+                    }`}
+                >
+                  <img src={refreshWhite} className="w-4 h-4" />
+                  Generate
+                </button>
+              </div>
+
             </div>
           </div>
-
         </div>
-
-        {/* FOOTER (fixed bottom) */}
-        <div className="p-4 border-t flex justify-between">
-          <button
-            onClick={() => setShowDetailsModal(false)}
-            className="px-4 py-2 border rounded-lg text-sm"
-          >
-            Close
-          </button>
-
-          <button
-            onClick={() => handleGenerate(selectedItem)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
-          >
-            🔄 Generate Recurring
-          </button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-)}
-        </>
       )}
     </DashboardLayout>
   );

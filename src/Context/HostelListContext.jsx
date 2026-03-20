@@ -297,13 +297,42 @@ const generateRecurringInvoice = async (hostelId, inputDay) => {
     setLoading(false);
   }
 };
+const getRecurringByHostelId = async (hostelId, page = 0, size = 10) => {
+  try {
+    
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      `/v2/hostels/recurring/${hostelId}`,
+      {
+        params: {
+          page,
+          size
+        }
+      }
+    );
+
+    if (res.status === 200) {
+      return { success: true, data: res.data };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+  } finally {
+   
+  }
+};
   return (
     <HostelContext.Provider
       value={{
         hostels,
         loading,
         errorMsg,
-        getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice
+        getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice,getRecurringByHostelId
       }}
     >
       {children}
