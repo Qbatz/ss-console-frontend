@@ -1,17 +1,18 @@
 import React from "react";
+import swap from "../../assets/arrowswap.png";
 
-const ProductSupport = ({hostelData}) => {
+const ProductSupport = ({ hostelData }) => {
 
-    return(
-<div className="bg-white border border-[#E6E8F0] rounded-xl overflow-hidden">
+  return (
+    <div className="bg-white border border-[#E6E8F0] rounded-xl overflow-hidden">
 
-  {/* FIXED HEIGHT */}
-  <div className="h-[200px] flex flex-col">
+      {/* FIXED HEIGHT */}
+      <div className="h-[200px] flex flex-col">
 
-    {/* TABLE HEADER */}
-    <table className="w-full text-sm border-b border-gray-200">
-      <thead className="bg-[#F5F7FB] text-gray-600 text-xs">
-        <tr>
+        {/* TABLE HEADER */}
+        <table className="w-full text-sm border-b border-gray-200">
+          <thead className="bg-[#F5F7FB] text-gray-600 text-xs">
+            {/* <tr>
           <th className="px-4 py-3 text-left">TICKET ID</th>
           <th className="px-4 py-3 text-left">CREATED ON</th>
           <th className="px-4 py-3 text-left">RAISED BY</th>
@@ -20,17 +21,74 @@ const ProductSupport = ({hostelData}) => {
           <th className="px-4 py-3 text-left">STATUS</th>
           <th className="px-4 py-3 text-left">ASSIGNED TO</th>
           <th className="px-4 py-3 text-left">ACTIONS</th>
-        </tr>
-      </thead>
-    </table>
+        </tr> */}
+            <tr>
+              <th className="px-4 py-3 text-left">
+                <div className="flex items-center gap-1 text-[12px] font-semibold uppercase text-[#6B7280]">
+                  TICKET ID
+                  <img src={swap} className="w-3 h-3 opacity-70" />
+                </div>
+              </th>
 
-    {/* SCROLLABLE BODY */}
-    <div className="flex-1 overflow-y-auto">
+              <th className="px-4 py-3 text-left">
+                <div className="flex items-center gap-1 text-[12px] font-semibold uppercase text-[#6B7280]">
+                  CREATED ON
+                  <img src={swap} className="w-3 h-3 opacity-70" />
+                </div>
+              </th>
 
-      <table className="w-full text-sm">
-        <tbody className="divide-y divide-gray-200">
+              <th className="px-4 py-3 text-left">
+                <div className="flex items-center gap-1 text-[12px] font-semibold uppercase text-[#6B7280]">
+                  RAISED BY
+                  <img src={swap} className="w-3 h-3 opacity-70" />
+                </div>
+              </th>
 
-          {/* {Array.from({ length: 20 }).map((_, i) => (
+              <th className="px-4 py-3 text-left">
+                <div className="flex items-center gap-1 text-[12px] font-semibold uppercase text-[#6B7280]">
+                  CATEGORY
+                  <img src={swap} className="w-3 h-3 opacity-70" />
+                </div>
+              </th>
+
+              <th className="px-4 py-3 text-left">
+                <div className="flex items-center gap-1 text-[12px] font-semibold uppercase text-[#6B7280]">
+                  PRIORITY
+                  <img src={swap} className="w-3 h-3 opacity-70" />
+                </div>
+              </th>
+
+              <th className="px-4 py-3 text-left">
+                <div className="flex items-center gap-1 text-[12px] font-semibold uppercase text-[#6B7280]">
+                  STATUS
+                  <img src={swap} className="w-3 h-3 opacity-70" />
+                </div>
+              </th>
+
+              <th className="px-4 py-3 text-left">
+                <div className="flex items-center gap-1 text-[12px] font-semibold uppercase text-[#6B7280]">
+                  ASSIGNED TO
+                  <img src={swap} className="w-3 h-3 opacity-70" />
+                </div>
+              </th>
+
+              <th className="px-4 py-3 text-right">
+                <div className="flex items-center justify-end gap-1 text-[12px] font-semibold uppercase text-[#6B7280]">
+                  ACTIONS
+                  <img src={swap} className="w-3 h-3 opacity-70" />
+                </div>
+              </th>
+            </tr>
+          </thead>
+        </table>
+
+        {/* SCROLLABLE BODY */}
+        <div className="flex-1 overflow-y-auto">
+
+          <table className="w-full text-sm">
+            <tbody className="divide-y divide-gray-200">
+
+              {/* {Array.from({ length: 20 }).map((_, i) => (
             <tr key={i} className="hover:bg-gray-50">
               <td className="px-4 py-3 text-blue-600">#TKT10{i}</td>
               <td className="px-4 py-3">20 Oct 2025</td>
@@ -42,20 +100,20 @@ const ProductSupport = ({hostelData}) => {
               <td className="px-4 py-3">⋮</td>
             </tr>
           ))} */}
-           <tr>
-      <td colSpan={5} className="text-center py-6 text-gray-400">
-        No Data Found
-      </td>
-    </tr>
+              <tr>
+                <td colSpan={5} className="text-center py-6 text-gray-400">
+                  No Data Found
+                </td>
+              </tr>
 
-        </tbody>
-      </table>
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
 
     </div>
-
-  </div>
-
-</div>
-    )
+  )
 }
 export default ProductSupport;
