@@ -114,7 +114,12 @@ const PropertyOverview = () => {
 
         <div className="flex items-center ">
           {/* <span className="text-xl cursor-pointer"  onClick={() => navigate(-1)}> ←  </span> */}
-          <img src={arrowleft} height={20} width={20} className="text-xl cursor-pointer" onClick={() => navigate(-1)} />
+          <img src={arrowleft} height={20} width={20} className="text-xl cursor-pointer" 
+          // onClick={() => navigate(-1)}
+            onClick={() =>navigate(`/properties/${hostelData?.roleId}`, {
+  state: { skipApi: true }
+})}
+           />
           <p className="text-[20px] leading-[48px] font-medium text-[#1F2937] font-sans ml-2">
             Property Overview
           </p>

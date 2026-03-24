@@ -9,13 +9,16 @@ import { useSubscription } from "../../Context/SubscriptionContext";
 import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import noteAdd from "../../assets/noteadd.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import LoginImg from "../../assets/LoginImg.png";
 import { usePermission } from "../../Utils/permissionHelper";
 
 const Properties = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, deleteHostelExpense } = useHostel();
   const { createSubscription } = useSubscription();
+   const location = useLocation();
+     const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
+   
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Hostels");
   console.log("canRead", canRead)
@@ -63,14 +66,20 @@ const Properties = () => {
   }, [searchText]);
 
   useEffect(() => {
+    if (skipFirstApi) {
+      setSkipFirstApi(false);
+      return;
+    }
     getHostels(page, pageSize, debouncedSearch);
 
-    if (isFirstLoad) {
-      setIsFirstLoad(false);
-    }
+    
   }, [page, pageSize, debouncedSearch]);
 
-
+ useEffect(() => {
+    if (location.state?.skipApi) {
+      navigate(location.pathname, { replace: true });
+    }
+  }, []);
 
 
   console.log("hostels", hostels);
@@ -267,7 +276,7 @@ const Properties = () => {
 
       <DashboardLayout>
 
-        {isFirstLoad && (canRead === false || accessError === "Access Restricted") ? (
+        { (canRead === false || accessError === "Access Restricted") ? (
 
           <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
@@ -292,13 +301,13 @@ const Properties = () => {
               type={modalType}
 
             />
-            {isFirstLoad && (
+            {/* {isFirstLoad && (
               <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
                 <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
               </div>
-            )}
+            )} */}
 
-            {!isFirstLoad && (
+            {/* {!isFirstLoad && ( */}
 
 
               <div className="flex flex-col h-full min-h-0">
@@ -767,9 +776,9 @@ const Properties = () => {
                 </div>
 
               </div>
-            )
+            {/* // )
 
-            }
+            // } */}
           </>
 
         )}
