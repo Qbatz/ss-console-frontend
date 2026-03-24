@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import ProprietorsOverview from "../components/ProprietorsScreen/ProprietorsOverview";
 import TenantsList from "../components/TenantsList/TenantAllLists";
 import RecurringInvoice from "../components/RecurringMonitor/RecurringInvoice";
+import { DashboardProvider } from "../Context/DashboardContext";
 
 
 
@@ -40,6 +41,7 @@ const PrivateRoutesScreen = () => {
         <HostelProvider>
           <SubscriptionProvider>
             <OwnersProvider>
+              <DashboardProvider>
           <Routes>
             <Route path="/home/:roleId" element={<Home />} />
             <Route path="/proprietors/:roleId" element={<Proprietors />} />
@@ -60,6 +62,7 @@ const PrivateRoutesScreen = () => {
                 <Route path="/subscriptions" element={<Subscription />} />
 
           </Routes>
+          </DashboardProvider>
           </OwnersProvider>
           </SubscriptionProvider>
         </HostelProvider>

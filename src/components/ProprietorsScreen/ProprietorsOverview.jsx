@@ -114,7 +114,9 @@ const handleEmailUpdate = async () => {
 
       
         <div
-  onClick={() => navigate(-1)}
+  onClick={() =>navigate(`/proprietors/${ownerData?.roleId}`, {
+  state: { skipApi: true }
+})}
   className="flex items-center gap-2 text-sm  cursor-pointer hover:text-gray-700"
 >
   <img src={Arrow} width={20} height={20} /><span>Proprietor Detail</span>

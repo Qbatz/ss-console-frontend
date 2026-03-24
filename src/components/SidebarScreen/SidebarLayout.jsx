@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SsIcon from "../../assets/SsIcon.png";
 import mailImg from "../../assets/Mail.png";
 import notificationImg from "../../assets/Bell.png";
@@ -14,15 +14,19 @@ import Support from "../../assets/supportticket.png";
 import Dashbord from "../../assets/spacedashboard.png";
 import Roles from "../../assets/roles.png";
 import Admin from "../../assets/adminuser.png";
+import { useDashboard } from "../../Context/DashboardContext";
 
 const DashboardLayout = ({ children }) => {
 
     const {adminDetails, agentRoles, getAgentRoles,getAgentRoleById,loading,deleteAgentRole,errorMsg,accessError} = useRole();
+     const {dashboardData,getDashboard} = useDashboard();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  console.log("adminDetails",adminDetails);
   
-
+  useEffect(()=>{
+getDashboard()
+  },[])
+console.log("dashboardData",dashboardData);
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden">
 
@@ -108,38 +112,38 @@ const DashboardLayout = ({ children }) => {
   <div className="space-y-2 text-gray-600 text-sm landing-7 ">
 
 
-    <SidebarItem title="Home" count="35" to={`/home/${adminDetails?.roleId}`} activeIcon={Home}
+    <SidebarItem title="Home" count="0" to={`/home/${adminDetails?.roleId}`} activeIcon={Home}
   inactiveIcon={Home} />
 
-<SidebarItem  title="Proprietors" count="04" to={`/proprietors/${adminDetails?.roleId}`} activeIcon={Users}
+<SidebarItem  title="Proprietors"   count={dashboardData?.ownersCount || 0} to={`/proprietors/${adminDetails?.roleId}`} activeIcon={Users}
   inactiveIcon={Users} />
 
-<SidebarItem title="Properties" count="05" to={`/properties/${adminDetails?.roleId}`}activeIcon={Buildings}
+<SidebarItem title="Properties"  count={dashboardData?.hostelCount || 0}  to={`/properties/${adminDetails?.roleId}`}activeIcon={Buildings}
   inactiveIcon={Buildings} />
 
-<SidebarItem title="Subscriptions" count="05" to={`/subscription/${adminDetails?.roleId}`}activeIcon={Subscription}
+<SidebarItem title="Subscriptions" count={dashboardData?.demoRequestCount || 0} to={`/subscription/${adminDetails?.roleId}`}activeIcon={Subscription}
   inactiveIcon={Subscription} />
 
 <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`}activeIcon={Billings}
   inactiveIcon={Billings} />
 
-<SidebarItem title="Recurring Monitor" count="2" to={`/Recurring-Bill/${adminDetails?.roleId}`}activeIcon={Recurring}
+<SidebarItem title="Recurring Monitor" count="0" to={`/Recurring-Bill/${adminDetails?.roleId}`}activeIcon={Recurring}
   inactiveIcon={Recurring} />
 
-  <SidebarItem title="Tenants Summary" to ="/tenantList"activeIcon={Users}
+  <SidebarItem title="Tenants Summary" count="0" to ="/tenantList"activeIcon={Users}
   inactiveIcon={Users}/>
 
-<SidebarItem title="Support Tickets" count="2" to={`/supportTicket/${adminDetails?.roleId}`}activeIcon={Support}
+<SidebarItem title="Support Tickets" count="0" to={`/supportTicket/${adminDetails?.roleId}`}activeIcon={Support}
   inactiveIcon={Support} />
 
-<SidebarItem title="CRM Dashboard" count="2" to={`/crmDashboard/${adminDetails?.roleId}`}activeIcon={Dashbord}
+<SidebarItem title="CRM Dashboard" count="0" to={`/crmDashboard/${adminDetails?.roleId}`}activeIcon={Dashbord}
   inactiveIcon={Dashbord} />
 
 
-<SidebarItem title="IAM-Admin User" count="2" to={`/iam-admin-user/${adminDetails?.roleId}`} activeIcon={Admin}
+<SidebarItem title="IAM-Admin User"  count={dashboardData?.agentCount || 0} to={`/iam-admin-user/${adminDetails?.roleId}`} activeIcon={Admin}
   inactiveIcon={Admin}/>
 
-  <SidebarItem title="roles" count="2" to={`/roles/${adminDetails?.roleId}`}activeIcon={Roles}
+  <SidebarItem title="roles" count="0" to={`/roles/${adminDetails?.roleId}`}activeIcon={Roles}
   inactiveIcon={Roles} />
  
   </div>
