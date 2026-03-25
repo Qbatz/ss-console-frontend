@@ -9,6 +9,7 @@ import Roles from "../components/RoleScreen/RoleList";
 import IamAdminUser from "../components/AdminUser/AdminUserList";
 import Properties from "../components/PropertiesScreen/Properties";
 import Subscription from "../components/SubscriptionScreen/subscription";
+import Manageplans from "../components/SubscriptionScreen/ManagePlans ";
 import Billing from "../components/BillingScreen/Billing";
 import SupportTicket from "../components/SupportTicketScreen/SupportTicket";
 import CRMDashboard from "../components/CRMDashboardScreen/CRMDashboard";
@@ -20,7 +21,7 @@ import ProprietorsOverview from "../components/ProprietorsScreen/ProprietorsOver
 import TenantsList from "../components/TenantsList/TenantAllLists";
 import RecurringInvoice from "../components/RecurringMonitor/RecurringInvoice";
 import { DashboardProvider } from "../Context/DashboardContext";
-
+import DemoRequests from "../components/DemoRequestsScreen/DemoRequests";
 
 
 
@@ -49,6 +50,7 @@ const PrivateRoutesScreen = () => {
             <Route path="/roles/:roleId" element={<Roles />} />
             <Route path="/properties/:roleId" element={<Properties />} />
             <Route path="/subscription/:roleId" element={<Subscription />} />
+             {/* <Route path="/subscription/:roleId" element={<Manageplans />} /> */}
             <Route path="/billing/:roleId" element={<Billing />} />
             <Route path="/supportTicket/:roleId" element={<SupportTicket />} />
             <Route path="/crmDashboard/:roleId" element={<CRMDashboard />} />
@@ -59,7 +61,9 @@ const PrivateRoutesScreen = () => {
               <Route path="/ProprietorsOverview/:ownerId" element={<ProprietorsOverview/>} />
               <Route path="/tenantList" element={<TenantsList/>} />
                  <Route path="/Recurring-Bill/:roleId" element={<RecurringInvoice />} />
-                <Route path="/subscriptions" element={<Subscription />} />
+                {/* <Route path="/subscriptions" element={<Subscription />} /> */}
+                <Route   path="/demo-requests/:roleId" element={<DemoRequests />}/>
+
 
           </Routes>
           </DashboardProvider>

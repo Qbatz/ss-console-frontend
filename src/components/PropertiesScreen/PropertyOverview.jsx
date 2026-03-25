@@ -215,7 +215,8 @@ const PropertyOverview = () => {
                 <div className="flex items-center gap-2 mt-1">
                   <img src={Crown} className="w-4 h-4 " />
                   <p className="text-sm font-medium ">
-                    {hostelData.hostelPlan?.currentPlan}
+                    {/* {hostelData.hostelPlan?.currentPlan} */}
+                    {hostelData?.currentSubscription?.planName || "N/A"}
                   </p>
                 </div>
               </div>
