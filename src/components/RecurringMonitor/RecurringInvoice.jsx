@@ -12,9 +12,10 @@ import call from "../../assets/call.png";
 import location from "../../assets/locationGrey.png";
 import team from "../../assets/team.png";
 import refreshWhite from "../../assets/refreshWhite.png";
-import refresh from "../../assets/RefreshButton.png"
+import refresh from "../../assets/RefreshButton.png";
+import Filter from "../../assets/Filter.png"
 const RecurringInvoice = () => {
-  const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId } = useHostel();
+  const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId, bulkGenerateRecurring } = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Recurring");
   console.log("errorMsg", errorMsg)
@@ -45,6 +46,21 @@ const RecurringInvoice = () => {
   const [bulkReason, setBulkReason] = useState("");
   const [bulkDesc, setBulkDesc] = useState("");
   const [confirmBulk, setConfirmBulk] = useState(false);
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+  const [systemFilter, setSystemFilter] = useState("");
+  const [openSystemDropdown, setOpenSystemDropdown] = useState(false);
+  const [appliedFilterType, setAppliedFilterType] = useState("");
+  const [appliedSystemFilter, setAppliedSystemFilter] = useState("");
+  const [errorTable, setErrorTable] = useState("")
+  const [recurringPending, setRecurringPending] = useState({
+    recurringPendingCount: 0,
+    subscriptionExpiredCount: 0
+  });
+
+  const [resStatusOptions, setResStatusOptions] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [openStatusFilter, setOpenStatusFilter] = useState(false);
+  console.log("selectedItem", selectedItem)
   const handleSelect = (id) => {
     setSelectedIds((prev) =>
       prev.includes(id)
@@ -60,24 +76,84 @@ const RecurringInvoice = () => {
       setSelectedIds(data.map((item) => item.hostelId));
     }
   };
-  const fetchRecurring = async () => {
+  // const fetchRecurring = async () => {
 
+  //   const res = await getRecurringHostels(
+  //     page,
+  //     size,
+  //     search,
+  //     filter
+  //   );
+
+  //   if (res?.success) {
+
+  //     setData(res.data.hostelList || []);
+  //     setTotalItems(res.data.totalItems);
+  //     setTotalPages(res.data.totalPages);
+  //     setFilterOptions(res.data.filterOptions || []);
+  //     setRecurringPending(res.data || [])
+  //   }
+
+  // };
+  const fetchRecurring = async () => {
+    setErrorTable("");
     const res = await getRecurringHostels(
       page,
       size,
       search,
-      filter
+      filter,
+      statusFilter,
+      // systemFilter // 👈 pass here
+      appliedSystemFilter
     );
 
     if (res?.success) {
+      setErrorTable("")
+      const response = res.data;
 
-      setData(res.data.hostelList || []);
-      setTotalItems(res.data.totalItems);
-      setTotalPages(res.data.totalPages);
-      setFilterOptions(res.data.filterOptions || []);
+      setData(response.hostelList || []);
+      setTotalItems(response.totalItems);
+      setTotalPages(response.totalPages);
+      setFilterOptions(response.filterOptions || []);
+      setResStatusOptions(response.statusFilterOptions || []);
+      setAppliedFilterType(response.appliedFilterType);
+      setRecurringPending({
+        recurringPendingCount: response.recurringPendingCount || 0,
+        subscriptionExpiredCount: response.subscriptionExpiredCount || 0
+      });
     }
-
+    else {
+      console.log("res.message", res.message)
+      setData([]);
+      setErrorTable(res.message)
+    }
   };
+  //   const fetchRecurring = async () => {
+  //   const res = await getRecurringHostels(
+  //     page,
+  //     size,
+  //     search,
+  //     filter,
+  //     statusFilter // ✅ add this also
+  //   );
+
+  //   if (res?.success) {
+  //     const response = res.data;
+
+  //     setData(response.hostelList || []);
+  //     setTotalItems(response.totalItems);
+  //     setTotalPages(response.totalPages);
+
+  //     setFilterOptions(response.filterOptions || []);
+  //     setResStatusOptions(response.statusFilterOptions || []);
+
+  //     // ✅ ONLY counts store pannunga
+  //     setRecurringPending({
+  //       recurringPendingCount: response.recurringPendingCount || 0,
+  //       subscriptionExpiredCount: response.subscriptionExpiredCount || 0
+  //     });
+  //   }
+  // };
   // useEffect(()=>{
   //   fetchRecurring();
   // },[page,size,filter,search]);
@@ -94,6 +170,17 @@ const RecurringInvoice = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  useEffect(() => {
+    if (showFilterDrawer) {
+      // reset filters
+      setFilter("TODAY");          // default
+      setStatusFilter("ALL");      // default
+
+      // close dropdowns
+      setOpenFilter(false);
+      setOpenStatusFilter(false);
+    }
+  }, [showFilterDrawer]);
   const handleOpenDetails = async (item, page = 0) => {
     setSelectedItem(item);
     console.log("setSelectedItem", selectedItem)
@@ -111,6 +198,44 @@ const RecurringInvoice = () => {
       setHistoryPage(page);
     }
   };
+  console.log("selectedItem?.currentPeriodStartDate",selectedItem?.activeTenantCount);
+ const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+
+  const parts = dateStr.split("/"); // ["24","03","2026"]
+
+  if (parts.length !== 3) return dateStr;
+
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1; // JS month 0-based
+  const year = parseInt(parts[2], 10);
+
+  const date = new Date(year, month, day);
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+};
+const formatFullDate = (dateStr) => {
+  if (!dateStr) return "";
+
+  const parts = dateStr.split("/"); // DD/MM/YYYY
+
+  if (parts.length !== 3) return dateStr;
+
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const year = parseInt(parts[2], 10);
+
+  const date = new Date(year, month, day);
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",   // 👉 May
+    day: "numeric",   // 👉 1
+    year: "numeric"   // 👉 2026
+  });
+};
   //   const handleOpenDetails = async (item) => {
   //     console.log("item",item)
   //   setSelectedItem(item);
@@ -130,16 +255,13 @@ const RecurringInvoice = () => {
 
     return () => clearTimeout(delay);
 
-  }, [page, size, filter, search]);
+  }, [page, size, filter, search, statusFilter, appliedSystemFilter]);
   const start = (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
-  const handleGenerate = async (item) => {
 
-    const res = await generateRecurringInvoice(
-      item.hostelId,
-      item.recurringDay
-    );
+  const handleGenerate = async (ids = []) => {
 
+    const res = await bulkGenerateRecurring(ids);
     if (res?.success) {
 
 
@@ -224,12 +346,12 @@ const RecurringInvoice = () => {
 
             <div className="border border-gray-200 rounded-xl p-4 bg-white">
               <p className="text-sm text-gray-500">Recurring Pending</p>
-              <p className="text-xl font-semibold mt-1">0</p>
+              <p className="text-xl font-semibold mt-1">{recurringPending?.recurringPendingCount || 0}</p>
             </div>
 
             <div className="border border-gray-200 rounded-xl p-4 bg-white">
               <p className="text-sm text-gray-500">Subscription Expired</p>
-              <p className="text-xl font-semibold mt-1">0</p>
+              <p className="text-xl font-semibold mt-1">{recurringPending?.subscriptionExpiredCount || 0}</p>
             </div>
 
           </div>
@@ -298,16 +420,23 @@ const RecurringInvoice = () => {
             <div className="flex items-center gap-2 flex-wrap">
 
               {/* All Properties */}
-              <button className="border border-blue-500 text-blue-600 px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
+              {/* <button className="border border-blue-500 text-blue-600 px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
                 All Properties ▾
-              </button>
+              </button> */}
 
               {/* This Month */}
               <div ref={dropdownRef} className="relative w-40">
 
-                <button
+                {/* <button
                   onClick={() => setOpenFilter(!openFilter)}
                   className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center cursor-pointer"
+                > */}
+                <button
+                  onClick={() => !showFilterDrawer && setOpenFilter(!openFilter)}
+                  disabled={showFilterDrawer}
+                  className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
+    ${showFilterDrawer ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+  `}
                 >
                   {filterOptions.find(f => f.key === filter)?.label || "today"}
                   <span>▾</span>
@@ -337,9 +466,51 @@ const RecurringInvoice = () => {
               </div>
 
               {/* Cycle */}
-              <button className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
+              {/* <button className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
                 ⚙ Cycle: 2 → 1
-              </button>
+              </button> */}
+              <div className="relative w-40">
+
+                {/* <button
+    onClick={() => setOpenStatusFilter(!openStatusFilter)}
+    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center cursor-pointer"
+  > */}
+                <button
+                  onClick={() => !showFilterDrawer && setOpenStatusFilter(!openStatusFilter)}
+                  disabled={showFilterDrawer}
+                  className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
+    ${showFilterDrawer ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+  `}
+                >
+                  {
+                    resStatusOptions.find(s => s.key === statusFilter)?.label || "All"
+                  }
+                  <span>▾</span>
+                </button>
+
+                {openStatusFilter && (
+                  <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50">
+
+                    {resStatusOptions.map((item) => (
+                      <div
+                        key={item.key}
+                        onClick={() => {
+                          setStatusFilter(item.key);
+                          setPage(1);
+                          setOpenStatusFilter(false);
+                        }}
+                        className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
+            ${statusFilter === item.key ? "bg-blue-600 text-white" : ""}
+          `}
+                      >
+                        {item.label}
+                      </div>
+                    ))}
+
+                  </div>
+                )}
+              </div>
+              <img src={Filter} className="w-4 h-4 cursor-pointer" onClick={() => setShowFilterDrawer(true)} />
 
             </div>
 
@@ -378,7 +549,7 @@ const RecurringInvoice = () => {
           {selectedIds.length > 0 && (
             <div className="flex justify-between items-center bg-blue-50 border border-blue-200 px-4 py-2 rounded-lg mb-3">
 
-              {/* LEFT */}
+
               <div className="flex items-center gap-3 text-sm">
 
                 <input
@@ -461,6 +632,14 @@ const RecurringInvoice = () => {
                       </tr>
                     ))
 
+                  ) : errorTable ? (
+                    <tr>
+                      <td colSpan="7">
+                        <div className="flex items-center justify-center h-[100px] text-red-500 font-medium">
+                          {errorTable}
+                        </div>
+                      </td>
+                    </tr>
                   ) : data.length > 0 ? (
 
                     data.map((item, index) => (
@@ -555,13 +734,13 @@ const RecurringInvoice = () => {
                           {item.city} , {item.state}
                         </td>
                         <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                          Billing Cycle
+                          {item.billingStartDay}to{item.billingEndDay} of Month
                         </td>
                         <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                           {item.recurringMode || "----"}
                         </td>
                         <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                          Tenant Count
+                          {item.activeTenantCount || "----"}
                         </td>
                         <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                           {item.recurringStatus ? (
@@ -605,7 +784,7 @@ const RecurringInvoice = () => {
                               //   getRecurringByHostelId(item.hostelId);
                               // }}
                               onClick={() => handleOpenDetails(item)}
-                              className="px-3 py-1 rounded-lg text-xs text-white bg-blue-600 hover:bg-blue-700"
+                             className="px-3 py-1 rounded-lg text-xs text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 cursor-pointer"
 
                             >
                               Generate
@@ -625,9 +804,19 @@ const RecurringInvoice = () => {
                   ) : (
 
                     <tr>
-                      <td colSpan="8" className="text-center py-6 text-gray-400">
-                        No Data Found
+
+                      <td colSpan="7" className="text-center py-6">
+                        {errorTable ? (
+                          <span className="text-red-500 font-medium">
+                            {errorTable}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">
+                            No Data Found
+                          </span>
+                        )}
                       </td>
+
                     </tr>
 
                   )}
@@ -798,7 +987,7 @@ const RecurringInvoice = () => {
                           <img src={team} className="w-4 h-4 opacity-60" />
                           <span className="text-gray-500 w-28 text-left">Active Tenants</span>
                           <span className="font-medium text-gray-800 text-left">
-                            N/A
+                            {selectedItem?.activeTenantCount || "N/A"}
                           </span>
                         </div>
 
@@ -844,31 +1033,36 @@ const RecurringInvoice = () => {
                         {/* Billing Method */}
                         <div>
                           <p className="text-gray-400 mb-1">Billing Method</p>
-                          <p className="font-medium text-gray-800">Monthly Recurring</p>
+                          <p className="font-medium text-gray-800">  {recurringDetails?.billingType || "N/A"}</p>
                         </div>
 
                         {/* Billing Cycle */}
                         <div>
                           <p className="text-gray-400 mb-1">Billing Cycle</p>
-                          <p className="font-medium text-gray-800">2 → 1</p>
+                          <p className="font-medium text-gray-800">{recurringDetails?.billingStartDay} → {recurringDetails?.billingEndDay}</p>
                         </div>
 
                         {/* Current Period */}
                         <div>
                           <p className="text-gray-400 mb-1">Current Period</p>
-                          <p className="font-medium text-gray-800">Apr 2 → May 1</p>
+                          <p className="font-medium text-black">
+    {formatDate(recurringDetails?.currentPeriodStartDate)} →{" "}
+    {formatDate(recurringDetails?.currentPeriodEndDate)}
+  </p>
                         </div>
 
                         {/* Next Recurring */}
                         <div>
                           <p className="text-gray-400 mb-1">Next Recurring</p>
-                          <p className="font-medium text-gray-800">May 1, 2026</p>
+                        <p className="font-medium text-gray-800">
+    {formatFullDate(recurringDetails?.nextRecurringDate)}
+  </p>
                         </div>
 
                         {/* Last Recurring (NEW row like design) */}
                         <div>
                           <p className="text-gray-400 mb-1">Last Recurring</p>
-                          <p className="font-medium text-gray-800">Apr 1, 2026</p>
+                          <p className="font-medium text-gray-800">{formatFullDate(recurringDetails?.lastRecurringDate)}</p>
                         </div>
 
                       </div>
@@ -885,7 +1079,7 @@ const RecurringInvoice = () => {
                             : "bg-red-100 text-red-600"
                           }`}
                       >
-                        {selectedItem?.isSubscriptionActive ? "Active" : "Expired"}
+                        {selectedItem?.recurringStatus ? "Active" : "Expired"}
                       </span>
 
                       {/* Recurring Status */}
@@ -1055,7 +1249,7 @@ const RecurringInvoice = () => {
                       🔄 Generate Recurring
                     </button>
                   </div> */}
-                  {!selectedItem?.isSubscriptionActive && !selectedItem?.recurringStatus && (
+                  {!selectedItem?.recurringStatus && (
                     <div className="p-4 border-t border-gray-300 flex justify-end gap-2">
 
                       <button
@@ -1068,7 +1262,8 @@ const RecurringInvoice = () => {
                       {/* Show only if BOTH are false */}
 
                       <button
-                        onClick={() => handleGenerate(selectedItem)}
+                        // onClick={() => handleGenerate(selectedItem)}
+                        onClick={() => handleGenerate([selectedItem.hostelId])}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg text-[12px] flex items-center gap-2"
                       >
                         <img src={refreshWhite} className="w-4 h-4" />
@@ -1122,17 +1317,19 @@ const RecurringInvoice = () => {
                     <p className="text-xs text-gray-400">Selected</p>
                   </div>
 
-                  <div className="border border-gray-200 rounded-lg p-3 text-left">
+                  {/* <div className="border border-gray-200 rounded-lg p-3 text-left">
                     <p className="text-gray-400 text-xs">Billing Cycle</p>
                     <p className="font-semibold text-lg">2 → 1</p>
                     <p className="text-xs text-gray-400">Common</p>
-                  </div>
+                  </div> */}
 
                   <div className="border border-gray-200 rounded-lg p-3 text-left">
                     <p className="text-gray-400 text-xs">Total Tenants</p>
                     <p className="font-semibold text-lg">
                       {
-                        data.filter(d => selectedIds.includes(d.hostelId)).length * 25
+                        data
+                          .filter(d => selectedIds.includes(d.hostelId))
+                          .reduce((total, item) => total + (item.activeTenantCount || 0), 0)
                       }
                     </p>
                     <p className="text-xs text-gray-400">Invoices</p>
@@ -1141,7 +1338,7 @@ const RecurringInvoice = () => {
                 </div>
 
                 {/* PROPERTY LIST */}
-                <div className="border border-gray-200 rounded-lg p-3 mb-4 max-h-[160px] overflow-y-auto">
+                {/* <div className="border border-gray-200 rounded-lg p-3 mb-4 max-h-[160px] overflow-y-auto">
                   <p className="text-xs text-gray-400 mb-2 text-left">
                     PROPERTIES TO BE PROCESSED
                   </p>
@@ -1151,10 +1348,61 @@ const RecurringInvoice = () => {
                     .map((item) => (
                       <div key={item.hostelId} className="flex justify-between py-1">
                         <span>{item.hostelName}</span>
-                        <span className="text-gray-400 text-xs">-- tenants</span>
+                        <span className="text-gray-400 text-xs">{item.activeTenantCount || 0} tenants </span>
                       </div>
                     ))}
-                </div>
+                </div> */}
+                <div className="border border-gray-200 rounded-xl mb-4 overflow-hidden">
+
+  {/* Header */}
+  <div className="bg-gray-50 px-4 py-2 border-b  border-gray-300">
+    <p className="text-xs text-gray-400 text-left tracking-wide">
+      PROPERTIES TO BE PROCESSED
+    </p>
+  </div>
+
+  {/* List */}
+  <div className="max-h-[180px] overflow-y-auto">
+
+    {data
+      .filter(d => selectedIds.includes(d.hostelId))
+      .map((item) => (
+        <div
+          key={item.hostelId}
+          className="flex justify-between items-center px-4 py-3 border-b border-gray-300 "
+        >
+          
+          {/* LEFT */}
+          <div className="flex items-center gap-3">
+
+            {/* Avatar */}
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-semibold bg-blue-500">
+              {item.initials || "NA"}
+            </div>
+
+            {/* Text */}
+            <div className="flex flex-col text-left">
+              <span className="text-sm font-medium text-gray-800">
+                {item.hostelName}
+              </span>
+
+              <span className="text-xs text-gray-400">
+                {item.hostelId?.slice(0, 6) || "SM0000"} • {item.city || "—"}
+              </span>
+            </div>
+
+          </div>
+
+          {/* RIGHT */}
+          <div className="text-sm text-gray-400">
+            {item.activeTenantCount || 0} tenants
+          </div>
+
+        </div>
+      ))}
+
+  </div>
+</div>
 
                 {/* REASON */}
                 <div className="mb-3">
@@ -1211,7 +1459,7 @@ const RecurringInvoice = () => {
                   Cancel
                 </button>
 
-                <button
+                {/* <button
                   disabled={!confirmBulk || !bulkReason}
                   className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2
     ${confirmBulk && bulkReason
@@ -1221,7 +1469,163 @@ const RecurringInvoice = () => {
                 >
                   <img src={refreshWhite} className="w-4 h-4" />
                   Generate
+                </button> */}
+                <button
+                  // disabled={!confirmBulk || !bulkReason}
+                  onClick={async () => {
+                    const res = await bulkGenerateRecurring(selectedIds);
+
+                    if (res?.success) {
+                      setShowBulkModal(false);
+                      setSelectedIds([]);
+                      setConfirmBulk(false);
+                      setBulkReason("");
+                      setBulkDesc("");
+
+                      setModalType("success");
+                      setMessage(res?.data || "Bulk Generated Successfully");
+                      setShowSuccess(true);
+
+                      setTimeout(() => setShowSuccess(false), 1500);
+
+                      fetchRecurring();
+                    } else {
+                      setModalType("error");
+                      setMessage(res?.message || "Failed");
+                      setShowSuccess(true);
+
+                      setTimeout(() => setShowSuccess(false), 1500);
+                    }
+                  }}
+                  className="px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 bg-blue-700"
+                // ${confirmBulk && bulkReason
+                //   ? "bg-blue-600 hover:bg-blue-700"
+                //   : "bg-gray-300 cursor-not-allowed"
+                // }`}
+                >
+                  <img src={refreshWhite} className="w-4 h-4" />
+                  Generate
                 </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+      {showFilterDrawer && (
+        <div className="fixed inset-0 z-[9999] flex justify-end">
+
+
+          <div
+            className="fixed inset-0 bg-black/20"
+            onClick={() => setShowFilterDrawer(false)}
+          ></div>
+
+
+          <div className="relative z-[10000] flex items-center">
+            <div className="w-[380px] h-[calc(100%-40px)] my-5 mr-5 bg-white shadow-xl border border-gray-300 flex flex-col animate-slideInRight rounded-xl">        {/* HEADER */}
+              <div className="flex justify-between items-center p-4 border-b">
+                <p className="font-semibold flex items-center gap-2">
+                  ⚙ Filter
+                </p>
+                <button onClick={() => {
+                  setShowFilterDrawer(false);
+                  setSystemFilter("");
+                }}>✕</button>
+              </div>
+
+
+              <div className="flex-1 p-4 space-y-4 text-sm">
+
+
+                {/* <div>
+  <label className="text-gray-500 text-xs">System Filter</label>
+
+<select
+  value={systemFilter || ""}
+  onChange={(e) => setSystemFilter(e.target.value)}
+  className="w-full border rounded-lg px-3 py-2 mt-1"
+  
+>
+  <option value="" disabled>
+    Select Day
+  </option>
+
+
+  {Array.from({ length: 31 }, (_, i) => (
+    <option key={i + 1} value={i + 1} >
+      {i + 1}
+    </option>
+  ))}
+
+</select>
+</div> */}
+
+                <div className="relative">
+                  <label className="text-gray-500 text-xs">System Filter</label>
+
+                  {/* BUTTON */}
+                  <div
+                    onClick={() => setOpenSystemDropdown(!openSystemDropdown)}
+                    className="w-full border rounded-lg px-3 py-2 mt-1 flex justify-between items-center cursor-pointer"
+                  >
+                    {systemFilter || "Select Day"}
+                    <span>▾</span>
+                  </div>
+
+                  {/* DROPDOWN */}
+                  {openSystemDropdown && (
+                    <div className="absolute mt-1 w-full bg-white border rounded-lg shadow z-50 max-h-40 overflow-y-auto text-left">
+
+                      {Array.from({ length: 31 }, (_, i) => (
+                        <div
+                          key={i + 1}
+                          onClick={() => {
+                            setSystemFilter(i + 1);
+                            setOpenSystemDropdown(false);
+                          }}
+                          className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
+            ${systemFilter === i + 1 ? "bg-blue-600 text-white" : ""}
+          `}
+                        >
+                          {i + 1}
+                        </div>
+                      ))}
+
+                    </div>
+                  )}
+                </div>
+
+
+              </div>
+
+
+              <div className="p-4 border-t flex justify-between gap-2">
+
+                <button
+                  onClick={() => {
+                    setStatusFilter("ALL");
+                    setSystemFilter("");
+                    setAppliedSystemFilter("");
+                    setPage(1);
+                  }}
+                  className="px-4 py-2 border rounded-lg text-sm"
+                >
+                  Reset
+                </button>
+
+                <button
+                  onClick={() => {
+                    setPage(1);
+                    setAppliedSystemFilter(systemFilter);
+                    setShowFilterDrawer(false);
+
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
+                >
+                  Apply Filters
+                </button>
+
               </div>
 
             </div>
