@@ -37,7 +37,9 @@ export const HostelProvider = ({ children }) => {
   //     setLoading(false);
   //   }
   // };
-  const getHostels = async (page = 1, size = 10, hostelName = "") => {
+  const getHostels = async (page = 1, size = 10, hostelName = "",  startDate = "",
+  endDate = ""
+) => {
   try {
     setLoading(true);
     setErrorMsg("");
@@ -46,7 +48,10 @@ export const HostelProvider = ({ children }) => {
       params: {
         page,
         size,
-        hostelName
+        hostelName,
+        startDate,
+        endDate
+        
       }
     });
 console.log("res",res)
@@ -224,7 +229,9 @@ const getRecurringHostels = async (
   page = 0,
   size = 10,
   hostelName = "",
-  filterBy = "TODAY"
+  filterBy = "TODAY",
+  statusFilterBy = "ALL",
+  billingCycleStartDay = ""
 ) => {
   try {
     setLoading(true);
@@ -235,7 +242,9 @@ const getRecurringHostels = async (
         page,
         size,
         hostelName,
-        filterBy
+        filterBy,
+        statusFilterBy,
+        billingCycleStartDay
       }
     });
 
@@ -261,6 +270,47 @@ const getRecurringHostels = async (
     setLoading(false);
   }
 };
+// const getRecurringHostels = async (
+//   page = 0,
+//   size = 10,
+//   hostelName = "",
+//   filterBy = "TODAY"
+// ) => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.get("/v2/hostels/recurring", {
+//       params: {
+//         page,
+//         size,
+//         hostelName,
+//         filterBy
+//       }
+//     });
+
+//     if (res.status === 200) {
+//       return {
+//         success: true,
+//         data: res.data
+//       };
+//     }
+
+//     return { success: false };
+
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+//     setErrorMsg(msg);
+
+//     return {
+//       success: false,
+//       message: msg
+//     };
+
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 const generateRecurringInvoice = async (hostelId, inputDay) => {
   try {
 
@@ -326,13 +376,87 @@ const getRecurringByHostelId = async (hostelId, page = 0, size = 10) => {
    
   }
 };
+const bulkGenerateRecurring = async (hostelIds = []) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const body = hostelIds.map(id => ({
+      hostelId: id
+    }));
+
+    const res = await axiosInstance.post(
+      "/v2/hostels/recurring",
+      body
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data || "Bulk Recurring Generated Successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const exportHostels = async (
+  hostelName = "",
+  startDate = "",
+  endDate = ""
+) => {
+  try {
+    // setLoading(true);
+
+    const res = await axiosInstance.get("/v2/hostels/export", {
+      params: {
+        hostelName,
+        startDate,
+        endDate
+      },
+      responseType: "blob" // 🔥 important for file download
+    });
+
+    // Create file download
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.setAttribute("download", "hostels.xlsx"); // file name
+    document.body.appendChild(link);
+    link.click();
+
+    return { success: true };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return { success: false, message: msg };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <HostelContext.Provider
       value={{
         hostels,
         loading,
         errorMsg,
-        getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice,getRecurringByHostelId
+        getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice,getRecurringByHostelId,
+        bulkGenerateRecurring,exportHostels
       }}
     >
       {children}
