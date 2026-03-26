@@ -14,7 +14,7 @@ const Subscription = () => {
       console.log("errorMsg", errorMsg)
    const {adminDetails, agentRoles, getAgentRoles,getAgentRoleById,deleteAgentRole,accessError} = useRole();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("demo");
+  const [activeTab, setActiveTab] = useState("subscriptions");
   const [subscriptions,setSubscriptions] = useState([]);
 const [page,setPage] = useState(1);
 const [size,setSize] = useState(10);
@@ -82,7 +82,7 @@ useEffect(() => {
               </h1>
 
               {/* Tabs */}
-              <div className="flex gap-6 text-sm font-medium font-inter">
+              {/* <div className="flex gap-6 text-sm font-medium font-inter">
                  <button
                   onClick={() => setActiveTab("demo")}
                   className={`text-[13px] pb-2 ${activeTab === "demo"
@@ -103,7 +103,7 @@ useEffect(() => {
                 </button>
 
                
-              </div>
+              </div> */}
 
             </div>
 
