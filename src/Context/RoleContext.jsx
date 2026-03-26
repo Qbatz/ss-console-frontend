@@ -321,6 +321,51 @@ const assignStaff = async (demoRequestId, agentId) => {
     return { success: false, message: msg };
   }
 };
+const reactivateAgent = async (agentId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await api.put(`/v2/admin/reactivate-agent/${agentId}`);
+
+    if (res.status === 200) {
+      await getAllAgents(); // 🔥 refresh list
+      return { success: true, message: "Agent Reactivated Successfully" };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const getAgentDetails = async (agentId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await api.get(`/v2/admin/agent-details/${agentId}`);
+
+    if (res.status === 200) {
+      return { success: true, data: res.data };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <RoleContext.Provider
@@ -331,7 +376,7 @@ const assignStaff = async (demoRequestId, agentId) => {
         errorMsg,
         adminDetails,  
         fetchModules,
-        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError,deactivateAgent, adminPermissions,assignStaff
+        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError,deactivateAgent, adminPermissions,assignStaff,reactivateAgent,getAgentDetails
       }}
     >
       {children}
