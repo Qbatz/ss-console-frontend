@@ -469,7 +469,7 @@ const handleExport = () => {
                   </div> */}
                   <div className="flex items-end gap-3">
  <div className="flex flex-col">
-    <label className="text-xs text-gray-500 mb-1">Select Date Range</label>
+    <label className="text-xs text-gray-500 mb-1 text-left">Select Date Range</label>
 
     <RangePicker
       value={dateRange}

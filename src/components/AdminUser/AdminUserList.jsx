@@ -7,18 +7,27 @@ import swap from "../../assets/arrowswap.png";
 import LoginImg from "../../assets/LoginImg.png";
 import Add from "../../assets/add_admin.png";
 import Frame from "../../assets/Frame.png";
-import DownArrow from "../../assets/dropdownImg.png"
+import DownArrow from "../../assets/dropdownImg.png";
+import Toast from "../SuccessModal/ToastDesign";
 
 
 
 const IamAdminUser = () => {
-  const { getAdminDetails, loading, agents, getAllAgents, accessError, deactivateAgent } = useRole();
+  const { getAdminDetails, loading, agents, getAllAgents, accessError, deactivateAgent,reactivateAgent,getAgentDetails } = useRole();
 
   const [admin, setAdmin] = useState(null);
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [status, setStatus] = useState("ACTIVE"); 
+  const [showReactivateModal, setShowReactivateModal] = useState(false);
+   const [modalType, setModalType] = useState("success");
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+const [agentDetails, setAgentDetails] = useState(null);
+    const [message, setMessage] = useState("");
+
 
   console.log("agents", agents)
 
@@ -44,6 +53,19 @@ const IamAdminUser = () => {
 
     fetchAdmin();
   }, []);
+  const activeAgents = agents?.activeAgents || [];
+const inactiveAgents = agents?.inActiveAgents
+ || [];
+let filteredAgents = [];
+
+if (status === "ACTIVE") {
+  filteredAgents = activeAgents;
+} else if (status === "INACTIVE") {
+  filteredAgents = inactiveAgents
+;
+} else {
+  filteredAgents = [...activeAgents, ...inactiveAgents];
+}
   console.log("accessError", accessError)
   const adminList = Array.isArray(admin) ? admin : [admin];
   const handleDeactivate = async (agentId) => {
@@ -51,15 +73,44 @@ const IamAdminUser = () => {
     const res = await deactivateAgent(agentId);
 
     if (res.success) {
-      alert(res.message);
-    } else {
-      alert(res.message);
+    
+      setShowSuccess(true)
+      setModalType("success");
+              setMessage(res.message);
+              setTimeout(()=>{
+                setShowSuccess(false)
+              },1000)
+    } 
+    else {
+  
+       setShowSuccess(true)
+      setModalType("error");
+              setMessage(res.message);
+              setTimeout(()=>{
+                setShowSuccess(false)
+              },1000)
     }
 
   };
+  const handleOpenDetails = async (user) => {
+  const res = await getAgentDetails(user.agentId);
+
+  if (res?.success) {
+    setAgentDetails(res.data);
+    setShowDetailsModal(true);
+  } else {
+    alert(res.message);
+  }
+};
 
   return (
     <DashboardLayout>
+       <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
+
+      />
       {accessError === "Access Restricted" ? (
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
@@ -110,16 +161,25 @@ const IamAdminUser = () => {
 
             <div className="px-2 md:px-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="relative w-full md:w-auto">
-                <select className="appearance-none border  border-gray-200 rounded-lg px-3 py-2 text-sm bg-white w-full md:w-auto">
+                {/* <select className="appearance-none border  border-gray-200 rounded-lg px-3 py-2 text-sm bg-white w-full md:w-auto">
 
                   <option>All</option>
                   <option>Active</option>
                   <option>Inactive</option>
-                </select>
+                </select> */}
+                <select
+  value={status}
+  onChange={(e) => setStatus(e.target.value)}
+  className="appearance-none border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white w-full md:w-auto"
+>
+  
+  <option value="ACTIVE">Active</option>
+  <option value="INACTIVE">Inactive</option>
+</select>
                 <img
                   src={DownArrow}
                   alt="down"
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 object-contain"
+                  className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 object-contain cursor-pointer"
                 />
               </div>
 
@@ -192,8 +252,8 @@ const IamAdminUser = () => {
                     </thead>
 
                     <tbody>
-                      {agents?.length > 0 ? (
-                        agents.map((user, index) => (
+                      {filteredAgents?.length > 0 ? (
+                        filteredAgents.map((user, index) => (
                           <tr
                             // key={index}
                             key={user.agentId}
@@ -232,7 +292,7 @@ const IamAdminUser = () => {
                             >
                               ⋮
                             </td> */}
-                            <td className="px-1 py-4  relative">
+                            {/* <td className="px-1 py-4  relative">
 
                               <span
                                 className="cursor-pointer"
@@ -261,7 +321,72 @@ const IamAdminUser = () => {
                                 </div>
                               )}
 
-                            </td>
+                            </td> */}
+                            <td className="px-1 py-4 relative">
+  <span
+    className="cursor-pointer"
+    onClick={(e) => {
+      e.stopPropagation();
+      setMenuOpen(menuOpen === user.agentId ? null : user.agentId);
+    }}
+  >
+    ⋮
+  </span>
+
+  {menuOpen === user.agentId && (
+    <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+
+      {/* ACTIVE → show deactivate */}
+      {status !== "INACTIVE" ? (
+        <button
+          onClick={() => {
+            setSelectedUser(user);
+            setConfirmOpen(true);
+            setMenuOpen(null);
+          }}
+          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+        >
+          Deactivate
+        </button>
+      ) : (
+        /* INACTIVE → show reactivate */
+        // <button
+        //   onClick={async () => {
+        //     const res = await reactivateAgent(user.agentId);
+
+        //     if (res.success) {
+        //       alert(res.message);
+        //     } else {
+        //       alert(res.message);
+        //     }
+
+        //     setMenuOpen(null);
+        //   }}
+        //   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
+        // >
+        //   Reactivate
+        // </button>
+        <button
+  onClick={() => {
+    setSelectedUser(user);
+    setShowReactivateModal(true);
+    setMenuOpen(null);
+  }}
+  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
+>
+  Reactivate
+</button>
+      )}
+      <button
+  onClick={() => handleOpenDetails(user)}
+  className="text-blue-600 text-sm cursor-pointer"
+>
+  View Details
+</button>
+
+    </div>
+  )}
+</td>
                           </tr>
                         ))
                       ) : (
@@ -279,6 +404,65 @@ const IamAdminUser = () => {
                 </div>
               </div>
             </div>
+            {showReactivateModal && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+
+    {/* Overlay */}
+    <div
+      className="absolute inset-0 bg-black/30"
+      onClick={() => setShowReactivateModal(false)}
+    ></div>
+
+    {/* Modal Box */}
+    <div className="relative bg-white rounded-xl shadow-xl w-[350px] p-5 z-[10000]">
+
+      <h2 className="text-lg font-semibold mb-2">
+        Reactivate Agent
+      </h2>
+
+      <p className="text-sm text-gray-600 mb-4">
+        Are you sure you want to reactivate this agent?
+      </p>
+
+      <div className="flex justify-end gap-2">
+
+        {/* Cancel */}
+        <button
+          onClick={() => setShowReactivateModal(false)}
+          className="px-4 py-2 border rounded-lg text-sm"
+        >
+          Cancel
+        </button>
+
+        {/* Confirm */}
+        <button
+          onClick={async () => {
+            const res = await reactivateAgent(selectedUser.agentId);
+
+            if (res.success) {
+             
+              setModalType("success");
+              setMessage(res.message);
+            } else {
+              setModalType("error");
+              setShowSuccess(true);
+              setMessage(res.message);
+            }
+ setShowSuccess(true);
+            
+            setTimeout(() => setShowSuccess(false), 1500);
+
+            setShowReactivateModal(false);
+          }}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+        >
+          Yes, Reactivate
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
 
             {confirmOpen && (
               <div
@@ -325,6 +509,45 @@ const IamAdminUser = () => {
                 </div>
               </div>
             )}
+            {/* {showDetailsModal && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+
+   
+    <div
+      className="absolute inset-0 bg-black/30"
+      onClick={() => setShowDetailsModal(false)}
+    ></div>
+
+
+    <div className="relative bg-white rounded-xl shadow-xl w-[400px] p-5 z-[10000]">
+
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Agent Details</h2>
+        <button onClick={() => setShowDetailsModal(false)}>✕</button>
+      </div>
+
+      <div className="space-y-2 text-sm">
+
+        <p><b>Name:</b> {agentDetails?.fullName || "-"}</p>
+        <p><b>Email:</b> {agentDetails?.email || "-"}</p>
+        <p><b>Mobile:</b> {agentDetails?.mobile || "-"}</p>
+        <p><b>Role:</b> {agentDetails?.roleName || "-"}</p>
+        <p><b>Status:</b> {agentDetails?.isActive ? "Active" : "Inactive"}</p>
+
+      </div>
+
+      <div className="mt-4 text-right">
+        <button
+          onClick={() => setShowDetailsModal(false)}
+          className="px-4 py-2 border rounded-lg text-sm"
+        >
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+)} */}
 
           </div>
           <AddAdmin isOpen={open} onClose={() => setOpen(false)} />
