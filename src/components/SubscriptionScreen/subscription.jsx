@@ -6,6 +6,8 @@ import { useRole } from "../../Context/RoleContext";
 import DemoRequests from "./DemoRequest";
 import LoginImg from "../../assets/LoginImg.png";
 import { usePermission } from "../../Utils/permissionHelper";
+import Arrow from "../../assets/direction-down 01.png";
+import ArrowRight from "../../assets/arrow-right.png";
 
 const Subscription = () => {
   const { getSubscriptions,loading,errorMsg } = useSubscription();
@@ -271,7 +273,7 @@ useEffect(() => {
         {(page-1)*size + index + 1}
       </td>
 
-      <td className="px-4 py-2 text-blue-600">
+      <td className="px-4 py-2 text-blue-600 text-left">
         {item.hostelName}
       </td>
 
@@ -355,7 +357,7 @@ useEffect(() => {
               disabled={page === 1}
               onClick={() => setPage((p) => p - 1)}
             >
-              ◀
+             <img src={ArrowRight} alt="Arrow" className="w-[15px] h-[15px]"/>
             </button>
 
             <span className="border px-3 py-1 rounded bg-gray-50">
@@ -366,7 +368,7 @@ useEffect(() => {
               disabled={page >= totalPages}
               onClick={() => setPage((p) => p + 1)}
             >
-              ▶
+             <img src={ArrowRight} alt="Arrow" className="w-[15px] h-[15px] scale-x-[-1]"/>
             </button>
 
             <span className="text-gray-400">

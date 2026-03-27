@@ -198,44 +198,44 @@ const RecurringInvoice = () => {
       setHistoryPage(page);
     }
   };
-  console.log("selectedItem?.currentPeriodStartDate",selectedItem?.activeTenantCount);
- const formatDate = (dateStr) => {
-  if (!dateStr) return "";
+  console.log("selectedItem?.currentPeriodStartDate", selectedItem?.activeTenantCount);
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
 
-  const parts = dateStr.split("/"); // ["24","03","2026"]
+    const parts = dateStr.split("/"); // ["24","03","2026"]
 
-  if (parts.length !== 3) return dateStr;
+    if (parts.length !== 3) return dateStr;
 
-  const day = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10) - 1; // JS month 0-based
-  const year = parseInt(parts[2], 10);
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // JS month 0-based
+    const year = parseInt(parts[2], 10);
 
-  const date = new Date(year, month, day);
+    const date = new Date(year, month, day);
 
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-};
-const formatFullDate = (dateStr) => {
-  if (!dateStr) return "";
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+  const formatFullDate = (dateStr) => {
+    if (!dateStr) return "";
 
-  const parts = dateStr.split("/"); // DD/MM/YYYY
+    const parts = dateStr.split("/"); // DD/MM/YYYY
 
-  if (parts.length !== 3) return dateStr;
+    if (parts.length !== 3) return dateStr;
 
-  const day = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10) - 1;
-  const year = parseInt(parts[2], 10);
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[2], 10);
 
-  const date = new Date(year, month, day);
+    const date = new Date(year, month, day);
 
-  return date.toLocaleDateString("en-US", {
-    month: "short",   // 👉 May
-    day: "numeric",   // 👉 1
-    year: "numeric"   // 👉 2026
-  });
-};
+    return date.toLocaleDateString("en-US", {
+      month: "short",   // 👉 May
+      day: "numeric",   // 👉 1
+      year: "numeric"   // 👉 2026
+    });
+  };
   //   const handleOpenDetails = async (item) => {
   //     console.log("item",item)
   //   setSelectedItem(item);
@@ -740,7 +740,7 @@ const formatFullDate = (dateStr) => {
                           {item.recurringMode || "----"}
                         </td>
                         <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                          {item.activeTenantCount || "----"}
+                          {item.activeTenantCount || 0}
                         </td>
                         <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                           {item.recurringStatus ? (
@@ -784,7 +784,7 @@ const formatFullDate = (dateStr) => {
                               //   getRecurringByHostelId(item.hostelId);
                               // }}
                               onClick={() => handleOpenDetails(item)}
-                             className="px-3 py-1 rounded-lg text-xs text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 cursor-pointer"
+                              className="px-3 py-1 rounded-lg text-xs text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 cursor-pointer"
 
                             >
                               Generate
@@ -876,7 +876,7 @@ const formatFullDate = (dateStr) => {
                 disabled={page === 1}
                 className="px-2"
               >
-                <img src={Arrow} className="w-4 h-4" />
+                <img src={Arrow} className="w-4 h-4 cursor-pointer" />
               </button>
 
               {/* Current Page */}
@@ -890,7 +890,7 @@ const formatFullDate = (dateStr) => {
                 disabled={page >= totalPages}
                 className="px-2"
               >
-                <img src={Arrow} className="w-4 h-4 rotate-180" />
+                <img src={Arrow} className="w-4 h-4 rotate-180 cursor-pointer" />
               </button>
 
               {/* Range */}
@@ -1046,17 +1046,17 @@ const formatFullDate = (dateStr) => {
                         <div>
                           <p className="text-gray-400 mb-1">Current Period</p>
                           <p className="font-medium text-black">
-    {formatDate(recurringDetails?.currentPeriodStartDate)} →{" "}
-    {formatDate(recurringDetails?.currentPeriodEndDate)}
-  </p>
+                            {formatDate(recurringDetails?.currentPeriodStartDate)} →{" "}
+                            {formatDate(recurringDetails?.currentPeriodEndDate)}
+                          </p>
                         </div>
 
                         {/* Next Recurring */}
                         <div>
                           <p className="text-gray-400 mb-1">Next Recurring</p>
-                        <p className="font-medium text-gray-800">
-    {formatFullDate(recurringDetails?.nextRecurringDate)}
-  </p>
+                          <p className="font-medium text-gray-800">
+                            {formatFullDate(recurringDetails?.nextRecurringDate)}
+                          </p>
                         </div>
 
                         {/* Last Recurring (NEW row like design) */}
@@ -1126,23 +1126,23 @@ const formatFullDate = (dateStr) => {
                               recurringDetails.recurringHistory.map((item) => (
                                 <tr key={item.trackerId}>
 
-                                  <td className="p-2">
+                                  <td className="p-2 text-start">
                                     {item.recurringCreatedAtDate}
                                   </td>
 
-                                  <td className="p-2">
+                                  <td className="p-2 text-start">
                                     {item.creationMonth - 1} → {item.creationMonth}
                                   </td>
 
-                                  <td className="p-2">
-                                    {item.trackerId}
+                                  <td className="p-2 text-start">
+                                    {item.invoiceGeneratedCount}
                                   </td>
 
-                                  <td className="p-2">
-                                    {item.createdBy || "System"}
+                                  <td className="p-2 text-start">
+                                    {item.createdBy || "N/A"}
                                   </td>
 
-                                  <td className="p-2">
+                                  <td className="p-2 text-start">
                                     <span
                                       className={`px-2 py-1 rounded-full text-xs
               ${item.recurringMode === "AUTOMATIC"
@@ -1254,7 +1254,7 @@ const formatFullDate = (dateStr) => {
 
                       <button
                         onClick={() => setShowDetailsModal(false)}
-                        className="px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                        className="px-4 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer"
                       >
                         Close
                       </button>
@@ -1264,7 +1264,7 @@ const formatFullDate = (dateStr) => {
                       <button
                         // onClick={() => handleGenerate(selectedItem)}
                         onClick={() => handleGenerate([selectedItem.hostelId])}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg text-[12px] flex items-center gap-2"
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg text-[12px] flex items-center gap-2 cursor-pointer"
                       >
                         <img src={refreshWhite} className="w-4 h-4" />
                         Generate Recurring
@@ -1354,55 +1354,55 @@ const formatFullDate = (dateStr) => {
                 </div> */}
                 <div className="border border-gray-200 rounded-xl mb-4 overflow-hidden">
 
-  {/* Header */}
-  <div className="bg-gray-50 px-4 py-2 border-b  border-gray-300">
-    <p className="text-xs text-gray-400 text-left tracking-wide">
-      PROPERTIES TO BE PROCESSED
-    </p>
-  </div>
+                  {/* Header */}
+                  <div className="bg-gray-50 px-4 py-2 border-b  border-gray-300">
+                    <p className="text-xs text-gray-400 text-left tracking-wide">
+                      PROPERTIES TO BE PROCESSED
+                    </p>
+                  </div>
 
-  {/* List */}
-  <div className="max-h-[180px] overflow-y-auto">
+                  {/* List */}
+                  <div className="max-h-[180px] overflow-y-auto">
 
-    {data
-      .filter(d => selectedIds.includes(d.hostelId))
-      .map((item) => (
-        <div
-          key={item.hostelId}
-          className="flex justify-between items-center px-4 py-3 border-b border-gray-300 "
-        >
-          
-          {/* LEFT */}
-          <div className="flex items-center gap-3">
+                    {data
+                      .filter(d => selectedIds.includes(d.hostelId))
+                      .map((item) => (
+                        <div
+                          key={item.hostelId}
+                          className="flex justify-between items-center px-4 py-3 border-b border-gray-300 "
+                        >
 
-            {/* Avatar */}
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-semibold bg-blue-500">
-              {item.initials || "NA"}
-            </div>
+                          {/* LEFT */}
+                          <div className="flex items-center gap-3">
 
-            {/* Text */}
-            <div className="flex flex-col text-left">
-              <span className="text-sm font-medium text-gray-800">
-                {item.hostelName}
-              </span>
+                            {/* Avatar */}
+                            <div className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-semibold bg-blue-500">
+                              {item.initials || "NA"}
+                            </div>
 
-              <span className="text-xs text-gray-400">
-                {item.hostelId?.slice(0, 6) || "SM0000"} • {item.city || "—"}
-              </span>
-            </div>
+                            {/* Text */}
+                            <div className="flex flex-col text-left">
+                              <span className="text-sm font-medium text-gray-800">
+                                {item.hostelName}
+                              </span>
 
-          </div>
+                              <span className="text-xs text-gray-400">
+                                {item.hostelId?.slice(0, 6) || "SM0000"} • {item.city || "—"}
+                              </span>
+                            </div>
 
-          {/* RIGHT */}
-          <div className="text-sm text-gray-400">
-            {item.activeTenantCount || 0} tenants
-          </div>
+                          </div>
 
-        </div>
-      ))}
+                          {/* RIGHT */}
+                          <div className="text-sm text-gray-400">
+                            {item.activeTenantCount || 0} tenants
+                          </div>
 
-  </div>
-</div>
+                        </div>
+                      ))}
+
+                  </div>
+                </div>
 
                 {/* REASON */}
                 <div className="mb-3">

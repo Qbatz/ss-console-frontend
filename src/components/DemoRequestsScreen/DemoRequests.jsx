@@ -160,8 +160,20 @@ const DemoRequests = () => {
             <h1 className="text-lg font-semibold font-inter">
               DemoRequests
             </h1>
+
             {/* Icon */}
-            <div className="relative w-64">
+
+
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+            <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
+              <p className="text-gray-500 text-sm font-gilroy">DemoRequestCount</p>
+              <h2 className="text-2xl font-bold mt-2">0</h2>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <div className="relative w-64 mb-3">
               <img
                 src={Search}
                 alt="search"
@@ -181,7 +193,6 @@ const DemoRequests = () => {
 
             </div>
           </div>
-
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]">
 
@@ -254,27 +265,27 @@ const DemoRequests = () => {
                     data.map((item, index) => (
                       <tr key={item.requestId} className="text-[13px] hover:bg-gray-50">
 
-                        <td className="px-4 py-2">
+                        <td className="px-4 py-2 ">
                           {(page - 1) * size + index + 1}
                         </td>
 
-                        <td className="px-4 py-2 text-[12px]">
+                        <td className="px-4 py-2 text-[12px] text-left">
                           {item.name || "----"}
                         </td>
 
-                        <td className="px-4 py-2 text-[12px]">
+                        <td className="px-4 py-2 text-[12px] text-left ">
                           {item.organization || "----"}
                         </td>
 
-                        <td className="px-4 py-2 text-[12px]">
+                        <td className="px-4 py-2 text-[12px] text-left">
                           {item.requestedDate || "----"}
                         </td>
 
-                        <td className="px-4 py-2 text-[12px]">
+                        <td className="px-4 py-2 text-[12px] text-left">
                           {item.assignedTo || "Un Assigned"}
                         </td>
 
-                        <td className="px-4 py-2 text-[12px]">
+                        <td className="px-4 py-2 text-[12px] text-left">
                           {item.demoRequestStatus}
                         </td>
 
@@ -355,7 +366,7 @@ const DemoRequests = () => {
                   setSize(Number(e.target.value));
                   setPage(1);
                 }}
-                className="border rounded px-2 py-1"
+                className="border rounded px-2 py-1 cursor-pointer"
               >
 
                 <option value={10}>10</option>
@@ -367,6 +378,7 @@ const DemoRequests = () => {
               <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => p - 1)}
+                className="cursor-pointer"
               >
                 <img src={ArrowRight} className="w-[15px] h-[15px]" />
               </button>
@@ -380,6 +392,7 @@ const DemoRequests = () => {
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => p + 1)}
+                className="cursor-pointer"
               >
                 <img src={ArrowRight} className="w-[15px] h-[15px] scale-x-[-1]" />
               </button>
