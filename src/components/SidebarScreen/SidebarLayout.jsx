@@ -140,11 +140,6 @@ const DashboardLayout = ({ children }) => {
 />
 
             <SidebarItem title="Subscriptions" count="0" to={`/subscription/${adminDetails?.roleId}`} activeIcon={Subscription}
-
-           
-
-            <SidebarItem title="Subscriptions" count="0"  to={`/subscription/${adminDetails?.roleId}`} activeIcon={Subscription}
-
               inactiveIcon={Subscription} />
 
             <SidebarItem
