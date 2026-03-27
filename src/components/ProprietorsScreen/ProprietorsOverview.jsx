@@ -11,9 +11,12 @@ import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import { usePermission } from "../../Utils/permissionHelper";
 import { useHostel } from "../../Context/HostelListContext";
+import { useRole } from "../../Context/RoleContext";
 const ProprietorsOverview = () => {
 const navigate = useNavigate();
  const location = useLocation();
+   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
+ 
   const { canRead, canWrite, canUpdate, canDelete } =
           usePermission("Owners");
  const ownerData = location.state?.ownerData;
@@ -114,7 +117,7 @@ const handleEmailUpdate = async () => {
 
       
         <div
-  onClick={() =>navigate(`/proprietors/${ownerData?.roleId}`, {
+  onClick={() =>navigate(`/proprietors/${adminDetails?.roleId}`, {
   state: { skipApi: true }
 })}
   className="flex items-center gap-2 text-sm  cursor-pointer hover:text-gray-700"

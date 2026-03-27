@@ -59,7 +59,7 @@ const PrivateRoutesScreen = () => {
              <Route path="/property-overview/:hostelId" element={<PropertyOverview/>} />
               {/* <Route path="/ProprietorsOverview" element={<ProprietorsOverview/>} /> */}
               <Route path="/ProprietorsOverview/:ownerId" element={<ProprietorsOverview/>} />
-              <Route path="/tenantList" element={<TenantsList/>} />
+              <Route path="/tenantList/:roleId" element={<TenantsList/>} />
                  <Route path="/Recurring-Bill/:roleId" element={<RecurringInvoice />} />
                 {/* <Route path="/subscriptions" element={<Subscription />} /> */}
                 <Route   path="/demo-requests/:roleId" element={<DemoRequests />}/>

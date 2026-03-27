@@ -22,9 +22,11 @@ import { usePermission } from "../../Utils/permissionHelper";
 import LoginImg from "../../assets/LoginImg.png";
 import ReccuringBill from "./ReccuringBill";
 import { useOwners } from "../../Context/OwnersContext";
+import { useRole } from "../../Context/RoleContext";
 const PropertyOverview = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError } = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById } = useOwners();
+  const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
 
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenants");
@@ -116,7 +118,7 @@ const PropertyOverview = () => {
           {/* <span className="text-xl cursor-pointer"  onClick={() => navigate(-1)}> ←  </span> */}
           <img src={arrowleft} height={20} width={20} className="text-xl cursor-pointer" 
           // onClick={() => navigate(-1)}
-            onClick={() =>navigate(`/properties/${hostelData?.roleId}`, {
+            onClick={() =>navigate(`/properties/${adminDetails?.roleId}`, {
   state: { skipApi: true }
 })}
            />
