@@ -417,7 +417,7 @@ const exportHostels = async (
   endDate = ""
 ) => {
   try {
-    // setLoading(true);
+    setLoading(true);
 
     const res = await axiosInstance.get("/v2/hostels/export", {
       params: {

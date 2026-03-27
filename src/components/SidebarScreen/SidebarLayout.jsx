@@ -110,8 +110,10 @@ const DashboardLayout = ({ children }) => {
             <button onClick={() => setSidebarOpen(false)}>✕</button>
           </div>
 
-          <div className="space-y-2 text-gray-600 text-sm landing-7 max-h-[calc(100vh-100px)] overflow-y-auto scrollbar-thin">
-
+          {/* <div className="space-y-2 text-gray-600 text-sm landing-7 max-h-[calc(100vh-100px)] overflow-y-auto scrollbar-thin"> */}
+<div className="space-y-2 text-gray-600 text-[12px] landing-7 
+  max-h-[calc(100vh-100px)] overflow-y-auto scrollbar-thin
+  whitespace-nowrap ">
 
             <SidebarItem title="Home" count="0" to={`/home/${adminDetails?.roleId}`} activeIcon={Home}
               inactiveIcon={Home} />
@@ -121,7 +123,7 @@ const DashboardLayout = ({ children }) => {
               inactiveIcon={Users} /> */}
               <SidebarItem
   title="Proprietors"
-  count={dashboardData?.ownerCount || 0}
+  count={dashboardData?.ownersCount || 0}
   to={`/proprietors/${adminDetails?.roleId}`}
   activeIcon={Users}
   inactiveIcon={Users}
