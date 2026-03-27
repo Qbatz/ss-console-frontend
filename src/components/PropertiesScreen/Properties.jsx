@@ -14,11 +14,17 @@ import LoginImg from "../../assets/LoginImg.png";
 import { usePermission } from "../../Utils/permissionHelper";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
+import { usePlan } from "../../Context/PlanContexts";
 
 const Properties = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, deleteHostelExpense, exportHostels } = useHostel();
   const { createSubscription } = useSubscription();
+   const { plans, getPlans } = usePlan();
   const location = useLocation();
+  useEffect(() => {
+    getPlans();
+  }, []);
+  console.log("plans",plans)
   const { RangePicker } = DatePicker;
   const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
 const [dateRange, setDateRange] = useState([]);

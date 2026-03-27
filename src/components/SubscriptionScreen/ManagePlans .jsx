@@ -3,130 +3,155 @@ import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-
 const plans = [
   {
     name: "Basic Plan",
-    price: "₹599",
+    price: 599,
+    yearly: 7188,
+    active: true,
     features: [
-      "30h Fast generations",
-      "Unlimited Relaxed generations",
-      "General commercial terms",
-      "Access to member gallery",
-      "Optional credit top ups",
-      "3 concurrent fast jobs",
+      "Dashboard & Property Management",
+      "Tenant & Room Management",
+      "Asset and Expense Management",
+      "Auto Recurring Invoices",
+      "Complaint Management",
+      "Due Reminders (In-App & Email)",
+      "EB Calculation",
+      "Rent Collection Tracking",
+      "Reports & Insights",
     ],
   },
   {
     name: "Premium Plan",
-    price: "₹999",
+    price: 999,
+    yearly: 11988,
+    active: true,
     features: [
-      "30h Fast generations",
-      "Unlimited Relaxed generations",
-      "General commercial terms",
-      "Access to member gallery",
-      "Optional credit top ups",
-      "3 concurrent fast jobs",
-      "12 concurrent fast jobs",
-    ],
-  },
-  {
-    name: "Pro Plan",
-    price: "₹1299",
-    features: [
-      "30h Fast generations",
-      "Unlimited Relaxed generations",
-      "General commercial terms",
-      "Access to member gallery",
-      "Optional credit top ups",
-      "3 concurrent fast jobs",
+      "Dashboard & Property Management",
+      "Tenant & Room Management",
+      "Asset and Expense Management",
+      "Auto Recurring Invoices",
+      "Complaint Management",
+      "Due Reminders (In-App & Email)",
+      "EB Calculation",
+      "Rent Collection Tracking",
+      "Reports & Insights",
+      "Secure Cloud Storage",
+      "Unlimited Staff Access",
     ],
   },
 ];
 
 const ManagePlans = () => {
   const navigate = useNavigate();
+
   return (
     <DashboardLayout>
-      <div className="font-inter">
+      <div className="bg-gray-50 min-h-screen">
 
-        {/* HEADER SECTION */}
-        <div className="px-8 py-2 border-b bg-white">
-          <div className="flex justify-between items-center">
-
-            <div className="flex items-center gap-3">
-              <ArrowLeft size={18} className="cursor-pointer" onClick={() => navigate(-1)} />
-              <div>
-                <h1 className="text-l font-medium font-sans text-gray-800 text-start">
-                  Subscription Plans
-                </h1>
-                <p className="text-xs text-gray-500 mt-1 font-sans">
-                  Subscriptions &gt; Manage Plans
-                </p>
-              </div>
+        {/* HEADER */}
+        <div className="px-6 py-4 bg-white border-b flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <ArrowLeft size={18} onClick={() => navigate(-1)} className="cursor-pointer" />
+            <div>
+              <h1 className="text-lg font-semibold">Manage Plans</h1>
+              <p className="text-xs text-gray-500">
+                Subscriptions &gt; Manage Plans
+              </p>
             </div>
-
-            <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-medium hover:bg-blue-700 transition font-sans">
-              + Add New Plan
-            </button>
           </div>
+
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
+            + Add New Plan
+          </button>
         </div>
 
-        {/* CONTENT AREA */}
-        <div className="p-6  min-h-screen">
+        <div className="p-6">
 
-          {/* Toggle */}
-          <div className="flex justify-start mb-8">
-            <div className="inline-flex bg-gray-100 p-1 rounded-full">
+          {/* REVENUE CARD */}
+          <div className="bg-white rounded-xl p-6 mb-6 border">
+            <p className="text-xs text-gray-500 mb-2">
+              TOTAL RECURRING REVENUE
+            </p>
+            <h2 className="text-2xl font-bold text-gray-800">
+              ₹1,366,850.00
+            </h2>
 
-              <button className="px-6 py-1 text-sm font-medium text-gray-600 rounded-full">
-                Monthly
-              </button>
-
-              <button className="px-6 py-1 text-sm font-medium text-white bg-blue-600 rounded-full shadow-sm">
-                Yearly <span className="text-xs font-normal">-20% off</span>
-              </button>
-
+            <div className="flex gap-10 mt-4 text-sm text-gray-600">
+              <div>
+                <p>Active Subscribers</p>
+                <p className="font-semibold text-gray-800">182</p>
+              </div>
+              <div>
+                <p>Average Recurring/Month</p>
+                <p className="font-semibold text-gray-800">₹109,018</p>
+              </div>
             </div>
           </div>
 
+          {/* ACTIVE PLANS */}
+          <h2 className="text-lg font-semibold mb-4">Active Plans</h2>
 
+          {/* TOGGLE */}
+          <div className="flex mb-6">
+            <div className="bg-gray-100 rounded-full p-1 flex">
+              <button className="px-5 py-1 text-sm bg-blue-600 text-white rounded-full">
+                Monthly
+              </button>
+              <button className="px-5 py-1 text-sm text-gray-600">
+                Yearly -20%
+              </button>
+            </div>
+          </div>
 
-          {/* Plans Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          {/* PLAN CARDS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {plans.map((plan, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl border shadow-sm p-6 flex flex-col justify-between"
-              >
-                <div>
-                  <h2 className="text-lg font-semibold mb-3 text-gray-800 font-inter text-start">
-                    {plan.name}
-                  </h2>
+              <div key={index} className="bg-white border rounded-xl p-6 shadow-sm">
 
-                  <div className="mb-6  text-start">
-                    <span className="text-3xl  text-gray-900 font-bold font-inter">
-                      {plan.price}
+                {/* TITLE + BADGE */}
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-semibold text-gray-800">{plan.name}</h3>
+                  {plan.active && (
+                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                      ACTIVE
                     </span>
-                    <span className="text-sm text-gray-500 ml-2">
-                      per editor/month
-                    </span>
-                  </div>
-
-                  <ul className="space-y-3 text-sm text-gray-600">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-start gap-3">
-                        <span className="text-green-500 mt-1">✔</span>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  )}
                 </div>
 
-                <button className="mt-8 bg-gray-100 hover:bg-gray-200 text-sm font-medium py-2 rounded-lg transition">
-                  Edit Plan
-                </button>
+                {/* PRICE */}
+                <div className="mb-4">
+                  <span className="text-2xl font-bold text-gray-900">
+                    ₹{plan.price}
+                  </span>
+                  <span className="text-sm text-gray-500 ml-1">/month</span>
+                  <p className="text-xs text-gray-400">
+                    billed yearly as ₹{plan.yearly}
+                  </p>
+                </div>
+
+                {/* FEATURES */}
+                <ul className="space-y-2 text-sm text-gray-600">
+                  {plan.features.map((f, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="text-blue-600">✔</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* BUTTONS */}
+                <div className="mt-6 space-y-2">
+                  <button className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm">
+                    Create Offer
+                  </button>
+
+                  <button className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg text-sm">
+                    Edit Plan
+                  </button>
+                </div>
+
               </div>
             ))}
 
