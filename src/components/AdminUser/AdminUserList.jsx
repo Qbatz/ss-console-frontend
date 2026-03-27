@@ -509,37 +509,109 @@ if (status === "ACTIVE") {
                 </div>
               </div>
             )}
-            {/* {showDetailsModal && (
+  {/* {showDetailsModal && (
   <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
    
     <div
-      className="absolute inset-0 bg-black/30"
+      className="absolute inset-0 bg-black/40 backdrop-blur-sm"
       onClick={() => setShowDetailsModal(false)}
     ></div>
 
+  
+    <div className="relative bg-white rounded-2xl shadow-2xl w-[500px] max-h-[90vh] overflow-y-auto p-6 z-[10000]">
 
-    <div className="relative bg-white rounded-xl shadow-xl w-[400px] p-5 z-[10000]">
-
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Agent Details</h2>
-        <button onClick={() => setShowDetailsModal(false)}>✕</button>
-      </div>
-
-      <div className="space-y-2 text-sm">
-
-        <p><b>Name:</b> {agentDetails?.fullName || "-"}</p>
-        <p><b>Email:</b> {agentDetails?.email || "-"}</p>
-        <p><b>Mobile:</b> {agentDetails?.mobile || "-"}</p>
-        <p><b>Role:</b> {agentDetails?.roleName || "-"}</p>
-        <p><b>Status:</b> {agentDetails?.isActive ? "Active" : "Inactive"}</p>
-
-      </div>
-
-      <div className="mt-4 text-right">
+     
+      <div className="flex justify-between items-center mb-5 border-b pb-3">
+        <h2 className="text-xl font-semibold">Agent Details</h2>
         <button
           onClick={() => setShowDetailsModal(false)}
-          className="px-4 py-2 border rounded-lg text-sm"
+          className="text-gray-500 hover:text-black"
+        >
+          ✕
+        </button>
+      </div>
+
+     
+      <div className="flex items-center gap-4 mb-5">
+        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
+          {agentDetails?.initials}
+        </div>
+        <div>
+          <p className="font-semibold text-base">
+            {agentDetails?.fullName}
+          </p>
+          <p className="text-sm text-gray-500">
+            {agentDetails?.roleName}
+          </p>
+        </div>
+      </div>
+
+   
+      <div className="grid grid-cols-2 gap-3 text-sm mb-5">
+
+        <div>
+          <p className="text-gray-500 text-left">Email</p>
+          <p className="font-medium">{agentDetails?.email || "-"}</p>
+        </div>
+
+        <div>
+          <p className="text-gray-500 ">Mobile</p>
+          <p className="font-medium">{agentDetails?.mobile || "-"}</p>
+        </div>
+
+        <div>
+          <p className="text-gray-500 text-left">Created By</p>
+          <p className="font-medium text-left">{agentDetails?.createdBy || "-"}</p>
+        </div>
+
+        <div>
+          <p className="text-gray-500 text-left">Created Date</p>
+          <p className="font-medium text-left">
+            {agentDetails?.createdAtDate} {agentDetails?.createdAtTime}
+          </p>
+        </div>
+
+      </div>
+
+   
+      <div>
+        <h3 className="font-semibold mb-3 text-left">Recent Activities</h3>
+
+        <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2">
+
+          {agentDetails?.agentActivities?.length > 0 ? (
+            agentDetails.agentActivities.map((activity, index) => (
+              <div
+                key={index}
+                className="border rounded-lg p-3 flex justify-between items-center"
+              >
+                <div>
+                  <p className="font-medium text-sm">
+                    {activity.activityType}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {activity.description}
+                  </p>
+                </div>
+
+                <div className="text-xs text-gray-400 text-right">
+                  <p>{activity.createdAtDate}</p>
+                  <p>{activity.createdAtTime}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-400 text-sm">No activities found</p>
+          )}
+
+        </div>
+      </div>
+
+      <div className="mt-6 text-right">
+        <button
+          onClick={() => setShowDetailsModal(false)}
+          className="px-5 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm"
         >
           Close
         </button>
@@ -548,7 +620,137 @@ if (status === "ACTIVE") {
     </div>
   </div>
 )} */}
+{showDetailsModal && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
+    {/* Overlay */}
+    <div
+      className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+      onClick={() => setShowDetailsModal(false)}
+    ></div>
+
+    {/* Modal */}
+    <div className="relative bg-white rounded-2xl shadow-2xl w-[520px] max-h-[90vh] overflow-y-auto z-[10000]">
+
+      {/* Header */}
+      <div className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-2xl">
+        <h2 className="text-lg font-semibold">Agent Details</h2>
+        <button
+          onClick={() => setShowDetailsModal(false)}
+          className="hover:text-gray-200"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="p-6">
+
+        {/* Profile */}
+        <div className="flex items-center gap-4 mb-6">
+
+          <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+            {agentDetails?.initials || "NA"}
+          </div>
+
+          <div>
+            <p className="font-semibold text-lg text-gray-900">
+              {agentDetails?.fullName}
+            </p>
+            <p className="text-sm text-gray-500">
+              {agentDetails?.roleName}
+            </p>
+          </div>
+
+        </div>
+
+        {/* Info Grid */}
+        <div className="grid grid-cols-2 gap-4 text-sm mb-6">
+
+          <div className="bg-blue-50 rounded-xl p-3">
+            <p className="text-blue-400 text-xs mb-1">Email</p>
+            <p className="font-medium text-gray-800">
+              {agentDetails?.email || "-"}
+            </p>
+          </div>
+
+          <div className="bg-purple-50 rounded-xl p-3">
+            <p className="text-purple-400 text-xs mb-1">Mobile</p>
+            <p className="font-medium text-gray-800">
+              {agentDetails?.mobile || "-"}
+            </p>
+          </div>
+
+          <div className="bg-green-50 rounded-xl p-3">
+            <p className="text-green-500 text-xs mb-1">Created By</p>
+            <p className="font-medium text-gray-800">
+              {agentDetails?.createdBy || "-"}
+            </p>
+          </div>
+
+          <div className="bg-orange-50 rounded-xl p-3">
+            <p className="text-orange-400 text-xs mb-1">Created Date</p>
+            <p className="font-medium text-gray-800">
+              {agentDetails?.createdAtDate}{" "}
+              <span className="text-gray-400 text-xs">
+                {agentDetails?.createdAtTime}
+              </span>
+            </p>
+          </div>
+
+        </div>
+
+        {/* Activities */}
+        <div>
+          <h3 className="font-semibold mb-3 text-gray-800">
+            Recent Activities
+          </h3>
+
+          <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2">
+
+            {agentDetails?.agentActivities?.length > 0 ? (
+              agentDetails.agentActivities.map((activity, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-50 border-l-4 border-blue-500 rounded-lg p-3 flex justify-between items-center hover:shadow-sm transition"
+                >
+                  <div>
+                    <p className="font-medium text-sm text-gray-800">
+                      {activity.activityType}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {activity.description}
+                    </p>
+                  </div>
+
+                  <div className="text-xs text-gray-400 text-right">
+                    <p>{activity.createdAtDate}</p>
+                    <p>{activity.createdAtTime}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-400 text-sm text-center py-6">
+                No activities found
+              </p>
+            )}
+
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-6 text-right">
+          <button
+            onClick={() => setShowDetailsModal(false)}
+            className="px-5 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-sm"
+          >
+            Close
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+)}
           </div>
           <AddAdmin isOpen={open} onClose={() => setOpen(false)} />
 

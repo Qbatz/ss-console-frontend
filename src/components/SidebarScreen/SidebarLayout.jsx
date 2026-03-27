@@ -15,6 +15,8 @@ import Dashbord from "../../assets/spacedashboard.png";
 import Roles from "../../assets/roles.png";
 import Admin from "../../assets/adminuser.png";
 import { useDashboard } from "../../Context/DashboardContext";
+import { useLocation } from "react-router-dom";
+
 
 const DashboardLayout = ({ children }) => {
 
@@ -92,10 +94,9 @@ const DashboardLayout = ({ children }) => {
       </div>
 
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden ">
 
-        {/* Sidebar */}
-        {/* Sidebar */}
+        
         <div
           className={`
     fixed md:static top-0 left-0 h-full w-[240px] bg-white border-r border-gray-200 pt-6 px-4
@@ -104,7 +105,7 @@ const DashboardLayout = ({ children }) => {
   `}
         >
 
-          {/* Close button (mobile only) */}
+        
           <div className="md:hidden flex justify-end mb-4">
             <button onClick={() => setSidebarOpen(false)}>✕</button>
           </div>
@@ -115,13 +116,35 @@ const DashboardLayout = ({ children }) => {
             <SidebarItem title="Home" count="0" to={`/home/${adminDetails?.roleId}`} activeIcon={Home}
               inactiveIcon={Home} />
 
-            <SidebarItem title="Proprietors" count={dashboardData?.ownersCount || 0} to={`/proprietors/${adminDetails?.roleId}`} activeIcon={Users}
-              inactiveIcon={Users} />
 
-            <SidebarItem title="Properties" count={dashboardData?.hostelCount || 0} to={`/properties/${adminDetails?.roleId}`} activeIcon={Buildings}
-              inactiveIcon={Buildings} />
+            {/* <SidebarItem title="Proprietors" count={dashboardData?.ownersCount || 0} to={`/proprietors/${adminDetails?.roleId}`} activeIcon={Users}
+              inactiveIcon={Users} /> */}
+              <SidebarItem
+  title="Proprietors"
+  count={dashboardData?.ownerCount || 0}
+  to={`/proprietors/${adminDetails?.roleId}`}
+  activeIcon={Users}
+  inactiveIcon={Users}
+  customActivePaths={["/proprietors", "/ProprietorsOverview"]}
+/>
+
+            {/* <SidebarItem title="Properties" count={dashboardData?.hostelCount || 0} to={`/properties/${adminDetails?.roleId}`} activeIcon={Buildings}
+              inactiveIcon={Buildings} /> */}
+              <SidebarItem
+  title="Properties"
+  count={dashboardData?.hostelCount || 0}
+  to={`/properties/${adminDetails?.roleId}`}
+  activeIcon={Buildings}
+  inactiveIcon={Buildings}
+  customActivePaths={["/properties", "/property-overview"]}
+/>
+
+            <SidebarItem title="Subscriptions" count="0" to={`/subscription/${adminDetails?.roleId}`} activeIcon={Subscription}
+
+           
 
             <SidebarItem title="Subscriptions" count="0"  to={`/subscription/${adminDetails?.roleId}`} activeIcon={Subscription}
+
               inactiveIcon={Subscription} />
 
             <SidebarItem
@@ -138,7 +161,7 @@ const DashboardLayout = ({ children }) => {
             <SidebarItem title="Recurring Monitor" count="0" to={`/Recurring-Bill/${adminDetails?.roleId}`} activeIcon={Recurring}
               inactiveIcon={Recurring} />
 
-            <SidebarItem title="Tenants Summary" count="0" to="/tenantList" activeIcon={Users}
+            <SidebarItem title="Tenants Summary" count="0" to={`/tenantList/${adminDetails?.roleId}`} activeIcon={Users}
               inactiveIcon={Users} />
 
             <SidebarItem title="Support Tickets" count="0" to={`/supportTicket/${adminDetails?.roleId}`} activeIcon={Support}
@@ -199,35 +222,77 @@ const DashboardLayout = ({ children }) => {
 
 // );
 
-const SidebarItem = ({ title, count, to, activeIcon, inactiveIcon }) => (
-  <NavLink
-    to={to}
-    className={({ isActive }) =>
-      `flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition
-      ${isActive
-        ? "bg-blue-50 text-blue-600 font-medium"
-        : "hover:bg-gray-100 text-gray-600"
-      }`
-    }
-  >
-    {({ isActive }) => (
-      <>
-        <div className="flex items-center gap-5">
-          <img
-            src={isActive ? activeIcon : inactiveIcon}
-            className="w-5 h-5"
-          />
-          <span className="whitespace-nowrap">{title}</span>
-        </div>
+// const SidebarItem = ({ title, count, to, activeIcon, inactiveIcon }) => (
+//   <NavLink
+//     to={to}
+//     className={({ isActive }) =>
+//       `flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition
+//       ${isActive
+//         ? "bg-blue-50 text-blue-600 font-medium"
+//         : "hover:bg-gray-100 text-gray-600"
+//       }`
+//     }
+//   >
+//     {({ isActive }) => (
+//       <>
+//         <div className="flex items-center gap-5">
+//           <img
+//             src={isActive ? activeIcon : inactiveIcon}
+//             className="w-5 h-5"
+//           />
+//           <span className="whitespace-nowrap">{title}</span>
+//         </div>
 
-        {count && (
-          <span className="text-xs bg-gray-100 px-2 rounded-full text-blue-500">
-            {count}
-          </span>
-        )}
-      </>
-    )}
-  </NavLink>
-);
+//         {count && (
+//           <span className="text-xs bg-gray-100 px-2 rounded-full text-blue-500">
+//             {count}
+//           </span>
+//         )}
+//       </>
+//     )}
+//   </NavLink>
+// );
+const SidebarItem = ({
+  title,
+  count,
+  to,
+  activeIcon,
+  inactiveIcon,
+  customActivePaths = []
+}) => {
+  const location = useLocation();
+
+  const isActive =
+    customActivePaths.length > 0
+      ? customActivePaths.some(path =>
+          location.pathname.startsWith(path)
+        )
+      : location.pathname === to;
+
+  return (
+    <NavLink
+      to={to}
+      className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition
+        ${isActive
+          ? "bg-blue-50 text-blue-600 font-medium"
+          : "hover:bg-gray-100 text-gray-600"
+        }`}
+    >
+      <div className="flex items-center gap-5">
+        <img
+          src={isActive ? activeIcon : inactiveIcon}
+          className="w-5 h-5"
+        />
+        <span>{title}</span>
+      </div>
+
+      {count && (
+        <span className="text-xs bg-gray-100 px-2 rounded-full text-blue-500">
+          {count}
+        </span>
+      )}
+    </NavLink>
+  );
+};
 
 export default DashboardLayout;
