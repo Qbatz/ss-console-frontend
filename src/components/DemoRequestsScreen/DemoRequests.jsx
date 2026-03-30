@@ -32,6 +32,8 @@ const DemoRequests = () => {
   const [message, setMessage] = useState("");
   const [pageSize, setPageSize] = useState("")
   const [agentList, setAgentList] = useState([])
+  const [tableLoading, setTableLoading] = useState(false);
+
   useEffect(() => {
     const fetchAgents = async () => {
       const res = await getAgentsDropdown();
@@ -72,6 +74,7 @@ const DemoRequests = () => {
     getAllAgents()
   }, [])
   const fetchData = async () => {
+    setTableLoading(true);
     const res = await getDemoRequests(page, size, search);
 
     if (res?.success) {
@@ -80,6 +83,12 @@ const DemoRequests = () => {
       setTotalPages(res.data.totalPages);
       setPageSize(res.data.pageSize)
     }
+    // setTableLoading(false);
+    setTimeout(() => {
+      setTableLoading(false);
+    }, 400); 
+
+
   };
 
   useEffect(() => {
@@ -124,6 +133,8 @@ const DemoRequests = () => {
 
 
     if (res.success) {
+      setShowModal(false);
+      setDropdownValue("");
       setModalType("success");
       setMessage("Updated Successfully");
       setShowSuccess(true);
@@ -131,11 +142,11 @@ const DemoRequests = () => {
       setTimeout(() => {
         setShowSuccess(false);
 
-        setDropdownValue("");
-        setShowModal(false);
-        fetchData();
-      }, 1500);
+        // setDropdownValue("");
+        // setShowModal(false);
 
+      }, 1500);
+      fetchData();
     } else {
 
       setAssignError(res.message || "Failed");
@@ -217,7 +228,7 @@ const DemoRequests = () => {
 
                 <tbody className="divide-y divide-gray-200">
 
-                  {loading ? (
+                  {tableLoading ? (
 
 
                     Array.from({ length: size }).map((_, i) => (
