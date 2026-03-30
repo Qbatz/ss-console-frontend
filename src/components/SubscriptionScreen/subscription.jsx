@@ -112,7 +112,7 @@ useEffect(() => {
             {/* RIGHT SIDE BUTTON */}
             <button
               onClick={() => navigate(`/manage-plans/${adminDetails?.roleId}`)}
-              className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit"
+              className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit cursor-pointer"
             >
               Manage Plans
             </button>

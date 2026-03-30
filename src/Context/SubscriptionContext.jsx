@@ -144,12 +144,75 @@ const getAgentsDropdown = async () => {
     setLoading(false);
   }
 };
+const createDemoRequest = async (payload) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      "/v2/demo-request/",
+      payload
+    );
+
+    if (res.status === 200 || res.status === 201) {
+      return {
+        success: true,
+        data: res.data,
+        message: "Demo request created successfully",
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const updateDemoRequestStatus = async (demoRequestId, payload) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.put(
+      `/v2/demo-request/update-status/${demoRequestId}`,
+      payload
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+        message: "Status updated successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return { success: false, message: msg };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <SubscriptionContext.Provider
       value={{
         loading,
         errorMsg,
-        createSubscription,getSubscriptions,getDemoRequests,getAgentsDropdown
+        createSubscription,getSubscriptions,getDemoRequests,getAgentsDropdown,createDemoRequest,updateDemoRequestStatus
       }}
     >
       {children}
