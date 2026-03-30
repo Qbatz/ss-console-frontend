@@ -23,6 +23,7 @@ import RecurringInvoice from "../components/RecurringMonitor/RecurringInvoice";
 import { DashboardProvider } from "../Context/DashboardContext";
 import DemoRequests from "../components/DemoRequestsScreen/DemoRequests";
 import { PlanProvider } from "../Context/PlanContexts";
+import AddEditPlan from "../components/SubscriptionScreen/AddPlan";
 
 
 const PrivateRoute = ({ children }) => {
@@ -65,6 +66,7 @@ const PrivateRoutesScreen = () => {
                     <Route path="/Recurring-Bill/:roleId" element={<RecurringInvoice />} />
                     {/* <Route path="/subscriptions" element={<Subscription />} /> */}
                     <Route path="/demo-requests/:roleId" element={<DemoRequests />} />
+                     <Route path="/add-plan" element={<AddEditPlan />} />
 
 
                   </Routes>
