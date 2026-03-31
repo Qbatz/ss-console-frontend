@@ -24,7 +24,7 @@ import { DashboardProvider } from "../Context/DashboardContext";
 import DemoRequests from "../components/DemoRequestsScreen/DemoRequests";
 import { PlanProvider } from "../Context/PlanContexts";
 import AddEditPlan from "../components/SubscriptionScreen/AddPlan";
-
+import CreateOffer from "../components/SubscriptionScreen/CreateOffer";
 
 const PrivateRoute = ({ children }) => {
   const token =
@@ -67,7 +67,7 @@ const PrivateRoutesScreen = () => {
                     {/* <Route path="/subscriptions" element={<Subscription />} /> */}
                     <Route path="/demo-requests/:roleId" element={<DemoRequests />} />
                      <Route path="/add-plan" element={<AddEditPlan />} />
-
+                   <Route path="/create-offer" element={<CreateOffer />} />
 
                   </Routes>
                 </DashboardProvider>
