@@ -89,12 +89,12 @@ const ManagePlans = () => {
 
     }
     else {
-            setModalType("error");
+      setModalType("error");
       setMessage(res?.message);
       setShowSuccess(true);
       setDeleteError(res.message)
       setSelectedPlanId(null);
-        setTimeout(() => {
+      setTimeout(() => {
         setShowSuccess(false);
 
       }, 800);
@@ -104,7 +104,7 @@ const ManagePlans = () => {
   };
   return (
     <DashboardLayout>
-       <Toast
+      <Toast
         show={showSuccess}
         message={message}
         type={modalType}
@@ -418,7 +418,7 @@ const ManagePlans = () => {
 
                   <div className="mt-6 space-y-2">
                     <div className="w-full">
-                      <button className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
+                      {/* <button className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition cursor-pointer">
 
                         <img
                           src={discoutshape}
@@ -427,13 +427,24 @@ const ManagePlans = () => {
                         />
 
                         Create Offer
+                      </button> */}
+                      <button
+                        onClick={() => navigate("/create-offer", { state: { plan } })}
+                        className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-lg"
+                      >
+                         <img
+                          src={discoutshape}
+                          alt="discount"
+                          className="h-4 w-4"
+                        />
+                        Create Offer
                       </button>
                     </div>
 
 
                     <button
                       onClick={() => navigate("/add-plan", { state: { plan } })}
-                      className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-200 transition"
+                      className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-200 transition cursor-pointer"
                     >
                       <img src={Edit} alt="edit" className="h-4 w-4" />
                       Edit Plan
