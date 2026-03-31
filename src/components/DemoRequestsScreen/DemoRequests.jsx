@@ -34,7 +34,12 @@ const [selectedId, setSelectedId] = useState(null);
   const [message, setMessage] = useState("");
   const [pageSize, setPageSize] = useState("")
   const [agentList, setAgentList] = useState([])
+
   const [openDrawer, setOpenDrawer] = useState(false);
+
+  const [tableLoading, setTableLoading] = useState(false);
+
+
   useEffect(() => {
     const fetchAgents = async () => {
       const res = await getAgentsDropdown();
@@ -75,6 +80,7 @@ const [selectedId, setSelectedId] = useState(null);
     getAllAgents()
   }, [])
   const fetchData = async () => {
+    setTableLoading(true);
     const res = await getDemoRequests(page, size, search);
 
     if (res?.success) {
@@ -83,6 +89,12 @@ const [selectedId, setSelectedId] = useState(null);
       setTotalPages(res.data.totalPages);
       setPageSize(res.data.pageSize)
     }
+    // setTableLoading(false);
+    setTimeout(() => {
+      setTableLoading(false);
+    }, 400); 
+
+
   };
 
   useEffect(() => {
@@ -127,6 +139,8 @@ const [selectedId, setSelectedId] = useState(null);
 
 
     if (res.success) {
+      setShowModal(false);
+      setDropdownValue("");
       setModalType("success");
       setMessage("Updated Successfully");
       setShowSuccess(true);
@@ -134,11 +148,11 @@ const [selectedId, setSelectedId] = useState(null);
       setTimeout(() => {
         setShowSuccess(false);
 
-        setDropdownValue("");
-        setShowModal(false);
-        fetchData();
-      }, 1500);
+        // setDropdownValue("");
+        // setShowModal(false);
 
+      }, 1500);
+      fetchData();
     } else {
 
       setAssignError(res.message || "Failed");
@@ -228,7 +242,7 @@ const [selectedId, setSelectedId] = useState(null);
 
                 <tbody className="divide-y divide-gray-200">
 
-                  {loading ? (
+                  {tableLoading ? (
 
 
                     Array.from({ length: size }).map((_, i) => (
