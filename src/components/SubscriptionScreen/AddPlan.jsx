@@ -25,7 +25,7 @@ const defaultFeatures = [
 const AddEditPlan = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { plans, getPlans, createPlan, updatePlan, deactivatePlanFeature,addPlanFeature } = usePlan();
+  const { plans, getPlans, createPlan, updatePlan, deactivatePlanFeature, addPlanFeature } = usePlan();
   useEffect(() => {
     getPlans();
   }, []);
@@ -85,12 +85,9 @@ const AddEditPlan = () => {
 
     setFeatures(initial);
   }, [editData]);
+  
   const handleSubmit = async () => {
-
-
     let hasError = false;
-
-
     if (!planName?.trim()) {
       setPlanNameError("Plan name is required");
       hasError = true;
@@ -106,7 +103,7 @@ const AddEditPlan = () => {
       hasError = true;
     }
 
-    // ⛔ STOP if error
+
     if (hasError) return;
 
 
@@ -118,7 +115,7 @@ const AddEditPlan = () => {
       );
 
       return {
-        planFeatureId: existing?.planFeatureId, // only for edit
+        planFeatureId: existing?.planFeatureId,
         featureName: a.name,
         price: Number(a.price || 0)
       };
@@ -651,7 +648,7 @@ const AddEditPlan = () => {
 
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
           >
             {editData ? "Save Changes" : "Create Plan"}
           </button>

@@ -8,17 +8,19 @@ import Toast from "../SuccessModal/ToastDesign";
 import Arrow from "../../assets/direction-down 01.png";
 import ArrowRight from "../../assets/arrow-right.png";
 import Search from "../../assets/Search.png";
-
+import DemoRequestDrawer from "./AddRequest";
+import UpdateStatusModal from "./UpdateStatusModal";
 const DemoRequests = () => {
 
-  const { getDemoRequests, loading, getAgentsDropdown } = useSubscription();
+  const { getDemoRequests, loading, getAgentsDropdown,updateDemoRequestStatus } = useSubscription();
   const { adminDetails, agents, getAllAgents, assignStaff } = useRole();
   const dropdownRef = useRef(null);
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
   const [search, setSearch] = useState("");
-
+const [openStatusModal, setOpenStatusModal] = useState(false);
+const [selectedId, setSelectedId] = useState(null);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [openMenu, setOpenMenu] = useState(null);
@@ -32,7 +34,11 @@ const DemoRequests = () => {
   const [message, setMessage] = useState("");
   const [pageSize, setPageSize] = useState("")
   const [agentList, setAgentList] = useState([])
+
+  const [openDrawer, setOpenDrawer] = useState(false);
+
   const [tableLoading, setTableLoading] = useState(false);
+
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -177,12 +183,20 @@ const DemoRequests = () => {
 
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
-            <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
-              <p className="text-gray-500 text-sm font-gilroy">DemoRequestCount</p>
-              <h2 className="text-2xl font-bold mt-2">0</h2>
-            </div>
-          </div>
+        <div className="flex items-center justify-between mb-6">
+
+  {/* Left side card */}
+  <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300 w-full max-w-xs">
+    <p className="text-gray-500 text-sm font-gilroy">DemoRequestCount</p>
+    <h2 className="text-2xl font-bold mt-2">0</h2>
+  </div>
+
+  {/* Right side button */}
+  <button className="bg-blue-500 text-white px-4 py-2 rounded-lg cursor-pointer" onClick={() => setOpenDrawer(true)}>
+    Add Request
+  </button>
+
+</div>
           <div className="flex justify-end">
             <div className="relative w-64 mb-3">
               <img
@@ -334,6 +348,14 @@ const DemoRequests = () => {
                               >
                                 Assign Staff
                               </button>
+                              <button
+  onClick={() => {
+    setSelectedId(item.requestId);
+    setOpenStatusModal(true);
+  }}
+>
+  Change Status
+</button>
                             </div>
                           )}
 
@@ -510,6 +532,15 @@ const DemoRequests = () => {
           </div>
         )}
       </>
+      <DemoRequestDrawer
+  open={openDrawer}
+  onClose={() => setOpenDrawer(false)}
+/>
+<UpdateStatusModal
+  open={openStatusModal}
+  onClose={() => setOpenStatusModal(false)}
+  demoRequestId={selectedId}
+/>
     </DashboardLayout>
   );
 };

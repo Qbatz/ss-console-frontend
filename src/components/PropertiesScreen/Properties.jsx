@@ -19,13 +19,13 @@ import dayjs from "dayjs";
 const Properties = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, deleteHostelExpense, exportHostels } = useHostel();
   const { createSubscription } = useSubscription();
-  
+
   const location = useLocation();
- 
- 
+
+
   const { RangePicker } = DatePicker;
   const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
-const [dateRange, setDateRange] = useState([]);
+  const [dateRange, setDateRange] = useState([]);
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Hostels");
   console.log("canRead", canRead)
@@ -84,22 +84,22 @@ const [dateRange, setDateRange] = useState([]);
 
   // }, [page, pageSize, debouncedSearch]);
   useEffect(() => {
-  if (skipFirstApi) {
-    setSkipFirstApi(false);
-    return;
-  }
+    if (skipFirstApi) {
+      setSkipFirstApi(false);
+      return;
+    }
 
-  let start = "";
-  let end = "";
+    let start = "";
+    let end = "";
 
-  if (dateRange && dateRange.length === 2) {
-    start = dateRange[0].format("DD-MM-YYYY"); // API format
-    end = dateRange[1].format("DD-MM-YYYY");
-  }
+    if (dateRange && dateRange.length === 2) {
+      start = dateRange[0].format("DD-MM-YYYY"); // API format
+      end = dateRange[1].format("DD-MM-YYYY");
+    }
 
-  getHostels(page, pageSize, debouncedSearch, start, end);
+    getHostels(page, pageSize, debouncedSearch, start, end);
 
-}, [page, pageSize, debouncedSearch, dateRange]);
+  }, [page, pageSize, debouncedSearch, dateRange]);
 
   useEffect(() => {
     if (location.state?.skipApi) {
@@ -146,29 +146,29 @@ const [dateRange, setDateRange] = useState([]);
 
     }
   };
-// const handleExport = () => {
-//   if (!dateRange || dateRange.length !== 2) {
-//     console.log("Select date range");
-//     return;
-//   }
+  // const handleExport = () => {
+  //   if (!dateRange || dateRange.length !== 2) {
+  //     console.log("Select date range");
+  //     return;
+  //   }
 
-//   const start = dateRange[0].format("DD-MM-YYYY");
-//   const end = dateRange[1].format("DD-MM-YYYY");
+  //   const start = dateRange[0].format("DD-MM-YYYY");
+  //   const end = dateRange[1].format("DD-MM-YYYY");
 
-//   exportHostels(searchText, start, end);
-// };
-const handleExport = () => {
-  let start = "";
-  let end = "";
+  //   exportHostels(searchText, start, end);
+  // };
+  const handleExport = () => {
+    let start = "";
+    let end = "";
 
-  // date irundha mattum format pannum
-  if (dateRange && dateRange.length === 2) {
-    start = dateRange[0].format("DD-MM-YYYY");
-    end = dateRange[1].format("DD-MM-YYYY");
-  }
+    // date irundha mattum format pannum
+    if (dateRange && dateRange.length === 2) {
+      start = dateRange[0].format("DD-MM-YYYY");
+      end = dateRange[1].format("DD-MM-YYYY");
+    }
 
-  exportHostels(searchText, start, end);
-};
+    exportHostels(searchText, start, end);
+  };
   const handleCreateSubscription = async (hostelId) => {
     const payload = {
       planCode: hostelId?.hostelPlan.currentPlanCode,
@@ -472,18 +472,18 @@ const handleExport = () => {
 
                   </div> */}
                   <div className="flex items-end gap-3">
- <div className="flex flex-col">
-    <label className="text-xs text-gray-500 mb-1 text-left">Select Date Range</label>
+                    <div className="flex flex-col">
+                      <label className="text-xs text-gray-500 mb-1 text-left">Select Date Range</label>
 
-    <RangePicker
-      value={dateRange}
-      onChange={(dates) => setDateRange(dates)}
-      format="DD-MM-YYYY"
-      className="h-[38px] rounded-lg"
-    />
-  </div>
-  {/* Start Date */}
-  {/* <div className="flex flex-col">
+                      <RangePicker
+                        value={dateRange}
+                        onChange={(dates) => setDateRange(dates)}
+                        format="DD-MM-YYYY"
+                        className="h-[38px] rounded-lg"
+                      />
+                    </div>
+                    {/* Start Date */}
+                    {/* <div className="flex flex-col">
     <label className="text-xs text-gray-500 mb-1">Start Date</label>
     <input
       type="date"
@@ -493,8 +493,8 @@ const handleExport = () => {
     />
   </div> */}
 
-  {/* End Date */}
-  {/* <div className="flex flex-col">
+                    {/* End Date */}
+                    {/* <div className="flex flex-col">
     <label className="text-xs text-gray-500 mb-1">End Date</label>
     <input
       type="date"
@@ -504,22 +504,22 @@ const handleExport = () => {
     />
   </div> */}
 
-  {/* Export Button */}
-  <button
-    // onClick={() =>
-    //   exportHostels(
-    //     searchText,
-    //     formatDateToDDMMYYYY(startDate),
-    //     formatDateToDDMMYYYY(endDate)
-    //   )
-    // }
-    onClick={handleExport}
-    className="h-[38px] px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm flex items-center gap-2 shadow-sm cursor-pointer" 
-  >
-    ⬇ Export
-  </button>
+                    {/* Export Button */}
+                    <button
+                      // onClick={() =>
+                      //   exportHostels(
+                      //     searchText,
+                      //     formatDateToDDMMYYYY(startDate),
+                      //     formatDateToDDMMYYYY(endDate)
+                      //   )
+                      // }
+                      onClick={handleExport}
+                      className="h-[38px] px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm flex items-center gap-2 shadow-sm cursor-pointer"
+                    >
+                      ⬇ Export
+                    </button>
 
-</div>
+                  </div>
                   <div className="relative">
                     <img
                       src={Search}
@@ -818,14 +818,24 @@ const handleExport = () => {
                                     alt="money"
                                     className="w-5 h-5 cursor-pointer"
                                   /> */}
-                                <img
+                                {/* <img
                                   src={Money}
                                   onClick={() => {
                                     if (canWrite === true) handleCreateSubscription(item);
                                   }}
                                   alt="money"
                                   className={`w-5 h-5 ${canWrite === true ? "cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
-                                />
+                                /> */}
+                                {item?.hostelPlan?.currentPlan === "Trial" && item?.isTrial === "true" && (
+  <img
+    src={Money}
+    onClick={() => {
+      if (canWrite === true) handleCreateSubscription(item);
+    }}
+    alt="money"
+    className={`w-5 h-5 ${canWrite === true ? "cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
+  />
+)}
                               </div>
                             </td>
 

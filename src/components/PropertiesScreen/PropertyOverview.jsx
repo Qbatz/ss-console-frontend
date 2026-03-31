@@ -14,6 +14,7 @@ import StaffScreen from "./StaffScreen";
 import InvoicesScreen from "./InvoicesScreen";
 import PropertyActive from "./ActiveScreen";
 import swap from "../../assets/arrowswap.png";
+import Star from "../../assets/star.png"
 import PropertyAmenities from "./PropertyAmenities";
 import { useHostel } from "../../Context/HostelListContext";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
@@ -87,6 +88,9 @@ const PropertyOverview = () => {
       setHostelError(res?.message || "Please Enter Valid Hostel ID");
     }
   };
+  const plan = hostelData?.currentSubscription?.planName;
+  console.log("Plandetails", hostelData);
+  
   const handleOwnerClick = async (item) => {
 
     const res = await getOwnerById(item.ownerInfo.ownerId);
@@ -215,7 +219,12 @@ const PropertyOverview = () => {
               <div>
                 <p className="  text-[#1D1D1D] text-left font-sans font-medium text-sm">Subscription Plan</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <img src={Crown} className="w-4 h-4 " />
+                 <img
+  src={(plan === "Basic") ? Star : (plan === "Premium") ? Crown : null}
+  className="w-4 h-4"
+  style={{ display: plan === "basic" || plan === "premium" ? "block" : "none" }}
+/>
+              
                   <p className="text-sm font-medium ">
                     {/* {hostelData.hostelPlan?.currentPlan} */}
                     {hostelData?.currentSubscription?.planName || "N/A"}
