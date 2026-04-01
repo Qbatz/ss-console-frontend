@@ -2,8 +2,21 @@ import React, { useState, useEffect,useRef } from "react";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import Arrow from "../../assets/direction-down 01.png";
 
-const UpdateStatusModal = ({ open, onClose, demoRequestId }) => {
-  const { updateDemoRequestStatus, getAgentsDropdown } = useSubscription();
+const UpdateStatusModal = ({ open, onClose, demoRequestId,refreshList }) => {
+  const { updateDemoRequestStatus, getAgentsDropdown,getDemoRequestStatus,getDemoRequests } = useSubscription();
+const [statusList, setStatusList] = useState([]);
+const [openStatus, setOpenStatus] = useState(false);
+const [selectedStatus, setSelectedStatus] = useState("");
+useEffect(() => {
+  const fetchStatus = async () => {
+    const res = await getDemoRequestStatus();
+    if (res.success) {
+      setStatusList(res.data);
+    }
+  };
+
+  fetchStatus();
+}, []);
 
   const [form, setForm] = useState({
     demoRequestStatus: "",
@@ -92,7 +105,9 @@ useEffect(() => {
     const res = await updateDemoRequestStatus(demoRequestId, payload);
 
     if (res.success) {
+       await refreshList();
       onClose();
+      
     }
   };
 
@@ -109,20 +124,47 @@ useEffect(() => {
 
         <h2 className="text-lg font-semibold mb-4">Update Status</h2>
 
-        {/* Status */}
-        <select
-          name="demoRequestStatus"
-          onChange={handleChange}
-          className="w-full border p-2 rounded mb-2"
+       
+       <div className="relative mt-2">
+
+  {/* Selected box */}
+  <div
+    onClick={() => setOpenStatus(!openStatus)}
+    className="w-full border border-gray-300 rounded px-4 py-2 flex justify-between items-center cursor-pointer"
+  >
+    <span className="text-sm">
+      {statusList.find(s => s.key === selectedStatus)?.value || "Select Status"}
+    </span>
+  </div>
+
+  {/* Dropdown */}
+  {openStatus && (
+    <div className="absolute mt-2 w-full bg-white border rounded shadow max-h-40 overflow-y-auto z-50">
+
+      {statusList.map((item) => (
+        <div
+          key={item.key}
+          onClick={() => {
+            setSelectedStatus(item.key);
+            setForm({ ...form, demoRequestStatus: item.key });
+            setOpenStatus(false);
+          }}
+          className={`px-4 py-2 cursor-pointer text-sm
+            ${selectedStatus === item.key
+              ? "bg-blue-500 text-white"
+              : "hover:bg-gray-100"
+            }`}
         >
-          <option value="">Select Status</option>
-          <option value="PENDING">Pending</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="REJECTED">Rejected</option>
-        </select>
+          {item.value}
+        </div>
+      ))}
+
+    </div>
+  )}
+</div>
         {errors.demoRequestStatus && <p className="text-red-500 text-xs">{errors.demoRequestStatus}</p>}
 
-        {/* Comments */}
+     
         <textarea
           name="comments"
           placeholder="Comments"
@@ -142,7 +184,7 @@ useEffect(() => {
       e.stopPropagation();
       setOpenDropdown(!openDropdown);
     }}
-    className="w-full border border-gray-300 rounded-xl px-4 py-2 flex justify-between items-center cursor-pointer"
+    className="w-full border border-gray-300 rounded px-4 py-2 flex justify-between items-center cursor-pointer"
   >
     <span className="text-sm">
       {agentList.find(a => a.agentId === selectedAgent)?.agentName || "Select Agent"}
@@ -153,7 +195,7 @@ useEffect(() => {
 
   {/* Dropdown list */}
   {openDropdown && (
-    <div className="absolute mt-2 w-full bg-white rounded-xl shadow-lg border max-h-44 overflow-y-auto z-[9999]">
+    <div className="absolute mt-2 w-full bg-white rounded shadow-lg border max-h-44 overflow-y-auto z-[9999]">
 
       {agentList.map((agent) => (
         <div

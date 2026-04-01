@@ -51,6 +51,7 @@ const AddEditPlan = () => {
   const [planCodeError, setPlanCodeError] = useState("")
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [selectedAddonIndex, setSelectedAddonIndex] = useState(null);
+  const [initialAddons, setInitialAddons] = useState([]);
 
   // INIT FEATURES
   useEffect(() => {
@@ -85,6 +86,19 @@ const AddEditPlan = () => {
 
     setFeatures(initial);
   }, [editData]);
+  useEffect(() => {
+  if (editData) {
+    const addonData = editData.planFeatures.map(f => ({
+      name: f.featureName,
+      price: f.price,
+      planFeatureId: f.planFeatureId
+    }));
+
+    setAddons(addonData);
+    setInitialAddons(addonData); // 👈 IMPORTANT
+  }
+}, [editData]);
+
   
   const handleSubmit = async () => {
     let hasError = false;
@@ -107,20 +121,15 @@ const AddEditPlan = () => {
     if (hasError) return;
 
 
-    const validAddons = addons.filter(a => a.name);
+ const validAddons = addons.filter(a => a.name);
 
-    let planFeatures = validAddons.map(a => {
-      const existing = editData?.planFeatures?.find(
-        pf => pf.featureName === a.name
-      );
-
-      return {
-        planFeatureId: existing?.planFeatureId,
-        featureName: a.name,
-        price: Number(a.price || 0)
-      };
-    });
-
+let planFeatures = validAddons.map(a => ({
+  planFeatureId: a.planFeatureId, // 🔥 IMPORTANT FIX
+  featureName: a.name,
+  price: Number(a.price || 0)
+}));
+console.log("addons:", addons);
+console.log("initial:", initialAddons);
 
     const payload = {
       planName,
@@ -138,10 +147,80 @@ const AddEditPlan = () => {
 
     let res;
 
-    if (editData) {
+    // if (editData) {
 
-      res = await updatePlan(editData.planId, payload);
-    } else {
+    //   res = await updatePlan(editData.planId, payload);
+    // } 
+if (editData) {
+
+  const newFeatures = addons.filter(a => !a.planFeatureId);
+
+  const editedFeatures = addons.filter(a => {
+    const initial = initialAddons.find(
+      i => i.planFeatureId === a.planFeatureId
+    );
+
+    if (!initial) return false;
+
+    return (
+      initial.name?.trim() !== a.name?.trim() ||
+      Number(initial.price || 0) !== Number(a.price || 0)
+    );
+  });
+
+  const otherFieldsChanged =
+    planName?.trim() !== editData.planName?.trim() ||
+    planCode?.trim() !== editData.planCode?.trim() ||
+    planType?.trim() !== editData.planType?.trim() ||
+    Number(price || 0) !== Number(editData.price || 0) ||
+    Number(duration || 0) !== Number(editData.duration || 0) ||
+    Number(discount || 0) !== Number(editData.discountPercentage || 0);
+
+  // ❌ No changes
+  if (
+    newFeatures.length === 0 &&
+    editedFeatures.length === 0 &&
+    !otherFieldsChanged
+  ) {
+    setModalType("error");
+    setMessage("No changes detected");
+    setShowSuccess(true);
+    return;
+  }
+
+  // ✅ ANY feature change (new OR edit)
+  if (
+    (newFeatures.length > 0 || editedFeatures.length > 0) &&
+    !otherFieldsChanged
+  ) {
+    const featuresToSend = [...newFeatures, ...editedFeatures];
+
+   await Promise.all(
+  featuresToSend.map(f =>
+    addPlanFeature(editData.planId, {
+      planFeatureId: f.planFeatureId, // 🔥 IMPORTANT
+      featureName: f.name,
+      price: Number(f.price || 0)
+    })
+  )
+);
+
+    setModalType("success");
+    setMessage("Feature updated successfully");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+      navigate(-1);
+    }, 800);
+
+    return;
+  }
+
+  // ✅ other fields change → updatePlan
+  res = await updatePlan(editData.planId, payload);
+}
+    else {
 
       payload.planFeatures = payload.planFeatures.map(({ featureName, price }) => ({
         featureName,

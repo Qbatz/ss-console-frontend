@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef  } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -61,6 +61,7 @@ const ManagePlans = () => {
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
+  const menuRef = useRef(null);
   console.log("errorMsg", errorMsg)
   const toggleMenu = (id) => {
     setOpenMenuId(prev => (prev === id ? null : id));
@@ -102,6 +103,19 @@ const ManagePlans = () => {
 
 
   };
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setOpenMenuId(null); // close menu
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
   return (
     <DashboardLayout>
       <Toast
@@ -338,22 +352,23 @@ const ManagePlans = () => {
                       </div>
 
                       {/* DROPDOWN MENU */}
-                      {openMenuId === plan.planId && (
-                        <div className="absolute right-0 top-8 bg-white border rounded-lg shadow-md w-32 z-10">
-
-
-                          <button
-                            onClick={() => {
-                              setSelectedPlanId(plan.planId);
-                              setShowModal(true);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-gray-100 cursor-pointer"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
+                     {openMenuId === plan.planId && (
+  <div
+    ref={menuRef}   
+    className="absolute right-0 top-8 bg-white border rounded-lg shadow-md w-32 z-10"
+  >
+    <button
+      onClick={() => {
+        setSelectedPlanId(plan.planId);
+        setShowModal(true);
+        setOpenMenuId(null);
+      }}
+      className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-gray-100 cursor-pointer"
+    >
+      Delete
+    </button>
+  </div>
+)}
 
                     </div>
 
