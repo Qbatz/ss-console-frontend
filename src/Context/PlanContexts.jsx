@@ -7,6 +7,7 @@ export const PlanProvider = ({ children }) => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  
 
   const getErrorMessage = (error) =>
     error?.response?.data?.message ||
@@ -112,7 +113,7 @@ const deactivatePlanFeature = async (planFeatureId) => {
     setErrorMsg("");
 
     const res = await axiosInstance.put(
-      `/v2/plans/deactivate-plan-feature/${planFeatureId}`
+      `/v2/plans/plan-feature/${planFeatureId}`
     );
 
     if (res.status === 200) {
@@ -137,7 +138,7 @@ const addPlanFeature = async (planId, feature) => {
     setErrorMsg("");
 
     const res = await axiosInstance.post(
-      `/v2/plans/add-plan-feature/${planId}`,
+      `/v2/plans/plan-feature/${planId}`,
       feature
     );
 

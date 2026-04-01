@@ -540,6 +540,7 @@ const [selectedId, setSelectedId] = useState(null);
   open={openStatusModal}
   onClose={() => setOpenStatusModal(false)}
   demoRequestId={selectedId}
+   refreshList={fetchData} 
 />
     </DashboardLayout>
   );

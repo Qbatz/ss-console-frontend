@@ -207,12 +207,41 @@ const updateDemoRequestStatus = async (demoRequestId, payload) => {
     setLoading(false);
   }
 };
+const getDemoRequestStatus = async () => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get("/v2/demo-request/status");
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <SubscriptionContext.Provider
       value={{
         loading,
         errorMsg,
-        createSubscription,getSubscriptions,getDemoRequests,getAgentsDropdown,createDemoRequest,updateDemoRequestStatus
+        createSubscription,getSubscriptions,getDemoRequests,getAgentsDropdown,createDemoRequest,updateDemoRequestStatus,getDemoRequestStatus
       }}
     >
       {children}
