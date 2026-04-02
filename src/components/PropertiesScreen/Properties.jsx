@@ -571,6 +571,9 @@ const Properties = () => {
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">
                           Mobile.No
                         </th>
+                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">
+                         Email
+                        </th>
 
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">
                           Created On
@@ -722,7 +725,9 @@ const Properties = () => {
                             <td className="px-4 py-2 whitespace-nowrap">
                               {item.ownerInfo?.mobile}
                             </td>
-
+<td className="px-4 py-2 whitespace-nowrap">
+                              {item.ownerInfo?.emailId}
+                            </td>
                             <td className="px-4 py-2 whitespace-nowrap">
                               {item?.joinedOn}
                             </td>
@@ -826,16 +831,19 @@ const Properties = () => {
                                   alt="money"
                                   className={`w-5 h-5 ${canWrite === true ? "cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
                                 /> */}
-                                {item?.hostelPlan?.currentPlan === "Trial" && item?.isTrial === "true" && (
+                                {/* {item?.hostelPlan?.currentPlan === "Trial" && item?.isTrial === "true" && ( */}
   <img
     src={Money}
     onClick={() => {
-      if (canWrite === true) handleCreateSubscription(item);
-    }}
+         console.log("clicked", item , canWrite) ;
+      if (canWrite === true && item?.trialExtendable === true ) {
+     
+        handleCreateSubscription(item);
+    }}}
     alt="money"
-    className={`w-5 h-5 ${canWrite === true ? "cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
+    className={`w-5 h-5 ${(canWrite === true && item?.trialExtendable === true) ? "cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
   />
-)}
+{/* // )} */}
                               </div>
                             </td>
 
