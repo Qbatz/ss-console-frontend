@@ -378,7 +378,7 @@ const PropertyOverview = () => {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`pb-3 text-sm font-medium font-sans capitalize border-b-2 whitespace-nowrap ${activeTab === tab
+                    className={`pb-3 text-sm font-medium font-sans capitalize border-b-2 whitespace-nowrap cursor-pointer ${activeTab === tab
                       ? "border-[#2563EB] text-[#2563EB]"
                       : "border-transparent text-gray-500"
                       }`}

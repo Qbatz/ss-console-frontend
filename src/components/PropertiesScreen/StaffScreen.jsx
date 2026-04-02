@@ -12,17 +12,31 @@ const StaffScreen = ({ hostelData }) => {
   const staffs = hostelData?.staffs || [];
   const owner = hostelData?.ownerInfo;
 
+  // const mastersList = [
+  //   {
+  //     fullName: owner?.fullName,
+  //     email: owner?.emailId,
+  //     mobileNo: owner?.mobile,
+  //     updatedAt: "—",
+  //     userId: owner?.ownerId,
+  //     isOwner: true,
+  //   },
+  //   ...(masters || []),
+  // ];
   const mastersList = [
-    {
-      fullName: owner?.fullName,
-      email: owner?.email,
-      mobileNo: owner?.mobile,
-      updatedAt: "—",
-      userId: owner?.ownerId,
-      isOwner: true,
-    },
-    ...(masters || []),
-  ];
+  {
+    fullName: owner?.fullName,
+    email: owner?.emailId,
+    mobileNo: owner?.mobile,
+    updatedAt: "—",
+    userId: owner?.ownerId,
+    isOwner: true,
+  },
+  ...(masters || []).map(m => ({
+    ...m,
+    email: m.email || m.emailId // 🔥 normalize
+  })),
+];
   const { changeOwnerPassword } = useOwners();
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
   const [showResetModal, setShowResetModal] = useState(false);
@@ -324,7 +338,7 @@ const StaffScreen = ({ hostelData }) => {
                       </td>
 
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
-                        {item.email || "N/A"}
+                        {item.emailId || "N/A"}
                       </td>
 
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
