@@ -112,10 +112,10 @@ const AddEditPlan = () => {
       hasError = true;
     }
 
-    if (!planCode?.trim()) {
-      setPlanCodeError("Plan code is required");
-      hasError = true;
-    }
+    // if (!planCode?.trim()) {
+    //   setPlanCodeError("Plan code is required");
+    //   hasError = true;
+    // }
 
 
     if (hasError) return;
@@ -246,6 +246,7 @@ if (editData) {
     } else {
 
       setModalType("error");
+      setPlanTypeError(res.message)
       setMessage(res.message || "Something went wrong");
       setShowSuccess(true);
 
@@ -477,9 +478,9 @@ if (editData) {
                     placeholder="Enter plan code"
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  {planCodeError && (
+                  {/* {planCodeError && (
                     <ErrorMessage message={planCodeError} type="error" />
-                  )}
+                  )} */}
                 </div>
 
                 {/* PLAN TYPE */}
