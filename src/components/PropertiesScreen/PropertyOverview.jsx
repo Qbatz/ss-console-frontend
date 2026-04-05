@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import OverviewSubscriptions from "./OverviewSubscription";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
@@ -24,16 +24,22 @@ import LoginImg from "../../assets/LoginImg.png";
 import ReccuringBill from "./ReccuringBill";
 import { useOwners } from "../../Context/OwnersContext";
 import { useRole } from "../../Context/RoleContext";
+import { usePlan } from "../../Context/PlanContexts";
+import { useSubscription } from "../../Context/SubscriptionContext";
 const PropertyOverview = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError } = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
-
+  const { createSubscription } = useSubscription();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenants");
 
   const { canWrite: canResetWrite } = usePermission("Reset hostel");
-  console.log("canWrite", canRead)
+  const { plans, getPlans } = usePlan();
+  console.log("plans", plans)
+  useEffect(() => {
+    getPlans()
+  }, [])
   const [activeTab, setActiveTab] = useState("tenants");
   const [showSharing, setShowSharing] = useState(false);
   const [showBillingRule, setShowBillingRule] = useState(false);
@@ -44,6 +50,18 @@ const PropertyOverview = () => {
 
   const [hostelerror, setHostelError] = useState("")
   const [noteText, setNoteText] = useState("");
+  const [days, setDays] = useState("");
+  const [daysError, setDaysError] = useState("")
+  const [planCode, setPlanCode] = useState("");
+  const [paidAmount, setPaidAmount] = useState("");
+  const [discountAmount, setDiscountAmount] = useState("");
+  const [paymentProof, setPaymentProof] = useState(null);
+  const [showTrialModal, setShowTrialModal] = useState(false);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [menuError, setMenuError] = useState("")
+  const [planError, setPlanError] = useState("")
+  const [proofError, setProofError] = useState("")
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -52,7 +70,8 @@ const PropertyOverview = () => {
 
 
   const hostelData = location.state?.hostelData;
-  console.log("hostelData", hostelData)
+  const trialPlan = location.state?.trialPlan;
+  console.log("trialPlan", trialPlan?.trialExtendable)
 
   const handleHardReset = async () => {
 
@@ -90,7 +109,7 @@ const PropertyOverview = () => {
   };
   const plan = hostelData?.currentSubscription?.planName;
   console.log("Plandetails", hostelData);
-  
+
   const handleOwnerClick = async (item) => {
 
     const res = await getOwnerById(item.ownerInfo.ownerId);
@@ -104,6 +123,195 @@ const PropertyOverview = () => {
     }
 
   };
+  const handleTrialOnly = async () => {
+    console.log("trialPlan?.trialExtendable", trialPlan?.trialExtendable)
+    const payload = {
+      isTrial: trialPlan?.trialExtendable,
+      trialDays: 0,
+      paidAmount: Number(paidAmount || 0),
+      discountAmount: Number(discountAmount || 0)
+    };
+
+    const res = await createSubscription(
+      trialPlan?.hostelId,
+      payload
+    );
+
+    if (res?.success) {
+      setModalType("success");
+      setMessage(res.message);
+      setShowSuccess(true);
+
+      await getHostels(1, 10, "");
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1000);
+
+    } else {
+      setMenuError(res?.message);
+      setModalType("error");
+      setMessage(res?.message);
+      setShowSuccess(true);
+
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1000);
+    }
+  };
+  const handleTrialWithDays = async () => {
+    if (!days) {
+      setDaysError("Please Enter Days");
+      return;
+    }
+
+    const payload = {
+      isTrial: trialPlan?.trialExtendable,
+      trialDays: Number(days),
+      paidAmount: Number(paidAmount || 0),
+      discountAmount: Number(discountAmount || 0)
+    };
+
+    const res = await createSubscription( 
+      trialPlan?.hostelId,
+      payload
+    );
+
+    if (res?.success) {
+      setModalType("success");
+      setMessage(res.message);
+      setShowSuccess(true);
+
+      await getHostels(1, 10, "");
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1000);
+
+    } else {
+      setDaysError(res?.message);
+      setModalType("error");
+      setMessage(res?.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1000);
+    }
+  };
+
+  const resetPlanForm = () => {
+    setPlanCode("");
+    setPaidAmount("");
+    setDiscountAmount("");
+    setPaymentProof(null);
+    setProofError("")
+    setPlanError("")
+  };
+  const handleSubscription = async () => {
+
+    let hasError = false;
+
+    if (!planCode) {
+      setPlanError("Please Select Plancode");
+      hasError = true;
+    }
+
+    if (!paymentProof) {
+      setProofError("Please upload proof");
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    const payload = {
+      isTrial: trialPlan?.trialExtendable,
+      trialDays: 0,
+      planCode: planCode,
+      paidAmount: Number(paidAmount),
+      discountAmount: Number(discountAmount || 0)
+    };
+    console.log("payload", payload)
+    const res = await createSubscription(
+      trialPlan?.hostelId,
+      payload,
+      paymentProof
+    );
+
+    if (res?.success) {
+      setModalType("success");
+      setMessage(res.message);
+      setShowSuccess(true);
+
+      await getHostels(1, 10, "");
+
+      setTimeout(() => {
+        setShowSuccess(false);
+        setShowPlanModal(false)
+        resetPlanForm()
+
+      }, 1000);
+
+    } else {
+      setModalType("error");
+      setMessage(res?.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1000);
+    }
+  };
+  // const handleSubscription = async () => {
+  //   let hasError = false;
+
+  //   if (!planCode) {
+  //     setPlanError("Please Select Plancode");
+  //     hasError = true;
+  //   }
+
+  //   if (!paymentProof) {
+  //     setProofError("Please upload proof");
+  //     hasError = true;
+  //   }
+
+  //   if (hasError) return;
+  //   const payload = {
+  //     isTrial: false,
+  //     trialDays: 0,
+  //     planCode: planCode,
+  //     paidAmount: Number(paidAmount),
+  //     discountAmount: Number(discountAmount || 0)
+  //   };
+
+  //   await createSubscription(
+  //     trialPlan?.hostelId,
+  //     payload,
+  //     paymentProof
+  //   );
+  //    if (res?.success) {
+  //     setModalType("success");
+  //     setMessage(res.message);
+  //     setShowSuccess(true);
+
+  //     getHostels(page, pageSize, searchText);
+
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1000);
+
+  //   } else {
+
+  //     setModalType("error");
+  //     setMessage(res?.message);
+  //     setShowSuccess(true);
+
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1000);
+  //   }
+  // };
 
   if (!hostelData) return <div className="p-5">Loading...</div>;
 
@@ -120,12 +328,12 @@ const PropertyOverview = () => {
 
         <div className="flex items-center ">
           {/* <span className="text-xl cursor-pointer"  onClick={() => navigate(-1)}> ←  </span> */}
-          <img src={arrowleft} height={20} width={20} className="text-xl cursor-pointer" 
-          // onClick={() => navigate(-1)}
-            onClick={() =>navigate(`/properties/${adminDetails?.roleId}`, {
-  state: { skipApi: true }
-})}
-           />
+          <img src={arrowleft} height={20} width={20} className="text-xl cursor-pointer"
+            // onClick={() => navigate(-1)}
+            onClick={() => navigate(`/properties/${adminDetails?.roleId}`, {
+              state: { skipApi: true }
+            })}
+          />
           <p className="text-[20px] leading-[48px] font-medium text-[#1F2937] font-sans ml-2">
             Property Overview
           </p>
@@ -157,6 +365,44 @@ const PropertyOverview = () => {
 
                   <img src={Arrow} className="w-3 h-3 ml-1" />
                 </p>
+              </div>
+              <div className="flex gap-5 mt-4">
+
+                {/* 1️⃣ Trial Extend */}
+                <button
+                  onClick={handleTrialOnly}
+                  className="bg-green-600 text-white px-2 py-[2px] font-medium rounded text-[10px] whitespace-nowrap cursor-pointer"
+                >
+                  Trial Extend
+                </button>
+
+                {/* 2️⃣ Trial + Days */}
+                <button
+                  onClick={() => setShowTrialModal(true)}
+                  className="bg-yellow-500 text-white px-3 py-1 rounded text-[10px] whitespace-nowrap cursor-pointer"
+                >
+                  Trial + Days
+                </button>
+
+                {/* 3️⃣ Subscription */}
+                {/* <button
+                  onClick={() => setShowPlanModal(true)}
+                  className="bg-blue-600 text-white px-3 py-1 rounded text-[10px] whitespace-nowrap cursor-pointer"
+                >
+                  Buy Plan
+                </button> */}
+                <button
+                  onClick={() => setShowPlanModal(true)}
+                  disabled={trialPlan?.trialExtendable === true}
+                  className={`px-3 py-1 rounded text-[10px] whitespace-nowrap
+    ${trialPlan?.trialExtendable === true
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 text-white cursor-pointer"}
+  `}
+                >
+                  Buy Plan
+                </button>
+
               </div>
             </div>
 
@@ -219,12 +465,12 @@ const PropertyOverview = () => {
               <div>
                 <p className="  text-[#1D1D1D] text-left font-sans font-medium text-sm">Subscription Plan</p>
                 <div className="flex items-center gap-2 mt-1">
-                 <img
-  src={(plan === "Basic") ? Star : (plan === "Premium") ? Crown : null}
-  className="w-4 h-4"
-  style={{ display: plan === "basic" || plan === "premium" ? "block" : "none" }}
-/>
-              
+                  <img
+                    src={(plan === "Basic") ? Star : (plan === "Premium") ? Crown : null}
+                    className="w-4 h-4"
+                    style={{ display: plan === "basic" || plan === "premium" ? "block" : "none" }}
+                  />
+
                   <p className="text-sm font-medium ">
                     {/* {hostelData.hostelPlan?.currentPlan} */}
                     {hostelData?.currentSubscription?.planName || "N/A"}
@@ -821,6 +1067,190 @@ const PropertyOverview = () => {
 
             </div>
 
+          </div>
+        </div>
+      )}
+      {showTrialModal && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+          onClick={() => {
+            setShowTrialModal(false);
+            setDaysError("");
+          }}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl w-[350px] p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Title */}
+            <h2 className="text-lg font-semibold mb-4">
+              Extend Trial
+            </h2>
+
+            {/* Input */}
+            <input
+              type="number"
+              placeholder="Enter days"
+              value={days}
+              onChange={(e) => {
+                setDays(e.target.value);
+                setDaysError("");
+              }}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4"
+            />
+            {daysError && (
+              <ErrorMessage message={daysError} type="error" />
+            )}
+            {/* Buttons */}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowTrialModal(false)}
+                className="px-4 py-2 border rounded-lg text-gray-600"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                  handleTrialWithDays();
+
+                }}
+                className="px-4 py-2 bg-yellow-500 text-white rounded-lg cursor-pointer"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showPlanModal && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+          onClick={() => {
+            setShowPlanModal(false);
+            resetPlanForm();
+          }}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl w-[400px] p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Title */}
+            <h2 className="text-lg font-semibold mb-4">
+              Buy Subscription Plan
+            </h2>
+
+            {/* Plan Code */}
+            <select
+              value={planCode}
+              onChange={(e) => {
+                setPlanCode(e.target.value);
+                setPlanError("");
+              }}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3"
+            >
+              <option value="">Select Plan</option>
+
+              {plans?.map((plan) => (
+                <option key={plan.planId} value={plan.planCode}>
+                  {plan.planCode}
+                </option>
+              ))}
+            </select>
+            {planError && (
+              <ErrorMessage message={planError} type="error" />
+            )}
+            {/* Paid Amount */}
+            <input
+              type="number"
+              placeholder="Paid Amount"
+              value={paidAmount}
+              onChange={(e) => setPaidAmount(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3"
+            />
+
+            {/* Discount */}
+            <input
+              type="number"
+              placeholder="Discount Amount"
+              value={discountAmount}
+              onChange={(e) => setDiscountAmount(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3"
+            />
+
+            {/* File Upload */}
+            {/* <input
+              type="file"
+              onChange={(e) => {
+                setPaymentProof(e.target.files[0]);
+                setProofError("");
+              }}
+              className="w-full mb-4"
+            /> */}
+            <div className="w-full mb-4">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+
+                {/* Hidden input */}
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => {
+                    setPaymentProof(e.target.files[0]);
+                    setProofError("");
+                  }}
+                />
+
+                {/* Icon + Text */}
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <svg
+                    className="w-8 h-8 mb-2 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M7 16V4m0 0l-4 4m4-4l4 4M17 8v12m0 0l-4-4m4 4l4-4" />
+                  </svg>
+
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium text-blue-600">Choose Image</span> to Upload
+                  </p>
+                  <p className="text-xs text-gray-400">JPG/JPEG Format</p>
+                </div>
+              </label>
+
+              {/* File name show */}
+              {paymentProof && (
+                <p className="text-sm text-green-600 mt-2">
+                  Selected: {paymentProof.name}
+                </p>
+              )}
+            </div>
+            {proofError && (
+              <ErrorMessage message={proofError} type="error" />
+            )}
+            {/* Buttons */}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowPlanModal(false);
+                  resetPlanForm();
+                }}
+                className="px-4 py-2 border rounded-lg text-gray-600"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={async () => {
+                  await handleSubscription();
+
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
+              >
+                Submit
+              </button>
+            </div>
           </div>
         </div>
       )}

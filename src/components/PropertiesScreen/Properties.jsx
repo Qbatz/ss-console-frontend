@@ -50,6 +50,7 @@ const Properties = () => {
   const [menuError, setMenuError] = useState("")
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [trialPlan,setTrialPlan] = useState("")
   console.log("startDate", startDate)
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState({
@@ -135,17 +136,29 @@ const Properties = () => {
 
 
   // const isNextDisabled = page >= totalPages - 1;
-  const handlePropertyClick = async (item) => {
+//   const handlePropertyClick = async (item) => {
+// setTrialPlan(item)
+//     const res = await getHostelById(item.hostelId);
+//     console.log("res", res)
+//     if (res?.success) {
+//       navigate(`/property-overview/${item.hostelId}`, {
+//         state: { hostelData: res.data,trialPlan }
+//       });
 
-    const res = await getHostelById(item.hostelId);
-    console.log("res", res)
-    if (res?.success) {
-      navigate(`/property-overview/${item.hostelId}`, {
-        state: { hostelData: res.data }
-      });
+//     }
+//   };
+const handlePropertyClick = async (item) => {
+  const res = await getHostelById(item.hostelId);
 
-    }
-  };
+  if (res?.success) {
+    navigate(`/property-overview/${item.hostelId}`, {
+      state: {
+        hostelData: res.data,
+        trialPlan: item  
+      }
+    });
+  }
+};
   // const handleExport = () => {
   //   if (!dateRange || dateRange.length !== 2) {
   //     console.log("Select date range");
@@ -169,37 +182,78 @@ const Properties = () => {
 
     exportHostels(searchText, start, end);
   };
-  const handleCreateSubscription = async (hostelId) => {
-    const payload = {
-      planCode: hostelId?.hostelPlan.currentPlanCode,
-      paidAmount: 0,
-      referenceNumber: "",
-    };
+  const handleCreateSubscription = async (item) => {
 
-    const res = await createSubscription(hostelId?.hostelId, payload);
-
-    if (res?.success) {
-
-      setModalType("success");
-      setMessage(res.message);
-      setShowSuccess(true);
-      getHostels(page, pageSize, searchText);
-      setTimeout(() => {
-        setShowSuccess(false);
-
-      }, 1000);
-    } else {
-      setMenuError(res.message)
-      setModalType("error");
-      setMessage(res.message);
-      setShowSuccess(true);
-
-      setTimeout(() => {
-        setShowSuccess(false);
-
-      }, 1000);
-    }
+  const payload = {
+    isTrial: item?.trialExtendable,
+    trialDays: 0,
+    paidAmount:0,
+    discountAmount:0
   };
+
+  const res = await createSubscription( 
+    item?.hostelId,
+    payload
+  );
+console.log("payload",payload)
+  if (res?.success) {
+    setModalType("success");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    getHostels(page, pageSize, searchText);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1000);
+
+  } else {
+    setMenuError(res?.message);
+    setModalType("error");
+    setMessage(res?.message);
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1000);
+  }
+};
+// const handleCreateSubscription = async (item) => {
+
+//    const payload = {
+//     isTrial: true,
+//     trialDays: 0,
+//     paidAmount: Number(paidAmount || 0),
+//     discountAmount: Number(discountAmount || 0)
+//   };
+
+//   await createSubscription(
+//     trialPlan?.hostelId,
+//     payload
+    
+//   );
+//    if (res?.success) {
+
+//       setModalType("success");
+//       setMessage(res.message);
+//       setShowSuccess(true);
+//       getHostels(page, pageSize, searchText);
+//       setTimeout(() => {
+//         setShowSuccess(false);
+
+//       }, 1000);
+//     } else {
+//       setMenuError(res.message)
+//       setModalType("error");
+//       setMessage(res.message);
+//       setShowSuccess(true);
+
+//       setTimeout(() => {
+//         setShowSuccess(false);
+
+//       }, 1000);
+//     }
+// };
   // const handleHardReset = async () => {
 
   //   if (!selectedHostel?.hostelId) return;
