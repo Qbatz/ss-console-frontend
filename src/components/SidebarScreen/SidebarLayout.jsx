@@ -9,26 +9,39 @@ import Users from "../../assets/users.png";
 import Buildings from "../../assets/buildings.png";
 import Subscription from "../../assets/subscriptions.png";
 import Billings from "../../assets/billings.png";
-import Recurring from "../../assets/recurringmonitor.png";
 import Support from "../../assets/supportticket.png";
 import Dashbord from "../../assets/spacedashboard.png";
 import Roles from "../../assets/roles.png";
 import Admin from "../../assets/adminuser.png";
 import { useDashboard } from "../../Context/DashboardContext";
 import { useLocation } from "react-router-dom";
-
+import Chart from "../../assets/chart-wave-rectangle.png"
 
 const DashboardLayout = ({ children }) => {
 
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, loading, deleteAgentRole, errorMsg, accessError } = useRole();
   const { dashboardData, getDashboard } = useDashboard();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const [openSales, setOpenSales] = useState(true);
+
+  const [recurringOpen, setRecurringOpen] = useState(false);
+
 
 
   useEffect(() => {
     getDashboard()
   }, [])
+  const location = useLocation();
+
+  useEffect(() => {
+    if (
+      location.pathname.includes("/Recurring-Bill") ||
+      location.pathname.includes("/tenant-Bill")
+    ) {
+      setRecurringOpen(true);
+    }
+  }, [location.pathname]);
   console.log("dashboardData", dashboardData);
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden">
@@ -97,7 +110,7 @@ const DashboardLayout = ({ children }) => {
 
       <div className="flex flex-1 overflow-hidden ">
 
-        
+
         <div
           className={`
     fixed md:static top-0 left-0 h-full w-[240px] bg-white border-r border-gray-200 pt-6 px-4
@@ -106,15 +119,17 @@ const DashboardLayout = ({ children }) => {
   `}
         >
 
-        
+
           <div className="md:hidden flex justify-end mb-4">
             <button onClick={() => setSidebarOpen(false)}>✕</button>
           </div>
 
           {/* <div className="space-y-2 text-gray-600 text-sm landing-7 max-h-[calc(100vh-100px)] overflow-y-auto scrollbar-thin"> */}
-<div className="space-y-2 text-gray-600 text-[12px] landing-7 
+          <div className="space-y-2 text-gray-600 text-[12px] landing-7 
   max-h-[calc(100vh-100px)] overflow-y-auto scrollbar-thin
   whitespace-nowrap ">
+
+
 
             <SidebarItem title="Home" count="0" to={`/home/${adminDetails?.roleId}`} activeIcon={Home}
               inactiveIcon={Home} />
@@ -122,25 +137,25 @@ const DashboardLayout = ({ children }) => {
 
             {/* <SidebarItem title="Proprietors" count={dashboardData?.ownersCount || 0} to={`/proprietors/${adminDetails?.roleId}`} activeIcon={Users}
               inactiveIcon={Users} /> */}
-              <SidebarItem
-  title="Proprietors"
-  count={dashboardData?.ownersCount || 0}
-  to={`/proprietors/${adminDetails?.roleId}`}
-  activeIcon={Users}
-  inactiveIcon={Users}
-  customActivePaths={["/proprietors", "/ProprietorsOverview"]}
-/>
+            <SidebarItem
+              title="Proprietors"
+              count={dashboardData?.ownersCount || 0}
+              to={`/proprietors/${adminDetails?.roleId}`}
+              activeIcon={Users}
+              inactiveIcon={Users}
+              customActivePaths={["/proprietors", "/ProprietorsOverview"]}
+            />
 
             {/* <SidebarItem title="Properties" count={dashboardData?.hostelCount || 0} to={`/properties/${adminDetails?.roleId}`} activeIcon={Buildings}
               inactiveIcon={Buildings} /> */}
-              <SidebarItem
-  title="Properties"
-  count={dashboardData?.hostelCount || 0}
-  to={`/properties/${adminDetails?.roleId}`}
-  activeIcon={Buildings}
-  inactiveIcon={Buildings}
-  customActivePaths={["/properties", "/property-overview"]}
-/>
+            <SidebarItem
+              title="Properties"
+              count={dashboardData?.hostelCount || 0}
+              to={`/properties/${adminDetails?.roleId}`}
+              activeIcon={Buildings}
+              inactiveIcon={Buildings}
+              customActivePaths={["/properties", "/property-overview"]}
+            />
 
             {/* <SidebarItem title="Subscriptions" count="0" to={`/subscription/${adminDetails?.roleId}`} activeIcon={Subscription}
               inactiveIcon={Subscription} />
@@ -149,7 +164,7 @@ const DashboardLayout = ({ children }) => {
               title="DemoRequests"
               count={dashboardData?.demoRequestCount || 0}
               to={`/demo-requests/${adminDetails?.roleId}`}
-              activeIcon={Subscription}  
+              activeIcon={Subscription}
               inactiveIcon={Subscription}
             /> */}
 <div>
@@ -208,8 +223,49 @@ const DashboardLayout = ({ children }) => {
             <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} activeIcon={Billings}
               inactiveIcon={Billings} />
 
-            <SidebarItem title="Recurring Monitor" count="0" to={`/Recurring-Bill/${adminDetails?.roleId}`} activeIcon={Recurring}
-              inactiveIcon={Recurring} />
+            {/* <SidebarItem title="Monthly Recurring" count="0" to={`/Recurring-Bill/${adminDetails?.roleId}`} /> */}
+
+
+            {/* <SidebarItem
+              title="Monthly Recurring"count="0"to={`/Recurring-Bill/${adminDetails?.roleId}`}
+            />
+             <SidebarItem
+              title="Tenant Recurring"count="0"to={`/tenant-Bill/${adminDetails?.roleId}`}/> */}
+            <div>
+              {/* Parent */}
+
+              <div
+                onClick={() => setRecurringOpen(!recurringOpen)}
+                className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg"
+              >
+                <div className="flex items-center gap-5">
+                  <img src={Subscription} className="w-5 h-5" />
+                  <span className="font-medium">Recurring Monitor</span>
+                </div>
+
+                <span className={`text-xs transition ${recurringOpen ? "" : ""}`}>
+                  <img src={Users} className="w-4 h-4"/>
+                </span>
+              </div>
+
+              {/* Children */}
+              {recurringOpen && (
+                <div className="ml-8 mt-1 space-y-1 text-[12px]">
+
+                  <SidebarItem
+                    title="Monthly Recurring"
+                    to={`/Recurring-Bill/${adminDetails?.roleId}`}
+                  />
+
+                  <SidebarItem
+                    title="Tenant Recurring"
+                    to={`/tenant-Bill/${adminDetails?.roleId}`}
+                  />
+
+                </div>
+              )}
+            </div>
+
 
             <SidebarItem title="Tenants Summary" count="0" to={`/tenantList/${adminDetails?.roleId}`} activeIcon={Users}
               inactiveIcon={Users} />
@@ -302,6 +358,51 @@ const DashboardLayout = ({ children }) => {
 //     )}
 //   </NavLink>
 // );
+
+
+// const SidebarItem = ({
+//   title,
+//   count,
+//   to,
+//   activeIcon,
+//   inactiveIcon,
+//   customActivePaths = []
+// }) => {
+//   const location = useLocation();
+
+//   const isActive =
+//     customActivePaths.length > 0
+//       ? customActivePaths.some(path =>
+//           location.pathname.startsWith(path)
+//         )
+//       : location.pathname === to;
+
+//   return (
+//     <NavLink
+//       to={to}
+//       className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition
+//         ${isActive
+//           ? "bg-blue-50 text-blue-600 font-medium"
+//           : "hover:bg-gray-100 text-gray-600"
+//         }`}
+//     >
+//       <div className="flex items-center gap-5">
+//         <img
+//           src={isActive ? activeIcon : inactiveIcon}
+//           className="w-5 h-5"
+//         />
+//         <span>{title}</span>
+//       </div>
+
+//       {count && (
+//         <span className="text-xs bg-gray-100 px-2 rounded-full text-blue-500">
+//           {count}
+//         </span>
+//       )}
+//     </NavLink>
+//   );
+// };
+
 const SidebarItem = ({
   title,
   count,
@@ -315,8 +416,8 @@ const SidebarItem = ({
   const isActive =
     customActivePaths.length > 0
       ? customActivePaths.some(path =>
-          location.pathname.startsWith(path)
-        )
+        location.pathname.startsWith(path)
+      )
       : location.pathname === to;
 
   return (
@@ -329,10 +430,13 @@ const SidebarItem = ({
         }`}
     >
       <div className="flex items-center gap-5">
-        <img
-          src={isActive ? activeIcon : inactiveIcon}
-          className="w-5 h-5"
-        />
+        {activeIcon && inactiveIcon && (
+          <img
+            src={isActive ? activeIcon : inactiveIcon}
+            className="w-5 h-5"
+          />
+        )}
+
         <span>{title}</span>
       </div>
 
@@ -344,5 +448,4 @@ const SidebarItem = ({
     </NavLink>
   );
 };
-
 export default DashboardLayout;
