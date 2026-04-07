@@ -36,7 +36,7 @@ const AddEditPlan = () => {
   const [planType, setPlanType] = useState("");
   const [planCode, setPlanCode] = useState("");
   const [duration, setDuration] = useState("");
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState("");
   const [discount, setDiscount] = useState(0);
   const [canCustomize, setCanCustomize] = useState(false);
   const [shouldShow, setShouldShow] = useState(true);
@@ -52,6 +52,9 @@ const AddEditPlan = () => {
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [selectedAddonIndex, setSelectedAddonIndex] = useState(null);
   const [initialAddons, setInitialAddons] = useState([]);
+  const [planError,setPlanError] =useState("")
+  const [priceError,setPriceError] =useState("")
+  const [durationError,setDurationError] =useState("")
 
   // INIT FEATURES
   useEffect(() => {
@@ -104,13 +107,27 @@ const AddEditPlan = () => {
     let hasError = false;
     if (!planName?.trim()) {
       setPlanNameError("Plan name is required");
-      hasError = true;
+      
     }
 
     if (!planType?.trim()) {
       setPlanTypeError("Plan type is required");
       hasError = true;
     }
+ if (price === "" || price === null) {
+  setPriceError("Price is required");
+  hasError = true;
+} else if (Number(price) < 0) {
+  setPriceError("Price cannot be less than 0");
+  hasError = true;
+}
+if (duration === "" || duration === null) {
+  setDurationError("Duration is required");
+  hasError = true;
+} else if (Number(duration) <= 0) {
+  setDurationError("Duration should be higher than 0");
+  hasError = true;
+}
 
     // if (!planCode?.trim()) {
     //   setPlanCodeError("Plan code is required");
@@ -243,7 +260,7 @@ if (editData) {
     } else {
 
       setModalType("error");
-      setPlanTypeError(res.message)
+      setPlanError(res.message)
       setMessage(res.message || "Something went wrong");
       setShowSuccess(true);
 
@@ -454,6 +471,7 @@ if (editData) {
                     onChange={(e) => {
                       setPlanName(e.target.value);
                       setPlanNameError("");
+                      setPlanError("")
                     }}
                     placeholder="Enter plan name"
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -471,6 +489,7 @@ if (editData) {
                     onChange={(e) => {
                       setPlanCode(e.target.value);
                       setPlanCodeError("");
+                      setPlanError("")
                     }}
                     placeholder="Enter plan code"
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -503,29 +522,74 @@ if (editData) {
 
 
                 {/* PRICE */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-black-500 text-left">Price (Monthly)</label>
-                  <input
-                    type="text"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="₹ Price"
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+               <div className="flex flex-col gap-1">
+  <label className="text-xs font-medium text-black-500 text-left">
+    Price (Monthly)
+  </label>
+
+  <input
+    type="text"
+    value={price}
+    onChange={(e) => {
+      const value = e.target.value;
+
+      if (value < 0) {
+        setPriceError("Price cannot be less than 0");
+      } else {
+        setPriceError("");
+        setPlanError("")
+        setPrice(value);
+      }
+    }}
+    placeholder="₹ Price"
+    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+
+  {/* ✅ MOVE HERE */}
+  {priceError && (
+    <ErrorMessage message={priceError} type="error" />
+  )}
+</div>
 
                 {/* DURATION */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-black-500 text-left">Duration (Days)</label>
-                  <input
-                    type="text"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    placeholder="Enter duration"
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+              <div className="flex flex-col gap-1">
+  <label className="text-xs font-medium text-black-500 text-left">
+    Duration (Days)
+  </label>
 
+  <input
+    type="text"
+    value={duration}
+   onChange={(e) => {
+  const value = e.target.value;
+
+  // ✅ allow empty (backspace work)
+  if (value === "") {
+    setDuration("");
+    setDurationError("");
+    setPlanError("")
+    return;
+  }
+
+  // ✅ validate only if value exists
+  if (Number(value) <= 0) {
+    setDurationError("Duration should be higher than 0");
+  } else {
+    setDurationError("");
+  }
+
+  setDuration(value);
+}}
+    placeholder="Enter duration"
+    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+
+  {/* ✅ ADD THIS */}
+  {durationError && (
+    <ErrorMessage message={durationError} type="error" />
+  )}
+</div>
+ 
                 {/* DISCOUNT */}
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-medium text-black-500 text-left">Discount (%)</label>
@@ -566,6 +630,9 @@ if (editData) {
                 </div>
 
               </div>
+              {planError && (
+                    <ErrorMessage message={planError} type="error" />
+                  )}
             </div>
 
             {/* CORE FEATURES */}
