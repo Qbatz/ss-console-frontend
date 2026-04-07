@@ -22,7 +22,11 @@ const DashboardLayout = ({ children }) => {
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, loading, deleteAgentRole, errorMsg, accessError } = useRole();
   const { dashboardData, getDashboard } = useDashboard();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [openSales, setOpenSales] = useState(true);
+
   const [recurringOpen, setRecurringOpen] = useState(false);
+
 
 
   useEffect(() => {
@@ -153,7 +157,7 @@ const DashboardLayout = ({ children }) => {
               customActivePaths={["/properties", "/property-overview"]}
             />
 
-            <SidebarItem title="Subscriptions" count="0" to={`/subscription/${adminDetails?.roleId}`} activeIcon={Subscription}
+            {/* <SidebarItem title="Subscriptions" count="0" to={`/subscription/${adminDetails?.roleId}`} activeIcon={Subscription}
               inactiveIcon={Subscription} />
 
             <SidebarItem
@@ -162,8 +166,60 @@ const DashboardLayout = ({ children }) => {
               to={`/demo-requests/${adminDetails?.roleId}`}
               activeIcon={Subscription}
               inactiveIcon={Subscription}
-            />
+            /> */}
+<div>
 
+  {/* Parent */}
+  <div
+    onClick={() => setOpenSales(!openSales)}
+    className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100"
+  >
+    <div className="flex items-center gap-5">
+      <img src={Users} className="w-5 h-5" />
+      <span>Sales</span>
+    </div>
+
+    <span className={`transform transition ${openSales ? "rotate-180" : ""}`}>
+      ▼
+    </span>
+  </div>
+
+  {/* Children */}
+  {openSales && (
+    <div className="ml-3 mt-1 space-y-1">
+
+      <SidebarItem
+        title="Demo Requests"
+        to={`/demo-requests/${adminDetails?.roleId}`}
+        activeIcon={Subscription}
+        inactiveIcon={Subscription}
+      />
+
+      <SidebarItem
+        title="Subscriptions"
+        to={`/subscription/${adminDetails?.roleId}`}
+        activeIcon={Subscription}
+        inactiveIcon={Subscription}
+      />
+
+      <SidebarItem
+        title="Trial Users"
+        to={`/trial-users/${adminDetails?.roleId}`}
+        activeIcon={Users}
+        inactiveIcon={Users}
+      />
+
+      <SidebarItem
+        title="Transactions"
+        to={`/transactions/${adminDetails?.roleId}`}
+        activeIcon={Billings}
+        inactiveIcon={Billings}
+      />
+
+    </div>
+  )}
+
+</div>
             <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} activeIcon={Billings}
               inactiveIcon={Billings} />
 
