@@ -147,10 +147,7 @@ console.log("initial:", initialAddons);
 
     let res;
 
-    // if (editData) {
-
-    //   res = await updatePlan(editData.planId, payload);
-    // } 
+    
 if (editData) {
 
   const newFeatures = addons.filter(a => !a.planFeatureId);

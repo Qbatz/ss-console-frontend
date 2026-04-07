@@ -25,6 +25,8 @@ import DemoRequests from "../components/DemoRequestsScreen/DemoRequests";
 import { PlanProvider } from "../Context/PlanContexts";
 import AddEditPlan from "../components/SubscriptionScreen/AddPlan";
 import CreateOffer from "../components/SubscriptionScreen/CreateOffer";
+import TransactionsPage from "../components/TransactionList/TransactionDetails";
+import TrailPage from "../components/SubscriptionScreen/TrialUsers";
 
 const PrivateRoute = ({ children }) => {
   const token =
@@ -68,6 +70,8 @@ const PrivateRoutesScreen = () => {
                     <Route path="/demo-requests/:roleId" element={<DemoRequests />} />
                      <Route path="/add-plan" element={<AddEditPlan />} />
                    <Route path="/create-offer" element={<CreateOffer />} />
+                    <Route path="/transactions/:roleId" element={<TransactionsPage />} />
+                    <Route path="/trial-users/:roleId" element={<TrailPage/>} />
 
                   </Routes>
                 </DashboardProvider>
