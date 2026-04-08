@@ -23,7 +23,7 @@ const DashboardLayout = ({ children }) => {
   const { dashboardData, getDashboard } = useDashboard();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [openSales, setOpenSales] = useState(true);
+  const [openSales, setOpenSales] = useState(false);
 
   const [recurringOpen, setRecurringOpen] = useState(false);
 
@@ -171,7 +171,10 @@ const DashboardLayout = ({ children }) => {
 
   {/* Parent */}
   <div
-    onClick={() => setOpenSales(!openSales)}
+    onClick={() => {
+  setOpenSales(!openSales);
+  setRecurringOpen(false); // 🔥 close other
+}}
     className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100"
   >
     <div className="flex items-center gap-5">
@@ -235,7 +238,10 @@ const DashboardLayout = ({ children }) => {
               {/* Parent */}
 
               <div
-                onClick={() => setRecurringOpen(!recurringOpen)}
+              onClick={() => {
+  setRecurringOpen(!recurringOpen);
+  setOpenSales(false); // 🔥 close other
+}}
                 className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg"
               >
                 <div className="flex items-center gap-5">
@@ -243,9 +249,9 @@ const DashboardLayout = ({ children }) => {
                   <span className="font-medium">Recurring Monitor</span>
                 </div>
 
-                <span className={`text-xs transition ${recurringOpen ? "" : ""}`}>
-                  <img src={Users} className="w-4 h-4"/>
-                </span>
+                <span className={`transform transition ${recurringOpen ? "rotate-180" : ""}`}>
+      ▼
+    </span>
               </div>
 
               {/* Children */}

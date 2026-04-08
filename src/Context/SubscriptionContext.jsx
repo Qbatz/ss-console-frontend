@@ -249,12 +249,50 @@ export const SubscriptionProvider = ({ children }) => {
       setLoading(false);
     }
   };
+  const getOrderHistory = async (
+  page = 1,
+  size = 10,
+  name = "",
+  startDate = "",
+  endDate = ""
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get("/v2/order-history", {
+      params: {
+        page,
+        size,
+        name,
+        startDate,
+        endDate,
+      },
+    });
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <SubscriptionContext.Provider
       value={{
         loading,
         errorMsg,
-        createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, getDemoRequestStatus
+        createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, getDemoRequestStatus,getOrderHistory
       }}
     >
       {children}
