@@ -7,6 +7,7 @@ export const PlanProvider = ({ children }) => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+   const [accessError,setAccessError] = useState("")
   
 
   const getErrorMessage = (error) =>
@@ -31,6 +32,7 @@ export const PlanProvider = ({ children }) => {
     } catch (error) {
       const msg = getErrorMessage(error);
       setErrorMsg(msg);
+      setAccessError(msg)
       return { success: false, message: msg };
     } finally {
       setLoading(false);
@@ -164,7 +166,7 @@ const addPlanFeature = async (planId, feature) => {
         plans,
         loading,
         errorMsg,
-        getPlans,createPlan,updatePlan,deactivatePlan,deactivatePlanFeature,addPlanFeature
+        getPlans,createPlan,updatePlan,deactivatePlan,deactivatePlanFeature,addPlanFeature,accessError
       }}
     >
       {children}

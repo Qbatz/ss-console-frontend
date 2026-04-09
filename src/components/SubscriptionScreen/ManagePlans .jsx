@@ -10,6 +10,9 @@ import Edit from "../../assets/edit-2.png";
 import Dots from "../../assets/menucircle.png";
 import Toast from "../../components/SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import { usePermission } from "../../Utils/permissionHelper";
+import LoginImg from "../../assets/LoginImg.png";
+
 
 // const plans = [
 //   {
@@ -53,7 +56,7 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 const ManagePlans = () => {
   const navigate = useNavigate();
 
-  const { plans, getPlans, deactivatePlan, errorMsg } = usePlan();
+  const { plans, getPlans, deactivatePlan, errorMsg ,accessError} = usePlan();
   const [openMenuId, setOpenMenuId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState(null);
@@ -63,6 +66,8 @@ const ManagePlans = () => {
   const [message, setMessage] = useState("");
   const menuRef = useRef(null);
   console.log("errorMsg", errorMsg)
+   const { canRead, canWrite, canUpdate, canDelete } =
+      usePermission("Plans");
   const toggleMenu = (id) => {
     setOpenMenuId(prev => (prev === id ? null : id));
   };
@@ -124,6 +129,24 @@ const ManagePlans = () => {
         type={modalType}
 
       />
+       {(canRead === false || errorMsg === "Access Restricted") ? (
+      
+                    <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+      
+                      <img
+                        src={LoginImg}
+                        alt="Access Restricted"
+                        className="w-64 object-contain"
+                      />
+      
+                      <p className="text-red-600 text-lg font-medium">
+                        {accessError}
+                      </p>
+      
+                    </div>
+      
+                  ) : (
+                    <>
       <div className="bg-[#F8FAFC] min-h-screen w-full">
 
         {/* HEADER */}
@@ -188,12 +211,24 @@ const ManagePlans = () => {
             </div>
 
             {/* RIGHT SIDE BUTTON */}
-            <button
+            {/* <button
               onClick={() => navigate("/add-plan")}
               className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition cursor-pointer"
             >
               + Add New Plan
-            </button>
+            </button> */}
+            <button
+  onClick={() => navigate("/add-plan")}
+  disabled={!canWrite}
+  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+  ${
+    !canWrite
+      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+      : "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+  }`}
+>
+  + Add New Plan
+</button>
 
           </div>
 
@@ -357,7 +392,7 @@ const ManagePlans = () => {
     ref={menuRef}   
     className="absolute right-0 top-8 bg-white border rounded-lg shadow-md w-32 z-10"
   >
-    <button
+    {/* <button
       onClick={() => {
         setSelectedPlanId(plan.planId);
         setShowModal(true);
@@ -366,7 +401,23 @@ const ManagePlans = () => {
       className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-gray-100 cursor-pointer"
     >
       Delete
-    </button>
+    </button> */}
+    <button
+  onClick={() => {
+    setSelectedPlanId(plan.planId);
+    setShowModal(true);
+    setOpenMenuId(null);
+  }}
+  disabled={!canDelete}
+  className={`w-full text-left px-3 py-2 text-sm
+  ${
+    !canDelete
+      ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+      : "text-red-500 hover:bg-gray-100 cursor-pointer"
+  }`}
+>
+  Delete
+</button>
   </div>
 )}
 
@@ -457,13 +508,26 @@ const ManagePlans = () => {
                     </div>
 
 
-                    <button
+                    {/* <button
                       onClick={() => navigate("/add-plan", { state: { plan } })}
                       className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-200 transition cursor-pointer"
                     >
                       <img src={Edit} alt="edit" className="h-4 w-4" />
                       Edit Plan
-                    </button>
+                    </button> */}
+                    <button
+  onClick={() => navigate("/add-plan", { state: { plan } })}
+  disabled={!canUpdate}
+  className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition
+  ${
+    !canUpdate
+      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+      : "bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer"
+  }`}
+>
+  <img src={Edit} alt="edit" className="h-4 w-4" />
+  Edit Plan
+</button>
                   </div>
                 </div>
               );
@@ -472,6 +536,8 @@ const ManagePlans = () => {
           </div>
         </div>
       </div>
+      </>
+                  )}
       {showModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 

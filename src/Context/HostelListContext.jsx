@@ -231,6 +231,7 @@ const getRecurringHostels = async (
   hostelName = "",
   filterBy = "TODAY",
   statusFilterBy = "ALL",
+  billingModelFilterBy = "ALL",
   billingCycleStartDay = ""
 ) => {
   try {
@@ -244,6 +245,7 @@ const getRecurringHostels = async (
         hostelName,
         filterBy,
         statusFilterBy,
+        billingModelFilterBy,
         billingCycleStartDay
       }
     });
@@ -270,6 +272,53 @@ const getRecurringHostels = async (
     setLoading(false);
   }
 };
+// const getRecurringHostels = async (
+//   page = 0,
+//   size = 10,
+//   hostelName = "",
+//   filterBy = "TODAY",
+//   statusFilterBy = "ALL",
+  
+//   billingCycleStartDay = ""
+// ) => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.get("/v2/hostels/recurring", {
+//       params: {
+//         page,
+//         size,
+//         hostelName,
+//         filterBy,
+//         statusFilterBy,
+//         billingCycleStartDay,
+//         statusFilterBy 
+//       }
+//     });
+
+//     if (res.status === 200) {
+//       return {
+//         success: true,
+//         data: res.data
+//       };
+//     }
+
+//     return { success: false };
+
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+//     setErrorMsg(msg);
+
+//     return {
+//       success: false,
+//       message: msg
+//     };
+
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 // const getRecurringHostels = async (
 //   page = 0,
 //   size = 10,

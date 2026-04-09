@@ -13,7 +13,9 @@ import location from "../../assets/locationGrey.png";
 import team from "../../assets/team.png";
 import refreshWhite from "../../assets/refreshWhite.png";
 import refresh from "../../assets/RefreshButton.png";
-import Filter from "../../assets/Filter.png"
+import Filter from "../../assets/Filter.png";
+import AvatarFrame from "../../assets/AvatarFrame.png";
+import buildingWhite from "../../assets/buildingsWhite.png"
 const TenantRecurring = () => {
   const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId, bulkGenerateRecurring } = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
@@ -330,13 +332,36 @@ const TenantRecurring = () => {
 
           />
 
-          <div className="border-b border-gray-300 mb-6 pb-2">
+          {/* <div className="border-b border-gray-300 mb-6 pb-2">
             <h1 className="text-xl font-semibold text-left">
-              Recurring Monitor
+              Tenant Recurring
             </h1>
-          </div>
+          </div> */}
+
+   <div className="border-b border-gray-300 mb-6 pb-2 flex items-center justify-between">
 
 
+  <h1 className="text-xl font-semibold">
+    Tenant Recurring
+  </h1>
+
+ 
+ <div className="flex items-center bg-blue-600 p-1 rounded-full">
+
+  {/* Avatar */}
+   <button className="p-2 rounded-full cursor-pointer">
+    <img src={buildingWhite} className="w-3 h-3" />
+  </button>
+  <button className="p-2 bg-white rounded-full cursor-pointer">
+    <img src={AvatarFrame} className="w-3 h-3" />
+  </button>
+
+  {/* Building */}
+ 
+
+</div>
+
+</div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 
             <div className="border border-gray-200 rounded-xl p-4 bg-white">
