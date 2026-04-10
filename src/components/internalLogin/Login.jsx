@@ -220,7 +220,7 @@ const verifyToken = async () => {
 
       <div className="flex flex-col gap-6 w-[800px]">
 
-        {/* 🔹 Token Login → Only Local */}
+      
         {isLocal && (
           <div className="flex flex-col gap-3">
             <h2 className="font-semibold text-lg">Token Login</h2>
@@ -235,7 +235,7 @@ const verifyToken = async () => {
 
             <button
               onClick={verifyToken}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md cursor-pointer"
             >
               Sign in with Token
             </button>
@@ -258,7 +258,7 @@ const verifyToken = async () => {
             <button
               onClick={handleMockLogin}
               disabled={loading}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md cursor-pointer"
             >
               Login with Email
             </button>
