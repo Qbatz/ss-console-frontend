@@ -71,7 +71,7 @@ const PropertyOverview = () => {
 
   const hostelData = location.state?.hostelData;
   const trialPlan = location.state?.trialPlan;
-  console.log("trialPlan", trialPlan?.trialExtendable)
+  console.log("trialPlan", trialPlan)
 
   const handleHardReset = async () => {
 
@@ -129,7 +129,8 @@ const PropertyOverview = () => {
       isTrial: trialPlan?.trialExtendable,
       trialDays: 0,
       paidAmount: Number(paidAmount || 0),
-      discountAmount: Number(discountAmount || 0)
+      discountAmount: Number(discountAmount || 0),
+       planCode:trialPlan?.hostelPlan?.currentPlanCode
     };
 
     const res = await createSubscription(
@@ -170,7 +171,9 @@ const PropertyOverview = () => {
       isTrial: trialPlan?.trialExtendable,
       trialDays: Number(days),
       paidAmount: Number(paidAmount || 0),
-      discountAmount: Number(discountAmount || 0)
+      discountAmount: Number(discountAmount || 0),
+       planCode:trialPlan?.hostelPlan?.currentPlanCode
+,
     };
 
     const res = await createSubscription( 
