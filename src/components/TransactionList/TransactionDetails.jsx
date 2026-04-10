@@ -6,13 +6,17 @@ import ArrowRight from "../../assets/arrow-right.png";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import Filter from "../../assets/Filter.png";
-import Refresh from "../../assets/RefreshButton.png"
+import Refresh from "../../assets/RefreshButton.png";
+import { usePermission } from "../../Utils/permissionHelper";
+import LoginImg from "../../assets/LoginImg.png";
 
 
 const TransactionsPage = () => {
   const [openMenu, setOpenMenu] = useState(null);
   const [totalItems, setTotalItems] = useState(0);
-  const { getOrderHistory } = useSubscription();
+  const { getOrderHistory,loading,accessError } = useSubscription();
+   const { canRead, canWrite, canUpdate, canDelete } =
+      usePermission("Hostel Transactions");
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
@@ -80,6 +84,23 @@ const formatDate = (date) => {
 
   return (
     <DashboardLayout>
+        {(canRead === false || accessError === "Access Restricted") ? (
+      
+                <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+      
+                  <img
+                    src={LoginImg}
+                    alt="Access Restricted"
+                    className="w-64 object-contain"
+                  />
+      
+                  <p className="text-red-600 text-lg font-medium">
+                    {accessError}
+                  </p>
+      
+                </div>
+      
+              ) : (
       <div className="p-6 min-h-screen">
 
         {/* Header */}
@@ -184,68 +205,75 @@ const formatDate = (date) => {
                 </tr>
               </thead>
 
-              <tbody>
-                {data.map((item, index) => (
-                  <tr key={index} className="border-t border-gray-300">
+           <tbody>
+  {loading ? (
+    Array.from({ length: size }).map((_, i) => (
+      <tr key={i} className="animate-pulse border-t border-gray-300">
+        {Array.from({ length: 11 }).map((_, j) => (
+          <td key={j} className="px-4 py-3">
+            <div className="h-3 bg-gray-200 rounded w-full"></div>
+          </td>
+        ))}
+      </tr>
+    ))
+  ) : data.length > 0 ? (
+    data.map((item, index) => (
+      <tr key={index} className="border-t border-gray-300">
 
-                    {/* ID */}
-                    <td className="px-4 py-2 text-[12px] whitespace-nowrap">
-                      TXN{item.historyId}
-                    </td>
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+          TXN{item.historyId}
+        </td>
 
-                    {/* DATE */}
-                    <td className="px-4 py-2 text-[12px] whitespace-nowrap">
-                      {item.createdAtDate}
-                    </td>
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+          {item.createdAtDate}
+        </td>
 
-                    {/* CUSTOMER */}
-                    <td className="px-4 py-2 text-[12px] whitespace-nowrap text-blue-600">
-                      {item.createdBy}
-                    </td>
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-blue-600">
+          {item.createdBy}
+        </td>
 
-                    {/* PROPERTY */}
-                    <td className="px-4 py-2 text-[12px] whitespace-nowrap">
-                      {item.hostelName}
-                    </td>
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+          {item.hostelName}
+        </td>
 
-                    {/* REGION */}
-                    <td className="px-4 py-2 text-[12px] whitespace-nowrap">
-                      {item.city}, {item.state}
-                    </td>
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+          {item.city}, {item.state}
+        </td>
 
-                    {/* PLAN */}
-                    <td className="px-4 py-2 text-[12px] whitespace-nowrap">
-                      {item.planType || item.planName || "-"}
-                    </td>
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+          {item.planType || item.planName || "-"}
+        </td>
 
-                    {/* AMOUNT */}
-                    <td className="px-4 py-2 text-[12px] whitespace-nowrap">
-                      ₹ {item.totalAmount}
-                    </td>
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+          ₹ {item.totalAmount}
+        </td>
 
-                    {/* PAYMENT */}
-                    <td className="px-4 py-2 text-[12px] whitespace-nowrap">
-                      {item.paymentType || "-"}
-                    </td>
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+          {item.paymentType || "-"}
+        </td>
 
-                    {/* STATUS */}
-                    <td className="px-4 py-2 text-[12px] whitespace-nowrap">
-                      {item.orderStatus}
-                    </td>
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+          {item.orderStatus}
+        </td>
 
-                    {/* COLLECTED BY */}
-                    <td className="px-4 py-2 text-[12px] whitespace-nowrap">
-                      {item.createdBy}
-                    </td>
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+          {item.createdBy}
+        </td>
 
-                    {/* ACTION */}
-                    <td className="px-4 py-2 cursor-pointer">
-                      <img src={MenuCircle} className="w-4 h-4" />
-                    </td>
+        <td className="px-4 py-2">
+          <img src={MenuCircle} className="w-4 h-4" />
+        </td>
 
-                  </tr>
-                ))}
-              </tbody>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="11" className="text-center py-6 text-gray-400">
+        No Data Found
+      </td>
+    </tr>
+  )}
+</tbody>
 
             </table>
 
@@ -307,6 +335,7 @@ const formatDate = (date) => {
         </div>
 
       </div>
+              )}
     </DashboardLayout>
   );
 };

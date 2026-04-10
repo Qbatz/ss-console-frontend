@@ -7,6 +7,7 @@ const SubscriptionContext = createContext(null);
 export const SubscriptionProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [accessError,setAccessError] = useState("")
   console.log("errorMsg", errorMsg)
   const getErrorMessage = (error) => {
     if (error?.response?.data) {
@@ -92,7 +93,8 @@ export const SubscriptionProvider = ({ children }) => {
 
       const msg = getErrorMessage(error);
       setErrorMsg(msg);
-
+      setAccessError(msg);
+     
       return {
         success: false,
         message: msg
@@ -281,7 +283,7 @@ export const SubscriptionProvider = ({ children }) => {
   } catch (error) {
     const msg = getErrorMessage(error);
     setErrorMsg(msg);
-
+setAccessError(msg)
     return { success: false, message: msg };
   } finally {
     setLoading(false);
@@ -292,7 +294,7 @@ export const SubscriptionProvider = ({ children }) => {
       value={{
         loading,
         errorMsg,
-        createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, getDemoRequestStatus,getOrderHistory
+        createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, getDemoRequestStatus,getOrderHistory,accessError
       }}
     >
       {children}

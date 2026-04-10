@@ -786,7 +786,7 @@ if (editData) {
               setPlanNameError("");
               setPlanTypeError("");
             }}
-            className="px-4 py-2 bg-gray-200 rounded-lg"
+            className="px-4 py-2 bg-gray-200 rounded-lg cursor-pointer"
           >
             Discard
           </button>
