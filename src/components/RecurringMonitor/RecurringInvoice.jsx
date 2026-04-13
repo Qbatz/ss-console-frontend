@@ -912,11 +912,20 @@ const RecurringInvoice = () => {
             </div>
           )}
           {viewType === "calendar" && (
-            <CalendarView
-              currentMonth={currentMonth}
-              currentYear={currentYear}
-              data={calendarData}
-            />)}
+  loading ? (
+    <div className="grid grid-cols-7 gap-3 p-4 animate-pulse">
+      {Array.from({ length: 35 }).map((_, i) => (
+        <div key={i} className="h-20 bg-gray-200 rounded-lg"></div>
+      ))}
+    </div>
+  ) : (
+    <CalendarView
+      currentMonth={currentMonth}
+      currentYear={currentYear}
+      data={calendarData}
+    />
+  )
+)}
           {showDetailsModal && selectedItem && (
             <div className="fixed inset-0 z-[9999] flex justify-end">
 
