@@ -14,19 +14,27 @@ import team from "../../assets/team.png";
 import refreshWhite from "../../assets/refreshWhite.png";
 import refresh from "../../assets/RefreshButton.png";
 import Filter from "../../assets/Filter.png";
-import AvatarFrame from "../../assets/AvatarFrame.png";
-import buildingWhite from "../../assets/buildingsWhite.png"
+import Monthlycalendar from "../../assets/monthCalendar.png";
+import MonthBlue from "../../assets/monthBlue.png";
+import CalendarView from "./CalendarView";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import buildingWhite from "../../assets/buildingsWhite.png";
+import Avatar from "../../assets/AvatarFrame.png";
+import Building from "../../assets/buildings.png"
+
 const TenantRecurring = () => {
-  const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId, bulkGenerateRecurring } = useHostel();
+  const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId, bulkGenerateRecurring,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId } = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Recurring");
   console.log("errorMsg", errorMsg)
   const [search, setSearch] = useState("");
   const dropdownRef = useRef(null);
+  const statusDropdownRef = useRef(null);
   const [data, setData] = useState([]);
   console.log("data", data)
   const [filterOptions, setFilterOptions] = useState([]);
   const [filter, setFilter] = useState("TODAY");
+  const [billingModelFilterBy, setBillingModelFilterBy] = useState("ALL");
   console.log("filter", filter)
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
@@ -53,7 +61,13 @@ const TenantRecurring = () => {
   const [openSystemDropdown, setOpenSystemDropdown] = useState(false);
   const [appliedFilterType, setAppliedFilterType] = useState("");
   const [appliedSystemFilter, setAppliedSystemFilter] = useState("");
+  const [billingModelOptions, setBillingModelOptions] = useState([]);
+  console.log("billingModelOptions", billingModelOptions)
   const [errorTable, setErrorTable] = useState("")
+  const [viewType, setViewType] = useState("table");
+  const [generateError,setGenrateError] = useState("")
+  const [totalTenants,setTotalTenants] = useState("")
+  const [isTableView, setIsTableView] = useState(false); // default FALSE
   const [recurringPending, setRecurringPending] = useState({
     recurringPendingCount: 0,
     subscriptionExpiredCount: 0
@@ -75,7 +89,7 @@ const TenantRecurring = () => {
     if (selectedIds.length === data.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(data.map((item) => item.hostelId));
+      setSelectedIds(data.map((item) => item.customerId));
     }
   };
   // const fetchRecurring = async () => {
@@ -99,25 +113,29 @@ const TenantRecurring = () => {
   // };
   const fetchRecurring = async () => {
     setErrorTable("");
-    const res = await getRecurringHostels(
+    const res = await getTenantRecurring(
       page,
       size,
       search,
       filter,
       statusFilter,
-      // systemFilter // 👈 pass here
-      appliedSystemFilter
+      billingModelFilterBy,
+      appliedSystemFilter,
+      isTableView 
     );
 
     if (res?.success) {
       setErrorTable("")
       const response = res.data;
+      console.log("statusfilter", response.statusFilterOptions);
 
-      setData(response.hostelList || []);
+      setData(response.customerList || []);
       setTotalItems(response.totalItems);
       setTotalPages(response.totalPages);
+      setTotalTenants(response)
       setFilterOptions(response.filterOptions || []);
       setResStatusOptions(response.statusFilterOptions || []);
+      setBillingModelOptions(response?.billingModelFilterOptions || []);
       setAppliedFilterType(response.appliedFilterType);
       setRecurringPending({
         recurringPendingCount: response.recurringPendingCount || 0,
@@ -130,35 +148,23 @@ const TenantRecurring = () => {
       setErrorTable(res.message)
     }
   };
-  //   const fetchRecurring = async () => {
-  //   const res = await getRecurringHostels(
-  //     page,
-  //     size,
-  //     search,
-  //     filter,
-  //     statusFilter // ✅ add this also
-  //   );
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      statusDropdownRef.current &&
+      !statusDropdownRef.current.contains(event.target)
+    ) {
+      setOpenStatusFilter(false);
+    }
+  };
 
-  //   if (res?.success) {
-  //     const response = res.data;
+  document.addEventListener("mousedown", handleClickOutside);
 
-  //     setData(response.hostelList || []);
-  //     setTotalItems(response.totalItems);
-  //     setTotalPages(response.totalPages);
-
-  //     setFilterOptions(response.filterOptions || []);
-  //     setResStatusOptions(response.statusFilterOptions || []);
-
-  //     // ✅ ONLY counts store pannunga
-  //     setRecurringPending({
-  //       recurringPendingCount: response.recurringPendingCount || 0,
-  //       subscriptionExpiredCount: response.subscriptionExpiredCount || 0
-  //     });
-  //   }
-  // };
-  // useEffect(()=>{
-  //   fetchRecurring();
-  // },[page,size,filter,search]);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
+ 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -188,8 +194,8 @@ const TenantRecurring = () => {
     console.log("setSelectedItem", selectedItem)
     setShowDetailsModal(true);
 
-    const res = await getRecurringByHostelId(
-      item.hostelId,
+    const res = await getRecurringByTenantId(
+      item.customerId,
       page,
       historySize
     );
@@ -257,13 +263,13 @@ const TenantRecurring = () => {
 
     return () => clearTimeout(delay);
 
-  }, [page, size, filter, search, statusFilter, appliedSystemFilter]);
+  }, [page, size, filter, search, statusFilter, appliedSystemFilter, billingModelFilterBy,isTableView ]);
   const start = (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
 
   const handleGenerate = async (ids = []) => {
 
-    const res = await bulkGenerateRecurring(ids);
+    const res = await generateTenantRecurring(ids);
     if (res?.success) {
 
 
@@ -280,6 +286,7 @@ const TenantRecurring = () => {
 
       setMessage(res?.message);
       setModalType("error");
+      setGenrateError(res?.message)
 
       setShowSuccess(true);
       setTimeout(() => {
@@ -305,7 +312,7 @@ const TenantRecurring = () => {
   return (
 
     <DashboardLayout>
-      {(errorMsg === false || errorMsg === "Access Restricted") ? (
+      {(errorMsg === false || errorMsg === "Access Restricted" || !canRead ) ? (
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
@@ -332,59 +339,89 @@ const TenantRecurring = () => {
 
           />
 
-          {/* <div className="border-b border-gray-300 mb-6 pb-2">
-            <h1 className="text-xl font-semibold text-left">
+
+          <div className="border-b border-gray-300 mb-6 pb-2 flex items-center justify-between">
+
+
+            <h1 className="text-xl font-semibold">
               Tenant Recurring
             </h1>
-          </div> */}
 
-   <div className="border-b border-gray-300 mb-6 pb-2 flex items-center justify-between">
+{/* 
+            <div className="flex items-center bg-gray-100 p-1 rounded-lg border border-gray-300">
 
 
-  <h1 className="text-xl font-semibold">
-    Tenant Recurring
-  </h1>
+              <button
+                onClick={() => setViewType("table")}
+                className={`p-2 rounded-md cursor-pointer ${viewType === "table" ? "bg-white shadow-sm" : ""
+                  }`}
+              >
+                <img src={buildingWhite} className="w-4 h-4" />
+              </button>
 
- 
- <div className="flex items-center bg-blue-600 p-1 rounded-full">
 
-  {/* Avatar */}
-   <button className="p-2 rounded-full cursor-pointer">
-    <img src={buildingWhite} className="w-3 h-3" />
+              <button className="p-2 rounded-md cursor-pointer">
+                <img src={Avatar} className="w-4 h-4" />
+              </button>
+
+            </div> */}
+<div className="flex items-center bg-blue-600 p-[2px] rounded-full border border-gray-300 w-fit">
+
+  {/* TABLE VIEW */}
+  <button
+    onClick={() => setIsTableView(false)}
+    className={`p-2 rounded-full transition-all duration-200
+      ${!isTableView ? "bg-white shadow-sm" : ""}
+    `}
+  >
+    <img
+      src={!isTableView ? Building : buildingWhite}
+      className="w-4 h-4 cursor-pointer"
+    />
   </button>
-  <button className="p-2 bg-white rounded-full cursor-pointer">
-    <img src={AvatarFrame} className="w-3 h-3" />
-  </button>
 
-  {/* Building */}
- 
+  {/* AVATAR VIEW */}
+  <button
+    onClick={() => setIsTableView(true)}
+    className={`p-2 rounded-full transition-all duration-200
+      ${isTableView ? "bg-white shadow-sm " : ""}
+    `}
+  >
+    <img
+      src={isTableView ? Avatar : Avatar}
+      className={`w-4 h-4 cursor-pointer ${!isTableView ? "opacity-60" : ""}`}
+    />
+  </button>
 
 </div>
-
-</div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-
-            <div className="border border-gray-200 rounded-xl p-4 bg-white">
-              <p className="text-sm text-gray-500">Total Properties</p>
-              <p className="text-xl font-semibold mt-1">{totalItems}</p>
-            </div>
-
-            <div className="border border-gray-200 rounded-xl p-4 bg-white">
-              <p className="text-sm text-gray-500">Recurring Pending</p>
-              <p className="text-xl font-semibold mt-1">{recurringPending?.recurringPendingCount || 0}</p>
-            </div>
-
-            <div className="border border-gray-200 rounded-xl p-4 bg-white">
-              <p className="text-sm text-gray-500">Subscription Expired</p>
-              <p className="text-xl font-semibold mt-1">{recurringPending?.subscriptionExpiredCount || 0}</p>
-            </div>
 
           </div>
+         
+            <div>
 
-          <p className="text-xs text-blue-500 mb-4 text-left">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+
+                <div className="border border-gray-200 rounded-xl p-4 bg-white">
+                  <p className="text-sm text-gray-500">Total Tenant</p>
+                  <p className="text-xl font-semibold mt-1">{totalTenants.totalTenants}</p>
+                </div>
+
+                <div className="border border-gray-200 rounded-xl p-4 bg-white">
+                  <p className="text-sm text-gray-500">Billing Today</p>
+                  <p className="text-xl font-semibold mt-1">{totalTenants.billingToday}</p>
+                </div>
+
+                <div className="border border-gray-200 rounded-xl p-4 bg-white">
+                  <p className="text-sm text-gray-500">Due Tomorrow</p>
+                  <p className="text-xl font-semibold mt-1">{totalTenants.billingTomorrow}</p>
+                </div>
+
+              </div>
+
+              {/* <p className="text-xs text-blue-500 mb-4 text-left">
             Based upon last 30 Days
-          </p>
-          {/* 
+          </p> */}
+              {/* 
                    <div className="flex justify-between items-center mb-4">
 
             <div ref={dropdownRef} className="relative w-40">
@@ -439,240 +476,254 @@ const TenantRecurring = () => {
             </div>
 
           </div> */}
-          <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
+              <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
 
-            {/* LEFT SIDE */}
-            <div className="flex items-center gap-2 flex-wrap">
+              
+               
+<div className="flex items-end gap-4 flex-wrap">
 
-              {/* All Properties */}
-              {/* <button className="border border-blue-500 text-blue-600 px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
-                All Properties ▾
-              </button> */}
+  {/* Day Filter */}
+  <div className="flex flex-col">
+    <label className="text-xs text-gray-500 mb-1">Day Filter</label>
 
-              {/* This Month */}
-              <div ref={dropdownRef} className="relative w-40">
+     <div ref={dropdownRef} className="relative w-40">
 
-                {/* <button
-                  onClick={() => setOpenFilter(!openFilter)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center cursor-pointer"
-                > */}
-                <button
-                  onClick={() => !showFilterDrawer && setOpenFilter(!openFilter)}
-                  disabled={showFilterDrawer}
-                  className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
+
+                    <button
+                      onClick={() => !showFilterDrawer && setOpenFilter(!openFilter)}
+                      disabled={showFilterDrawer}
+                      className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
     ${showFilterDrawer ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
   `}
-                >
-                  {filterOptions.find(f => f.key === filter)?.label || "today"}
-                  <span>▾</span>
-                </button>
+                    >
+                      {filterOptions.find(f => f.key === filter)?.label || "today"}
+                      <span>▾</span>
+                    </button>
 
-                {openFilter && (
-                  <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50 max-h-40 overflow-y-auto">
+                    {openFilter && (
+                      <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50 max-h-40 overflow-y-auto">
 
-                    {filterOptions.map((item) => (
-                      <div
-                        key={item.key}
-                        onClick={() => {
-                          setFilter(item.key);
-                          setPage(1);
-                          setOpenFilter(false);
-                        }}
-                        className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
+                        {filterOptions.map((item) => (
+                          <div
+                            key={item.key}
+                            onClick={() => {
+                              setFilter(item.key);
+                              setPage(1);
+                              setOpenFilter(false);
+                            }}
+                            className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
           ${filter === item.key ? "bg-blue-600 text-white" : ""}`}
-                      >
-                        {item.label}
+                          >
+                            {item.label}
+                          </div>
+                        ))}
+
                       </div>
-                    ))}
+                    )}
 
                   </div>
-                )}
+  </div>
 
-              </div>
+  {/* Status Filter */}
+  <div className="flex flex-col">
+    <label className="text-xs text-gray-500 mb-1">Status Filter</label>
 
-              {/* Cycle */}
-              {/* <button className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
-                ⚙ Cycle: 2 → 1
-              </button> */}
-              <div className="relative w-40">
+  <div ref={statusDropdownRef} className="relative w-40">
 
-                {/* <button
-    onClick={() => setOpenStatusFilter(!openStatusFilter)}
-    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center cursor-pointer"
-  > */}
-                <button
-                  onClick={() => !showFilterDrawer && setOpenStatusFilter(!openStatusFilter)}
-                  disabled={showFilterDrawer}
-                  className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
+     
+                    <button
+                      onClick={() => !showFilterDrawer && setOpenStatusFilter(!openStatusFilter)}
+                      disabled={showFilterDrawer}
+                      className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
     ${showFilterDrawer ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
   `}
-                >
-                  {
-                    resStatusOptions.find(s => s.key === statusFilter)?.label || "All"
-                  }
-                  <span>▾</span>
-                </button>
+                    >
+                      {
+                        resStatusOptions.find(s => s.key === statusFilter)?.label || "All"
+                      }
+                      <span>▾</span>
+                    </button>
 
-                {openStatusFilter && (
-                  <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50">
+                    {openStatusFilter && (
+                      <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50">
 
-                    {resStatusOptions.map((item) => (
-                      <div
-                        key={item.key}
-                        onClick={() => {
-                          setStatusFilter(item.key);
-                          setPage(1);
-                          setOpenStatusFilter(false);
-                        }}
-                        className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
+                        {resStatusOptions.map((item) => (
+                          <div
+                            key={item.key}
+                            onClick={() => {
+                              setStatusFilter(item.key);
+                              setPage(1);
+                              setOpenStatusFilter(false);
+                            }}
+                            className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
             ${statusFilter === item.key ? "bg-blue-600 text-white" : ""}
           `}
-                      >
-                        {item.label}
+                          >
+                            {item.label}
+                          </div>
+                        ))}
+
                       </div>
-                    ))}
+                    )}
+                  </div>
+  </div>
+
+  {/* Billing Mode */}
+  <div className="flex flex-col">
+    <label className="text-xs text-gray-500 mb-1">Billing Mode</label>
+
+    <select
+      value={billingModelFilterBy}
+      onChange={(e) => {
+        setBillingModelFilterBy(e.target.value);
+        setPage(1);
+      }}
+      className="border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer w-40"
+    >
+      {billingModelOptions?.map((item) => (
+        <option key={item.key} value={item.key}>
+          {item.label}
+        </option>
+      ))}
+    </select>
+  </div>
+
+</div>
+               
+                <div className="flex items-center gap-2">
+
+                  
+                  <button
+                    onClick={fetchRecurring}
+                    className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 cursor-pointer"
+                  >
+                    ⟳
+                  </button>
+
+                  {/* Search */}
+                  <div className="relative">
+                    <img
+                      src={Search}
+                      className="absolute left-3 top-2.5 w-4 h-4"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search Properties..."
+                      value={search}
+                      onChange={(e) => {
+                        setSearch(e.target.value);
+                        setPage(1);
+                      }}
+                      className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm w-56"
+                    />
+                  </div>
+
+                </div>
+              </div>
+
+              {selectedIds.length > 0 && (
+                <div className="flex justify-between items-center bg-blue-50 border border-blue-200 px-4 py-2 rounded-lg mb-3">
+
+
+                  <div className="flex items-center gap-3 text-sm">
+
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.length === data.length}
+                      onChange={handleSelectAll}
+                    />
+
+                    <span className="text-blue-600 font-medium">
+                      {selectedIds.length} properties selected
+                    </span>
+
+                    <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs">
+                      Cycle: 2 → 1
+                    </span>
+
+                    <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">
+                      Recurring: All
+                    </span>
 
                   </div>
-                )}
-              </div>
-              <img src={Filter} className="w-4 h-4 cursor-pointer" onClick={() => setShowFilterDrawer(true)} />
 
-            </div>
+                  {/* RIGHT */}
+                  <div className="flex items-center gap-2">
 
-            {/* RIGHT SIDE */}
-            <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowBulkModal(true)}
+                      className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 cursor-pointer"
 
-              {/* Refresh */}
-              <button
-                onClick={fetchRecurring}
-                className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 cursor-pointer"
-              >
-                ⟳
-              </button>
+                    >
+                      ⟳ Bulk Generate Recurring
+                    </button>
 
-              {/* Search */}
-              <div className="relative">
-                <img
-                  src={Search}
-                  className="absolute left-3 top-2.5 w-4 h-4"
-                />
-                <input
-                  type="text"
-                  placeholder="Search Properties..."
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                  }}
-                  className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm w-56"
-                />
-              </div>
+                    <button
+                      onClick={() => setSelectedIds([])}
+                      className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm cursor-pointer"
+                    >
+                      ✕ Clear
+                    </button>
 
-            </div>
-          </div>
+                  </div>
 
-          {selectedIds.length > 0 && (
-            <div className="flex justify-between items-center bg-blue-50 border border-blue-200 px-4 py-2 rounded-lg mb-3">
+                </div>
+              )}
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
 
+                <div className="max-h-[400px]  overflow-x-auto overflow-y-auto">
 
-              <div className="flex items-center gap-3 text-sm">
+                  <table className="w-max min-w-full table-fixed text-sm text-left">
 
-                <input
-                  type="checkbox"
-                  checked={selectedIds.length === data.length}
-                  onChange={handleSelectAll}
-                />
-
-                <span className="text-blue-600 font-medium">
-                  {selectedIds.length} properties selected
-                </span>
-
-                <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs">
-                  Cycle: 2 → 1
-                </span>
-
-                <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">
-                  Recurring: All
-                </span>
-
-              </div>
-
-              {/* RIGHT */}
-              <div className="flex items-center gap-2">
-
-                <button
-                  onClick={() => setShowBulkModal(true)}
-                  className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 cursor-pointer"
-
-                >
-                  ⟳ Bulk Generate Recurring
-                </button>
-
-                <button
-                  onClick={() => setSelectedIds([])}
-                  className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm cursor-pointer"
-                >
-                  ✕ Clear
-                </button>
-
-              </div>
-
-            </div>
-          )}
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-
-            <div className="max-h-[400px]  overflow-x-auto overflow-y-auto">
-
-              <table className="w-max min-w-full table-fixed text-sm text-left">
-
-                <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-40">
-                  <tr>
-                    <th className="px-4 py-3 sticky left-0 bg-[#F8F9FF] z-50 w-[80px]">ID</th>
-                    <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">Property</th>
-                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Mobile No</th>
-                    {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Sub Status</th> */}
-                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring Status</th>
-                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Region / City</th>
-                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Billing Cycle</th>
-                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring mode</th>
-                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Tenant Count</th>
-                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Sub Status</th>
-                    <th className="px-4 py-3 w-[150px] whitespace-nowrap">Actions</th>
-                  </tr>
-                </thead>
-
-
-                <tbody className="divide-y divide-gray-200">
-
-                  {loading ? (
-
-
-                    Array.from({ length: size }).map((_, i) => (
-                      <tr key={i} className="animate-pulse">
-                        {Array.from({ length: 8 }).map((_, j) => (
-                          <td key={j} className="px-4 py-3">
-                            <div className="h-3 bg-gray-200 rounded w-full"></div>
-                          </td>
-                        ))}
+                    <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-40">
+                      <tr>
+                        <th className="px-4 py-3 sticky left-0 bg-[#F8F9FF] z-50 w-[80px]">ID</th>
+                        <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">Property</th>
+                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Tenant Name</th>
+                        {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Sub Status</th> */}
+                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring Status</th>
+                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Region / City</th>
+                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Billing Schedule</th>
+                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Billingmodel</th>
+                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring mode</th>
+                        {/* <th className="px-4 py-3 w-[150px] whitespace-nowrap">Tenant Count</th> */}
+                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Sub Status</th>
+                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Actions</th>
                       </tr>
-                    ))
+                    </thead>
 
-                  ) : errorTable ? (
-                    <tr>
-                      <td colSpan="7">
-                        <div className="flex items-center justify-center h-[100px] text-red-500 font-medium">
-                          {errorTable}
-                        </div>
-                      </td>
-                    </tr>
-                  ) : data.length > 0 ? (
 
-                    data.map((item, index) => (
-                      <tr key={item.hostelId}>
-                        {/* <td className="px-4 py-3">
+                    <tbody className="divide-y divide-gray-200">
+
+                      {loading ? (
+
+
+                        Array.from({ length: size }).map((_, i) => (
+                          <tr key={i} className="animate-pulse">
+                            {Array.from({ length: 8 }).map((_, j) => (
+                              <td key={j} className="px-4 py-3">
+                                <div className="h-3 bg-gray-200 rounded w-full"></div>
+                              </td>
+                            ))}
+                          </tr>
+                        ))
+
+                      ) : errorTable ? (
+                        <tr>
+                          <td colSpan="7">
+                            <div className="flex items-center justify-center h-[100px] text-red-500 font-medium">
+                              {errorTable}
+                            </div>
+                          </td>
+                        </tr>
+                      ) : data.length > 0 ? (
+
+                        data.map((item, index) => (
+                          <tr key={item.customerId}>
+                            {/* <td className="px-4 py-3">
                           {(page - 1) * size + index + 1}
                         </td> */}
-                        {/* <td className="px-4 py-3 flex items-center gap-2">
+                            {/* <td className="px-4 py-3 flex items-center gap-2">
   <input
     type="checkbox"
     checked={selectedIds.includes(item.hostelId)}
@@ -683,103 +734,106 @@ const TenantRecurring = () => {
     {(page - 1) * size + index + 1}
   </span>
 </td> */}
-                        <td className="px-4 py-2 sticky left-0 bg-white z-30 w-[80px] group-hover:bg-gray-50 flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedIds.includes(item.hostelId)}
-                            onChange={() => handleSelect(item.hostelId)}
-                            disabled={item.recurringStatus}
-                            className={item.recurringStatus ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                           <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] shadow-[2px_0_5px_rgba(0,0,0,0.05)] gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedIds.includes(item.customerId)}
+                                onChange={() => handleSelect(item.customerId)}
+                                disabled={item.recurringStatus}
+                                className={item.recurringStatus ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
 
-                          />
-
-                          <span>
-                            {(page - 1) * size + index + 1}
-                          </span>
-                        </td>
-
-
-                        <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] group-hover:bg-gray-50">
-                          <div className="flex items-center gap-3">
-
-                            {/* Avatar */}
-                            {item.ownerInfo?.profilePic ? (
-                              <img
-                                src={item.ownerInfo.profilePic}
-                                className="w-8 h-8 rounded-full object-cover"
-                                alt="owner"
                               />
-                            ) : (
-                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600">
-                                {item?.initials || "NA"}
+
+                              <span>
+                                {(page - 1) * size + index + 1}
+                              </span>
+                            </td>
+
+
+                            <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] group-hover:bg-gray-50">
+                              <div className="flex items-center gap-3">
+
+                                {/* Avatar */}
+                                {item.ownerInfo?.profilePic ? (
+                                  <img
+                                    src={item.ownerInfo.profilePic}
+                                    className="w-8 h-8 rounded-full object-cover"
+                                    alt="owner"
+                                  />
+                                ) : (
+                                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600">
+                                    {item?.initials || "NA"}
+                                  </div>
+                                )}
+
+                                {/* Text */}
+                                <div className="flex flex-col">
+                                  <span className="text-[13px] font-semibold text-gray-900 text-left">
+                                    {item.hostelName}
+                                  </span>
+                                  <span className="text-[11px] text-gray-500 text-left">
+                                    {item.ownerInfo?.mobile || "----"}
+                                  </span>
+                                </div>
+
                               </div>
-                            )}
+                            </td>
 
-                            {/* Text */}
-                            <div className="flex flex-col">
-                              <span className="text-[13px] font-semibold text-gray-900 text-left">
-                                {item.hostelName}
-                              </span>
-                              <span className="text-[11px] text-gray-500 text-left">
-                                {item.ownerInfo?.fullName || "----"}
-                              </span>
-                            </div>
-
-                          </div>
-                        </td>
-
-                        <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                          {item.mobile}
-                        </td>
+                            <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                              {item.fullName}
+                            </td>
 
 
-                        <td className="px-4 py-2 text-left text-[12px] whitespace-nowrap">
-                          <span
-                            className={`font-medium
+                            <td className="px-4 py-2 text-left text-[12px] whitespace-nowrap">
+                              <span
+                                className={`font-medium
     ${item.recurringStatus
-                                ? "text-green-600"
-                                : "text-orange-500"
-                              }`}
-                          >
-                            {item.recurringStatus ? "Generated" : "Blocked"}
-                          </span>
-                        </td>
+                                    ? "text-green-600"
+                                    : "text-orange-500"
+                                  }`}
+                              >
+                                {item.recurringStatus ? "Generated" : "Blocked"}
+                              </span>
+                            </td>
 
-                        <td
-                          className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap"
-                          onMouseEnter={(e) => {
-                            setTooltip({
-                              text: item.fullAddress,
-                              x: e.clientX,
-                              y: e.clientY
-                            });
-                          }}
-                          onMouseLeave={() => setTooltip(null)}
-                        >
-                          {item.city} , {item.state}
-                        </td>
-                        <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                          {item.billingStartDay}to{item.billingEndDay} of Month
-                        </td>
-                        <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                          {item.recurringMode || "----"}
-                        </td>
-                        <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                          {item.activeTenantCount || 0}
-                        </td>
-                        <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                          {item.recurringStatus ? (
-                            <span className="text-green-600 bg-green-100 px-2 py-1 rounded-full text-xs">
-                              Generated
-                            </span>
-                          ) : (
-                            <span className="text-red-600 bg-red-100 px-2 py-1 rounded-full text-xs">
-                              Not Generated
-                            </span>
-                          )}
-                        </td>
+                            <td
+                              className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap"
+                              onMouseEnter={(e) => {
+                                setTooltip({
+                                  text: item.HostelFullAddress,
+                                  x: e.clientX,
+                                  y: e.clientY
+                                });
+                              }}
+                              onMouseLeave={() => setTooltip(null)}
+                            >
+                              {item.HostelCity} , {item.HostelState}
+                            </td>
+                            <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                              {item.billingStartDay}to{item.billingEndDay} of Month
+                            </td>
+                            <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                              {item.billingModel || "----"}
+                            </td>
+                            <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                              {item.recurringMode || "----"}
+                            </td>
+                            {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                              {item.activeTenantCount || 0}
+                            </td> */}
+                            <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                              {item.recurringStatus ? (
+                                <span className="text-green-600 bg-green-100 px-2 py-1 rounded-full text-xs">
+                                  Generated
+                                </span>
+                              ) : (
+                                <span className="text-red-600 bg-red-100 px-2 py-1 rounded-full text-xs">
+                                  Not Generated
+                                </span>
+                              )}
+                            </td>
 
-                        {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                            {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                           <button
                             disabled={item.recurringStatus || filter === "UP_COMING"}
                             onClick={() => handleGenerate(item)}
@@ -792,147 +846,155 @@ const TenantRecurring = () => {
                             Generate
                           </button>
                         </td> */}
-                        <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                          {!item.recurringStatus ? (
-                            <button
-                              // disabled={filter === "UP_COMING"}
-                              // onClick={() => handleGenerate(item)}
-                              // onClick={() => {
-                              //   setSelectedItem(item);
-                              //   setShowDetailsModal(true);
-                              // }}
-                              //                               onClick={() => {
-                              //   setSelectedItem(item);
-                              //   setShowDetailsModal(true);
+                            <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                              {!item.recurringStatus ? (
+                                <button
+                                  // disabled={filter === "UP_COMING"}
+                                  // onClick={() => handleGenerate(item)}
+                                  // onClick={() => {
+                                  //   setSelectedItem(item);
+                                  //   setShowDetailsModal(true);
+                                  // }}
+                                  //                               onClick={() => {
+                                  //   setSelectedItem(item);
+                                  //   setShowDetailsModal(true);
 
 
-                              //   getRecurringByHostelId(item.hostelId);
-                              // }}
-                              onClick={() => handleOpenDetails(item)}
-                              className="px-3 py-1 rounded-lg text-xs text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 cursor-pointer"
+                                  //   getRecurringByHostelId(item.hostelId);
+                                  // }}
+                                  onClick={() => handleOpenDetails(item)}
+                                  className="px-3 py-1 rounded-lg text-xs text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 cursor-pointer"
 
-                            >
-                              Generate
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleOpenDetails(item)}
-                              className="px-3 py-1 rounded-lg text-xs border border-gray-300 text-blue-600 bg-white hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
-                            >
-                              👁 View Details
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))
+                                >
+                                  Generate
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleOpenDetails(item)}
+                                  className="px-3 py-1 rounded-lg text-xs border border-gray-300 text-blue-600 bg-white hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
+                                >
+                                  👁 View Details
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))
 
-                  ) : (
+                      ) : (
 
-                    <tr>
+                        <tr>
 
-                      <td colSpan="7" className="text-center py-6">
-                        {errorTable ? (
-                          <span className="text-red-500 font-medium">
-                            {errorTable}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">
-                            No Data Found
-                          </span>
-                        )}
-                      </td>
+                          <td colSpan="7" className="text-center py-6">
+                            {errorTable ? (
+                              <span className="text-red-500 font-medium">
+                                {errorTable}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">
+                                No Data Found
+                              </span>
+                            )}
+                          </td>
 
-                    </tr>
+                        </tr>
 
+                      )}
+
+                    </tbody>
+
+                  </table>
+                  {tooltip && (
+                    <div
+                      className="fixed z-[99999] pointer-events-none"
+                      style={{
+                        top: tooltip.y + 5,
+                        left: tooltip.x + 10
+                      }}
+                    >
+                      <div className="bg-white text-gray-600 text-xs rounded-xl px-4 py-3 shadow-lg border border-gray-200 max-w-xs break-words">
+                        {tooltip.text}
+                      </div>
+
+                      {/* Arrow */}
+                      <div className="w-3 h-3 bg-white rotate-45 ml-4 -mt-1 border-l border-b border-gray-200"></div>
+                    </div>
                   )}
 
-                </tbody>
-
-              </table>
-              {tooltip && (
-                <div
-                  className="fixed z-[99999] pointer-events-none"
-                  style={{
-                    top: tooltip.y + 5,
-                    left: tooltip.x + 10
-                  }}
-                >
-                  <div className="bg-white text-gray-600 text-xs rounded-xl px-4 py-3 shadow-lg border border-gray-200 max-w-xs break-words">
-                    {tooltip.text}
-                  </div>
-
-                  {/* Arrow */}
-                  <div className="w-3 h-3 bg-white rotate-45 ml-4 -mt-1 border-l border-b border-gray-200"></div>
                 </div>
-              )}
 
+                {/* Footer Pagination */}
+
+
+              </div>
+              <div className="flex items-center justify-between px-6 py-3  text-sm text-gray-500">
+
+                <span>
+                  Total Record Count :
+                  <span className="text-blue-600 ml-1">{size}</span>
+                </span>
+
+                <div className="flex items-center gap-4">
+
+                  {/* Page size */}
+                  <select
+                    value={size}
+                    onChange={(e) => {
+                      setSize(Number(e.target.value));
+                      setPage(1);
+                    }}
+                    className="border rounded px-2 py-1 text-sm"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                  </select>
+
+                  {/* Prev */}
+                  <button
+                    onClick={() => setPage(p => Math.max(p - 1, 1))}
+                    disabled={page === 1}
+                    className="px-2"
+                  >
+                    <img src={Arrow} className="w-4 h-4 cursor-pointer" />
+                  </button>
+
+                  {/* Current Page */}
+                  <span className="border px-2 py-1 rounded bg-gray-50">
+                    {page}
+                  </span>
+
+                  {/* Next */}
+                  <button
+                    onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+                    disabled={page >= totalPages}
+                    className="px-2"
+                  >
+                    <img src={Arrow} className="w-4 h-4 rotate-180 cursor-pointer" />
+                  </button>
+
+                  {/* Range */}
+                  <span className="text-gray-400">
+                    {start} - {end}
+                  </span>
+
+                </div>
+
+              </div>
             </div>
-
-            {/* Footer Pagination */}
-
-
-          </div>
-          <div className="flex items-center justify-between px-6 py-3  text-sm text-gray-500">
-
-            <span>
-              Total Record Count :
-              <span className="text-blue-600 ml-1">{size}</span>
-            </span>
-
-            <div className="flex items-center gap-4">
-
-              {/* Page size */}
-              <select
-                value={size}
-                onChange={(e) => {
-                  setSize(Number(e.target.value));
-                  setPage(1);
-                }}
-                className="border rounded px-2 py-1 text-sm"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-
-              {/* Prev */}
-              <button
-                onClick={() => setPage(p => Math.max(p - 1, 1))}
-                disabled={page === 1}
-                className="px-2"
-              >
-                <img src={Arrow} className="w-4 h-4 cursor-pointer" />
-              </button>
-
-              {/* Current Page */}
-              <span className="border px-2 py-1 rounded bg-gray-50">
-                {page}
-              </span>
-
-              {/* Next */}
-              <button
-                onClick={() => setPage(p => Math.min(p + 1, totalPages))}
-                disabled={page >= totalPages}
-                className="px-2"
-              >
-                <img src={Arrow} className="w-4 h-4 rotate-180 cursor-pointer" />
-              </button>
-
-              {/* Range */}
-              <span className="text-gray-400">
-                {start} - {end}
-              </span>
-
-            </div>
-
-          </div>
+        
+          {viewType === "calendar" && (
+            <CalendarView data={data} />
+          )}
           {showDetailsModal && selectedItem && (
             <div className="fixed inset-0 z-[9999] flex justify-end">
 
 
               <div
                 className="fixed inset-0 bg-black/10 backdrop-blur-[0px]"
-                onClick={() => setShowDetailsModal(false)}
+              onClick={() => {
+  setShowDetailsModal(false);
+  setGenrateError("");
+}}
               ></div>
 
 
@@ -948,15 +1010,18 @@ const TenantRecurring = () => {
 
                       <div className="text-left">
                         <p className="font-semibold text-sm">
-                          {selectedItem.hostelName}
+                          {selectedItem.fullName}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {selectedItem.hostelId}
+                          {selectedItem.customerId}
                         </p>
                       </div>
                     </div>
 
-                    <button className="cursor-pointer" onClick={() => setShowDetailsModal(false)}>✕</button>
+                    <button className="cursor-pointer"               onClick={() => {
+  setShowDetailsModal(false);
+  setGenrateError("");
+}}>✕</button>
                   </div>
 
 
@@ -985,7 +1050,7 @@ const TenantRecurring = () => {
                           <img src={location} className="w-4 h-4 opacity-60" />
                           <span className="text-gray-500 w-28 text-left">Location</span>
                           <span className="font-medium text-gray-800 text-left">
-                            {selectedItem.city}, {selectedItem.state}
+                            {selectedItem.HostelFullAddress}
                           </span>
                         </div>
 
@@ -994,7 +1059,7 @@ const TenantRecurring = () => {
                           <img src={call} className="w-4 h-4 opacity-60" />
                           <span className="text-gray-500 w-28 text-left">Mobile</span>
                           <span className="font-medium text-gray-800 text-left">
-                            {selectedItem.mobile}
+                            {selectedItem.HostelMobile}
                           </span>
                         </div>
 
@@ -1140,7 +1205,7 @@ const TenantRecurring = () => {
                             <tr>
                               <th className="p-2 text-left">Month</th>
                               <th className="p-2 text-left">Cycle</th>
-                              <th className="p-2 text-left">Inv</th>
+                              {/* <th className="p-2 text-left">Inv</th> */}
                               <th className="p-2 text-left">By</th>
                               <th className="p-2 text-left">Status</th>
                             </tr>
@@ -1156,12 +1221,12 @@ const TenantRecurring = () => {
                                   </td>
 
                                   <td className="p-2 text-start">
-                                    {item.creationMonth - 1} → {item.creationMonth}
+                                    {item.cycleStartDay} → {item.cycleEndDay}
                                   </td>
 
-                                  <td className="p-2 text-start">
+                                  {/* <td className="p-2 text-start">
                                     {item.invoiceGeneratedCount}
-                                  </td>
+                                  </td> */}
 
                                   <td className="p-2 text-start">
                                     {item.createdBy || "N/A"}
@@ -1274,11 +1339,17 @@ const TenantRecurring = () => {
                       🔄 Generate Recurring
                     </button>
                   </div> */}
+                   {generateError && (
+              <ErrorMessage message={generateError} type="error" />
+            )}
                   {!selectedItem?.recurringStatus && (
                     <div className="p-4 border-t border-gray-300 flex justify-end gap-2">
 
                       <button
-                        onClick={() => setShowDetailsModal(false)}
+                        onClick={() => {
+  setShowDetailsModal(false);
+  setGenrateError("");
+}}
                         className="px-4 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer"
                       >
                         Close
@@ -1288,7 +1359,7 @@ const TenantRecurring = () => {
 
                       <button
                         // onClick={() => handleGenerate(selectedItem)}
-                        onClick={() => handleGenerate([selectedItem.hostelId])}
+                        onClick={() => handleGenerate([selectedItem.customerId])}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg text-[12px] flex items-center gap-2 cursor-pointer"
                       >
                         <img src={refreshWhite} className="w-4 h-4" />
@@ -1310,7 +1381,11 @@ const TenantRecurring = () => {
           {/* Overlay */}
           <div
             className="fixed inset-0 bg-black/20"
-            onClick={() => setShowBulkModal(false)}
+            // onClick={() => setShowBulkModal(false)}
+                          onClick={() => {
+  setShowBulkModal(false);
+  setGenrateError("");
+}}
           ></div>
 
           {/* RIGHT DRAWER */}
@@ -1322,7 +1397,10 @@ const TenantRecurring = () => {
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-left">
                   <img src={refresh} className="w-5 h-5" /> Bulk Generate Recurring
                 </h2>
-                <button onClick={() => setShowBulkModal(false)}>✕</button>
+                <button                           onClick={() => {
+  setShowBulkModal(false);
+  setGenrateError("");
+}}>✕</button>
               </div>
 
               {/* BODY */}
@@ -1474,11 +1552,16 @@ const TenantRecurring = () => {
                 </div>
 
               </div>
-
+       {generateError && (
+              <ErrorMessage message={generateError} type="error" />
+            )}
               {/* FOOTER */}
               <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
                 <button
-                  onClick={() => setShowBulkModal(false)}
+                                            onClick={() => {
+  setShowBulkModal(false);
+  setGenrateError("");
+}}
                   className="px-4 py-2 border border-gray-200 rounded-lg text-sm"
                 >
                   Cancel
@@ -1498,7 +1581,7 @@ const TenantRecurring = () => {
                 <button
                   // disabled={!confirmBulk || !bulkReason}
                   onClick={async () => {
-                    const res = await bulkGenerateRecurring(selectedIds);
+                    const res = await generateTenantRecurring(selectedIds);
 
                     if (res?.success) {
                       setShowBulkModal(false);
@@ -1517,6 +1600,7 @@ const TenantRecurring = () => {
                     } else {
                       setModalType("error");
                       setMessage(res?.message || "Failed");
+                      setGenrateError(res?.message)
                       setShowSuccess(true);
 
                       setTimeout(() => setShowSuccess(false), 1500);
@@ -1657,6 +1741,7 @@ const TenantRecurring = () => {
           </div>
         </div>
       )}
+
     </DashboardLayout>
   );
 };

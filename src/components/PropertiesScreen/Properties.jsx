@@ -188,7 +188,8 @@ const handlePropertyClick = async (item) => {
     isTrial: item?.trialExtendable,
     trialDays: 0,
     paidAmount:0,
-    discountAmount:0
+    discountAmount:0,
+  
   };
 
   const res = await createSubscription( 

@@ -15,7 +15,7 @@ import Roles from "../../assets/roles.png";
 import Admin from "../../assets/adminuser.png";
 import { useDashboard } from "../../Context/DashboardContext";
 import { useLocation } from "react-router-dom";
-import Chart from "../../assets/chart-wave-rectangle.png"
+import Drop from "../../assets/direction-down 01.png"
 
 const DashboardLayout = ({ children }) => {
 
@@ -26,13 +26,23 @@ const DashboardLayout = ({ children }) => {
   const [openSales, setOpenSales] = useState(false);
 
   const [recurringOpen, setRecurringOpen] = useState(false);
+   const location = useLocation();
 
-
+useEffect(() => {
+  if (
+    location.pathname.includes("/demo-requests") ||
+    location.pathname.includes("/subscription") ||
+    location.pathname.includes("/trial-users") ||
+    location.pathname.includes("/transactions")
+  ) {
+    setOpenSales(true);
+  }
+}, [location.pathname]);
 
   useEffect(() => {
     getDashboard()
   }, [])
-  const location = useLocation();
+ 
 
   useEffect(() => {
     if (
@@ -173,7 +183,7 @@ const DashboardLayout = ({ children }) => {
   <div
     onClick={() => {
   setOpenSales(!openSales);
-  setRecurringOpen(false); // 🔥 close other
+  setRecurringOpen(false); 
 }}
     className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100"
   >
@@ -183,7 +193,7 @@ const DashboardLayout = ({ children }) => {
     </div>
 
     <span className={`transform transition ${openSales ? "rotate-180" : ""}`}>
-      ▼
+      <img src={Drop} className="w-5 h-5"/>
     </span>
   </div>
 
@@ -250,7 +260,7 @@ const DashboardLayout = ({ children }) => {
                 </div>
 
                 <span className={`transform transition ${recurringOpen ? "rotate-180" : ""}`}>
-      ▼
+       <img src={Drop} className="w-5 h-5"/>
     </span>
               </div>
 
