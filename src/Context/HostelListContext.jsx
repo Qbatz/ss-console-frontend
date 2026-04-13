@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState } from "react";
 import api from "../Config/AxiosConfig";
 import axiosInstance from "../Config/AxiosConfig";
 
+
 const HostelContext = createContext(null);
 
 export const HostelProvider = ({ children }) => {
@@ -505,7 +506,8 @@ const getTenantRecurring = async (
   filterBy = "TODAY",
   statusFilterBy = "ALL",
   billingModelFilterBy = "ALL",
-  billingCycleStartDay = ""
+  billingCycleStartDay = "",
+  isHostelBased = false
 ) => {
   try {
     setLoading(true);
@@ -519,7 +521,8 @@ const getTenantRecurring = async (
         filterBy,
         statusFilterBy,
         billingModelFilterBy,
-        billingCycleStartDay
+        billingCycleStartDay,
+        isHostelBased
       }
     });
 
@@ -610,6 +613,40 @@ const getRecurringByTenantId = async (tenantId, page = 0, size = 10) => {
    
   }
 };
+const getRecurringMonth = async (month, year) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get("/v2/hostels/recurring/month", {
+      params: {
+        month,
+        year
+      }
+    });
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <HostelContext.Provider
       value={{
@@ -617,7 +654,7 @@ const getRecurringByTenantId = async (tenantId, page = 0, size = 10) => {
         loading,
         errorMsg,
         getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice,getRecurringByHostelId,
-        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId
+        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth
       }}
     >
       {children}

@@ -20,7 +20,7 @@ import CalendarView from "./CalendarView";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 const RecurringInvoice = () => {
-  const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId, bulkGenerateRecurring } = useHostel();
+  const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId, bulkGenerateRecurring, getRecurringMonth } = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Recurring");
   console.log("errorMsg", errorMsg)
@@ -62,15 +62,50 @@ const RecurringInvoice = () => {
   console.log("billingModelOptions", billingModelOptions)
   const [errorTable, setErrorTable] = useState("")
   const [viewType, setViewType] = useState("table");
-  const [generateError,setGenrateError] = useState("")
+  const [generateError, setGenrateError] = useState("")
   const [recurringPending, setRecurringPending] = useState({
     recurringPendingCount: 0,
     subscriptionExpiredCount: 0
   });
+  const today = new Date();
+
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth() + 1);
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
   const [resStatusOptions, setResStatusOptions] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [openStatusFilter, setOpenStatusFilter] = useState(false);
+  const [calendarData, setCalendarData] = useState([]);
+
+  const fetchCalendar = async () => {
+    const res = await getRecurringMonth(currentMonth, currentYear);
+
+    if (res?.success) {
+      setCalendarData(res.data || []);
+    }
+  };
+  useEffect(() => {
+    if (viewType === "calendar") {
+      fetchCalendar();
+    }
+  }, [viewType, currentMonth, currentYear]);
+  const handlePrevMonth = () => {
+    if (currentMonth === 1) {
+      setCurrentMonth(12);
+      setCurrentYear(prev => prev - 1);
+    } else {
+      setCurrentMonth(prev => prev - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 12) {
+      setCurrentMonth(1);
+      setCurrentYear(prev => prev + 1);
+    } else {
+      setCurrentMonth(prev => prev + 1);
+    }
+  };
   console.log("selectedItem", selectedItem)
   const handleSelect = (id) => {
     setSelectedIds((prev) =>
@@ -87,25 +122,7 @@ const RecurringInvoice = () => {
       setSelectedIds(data.map((item) => item.hostelId));
     }
   };
-  // const fetchRecurring = async () => {
 
-  //   const res = await getRecurringHostels(
-  //     page,
-  //     size,
-  //     search,
-  //     filter
-  //   );
-
-  //   if (res?.success) {
-
-  //     setData(res.data.hostelList || []);
-  //     setTotalItems(res.data.totalItems);
-  //     setTotalPages(res.data.totalPages);
-  //     setFilterOptions(res.data.filterOptions || []);
-  //     setRecurringPending(res.data || [])
-  //   }
-
-  // };
   const fetchRecurring = async () => {
     setErrorTable("");
     const res = await getRecurringHostels(
@@ -142,50 +159,22 @@ const RecurringInvoice = () => {
     }
   };
   useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (
-      statusDropdownRef.current &&
-      !statusDropdownRef.current.contains(event.target)
-    ) {
-      setOpenStatusFilter(false);
-    }
-  };
+    const handleClickOutside = (event) => {
+      if (
+        statusDropdownRef.current &&
+        !statusDropdownRef.current.contains(event.target)
+      ) {
+        setOpenStatusFilter(false);
+      }
+    };
 
-  document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
-  //   const fetchRecurring = async () => {
-  //   const res = await getRecurringHostels(
-  //     page,
-  //     size,
-  //     search,
-  //     filter,
-  //     statusFilter // ✅ add this also
-  //   );
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
-  //   if (res?.success) {
-  //     const response = res.data;
-
-  //     setData(response.hostelList || []);
-  //     setTotalItems(response.totalItems);
-  //     setTotalPages(response.totalPages);
-
-  //     setFilterOptions(response.filterOptions || []);
-  //     setResStatusOptions(response.statusFilterOptions || []);
-
-  //     // ✅ ONLY counts store pannunga
-  //     setRecurringPending({
-  //       recurringPendingCount: response.recurringPendingCount || 0,
-  //       subscriptionExpiredCount: response.subscriptionExpiredCount || 0
-  //     });
-  //   }
-  // };
-  // useEffect(()=>{
-  //   fetchRecurring();
-  // },[page,size,filter,search]);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -201,11 +190,11 @@ const RecurringInvoice = () => {
   }, []);
   useEffect(() => {
     if (showFilterDrawer) {
-      // reset filters
-      setFilter("TODAY");          // default
-      setStatusFilter("ALL");      // default
 
-      // close dropdowns
+      setFilter("TODAY");
+      setStatusFilter("ALL");
+
+
       setOpenFilter(false);
       setOpenStatusFilter(false);
     }
@@ -231,12 +220,12 @@ const RecurringInvoice = () => {
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
 
-    const parts = dateStr.split("/"); // ["24","03","2026"]
+    const parts = dateStr.split("/");
 
     if (parts.length !== 3) return dateStr;
 
     const day = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1; // JS month 0-based
+    const month = parseInt(parts[1], 10) - 1;
     const year = parseInt(parts[2], 10);
 
     const date = new Date(year, month, day);
@@ -249,7 +238,7 @@ const RecurringInvoice = () => {
   const formatFullDate = (dateStr) => {
     if (!dateStr) return "";
 
-    const parts = dateStr.split("/"); // DD/MM/YYYY
+    const parts = dateStr.split("/");
 
     if (parts.length !== 3) return dateStr;
 
@@ -260,22 +249,12 @@ const RecurringInvoice = () => {
     const date = new Date(year, month, day);
 
     return date.toLocaleDateString("en-US", {
-      month: "short",   // 👉 May
-      day: "numeric",   // 👉 1
-      year: "numeric"   // 👉 2026
+      month: "short",
+      day: "numeric",
+      year: "numeric"
     });
   };
-  //   const handleOpenDetails = async (item) => {
-  //     console.log("item",item)
-  //   setSelectedItem(item);
-  //   setShowDetailsModal(true);
 
-  //   const res = await getRecurringByHostelId(item.hostelId);
-
-  //   if (res?.success) {
-  //     setRecurringDetails(res.data);
-  //   }
-  // };
   useEffect(() => {
 
     const delay = setTimeout(() => {
@@ -317,23 +296,12 @@ const RecurringInvoice = () => {
     }
 
   };
-  //   const handleGenerate = async (item) => {
 
-  //   const res = await generateRecurringInvoice(
-  //     item.hostelId,
-  //     item.recurringDay
-  //   );
-
-  //   if (res?.success) {
-  //     fetchRecurring();
-  //   }
-
-  // };
 
   return (
 
     <DashboardLayout>
-      {(errorMsg === false || errorMsg === "Access Restricted" || !canRead ) ? (
+      {(errorMsg === false || errorMsg === "Access Restricted" || !canRead) ? (
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
@@ -367,7 +335,29 @@ const RecurringInvoice = () => {
             <h1 className="text-xl font-semibold">
               Monthly Recurring
             </h1>
+            <div className="flex justify-between items-center mb-4">
 
+
+
+              {viewType === "calendar" && (
+
+                <div className="flex items-center gap-2 bg-gray-100 px-4 py-1 rounded-lg border">
+
+                  <button onClick={handlePrevMonth} className="cursor-pointer">‹</button>
+
+                  <span className="text-sm font-medium">
+                    {new Date(currentYear, currentMonth - 1).toLocaleString("default", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+
+                  <button onClick={handleNextMonth} className="cursor-pointer">›</button>
+
+                </div>
+              )}
+
+            </div>
 
             <div className="flex items-center bg-gray-100 p-1 rounded-lg border border-gray-300">
 
@@ -377,7 +367,7 @@ const RecurringInvoice = () => {
                 className={`p-2 rounded-md cursor-pointer ${viewType === "table" ? "bg-white shadow-sm" : ""
                   }`}
               >
-                <img src={MonthBlue} className="w-4 h-4" />
+                <img src={MonthBlue} className="w-4 h-4 cursor-pointer" />
               </button>
 
 
@@ -414,181 +404,124 @@ const RecurringInvoice = () => {
 
               </div>
 
-              {/* <p className="text-xs text-blue-500 mb-4 text-left">
-            Based upon last 30 Days
-          </p> */}
-              {/* 
-                   <div className="flex justify-between items-center mb-4">
 
-            <div ref={dropdownRef} className="relative w-40">
-
-              <button
-                onClick={() => setOpenFilter(!openFilter)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center cursor-pointer"
-              >
-                {filterOptions.find(f => f.key === filter)?.label || "today"}
-                <span>▾</span>
-              </button>
-
-              {openFilter && (
-                <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50 max-h-40 overflow-y-auto">
-
-                  {filterOptions.map((item) => (
-                    <div
-                      key={item.key}
-                      onClick={() => {
-                        setFilter(item.key);
-                        setPage(1);
-                        setOpenFilter(false);
-                      }}
-                      className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
-          ${filter === item.key ? "bg-blue-600 text-white" : ""}`}
-                    >
-                      {item.label}
-                    </div>
-                  ))}
-
-                </div>
-              )}
-
-            </div>
-  
-            <div className="relative">
-              <img
-                src={Search}
-                alt="Search"
-                className="absolute left-3 top-2.5 w-4 h-4"
-              />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm font-medium leading-[150%] w-56"
-              />
-            </div>
-
-          </div> */}
               <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
 
-              
-               
-<div className="flex items-end gap-4 flex-wrap">
-
-  {/* Day Filter */}
-  <div className="flex flex-col">
-    <label className="text-xs text-gray-500 mb-1">Day Filter</label>
-
-     <div ref={dropdownRef} className="relative w-40">
 
 
-                    <button
-                      onClick={() => !showFilterDrawer && setOpenFilter(!openFilter)}
-                      disabled={showFilterDrawer}
-                      className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
+                <div className="flex items-end gap-4 flex-wrap">
+
+
+                  <div className="flex flex-col">
+                    <label className="text-xs text-gray-500 mb-1">Day Filter</label>
+
+                    <div ref={dropdownRef} className="relative w-40">
+
+
+                      <button
+                        onClick={() => !showFilterDrawer && setOpenFilter(!openFilter)}
+                        disabled={showFilterDrawer}
+                        className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
     ${showFilterDrawer ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
   `}
-                    >
-                      {filterOptions.find(f => f.key === filter)?.label || "today"}
-                      <span>▾</span>
-                    </button>
+                      >
+                        {filterOptions.find(f => f.key === filter)?.label || "today"}
+                        <span>▾</span>
+                      </button>
 
-                    {openFilter && (
-                      <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50 max-h-40 overflow-y-auto">
+                      {openFilter && (
+                        <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50 max-h-40 overflow-y-auto">
 
-                        {filterOptions.map((item) => (
-                          <div
-                            key={item.key}
-                            onClick={() => {
-                              setFilter(item.key);
-                              setPage(1);
-                              setOpenFilter(false);
-                            }}
-                            className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
+                          {filterOptions.map((item) => (
+                            <div
+                              key={item.key}
+                              onClick={() => {
+                                setFilter(item.key);
+                                setPage(1);
+                                setOpenFilter(false);
+                              }}
+                              className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
           ${filter === item.key ? "bg-blue-600 text-white" : ""}`}
-                          >
-                            {item.label}
-                          </div>
-                        ))}
+                            >
+                              {item.label}
+                            </div>
+                          ))}
 
-                      </div>
-                    )}
+                        </div>
+                      )}
 
+                    </div>
                   </div>
-  </div>
 
-  {/* Status Filter */}
-  <div className="flex flex-col">
-    <label className="text-xs text-gray-500 mb-1">Status Filter</label>
 
-  <div ref={statusDropdownRef} className="relative w-40">
+                  <div className="flex flex-col">
+                    <label className="text-xs text-gray-500 mb-1">Status Filter</label>
 
-     
-                    <button
-                      onClick={() => !showFilterDrawer && setOpenStatusFilter(!openStatusFilter)}
-                      disabled={showFilterDrawer}
-                      className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
+                    <div ref={statusDropdownRef} className="relative w-40">
+
+
+                      <button
+                        onClick={() => !showFilterDrawer && setOpenStatusFilter(!openStatusFilter)}
+                        disabled={showFilterDrawer}
+                        className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
     ${showFilterDrawer ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
   `}
-                    >
-                      {
-                        resStatusOptions.find(s => s.key === statusFilter)?.label || "All"
-                      }
-                      <span>▾</span>
-                    </button>
+                      >
+                        {
+                          resStatusOptions.find(s => s.key === statusFilter)?.label || "All"
+                        }
+                        <span>▾</span>
+                      </button>
 
-                    {openStatusFilter && (
-                      <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50">
+                      {openStatusFilter && (
+                        <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50">
 
-                        {resStatusOptions.map((item) => (
-                          <div
-                            key={item.key}
-                            onClick={() => {
-                              setStatusFilter(item.key);
-                              setPage(1);
-                              setOpenStatusFilter(false);
-                            }}
-                            className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
+                          {resStatusOptions.map((item) => (
+                            <div
+                              key={item.key}
+                              onClick={() => {
+                                setStatusFilter(item.key);
+                                setPage(1);
+                                setOpenStatusFilter(false);
+                              }}
+                              className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
             ${statusFilter === item.key ? "bg-blue-600 text-white" : ""}
           `}
-                          >
-                            {item.label}
-                          </div>
-                        ))}
+                            >
+                              {item.label}
+                            </div>
+                          ))}
 
-                      </div>
-                    )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-  </div>
 
-  {/* Billing Mode */}
-  <div className="flex flex-col">
-    <label className="text-xs text-gray-500 mb-1">Billing Mode</label>
 
-    <select
-      value={billingModelFilterBy}
-      onChange={(e) => {
-        setBillingModelFilterBy(e.target.value);
-        setPage(1);
-      }}
-      className="border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer w-40"
-    >
-      {billingModelOptions?.map((item) => (
-        <option key={item.key} value={item.key}>
-          {item.label}
-        </option>
-      ))}
-    </select>
-  </div>
+                  <div className="flex flex-col">
+                    <label className="text-xs text-gray-500 mb-1">Billing Mode</label>
 
-</div>
-               
+                    <select
+                      value={billingModelFilterBy}
+                      onChange={(e) => {
+                        setBillingModelFilterBy(e.target.value);
+                        setPage(1);
+                      }}
+                      className="border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer w-40"
+                    >
+                      {billingModelOptions?.map((item) => (
+                        <option key={item.key} value={item.key}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                </div>
+
                 <div className="flex items-center gap-2">
 
-                  
+
                   <button
                     onClick={fetchRecurring}
                     className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 cursor-pointer"
@@ -643,7 +576,7 @@ const RecurringInvoice = () => {
 
                   </div>
 
-                  {/* RIGHT */}
+
                   <div className="flex items-center gap-2">
 
                     <button
@@ -730,7 +663,7 @@ const RecurringInvoice = () => {
     {(page - 1) * size + index + 1}
   </span>
 </td> */}
-                           <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] shadow-[2px_0_5px_rgba(0,0,0,0.05)] gap-2">
+                            <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] shadow-[2px_0_5px_rgba(0,0,0,0.05)] gap-2">
                               <input
                                 type="checkbox"
                                 checked={selectedIds.includes(item.hostelId)}
@@ -979,18 +912,21 @@ const RecurringInvoice = () => {
             </div>
           )}
           {viewType === "calendar" && (
-            <CalendarView data={data} />
-          )}
+            <CalendarView
+              currentMonth={currentMonth}
+              currentYear={currentYear}
+              data={calendarData}
+            />)}
           {showDetailsModal && selectedItem && (
             <div className="fixed inset-0 z-[9999] flex justify-end">
 
 
               <div
                 className="fixed inset-0 bg-black/10 backdrop-blur-[0px]"
-              onClick={() => {
-  setShowDetailsModal(false);
-  setGenrateError("");
-}}
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  setGenrateError("");
+                }}
               ></div>
 
 
@@ -1014,10 +950,10 @@ const RecurringInvoice = () => {
                       </div>
                     </div>
 
-                    <button className="cursor-pointer"               onClick={() => {
-  setShowDetailsModal(false);
-  setGenrateError("");
-}}>✕</button>
+                    <button className="cursor-pointer" onClick={() => {
+                      setShowDetailsModal(false);
+                      setGenrateError("");
+                    }}>✕</button>
                   </div>
 
 
@@ -1335,17 +1271,17 @@ const RecurringInvoice = () => {
                       🔄 Generate Recurring
                     </button>
                   </div> */}
-                   {generateError && (
-              <ErrorMessage message={generateError} type="error" />
-            )}
+                  {generateError && (
+                    <ErrorMessage message={generateError} type="error" />
+                  )}
                   {!selectedItem?.recurringStatus && (
                     <div className="p-4 border-t border-gray-300 flex justify-end gap-2">
 
                       <button
                         onClick={() => {
-  setShowDetailsModal(false);
-  setGenrateError("");
-}}
+                          setShowDetailsModal(false);
+                          setGenrateError("");
+                        }}
                         className="px-4 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer"
                       >
                         Close
@@ -1378,10 +1314,10 @@ const RecurringInvoice = () => {
           <div
             className="fixed inset-0 bg-black/20"
             // onClick={() => setShowBulkModal(false)}
-                          onClick={() => {
-  setShowBulkModal(false);
-  setGenrateError("");
-}}
+            onClick={() => {
+              setShowBulkModal(false);
+              setGenrateError("");
+            }}
           ></div>
 
           {/* RIGHT DRAWER */}
@@ -1393,10 +1329,10 @@ const RecurringInvoice = () => {
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-left">
                   <img src={refresh} className="w-5 h-5" /> Bulk Generate Recurring
                 </h2>
-                <button                           onClick={() => {
-  setShowBulkModal(false);
-  setGenrateError("");
-}}>✕</button>
+                <button onClick={() => {
+                  setShowBulkModal(false);
+                  setGenrateError("");
+                }}>✕</button>
               </div>
 
               {/* BODY */}
@@ -1548,16 +1484,16 @@ const RecurringInvoice = () => {
                 </div>
 
               </div>
-       {generateError && (
-              <ErrorMessage message={generateError} type="error" />
-            )}
+              {generateError && (
+                <ErrorMessage message={generateError} type="error" />
+              )}
               {/* FOOTER */}
               <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
                 <button
-                                            onClick={() => {
-  setShowBulkModal(false);
-  setGenrateError("");
-}}
+                  onClick={() => {
+                    setShowBulkModal(false);
+                    setGenrateError("");
+                  }}
                   className="px-4 py-2 border border-gray-200 rounded-lg text-sm"
                 >
                   Cancel

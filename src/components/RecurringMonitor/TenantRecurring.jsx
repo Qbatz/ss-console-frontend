@@ -18,6 +18,9 @@ import Monthlycalendar from "../../assets/monthCalendar.png";
 import MonthBlue from "../../assets/monthBlue.png";
 import CalendarView from "./CalendarView";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import buildingWhite from "../../assets/buildingsWhite.png";
+import Avatar from "../../assets/AvatarFrame.png";
+import Building from "../../assets/buildings.png"
 
 const TenantRecurring = () => {
   const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId, bulkGenerateRecurring,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId } = useHostel();
@@ -64,6 +67,7 @@ const TenantRecurring = () => {
   const [viewType, setViewType] = useState("table");
   const [generateError,setGenrateError] = useState("")
   const [totalTenants,setTotalTenants] = useState("")
+  const [isTableView, setIsTableView] = useState(false); // default FALSE
   const [recurringPending, setRecurringPending] = useState({
     recurringPendingCount: 0,
     subscriptionExpiredCount: 0
@@ -116,7 +120,8 @@ const TenantRecurring = () => {
       filter,
       statusFilter,
       billingModelFilterBy,
-      appliedSystemFilter
+      appliedSystemFilter,
+      isTableView 
     );
 
     if (res?.success) {
@@ -258,7 +263,7 @@ const TenantRecurring = () => {
 
     return () => clearTimeout(delay);
 
-  }, [page, size, filter, search, statusFilter, appliedSystemFilter, billingModelFilterBy]);
+  }, [page, size, filter, search, statusFilter, appliedSystemFilter, billingModelFilterBy,isTableView ]);
   const start = (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
 
@@ -342,7 +347,7 @@ const TenantRecurring = () => {
               Tenant Recurring
             </h1>
 
-
+{/* 
             <div className="flex items-center bg-gray-100 p-1 rounded-lg border border-gray-300">
 
 
@@ -351,22 +356,47 @@ const TenantRecurring = () => {
                 className={`p-2 rounded-md cursor-pointer ${viewType === "table" ? "bg-white shadow-sm" : ""
                   }`}
               >
-                <img src={MonthBlue} className="w-4 h-4" />
+                <img src={buildingWhite} className="w-4 h-4" />
               </button>
 
 
-              <button
-                onClick={() => setViewType("calendar")}
-                className={`p-2 rounded-md cursor-pointer ${viewType === "calendar" ? "bg-white shadow-sm" : ""
-                  }`}
-              >
-                <img src={Monthlycalendar} className="w-4 h-4" />
+              <button className="p-2 rounded-md cursor-pointer">
+                <img src={Avatar} className="w-4 h-4" />
               </button>
 
-            </div>
+            </div> */}
+<div className="flex items-center bg-blue-600 p-[2px] rounded-full border border-gray-300 w-fit">
+
+  {/* TABLE VIEW */}
+  <button
+    onClick={() => setIsTableView(false)}
+    className={`p-2 rounded-full transition-all duration-200
+      ${!isTableView ? "bg-white shadow-sm" : ""}
+    `}
+  >
+    <img
+      src={!isTableView ? Building : buildingWhite}
+      className="w-4 h-4 cursor-pointer"
+    />
+  </button>
+
+  {/* AVATAR VIEW */}
+  <button
+    onClick={() => setIsTableView(true)}
+    className={`p-2 rounded-full transition-all duration-200
+      ${isTableView ? "bg-white shadow-sm " : ""}
+    `}
+  >
+    <img
+      src={isTableView ? Avatar : Avatar}
+      className={`w-4 h-4 cursor-pointer ${!isTableView ? "opacity-60" : ""}`}
+    />
+  </button>
+
+</div>
 
           </div>
-          {viewType === "table" && (
+         
             <div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -951,7 +981,7 @@ const TenantRecurring = () => {
 
               </div>
             </div>
-          )}
+        
           {viewType === "calendar" && (
             <CalendarView data={data} />
           )}
