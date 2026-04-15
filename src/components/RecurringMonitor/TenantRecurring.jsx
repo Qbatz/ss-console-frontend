@@ -150,6 +150,17 @@ const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
       setHostelBasedTrue([])
     }
   };
+const filteredCustomers = search
+  ? selectedCustomers.filter(cust => {
+      const value = search.toLowerCase();
+
+      return (
+        cust.fullName?.toLowerCase().includes(value) ||
+        cust.mobile?.includes(value) ||
+        cust.customerId?.toLowerCase().includes(value)
+      );
+    })
+  : selectedCustomers;
   console.log("ressss",hostelBasedTrue)
   useEffect(() => {
   const handleClickOutside = (event) => {
@@ -273,13 +284,21 @@ const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   //     setRecurringDetails(res.data);
   //   }
   // };
-  const displayData = isTableView
-  ? hostelBasedTrue.filter((item) =>
-      selectedHostels.length > 0
-        ? selectedHostels.includes(item.hostelId)
-        : true
-    )
-  : data;
+  // const displayData = isTableView
+  // ? hostelBasedTrue.filter((item) =>
+  //     selectedHostels.length > 0
+  //       ? selectedHostels.includes(item.hostelId)
+  //       : true
+  //   )
+  // : data;
+  const displayData = (isTableView ? hostelBasedTrue : data).filter(item => {
+  const value = search.toLowerCase();
+
+  return (
+    item.hostelName?.toLowerCase().includes(value) ||
+    item.fullName?.toLowerCase().includes(value)
+  );
+});
   const getId = (item) => isTableView ? item.hostelId : item.customerId;
   const handleSelect = (item) => {
   const id = getId(item);
@@ -550,7 +569,7 @@ const handleSelectAll = () => {
   `}
                     >
                       {filterOptions.find(f => f.key === filter)?.label || "today"}
-                      <span>▾</span>
+                      <img src={ArrowDrop} className="w-5 h-5"/> 
                     </button>
 
                     {openFilter && (
@@ -594,7 +613,7 @@ const handleSelectAll = () => {
                       {
                         resStatusOptions.find(s => s.key === statusFilter)?.label || "All"
                       }
-                      <span>▾</span>
+                      <img src={ArrowDrop} className="w-5 h-5"/> 
                     </button>
 
                     {openStatusFilter && (
@@ -736,16 +755,16 @@ const handleSelectAll = () => {
                       <tr>
                         <th className="px-4 py-3 sticky left-0 bg-[#F8F9FF] z-50 w-[80px]">ID</th>
                         <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">Property</th>
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Tenant Name</th>
+                        <th className=" py-3 w-[150px] whitespace-nowrap text-left">Tenant Name</th>
                         {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Sub Status</th> */}
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring Status</th>
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Region / City</th>
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Billing Schedule</th>
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Billingmodel</th>
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring mode</th>
+                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Recurring Status</th>
+                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Region / City</th>
+                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Billing Schedule</th>
+                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Billingmodel</th>
+                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Recurring mode</th>
                         {/* <th className="px-4 py-3 w-[150px] whitespace-nowrap">Tenant Count</th> */}
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Sub Status</th>
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Actions</th>
+                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Sub Status</th>
+                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Actions</th>
                       </tr>
                     </thead>
 
@@ -783,7 +802,7 @@ const handleSelectAll = () => {
 
           {/* 🔹 MAIN ROW */}
           <tr>
-<td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] flex items-center gap-2">
+<td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] flex items-center gap-2 text-[12px]">
 
   {!isTableView && (
     <input
@@ -803,7 +822,7 @@ const handleSelectAll = () => {
   {(page - 1) * size + index + 1}
 </td>
 
-   <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px]">
+   <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] text-[12px]">
   <div className="flex items-center gap-2">
 
     {/* 🔽 dropdown trigger */}
@@ -895,31 +914,31 @@ const handleSelectAll = () => {
   </div>
 </td>
 
-            <td>{isTableView ? "--" : item.fullName}</td>
+            <td className="text-left text-[12px]">{isTableView ? "--" : item.fullName}</td>
 
-            <td>
+            <td className="text-[12px]">
               {isTableView
                 ? "--"
                 : item.recurringStatus ? "Generated" : "Blocked"}
             </td>
 
-            <td>
+            <td className="text-left text-[12px]">
               {isTableView
                 ? item.city
                 : `${item.HostelCity}, ${item.HostelState}`}
             </td>
 
-            <td>
+            <td className="text-left ml-3 text-[12px]">
               {isTableView
                 ? item.billingType
                 : `${item.billingStartDay} → ${item.billingEndDay}`}
             </td>
 
-            <td>{item.billingModel || "--"}</td>
+            <td className="text-[12px]">{item.billingModel || "--"}</td>
 
-            <td>{isTableView ? "--" : item.recurringMode || "--"}</td>
+            <td className="text-[12px]">{isTableView ? "--" : item.recurringMode || "--"}</td>
 
-            <td>
+            <td className="text-[12px]">
               {isTableView
                 ? (item.subscriptionActive ? "Active" : "Inactive")
                 : (item.recurringStatus ? "Generated" : "Not Generated")}
@@ -1091,8 +1110,8 @@ const handleSelectAll = () => {
       </thead>
 
       <tbody>
-        {selectedCustomers.length > 0 ? (
-          selectedCustomers.map((cust) => (
+        {filteredCustomers.length > 0 ? (
+    filteredCustomers.map((cust) => (
             <tr key={cust.customerId} className="border-t border-gray-200">
 
               <td className="p-2">

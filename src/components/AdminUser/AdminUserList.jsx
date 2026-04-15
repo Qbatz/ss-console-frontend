@@ -27,6 +27,7 @@ const IamAdminUser = () => {
     const [showDetailsModal, setShowDetailsModal] = useState(false);
 const [agentDetails, setAgentDetails] = useState(null);
     const [message, setMessage] = useState("");
+    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
 
 
   console.log("agents", agents)
@@ -325,18 +326,38 @@ if (status === "ACTIVE") {
                             <td className="px-1 py-4 relative">
   <span
     className="cursor-pointer"
-    onClick={(e) => {
-      e.stopPropagation();
-      setMenuOpen(menuOpen === user.agentId ? null : user.agentId);
-    }}
+   onClick={(e) => {
+  e.stopPropagation();
+
+  const rect = e.currentTarget.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const dropdownHeight = 70; // approx height
+
+  const openUp = spaceBelow < dropdownHeight;
+
+  setDropdownPosition({
+    top: openUp
+      ? rect.top + window.scrollY - dropdownHeight
+      : rect.bottom + window.scrollY,
+    left: rect.right - 140 // adjust width
+  });
+
+  setMenuOpen(menuOpen === user.agentId ? null : user.agentId);
+}}
   >
     ⋮
   </span>
 
   {menuOpen === user.agentId && (
-    <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+   <div
+    className="fixed w-36 bg-white border rounded-lg shadow-lg z-[9999]"
+    style={{
+      top: dropdownPosition.top,
+      left: dropdownPosition.left
+    }}
+  >
 
-      {/* ACTIVE → show deactivate */}
+     
       {status !== "INACTIVE" ? (
         <button
           onClick={() => {
@@ -379,7 +400,7 @@ if (status === "ACTIVE") {
       )}
       <button
   onClick={() => handleOpenDetails(user)}
-  className="text-blue-600 text-sm cursor-pointer"
+  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600 cursor-pointer"
 >
   View Details
 </button>
@@ -637,7 +658,7 @@ if (status === "ACTIVE") {
         <h2 className="text-lg font-semibold">Agent Details</h2>
         <button
           onClick={() => setShowDetailsModal(false)}
-          className="hover:text-gray-200"
+          className="hover:text-gray-200 cursor-pointer"
         >
           ✕
         </button>

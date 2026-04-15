@@ -61,6 +61,7 @@ const PropertyOverview = () => {
   const [menuError, setMenuError] = useState("")
   const [planError, setPlanError] = useState("")
   const [proofError, setProofError] = useState("")
+  const [showTrialConfirm, setShowTrialConfirm] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -373,7 +374,7 @@ const PropertyOverview = () => {
 
                 {/* 1️⃣ Trial Extend */}
                 <button
-                  onClick={handleTrialOnly}
+                 onClick={() => setShowTrialConfirm(true)}
                   className="bg-green-600 text-white px-2 py-[2px] font-medium rounded text-[10px] whitespace-nowrap cursor-pointer"
                 >
                   Trial Extend
@@ -1257,6 +1258,51 @@ const PropertyOverview = () => {
           </div>
         </div>
       )}
+      {showTrialConfirm && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+
+    {/* Overlay */}
+    <div
+      className="absolute inset-0 bg-black/40"
+      onClick={() => setShowTrialConfirm(false)}
+    ></div>
+
+    {/* Modal */}
+    <div className="relative bg-white rounded-xl shadow-xl w-[350px] p-5 z-[10000]">
+
+      <h2 className="text-lg font-semibold mb-2">
+        Extend Trial
+      </h2>
+
+      <p className="text-sm text-gray-600 mb-4">
+        Do you want to extend the trial?
+      </p>
+
+      <div className="flex justify-end gap-2">
+
+        {/* Cancel */}
+        <button
+          onClick={() => setShowTrialConfirm(false)}
+          className="px-4 py-2 border rounded-lg text-sm"
+        >
+          Cancel
+        </button>
+
+        {/* OK */}
+        <button
+          onClick={async () => {
+            await handleTrialOnly();   // ✅ API call
+            setShowTrialConfirm(false);
+          }}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm"
+        >
+          OK
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };

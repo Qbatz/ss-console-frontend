@@ -18,6 +18,7 @@ import Monthlycalendar from "../../assets/monthCalendar.png";
 import MonthBlue from "../../assets/monthBlue.png";
 import CalendarView from "./CalendarView";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import ArrowDrop from "../../assets/direction-down 01.png";
 
 const RecurringInvoice = () => {
   const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId, bulkGenerateRecurring, getRecurringMonth } = useHostel();
@@ -122,7 +123,7 @@ const RecurringInvoice = () => {
       setSelectedIds(data.map((item) => item.hostelId));
     }
   };
-
+const [totalProperty,setTotalProperty] = useState("")
   const fetchRecurring = async () => {
     setErrorTable("");
     const res = await getRecurringHostels(
@@ -142,6 +143,7 @@ const RecurringInvoice = () => {
 
       setData(response.hostelList || []);
       setTotalItems(response.totalItems);
+      setTotalProperty(response.totalProperties)
       setTotalPages(response.totalPages);
       setFilterOptions(response.filterOptions || []);
       setResStatusOptions(response.statusFilterOptions || []);
@@ -389,7 +391,7 @@ const RecurringInvoice = () => {
 
                 <div className="border border-gray-200 rounded-xl p-4 bg-white">
                   <p className="text-sm text-gray-500">Total Properties</p>
-                  <p className="text-xl font-semibold mt-1">{totalItems}</p>
+                  <p className="text-xl font-semibold mt-1">{totalProperty}</p>
                 </div>
 
                 <div className="border border-gray-200 rounded-xl p-4 bg-white">
@@ -426,7 +428,7 @@ const RecurringInvoice = () => {
   `}
                       >
                         {filterOptions.find(f => f.key === filter)?.label || "today"}
-                        <span>▾</span>
+                        <img src={ArrowDrop} className="w-5 h-5"/> 
                       </button>
 
                       {openFilter && (
@@ -470,7 +472,7 @@ const RecurringInvoice = () => {
                         {
                           resStatusOptions.find(s => s.key === statusFilter)?.label || "All"
                         }
-                        <span>▾</span>
+                        <img src={ArrowDrop} className="w-5 h-5"/> 
                       </button>
 
                       {openStatusFilter && (
@@ -610,13 +612,13 @@ const RecurringInvoice = () => {
                         <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">Property</th>
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Mobile No</th>
                         {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Sub Status</th> */}
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring Status</th>
+                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Sub Status</th>
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Region / City</th>
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Billing Cycle</th>
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Billingmodel</th>
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring mode</th>
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Tenant Count</th>
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Sub Status</th>
+                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring Status</th>
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Actions</th>
                       </tr>
                     </thead>
@@ -716,12 +718,12 @@ const RecurringInvoice = () => {
                             <td className="px-4 py-2 text-left text-[12px] whitespace-nowrap">
                               <span
                                 className={`font-medium
-    ${item.recurringStatus
+    ${item.isSubscriptionActive
                                     ? "text-green-600"
                                     : "text-orange-500"
                                   }`}
                               >
-                                {item.recurringStatus ? "Generated" : "Blocked"}
+                                {item.isSubscriptionActive ? "Active" : "Blocked"}
                               </span>
                             </td>
 
