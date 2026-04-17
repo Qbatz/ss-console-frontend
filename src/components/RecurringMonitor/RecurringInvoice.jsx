@@ -1164,7 +1164,7 @@ const [totalProperty,setTotalProperty] = useState("")
                                   </td>
 
                                   <td className="p-2 text-start">
-                                    {item.creationMonth - 1} → {item.creationMonth}
+                                    {item.cycleStartDay} → {item.cycleEndDay}
                                   </td>
 
                                   <td className="p-2 text-start">

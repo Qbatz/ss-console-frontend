@@ -752,10 +752,11 @@ console.log("payload",payload)
                                   setTooltip((prev) => ({ ...prev, visible: false }))
                                 }
                               >
-
-                                <div className="flex border rounded-full w-5 h-5 items-center justify-center text-[9px] font-medium text-gray-600">
-                                  T
-                                </div>
+{item?.trialExtendable !== false && (
+  <div className="flex border rounded-full w-5 h-5 items-center justify-center text-[9px] font-medium text-gray-600">
+    T
+  </div>
+)}
 
                                 <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 text-sm font-semibold uppercase">
                                   {item.initials || "NA"}

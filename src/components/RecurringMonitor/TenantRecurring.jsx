@@ -25,7 +25,7 @@ import ArrowDrop from "../../assets/direction-down 01.png";
 
 
 const TenantRecurring = () => {
-  const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId, bulkGenerateRecurring,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId } = useHostel();
+  const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId, bulkGenerateRecurring, getTenantRecurring, generateTenantRecurring, getRecurringByTenantId } = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Recurring");
   console.log("errorMsg", errorMsg)
@@ -67,16 +67,16 @@ const TenantRecurring = () => {
   console.log("billingModelOptions", billingModelOptions)
   const [errorTable, setErrorTable] = useState("")
   const [viewType, setViewType] = useState("table");
-  const [generateError,setGenrateError] = useState("")
-  const [totalTenants,setTotalTenants] = useState("")
+  const [generateError, setGenrateError] = useState("")
+  const [totalTenants, setTotalTenants] = useState("")
   const [isTableView, setIsTableView] = useState(false); // default FALSE
   const [expandedHostel, setExpandedHostel] = useState(null);
   const [selectedHostels, setSelectedHostels] = useState([]);
   const [selectedCustomers, setSelectedCustomers] = useState([]);
-const [showCustomerTable, setShowCustomerTable] = useState(false);
-const [openHostelDropdown, setOpenHostelDropdown] = useState(false);
-const tableRef = useRef(null);
-const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const [showCustomerTable, setShowCustomerTable] = useState(false);
+  const [openHostelDropdown, setOpenHostelDropdown] = useState(false);
+  const tableRef = useRef(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [recurringPending, setRecurringPending] = useState({
     recurringPendingCount: 0,
     subscriptionExpiredCount: 0
@@ -85,12 +85,12 @@ const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [resStatusOptions, setResStatusOptions] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [openStatusFilter, setOpenStatusFilter] = useState(false);
-  const [hostelBasedTrue,setHostelBasedTrue] = useState([])
+  const [hostelBasedTrue, setHostelBasedTrue] = useState([])
   const [openCustomerDropdown, setOpenCustomerDropdown] = useState(null);
   const [selectedHostel, setSelectedHostel] = useState(null);
 
   console.log("selectedItem", selectedItem)
- 
+
 
   // const fetchRecurring = async () => {
 
@@ -121,7 +121,7 @@ const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
       statusFilter,
       billingModelFilterBy,
       appliedSystemFilter,
-      isTableView 
+      isTableView
     );
 
     if (res?.success) {
@@ -150,8 +150,11 @@ const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
       setHostelBasedTrue([])
     }
   };
-const filteredCustomers = search
-  ? selectedCustomers.filter(cust => {
+  useEffect(() => {
+    fetchRecurring();
+  }, [page, size, filter, search, statusFilter, appliedSystemFilter, billingModelFilterBy, isTableView]);
+  const filteredCustomers = search
+    ? selectedCustomers.filter(cust => {
       const value = search.toLowerCase();
 
       return (
@@ -160,25 +163,25 @@ const filteredCustomers = search
         cust.customerId?.toLowerCase().includes(value)
       );
     })
-  : selectedCustomers;
-  console.log("ressss",hostelBasedTrue)
+    : selectedCustomers;
+  console.log("filteredCustomers", filteredCustomers)
   useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (
-      statusDropdownRef.current &&
-      !statusDropdownRef.current.contains(event.target)
-    ) {
-      setOpenStatusFilter(false);
-    }
-  };
+    const handleClickOutside = (event) => {
+      if (
+        statusDropdownRef.current &&
+        !statusDropdownRef.current.contains(event.target)
+      ) {
+        setOpenStatusFilter(false);
+      }
+    };
 
-  document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
- 
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -204,11 +207,11 @@ const filteredCustomers = search
     }
   }, [showFilterDrawer]);
   useEffect(() => {
-  const handleScroll = () => setOpenCustomerDropdown(null);
-  window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => setOpenCustomerDropdown(null);
+    window.addEventListener("scroll", handleScroll);
 
-  return () => window.removeEventListener("scroll", handleScroll);
-}, []);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const handleOpenDetails = async (item, page = 0) => {
     setSelectedItem(item);
     console.log("setSelectedItem", selectedItem)
@@ -227,12 +230,12 @@ const filteredCustomers = search
     }
   };
   const handleHostelSelect = (hostelId) => {
-  setSelectedHostels((prev) =>
-    prev.includes(hostelId)
-      ? prev.filter((id) => id !== hostelId)
-      : [...prev, hostelId]
-  );
-};
+    setSelectedHostels((prev) =>
+      prev.includes(hostelId)
+        ? prev.filter((id) => id !== hostelId)
+        : [...prev, hostelId]
+    );
+  };
 
   console.log("selectedItem?.currentPeriodStartDate", selectedItem?.activeTenantCount);
   const formatDate = (dateStr) => {
@@ -292,44 +295,44 @@ const filteredCustomers = search
   //   )
   // : data;
   const displayData = (isTableView ? hostelBasedTrue : data).filter(item => {
-  const value = search.toLowerCase();
+    const value = search.toLowerCase();
 
-  return (
-    item.hostelName?.toLowerCase().includes(value) ||
-    item.fullName?.toLowerCase().includes(value)
-  );
-});
+    return (
+      item.hostelName?.toLowerCase().includes(value) ||
+      item.fullName?.toLowerCase().includes(value)
+    );
+  });
   const getId = (item) => isTableView ? item.hostelId : item.customerId;
   const handleSelect = (item) => {
-  const id = getId(item);
+    const id = getId(item);
 
-  setSelectedIds((prev) =>
-    prev.includes(id)
-      ? prev.filter((i) => i !== id)
-      : [...prev, id]
-  );
-};
-const handleToggleHostel = (hostelId) => {
-  setExpandedHostel(prev => prev === hostelId ? null : hostelId);
-};
-const handleSelectAll = () => {
-  const ids = displayData.map((item) => getId(item));
+    setSelectedIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((i) => i !== id)
+        : [...prev, id]
+    );
+  };
+  const handleToggleHostel = (hostelId) => {
+    setExpandedHostel(prev => prev === hostelId ? null : hostelId);
+  };
+  const handleSelectAll = () => {
+    const ids = displayData.map((item) => getId(item));
 
-  if (selectedIds.length === ids.length) {
-    setSelectedIds([]);
-  } else {
-    setSelectedIds(ids);
-  }
-};
-  useEffect(() => {
+    if (selectedIds.length === ids.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(ids);
+    }
+  };
+  // useEffect(() => {
 
-    const delay = setTimeout(() => {
-      fetchRecurring();
-    }, 400);
+  //   const delay = setTimeout(() => {
+  //     fetchRecurring();
+  //   }, 400);
 
-    return () => clearTimeout(delay);
+  //   return () => clearTimeout(delay);
 
-  }, [page, size, filter, search, statusFilter, appliedSystemFilter, billingModelFilterBy,isTableView ]);
+  // }, [page, size, filter, search, statusFilter, appliedSystemFilter, billingModelFilterBy, isTableView]);
   const start = (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
 
@@ -345,7 +348,24 @@ const handleSelectAll = () => {
       setTimeout(() => {
         setShowSuccess(false);
       }, 1500);
+      setData(prev =>
+        prev.map(item =>
+          ids.includes(item.customerId)
+            ? { ...item, recurringStatus: true }
+            : item
+        )
+      );
+
+
+      setSelectedCustomers(prev =>
+        prev.map(item =>
+          ids.includes(item.customerId)
+            ? { ...item, recurringStatus: true }
+            : item
+        )
+      );
       fetchRecurring();
+
 
     }
     else {
@@ -378,7 +398,7 @@ const handleSelectAll = () => {
   return (
 
     <DashboardLayout>
-      {(errorMsg === false || errorMsg === "Access Restricted" || !canRead ) ? (
+      {(errorMsg === false || errorMsg === "Access Restricted" || !canRead) ? (
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
@@ -413,7 +433,7 @@ const handleSelectAll = () => {
               Tenant Recurring
             </h1>
 
-{/* 
+            {/* 
             <div className="flex items-center bg-gray-100 p-1 rounded-lg border border-gray-300">
 
 
@@ -431,69 +451,69 @@ const handleSelectAll = () => {
               </button>
 
             </div> */}
-<div className="flex items-center bg-blue-600 p-[2px] rounded-full border border-gray-300 w-fit">
+            <div className="flex items-center bg-blue-600 p-[2px] rounded-full border border-gray-300 w-fit">
 
-  {/* TABLE VIEW */}
-  <button
-    // onClick={() => setIsTableView(false) setShowCustomerTable(false)}
-     onClick={() => {
-                              setIsTableView(false)
-                              setShowCustomerTable(false)
-                              setSelectedCustomers([])
-                              
-                            }}
-    className={`p-2 rounded-full transition-all duration-200
+              {/* TABLE VIEW */}
+              <button
+                // onClick={() => setIsTableView(false) setShowCustomerTable(false)}
+                onClick={() => {
+                  setIsTableView(false)
+                  setShowCustomerTable(false)
+                  setSelectedCustomers([])
+
+                }}
+                className={`p-2 rounded-full transition-all duration-200
       ${!isTableView ? "bg-white shadow-sm" : ""}
     `}
-  >
-    <img
-      src={!isTableView ? Building : buildingWhite}
-      className="w-4 h-4 cursor-pointer"
-    />
-  </button>
+              >
+                <img
+                  src={!isTableView ? Building : buildingWhite}
+                  className="w-4 h-4 cursor-pointer"
+                />
+              </button>
 
-  {/* AVATAR VIEW */}
-  <button
-    onClick={() => setIsTableView(true)}
-    className={`p-2 rounded-full transition-all duration-200
+              {/* AVATAR VIEW */}
+              <button
+                onClick={() => setIsTableView(true)}
+                className={`p-2 rounded-full transition-all duration-200
       ${isTableView ? "bg-white shadow-sm " : ""}
     `}
-  >
-    <img
-      src={isTableView ? Avatar : Avatar}
-      className={`w-4 h-4 cursor-pointer ${!isTableView ? "opacity-60" : ""}`}
-    />
-  </button>
+              >
+                <img
+                  src={isTableView ? Avatar : Avatar}
+                  className={`w-4 h-4 cursor-pointer ${!isTableView ? "opacity-60" : ""}`}
+                />
+              </button>
 
-</div>
+            </div>
 
           </div>
-         
-            <div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
 
-                <div className="border border-gray-200 rounded-xl p-4 bg-white">
-                  <p className="text-sm text-gray-500">Total Tenant</p>
-                  <p className="text-xl font-semibold mt-1">{totalTenants.totalTenants}</p>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 
-                <div className="border border-gray-200 rounded-xl p-4 bg-white">
-                  <p className="text-sm text-gray-500">Billing Today</p>
-                  <p className="text-xl font-semibold mt-1">{totalTenants.billingToday}</p>
-                </div>
-
-                <div className="border border-gray-200 rounded-xl p-4 bg-white">
-                  <p className="text-sm text-gray-500">Due Tomorrow</p>
-                  <p className="text-xl font-semibold mt-1">{totalTenants.billingTomorrow}</p>
-                </div>
-
+              <div className="border border-gray-200 rounded-xl p-4 bg-white">
+                <p className="text-sm text-gray-500">Total Tenant</p>
+                <p className="text-xl font-semibold mt-1">{totalTenants.totalTenants}</p>
               </div>
 
-              {/* <p className="text-xs text-blue-500 mb-4 text-left">
+              <div className="border border-gray-200 rounded-xl p-4 bg-white">
+                <p className="text-sm text-gray-500">Billing Today</p>
+                <p className="text-xl font-semibold mt-1">{totalTenants.billingToday}</p>
+              </div>
+
+              <div className="border border-gray-200 rounded-xl p-4 bg-white">
+                <p className="text-sm text-gray-500">Due Tomorrow</p>
+                <p className="text-xl font-semibold mt-1">{totalTenants.billingTomorrow}</p>
+              </div>
+
+            </div>
+
+            {/* <p className="text-xs text-blue-500 mb-4 text-left">
             Based upon last 30 Days
           </p> */}
-              {/* 
+            {/* 
                    <div className="flex justify-between items-center mb-4">
 
             <div ref={dropdownRef} className="relative w-40">
@@ -548,17 +568,17 @@ const handleSelectAll = () => {
             </div>
 
           </div> */}
-              <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
+            <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
 
-              
-               
-<div className="flex items-end gap-4 flex-wrap">
 
-  {/* Day Filter */}
-  <div className="flex flex-col">
-    <label className="text-xs text-gray-500 mb-1">Day Filter</label>
 
-     <div ref={dropdownRef} className="relative w-40">
+              <div className="flex items-end gap-4 flex-wrap">
+
+                {/* Day Filter */}
+                <div className="flex flex-col">
+                  <label className="text-xs text-gray-500 mb-1">Day Filter</label>
+
+                  <div ref={dropdownRef} className="relative w-40">
 
 
                     <button
@@ -569,7 +589,7 @@ const handleSelectAll = () => {
   `}
                     >
                       {filterOptions.find(f => f.key === filter)?.label || "today"}
-                      <img src={ArrowDrop} className="w-5 h-5"/> 
+                      <img src={ArrowDrop} className="w-5 h-5" />
                     </button>
 
                     {openFilter && (
@@ -594,15 +614,15 @@ const handleSelectAll = () => {
                     )}
 
                   </div>
-  </div>
+                </div>
 
-  {/* Status Filter */}
-  <div className="flex flex-col">
-    <label className="text-xs text-gray-500 mb-1">Status Filter</label>
+                {/* Status Filter */}
+                <div className="flex flex-col">
+                  <label className="text-xs text-gray-500 mb-1">Status Filter</label>
 
-  <div ref={statusDropdownRef} className="relative w-40">
+                  <div ref={statusDropdownRef} className="relative w-40">
 
-     
+
                     <button
                       onClick={() => !showFilterDrawer && setOpenStatusFilter(!openStatusFilter)}
                       disabled={showFilterDrawer}
@@ -613,7 +633,7 @@ const handleSelectAll = () => {
                       {
                         resStatusOptions.find(s => s.key === statusFilter)?.label || "All"
                       }
-                      <img src={ArrowDrop} className="w-5 h-5"/> 
+                      <img src={ArrowDrop} className="w-5 h-5" />
                     </button>
 
                     {openStatusFilter && (
@@ -638,116 +658,116 @@ const handleSelectAll = () => {
                       </div>
                     )}
                   </div>
-  </div>
-
-  {/* Billing Mode */}
-  <div className="flex flex-col">
-    <label className="text-xs text-gray-500 mb-1">Billing Mode</label>
-
-    <select
-      value={billingModelFilterBy}
-      onChange={(e) => {
-        setBillingModelFilterBy(e.target.value);
-        setPage(1);
-      }}
-      className="border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer w-40"
-    >
-      {billingModelOptions?.map((item) => (
-        <option key={item.key} value={item.key}>
-          {item.label}
-        </option>
-      ))}
-    </select>
-  </div>
-
-</div>
-               
-                <div className="flex items-center gap-2">
-
-                  
-                  <button
-                    onClick={fetchRecurring}
-                    className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 cursor-pointer"
-                  >
-                    ⟳
-                  </button>
-
-                  {/* Search */}
-                  <div className="relative">
-                    <img
-                      src={Search}
-                      className="absolute left-3 top-2.5 w-4 h-4"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Search Properties..."
-                      value={search}
-                      onChange={(e) => {
-                        setSearch(e.target.value);
-                        setPage(1);
-                      }}
-                      className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm w-56"
-                    />
-                  </div>
-
                 </div>
+
+                {/* Billing Mode */}
+                <div className="flex flex-col">
+                  <label className="text-xs text-gray-500 mb-1">Billing Mode</label>
+
+                  <select
+                    value={billingModelFilterBy}
+                    onChange={(e) => {
+                      setBillingModelFilterBy(e.target.value);
+                      setPage(1);
+                    }}
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer w-40"
+                  >
+                    {billingModelOptions?.map((item) => (
+                      <option key={item.key} value={item.key}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
               </div>
 
-              {selectedIds.length > 0 && (
-                <div className="flex justify-between items-center bg-blue-50 border border-blue-200 px-4 py-2 rounded-lg mb-3">
+              <div className="flex items-center gap-2">
 
 
-                  <div className="flex items-center gap-3 text-sm">
+                <button
+                  onClick={fetchRecurring}
+                  className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 cursor-pointer"
+                >
+                  ⟳
+                </button>
 
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.length === data.length}
-                      onChange={handleSelectAll}
-                    />
+                {/* Search */}
+                <div className="relative">
+                  <img
+                    src={Search}
+                    className="absolute left-3 top-2.5 w-4 h-4"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search Properties..."
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
+                    className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm w-56"
+                  />
+                </div>
 
-                    <span className="text-blue-600 font-medium">
-                      {selectedIds.length} properties selected
-                    </span>
+              </div>
+            </div>
 
-                    <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs">
-                      Cycle: 2 → 1
-                    </span>
+            {selectedIds.length > 0 && (
+              <div className="flex justify-between items-center bg-blue-50 border border-blue-200 px-4 py-2 rounded-lg mb-3">
 
-                    <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">
-                      Recurring: All
-                    </span>
 
-                  </div>
+                <div className="flex items-center gap-3 text-sm">
 
-                  {/* RIGHT */}
-                  <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.length === data.length}
+                    onChange={handleSelectAll}
+                  />
 
-                    <button
-                      onClick={() => setShowBulkModal(true)}
-                      className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 cursor-pointer"
+                  <span className="text-blue-600 font-medium">
+                    {selectedIds.length} properties selected
+                  </span>
 
-                    >
-                      ⟳ Bulk Generate Recurring
-                    </button>
+                  <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs">
+                    Cycle: 2 → 1
+                  </span>
 
-                    <button
-                      onClick={() => setSelectedIds([])}
-                      className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm cursor-pointer"
-                    >
-                      ✕ Clear
-                    </button>
-
-                  </div>
+                  <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">
+                    Recurring: All
+                  </span>
 
                 </div>
-              )}
-              {!showCustomerTable && (
-             <div className="bg-white border border-gray-200 rounded-xl overflow-visible">
 
-  <div
-  ref={tableRef}
-  className="max-h-[400px] overflow-x-auto overflow-y-visible relative"
->
+                {/* RIGHT */}
+                <div className="flex items-center gap-2">
+
+                  <button
+                    onClick={() => setShowBulkModal(true)}
+                    className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 cursor-pointer"
+
+                  >
+                    ⟳ Bulk Generate Recurring
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedIds([])}
+                    className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm cursor-pointer"
+                  >
+                    ✕ Clear
+                  </button>
+
+                </div>
+
+              </div>
+            )}
+            {!showCustomerTable && (
+              <div className="bg-white border border-gray-200 rounded-xl overflow-visible">
+
+                <div
+                  ref={tableRef}
+                  className="max-h-[400px] overflow-x-auto overflow-y-visible relative"
+                >
 
                   <table className="w-max min-w-full table-fixed text-sm text-left">
 
@@ -769,289 +789,294 @@ const handleSelectAll = () => {
                     </thead>
 
 
-     <tbody className="divide-y divide-gray-200">
+                    <tbody className="divide-y divide-gray-200">
 
-  {loading ? (
+                      {loading ? (
 
-    Array.from({ length: size }).map((_, i) => (
-      <tr key={i} className="animate-pulse">
-        {Array.from({ length: 9 }).map((_, j) => (
-          <td key={j} className="px-4 py-3">
-            <div className="h-3 bg-gray-200 rounded w-full"></div>
-          </td>
-        ))}
-      </tr>
-    ))
+                        Array.from({ length: size }).map((_, i) => (
+                          <tr key={i} className="animate-pulse">
+                            {Array.from({ length: 9 }).map((_, j) => (
+                              <td key={j} className="px-4 py-3">
+                                <div className="h-3 bg-gray-200 rounded w-full"></div>
+                              </td>
+                            ))}
+                          </tr>
+                        ))
 
-  ) : errorTable ? (
+                      ) : errorTable ? (
 
-    <tr>
-      <td colSpan="10" className="text-center text-red-500 py-4">
-        {errorTable}
-      </td>
-    </tr>
+                        <tr>
+                          <td colSpan="10" className="text-center text-red-500 py-4">
+                            {errorTable}
+                          </td>
+                        </tr>
 
-  ) : (isTableView ? hostelBasedTrue : data)?.length > 0 ? (
+                      ) : (isTableView ? hostelBasedTrue : data)?.length > 0 ? (
 
-    (isTableView ? hostelBasedTrue : data).map((item, index) => {
+                        (isTableView ? hostelBasedTrue : data).map((item, index) => {
 
-      const id = isTableView ? item.hostelId : item.customerId;
+                          const id = isTableView ? item.hostelId : item.customerId;
 
-      return (
-        <React.Fragment key={id}>
+                          return (
+                            <React.Fragment key={id}>
 
-          {/* 🔹 MAIN ROW */}
-          <tr>
-<td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] flex items-center gap-2 text-[12px]">
+                              {/* 🔹 MAIN ROW */}
+                              <tr>
+                                <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] flex items-center gap-2 text-[12px]">
 
-  {!isTableView && (
-    <input
-      type="checkbox"
-      checked={selectedIds.includes(id)}
-      disabled={item.recurringStatus}
-      className={`cursor-pointer ${
-        item.recurringStatus ? "opacity-50 cursor-not-allowed" : ""
-      }`}
-      onChange={() => {
-        if (item.recurringStatus) return;
-        handleSelect(item);
-      }}
-    />
-  )}
+                                  {!isTableView && (
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedIds.includes(id)}
+                                      disabled={item.recurringStatus}
+                                      className={`cursor-pointer ${item.recurringStatus ? "opacity-50 cursor-not-allowed" : ""
+                                        }`}
+                                      onChange={() => {
+                                        if (item.recurringStatus) return;
+                                        handleSelect(item);
+                                      }}
+                                    />
+                                  )}
 
-  {(page - 1) * size + index + 1}
-</td>
+                                  {(page - 1) * size + index + 1}
+                                </td>
 
-   <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] text-[12px]">
-  <div className="flex items-center gap-2">
+                                <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] text-[12px]">
+                                  <div className="flex items-center gap-2">
 
-    {/* 🔽 dropdown trigger */}
-    {isTableView && (
-     <button className="cursor-pointer"
-  onClick={(e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
+                                    {/* 🔽 dropdown trigger */}
+                                    {isTableView && (
+                                      <button className="cursor-pointer"
+                                        onClick={(e) => {
+                                          const rect = e.currentTarget.getBoundingClientRect();
 
-    setDropdownPosition({
-      top: rect.bottom + window.scrollY,
-      left: rect.left
-    });
+                                          setDropdownPosition({
+                                            top: rect.bottom + window.scrollY,
+                                            left: rect.left
+                                          });
 
-    setSelectedHostel(item);
+                                          setSelectedHostel(item);
 
-    setOpenCustomerDropdown(
-      prev => prev === item.hostelId ? null : item.hostelId
-    );
-  }}
->
-  <img src={ArrowDrop} className="w-5 h-5"/> 
-</button>
-    )}
+                                          setOpenCustomerDropdown(
+                                            prev => prev === item.hostelId ? null : item.hostelId
+                                          );
+                                        }}
+                                      >
+                                        <img src={ArrowDrop} className="w-5 h-5" />
+                                      </button>
+                                    )}
 
-   <div className="relative">
+                                    <div className="relative">
 
-  <span className="font-semibold">
-    {item.hostelName}
-  </span>
+                                      <span className="font-semibold">
+                                        {item.hostelName}
+                                      </span>
 
-  {/* DROPDOWN */}
-{openCustomerDropdown && (
-  <div
-    className="fixed w-64 bg-white border rounded-lg shadow-lg z-[99999]"
-    style={{
-      top: dropdownPosition.top,
-      left: dropdownPosition.left
-    }}
-  >
-    {/* LIST */}
-    <div className="max-h-48 overflow-y-auto">
-      {selectedHostel?.customerList?.map((cust) => (
-        <div
-          key={cust.customerId}
-          className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100"
-        >
-          <input
-            type="checkbox"
-            checked={selectedCustomers.some(c => c.customerId === cust.customerId)}
-            className="cursor-pointer"
-            onChange={() => {
-              setSelectedCustomers(prev =>
-                prev.some(c => c.customerId === cust.customerId)
-                  ? prev.filter(c => c.customerId !== cust.customerId)
-                  : [...prev, cust]
-              );
-              
-            }}
-          />
-          <span>{cust.fullName}</span>
-        </div>
-      ))}
-    </div>
+                                      {/* DROPDOWN */}
+                                      {openCustomerDropdown && (
+                                        <div
+                                          className="fixed w-64 bg-white border rounded-lg shadow-lg z-[99999]"
+                                          style={{
+                                            top: dropdownPosition.top,
+                                            left: dropdownPosition.left
+                                          }}
+                                        >
+                                          {/* LIST */}
+                                          <div className="max-h-48 overflow-y-auto">
+                                            {selectedHostel?.customerList?.map((cust) => (
+                                              <div
+                                                key={cust.customerId}
+                                                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100"
+                                              >
+                                                <input
+                                                  type="checkbox"
+                                                  checked={selectedCustomers.some(c => c.customerId === cust.customerId)}
+                                                  className="cursor-pointer"
+                                                  onChange={() => {
+                                                    setSelectedCustomers(prev =>
+                                                      prev.some(c => c.customerId === cust.customerId)
+                                                        ? prev.filter(c => c.customerId !== cust.customerId)
+                                                        : [...prev, cust]
+                                                    );
 
-    {/* FOOTER */}
-    <div className="flex justify-between items-center p-2 border-t bg-white">
-      <button
-        onClick={() => setOpenCustomerDropdown(null)}
-        className="text-gray-500 text-sm cursor-pointer"
-      >
-        Cancel
-      </button>
+                                                  }}
+                                                />
+                                                <span>{cust.fullName}</span>
+                                              </div>
+                                            ))}
+                                          </div>
 
-      <button
-        onClick={() => {
-          setShowCustomerTable(true);
-          setOpenCustomerDropdown(null);
-        }}
-        className="bg-blue-600 text-white px-3 py-1 rounded text-sm cursor-pointer"
-      >
-        Done
-      </button>
-    </div>
-  </div>
-)}
+                                          {/* FOOTER */}
+                                          <div className="flex justify-between items-center p-2 border-t bg-white">
+                                            <button
+                                              onClick={() => setOpenCustomerDropdown(null)}
+                                              className="text-gray-500 text-sm cursor-pointer"
+                                            >
+                                              Cancel
+                                            </button>
 
-</div>
+                                            <button
+                                              onClick={() => {
+                                                setShowCustomerTable(true);
+                                                setOpenCustomerDropdown(null);
+                                              }}
+                                              className="bg-blue-600 text-white px-3 py-1 rounded text-sm cursor-pointer"
+                                            >
+                                              Done
+                                            </button>
+                                          </div>
+                                        </div>
+                                      )}
 
-  </div>
-</td>
+                                    </div>
 
-            <td className="text-left text-[12px]">{isTableView ? "--" : item.fullName}</td>
+                                  </div>
+                                </td>
 
-            <td className="text-[12px]">
-              {isTableView
-                ? "--"
-                : item.recurringStatus ? "Generated" : "Blocked"}
-            </td>
+                                <td className="text-left text-[12px]">{isTableView ? "--" : item.fullName}</td>
 
-            <td className="text-left text-[12px]">
-              {isTableView
-                ? item.city
-                : `${item.HostelCity}, ${item.HostelState}`}
-            </td>
+                                <td className="text-[12px]">
+                                  {isTableView
+                                    ? "--"
+                                    : item.recurringStatus ? "Generated" : "Blocked"}
+                                </td>
 
-            <td className="text-left ml-3 text-[12px]">
-              {isTableView
-                ? item.billingType
-                : `${item.billingStartDay} → ${item.billingEndDay}`}
-            </td>
+                                <td className="text-left text-[12px]">
+                                  {isTableView
+                                    ? item.city
+                                    : `${item.HostelCity}, ${item.HostelState}`}
+                                </td>
 
-            <td className="text-[12px]">{item.billingModel || "--"}</td>
+                                <td className="text-left ml-3 text-[12px]">
+                                  {isTableView
+                                    ? item.billingType
+                                    : `${item.billingStartDay} → ${item.billingEndDay}`}
+                                </td>
 
-            <td className="text-[12px]">{isTableView ? "--" : item.recurringMode || "--"}</td>
+                                <td className="text-[12px]">{item.billingModel || "--"}</td>
 
-            <td className="text-[12px]">
-              {isTableView
-                ? (item.subscriptionActive ? "Active" : "Inactive")
-                : (item.recurringStatus ? "Generated" : "Not Generated")}
-            </td>
+                                <td className="text-[12px]">{isTableView ? "--" : item.recurringMode || "--"}</td>
 
-            <td>
-              {!isTableView ? (
-                !item.recurringStatus ? (
-                  <button
-                    onClick={() => handleOpenDetails(item)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded"
-                  >
-                    Generate
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleOpenDetails(item)}
-                    className="px-3 py-1 border text-blue-600 rounded"
-                  >
-                    View
-                  </button>
-                )
-              ) : "--"}
-            </td>
+                                <td className="text-[12px]">
+                                  {isTableView
+                                    ? (item.subscriptionActive ? "Active" : "Inactive")
+                                    : (item.recurringStatus ? "Generated" : "Not Generated")}
+                                </td>
 
-          </tr>
+                                <td>
+                                  {!isTableView ? (
+                                    !item.recurringStatus ? (
+                                      <button
+                                        onClick={() => handleOpenDetails(item)}
+                                        className="px-3 py-1 bg-blue-600 text-white rounded cursor-pointer"
+                                      >
+                                        Generate
+                                      </button>
+                                    ) : (
+                                      // <button
+                                      //   onClick={() => handleOpenDetails(item)}
+                                      //   className="px-3 py-1 border text-blue-600 rounded cursor-pointer"
+                                      // >
+                                      //   View
+                                      // </button>
+                                      <button
+                                        onClick={() => handleOpenDetails(item)}
+                                        className="px-3 py-1 rounded-lg text-xs border border-gray-300 text-blue-600 bg-white hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
+                                      >
+                                        👁 View Details
+                                      </button>
+                                    )
+                                  ) : "--"}
+                                </td>
 
-          {/* 🔽 EXPANDED CUSTOMER TABLE */}
-          {isTableView && expandedHostel === item.hostelId && (
-            <tr>
-              <td colSpan="10" className="bg-gray-50 p-4">
+                              </tr>
 
-                <table className="w-full border rounded text-sm">
+                              {/* 🔽 EXPANDED CUSTOMER TABLE */}
+                              {isTableView && expandedHostel === item.hostelId && (
+                                <tr>
+                                  <td colSpan="10" className="bg-gray-50 p-4">
 
-                  <thead className="bg-gray-100 text-xs">
-                    <tr>
-                      <th className="px-3 py-2">ID</th>
-                      <th className="px-3 py-2">Tenant</th>
-                      <th className="px-3 py-2">Status</th>
-                      <th className="px-3 py-2">Billing</th>
-                      <th className="px-3 py-2">Action</th>
-                    </tr>
-                  </thead>
+                                    <table className="w-full border rounded text-sm">
 
-                  <tbody>
-                    {item.customerList?.map((cust, i) => (
+                                      <thead className="bg-gray-100 text-xs">
+                                        <tr>
+                                          <th className="px-3 py-2">ID</th>
+                                          <th className="px-3 py-2">Tenant</th>
+                                          <th className="px-3 py-2">Status</th>
+                                          <th className="px-3 py-2">Billing</th>
+                                          <th className="px-3 py-2">Action</th>
+                                        </tr>
+                                      </thead>
 
-                      <tr key={cust.customerId} className="border-t">
+                                      <tbody>
+                                        {item.customerList?.map((cust, i) => (
 
-                      <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] flex items-center gap-2">
-  <input
-    type="checkbox"
-    checked={selectedIds.includes(id)}
-    onChange={() => handleSelect(item)}
-  />
-  {(page - 1) * size + index + 1}
-</td>
+                                          <tr key={cust.customerId} className="border-t">
 
-                        <td>{cust.fullName}</td>
+                                            <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] flex items-center gap-2">
+                                              <input
+                                                type="checkbox"
+                                                checked={selectedIds.includes(id)}
+                                                onChange={() => handleSelect(item)}
+                                              />
+                                              {(page - 1) * size + index + 1}
+                                            </td>
 
-                        <td>
-                          {cust.recurringStatus ? "Generated" : "Pending"}
-                        </td>
+                                            <td>{cust.fullName}</td>
 
-                        <td>
-                          {cust.billingStartDay} → {cust.billingEndDay}
-                        </td>
+                                            <td>
+                                              {cust.recurringStatus ? "Generated" : "Pending"}
+                                            </td>
 
-                        <td>
-                          {!cust.recurringStatus ? (
-                            <button
-                              onClick={() => handleOpenDetails(cust)}
-                              className="px-2 py-1 text-xs bg-blue-600 text-white rounded"
-                            >
-                              Generate
-                            </button>
-                          ) : (
-                            <button
-                            
-                              onClick={() => handleOpenDetails(cust)}
-                              className="px-2 py-1 text-xs border text-blue-600 rounded"
-                            >
-                              View
-                            </button>
-                          )}
-                        </td>
+                                            <td>
+                                              {cust.billingStartDay} → {cust.billingEndDay}
+                                            </td>
 
-                      </tr>
+                                            <td>
+                                              {!cust.recurringStatus ? (
+                                                <button
+                                                  onClick={() => handleOpenDetails(cust)}
+                                                  className="px-2 py-1 text-xs bg-blue-600 text-white rounded"
+                                                >
+                                                  Generate
+                                                </button>
+                                              ) : (
+                                                <button
 
-                    ))}
-                  </tbody>
+                                                  onClick={() => handleOpenDetails(cust)}
+                                                  className="px-2 py-1 text-xs border text-blue-600 rounded"
+                                                >
+                                                  View
+                                                </button>
+                                              )}
+                                            </td>
 
-                </table>
+                                          </tr>
 
-              </td>
-            </tr>
-          )}
+                                        ))}
+                                      </tbody>
 
-        </React.Fragment>
-      );
-    })
+                                    </table>
 
-  ) : (
+                                  </td>
+                                </tr>
+                              )}
 
-    <tr>
-      <td colSpan="10" className="text-center py-6 text-gray-400">
-        No Data Found
-      </td>
-    </tr>
+                            </React.Fragment>
+                          );
+                        })
 
-  )}
+                      ) : (
 
-</tbody>
+                        <tr>
+                          <td colSpan="10" className="text-center py-6 text-gray-400">
+                            No Data Found
+                          </td>
+                        </tr>
+
+                      )}
+
+                    </tbody>
 
                   </table>
                   {tooltip && (
@@ -1077,45 +1102,49 @@ const handleSelectAll = () => {
 
 
               </div>
-              )}
-              {showCustomerTable && (
-  <div className="bg-white border border-gray-200 rounded-xl p-4 mt-4">
+            )}
+            {showCustomerTable && (
+              <div className="bg-white border border-gray-200 rounded-xl p-4 mt-4">
 
-    <div className="flex justify-between items-center mb-3">
-      <h3 className="font-semibold text-sm">Selected Customers</h3>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-semibold text-sm">Selected Customers</h3>
 
-      <button
-        onClick={() => {
-          setShowCustomerTable(false);
-          setSelectedCustomers([]);
-        }}
-        className="text-sm border border-gray-200 px-3 py-1 rounded cursor-pointer"
-      >
-        Back
-      </button>
-    </div>
+                  <button
+                    onClick={() => {
+                      setShowCustomerTable(false);
+                      setSelectedCustomers([]);
+                    }}
+                    className="text-sm border border-gray-200 px-3 py-1 rounded cursor-pointer"
+                  >
+                    Back
+                  </button>
+                </div>
 
-   <div className="border border-gray-200 rounded-xl overflow-hidden">
-  <table className="w-full text-sm">
+                <div className="border border-gray-200 rounded-xl overflow-hidden">
+                  <table className="w-full text-sm">
 
 
-      <thead className="bg-gray-100">
-        <tr>
-          <th className="p-2">Select</th>
-          <th className="p-2">Name</th>
-          <th className="p-2">Status</th>
-          <th className="p-2">Billing</th>
-          <th className="p-2">Action</th>
-        </tr>
-      </thead>
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="p-2">Select</th>
+                        <th className="p-2">Property</th>
+                        <th className="p-2">Tenant Name</th>
+                        <th className="p-2">Subscription Status</th>
+                        <th className="p-2">Recurring Status</th>
+                        <th className="p-2">Billing Schedule</th>
 
-      <tbody>
-        {filteredCustomers.length > 0 ? (
-    filteredCustomers.map((cust) => (
-            <tr key={cust.customerId} className="border-t border-gray-200">
+                        <th className="p-2">Billing</th>
+                        <th className="p-2">Action</th>
+                      </tr>
+                    </thead>
 
-              <td className="p-2">
-                {/* <input
+                    <tbody>
+                      {filteredCustomers.length > 0 ? (
+                        filteredCustomers.map((cust) => (
+                          <tr key={cust.customerId} className="border-t border-gray-200">
+
+                            <td className="p-2">
+                              {/* <input
                   type="checkbox"
                   checked={selectedIds.includes(cust.customerId)}
                   onChange={() => {
@@ -1126,127 +1155,153 @@ const handleSelectAll = () => {
                     );
                   }}
                 /> */}
-                <input
-  type="checkbox"
-  checked={selectedIds.includes(cust.customerId)}
-  disabled={cust.recurringStatus}   // ✅ disable condition
-  className={`cursor-pointer ${
-    cust.recurringStatus ? "opacity-50 cursor-not-allowed" : ""
-  }`}
-  onChange={() => {
-    if (cust.recurringStatus) return; // safety
+                              <input
+                                type="checkbox"
+                                checked={selectedIds.includes(cust.customerId)}
+                                disabled={cust.recurringStatus}   // ✅ disable condition
+                                className={`cursor-pointer ${cust.recurringStatus ? "opacity-50 cursor-not-allowed" : ""
+                                  }`}
+                                onChange={() => {
+                                  if (cust.recurringStatus) return; // safety
 
-    setSelectedIds(prev =>
-      prev.includes(cust.customerId)
-        ? prev.filter(id => id !== cust.customerId)
-        : [...prev, cust.customerId]
-    );
-  }}
-/>
-              </td>
+                                  setSelectedIds(prev =>
+                                    prev.includes(cust.customerId)
+                                      ? prev.filter(id => id !== cust.customerId)
+                                      : [...prev, cust.customerId]
+                                  );
+                                }}
+                              />
+                            </td>
+                            <td>{cust.hostelName}</td>
+                            <td>{cust.fullName}</td>
+                            {/* <td>
+                              {cust.recurringStatus ? "Generated" : "Pending"}
+                            </td> */}
+                            <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                              {cust.isSubscriptionActive ? (
+                                <span className="text-green-600 bg-green-100 px-2 py-1 rounded-full text-xs">
+                                  Active
+                                </span>
+                              ) : (
+                                <span className="text-red-600 bg-red-100 px-2 py-1 rounded-full text-xs">
+                                  Blocked
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                              {cust.recurringStatus ? (
+                                <span className="text-green-600 bg-green-100 px-2 py-1 rounded-full text-xs">
+                                  Generated
+                                </span>
+                              ) : (
+                                <span className="text-red-600 bg-red-100 px-2 py-1 rounded-full text-xs">
+                                  Not Generated
+                                </span>
+                              )}
+                            </td>
+                            <td>
+                              {cust.billingStartDay} → {cust.billingEndDay}
+                            </td>
 
-              <td>{cust.fullName}</td>
+                            {/* <td>
+                              {cust.billingStartDay} → {cust.billingEndDay}
+                            </td> */}
+                            <td>
+                              {cust.billingModel}
+                            </td>
 
-              <td>
-                {cust.recurringStatus ? "Generated" : "Pending"}
-              </td>
+                            <td>
+                              {!cust.recurringStatus ? (
+                                <button
+                                  onClick={() => handleOpenDetails(cust)}
+                                  className="px-2 py-1 bg-blue-600 text-white rounded text-xs cursor-pointer"
+                                >
+                                  Generate
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleOpenDetails(cust)}
+                                  className="px-2 py-1 border text-blue-600 rounded text-xs cursor-pointer"
+                                >
+                                  View
+                                </button>
+                              )}
+                            </td>
 
-              <td>
-                {cust.billingStartDay} → {cust.billingEndDay}
-              </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="text-center py-4 text-gray-400">
+                            No Customers Selected
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
 
-              <td>
-                {!cust.recurringStatus ? (
-                  <button
-                    onClick={() => handleOpenDetails(cust)}
-                    className="px-2 py-1 bg-blue-600 text-white rounded text-xs cursor-pointer"
-                  >
-                    Generate
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleOpenDetails(cust)}
-                    className="px-2 py-1 border text-blue-600 rounded text-xs cursor-pointer"
-                  >
-                    View
-                  </button>
-                )}
-              </td>
-
-            </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan="5" className="text-center py-4 text-gray-400">
-              No Customers Selected
-            </td>
-          </tr>
-        )}
-      </tbody>
-
-    </table>
-</div>
-   
-  
-
-  </div>
-)}
-              <div className="flex items-center justify-between px-6 py-3  text-sm text-gray-500">
-
-                <span>
-                  Total Record Count :
-                  <span className="text-blue-600 ml-1">{size}</span>
-                </span>
-
-                <div className="flex items-center gap-4">
-
-                  {/* Page size */}
-                  <select
-                    value={size}
-                    onChange={(e) => {
-                      setSize(Number(e.target.value));
-                      setPage(1);
-                    }}
-                    className="border rounded px-2 py-1 text-sm"
-                  >
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
-                  </select>
-
-                  {/* Prev */}
-                  <button
-                    onClick={() => setPage(p => Math.max(p - 1, 1))}
-                    disabled={page === 1}
-                    className="px-2"
-                  >
-                    <img src={Arrow} className="w-4 h-4 cursor-pointer" />
-                  </button>
-
-                  {/* Current Page */}
-                  <span className="border px-2 py-1 rounded bg-gray-50">
-                    {page}
-                  </span>
-
-                  {/* Next */}
-                  <button
-                    onClick={() => setPage(p => Math.min(p + 1, totalPages))}
-                    disabled={page >= totalPages}
-                    className="px-2"
-                  >
-                    <img src={Arrow} className="w-4 h-4 rotate-180 cursor-pointer" />
-                  </button>
-
-                  {/* Range */}
-                  <span className="text-gray-400">
-                    {start} - {end}
-                  </span>
-
+                  </table>
                 </div>
 
+
+
               </div>
+            )}
+            <div className="flex items-center justify-between px-6 py-3  text-sm text-gray-500">
+
+              <span>
+                Total Record Count :
+                <span className="text-blue-600 ml-1">{size}</span>
+              </span>
+
+              <div className="flex items-center gap-4">
+
+                {/* Page size */}
+                <select
+                  value={size}
+                  onChange={(e) => {
+                    setSize(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  className="border rounded px-2 py-1 text-sm"
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+
+                {/* Prev */}
+                <button
+                  onClick={() => setPage(p => Math.max(p - 1, 1))}
+                  disabled={page === 1}
+                  className="px-2"
+                >
+                  <img src={Arrow} className="w-4 h-4 cursor-pointer" />
+                </button>
+
+                {/* Current Page */}
+                <span className="border px-2 py-1 rounded bg-gray-50">
+                  {page}
+                </span>
+
+                {/* Next */}
+                <button
+                  onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+                  disabled={page >= totalPages}
+                  className="px-2"
+                >
+                  <img src={Arrow} className="w-4 h-4 rotate-180 cursor-pointer" />
+                </button>
+
+                {/* Range */}
+                <span className="text-gray-400">
+                  {start} - {end}
+                </span>
+
+              </div>
+
             </div>
-        
+          </div>
+
           {viewType === "calendar" && (
             <CalendarView data={data} />
           )}
@@ -1256,10 +1311,10 @@ const handleSelectAll = () => {
 
               <div
                 className="fixed inset-0 bg-black/10 backdrop-blur-[0px]"
-              onClick={() => {
-  setShowDetailsModal(false);
-  setGenrateError("");
-}}
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  setGenrateError("");
+                }}
               ></div>
 
 
@@ -1283,10 +1338,10 @@ const handleSelectAll = () => {
                       </div>
                     </div>
 
-                    <button className="cursor-pointer"               onClick={() => {
-  setShowDetailsModal(false);
-  setGenrateError("");
-}}>✕</button>
+                    <button className="cursor-pointer" onClick={() => {
+                      setShowDetailsModal(false);
+                      setGenrateError("");
+                    }}>✕</button>
                   </div>
 
 
@@ -1522,68 +1577,7 @@ const handleSelectAll = () => {
                         </table>
 
                       </div>
-                      {recurringDetails?.totalItems > historySize && (
-                        <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
-
-                          {/* Left - Total Count */}
-                          <span>
-                            Total Record Count :
-                            <span className="text-blue-600 ml-1">
-                              {recurringDetails?.totalItems || 0}
-                            </span>
-                          </span>
-
-                          {/* Right Controls */}
-                          <div className="flex items-center gap-3">
-
-                            {/* Page Size */}
-                            <select
-                              value={historySize}
-                              onChange={(e) => {
-                                const newSize = Number(e.target.value);
-                                setHistorySize(newSize);
-                                handleOpenDetails(selectedItem, 0);
-                              }}
-                              className="border rounded px-2 py-1 text-xs"
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                            </select>
-
-                            {/* Prev */}
-                            <button
-                              onClick={() =>
-                                handleOpenDetails(selectedItem, Math.max(historyPage - 1, 0))
-                              }
-                              disabled={historyPage === 0}
-                              className="px-1 disabled:opacity-40"
-                            >
-                              <img src={Arrow} className="w-3 h-3" />
-                            </button>
-
-                            {/* Current Page */}
-                            <span className="border px-2 py-1 rounded bg-gray-50 text-black">
-                              {historyPage + 1}
-                            </span>
-
-                            {/* Next */}
-                            <button
-                              onClick={() =>
-                                handleOpenDetails(
-                                  selectedItem,
-                                  Math.min(historyPage + 1, historyTotalPages - 1)
-                                )
-                              }
-                              disabled={historyPage >= historyTotalPages - 1}
-                              className="px-1 disabled:opacity-40"
-                            >
-                              <img src={Arrow} className="w-3 h-3 rotate-180" />
-                            </button>
-
-                          </div>
-                        </div>
-                      )}
+                    
                     </div>
 
                   </div>
@@ -1604,17 +1598,17 @@ const handleSelectAll = () => {
                       🔄 Generate Recurring
                     </button>
                   </div> */}
-                   {generateError && (
-              <ErrorMessage message={generateError} type="error" />
-            )}
+                  {generateError && (
+                    <ErrorMessage message={generateError} type="error" />
+                  )}
                   {!selectedItem?.recurringStatus && (
                     <div className="p-4 border-t border-gray-300 flex justify-end gap-2">
 
                       <button
                         onClick={() => {
-  setShowDetailsModal(false);
-  setGenrateError("");
-}}
+                          setShowDetailsModal(false);
+                          setGenrateError("");
+                        }}
                         className="px-4 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer"
                       >
                         Close
@@ -1647,10 +1641,10 @@ const handleSelectAll = () => {
           <div
             className="fixed inset-0 bg-black/20"
             // onClick={() => setShowBulkModal(false)}
-                          onClick={() => {
-  setShowBulkModal(false);
-  setGenrateError("");
-}}
+            onClick={() => {
+              setShowBulkModal(false);
+              setGenrateError("");
+            }}
           ></div>
 
           {/* RIGHT DRAWER */}
@@ -1662,10 +1656,10 @@ const handleSelectAll = () => {
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-left">
                   <img src={refresh} className="w-5 h-5" /> Bulk Generate Recurring
                 </h2>
-                <button                           onClick={() => {
-  setShowBulkModal(false);
-  setGenrateError("");
-}}>✕</button>
+                <button onClick={() => {
+                  setShowBulkModal(false);
+                  setGenrateError("");
+                }}>✕</button>
               </div>
 
               {/* BODY */}
@@ -1817,16 +1811,16 @@ const handleSelectAll = () => {
                 </div>
 
               </div>
-       {generateError && (
-              <ErrorMessage message={generateError} type="error" />
-            )}
+              {generateError && (
+                <ErrorMessage message={generateError} type="error" />
+              )}
               {/* FOOTER */}
               <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
                 <button
-                                            onClick={() => {
-  setShowBulkModal(false);
-  setGenrateError("");
-}}
+                  onClick={() => {
+                    setShowBulkModal(false);
+                    setGenrateError("");
+                  }}
                   className="px-4 py-2 border border-gray-200 rounded-lg text-sm"
                 >
                   Cancel
@@ -1860,7 +1854,22 @@ const handleSelectAll = () => {
                       setShowSuccess(true);
 
                       setTimeout(() => setShowSuccess(false), 1500);
+                      setData(prev =>
+                        prev.map(item =>
+                          ids.includes(selectedIds)
+                            ? { ...item, recurringStatus: true }
+                            : item
+                        )
+                      );
 
+
+                      setSelectedCustomers(prev =>
+                        prev.map(item =>
+                          ids.includes(item.customerId)
+                            ? { ...item, recurringStatus: true }
+                            : item
+                        )
+                      );
                       fetchRecurring();
                     } else {
                       setModalType("error");
