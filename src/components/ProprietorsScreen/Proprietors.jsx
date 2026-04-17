@@ -367,7 +367,7 @@ const Proprietors = () => {
                         </td>
 
                         <td className="px-4 py-1 text-[12px] text-left">
-                          -
+                          {item.emailId}
                         </td>
 
                         <td className="px-4 py-1 text-[12px] text-left">

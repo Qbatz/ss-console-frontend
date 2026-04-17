@@ -80,15 +80,15 @@ const CalendarView = ({ currentMonth, currentYear, data = [] }) => {
                     {item.totalProperties} Properties
                   </div>
 
-                  {item.recurringPending > 0 && (
+                  {/* {item.recurringPending > 0 && (
                     <div className="bg-green-500 text-white px-2 py-[2px] rounded-md w-fit">
-                      {item.recurringPending} Recurring
+                      {item.recurringPending} Recurring_Pending
                     </div>
-                  )}
+                  )} */}
 
                   {item.subscriptionExpired > 0 && (
                     <div className="bg-orange-500 text-white px-2 py-[2px] rounded-md w-fit">
-                      {item.subscriptionExpired} Blocked
+                      {item.subscriptionExpired} Sub_Expired
                     </div>
                   )}
 

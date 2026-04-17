@@ -61,6 +61,7 @@ const PropertyOverview = () => {
   const [menuError, setMenuError] = useState("")
   const [planError, setPlanError] = useState("")
   const [proofError, setProofError] = useState("")
+  const [showTrialConfirm, setShowTrialConfirm] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -130,7 +131,7 @@ const PropertyOverview = () => {
       trialDays: 0,
       paidAmount: Number(paidAmount || 0),
       discountAmount: Number(discountAmount || 0),
-       planCode:trialPlan?.hostelPlan?.currentPlanCode
+      planCode: trialPlan?.hostelPlan?.currentPlanCode
     };
 
     const res = await createSubscription(
@@ -172,11 +173,11 @@ const PropertyOverview = () => {
       trialDays: Number(days),
       paidAmount: Number(paidAmount || 0),
       discountAmount: Number(discountAmount || 0),
-       planCode:trialPlan?.hostelPlan?.currentPlanCode
-,
+      planCode: trialPlan?.hostelPlan?.currentPlanCode
+      ,
     };
 
-    const res = await createSubscription( 
+    const res = await createSubscription(
       trialPlan?.hostelId,
       payload
     );
@@ -372,17 +373,48 @@ const PropertyOverview = () => {
               <div className="flex gap-5 mt-4">
 
                 {/* 1️⃣ Trial Extend */}
-                <button
-                  onClick={handleTrialOnly}
+                {/* <button
+                disabled={trialPlan?.trialExtendable === false}
+                 onClick={() => setShowTrialConfirm(true)}
                   className="bg-green-600 text-white px-2 py-[2px] font-medium rounded text-[10px] whitespace-nowrap cursor-pointer"
+                >
+                  Trial Extend
+                </button> */}
+                <button
+                  disabled={trialPlan?.trialExtendable === false}
+                  onClick={() => setShowTrialConfirm(true)}
+                  className={`px-2 py-[2px] font-medium rounded text-[10px] whitespace-nowrap
+    ${trialPlan?.trialExtendable === false
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-green-600 text-white cursor-pointer hover:bg-green-700"
+                    }
+  `}
+                  title={
+                    trialPlan?.trialExtendable === false
+                      ? "Trial cannot be extended"
+                      : ""
+                  }
                 >
                   Trial Extend
                 </button>
 
                 {/* 2️⃣ Trial + Days */}
-                <button
+                {/* <button
+                 disabled={trialPlan?.trialExtendable === false}
                   onClick={() => setShowTrialModal(true)}
                   className="bg-yellow-500 text-white px-3 py-1 rounded text-[10px] whitespace-nowrap cursor-pointer"
+                >
+                  Trial + Days
+                </button> */}
+                <button
+                  disabled={trialPlan?.trialExtendable === false}
+                  onClick={() => setShowTrialModal(true)}
+                  className={`px-3 py-1 rounded text-[10px] whitespace-nowrap
+    ${trialPlan?.trialExtendable === false
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-yellow-500 text-white cursor-pointer hover:bg-yellow-600"
+                    }
+  `}
                 >
                   Trial + Days
                 </button>
@@ -1046,6 +1078,16 @@ const PropertyOverview = () => {
 
             <div className="space-y-4">
 
+              {/* <input
+                type="text"
+                placeholder="Enter Hostel ID"
+                value={noteText}
+                onChange={(e) => {
+                  setNoteText(e.target.value);
+                  setHostelError("");
+                }}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              /> */}
               <input
                 type="text"
                 placeholder="Enter Hostel ID"
@@ -1053,6 +1095,9 @@ const PropertyOverview = () => {
                 onChange={(e) => {
                   setNoteText(e.target.value);
                   setHostelError("");
+                }}
+                onPaste={(e) => {
+                  e.preventDefault();
                 }}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
               />
@@ -1063,7 +1108,7 @@ const PropertyOverview = () => {
 
               <button
                 onClick={handleHardReset}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition cursor-pointer"
               >
                 Submit
               </button>
@@ -1253,6 +1298,51 @@ const PropertyOverview = () => {
               >
                 Submit
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showTrialConfirm && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setShowTrialConfirm(false)}
+          ></div>
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-xl shadow-xl w-[350px] p-5 z-[10000]">
+
+            <h2 className="text-lg font-semibold mb-2">
+              Extend Trial
+            </h2>
+
+            <p className="text-sm text-gray-600 mb-4">
+              Do you want to extend the trial?
+            </p>
+
+            <div className="flex justify-end gap-2">
+
+              {/* Cancel */}
+              <button
+                onClick={() => setShowTrialConfirm(false)}
+                className="px-4 py-2 border rounded-lg text-sm"
+              >
+                Cancel
+              </button>
+
+              {/* OK */}
+              <button
+                onClick={async () => {
+                  await handleTrialOnly();   // ✅ API call
+                  setShowTrialConfirm(false);
+                }}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm"
+              >
+                OK
+              </button>
+
             </div>
           </div>
         </div>
