@@ -10,7 +10,7 @@ import Edit from "../../assets/editicon.png";
 
 const TenantsList = () => {
 
-  const { getTenantSummary, deleteTenant, accessError } = useOwners();
+  const { getTenantSummary,loading, deleteTenant, accessError } = useOwners();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenant Summary");
   const menuRef = useRef(null);
@@ -241,11 +241,67 @@ useEffect(() => {
                   </tr>
                 </thead>
 
-                <tbody>
+              <tbody className="divide-y divide-gray-200">
 
-                  {/* {tenants.map((item, i) => ( */}
-                  {tenants.map((item, index) => (
-                    <tr key={item.customerId} className="border-b border-gray-300 hover:bg-gray-50 text-left whitespace-nowrap">
+{loading ? (
+
+  // 🔥 Skeleton Loader
+  Array.from({ length: size }).map((_, i) => (
+    <tr key={i} className="animate-pulse text-[12px]">
+
+      {/* ID */}
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-6"></div>
+      </td>
+
+      {/* Name + Avatar */}
+      <td className="px-6 py-2 flex items-center gap-3">
+        <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+        <div className="h-3 bg-gray-200 rounded w-24"></div>
+      </td>
+
+      {/* Mobile */}
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-20"></div>
+      </td>
+
+      {/* Hostel */}
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-24"></div>
+      </td>
+
+      {/* Status */}
+      <td className="px-4 py-2">
+        <div className="h-5 bg-gray-200 rounded-full w-20"></div>
+      </td>
+
+      {/* Payable */}
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-16"></div>
+      </td>
+
+      {/* Paid */}
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-16"></div>
+      </td>
+
+      {/* Due */}
+      <td className="px-4 py-2">
+        <div className="h-3 bg-gray-200 rounded w-16"></div>
+      </td>
+
+      {/* Action */}
+      <td className="px-4 py-2">
+        <div className="h-5 bg-gray-200 rounded w-6"></div>
+      </td>
+
+    </tr>
+  ))
+
+) : tenants.length > 0 ? (
+
+  tenants.map((item, index) => (
+    <tr key={item.customerId} className="border-b border-gray-300 hover:bg-gray-50 text-left whitespace-nowrap">
                       <td className="px-4 py-1">
                         {(page - 1) * size + index + 1}
                       </td>
@@ -276,9 +332,7 @@ useEffect(() => {
                         {item.hostelName}
                       </td>
 
-                      {/* <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
-                    {item.currentStatus}
-                  </td> */}
+                    
                       <td className="px-4 py-2 text-left whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(item.currentStatus)}`}>
                           {item.currentStatus}
@@ -334,10 +388,19 @@ useEffect(() => {
                       </td>
 
                     </tr>
+  ))
 
-                  ))}
+) : (
 
-                </tbody>
+  <tr>
+    <td colSpan="9" className="text-center py-6 text-gray-400">
+      No Data Found
+    </td>
+  </tr>
+
+)}
+
+</tbody>
 
               </table>
 

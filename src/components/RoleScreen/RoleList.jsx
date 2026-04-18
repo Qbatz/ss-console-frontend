@@ -108,7 +108,7 @@ const Roles = () => {
               <span className="bg-blue-600 text-white w-5 h-5 flex items-center justify-center rounded-md text-xs font-sans">
                 +
               </span>
-              Create Role
+              Update Role
             </button>
           </div>
 

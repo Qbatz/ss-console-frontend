@@ -9,11 +9,19 @@ import Arrow from "../../assets/arrow-up.png";
 import { useOwners } from "../../Context/OwnersContext";
 import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import { usePermission } from "../../Utils/permissionHelper";
+import { useHostel } from "../../Context/HostelListContext";
+import { useRole } from "../../Context/RoleContext";
 const ProprietorsOverview = () => {
 const navigate = useNavigate();
  const location = useLocation();
+   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
+ 
+  const { canRead, canWrite, canUpdate, canDelete } =
+          usePermission("Owners");
  const ownerData = location.state?.ownerData;
     const { owners, totalItems, totalPages, loading, getOwners,accessError,getOwnerById,updateOwnerEmail} = useOwners();
+    const { hostels, getHostels, getHostelById, hardResetHostel, errorMsg, deleteHostelExpense } = useHostel();
   
 
   const [activeTab, setActiveTab] = useState("properties");
@@ -33,6 +41,17 @@ const formatDateTime = (date, time) => {
     day: "2-digit"
   }) + " " + (time || "");
 };
+ const handlePropertyClick = async (item) => {
+
+    const res = await getHostelById(item.hostelId);
+    console.log("res", res)
+    if (res?.success) {
+      navigate(`/property-overview/${item.hostelId}`, {
+        state: { hostelData: res.data }
+      });
+
+    }
+  };
 
 const handleEmailUpdate = async () => {
 
@@ -67,7 +86,7 @@ const handleEmailUpdate = async () => {
       }, 1500);
 
   } else {
-    alert(res.message);
+    setEmailError(res.message);
   }
 
 };
@@ -98,7 +117,9 @@ const handleEmailUpdate = async () => {
 
       
         <div
-  onClick={() => navigate(-1)}
+  onClick={() =>navigate(`/proprietors/${adminDetails?.roleId}`, {
+  state: { skipApi: true }
+})}
   className="flex items-center gap-2 text-sm  cursor-pointer hover:text-gray-700"
 >
   <img src={Arrow} width={20} height={20} /><span>Proprietor Detail</span>
@@ -152,7 +173,15 @@ const handleEmailUpdate = async () => {
       </p>
     </div>
 
-    <button className="text-gray-900 border rounded border-gray-300   text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white cursor-pointer "  onClick={() => setShowEmailModal(true)}>
+    <button
+  onClick={() => setShowEmailModal(true)}
+  disabled={canWrite === false}
+  className={`px-4 py-2 text-[12px] font-medium rounded border
+  ${canWrite
+    ? "bg-blue-600 hover:bg-blue-700 text-white border-blue-600 cursor-pointer"
+    : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
+  }`}
+>
   Change Email
 </button>
 
@@ -264,9 +293,14 @@ const handleEmailUpdate = async () => {
 
             <td className="px-4 py-3 text-left font-medium text-[12px]">{index + 1}</td>
 
-            <td className="px-4 py-3 text-left font-medium text-[12px]">
-              {property.hostelName}
-            </td>
+           <td className="px-4 py-3 text-left font-medium text-[12px]">
+  <span
+    className="text-blue-600 cursor-pointer hover:underline"
+    onClick={() => handlePropertyClick(property)}
+  >
+    {property.hostelName}
+  </span>
+</td>
 
             <td className="px-4 py-3 text-left font-medium text-[12px]">
             {property?.hostelType}

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState } from "react";
 import api from "../Config/AxiosConfig";
 import axiosInstance from "../Config/AxiosConfig";
 
+
 const HostelContext = createContext(null);
 
 export const HostelProvider = ({ children }) => {
@@ -37,7 +38,9 @@ export const HostelProvider = ({ children }) => {
   //     setLoading(false);
   //   }
   // };
-  const getHostels = async (page = 1, size = 10, hostelName = "") => {
+  const getHostels = async (page = 1, size = 10, hostelName = "",  startDate = "",
+  endDate = ""
+) => {
   try {
     setLoading(true);
     setErrorMsg("");
@@ -46,7 +49,10 @@ export const HostelProvider = ({ children }) => {
       params: {
         page,
         size,
-        hostelName
+        hostelName,
+        startDate,
+        endDate
+        
       }
     });
 console.log("res",res)
@@ -154,7 +160,7 @@ const deleteHostelExpense = async (hostelId) => {
       `/v2/hostels/expense/${hostelId}`
     );
 
-    if (res.status === 200) {
+    if (res.status === 200 || res.status === 204) {
       return {
         success: true,
         message: "Expense deleted successfully"
@@ -224,7 +230,10 @@ const getRecurringHostels = async (
   page = 0,
   size = 10,
   hostelName = "",
-  filterBy = "TODAY"
+  filterBy = "TODAY",
+  statusFilterBy = "ALL",
+  billingModelFilterBy = "ALL",
+  billingCycleStartDay = ""
 ) => {
   try {
     setLoading(true);
@@ -235,7 +244,10 @@ const getRecurringHostels = async (
         page,
         size,
         hostelName,
-        filterBy
+        filterBy,
+        statusFilterBy,
+        billingModelFilterBy,
+        billingCycleStartDay
       }
     });
 
@@ -261,6 +273,94 @@ const getRecurringHostels = async (
     setLoading(false);
   }
 };
+// const getRecurringHostels = async (
+//   page = 0,
+//   size = 10,
+//   hostelName = "",
+//   filterBy = "TODAY",
+//   statusFilterBy = "ALL",
+  
+//   billingCycleStartDay = ""
+// ) => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.get("/v2/hostels/recurring", {
+//       params: {
+//         page,
+//         size,
+//         hostelName,
+//         filterBy,
+//         statusFilterBy,
+//         billingCycleStartDay,
+//         statusFilterBy 
+//       }
+//     });
+
+//     if (res.status === 200) {
+//       return {
+//         success: true,
+//         data: res.data
+//       };
+//     }
+
+//     return { success: false };
+
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+//     setErrorMsg(msg);
+
+//     return {
+//       success: false,
+//       message: msg
+//     };
+
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+// const getRecurringHostels = async (
+//   page = 0,
+//   size = 10,
+//   hostelName = "",
+//   filterBy = "TODAY"
+// ) => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.get("/v2/hostels/recurring", {
+//       params: {
+//         page,
+//         size,
+//         hostelName,
+//         filterBy
+//       }
+//     });
+
+//     if (res.status === 200) {
+//       return {
+//         success: true,
+//         data: res.data
+//       };
+//     }
+
+//     return { success: false };
+
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+//     setErrorMsg(msg);
+
+//     return {
+//       success: false,
+//       message: msg
+//     };
+
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 const generateRecurringInvoice = async (hostelId, inputDay) => {
   try {
 
@@ -297,13 +397,264 @@ const generateRecurringInvoice = async (hostelId, inputDay) => {
     setLoading(false);
   }
 };
+const getRecurringByHostelId = async (hostelId, page = 0, size = 10) => {
+  try {
+    
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      `/v2/hostels/recurring/${hostelId}`,
+      {
+        params: {
+          page,
+          size
+        }
+      }
+    );
+
+    if (res.status === 200) {
+      return { success: true, data: res.data };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+  } finally {
+   
+  }
+};
+const bulkGenerateRecurring = async (hostelIds = []) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const body = hostelIds.map(id => ({
+      hostelId: id
+    }));
+
+    const res = await axiosInstance.post(
+      "/v2/hostels/recurring",
+      body
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data || "Bulk Recurring Generated Successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const exportHostels = async (
+  hostelName = "",
+  startDate = "",
+  endDate = ""
+) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.get("/v2/hostels/export", {
+      params: {
+        hostelName,
+        startDate,
+        endDate
+      },
+      responseType: "blob" // 🔥 important for file download
+    });
+
+    // Create file download
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.setAttribute("download", "hostels.xlsx"); // file name
+    document.body.appendChild(link);
+    link.click();
+
+    return { success: true };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return { success: false, message: msg };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const getTenantRecurring = async (
+  page = 0,
+  size = 10,
+  name = "",
+  filterBy = "TODAY",
+  statusFilterBy = "ALL",
+  billingModelFilterBy = "ALL",
+  billingCycleStartDay = "",
+  isHostelBased = false
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get("/v2/hostels/tenant-recurring", {
+      params: {
+        page,
+        size,
+        name,
+        filterBy,
+        statusFilterBy,
+        billingModelFilterBy,
+        billingCycleStartDay,
+        isHostelBased
+      }
+    });
+
+    console.log("tenant recurring response", res.data);
+
+    return {
+      success: true,
+      data: res.data
+    };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const generateTenantRecurring = async (customerIds = []) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const body = customerIds.map(id => ({
+      customerId: id
+    }));
+
+    const res = await axiosInstance.post(
+      "/v2/hostels/tenant-recurring",
+      body
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data || "Recurring Generated Successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+const getRecurringByTenantId = async (tenantId, page = 0, size = 10) => {
+  try {
+    
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      `/v2/hostels/tenant-recurring/${tenantId}`,
+      {
+        params: {
+          page,
+          size
+        }
+      }
+    );
+
+    if (res.status === 200) {
+      return { success: true, data: res.data };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+  } finally {
+   
+  }
+};
+const getRecurringMonth = async (month, year) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get("/v2/hostels/recurring/month", {
+      params: {
+        month,
+        year
+      }
+    });
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <HostelContext.Provider
       value={{
         hostels,
         loading,
         errorMsg,
-        getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice
+        getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice,getRecurringByHostelId,
+        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth
       }}
     >
       {children}
