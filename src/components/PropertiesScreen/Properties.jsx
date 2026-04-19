@@ -752,7 +752,7 @@ console.log("payload",payload)
                                   setTooltip((prev) => ({ ...prev, visible: false }))
                                 }
                               >
-{item?.trialExtendable !== false && (
+{item?.isTrial !== false && (
   <div className="flex border rounded-full w-5 h-5 items-center justify-center text-[9px] font-medium text-gray-600">
     T
   </div>
