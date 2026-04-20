@@ -5,10 +5,12 @@ import { useOwners } from "../../Context/OwnersContext";
 import LoginImg from "../../assets/LoginImg.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { usePermission } from "../../Utils/permissionHelper";
-
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import Toast from "../SuccessModal/ToastDesign";
+import Menucircle from "../../assets/menucircle.png"
 const Proprietors = () => {
 
-  const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById } = useOwners();
+  const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById, updateOwnerMobile, deleteOwner } = useOwners();
   const navigate = useNavigate();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Owners");
@@ -22,6 +24,13 @@ const Proprietors = () => {
   const [sortBy, setSortBy] = useState("JOINING_DATE");
   const [direction, setDirection] = useState("desc");
   const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedOwner, setSelectedOwner] = useState(null);
+  const [mobile, setMobile] = useState("");
+  const [error, setError] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
 
 
   console.log("owners", owners)
@@ -112,7 +121,69 @@ const Proprietors = () => {
     }
 
   };
+  useEffect(() => {
+    const handleClick = () => setOpenMenuId(null);
+    window.addEventListener("click", handleClick);
+    return () => window.removeEventListener("click", handleClick);
+  }, []);
+  const handleUpdate = async () => {
 
+    if (!mobile) {
+      setError("Please enter mobile number");
+      return;
+    }
+
+    const res = await updateOwnerMobile(
+      selectedOwner.ownerId,
+      mobile
+    );
+
+    if (res?.success) {
+      setShowModal(false);
+      setError("");
+
+      // refresh table
+      getOwners({
+        page,
+        size,
+        name: search,
+        sortBy,
+        direction,
+        ...getFilterParams()
+      });
+
+    } else {
+      setError(res?.message);
+    }
+  };
+  useEffect(() => {
+  if (showDeleteModal) {
+    setError("");
+  }
+}, [showDeleteModal]);
+  const handleDelete = async () => {
+
+    const res = await deleteOwner(selectedOwner.ownerId);
+
+    if (res?.success) {
+
+      setShowDeleteModal(false);
+
+     
+      getOwners({
+        page,
+        size,
+        name: search,
+        sortBy,
+        direction,
+        ...getFilterParams()
+      });
+
+    } else {
+     
+      setError(res?.message)
+    }
+  };
   return (
     <DashboardLayout>
 
@@ -382,7 +453,48 @@ const Proprietors = () => {
                           {item.lastActivityDate}
                         </td>
 
-                        <td className="px-4 py-1">⋮</td>
+                        <td className="px-4 py-1 relative">
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuId(
+                                openMenuId === item.ownerId ? null : item.ownerId
+                              );
+                            }}
+                          >
+                            <img src={Menucircle} className="w-5 h-5 cursor-pointer" />
+                          </button>
+
+                          {openMenuId === item.ownerId && (
+                            <div className="absolute right-0 mt-1 w-24 bg-white border rounded shadow z-10">
+
+                              <button
+                                onClick={() => {
+                                  setSelectedOwner(item);
+                                  setMobile(item.mobileNo);
+                                  setShowModal(true);
+                                  setOpenMenuId(null);
+                                }}
+                                className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedOwner(item);
+                                  setShowDeleteModal(true);
+                                  setOpenMenuId(null);
+                                }}
+                                className="block w-full text-left px-3 py-2 text-sm hover:bg-red-50 text-red-600 cursor-pointer"
+                              >
+                                Delete
+                              </button>
+
+                            </div>
+                          )}
+
+                        </td>
 
                       </tr>
 
@@ -447,6 +559,103 @@ const Proprietors = () => {
 
         </div>
       )}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+          <div className="bg-white rounded-xl p-5 w-[350px]">
+
+            <h2 className="text-sm font-semibold mb-3 text-left">
+              Update Mobile Number
+            </h2>
+
+            <input
+              type="text"
+              value={mobile}
+              onChange={(e) => {
+                setMobile(e.target.value);
+                setError("");
+              }}
+              placeholder="Enter mobile number"
+              className="w-full border rounded px-3 py-2 text-sm mb-2"
+            />
+
+            {/* {error && (
+        <p className="text-red-500 text-xs mb-2">{error}</p>
+      )} */}
+            {error && (
+              <ErrorMessage message={error} type="error" />
+            )}
+
+
+            <div className="flex justify-end gap-2 mt-3">
+
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  setError("");
+                }}
+                className="px-3 py-1 border rounded text-sm cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleUpdate}
+                className="px-3 py-1 bg-blue-600 text-white rounded text-sm cursor-pointer"
+              >
+                Update
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+      {showDeleteModal && (
+  <div
+    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+    onClick={() => {
+      setShowDeleteModal(false);
+      setError("");
+    }}
+  >
+    <div
+      className="bg-white rounded-xl p-5 w-[350px]"
+      onClick={(e) => e.stopPropagation()}   // 🔥 inside click close aagadhu
+    >
+      <h2 className="text-sm font-semibold mb-2">
+        Delete Owner
+      </h2>
+
+      <p className="text-sm text-gray-500 mb-4">
+        Are you sure you want to delete this owner?
+      </p>
+{error && (
+              <ErrorMessage message={error} type="error" />
+            )}
+      <div className="flex justify-end gap-2">
+
+        <button
+          onClick={() => {
+            setShowDeleteModal(false);
+            setError("");
+          }}
+          className="px-3 py-1 border rounded text-sm cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleDelete}
+          className="px-3 py-1 bg-red-600 text-white rounded text-sm"
+        >
+          Delete
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };
