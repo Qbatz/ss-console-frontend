@@ -220,43 +220,43 @@ const formatDate = (date) => {
     data.map((item, index) => (
       <tr key={index} className="border-t border-gray-300">
 
-        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
           TXN{item.historyId}
         </td>
 
-        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
           {item.createdAtDate}
         </td>
 
-        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-blue-600">
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-blue-600 text-left">
           {item.createdBy}
         </td>
 
-        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
           {item.hostelName}
         </td>
 
-        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
           {item.city}, {item.state}
         </td>
 
-        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
           {item.planType || item.planName || "-"}
         </td>
 
-        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
           ₹ {item.totalAmount}
         </td>
 
-        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
           {item.paymentType || "-"}
         </td>
 
-        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
           {item.orderStatus}
         </td>
 
-        <td className="px-4 py-2 text-[12px] whitespace-nowrap">
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
           {item.createdBy}
         </td>
 
