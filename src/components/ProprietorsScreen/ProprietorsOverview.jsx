@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +12,7 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import { usePermission } from "../../Utils/permissionHelper";
 import { useHostel } from "../../Context/HostelListContext";
 import { useRole } from "../../Context/RoleContext";
+import { useParams } from "react-router-dom";
 const ProprietorsOverview = () => {
 const navigate = useNavigate();
  const location = useLocation();
@@ -19,7 +20,9 @@ const navigate = useNavigate();
  
   const { canRead, canWrite, canUpdate, canDelete } =
           usePermission("Owners");
- const ownerData = location.state?.ownerData;
+//  const ownerData = location.state?.ownerData;
+const [ownerData, setOwnerData] = useState(null);
+const { ownerId } = useParams();
     const { owners, totalItems, totalPages, loading, getOwners,accessError,getOwnerById,updateOwnerEmail} = useOwners();
     const { hostels, getHostels, getHostelById, hardResetHostel, errorMsg, deleteHostelExpense } = useHostel();
   
@@ -29,6 +32,20 @@ const navigate = useNavigate();
 const [newEmail, setNewEmail] = useState("");
 const [emailError,setEmailError] = useState("")
 const [modalType, setModalType] = useState("success");
+useEffect(() => {
+  const fetchOwner = async () => {
+    if (!ownerId) return;
+
+    const res = await getOwnerById(ownerId);
+
+    if (res?.success) {
+      setOwnerData(res.data);
+    }
+  };
+
+  fetchOwner();
+}, [ownerId]);
+
     const [showSuccess, setShowSuccess] = useState(false);
     const [message, setMessage] = useState("");
 console.log("ownerData",ownerData)
@@ -117,9 +134,7 @@ const handleEmailUpdate = async () => {
 
       
         <div
-  onClick={() =>navigate(`/proprietors/${adminDetails?.roleId}`, {
-  state: { skipApi: true }
-})}
+  onClick={() => navigate(`/proprietors/${adminDetails?.roleId}`)}
   className="flex items-center gap-2 text-sm  cursor-pointer hover:text-gray-700"
 >
   <img src={Arrow} width={20} height={20} /><span>Proprietor Detail</span>

@@ -31,6 +31,7 @@ const PropertyOverview = () => {
   const { owners, totalItems, totalPages, getOwners, getOwnerById } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription } = useSubscription();
+  const [hostelData, setHostelData] = useState(null);
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenants");
 
@@ -70,9 +71,22 @@ const dropdownRef = useRef(null);
 
   const loginType = localStorage.getItem("login_type");
   const showInvoices = loginType === "normal";
+const { hostelId } = useParams();
 
+  // const hostelData = location.state?.hostelData;
+  useEffect(() => {
+  const fetchData = async () => {
+    if (!hostelId) return;
 
-  const hostelData = location.state?.hostelData;
+    const res = await getHostelById(hostelId);
+
+    if (res?.success) {
+      setHostelData(res.data);
+    }
+  };
+
+  fetchData();
+}, [hostelId]);
   const trialPlan = location.state?.trialPlan;
   console.log("trialPlan", trialPlan)
   useEffect(() => {

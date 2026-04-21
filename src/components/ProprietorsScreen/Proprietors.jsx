@@ -7,14 +7,18 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { usePermission } from "../../Utils/permissionHelper";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
-import Menucircle from "../../assets/menucircle.png"
+import Menucircle from "../../assets/menucircle.png";
+
+
 const Proprietors = () => {
 
   const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById, updateOwnerMobile, deleteOwner } = useOwners();
   const navigate = useNavigate();
+ 
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Owners");
   const location = useLocation();
+  const isBackNavigation = location.state?.skipApi || false;
   const isFirstLoad = useRef(true);
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
@@ -44,31 +48,69 @@ const Proprietors = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const isBackNavigation = useRef(location.state?.skipApi || false);
+ 
   useEffect(() => {
 
-    if (skipFirstApi) {
-      setSkipFirstApi(false);
-      return;
-    }
-
-    const filters = getFilterParams();
+  // 🔥 back வந்தா reset pannum
+  if (isBackNavigation) {
+    setPage(1);
+    setSize(10);
+    setExpiryFilter("ALL");
+    setSearch("");
+    setSortBy("JOINING_DATE");
+    setDirection("desc");
 
     getOwners({
-      page,
-      size,
-      name: debouncedSearch,
-      sortBy,
-      direction,
-      ...filters
+      page: 1,
+      size: 10,
+      name: "",
+      sortBy: "JOINING_DATE",
+      direction: "desc"
     });
 
-  }, [page, size, debouncedSearch, sortBy, direction, expiryFilter]);
-  useEffect(() => {
-    if (location.state?.skipApi) {
-      navigate(location.pathname, { replace: true });
-    }
-  }, []);
+    // state clear pannum
+    navigate(location.pathname, { replace: true });
+
+    return;
+  }
+
+  // 🔥 normal flow
+  const filters = getFilterParams();
+
+  getOwners({
+    page,
+    size,
+    name: debouncedSearch,
+    sortBy,
+    direction,
+    ...filters
+  });
+
+}, [page, size, debouncedSearch, sortBy, direction, expiryFilter]);
+  // useEffect(() => {
+
+  //   if (skipFirstApi) {
+  //     setSkipFirstApi(false);
+  //     return;
+  //   }
+
+  //   const filters = getFilterParams();
+
+  //   getOwners({
+  //     page,
+  //     size,
+  //     name: debouncedSearch,
+  //     sortBy,
+  //     direction,
+  //     ...filters
+  //   });
+
+  // }, [page, size, debouncedSearch, sortBy, direction, expiryFilter]);
+  // useEffect(() => {
+  //   if (location.state?.skipApi) {
+  //     navigate(location.pathname, { replace: true });
+  //   }
+  // }, []);
 
   // useEffect(() => {
   //   const filters = getFilterParams();
@@ -114,9 +156,7 @@ const Proprietors = () => {
 
     if (res?.success) {
 
-      navigate(`/ProprietorsOverview/${item.ownerId}`, {
-        state: { ownerData: res.data }
-      });
+     navigate(`/ProprietorsOverview/${item.ownerId}`);
 
     }
 

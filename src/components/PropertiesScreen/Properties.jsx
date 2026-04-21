@@ -14,6 +14,7 @@ import LoginImg from "../../assets/LoginImg.png";
 import { usePermission } from "../../Utils/permissionHelper";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
+import { useParams } from "react-router-dom";
 
 
 const Properties = () => {
@@ -21,8 +22,11 @@ const Properties = () => {
   const { createSubscription } = useSubscription();
 
   const location = useLocation();
+const { roleId } = useParams();
 
 
+
+const skipApi = location.state?.skipApi;
   const { RangePicker } = DatePicker;
   const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
   const [dateRange, setDateRange] = useState([]);
@@ -84,23 +88,36 @@ const Properties = () => {
 
 
   // }, [page, pageSize, debouncedSearch]);
+  // useEffect(() => {
+  //   if (skipFirstApi) {
+  //     setSkipFirstApi(false);
+  //     return;
+  //   }
+
+  //   let start = "";
+  //   let end = "";
+
+  //   if (dateRange && dateRange.length === 2) {
+  //     start = dateRange[0].format("DD-MM-YYYY"); // API format
+  //     end = dateRange[1].format("DD-MM-YYYY");
+  //   }
+
+  //   getHostels(page, pageSize, debouncedSearch, start, end);
+
+  // }, [page, pageSize, debouncedSearch, dateRange]);
   useEffect(() => {
-    if (skipFirstApi) {
-      setSkipFirstApi(false);
-      return;
-    }
 
-    let start = "";
-    let end = "";
+  let start = "";
+  let end = "";
 
-    if (dateRange && dateRange.length === 2) {
-      start = dateRange[0].format("DD-MM-YYYY"); // API format
-      end = dateRange[1].format("DD-MM-YYYY");
-    }
+  if (dateRange && dateRange.length === 2) {
+    start = dateRange[0].format("DD-MM-YYYY");
+    end = dateRange[1].format("DD-MM-YYYY");
+  }
 
-    getHostels(page, pageSize, debouncedSearch, start, end);
+  getHostels(page, pageSize, debouncedSearch, start, end);
 
-  }, [page, pageSize, debouncedSearch, dateRange]);
+}, [page, pageSize, debouncedSearch, dateRange]);
 
   useEffect(() => {
     if (location.state?.skipApi) {
