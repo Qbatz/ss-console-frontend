@@ -76,7 +76,36 @@ const Login = () => {
   const isLocal = host === "localhost";
   const isDev = host.includes("consoledev");
   const isProd = !isLocal && !isDev;
+const isTokenValid = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const currentTime = Date.now() / 1000;
 
+    return payload.exp > currentTime;
+  } catch (err) {
+    return false;
+  }
+};
+useEffect(() => {
+  const token =
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("mock_token");
+
+  if (token && isTokenValid(token)) {
+
+    getAdminDetails().then((res) => {
+      if (res?.success) {
+        const roleId = res.data.roleId;
+        navigate(`/home/${roleId}`, { replace: true });
+      }
+    });
+
+  } else {
+    
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("mock_token");
+  }
+}, []);
   useEffect(() => {
     if (isProd) {
       navigate("/");
