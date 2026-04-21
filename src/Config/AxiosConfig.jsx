@@ -41,19 +41,32 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
 
+    // if (error?.response?.status === 401) {
+
+    //   const mockToken = localStorage.getItem("mock_token");
+
+    //   localStorage.removeItem("mock_token");
+    //   localStorage.removeItem("access_token");
+
+    //   if (mockToken) {
+    //     window.location.replace("/internal/login");
+    //   } else {
+    //     window.location.replace("/");
+    //   }
+    // }
     if (error?.response?.status === 401) {
 
-      const mockToken = localStorage.getItem("mock_token");
+  const alreadyLoggedOut = sessionStorage.getItem("logout");
 
-      localStorage.removeItem("mock_token");
-      localStorage.removeItem("access_token");
+  if (!alreadyLoggedOut) {
+    sessionStorage.setItem("logout", "true");
 
-      if (mockToken) {
-        window.location.replace("/internal/login");
-      } else {
-        window.location.replace("/");
-      }
-    }
+    localStorage.removeItem("mock_token");
+    localStorage.removeItem("access_token");
+
+    window.location.replace("/");
+  }
+}
 
     return Promise.reject(error);
   }
