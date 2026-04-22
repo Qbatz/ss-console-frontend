@@ -26,23 +26,24 @@ const DashboardLayout = ({ children }) => {
   const [openSales, setOpenSales] = useState(false);
 
   const [recurringOpen, setRecurringOpen] = useState(false);
-   const location = useLocation();
+  const location = useLocation();
 
-useEffect(() => {
-  if (
-    location.pathname.includes("/demo-requests") ||
-    location.pathname.includes("/subscription") ||
-    location.pathname.includes("/trial-users") ||
-    location.pathname.includes("/transactions")
-  ) {
-    setOpenSales(true);
-  }
-}, [location.pathname]);
+
+  useEffect(() => {
+    if (
+      location.pathname.includes("/demo-requests") ||
+      location.pathname.includes("/subscription") ||
+      location.pathname.includes("/trial-users") ||
+      location.pathname.includes("/transactions")
+    ) {
+      setOpenSales(true);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     getDashboard()
   }, [])
- 
+
 
   useEffect(() => {
     if (
@@ -177,62 +178,62 @@ useEffect(() => {
               activeIcon={Subscription}
               inactiveIcon={Subscription}
             /> */}
-<div>
+            <div>
 
-  {/* Parent */}
-  <div
-    onClick={() => {
-  setOpenSales(!openSales);
-  setRecurringOpen(false); 
-}}
-    className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100"
-  >
-    <div className="flex items-center gap-5">
-      <img src={Users} className="w-5 h-5" />
-      <span>Sales</span>
-    </div>
+              {/* Parent */}
+              <div
+                onClick={() => {
+                  setOpenSales(!openSales);
+                  setRecurringOpen(false);
+                }}
+                className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100"
+              >
+                <div className="flex items-center gap-5">
+                  <img src={Users} className="w-5 h-5" />
+                  <span>Sales</span>
+                </div>
 
-    <span className={`transform transition ${openSales ? "rotate-180" : ""}`}>
-      <img src={Drop} className="w-5 h-5"/>
-    </span>
-  </div>
+                <span className={`transform transition ${openSales ? "rotate-180" : ""}`}>
+                  <img src={Drop} className="w-5 h-5" />
+                </span>
+              </div>
 
-  {/* Children */}
-  {openSales && (
-    <div className="ml-3 mt-1 space-y-1">
+              {/* Children */}
+              {openSales && (
+                <div className="ml-3 mt-1 space-y-1">
 
-      <SidebarItem
-        title="Demo Requests"
-        to={`/demo-requests/${adminDetails?.roleId}`}
-        activeIcon={Subscription}
-        inactiveIcon={Subscription}
-      />
+                  <SidebarItem
+                    title="Demo Requests"
+                    to={`/demo-requests/${adminDetails?.roleId}`}
+                    activeIcon={Subscription}
+                    inactiveIcon={Subscription}
+                  />
 
-      <SidebarItem
-        title="Subscriptions"
-        to={`/subscription/${adminDetails?.roleId}`}
-        activeIcon={Subscription}
-        inactiveIcon={Subscription}
-      />
+                  <SidebarItem
+                    title="Subscriptions"
+                    to={`/subscription/${adminDetails?.roleId}`}
+                    activeIcon={Subscription}
+                    inactiveIcon={Subscription}
+                  />
 
-      <SidebarItem
-        title="Trial Users"
-        to={`/trial-users/${adminDetails?.roleId}`}
-        activeIcon={Users}
-        inactiveIcon={Users}
-      />
+                  <SidebarItem
+                    title="Trial Users"
+                    to={`/trial-users/${adminDetails?.roleId}`}
+                    activeIcon={Users}
+                    inactiveIcon={Users}
+                  />
 
-      <SidebarItem
-        title="Transactions"
-        to={`/transactions/${adminDetails?.roleId}`}
-        activeIcon={Billings}
-        inactiveIcon={Billings}
-      />
+                  <SidebarItem
+                    title="Transactions"
+                    to={`/transactions/${adminDetails?.roleId}`}
+                    activeIcon={Billings}
+                    inactiveIcon={Billings}
+                  />
 
-    </div>
-  )}
+                </div>
+              )}
 
-</div>
+            </div>
             <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} activeIcon={Billings}
               inactiveIcon={Billings} />
 
@@ -248,10 +249,10 @@ useEffect(() => {
               {/* Parent */}
 
               <div
-              onClick={() => {
-  setRecurringOpen(!recurringOpen);
-  setOpenSales(false); // 🔥 close other
-}}
+                onClick={() => {
+                  setRecurringOpen(!recurringOpen);
+                  setOpenSales(false); // 🔥 close other
+                }}
                 className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg"
               >
                 <div className="flex items-center gap-5">
@@ -260,8 +261,8 @@ useEffect(() => {
                 </div>
 
                 <span className={`transform transition ${recurringOpen ? "rotate-180" : ""}`}>
-       <img src={Drop} className="w-5 h-5"/>
-    </span>
+                  <img src={Drop} className="w-5 h-5" />
+                </span>
               </div>
 
               {/* Children */}
