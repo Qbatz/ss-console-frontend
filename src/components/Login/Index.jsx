@@ -26,38 +26,114 @@ import LoginImg from "../../assets/LoginImg.png";
 import WelcomeImg from "../../assets/WlcomeImg.png";
 import AccessRestricted from "../../assets/AccessResticted.png";
 import ConfigV2 from "../../Config/ConfigV2";
-
+import { useRole } from "../../Context/RoleContext";
 
 
 const Index = () => {
+//   const navigate = useNavigate();
+//   const { getAdminDetails } = useRole();
+//   const [isManualAction, setIsManualAction] = useState(false);
+//   const [checkingAuth, setCheckingAuth] = useState(true);
+// const isTokenValid = (token) => {
+//   try {
+//     const payload = JSON.parse(atob(token.split(".")[1]));
+//     const currentTime = Date.now() / 1000;
+//     return payload.exp > currentTime;
+//   } catch {
+//     return false;
+//   }
+// };
+//   //   useEffect(() => {
+
+//   //   if (calledRef.current) return;
+//   //   calledRef.current = true;
+
+//   //   const code = searchParams.get("code");
+//   //   const location = searchParams.get("location");
+//   //   const idToken = searchParams.get("id_token");
+//   //   const accountsServer = searchParams.get("accounts-server");
+
+//   //   axios.get("https://ssconsole.qbatz.com/v2/agents/verify", {
+//   //     params: { code, location, accountsServer, idToken }
+//   //   })
+//   //   .then(response => {
+//   //     if (response.status === 200) {
+//   //       navigate("/home");
+//   //     } else {
+//   //       shouldShowError(true);
+//   //     }
+//   //   });
+
+//   // }, []);
+
+//   // const loginAction = () => {
+//   //   window.location.href = ConfigV2.apiBaseUrl + "/v2/agents/authorize";
+//   // };
+//   const loginAction = () => {
+//   setIsManualAction(true);
+//   window.location.href = ConfigV2.apiBaseUrl + "/v2/agents/authorize";
+// };
+// useEffect(() => {
+//   const token =
+//     localStorage.getItem("access_token") ||
+//     localStorage.getItem("mock_token");
+
+  
+//   if (token && isTokenValid(token)) {
+//     getAdminDetails().then((res) => {
+//       if (res?.success) {
+//         const roleId = res.data.roleId;
+//         navigate(`/home/${roleId}`, { replace: true });
+//       }
+//     });
+//   } else {
+//     // ❌ expiredனா clear
+//     localStorage.removeItem("access_token");
+//     localStorage.removeItem("mock_token");
+//   }
+// }, []);
   const navigate = useNavigate();
-  //   useEffect(() => {
+  const { getAdminDetails } = useRole();
 
-  //   if (calledRef.current) return;
-  //   calledRef.current = true;
+  const [isChecking, setIsChecking] = useState(true); // ⭐ add
 
-  //   const code = searchParams.get("code");
-  //   const location = searchParams.get("location");
-  //   const idToken = searchParams.get("id_token");
-  //   const accountsServer = searchParams.get("accounts-server");
+  const isTokenValid = (token) => {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const currentTime = Date.now() / 1000;
+      return payload.exp > currentTime;
+    } catch {
+      return false;
+    }
+  };
 
-  //   axios.get("https://ssconsole.qbatz.com/v2/agents/verify", {
-  //     params: { code, location, accountsServer, idToken }
-  //   })
-  //   .then(response => {
-  //     if (response.status === 200) {
-  //       navigate("/home");
-  //     } else {
-  //       shouldShowError(true);
-  //     }
-  //   });
+  useEffect(() => {
+    const token =
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("mock_token");
 
-  // }, []);
+    if (token && isTokenValid(token)) {
+      getAdminDetails().then((res) => {
+        if (res?.success) {
+          const roleId = res.data.roleId;
+          navigate(`/home/${roleId}`, { replace: true });
+        }
+      });
+    } else {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("mock_token");
+      setIsChecking(false); // ⭐ allow login page
+    }
+  }, []);
+
+  // ⭐ முக்கியம் — render block
+  if (isChecking) {
+    return null; // or loader
+  }
 
   const loginAction = () => {
     window.location.href = ConfigV2.apiBaseUrl + "/v2/agents/authorize";
   };
-
 
   return (
   <div className="min-h-screen flex flex-col relative overflow-hidden">

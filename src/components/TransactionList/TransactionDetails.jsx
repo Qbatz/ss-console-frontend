@@ -12,7 +12,7 @@ import LoginImg from "../../assets/LoginImg.png";
 
 
 const TransactionsPage = () => {
-  const [openMenu, setOpenMenu] = useState(null);
+ 
   const [totalItems, setTotalItems] = useState(0);
   const { getOrderHistory,loading,accessError } = useSubscription();
    const { canRead, canWrite, canUpdate, canDelete } =
@@ -26,6 +26,9 @@ const TransactionsPage = () => {
   const [totalRevenue,setTotalRevenue] = useState("")
   const [dateRange, setDateRange] = useState([]);
   const [openPicker, setOpenPicker] = useState(false);
+  const [openMenu, setOpenMenu] = useState(null);
+const [selectedTxn, setSelectedTxn] = useState(null);
+const [showModal, setShowModal] = useState(false);
 const { RangePicker } = DatePicker;
 const formatDate = (date) => {
   if (!date) return "";
@@ -199,6 +202,8 @@ const formatDate = (date) => {
                   <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">PLAN TYPE</th>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Amount</th>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">PaymentMode</th>
+                  <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Transaction Ref no</th>
+                  <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Payment proof</th>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">status</th>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Collected By</th>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Action</th>
@@ -251,6 +256,12 @@ const formatDate = (date) => {
         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
           {item.paymentType || "-"}
         </td>
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
+          __
+        </td>
+        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
+         __
+        </td>
 
         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
           {item.orderStatus}
@@ -260,9 +271,32 @@ const formatDate = (date) => {
           {item.createdBy}
         </td>
 
-        <td className="px-4 py-2">
-          <img src={MenuCircle} className="w-4 h-4" />
+      <td className="px-4 py-2 relative">
+  <img 
+    src={MenuCircle} 
+    className="w-4 h-4 cursor-pointer"
+    onClick={(e) => {
+      e.stopPropagation();
+      setOpenMenu(openMenu === item.historyId ? null : item.historyId);
+    }}
+  />
+              {openMenu === item.historyId && (
+  <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-50">
+    <button
+      onClick={() => {
+        setSelectedTxn(item);
+        setShowModal(true);
+        setOpenMenu(null);
+      }}
+      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+    >
+      View Details
+    </button>
+  </div>
+)}
+  
         </td>
+        
 
       </tr>
     ))
@@ -336,6 +370,84 @@ const formatDate = (date) => {
 
       </div>
               )}
+  
+{showModal && selectedTxn && (
+  <>
+    {/* BACKDROP */}
+    <div
+      className="fixed inset-0 bg-black/40 z-40"
+      onClick={() => setShowModal(false)}
+    />
+
+    {/* DRAWER WITH SPACE */}
+    <div className="fixed top-6 bottom-6 right-6 w-[400px] bg-white rounded-xl shadow-lg z-50 transform transition-transform duration-300 translate-x-0">
+
+      <div className="h-full overflow-y-auto p-5">
+
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h2 className="font-semibold text-sm">
+              TXN{selectedTxn.historyId}
+            </h2>
+            <p className="text-green-600 text-xs">● Success</p>
+          </div>
+
+          <button onClick={() => setShowModal(false)}>✕</button>
+        </div>
+
+        {/* PROPERTY INFO */}
+        <div className="text-sm space-y-2 mb-4 text-left">
+          <p><b>Owner:</b> {selectedTxn.createdBy}</p>
+          <p><b>Location:</b> {selectedTxn.city}, {selectedTxn.state}</p>
+          <p><b>Mobile:</b> {selectedTxn.mobile || "-"}</p>
+          <p><b>Active Tenants:</b> 42</p>
+        </div>
+
+        {/* PAYMENT BOX */}
+       <div className="bg-gray-100 rounded-lg p-4 text-sm mb-4">
+          <div className="flex justify-between">
+            <div>
+              <p className="text-gray-500 text-xs">Plan</p>
+              <p className="font-medium">{selectedTxn.planName}</p>
+            </div>
+
+            <div>
+              <p className="text-gray-500 text-xs">Billing Cycle</p>
+              <p className="font-medium">2+1 - Pre-paid</p>
+            </div>
+          </div>
+
+          <div className="flex justify-between mt-3">
+            <div>
+              <p className="text-gray-500 text-xs">Amount</p>
+              <p>₹{selectedTxn.totalAmount}</p>
+            </div>
+
+            <div>
+              <p className="text-gray-500 text-xs">Discount</p>
+              <p>₹199</p>
+            </div>
+          </div>
+
+          <div className="mt-3">
+            <p className="text-gray-500 text-xs">Final Paid</p>
+            <p className="font-semibold">₹{selectedTxn.totalAmount}</p>
+          </div>
+        </div>
+
+        {/* IMAGE */}
+        <div className="rounded-lg overflow-hidden border">
+          <img
+            src={ArrowRight}
+            className="w-full h-auto object-contain"
+          />
+        </div>
+
+      </div>
+    </div>
+  </>
+)}
     </DashboardLayout>
   );
 };

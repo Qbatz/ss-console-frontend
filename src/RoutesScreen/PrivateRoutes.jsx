@@ -31,13 +31,36 @@ import TrailPage from "../components/SubscriptionScreen/TrialUsers";
 
 import TenantRecurring from "../components/RecurringMonitor/TenantRecurring";
 
-
 const PrivateRoute = ({ children }) => {
   const token =
     localStorage.getItem("access_token") ||
     localStorage.getItem("mock_token");
-  return token ? children : <Navigate to="/" replace />;
+
+  if (!token) {
+    return <Navigate to="/" replace />;
+  }
+
+  // ✅ token expiredனா reject
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const currentTime = Date.now() / 1000;
+
+    if (payload.exp < currentTime) {
+      localStorage.removeItem("access_token");
+      return <Navigate to="/" replace />;
+    }
+  } catch {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
+// const PrivateRoute = ({ children }) => {
+//   const token =
+//     localStorage.getItem("access_token") ||
+//     localStorage.getItem("mock_token");
+//   return token ? children : <Navigate to="/" replace />;
+// };
 
 const PrivateRoutesScreen = () => {
   const navigate = useNavigate();
