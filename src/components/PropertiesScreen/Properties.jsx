@@ -15,17 +15,25 @@ import { usePermission } from "../../Utils/permissionHelper";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
+import { usePlan } from "../../Context/PlanContexts";
 
 
 const Properties = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, deleteHostelExpense, exportHostels } = useHostel();
   const { createSubscription } = useSubscription();
-
+  const { getPlansDropdown  } = usePlan();
+  const [dropdownPlans, setDropdownPlans] = useState([]);
   const location = useLocation();
 const { roleId } = useParams();
 
-
-
+  useEffect(() => {
+  getPlansDropdown().then((res) => {
+    if (res?.success) {
+      setDropdownPlans(res.data);
+    }
+  });
+}, []);
+console.log("dropdownPlans",dropdownPlans)
 const skipApi = location.state?.skipApi;
   const { RangePicker } = DatePicker;
   const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
@@ -55,6 +63,11 @@ const skipApi = location.state?.skipApi;
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [trialPlan,setTrialPlan] = useState("")
+  const [showTrialPopup, setShowTrialPopup] = useState(false);
+const [selectedItem, setSelectedItem] = useState(null);
+const [selectedTrialPlan, setSelectedTrialPlan] = useState("");
+const [planError, setPlanError] = useState("");
+const [showDropdown, setShowDropdown] = useState(false);
   console.log("startDate", startDate)
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState({
@@ -201,20 +214,25 @@ const handlePropertyClick = async (item) => {
   };
   const handleCreateSubscription = async (item) => {
 
+  if (!selectedTrialPlan) {
+    setPlanError("Please select a plan");
+    return;
+  }
+
   const payload = {
-    isTrial: item?.trialExtendable,
     trialDays: 0,
-    paidAmount:0,
-    discountAmount:0,
-  
+    paidAmount: 0,
+    discountAmount: 0,
+    planCode: selectedTrialPlan   // ✅ முக்கியம்
   };
 
-  const res = await createSubscription( 
+  const res = await createSubscription(
     item?.hostelId,
     payload
   );
-console.log("payload",payload)
+
   if (res?.success) {
+    setShowTrialPopup(false); // close popup
     setModalType("success");
     setMessage(res.message);
     setShowSuccess(true);
@@ -224,18 +242,49 @@ console.log("payload",payload)
     setTimeout(() => {
       setShowSuccess(false);
     }, 1000);
-
   } else {
-    setMenuError(res?.message);
-    setModalType("error");
-    setMessage(res?.message);
-    setShowSuccess(true);
-
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1000);
+    setPlanError(res?.message);
   }
 };
+//   const handleCreateSubscription = async (item) => {
+
+//   const payload = {
+//     // isTrial: item?.trialExtendable,
+//     trialDays: 0,
+//     paidAmount:0,
+//     discountAmount:0,
+  
+//   };
+
+//   const res = await createSubscription( 
+//     item?.hostelId,
+//     payload
+//   );
+// console.log("payload",payload)
+//   if (res?.success) {
+//     setModalType("success");
+//     setMessage(res.message);
+//     setShowSuccess(true);
+
+//     getHostels(page, pageSize, searchText);
+
+//     setTimeout(() => {
+//       setShowSuccess(false);
+//     }, 1000);
+
+//   } else {
+//     setMenuError(res?.message);
+//     setModalType("error");
+//     setMessage(res?.message);
+//     setShowSuccess(true);
+
+//     setTimeout(() => {
+//       setShowSuccess(false);
+//     }, 1000);
+//   }
+// };
+
+
 // const handleCreateSubscription = async (item) => {
 
 //    const payload = {
@@ -905,17 +954,32 @@ console.log("payload",payload)
                                   className={`w-5 h-5 ${canWrite === true ? "cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
                                 /> */}
                                 {/* {item?.hostelPlan?.currentPlan === "Trial" && item?.isTrial === "true" && ( */}
-  <img
+  {/* <img
     src={Money}
     onClick={() => {
          console.log("clicked", item , canWrite) ;
-      if (canWrite === true && item?.trialExtendable === true ) {
+      if (canWrite === true && item?.canAddTrial === true ) {
      
         handleCreateSubscription(item);
     }}}
     alt="money"
-    className={`w-5 h-5 ${(canWrite === true && item?.trialExtendable === true) ? "cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
-  />
+    className={`w-5 h-5 ${(canWrite === true && item?.canAddTrial === true) ? "cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
+  /> */}
+  <img
+  src={Money}
+  onClick={() => {
+    if (canWrite === true && item?.canAddTrial === true) {
+      setSelectedItem(item);
+      setShowTrialPopup(true);
+    }
+  }}
+  alt="money"
+  className={`w-5 h-5 ${
+    canWrite === true && item?.canAddTrial === true
+      ? "cursor-pointer"
+      : "opacity-40 cursor-not-allowed"
+  }`}
+/>
 {/* // )} */}
                               </div>
                             </td>
@@ -1128,6 +1192,104 @@ console.log("payload",payload)
             </div>
           </div>
         )}
+        {showTrialPopup && (
+  <div
+    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+    onClick={() => {
+      setShowTrialPopup(false);
+      setSelectedTrialPlan("");
+      setPlanError("");
+    }}
+  >
+    <div
+      className="bg-white rounded-xl shadow-xl w-[350px] p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-semibold mb-4 text-left">Select Trial Plan</h2>
+
+      {/* DROPDOWN */}
+   <div className="relative">
+
+  {/* SELECT BOX */}
+  <div
+    onClick={() => setShowDropdown(!showDropdown)}
+    className="w-full border border-gray-300 rounded-lg px-3 py-2 flex justify-between items-center cursor-pointer"
+  >
+    <span className="text-sm">
+      {dropdownPlans?.trialPlans?.find(p => p.planCode === selectedTrialPlan)?.planName
+        ? `${dropdownPlans.trialPlans.find(p => p.planCode === selectedTrialPlan).planName} - ${selectedTrialPlan}`
+        : "Select Plan"}
+    </span>
+
+ 
+      <svg
+                  className={`w-4 h-4 text-gray-500 transition-transform ${showDropdown ? "rotate-180" : ""
+                    }`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+  </div>
+
+  {/* DROPDOWN LIST */}
+  {showDropdown && (
+    <div className="absolute mt-1 w-full bg-white border rounded-lg shadow-md max-h-40 overflow-y-auto z-50">
+
+      <div
+        onClick={() => {
+          setSelectedTrialPlan("");
+          setShowDropdown(false);
+        }}
+        className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+      >
+        Select Plan
+      </div>
+
+      {dropdownPlans?.trialPlans?.map((plan) => (
+        <div
+          key={plan.planId}
+          onClick={() => {
+            setSelectedTrialPlan(plan.planCode);
+            setPlanError("");
+            setShowDropdown(false);
+          }}
+          className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+        >
+          {plan.planName} - {plan.planCode} ({plan.duration} days)
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+      {planError && <ErrorMessage message={planError} type="error" />}
+
+      {/* BUTTONS */}
+      <div className="flex justify-end gap-3 mt-4">
+        <button
+         onClick={() => {
+  setShowTrialPopup(false);
+  setSelectedTrialPlan("");
+  setPlanError("");
+}}
+          className="px-4 py-2 border rounded-lg"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => handleCreateSubscription(selectedItem)}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       </DashboardLayout>
     </>
   );
