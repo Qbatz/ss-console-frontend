@@ -41,19 +41,32 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
 
-    if (error?.response?.status === 401) {
+    // if (error?.response?.status === 401) {
 
-      const mockToken = localStorage.getItem("mock_token");
+    //   const mockToken = localStorage.getItem("mock_token");
 
-      localStorage.removeItem("mock_token");
-      localStorage.removeItem("access_token");
+    //   localStorage.removeItem("mock_token");
+    //   localStorage.removeItem("access_token");
 
-      if (mockToken) {
-        window.location.replace("/internal/login");
-      } else {
-        window.location.replace("/");
-      }
-    }
+    //   if (mockToken) {
+    //     window.location.replace("/internal/login");
+    //   } else {
+    //     window.location.replace("/");
+    //   }
+    // }
+ if (error?.response?.status === 401) {
+
+  const isAlreadyRedirecting = sessionStorage.getItem("redirecting");
+
+  if (!isAlreadyRedirecting) {
+    sessionStorage.setItem("redirecting", "true");
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("mock_token");
+
+    window.location.replace("/");
+  }
+}
 
     return Promise.reject(error);
   }

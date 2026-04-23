@@ -246,6 +246,76 @@ const deleteTenant = async (hostelId, customerId, tenantMobile) => {
 
   }
 };
+const updateOwnerMobile = async (ownerId, mobileNumber) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.put(
+      `/v2/owners/mobile/${ownerId}`,
+      {
+        mobileNumber: mobileNumber
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+        message: res.data?.message || "Mobile updated successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg =
+      error?.response?.data?.message ||
+      error?.response?.data ||
+      "Failed to update mobile";
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const deleteOwner = async (ownerId) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.delete(
+      `/v2/owners/${ownerId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        message: res.data?.message || "Owner deleted successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg =
+      error?.response?.data?.message ||
+      error?.response?.data ||
+      "Failed to delete owner";
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <OwnersContext.Provider
@@ -254,7 +324,7 @@ const deleteTenant = async (hostelId, customerId, tenantMobile) => {
         totalItems,
         totalPages,
         loading,accessError,
-        getOwners,changeOwnerPassword,getOwnerById,getTenantSummary,updateOwnerEmail,deleteTenant   
+        getOwners,changeOwnerPassword,getOwnerById,getTenantSummary,updateOwnerEmail,deleteTenant,updateOwnerMobile,deleteOwner   
       }}
       
     >

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import OverviewSubscriptions from "./OverviewSubscription";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
@@ -31,6 +31,7 @@ const PropertyOverview = () => {
   const { owners, totalItems, totalPages, getOwners, getOwnerById } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription } = useSubscription();
+  const [hostelData, setHostelData] = useState(null);
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenants");
 
@@ -53,6 +54,7 @@ const PropertyOverview = () => {
   const [days, setDays] = useState("");
   const [daysError, setDaysError] = useState("")
   const [planCode, setPlanCode] = useState("");
+  console.log("planCode",planCode)
   const [paidAmount, setPaidAmount] = useState("");
   const [discountAmount, setDiscountAmount] = useState("");
   const [paymentProof, setPaymentProof] = useState(null);
@@ -62,17 +64,41 @@ const PropertyOverview = () => {
   const [planError, setPlanError] = useState("")
   const [proofError, setProofError] = useState("")
   const [showTrialConfirm, setShowTrialConfirm] = useState(false);
-
+const [showDropdown, setShowDropdown] = useState(false);
+const dropdownRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
 
   const loginType = localStorage.getItem("login_type");
   const showInvoices = loginType === "normal";
+const { hostelId } = useParams();
 
+  // const hostelData = location.state?.hostelData;
+  useEffect(() => {
+  const fetchData = async () => {
+    if (!hostelId) return;
 
-  const hostelData = location.state?.hostelData;
+    const res = await getHostelById(hostelId);
+
+    if (res?.success) {
+      setHostelData(res.data);
+    }
+  };
+
+  fetchData();
+}, [hostelId]);
   const trialPlan = location.state?.trialPlan;
   console.log("trialPlan", trialPlan)
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setShowDropdown(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, []);
 
   const handleHardReset = async () => {
 
@@ -420,13 +446,13 @@ const PropertyOverview = () => {
                 </button>
 
                 {/* 3️⃣ Subscription */}
-                {/* <button
+                <button
                   onClick={() => setShowPlanModal(true)}
                   className="bg-blue-600 text-white px-3 py-1 rounded text-[10px] whitespace-nowrap cursor-pointer"
                 >
                   Buy Plan
-                </button> */}
-                <button
+                </button>
+                {/* <button
                   onClick={() => setShowPlanModal(true)}
                   disabled={trialPlan?.trialExtendable === true}
                   className={`px-3 py-1 rounded text-[10px] whitespace-nowrap
@@ -436,7 +462,7 @@ const PropertyOverview = () => {
   `}
                 >
                   Buy Plan
-                </button>
+                </button> */}
 
               </div>
             </div>
@@ -653,7 +679,7 @@ const PropertyOverview = () => {
                 "invoices",
                 "activity",
                 "Amenities",
-                // "Billing Control"
+                "Configuration"
               ]
                 .map(tab => (
                   <button
@@ -817,7 +843,7 @@ const PropertyOverview = () => {
           {activeTab === "Amenities" && (
             <PropertyAmenities hostelData={hostelData} />
           )}
-          {activeTab === "Billing Control" && (
+          {activeTab === "Configuration" && (
             <ReccuringBill hostelData={hostelData} />
           )}
 
@@ -1189,22 +1215,73 @@ const PropertyOverview = () => {
             </h2>
 
             {/* Plan Code */}
-            <select
-              value={planCode}
-              onChange={(e) => {
-                setPlanCode(e.target.value);
-                setPlanError("");
-              }}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3"
-            >
-              <option value="">Select Plan</option>
+    <div className="relative w-full" ref={dropdownRef}>
 
-              {plans?.map((plan) => (
-                <option key={plan.planId} value={plan.planCode}>
-                  {plan.planCode}
-                </option>
-              ))}
-            </select>
+  {/* SELECT BOX */}
+  <div
+    onClick={() => setShowDropdown(!showDropdown)}
+    className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer mb-3 flex items-center justify-between bg-white"
+  >
+    {/* Selected text */}
+    <span
+      className={`text-sm ${
+        planCode ? "text-gray-800" : "text-gray-400"
+      }`}
+    >
+      {plans.find(p => p.planCode === planCode)?.planName || "Select Plan"}
+    </span>
+
+    {/* Arrow */}
+    <svg
+      className={`w-4 h-4 text-gray-500 transition-transform ${
+        showDropdown ? "rotate-180" : ""
+      }`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  </div>
+
+  {/* DROPDOWN LIST */}
+  {showDropdown && (
+    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow max-h-40 overflow-y-auto">
+
+      {plans?.length > 0 ? (
+        plans.map((plan) => (
+          <div
+            key={plan.planId}
+            onClick={() => {
+              setPlanCode(plan.planCode);   // ✅ store code
+              setShowDropdown(false);
+            }}
+            className={`px-3 py-2 cursor-pointer text-sm flex justify-between items-center
+              ${
+                plan.planCode === planCode
+                  ? "bg-blue-50 text-blue-600"
+                  : "hover:bg-gray-100"
+              }`}
+          >
+            <span>{plan.planName}</span>
+
+            {/* selected tick */}
+            {plan.planCode === planCode && (
+              <span className="text-blue-600">✔</span>
+            )}
+          </div>
+        ))
+      ) : (
+        <div className="px-3 py-2 text-sm text-gray-400">
+          No Plans Available
+        </div>
+      )}
+
+    </div>
+  )}
+
+</div>
             {planError && (
               <ErrorMessage message={planError} type="error" />
             )}
