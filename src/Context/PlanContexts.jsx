@@ -160,13 +160,36 @@ const addPlanFeature = async (planId, feature) => {
     setLoading(false);
   }
 };
+const getPlansDropdown = async () => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get("/v2/plans/dropdown");
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data || []
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <PlanContext.Provider
       value={{
         plans,
         loading,
         errorMsg,
-        getPlans,createPlan,updatePlan,deactivatePlan,deactivatePlanFeature,addPlanFeature,accessError
+        getPlans,createPlan,updatePlan,deactivatePlan,deactivatePlanFeature,addPlanFeature,accessError,getPlansDropdown
       }}
     >
       {children}
