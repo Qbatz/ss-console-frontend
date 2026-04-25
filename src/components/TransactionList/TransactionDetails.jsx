@@ -208,7 +208,7 @@ const TransactionsPage = () => {
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">PLAN TYPE</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Amount</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">PaymentMode</th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Transaction Ref no</th>
+                    {/* <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Transaction Ref no</th> */}
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Payment proof</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">status</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Collected By</th>
@@ -232,7 +232,7 @@ const TransactionsPage = () => {
                       <tr key={index} className="border-t border-gray-300">
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-                          TXN{item.historyId}
+                        {index + 1}
                         </td>
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
@@ -240,7 +240,7 @@ const TransactionsPage = () => {
                         </td>
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-blue-600 text-left">
-                          {item.createdBy}
+                          {item.paidBy}
                         </td>
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
@@ -262,14 +262,14 @@ const TransactionsPage = () => {
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
                           {item.paymentType || "-"}
                         </td>
-                        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
+                        {/* <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
                           __
-                        </td>
+                        </td> */}
                         {/* <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
          __
         </td> */}
 
-                        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
+                        {/* <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
                           {item.paymentProof ? (
                             <span
                               className="text-blue-600 cursor-pointer underline"
@@ -295,14 +295,41 @@ const TransactionsPage = () => {
                           ) : (
                             "--"
                           )}
-                        </td>
+                        </td> */}
+                        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
+  {item.paymentProof ? (
+    <span
+      className="text-blue-600 cursor-pointer underline"
+      onMouseEnter={(e) => {
+        setHoveredProof(item.paymentProof); // 👉 image URL
+        setPreviewPos({
+          x: e.clientX + 20,
+          y: e.clientY - 20,
+        });
+      }}
+      onMouseMove={(e) => {
+        setPreviewPos({
+          x: e.clientX + 20,
+          y: e.clientY - 20,
+        });
+      }}
+      onMouseLeave={() => {
+        setHoveredProof("");
+      }}
+    >
+      {item.paymentProofFileName || "View Proof"} {/* 👈 முக்கிய change */}
+    </span>
+  ) : (
+    "--"
+  )}
+</td>
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
                           {item.orderStatus}
                         </td>
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-                          {item.createdBy}
+                          {item.collectedBy || "__"}
                         </td>
 
                         <td className="px-4 py-2 relative">
@@ -419,7 +446,7 @@ const TransactionsPage = () => {
             <div className="h-full overflow-y-auto p-5">
 
               {/* HEADER */}
-              <div className="flex justify-between items-center mb-4 border-b">
+              <div className="flex justify-between items-center mb-4 border-b border-gray-300">
                 <div>
                   <h2 className="font-semibold text-sm text-start">
                     TXN{selectedTxn.historyId}
@@ -466,17 +493,17 @@ const TransactionsPage = () => {
       </span>
     </div>
 
-    <div className="grid grid-cols-[20px_120px_1fr] items-center gap-x-4">
+    {/* <div className="grid grid-cols-[20px_120px_1fr] items-center gap-x-4">
       <img src={Team} alt="tenants" className="w-4 h-4 opacity-70" />
       <span className="text-gray-500">Active Tenants</span>
       <span className="font-semibold text-gray-900">42</span>
-    </div>
+    </div> */}
   </div>
 </div>
 
               {/* PAYMENT BOX */}
               
-              <div className="bg-blue-100 rounded-lg p-4 text-sm mb-4 mt-3">
+              {/* <div className="bg-blue-100 rounded-lg p-4 text-sm mb-4 mt-3">
                 <div className="flex justify-between">
                   <div>
                     <p className="text-gray-500 text-xs text-start">Plan</p>
@@ -505,11 +532,64 @@ const TransactionsPage = () => {
                   <p className="text-gray-500 text-xs">Final Paid</p>
                   <p className="font-semibold">₹{selectedTxn.totalAmount}</p>
                 </div>
-              </div>
+              </div> */}
+              <div className="bg-gray-100 rounded-xl p-4 text-sm mt-3 mb-4 border border-gray-200">
+
+  {/* TITLE */}
+ <p className="text-[11px] text-gray-400 pb-2 mb-4 font-semibold tracking-wider border-b border-gray-300 text-left">
+  PAYMENT INFO
+</p>
+  {/* ROWS */}
+  <div className="space-y-3">
+
+    <div className="flex justify-between">
+      <p className="text-gray-500 text-xs">Payment Mode</p>
+      <p className="font-medium text-gray-800">
+        {selectedTxn.paymentMode || "Manual"}
+      </p>
+    </div>
+
+    <div className="flex justify-between">
+      <p className="text-gray-500 text-xs">Plan Name</p>
+      <p className="font-medium text-gray-800">
+        {selectedTxn.planName}
+      </p>
+    </div>
+
+    <div className="flex justify-between">
+      <p className="text-gray-500 text-xs">Amount</p>
+      <p className="font-medium text-gray-800">
+        ₹ {selectedTxn.totalAmount}
+      </p>
+    </div>
+
+    <div className="flex justify-between">
+      <p className="text-gray-500 text-xs">Discount Added</p>
+      <p className="font-medium text-gray-800">
+        ₹ {selectedTxn.discountAmount || 0}
+      </p>
+    </div>
+
+    <div className="flex justify-between">
+      <p className="text-gray-500 text-xs">Final Paid</p>
+      <p className="font-semibold text-gray-900">
+        ₹ {selectedTxn.totalAmount}
+      </p>
+    </div>
+
+    <div className="flex justify-between">
+      <p className="text-gray-500 text-xs">Collected by</p>
+      <p className="font-medium text-gray-800">
+        {selectedTxn.collectedBy || "-"}
+      </p>
+    </div>
+
+  </div>
+</div>
               
 
               {/* IMAGE */}
-              <div className="rounded-lg overflow-hidden border">
+              <div className="rounded-lg overflow-hidden border border-gray-300">
                 <img
                   src={selectedTxn.paymentProof}
                   className="w-full h-auto object-contain"

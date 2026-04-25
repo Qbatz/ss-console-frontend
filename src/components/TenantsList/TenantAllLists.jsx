@@ -10,7 +10,7 @@ import Edit from "../../assets/editicon.png";
 
 const TenantsList = () => {
 
-  const { getTenantSummary,loading, deleteTenant, accessError } = useOwners();
+  const { getTenantSummary, loading, deleteTenant, accessError } = useOwners();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenant Summary");
   const menuRef = useRef(null);
@@ -46,23 +46,23 @@ const TenantsList = () => {
     fetchData();
 
   }, [page, size, search]);
-useEffect(() => {
+  useEffect(() => {
 
-  const handleClickOutside = (event) => {
+    const handleClickOutside = (event) => {
 
-    if (menuRef.current && !menuRef.current.contains(event.target)) {
-      setOpenMenu(null);
-    }
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenu(null);
+      }
 
-  };
+    };
 
-  document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
 
-}, []);
+  }, []);
 
   // useEffect(() => {
   //   const handleClickOutside = (event) => {
@@ -85,36 +85,36 @@ useEffect(() => {
   };
   const handleDeleteTenant = async () => {
 
-  if (!selectedTenant) return;
+    if (!selectedTenant) return;
 
-  const res = await deleteTenant(
-    selectedTenant.hostelId,
-    selectedTenant.customerId,
-    phone
-  );
+    const res = await deleteTenant(
+      selectedTenant.hostelId,
+      selectedTenant.customerId,
+      phone
+    );
 
-  if (res?.success) {
+    if (res?.success) {
 
-    setShowEditModal(false);
-    setPhone("");
+      setShowEditModal(false);
+      setPhone("");
 
-    // refresh list
-    const refresh = await getTenantSummary({
-      page,
-      size,
-      tenantName: search
-    });
+      // refresh list
+      const refresh = await getTenantSummary({
+        page,
+        size,
+        tenantName: search
+      });
 
-    if (refresh?.success) {
-      setTenants(refresh.data.content || []);
-      setTotalItems(refresh.data.totalItems || 0);
-      setTotalPages(refresh.data.totalPages || 0);
+      if (refresh?.success) {
+        setTenants(refresh.data.content || []);
+        setTotalItems(refresh.data.totalItems || 0);
+        setTotalPages(refresh.data.totalPages || 0);
+      }
+
+    } else {
+      alert(res?.message || "Delete failed");
     }
-
-  } else {
-    alert(res?.message || "Delete failed");
-  }
-};
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -241,166 +241,166 @@ useEffect(() => {
                   </tr>
                 </thead>
 
-              <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200">
 
-{loading ? (
+                  {loading ? (
 
-  // 🔥 Skeleton Loader
-  Array.from({ length: size }).map((_, i) => (
-    <tr key={i} className="animate-pulse text-[12px]">
+                    // 🔥 Skeleton Loader
+                    Array.from({ length: size }).map((_, i) => (
+                      <tr key={i} className="animate-pulse text-[12px]">
 
-      {/* ID */}
-      <td className="px-4 py-2">
-        <div className="h-3 bg-gray-200 rounded w-6"></div>
-      </td>
+                        {/* ID */}
+                        <td className="px-4 py-2">
+                          <div className="h-3 bg-gray-200 rounded w-6"></div>
+                        </td>
 
-      {/* Name + Avatar */}
-      <td className="px-6 py-2 flex items-center gap-3">
-        <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-        <div className="h-3 bg-gray-200 rounded w-24"></div>
-      </td>
+                        {/* Name + Avatar */}
+                        <td className="px-6 py-2 flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                          <div className="h-3 bg-gray-200 rounded w-24"></div>
+                        </td>
 
-      {/* Mobile */}
-      <td className="px-4 py-2">
-        <div className="h-3 bg-gray-200 rounded w-20"></div>
-      </td>
+                        {/* Mobile */}
+                        <td className="px-4 py-2">
+                          <div className="h-3 bg-gray-200 rounded w-20"></div>
+                        </td>
 
-      {/* Hostel */}
-      <td className="px-4 py-2">
-        <div className="h-3 bg-gray-200 rounded w-24"></div>
-      </td>
+                        {/* Hostel */}
+                        <td className="px-4 py-2">
+                          <div className="h-3 bg-gray-200 rounded w-24"></div>
+                        </td>
 
-      {/* Status */}
-      <td className="px-4 py-2">
-        <div className="h-5 bg-gray-200 rounded-full w-20"></div>
-      </td>
+                        {/* Status */}
+                        <td className="px-4 py-2">
+                          <div className="h-5 bg-gray-200 rounded-full w-20"></div>
+                        </td>
 
-      {/* Payable */}
-      <td className="px-4 py-2">
-        <div className="h-3 bg-gray-200 rounded w-16"></div>
-      </td>
+                        {/* Payable */}
+                        <td className="px-4 py-2">
+                          <div className="h-3 bg-gray-200 rounded w-16"></div>
+                        </td>
 
-      {/* Paid */}
-      <td className="px-4 py-2">
-        <div className="h-3 bg-gray-200 rounded w-16"></div>
-      </td>
+                        {/* Paid */}
+                        <td className="px-4 py-2">
+                          <div className="h-3 bg-gray-200 rounded w-16"></div>
+                        </td>
 
-      {/* Due */}
-      <td className="px-4 py-2">
-        <div className="h-3 bg-gray-200 rounded w-16"></div>
-      </td>
+                        {/* Due */}
+                        <td className="px-4 py-2">
+                          <div className="h-3 bg-gray-200 rounded w-16"></div>
+                        </td>
 
-      {/* Action */}
-      <td className="px-4 py-2">
-        <div className="h-5 bg-gray-200 rounded w-6"></div>
-      </td>
+                        {/* Action */}
+                        <td className="px-4 py-2">
+                          <div className="h-5 bg-gray-200 rounded w-6"></div>
+                        </td>
 
-    </tr>
-  ))
+                      </tr>
+                    ))
 
-) : tenants.length > 0 ? (
+                  ) : tenants.length > 0 ? (
 
-  tenants.map((item, index) => (
-    <tr key={item.customerId} className="border-b border-gray-300 hover:bg-gray-50 text-left whitespace-nowrap">
-                      <td className="px-4 py-1">
-                        {(page - 1) * size + index + 1}
-                      </td>
+                    tenants.map((item, index) => (
+                      <tr key={item.customerId} className="border-b border-gray-300 hover:bg-gray-50 text-left whitespace-nowrap">
+                        <td className="px-4 py-1">
+                          {(page - 1) * size + index + 1}
+                        </td>
 
-                      <td className="px-6 py-1 flex items-center gap-3 text-left">
+                        <td className="px-6 py-1 flex items-center gap-3 text-left">
 
-                        {item.profilePic ? (
-                          <img
-                            src={item.profilePic}
-                            alt={item.fullName}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-                            {item.initials}
-                          </div>
-                        )}
+                          {item.profilePic ? (
+                            <img
+                              src={item.profilePic}
+                              alt={item.fullName}
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                              {item.initials}
+                            </div>
+                          )}
 
-                        {item.fullName}
+                          {item.fullName}
 
-                      </td>
+                        </td>
 
-                      <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
-                        {item.mobile}
-                      </td>
+                        <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
+                          {item.mobile}
+                        </td>
 
-                      <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
-                        {item.hostelName}
-                      </td>
-
-                    
-                      <td className="px-4 py-2 text-left whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(item.currentStatus)}`}>
-                          {item.currentStatus}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
-                        ₹{item.payableAmount}
-                      </td>
-
-                      <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
-                        ₹{item.paidAmount ?? 0}
-                      </td>
-
-                      <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
-                        ₹{item.dueAmount}
-                      </td>
+                        <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
+                          {item.hostelName}
+                        </td>
 
 
-                      <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap relative">
-                        <div className="flex items-center gap-3" >
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenMenu(openMenu === index ? null : index);
-                            }}
-                            className="text-gray-500 hover:text-gray-700 cursor-pointer"
-                          >
-                            <img src={Circle} alt="circle" className="w-5 h-5" />
-                          </button>
+                        <td className="px-4 py-2 text-left whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(item.currentStatus)}`}>
+                            {item.currentStatus}
+                          </span>
+                        </td>
 
-                         {openMenu === index && (
-  <div
-    ref={menuRef}
-    onClick={(e) => e.stopPropagation()}
-    className="absolute right-19 mt-2 w-28 bg-white border rounded-lg border-gray-300 shadow-lg z-20"
-  >
+                        <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
+                          ₹{item.payableAmount}
+                        </td>
 
-    <button
-      disabled={canDelete === false}
-      onClick={() => canDelete === true && handleEdit(item)}
-      className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm 
+                        <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
+                          ₹{item.paidAmount ?? 0}
+                        </td>
+
+                        <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
+                          ₹{item.dueAmount}
+                        </td>
+
+
+                        <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap relative">
+                          <div className="flex items-center gap-3" >
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenMenu(openMenu === index ? null : index);
+                              }}
+                              className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                            >
+                              <img src={Circle} alt="circle" className="w-5 h-5" />
+                            </button>
+
+                            {openMenu === index && (
+                              <div
+                                ref={menuRef}
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute right-19 mt-2 w-28 bg-white border rounded-lg border-gray-300 shadow-lg z-20"
+                              >
+
+                                <button
+                                  disabled={canDelete === false}
+                                  onClick={() => canDelete === true && handleEdit(item)}
+                                  className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm 
       ${canDelete ? "hover:bg-sky-100 cursor-pointer" : "text-gray-400 cursor-not-allowed"}`}
-    >
-      <img src={Edit} alt="Edit" className="w-4 h-4" />
-      Delete
-    </button>
+                                >
+                                  <img src={Edit} alt="Edit" className="w-4 h-4" />
+                                  Delete
+                                </button>
 
-  </div>
-)}
-                        </div>
+                              </div>
+                            )}
+                          </div>
 
+                        </td>
+
+                      </tr>
+                    ))
+
+                  ) : (
+
+                    <tr>
+                      <td colSpan="9" className="text-center py-6 text-gray-400">
+                        No Data Found
                       </td>
-
                     </tr>
-  ))
 
-) : (
+                  )}
 
-  <tr>
-    <td colSpan="9" className="text-center py-6 text-gray-400">
-      No Data Found
-    </td>
-  </tr>
-
-)}
-
-</tbody>
+                </tbody>
 
               </table>
 
@@ -489,7 +489,7 @@ useEffect(() => {
             </button>
 
             <h2 className="text-lg font-semibold text-gray-800 mb-4 text-left">
-             Phone Number <span className="text-red-400">*</span>
+              Phone Number <span className="text-red-400">*</span>
             </h2>
 
             <div className="space-y-4">
@@ -503,11 +503,11 @@ useEffect(() => {
               />
 
               <button
-  onClick={handleDeleteTenant}
-  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition"
->
-  Submit
-</button>
+                onClick={handleDeleteTenant}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition"
+              >
+                Submit
+              </button>
 
             </div>
 

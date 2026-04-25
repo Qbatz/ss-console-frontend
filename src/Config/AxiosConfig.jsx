@@ -54,19 +54,19 @@ axiosInstance.interceptors.response.use(
     //     window.location.replace("/");
     //   }
     // }
- if (error?.response?.status === 401) {
+    if (error?.response?.status === 401) {
 
-  const isAlreadyRedirecting = sessionStorage.getItem("redirecting");
+      const isAlreadyRedirecting = sessionStorage.getItem("redirecting");
 
-  if (!isAlreadyRedirecting) {
-    sessionStorage.setItem("redirecting", "true");
+      if (!isAlreadyRedirecting) {
+        sessionStorage.setItem("redirecting", "true");
 
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("mock_token");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("mock_token");
 
-    window.location.replace("/");
-  }
-}
+        window.location.replace("/");
+      }
+    }
 
     return Promise.reject(error);
   }
