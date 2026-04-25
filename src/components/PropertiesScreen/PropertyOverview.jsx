@@ -27,7 +27,7 @@ import { useRole } from "../../Context/RoleContext";
 import { usePlan } from "../../Context/PlanContexts";
 import { useSubscription } from "../../Context/SubscriptionContext";
 const PropertyOverview = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError } = useHostel();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError,  } = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription } = useSubscription();

@@ -16,7 +16,7 @@ import Change from "../../assets/change.png"
 
 
 const RecurringBill = ({ hostelData }) => {
-    const { getRecurringHostels, generateRecurringInvoice } = useHostel();
+    const { getRecurringHostels, generateRecurringInvoice,updateBillingRule} = useHostel();
     const [reccuringData, setReccuringData] = useState([])
     const [modalType, setModalType] = useState("success");
     const [showSuccess, setShowSuccess] = useState(false);
@@ -103,6 +103,38 @@ const end = parseDate(hostelData?.currentBillingRules?.currentPeriodEndDate);
         }
 
     };
+    const handleUpdateSchedule = async () => {
+  if (!confirmManual) return;
+
+  const payload = {
+    billingModel: billingType,
+  };
+
+  const res = await updateBillingRule(
+    hostelData?.hostelId,
+    payload
+  );
+
+  if (res?.success) {
+    setShowScheduleModal(false);
+
+    // refresh data
+    await getHostelById(hostelData?.hostelId);
+
+    setModalType("success");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+  } else {
+    setModalType("error");
+    setMessage(res?.message);
+    setShowSuccess(true);
+  }
+
+  setTimeout(() => {
+    setShowSuccess(false);
+  }, 1000);
+};
     return (
    <div className="p-5">
 
@@ -460,16 +492,17 @@ const end = parseDate(hostelData?.currentBillingRules?.currentPeriodEndDate);
           Cancel
         </button>
 
-        <button
-          disabled={!confirmManual}
-          className={`px-4 py-2 rounded-lg text-sm text-white ${
-            confirmManual
-              ? "bg-blue-600 cursor-pointer"
-              : "bg-blue-300 cursor-not-allowed"
-          }`}
-        >
-          Proceed
-        </button>
+      <button
+  onClick={handleUpdateSchedule}
+  disabled={!confirmManual}
+  className={`px-4 py-2 rounded-lg text-sm text-white ${
+    confirmManual
+      ? "bg-blue-600"
+      : "bg-blue-300 cursor-not-allowed"
+  }`}
+>
+  Proceed
+</button>
       </div>
 
     </div>

@@ -240,7 +240,7 @@ const TransactionsPage = () => {
                         </td>
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-blue-600 text-left">
-                          {item.createdBy}
+                          {item.paidBy}
                         </td>
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
