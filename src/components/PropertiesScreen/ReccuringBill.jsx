@@ -12,6 +12,7 @@ import { useHostel } from "../../Context/HostelListContext";
 import Circle from "../../assets/menucircle.png";
 import Toast from "../SuccessModal/ToastDesign";
 import Item from "antd/es/list/Item";
+import Change from "../../assets/change.png"
 
 
 const RecurringBill = ({ hostelData }) => {
@@ -21,6 +22,9 @@ const RecurringBill = ({ hostelData }) => {
     const [showSuccess, setShowSuccess] = useState(false);
     const [showBillingModal, setShowBillingModal] = useState(false);
     const [message, setMessage] = useState("");
+    const [showScheduleModal, setShowScheduleModal] = useState(false);
+const [billingType, setBillingType] = useState("PREPAID");
+const [confirmManual, setConfirmManual] = useState(false);
     useEffect(() => {
         fetchRecurring();
     }, []);
@@ -127,8 +131,26 @@ const end = parseDate(hostelData?.currentBillingRules?.currentPeriodEndDate);
         <p className="text-gray-800 font-medium">{hostelData?.currentBillingRules?.typeOfBilling}</p>
       </div>
 
-      <div>
-  <p className="text-gray-400 mb-1">Billing Cycle</p>
+  <div>
+  <p className="text-gray-400 mb-1 flex items-center gap-2">
+    Billing Cycle
+
+  
+    <div className="relative group cursor-pointer">
+     <img
+  src={Change}
+  className="w-3 h-3 cursor-pointer"
+  onClick={() => setShowScheduleModal(true)}
+/>
+
+     
+      <div className="absolute left-1/2 -translate-x-1/2 top-[-30px] 
+                      bg-gray-600 text-white text-[11px] px-2 py-[2px] rounded 
+                      opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+        Change Schedule
+      </div>
+    </div>
+  </p>
 
   <p className="text-gray-800 font-medium flex items-center gap-2">
     {hostelData?.currentBillingRules?.billingStartDay} → {hostelData?.currentBillingRules?.billingEndDay} -
@@ -366,6 +388,92 @@ const end = parseDate(hostelData?.currentBillingRules?.currentPeriodEndDate);
       </div>
     </div>
   </>
+)}
+{showScheduleModal && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+
+    {/* Overlay */}
+    <div
+      className="absolute inset-0 bg-black/40"
+      onClick={() => setShowScheduleModal(false)}
+    ></div>
+
+    {/* Modal */}
+    <div
+      className="relative bg-white rounded-xl shadow-xl w-[400px] p-5 z-[10000]"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-sm font-semibold">
+          Change Bill Schedule
+        </h2>
+
+        <button
+          onClick={() => setShowScheduleModal(false)}
+          className="text-red-500 text-lg cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Dropdown */}
+      <div className="mb-3">
+        <label className="text-xs text-gray-500 mb-1 block">
+          Billing Schedule
+        </label>
+
+        <select
+          value={billingType}
+          onChange={(e) => setBillingType(e.target.value)}
+          className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-100"
+        >
+          <option value="PREPAID">Prepaid</option>
+          <option value="POSTPAID">Postpaid</option>
+        </select>
+      </div>
+
+      {/* Info Box */}
+      <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs rounded-lg px-3 py-2 mb-3">
+        ⚠ It will reflects on from the next Billing Cycle
+      </div>
+
+      {/* Checkbox */}
+      <div className="flex items-start gap-2 mb-6">
+        <input
+          type="checkbox"
+          checked={confirmManual}
+          onChange={(e) => setConfirmManual(e.target.checked)}
+        />
+        <p className="text-xs text-gray-600">
+          I confirm that I want to generate invoices manually.
+        </p>
+      </div>
+
+      {/* Footer Buttons */}
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setShowScheduleModal(false)}
+          className="px-4 py-2 border rounded-lg text-sm"
+        >
+          Cancel
+        </button>
+
+        <button
+          disabled={!confirmManual}
+          className={`px-4 py-2 rounded-lg text-sm text-white ${
+            confirmManual
+              ? "bg-blue-600 cursor-pointer"
+              : "bg-blue-300 cursor-not-allowed"
+          }`}
+        >
+          Proceed
+        </button>
+      </div>
+
+    </div>
+  </div>
 )}
 
 </div>

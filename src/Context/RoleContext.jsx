@@ -367,6 +367,29 @@ const getAgentDetails = async (agentId) => {
   }
 };
 
+const updateAdminRole = async (agentId, payload) => {
+  try {
+    setLoading(true);
+
+    const res = await api.put(
+      `/v2/admin/update-role/${agentId}`,
+      payload
+    );
+
+    if (res.status === 200) {
+      await getAllAgents(); // refresh table
+      return { success: true, message: "Role Updated Successfully" };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
     <RoleContext.Provider
       value={{
@@ -376,7 +399,9 @@ const getAgentDetails = async (agentId) => {
         errorMsg,
         adminDetails,  
         fetchModules,
-        getAgentRoles,createAgentRole,createAdmin,updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError,deactivateAgent, adminPermissions,assignStaff,reactivateAgent,getAgentDetails
+        getAgentRoles,createAgentRole,createAdmin,
+        updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError,deactivateAgent, adminPermissions,
+        assignStaff,reactivateAgent,getAgentDetails,updateAdminRole
       }}
     >
       {children}

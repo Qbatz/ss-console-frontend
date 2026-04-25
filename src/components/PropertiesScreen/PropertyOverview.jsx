@@ -188,7 +188,7 @@ const PropertyOverview = () => {
 
   };
 
- 
+
 
   const handleTrialOnly = async () => {
 
@@ -290,7 +290,7 @@ const PropertyOverview = () => {
       }, 1000);
     }
   };
- 
+
 
   const resetPlanForm = () => {
     setPlanCode("");
@@ -332,7 +332,7 @@ const PropertyOverview = () => {
     if (hasError) return;
 
     const payload = {
-    
+
       trialDays: 0,
       planCode: planCode,
       paidAmount: Number(paidAmount),
@@ -370,15 +370,15 @@ const PropertyOverview = () => {
       }, 1000);
     }
   };
- 
 
-if (!hostelData) {
-  return (
-    <div className="flex items-center justify-center h-[300px]">
-      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-    </div>
-  );
-}
+
+  if (!hostelData) {
+    return (
+      <div className="flex items-center justify-center h-[300px]">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -392,9 +392,9 @@ if (!hostelData) {
 
 
         <div className="flex items-center ">
-         
+
           <img src={arrowleft} height={20} width={20} className="text-xl cursor-pointer"
-            
+
             onClick={() => navigate(`/properties/${adminDetails?.roleId}`, {
               state: { skipApi: true }
             })}
@@ -967,7 +967,7 @@ if (!hostelData) {
           </div>
         </div>
       )}
-    
+
       {showBillingRule && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
 
@@ -1356,7 +1356,7 @@ if (!hostelData) {
             {paidByError && (
               <ErrorMessage message={paidByError} type="error" />
             )}
-           
+
             <input
               type="number"
               placeholder={
