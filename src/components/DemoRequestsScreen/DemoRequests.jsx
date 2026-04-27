@@ -38,7 +38,20 @@ const [selectedId, setSelectedId] = useState(null);
   const [openDrawer, setOpenDrawer] = useState(false);
 
   const [tableLoading, setTableLoading] = useState(false);
-
+  const [showCommentModal, setShowCommentModal] = useState(false);
+const [commentText, setCommentText] = useState("");
+const [comments, setComments] = useState([
+  {
+    comment: "Need a Query Support for Client",
+    date: "25 Dec 2025, 1:00 PM",
+    user: "Priya"
+  },
+  {
+    comment: "Need a Query Support for Client",
+    date: "25 Dec 2025, 1:00 PM",
+    user: "Priya"
+  }
+]);
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -344,17 +357,26 @@ const [selectedId, setSelectedId] = useState(null);
                                   setShowModal(true);
                                   setOpenMenu(null);
                                 }}
-                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                               >
                                 Assign Staff
                               </button>
-                              <button
+                              <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
   onClick={() => {
     setSelectedId(item.requestId);
     setOpenStatusModal(true);
   }}
 >
   Change Status
+</button>
+   <button
+  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+  onClick={() => {
+    setSelectedItem(item);
+    setShowCommentModal(true);
+  }}
+>
+  Add Comments
 </button>
                             </div>
                           )}
@@ -542,6 +564,120 @@ const [selectedId, setSelectedId] = useState(null);
   demoRequestId={selectedId}
    refreshList={fetchData} 
 />
+{showCommentModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
+
+    {/* Overlay */}
+    <div
+      className="absolute inset-0"
+      onClick={() => setShowCommentModal(false)}
+    ></div>
+
+    {/* Modal */}
+    <div
+      className="relative bg-white rounded-xl w-[420px] shadow-xl z-[10000]"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center px-5 py-3 border-b">
+        <h2 className="text-sm font-semibold">📄 Internal Notes</h2>
+        <button
+          onClick={() => setShowCommentModal(false)}
+          className="text-red-500 text-lg"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* BODY */}
+      <div className="p-5">
+
+        <label className="text-xs text-gray-500 mb-1 block">
+          Additional Comments <span className="text-red-500">*</span>
+        </label>
+
+        {/* TEXTAREA */}
+        <textarea
+          placeholder="Comment here"
+          value={commentText}
+          onChange={(e) => setCommentText(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm h-24 resize-none"
+        />
+
+        {/* ADD BUTTON */}
+        <div className="flex justify-end mt-3">
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
+          >
+            ➤ Add
+          </button>
+        </div>
+
+        {/* COMMENTS LIST */}
+        <p className="text-[11px] text-gray-400 mt-5 mb-2">
+          ALL COMMENTS
+        </p>
+
+        <div className="space-y-4 max-h-[100px] overflow-y-auto">
+
+  {comments.map((item, index) => (
+    <div key={index} className="flex gap-3">
+
+      {/* LEFT ICON + LINE */}
+      <div className="flex flex-col items-center">
+        
+        {/* Circle Icon */}
+        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+          💬
+        </div>
+
+        {/* Vertical Line */}
+        {index !== comments.length - 1 && (
+          <div className="w-[1px] flex-1 bg-gray-300 mt-1"></div>
+        )}
+      </div>
+
+      {/* RIGHT CONTENT */}
+      <div className="flex-1 bg-gray-50 rounded-lg p-3 border border-gray-300">
+
+        <p className="text-sm font-medium text-gray-800">
+          {item.comment}
+        </p>
+
+        <p className="text-xs text-gray-500 mt-1">
+          {item.date}
+        </p>
+
+        <p className="text-xs text-gray-400">
+          Added by {item.user}
+        </p>
+
+      </div>
+    </div>
+  ))}
+
+</div>
+
+      </div>
+
+      {/* FOOTER */}
+      <div className="flex justify-end gap-3 p-4 border-t">
+        <button
+          onClick={() => setShowCommentModal(false)}
+          className="px-4 py-2 border rounded-lg text-sm"
+        >
+          Cancel
+        </button>
+
+        <button className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm">
+          Proceed
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };

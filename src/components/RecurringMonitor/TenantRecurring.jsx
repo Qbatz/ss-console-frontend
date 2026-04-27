@@ -777,13 +777,13 @@ const TenantRecurring = () => {
                         <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">Property</th>
                         <th className=" py-3 w-[150px] whitespace-nowrap text-left">Tenant Name</th>
                         {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Sub Status</th> */}
-                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Recurring Status</th>
+                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Sub Status</th>
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Region / City</th>
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Billing Schedule</th>
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Billingmodel</th>
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Recurring mode</th>
                         {/* <th className="px-4 py-3 w-[150px] whitespace-nowrap">Tenant Count</th> */}
-                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Sub Status</th>
+                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Recurring Status</th>
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Actions</th>
                       </tr>
                     </thead>
@@ -935,11 +935,14 @@ const TenantRecurring = () => {
 
                                 <td className="text-left text-[12px]">{isTableView ? "--" : item.fullName}</td>
 
-                                <td className="text-[12px]">
+                                {/* <td className="text-[12px]">
                                   {isTableView
                                     ? "--"
                                     : item.recurringStatus ? "Generated" : "Blocked"}
-                                </td>
+                                </td> */}
+                                                             <td className="text-[12px]">
+  {item.isSubscriptionActive ? "Active" : "Blocked"}
+</td>
 
                                 <td className="text-left text-[12px]">
                                   {isTableView
@@ -957,10 +960,19 @@ const TenantRecurring = () => {
 
                                 <td className="text-[12px]">{isTableView ? "--" : item.recurringMode || "--"}</td>
 
+                                {/* <td className="text-[12px]">
+                                  {isTableView
+                                    ? (item.isSubscriptionActive ? "Active" : "Inactive")
+                                    : (item.recurringStatus ? "Generated" : "Not Generated")}
+                                </td> */}
+                                {/* <td className="text-[12px]">
+  {item.isSubscriptionActive ? "Active" : "Inactive"}
+</td> */}
+
                                 <td className="text-[12px]">
                                   {isTableView
-                                    ? (item.subscriptionActive ? "Active" : "Inactive")
-                                    : (item.recurringStatus ? "Generated" : "Not Generated")}
+                                    ? "--"
+                                    : item.recurringStatus ? "Generated" : "Not Generated"}
                                 </td>
 
                                 <td>
