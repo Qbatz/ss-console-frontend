@@ -3,6 +3,7 @@ import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import Search from "../../assets/Search.png";
 import AddAdmin from "./AddAdmin";
 import { useRole } from "../../Context/RoleContext";
+import { useNavigate } from "react-router-dom";
 import swap from "../../assets/arrowswap.png";
 import LoginImg from "../../assets/LoginImg.png";
 import Add from "../../assets/add_admin.png";
@@ -14,6 +15,7 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 
 const IamAdminUser = () => {
+  const navigate = useNavigate();
   const { getAdminDetails, loading, agents, getAllAgents, accessError, deactivateAgent, reactivateAgent, getAgentDetails, getAgentRoles, agentRoles, updateAdminRole } = useRole();
 
   const [admin, setAdmin] = useState(null);
@@ -31,7 +33,7 @@ const IamAdminUser = () => {
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState("");
-  const [roleError,setRoleError] = useState("")
+  const [roleError, setRoleError] = useState("")
 
 
   console.log("agents", agents)
@@ -111,41 +113,41 @@ const IamAdminUser = () => {
     }
   };
   const handleUpdateRole = async () => {
-  if (!selectedRoleId) {
-    setRoleError("Please select a role");
-    return;
-  }
+    if (!selectedRoleId) {
+      setRoleError("Please select a role");
+      return;
+    }
 
-  // 🔥 No changes check
-  if (Number(selectedRoleId) === selectedUser.roleId) {
-    setRoleError("No changes detected");
-    return;
-  }
+    // 🔥 No changes check
+    if (Number(selectedRoleId) === selectedUser.roleId) {
+      setRoleError("No changes detected");
+      return;
+    }
 
-  const payload = {
-    roleId: Number(selectedRoleId)
+    const payload = {
+      roleId: Number(selectedRoleId)
+    };
+
+    const res = await updateAdminRole(
+      selectedUser.agentId,
+      payload
+    );
+
+    if (res?.success) {
+      setModalType("success");
+      setMessage(res.message);
+      setShowSuccess(true);
+      await getAllAgents();
+
+      setTimeout(() => setShowSuccess(false), 1500);
+    } else {
+      setModalType("error");
+      setMessage(res.message);
+      setShowSuccess(true);
+
+      setTimeout(() => setShowSuccess(false), 1500);
+    }
   };
-
-  const res = await updateAdminRole(
-    selectedUser.agentId,
-    payload
-  );
-
-  if (res?.success) {
-    setModalType("success");
-    setMessage(res.message);
-    setShowSuccess(true);
-    await getAllAgents();
-
-    setTimeout(() => setShowSuccess(false), 1500);
-  } else {
-    setModalType("error");
-    setMessage(res.message);
-    setShowSuccess(true);
-
-    setTimeout(() => setShowSuccess(false), 1500);
-  }
-};
   // const handleUpdateRole = async () => {
   //   if (!selectedRoleId) {
   //     setRoleError("Please select a role");
@@ -174,9 +176,9 @@ const IamAdminUser = () => {
   //     setTimeout(() => setShowSuccess(false), 1500);
   //   }
 
-   
 
-    
+
+
 
 
   // };
@@ -337,7 +339,14 @@ const IamAdminUser = () => {
                             key={user.agentId}
                             className="border-b last:border-0 hover:bg-gray-50 border-gray-300"
                           >
-                            <td className="px-4 py-1 text-left font-semibold text-xs whitespace-nowrap text-blue-700">
+                            {/* <td className="px-4 py-1 text-left font-semibold text-xs whitespace-nowrap text-blue-700">
+                              {user?.fullName}
+                            </td> */}
+
+                            <td
+                              onClick={() => navigate(`/iam-user/${user.agentId}`)}
+                              className="px-4 py-1 text-left font-semibold text-xs whitespace-nowrap text-blue-700 cursor-pointer hover:underline"
+                            >
                               {user?.fullName}
                             </td>
 
@@ -873,11 +882,11 @@ const IamAdminUser = () => {
           {/* Overlay */}
           <div
             className="absolute inset-0 bg-black/40"
-          onClick={() => {
-  setShowEditModal(false);
-  setRoleError("");
-  setSelectedRoleId("");
-}}
+            onClick={() => {
+              setShowEditModal(false);
+              setRoleError("");
+              setSelectedRoleId("");
+            }}
           ></div>
 
           {/* Modal */}
@@ -893,10 +902,10 @@ const IamAdminUser = () => {
             {/* DROPDOWN */}
             <select
               value={selectedRoleId}
-             onChange={(e) => {
-  setSelectedRoleId(e.target.value);
-  setRoleError("");
-}}
+              onChange={(e) => {
+                setSelectedRoleId(e.target.value);
+                setRoleError("");
+              }}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4"
             >
               <option value="">Select Role</option>
@@ -907,17 +916,17 @@ const IamAdminUser = () => {
                 </option>
               ))}
             </select>
- {roleError && (
+            {roleError && (
               <ErrorMessage message={roleError} type="error" />
             )}
             {/* Buttons */}
             <div className="flex justify-end gap-3">
               <button
-              onClick={() => {
-  setShowEditModal(false);
-  setRoleError("");
-  setSelectedRoleId("");
-}}
+                onClick={() => {
+                  setShowEditModal(false);
+                  setRoleError("");
+                  setSelectedRoleId("");
+                }}
                 className="px-4 py-2 border rounded-lg cursor-pointer"
               >
                 Cancel
