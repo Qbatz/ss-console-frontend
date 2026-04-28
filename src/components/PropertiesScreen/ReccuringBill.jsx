@@ -111,25 +111,25 @@ const RecurringBill = ({ hostelData }) => {
 
   };
   const isInvalidChange =
-  hostelData?.currentBillingRules?.typeOfBilling === "JOINING_DATE_BASED" &&
-  billingType === "POSTPAID";
+    hostelData?.currentBillingRules?.typeOfBilling === "JOINING_DATE_BASED" &&
+    billingType === "POSTPAID";
   const isJoiningBased =
-  hostelData?.currentBillingRules?.typeOfBilling === "JOINING_DATE_BASED";
+    hostelData?.currentBillingRules?.typeOfBilling === "JOINING_DATE_BASED";
 
   const handleUpdateSchedule = async () => {
 
     const currentModel = String(hostelData?.currentBillingRules?.billingModel || "");
     const selectedModel = String(billingType || "");
- if (hostelData?.currentBillingRules?.typeOfBilling === "JOINING_DATE_BASED") {
-  setModalType("error");
-  setMessage("Cannot change billing model for Joining Date Based");
-  setShowSuccess(true);
+    if (hostelData?.currentBillingRules?.typeOfBilling === "JOINING_DATE_BASED") {
+      setModalType("error");
+      setMessage("Cannot change billing model for Joining Date Based");
+      setShowSuccess(true);
 
-  setIsBlocked(true); 
+      setIsBlocked(true);
 
-  setTimeout(() => setShowSuccess(false), 1500);
-  return;
-}
+      setTimeout(() => setShowSuccess(false), 1500);
+      return;
+    }
     if (
       currentModel === selectedModel &&
       shouldDeleteInvoices === false
@@ -143,7 +143,7 @@ const RecurringBill = ({ hostelData }) => {
     }
 
 
- 
+
 
     const payload = {
       billingStartDate: null,
@@ -162,16 +162,25 @@ const RecurringBill = ({ hostelData }) => {
     );
 
     if (res?.success) {
-      setShowScheduleModal(false);
+      setShowSuccess(true);
       setModalType("success");
       setMessage(res.message);
+      setTimeout(() => {
+        setShowSuccess(false);
+        setShowScheduleModal(false);
+      }, 1000);
     } else {
+      setShowSuccess(true);
       setModalType("error");
       setMessage(res?.message);
+      setTimeout(() => {
+        setShowSuccess(false);
+
+      }, 1000);
     }
 
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 1000);
+
+
   };
   //     const handleUpdateSchedule = async () => {
   //   if (!confirmManual) return;
@@ -324,8 +333,8 @@ const RecurringBill = ({ hostelData }) => {
 
             <p
               className={`font-medium ${hostelData?.ebConfig?.shouldIncludeInRent
-                  ? "text-green-600"
-                  : "text-red-500"
+                ? "text-green-600"
+                : "text-red-500"
                 }`}
             >
               {hostelData?.ebConfig?.shouldIncludeInRent
@@ -580,11 +589,11 @@ const RecurringBill = ({ hostelData }) => {
               </select>
 
               {/* 🔥 Message here */}
-            {isJoiningBased && (
-  <p className="text-xs text-red-500 mt-1 text-center">
-    Only Prepaid is allowed for Joining Date Based billing
-  </p>
-)}
+              {isJoiningBased && (
+                <p className="text-xs text-red-500 mt-1 text-center">
+                  Only Prepaid is allowed for Joining Date Based billing
+                </p>
+              )}
             </div>
             <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs rounded-lg px-3 py-2 mb-3">
               ⚠ It will reflects on from the next Billing Cycle
@@ -612,17 +621,16 @@ const RecurringBill = ({ hostelData }) => {
                 Cancel
               </button>
 
- <button
-  onClick={handleUpdateSchedule}
-  disabled={isJoiningBased}
-  className={`px-4 py-2 rounded-lg text-sm text-white ${
-    isJoiningBased
-      ? "bg-gray-300 cursor-not-allowed"
-      : "bg-blue-600 cursor-pointer"
-  }`}
->
-  Proceed
-</button>
+              <button
+                onClick={handleUpdateSchedule}
+                disabled={isJoiningBased}
+                className={`px-4 py-2 rounded-lg text-sm text-white ${isJoiningBased
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-blue-600 cursor-pointer"
+                  }`}
+              >
+                Proceed
+              </button>
             </div>
 
           </div>

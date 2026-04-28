@@ -289,12 +289,42 @@ setAccessError(msg)
     setLoading(false);
   }
 };
+const addDemoRequestComment = async (demoRequestId, comment) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      `/v2/demo-request/comment/${demoRequestId}`,
+      { comment }
+    );
+
+    if (res.status === 200 || res.status === 201) {
+      return {
+        success: true,
+        data: res.data,
+        message: "Comment added successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <SubscriptionContext.Provider
       value={{
         loading,
         errorMsg,
-        createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, getDemoRequestStatus,getOrderHistory,accessError
+        createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, 
+        getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment
       }}
     >
       {children}
