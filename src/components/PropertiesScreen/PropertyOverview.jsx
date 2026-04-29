@@ -26,9 +26,10 @@ import { useOwners } from "../../Context/OwnersContext";
 import { useRole } from "../../Context/RoleContext";
 import { usePlan } from "../../Context/PlanContexts";
 import { useSubscription } from "../../Context/SubscriptionContext";
+import Circle from "../../assets/menucircle.png";
 const PropertyOverview = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError,  } = useHostel();
-  const { owners, totalItems, totalPages, getOwners, getOwnerById } = useOwners();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, } = useHostel();
+  const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription } = useSubscription();
   const [hostelData, setHostelData] = useState(null);
@@ -39,6 +40,10 @@ const PropertyOverview = () => {
   const [paidByError, setPaidByError] = useState("");
   const [paidAmountError, setPaidAmountError] = useState("");
   const [showTrialPlanDropdown, setShowTrialPlanDropdown] = useState(false);
+  const [openMenu, setOpenMenu] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedTenantId, setSelectedTenantId] = useState(null);
+  const [phone, setPhone] = useState("");
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenants");
 
@@ -106,6 +111,7 @@ const PropertyOverview = () => {
   const navigate = useNavigate();
   const [showPaidByDropdown, setShowPaidByDropdown] = useState(false);
   const [showPlanDropdown, setShowPlanDropdown] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const loginType = localStorage.getItem("login_type");
   const showInvoices = loginType === "normal";
   const { hostelId } = useParams();
@@ -370,7 +376,40 @@ const PropertyOverview = () => {
       }, 1000);
     }
   };
+const handleDeleteTenant = async () => {
 
+  const selectedTenant = hostelData?.tenantList?.find(
+    t => t.customerId === selectedTenantId
+  );
+
+  if (!selectedTenant) return;
+
+  const res = await deleteTenant(
+    hostelId,
+    selectedTenant.customerId,
+    phone // 🔥 input value
+  );
+
+  if (res?.success) {
+    setModalType("success");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    const updated = await getHostelById(hostelId);
+    if (updated?.success) {
+      setHostelData(updated.data);
+    }
+
+    setTimeout(() => {
+      setShowSuccess(false);
+      setShowDeleteModal(false);
+      setPhone("");
+    }, 1200);
+
+  } else {
+    setMenuError(res?.message);
+  }
+};
 
   if (!hostelData) {
     return (
@@ -792,6 +831,12 @@ const PropertyOverview = () => {
                             <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
                           </div>
                         </th>
+                        <th className="px-4 py-3 text-left">
+                          <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-sans">
+                            Action
+                            <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
+                          </div>
+                        </th>
 
                       </tr>
                     </thead>
@@ -824,7 +869,47 @@ const PropertyOverview = () => {
                                 {item.currentStatus || "N/A"}
                               </span>
                             </td>
+                            <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap relative">
+                              <div className="relative">
+                              <img
+  src={Circle}
+  className="w-5 h-5 cursor-pointer"
+  onClick={(e) => {
+    const rect = e.target.getBoundingClientRect();
 
+    setMenuPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX,
+    });
+
+    setOpenMenu(openMenu === index ? null : index);
+  }}
+/>
+
+                               {openMenu === index && (
+  <div
+    className="fixed w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
+    style={{
+      top: menuPosition.top,
+      left: menuPosition.left,
+    }}
+  >
+    <button
+      onClick={() => {
+        setSelectedTenantId(item.customerId);
+        setPhone(item.mobile);
+        setShowDeleteModal(true);
+        setOpenMenu(null);
+      }}
+      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600"
+    >
+      Delete
+    </button>
+  </div>
+)}
+                              </div>
+
+                            </td>
                           </tr>
                         ))
                       ) : (
@@ -1571,6 +1656,62 @@ const PropertyOverview = () => {
           </div>
         </div>
       )}
+  {showDeleteModal && (
+  <div
+    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+    onClick={() => {
+      setShowDeleteModal(false);
+      setMenuError("");
+      setPhone("");
+    }}
+  >
+    <div
+      className="bg-white rounded-2xl shadow-xl w-[400px] p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-semibold text-gray-800 mb-3">
+        Delete Tenant
+      </h2>
+
+      <p className="text-gray-500 text-sm mb-4">
+        Please enter tenant mobile number to confirm
+      </p>
+
+      {/* 🔥 PHONE INPUT */}
+      <input
+        type="text"
+        placeholder="Enter Phone Number"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3"
+      />
+
+      {menuError && (
+        <ErrorMessage message={menuError} type="error" />
+      )}
+
+      <div className="flex justify-end gap-3 mt-4">
+        <button
+          onClick={() => {
+            setShowDeleteModal(false);
+            setMenuError("");
+            setPhone("");
+          }}
+          className="px-4 py-2 border rounded-lg text-gray-600"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleDeleteTenant}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };

@@ -364,7 +364,7 @@ const TenantsList = () => {
                               <img src={Circle} alt="circle" className="w-5 h-5" />
                             </button>
 
-                            {openMenu === index && (
+                            {/* {openMenu === index && (
                               <div
                                 ref={menuRef}
                                 onClick={(e) => e.stopPropagation()}
@@ -382,7 +382,7 @@ const TenantsList = () => {
                                 </button>
 
                               </div>
-                            )}
+                            )} */}
                           </div>
 
                         </td>
