@@ -110,6 +110,14 @@ const RecurringBill = ({ hostelData }) => {
     }
 
   };
+  useEffect(() => {
+  if (showScheduleModal) {
+    setBillingType(
+      hostelData?.currentBillingRules?.billingModel || "PREPAID"
+    );
+    setShouldDeleteInvoices(false);
+  }
+}, [showScheduleModal, hostelData]);
   const isInvalidChange =
     hostelData?.currentBillingRules?.typeOfBilling === "JOINING_DATE_BASED" &&
     billingType === "POSTPAID";

@@ -171,10 +171,10 @@ const DemoRequests = () => {
     }
   }, [comments]);
   const handleAddComment = async () => {
-      if (!commentText.trim()) {
-    setCommentError("Please enter comment");
-    return;
-  }
+    if (!commentText.trim()) {
+      setCommentError("Please enter comment");
+      return;
+    }
 
     const res = await addDemoRequestComment(
       selectedItem?.requestId,
@@ -207,7 +207,7 @@ const DemoRequests = () => {
       // setCommentText("");
 
     } else {
-    
+
       setModalType("error");
       setMessage(res.message);
       setShowSuccess(true);
@@ -647,12 +647,12 @@ const DemoRequests = () => {
           {/* Overlay */}
           <div
             className="absolute inset-0"
-                         onClick={() => {
-  setShowCommentModal(false);
-  setCommentError("");
-  setCommentText("")
- 
-}}
+            onClick={() => {
+              setShowCommentModal(false);
+              setCommentError("");
+              setCommentText("")
+
+            }}
           ></div>
 
           {/* Modal */}
@@ -662,25 +662,25 @@ const DemoRequests = () => {
           >
 
             {/* HEADER */}
-         <div className="flex justify-between items-center px-5 py-3 border-b border-gray-300">
-  
-  <h2 className="flex items-center gap-2 text-sm font-semibold">
-    <img src={Notes} className="w-4 h-4" />
-    Internal Notes
-  </h2>
+            <div className="flex justify-between items-center px-5 py-3 border-b border-gray-300">
 
-  <button
-    onClick={() => {
-      setShowCommentModal(false);
-      setCommentError("");
-      setCommentText("");
-    }}
-    className="text-red-500 text-lg cursor-pointer"
-  >
-    ✕
-  </button>
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <img src={Notes} className="w-4 h-4" />
+                Internal Notes
+              </h2>
 
-</div>
+              <button
+                onClick={() => {
+                  setShowCommentModal(false);
+                  setCommentError("");
+                  setCommentText("");
+                }}
+                className="text-red-500 text-lg cursor-pointer"
+              >
+                ✕
+              </button>
+
+            </div>
 
             {/* BODY */}
             <div className="p-5">
@@ -694,14 +694,14 @@ const DemoRequests = () => {
                 placeholder="Comment here"
                 value={commentText}
                 onChange={(e) => {
-  setCommentText(e.target.value);
-  setCommentError("");
-}}
+                  setCommentText(e.target.value);
+                  setCommentError("");
+                }}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm h-24 resize-none"
               />
 
               {/* ADD BUTTON */}
-               {commentError && (
+              {commentError && (
                 <ErrorMessage message={commentError} type="error" />
               )}
               <div className="flex justify-end mt-3" >

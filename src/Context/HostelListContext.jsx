@@ -678,6 +678,36 @@ const updateBillingRule = async (hostelId, payload) => {
     setLoading(false);
   }
 };
+const deleteHostel = async (hostelId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.delete(
+      `/v2/hostels/${hostelId}`
+    );
+
+    if (res.status === 200 || res.status === 204) {
+      return {
+        success: true,
+        message: "Hostel deleted successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <HostelContext.Provider
       value={{
@@ -685,7 +715,7 @@ const updateBillingRule = async (hostelId, payload) => {
         loading,
         errorMsg,
         getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice,getRecurringByHostelId,
-        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule
+        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,deleteHostel
       }}
     >
       {children}
