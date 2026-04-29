@@ -10,17 +10,19 @@ import ArrowRight from "../../assets/arrow-right.png";
 import Search from "../../assets/Search.png";
 import DemoRequestDrawer from "./AddRequest";
 import UpdateStatusModal from "./UpdateStatusModal";
+import CommentBox from "../../assets/message-2.png";
+import Notes from "../../assets/notes.png"
 const DemoRequests = () => {
 
-  const { getDemoRequests, loading, getAgentsDropdown,updateDemoRequestStatus } = useSubscription();
+  const { getDemoRequests, loading, getAgentsDropdown, updateDemoRequestStatus, addDemoRequestComment } = useSubscription();
   const { adminDetails, agents, getAllAgents, assignStaff } = useRole();
   const dropdownRef = useRef(null);
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
   const [search, setSearch] = useState("");
-const [openStatusModal, setOpenStatusModal] = useState(false);
-const [selectedId, setSelectedId] = useState(null);
+  const [openStatusModal, setOpenStatusModal] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [openMenu, setOpenMenu] = useState(null);
@@ -34,11 +36,14 @@ const [selectedId, setSelectedId] = useState(null);
   const [message, setMessage] = useState("");
   const [pageSize, setPageSize] = useState("")
   const [agentList, setAgentList] = useState([])
+  const [commentError, setCommentError] = useState("")
 
   const [openDrawer, setOpenDrawer] = useState(false);
 
   const [tableLoading, setTableLoading] = useState(false);
-
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState([]);
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -88,11 +93,12 @@ const [selectedId, setSelectedId] = useState(null);
       setTotalItems(res.data.totalItems);
       setTotalPages(res.data.totalPages);
       setPageSize(res.data.pageSize)
+      // setComments(res.data.demoRequestList.demoRequestComments || [])
     }
     // setTableLoading(false);
     setTimeout(() => {
       setTableLoading(false);
-    }, 400); 
+    }, 400);
 
 
   };
@@ -124,7 +130,7 @@ const [selectedId, setSelectedId] = useState(null);
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
-
+  console.log("selectedItem", selectedItem)
   const handleAssignStaff = async () => {
     if (!dropdownValue) {
       setAssignError("Please Select Agent");
@@ -158,6 +164,89 @@ const [selectedId, setSelectedId] = useState(null);
       setAssignError(res.message || "Failed");
     }
   };
+  useEffect(() => {
+    const container = document.getElementById("commentsBox");
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [comments]);
+  const handleAddComment = async () => {
+    if (!commentText.trim()) {
+      setCommentError("Please enter comment");
+      return;
+    }
+
+    const res = await addDemoRequestComment(
+      selectedItem?.requestId,
+      commentText
+    );
+
+    if (res?.success) {
+      setShowModal(false);
+
+      setModalType("success");
+      setMessage(res.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+        setCommentText("");
+        setShowCommentModal(false);
+
+
+      }, 1500);
+
+      const updated = await getDemoRequests(page, size, search);
+
+      const updatedItem = updated?.data?.demoRequestList?.find(
+        (i) => i.requestId === selectedItem.requestId
+      );
+
+      setComments(updatedItem?.demoRequestComments || []);
+
+      // setCommentText("");
+
+    } else {
+
+      setModalType("error");
+      setMessage(res.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+
+
+
+      }, 1500);
+    }
+  };
+  //   const handleAddComment = async () => {
+  //   if (!commentText) return;
+
+  //   const res = await addDemoRequestComment(
+  //     selectedItem?.requestId,
+  //     commentText
+  //   );
+
+  //   if (res?.success) {
+
+  //     // 🔥 instant UI update
+  //     setComments((prev) => [
+  //       ...prev,
+  //       {
+  //         comment: commentText,
+  //         createdBy: "You",
+  //         createdAtDate: new Date().toLocaleDateString(),
+  //         createdAtTime: new Date().toLocaleTimeString()
+  //       }
+  //     ]);
+
+  //     setCommentText("");
+
+  //   } else {
+  //     alert(res?.message);
+  //   }
+  // };
 
   return (
     <DashboardLayout>
@@ -183,20 +272,20 @@ const [selectedId, setSelectedId] = useState(null);
 
           </div>
 
-        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6">
 
-  {/* Left side card */}
-  <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300 w-full max-w-xs">
-    <p className="text-gray-500 text-sm font-gilroy">DemoRequestCount</p>
-    <h2 className="text-2xl font-bold mt-2">0</h2>
-  </div>
+            {/* Left side card */}
+            <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300 w-full max-w-xs">
+              <p className="text-gray-500 text-sm font-gilroy">DemoRequestCount</p>
+              <h2 className="text-2xl font-bold mt-2">0</h2>
+            </div>
 
-  {/* Right side button */}
-  <button className="bg-blue-500 text-white px-4 py-2 rounded-lg cursor-pointer" onClick={() => setOpenDrawer(true)}>
-    Add Request
-  </button>
+            {/* Right side button */}
+            <button className="bg-blue-500 text-white px-4 py-2 rounded-lg cursor-pointer" onClick={() => setOpenDrawer(true)}>
+              Add Request
+            </button>
 
-</div>
+          </div>
           <div className="flex justify-end">
             <div className="relative w-64 mb-3">
               <img
@@ -344,18 +433,28 @@ const [selectedId, setSelectedId] = useState(null);
                                   setShowModal(true);
                                   setOpenMenu(null);
                                 }}
-                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                               >
                                 Assign Staff
                               </button>
+                              <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                                onClick={() => {
+                                  setSelectedId(item.requestId);
+                                  setOpenStatusModal(true);
+                                }}
+                              >
+                                Change Status
+                              </button>
                               <button
-  onClick={() => {
-    setSelectedId(item.requestId);
-    setOpenStatusModal(true);
-  }}
->
-  Change Status
-</button>
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                                onClick={() => {
+                                  setSelectedItem(item);
+                                  setComments(item.demoRequestComments || []);
+                                  setShowCommentModal(true);
+                                }}
+                              >
+                                Add Comments
+                              </button>
                             </div>
                           )}
 
@@ -533,15 +632,139 @@ const [selectedId, setSelectedId] = useState(null);
         )}
       </>
       <DemoRequestDrawer
-  open={openDrawer}
-  onClose={() => setOpenDrawer(false)}
-/>
-<UpdateStatusModal
-  open={openStatusModal}
-  onClose={() => setOpenStatusModal(false)}
-  demoRequestId={selectedId}
-   refreshList={fetchData} 
-/>
+        open={openDrawer}
+        onClose={() => setOpenDrawer(false)}
+      />
+      <UpdateStatusModal
+        open={openStatusModal}
+        onClose={() => setOpenStatusModal(false)}
+        demoRequestId={selectedId}
+        refreshList={fetchData}
+      />
+      {showCommentModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
+
+          {/* Overlay */}
+          <div
+            className="absolute inset-0"
+            onClick={() => {
+              setShowCommentModal(false);
+              setCommentError("");
+              setCommentText("")
+
+            }}
+          ></div>
+
+          {/* Modal */}
+          <div
+            className="relative bg-white rounded-xl w-[420px] shadow-xl z-[10000]"
+            onClick={(e) => e.stopPropagation()}
+          >
+
+            {/* HEADER */}
+            <div className="flex justify-between items-center px-5 py-3 border-b border-gray-300">
+
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <img src={Notes} className="w-4 h-4" />
+                Internal Notes
+              </h2>
+
+              <button
+                onClick={() => {
+                  setShowCommentModal(false);
+                  setCommentError("");
+                  setCommentText("");
+                }}
+                className="text-red-500 text-lg cursor-pointer"
+              >
+                ✕
+              </button>
+
+            </div>
+
+            {/* BODY */}
+            <div className="p-5">
+
+              <label className="text-xs text-gray-500 mb-1 block text-left">
+                Additional Comments <span className="text-red-500">*</span>
+              </label>
+
+              {/* TEXTAREA */}
+              <textarea
+                placeholder="Comment here"
+                value={commentText}
+                onChange={(e) => {
+                  setCommentText(e.target.value);
+                  setCommentError("");
+                }}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm h-24 resize-none"
+              />
+
+              {/* ADD BUTTON */}
+              {commentError && (
+                <ErrorMessage message={commentError} type="error" />
+              )}
+              <div className="flex justify-end mt-3" >
+                <button onClick={handleAddComment}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm cursor-pointer"
+                >
+                  ➤ Add
+                </button>
+              </div>
+
+              {/* COMMENTS LIST */}
+              <p className="text-[11px] text-gray-400 mt-5 mb-2 text-left">
+                ALL COMMENTS
+              </p>
+
+              <div className="space-y-4 max-h-[100px] overflow-y-auto">
+
+                {comments.map((item, index) => (
+                  <div key={item.demoRequestCommentsId} className="flex gap-3">
+
+                    {/* LEFT ICON + LINE */}
+                    <div className="flex flex-col items-center">
+
+                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                        <img src={CommentBox} className="w-4 h-4" />
+                      </div>
+
+                      {index !== comments.length - 1 && (
+                        <div className="w-[1px] flex-1 bg-gray-300 mt-1"></div>
+                      )}
+                    </div>
+
+
+                    <div className="flex-1 bg-gray-50 rounded-lg p-3 border border-gray-300">
+
+
+                      <p className="text-sm font-medium text-gray-800 text-left">
+                        {item.comment}
+                      </p>
+
+
+                      <p className="text-xs text-gray-500 mt-1 text-left">
+                        {item.createdAtDate} , {item.createdAtTime}
+                      </p>
+
+
+                      <p className="text-xs text-gray-400 text-left">
+                        Added by {item.createdBy}
+                      </p>
+
+                    </div>
+                  </div>
+                ))}
+
+              </div>
+
+            </div>
+
+
+
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };

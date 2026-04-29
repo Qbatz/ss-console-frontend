@@ -3,31 +3,37 @@ import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import Search from "../../assets/Search.png";
 import AddAdmin from "./AddAdmin";
 import { useRole } from "../../Context/RoleContext";
+import { useNavigate } from "react-router-dom";
 import swap from "../../assets/arrowswap.png";
 import LoginImg from "../../assets/LoginImg.png";
 import Add from "../../assets/add_admin.png";
 import Frame from "../../assets/Frame.png";
 import DownArrow from "../../assets/dropdownImg.png";
 import Toast from "../SuccessModal/ToastDesign";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 
 
 const IamAdminUser = () => {
-  const { getAdminDetails, loading, agents, getAllAgents, accessError, deactivateAgent,reactivateAgent,getAgentDetails } = useRole();
+  const navigate = useNavigate();
+  const { getAdminDetails, loading, agents, getAllAgents, accessError, deactivateAgent, reactivateAgent, getAgentDetails, getAgentRoles, agentRoles, updateAdminRole } = useRole();
 
   const [admin, setAdmin] = useState(null);
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [status, setStatus] = useState("ACTIVE"); 
+  const [status, setStatus] = useState("ACTIVE");
   const [showReactivateModal, setShowReactivateModal] = useState(false);
-   const [modalType, setModalType] = useState("success");
-    const [showSuccess, setShowSuccess] = useState(false);
-    const [showDetailsModal, setShowDetailsModal] = useState(false);
-const [agentDetails, setAgentDetails] = useState(null);
-    const [message, setMessage] = useState("");
-    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const [modalType, setModalType] = useState("success");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [agentDetails, setAgentDetails] = useState(null);
+  const [message, setMessage] = useState("");
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedRoleId, setSelectedRoleId] = useState("");
+  const [roleError, setRoleError] = useState("")
 
 
   console.log("agents", agents)
@@ -37,7 +43,10 @@ const [agentDetails, setAgentDetails] = useState(null);
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
-
+  useEffect(() => {
+    getAgentRoles()
+  }, [])
+  console.log("agentRoles", agentRoles)
   useEffect(() => {
     getAllAgents()
   }, [])
@@ -55,18 +64,18 @@ const [agentDetails, setAgentDetails] = useState(null);
     fetchAdmin();
   }, []);
   const activeAgents = agents?.activeAgents || [];
-const inactiveAgents = agents?.inActiveAgents
- || [];
-let filteredAgents = [];
+  const inactiveAgents = agents?.inActiveAgents
+    || [];
+  let filteredAgents = [];
 
-if (status === "ACTIVE") {
-  filteredAgents = activeAgents;
-} else if (status === "INACTIVE") {
-  filteredAgents = inactiveAgents
-;
-} else {
-  filteredAgents = [...activeAgents, ...inactiveAgents];
-}
+  if (status === "ACTIVE") {
+    filteredAgents = activeAgents;
+  } else if (status === "INACTIVE") {
+    filteredAgents = inactiveAgents
+      ;
+  } else {
+    filteredAgents = [...activeAgents, ...inactiveAgents];
+  }
   console.log("accessError", accessError)
   const adminList = Array.isArray(admin) ? admin : [admin];
   const handleDeactivate = async (agentId) => {
@@ -74,39 +83,109 @@ if (status === "ACTIVE") {
     const res = await deactivateAgent(agentId);
 
     if (res.success) {
-    
+
       setShowSuccess(true)
       setModalType("success");
-              setMessage(res.message);
-              setTimeout(()=>{
-                setShowSuccess(false)
-              },1000)
-    } 
+      setMessage(res.message);
+      setTimeout(() => {
+        setShowSuccess(false)
+      }, 1000)
+    }
     else {
-  
-       setShowSuccess(true)
+
+      setShowSuccess(true)
       setModalType("error");
-              setMessage(res.message);
-              setTimeout(()=>{
-                setShowSuccess(false)
-              },1000)
+      setMessage(res.message);
+      setTimeout(() => {
+        setShowSuccess(false)
+      }, 1000)
     }
 
   };
   const handleOpenDetails = async (user) => {
-  const res = await getAgentDetails(user.agentId);
+    const res = await getAgentDetails(user.agentId);
 
-  if (res?.success) {
-    setAgentDetails(res.data);
-    setShowDetailsModal(true);
-  } else {
-    alert(res.message);
-  }
-};
+    if (res?.success) {
+      setAgentDetails(res.data);
+      setShowDetailsModal(true);
+    } else {
+      alert(res.message);
+    }
+  };
+  const handleUpdateRole = async () => {
+    if (!selectedRoleId) {
+      setRoleError("Please select a role");
+      return;
+    }
+
+    // 🔥 No changes check
+    if (Number(selectedRoleId) === selectedUser.roleId) {
+      setRoleError("No changes detected");
+      return;
+    }
+
+    const payload = {
+      roleId: Number(selectedRoleId)
+    };
+
+    const res = await updateAdminRole(
+      selectedUser.agentId,
+      payload
+    );
+
+    if (res?.success) {
+      setModalType("success");
+      setMessage(res.message);
+      setShowSuccess(true);
+      await getAllAgents();
+
+      setTimeout(() => setShowSuccess(false), 1500);
+    } else {
+      setModalType("error");
+      setMessage(res.message);
+      setShowSuccess(true);
+
+      setTimeout(() => setShowSuccess(false), 1500);
+    }
+  };
+  // const handleUpdateRole = async () => {
+  //   if (!selectedRoleId) {
+  //     setRoleError("Please select a role");
+  //     return
+  //   }
+
+  //   const payload = {
+  //     roleId: Number(selectedRoleId)
+  //   };
+
+  //   const res = await updateAdminRole(
+  //     selectedUser.agentId,
+  //     payload
+  //   );
+
+  //   if (res?.success) {
+  //     setModalType("success");
+  //     setMessage(res.message);
+  //     setShowSuccess(true);   
+  //       await getAllAgents();
+  //     setTimeout(() => setShowSuccess(false), 1500);
+  //   } else {
+  //     setModalType("error");
+  //     setMessage(res.message);
+  //     setShowSuccess(true);   
+  //     setTimeout(() => setShowSuccess(false), 1500);
+  //   }
+
+
+
+
+
+
+  // };
 
   return (
     <DashboardLayout>
-       <Toast
+      <Toast
         show={showSuccess}
         message={message}
         type={modalType}
@@ -169,14 +248,14 @@ if (status === "ACTIVE") {
                   <option>Inactive</option>
                 </select> */}
                 <select
-  value={status}
-  onChange={(e) => setStatus(e.target.value)}
-  className="appearance-none border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white w-full md:w-auto"
->
-  
-  <option value="ACTIVE">Active</option>
-  <option value="INACTIVE">Inactive</option>
-</select>
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="appearance-none border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white w-full md:w-auto"
+                >
+
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                </select>
                 <img
                   src={DownArrow}
                   alt="down"
@@ -260,7 +339,14 @@ if (status === "ACTIVE") {
                             key={user.agentId}
                             className="border-b last:border-0 hover:bg-gray-50 border-gray-300"
                           >
-                            <td className="px-4 py-1 text-left font-semibold text-xs whitespace-nowrap text-blue-700">
+                            {/* <td className="px-4 py-1 text-left font-semibold text-xs whitespace-nowrap text-blue-700">
+                              {user?.fullName}
+                            </td> */}
+
+                            <td
+                              onClick={() => navigate(`/iam-user/${user.agentId}`)}
+                              className="px-4 py-1 text-left font-semibold text-xs whitespace-nowrap text-blue-700 cursor-pointer hover:underline"
+                            >
                               {user?.fullName}
                             </td>
 
@@ -324,90 +410,103 @@ if (status === "ACTIVE") {
 
                             </td> */}
                             <td className="px-1 py-4 relative">
-  <span
-    className="cursor-pointer"
-   onClick={(e) => {
-  e.stopPropagation();
+                              <span
+                                className="cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
 
-  const rect = e.currentTarget.getBoundingClientRect();
-  const spaceBelow = window.innerHeight - rect.bottom;
-  const dropdownHeight = 70; // approx height
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  const spaceBelow = window.innerHeight - rect.bottom;
+                                  const dropdownHeight = 70; // approx height
 
-  const openUp = spaceBelow < dropdownHeight;
+                                  const openUp = spaceBelow < dropdownHeight;
 
-  setDropdownPosition({
-    top: openUp
-      ? rect.top + window.scrollY - dropdownHeight
-      : rect.bottom + window.scrollY,
-    left: rect.right - 140 // adjust width
-  });
+                                  setDropdownPosition({
+                                    top: openUp
+                                      ? rect.top + window.scrollY - dropdownHeight
+                                      : rect.bottom + window.scrollY,
+                                    left: rect.right - 140 // adjust width
+                                  });
 
-  setMenuOpen(menuOpen === user.agentId ? null : user.agentId);
-}}
-  >
-    ⋮
-  </span>
+                                  setMenuOpen(menuOpen === user.agentId ? null : user.agentId);
+                                }}
+                              >
+                                ⋮
+                              </span>
 
-  {menuOpen === user.agentId && (
-   <div
-    className="fixed w-36 bg-white border rounded-lg shadow-lg z-[9999]"
-    style={{
-      top: dropdownPosition.top,
-      left: dropdownPosition.left
-    }}
-  >
+                              {menuOpen === user.agentId && (
+                                <div
+                                  className="fixed w-36 bg-white border rounded-lg shadow-lg z-[9999]"
+                                  style={{
+                                    top: dropdownPosition.top,
+                                    left: dropdownPosition.left
+                                  }}
+                                >
 
-     
-      {status !== "INACTIVE" ? (
-        <button
-          onClick={() => {
-            setSelectedUser(user);
-            setConfirmOpen(true);
-            setMenuOpen(null);
-          }}
-          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-        >
-          Deactivate
-        </button>
-      ) : (
-        /* INACTIVE → show reactivate */
-        // <button
-        //   onClick={async () => {
-        //     const res = await reactivateAgent(user.agentId);
 
-        //     if (res.success) {
-        //       alert(res.message);
-        //     } else {
-        //       alert(res.message);
-        //     }
+                                  {status !== "INACTIVE" ? (
+                                    <button
+                                      onClick={() => {
+                                        setSelectedUser(user);
+                                        setConfirmOpen(true);
+                                        setMenuOpen(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                    >
+                                      Deactivate
+                                    </button>
+                                  ) : (
+                                    /* INACTIVE → show reactivate */
+                                    // <button
+                                    //   onClick={async () => {
+                                    //     const res = await reactivateAgent(user.agentId);
 
-        //     setMenuOpen(null);
-        //   }}
-        //   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
-        // >
-        //   Reactivate
-        // </button>
-        <button
-  onClick={() => {
-    setSelectedUser(user);
-    setShowReactivateModal(true);
-    setMenuOpen(null);
-  }}
-  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
->
-  Reactivate
-</button>
-      )}
-      <button
-  onClick={() => handleOpenDetails(user)}
-  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600 cursor-pointer"
->
-  View Details
-</button>
+                                    //     if (res.success) {
+                                    //       alert(res.message);
+                                    //     } else {
+                                    //       alert(res.message);
+                                    //     }
 
-    </div>
-  )}
-</td>
+                                    //     setMenuOpen(null);
+                                    //   }}
+                                    //   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
+                                    // >
+                                    //   Reactivate
+                                    // </button>
+                                    <button
+                                      onClick={() => {
+                                        setSelectedUser(user);
+                                        setShowReactivateModal(true);
+                                        setMenuOpen(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
+                                    >
+                                      Reactivate
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => handleOpenDetails(user)}
+                                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600 cursor-pointer"
+                                  >
+                                    View Details
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setSelectedUser(user);
+                                      setSelectedRoleId(user.roleId); // current role set
+                                      setShowEditModal(true);
+                                      setMenuOpen(null);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                                  >
+                                    Edit
+                                  </button>
+
+
+                                </div>
+
+                              )}
+                            </td>
                           </tr>
                         ))
                       ) : (
@@ -426,64 +525,64 @@ if (status === "ACTIVE") {
               </div>
             </div>
             {showReactivateModal && (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+              <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
-    {/* Overlay */}
-    <div
-      className="absolute inset-0 bg-black/30"
-      onClick={() => setShowReactivateModal(false)}
-    ></div>
+                {/* Overlay */}
+                <div
+                  className="absolute inset-0 bg-black/30"
+                  onClick={() => setShowReactivateModal(false)}
+                ></div>
 
-    {/* Modal Box */}
-    <div className="relative bg-white rounded-xl shadow-xl w-[350px] p-5 z-[10000]">
+                {/* Modal Box */}
+                <div className="relative bg-white rounded-xl shadow-xl w-[350px] p-5 z-[10000]">
 
-      <h2 className="text-lg font-semibold mb-2">
-        Reactivate Agent
-      </h2>
+                  <h2 className="text-lg font-semibold mb-2">
+                    Reactivate Agent
+                  </h2>
 
-      <p className="text-sm text-gray-600 mb-4">
-        Are you sure you want to reactivate this agent?
-      </p>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Are you sure you want to reactivate this agent?
+                  </p>
 
-      <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-2">
 
-        {/* Cancel */}
-        <button
-          onClick={() => setShowReactivateModal(false)}
-          className="px-4 py-2 border rounded-lg text-sm"
-        >
-          Cancel
-        </button>
+                    {/* Cancel */}
+                    <button
+                      onClick={() => setShowReactivateModal(false)}
+                      className="px-4 py-2 border rounded-lg text-sm"
+                    >
+                      Cancel
+                    </button>
 
-        {/* Confirm */}
-        <button
-          onClick={async () => {
-            const res = await reactivateAgent(selectedUser.agentId);
+                    {/* Confirm */}
+                    <button
+                      onClick={async () => {
+                        const res = await reactivateAgent(selectedUser.agentId);
 
-            if (res.success) {
-             
-              setModalType("success");
-              setMessage(res.message);
-            } else {
-              setModalType("error");
-              setShowSuccess(true);
-              setMessage(res.message);
-            }
- setShowSuccess(true);
-            
-            setTimeout(() => setShowSuccess(false), 1500);
+                        if (res.success) {
 
-            setShowReactivateModal(false);
-          }}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
-        >
-          Yes, Reactivate
-        </button>
+                          setModalType("success");
+                          setMessage(res.message);
+                        } else {
+                          setModalType("error");
+                          setShowSuccess(true);
+                          setMessage(res.message);
+                        }
+                        setShowSuccess(true);
 
-      </div>
-    </div>
-  </div>
-)}
+                        setTimeout(() => setShowSuccess(false), 1500);
+
+                        setShowReactivateModal(false);
+                      }}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+                    >
+                      Yes, Reactivate
+                    </button>
+
+                  </div>
+                </div>
+              </div>
+            )}
 
             {confirmOpen && (
               <div
@@ -516,7 +615,7 @@ if (status === "ACTIVE") {
                     </button>
 
                     <button
-                      onClick={() => { 
+                      onClick={() => {
                         handleDeactivate(selectedUser.agentId);
                         setConfirmOpen(false);
                       }}
@@ -530,7 +629,7 @@ if (status === "ACTIVE") {
                 </div>
               </div>
             )}
-  {/* {showDetailsModal && (
+            {/* {showDetailsModal && (
   <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
    
@@ -641,141 +740,208 @@ if (status === "ACTIVE") {
     </div>
   </div>
 )} */}
-{showDetailsModal && (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+            {showDetailsModal && (
+              <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
-    {/* Overlay */}
-    <div
-      className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-      onClick={() => setShowDetailsModal(false)}
-    ></div>
-
-    {/* Modal */}
-    <div className="relative bg-white rounded-2xl shadow-2xl w-[520px] max-h-[90vh] overflow-y-auto z-[10000]">
-
-      {/* Header */}
-      <div className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-2xl">
-        <h2 className="text-lg font-semibold">Agent Details</h2>
-        <button
-          onClick={() => setShowDetailsModal(false)}
-          className="hover:text-gray-200 cursor-pointer"
-        >
-          ✕
-        </button>
-      </div>
-
-      <div className="p-6">
-
-        {/* Profile */}
-        <div className="flex items-center gap-4 mb-6">
-
-          <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
-            {agentDetails?.initials || "NA"}
-          </div>
-
-          <div>
-            <p className="font-semibold text-lg text-gray-900">
-              {agentDetails?.fullName}
-            </p>
-            <p className="text-sm text-gray-500">
-              {agentDetails?.roleName}
-            </p>
-          </div>
-
-        </div>
-
-        {/* Info Grid */}
-        <div className="grid grid-cols-2 gap-4 text-sm mb-6">
-
-          <div className="bg-blue-50 rounded-xl p-3">
-            <p className="text-blue-400 text-xs mb-1">Email</p>
-            <p className="font-medium text-gray-800">
-              {agentDetails?.email || "-"}
-            </p>
-          </div>
-
-          <div className="bg-purple-50 rounded-xl p-3">
-            <p className="text-purple-400 text-xs mb-1">Mobile</p>
-            <p className="font-medium text-gray-800">
-              {agentDetails?.mobile || "-"}
-            </p>
-          </div>
-
-          <div className="bg-green-50 rounded-xl p-3">
-            <p className="text-green-500 text-xs mb-1">Created By</p>
-            <p className="font-medium text-gray-800">
-              {agentDetails?.createdBy || "-"}
-            </p>
-          </div>
-
-          <div className="bg-orange-50 rounded-xl p-3">
-            <p className="text-orange-400 text-xs mb-1">Created Date</p>
-            <p className="font-medium text-gray-800">
-              {agentDetails?.createdAtDate}{" "}
-              <span className="text-gray-400 text-xs">
-                {agentDetails?.createdAtTime}
-              </span>
-            </p>
-          </div>
-
-        </div>
-
-        {/* Activities */}
-        <div>
-          <h3 className="font-semibold mb-3 text-gray-800">
-            Recent Activities
-          </h3>
-
-          <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2">
-
-            {agentDetails?.agentActivities?.length > 0 ? (
-              agentDetails.agentActivities.map((activity, index) => (
+                {/* Overlay */}
                 <div
-                  key={index}
-                  className="bg-gray-50 border-l-4 border-blue-500 rounded-lg p-3 flex justify-between items-center hover:shadow-sm transition"
-                >
-                  <div>
-                    <p className="font-medium text-sm text-gray-800">
-                      {activity.activityType}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {activity.description}
-                    </p>
+                  className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                  onClick={() => setShowDetailsModal(false)}
+                ></div>
+
+                {/* Modal */}
+                <div className="relative bg-white rounded-2xl shadow-2xl w-[520px] max-h-[90vh] overflow-y-auto z-[10000]">
+
+                  {/* Header */}
+                  <div className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-2xl">
+                    <h2 className="text-lg font-semibold">Agent Details</h2>
+                    <button
+                      onClick={() => setShowDetailsModal(false)}
+                      className="hover:text-gray-200 cursor-pointer"
+                    >
+                      ✕
+                    </button>
                   </div>
 
-                  <div className="text-xs text-gray-400 text-right">
-                    <p>{activity.createdAtDate}</p>
-                    <p>{activity.createdAtTime}</p>
+                  <div className="p-6">
+
+                    {/* Profile */}
+                    <div className="flex items-center gap-4 mb-6">
+
+                      <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                        {agentDetails?.initials || "NA"}
+                      </div>
+
+                      <div>
+                        <p className="font-semibold text-lg text-gray-900">
+                          {agentDetails?.fullName}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {agentDetails?.roleName}
+                        </p>
+                      </div>
+
+                    </div>
+
+                    {/* Info Grid */}
+                    <div className="grid grid-cols-2 gap-4 text-sm mb-6">
+
+                      <div className="bg-blue-50 rounded-xl p-3">
+                        <p className="text-blue-400 text-xs mb-1">Email</p>
+                        <p className="font-medium text-gray-800">
+                          {agentDetails?.email || "-"}
+                        </p>
+                      </div>
+
+                      <div className="bg-purple-50 rounded-xl p-3">
+                        <p className="text-purple-400 text-xs mb-1">Mobile</p>
+                        <p className="font-medium text-gray-800">
+                          {agentDetails?.mobile || "-"}
+                        </p>
+                      </div>
+
+                      <div className="bg-green-50 rounded-xl p-3">
+                        <p className="text-green-500 text-xs mb-1">Created By</p>
+                        <p className="font-medium text-gray-800">
+                          {agentDetails?.createdBy || "-"}
+                        </p>
+                      </div>
+
+                      <div className="bg-orange-50 rounded-xl p-3">
+                        <p className="text-orange-400 text-xs mb-1">Created Date</p>
+                        <p className="font-medium text-gray-800">
+                          {agentDetails?.createdAtDate}{" "}
+                          <span className="text-gray-400 text-xs">
+                            {agentDetails?.createdAtTime}
+                          </span>
+                        </p>
+                      </div>
+
+                    </div>
+
+                    {/* Activities */}
+                    <div>
+                      <h3 className="font-semibold mb-3 text-gray-800">
+                        Recent Activities
+                      </h3>
+
+                      <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2">
+
+                        {agentDetails?.agentActivities?.length > 0 ? (
+                          agentDetails.agentActivities.map((activity, index) => (
+                            <div
+                              key={index}
+                              className="bg-gray-50 border-l-4 border-blue-500 rounded-lg p-3 flex justify-between items-center hover:shadow-sm transition"
+                            >
+                              <div>
+                                <p className="font-medium text-sm text-gray-800">
+                                  {activity.activityType}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {activity.description}
+                                </p>
+                              </div>
+
+                              <div className="text-xs text-gray-400 text-right">
+                                <p>{activity.createdAtDate}</p>
+                                <p>{activity.createdAtTime}</p>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-400 text-sm text-center py-6">
+                            No activities found
+                          </p>
+                        )}
+
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="mt-6 text-right">
+                      <button
+                        onClick={() => setShowDetailsModal(false)}
+                        className="px-5 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-sm"
+                      >
+                        Close
+                      </button>
+                    </div>
+
                   </div>
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-400 text-sm text-center py-6">
-                No activities found
-              </p>
+              </div>
             )}
-
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-6 text-right">
-          <button
-            onClick={() => setShowDetailsModal(false)}
-            className="px-5 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-sm"
-          >
-            Close
-          </button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-)}
           </div>
           <AddAdmin isOpen={open} onClose={() => setOpen(false)} />
 
         </>
+      )}
+      {showEditModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => {
+              setShowEditModal(false);
+              setRoleError("");
+              setSelectedRoleId("");
+            }}
+          ></div>
+
+          {/* Modal */}
+          <div
+            className="bg-white rounded-xl shadow-xl w-[350px] p-5 z-[10000]"
+            onClick={(e) => e.stopPropagation()}
+          >
+
+            <h2 className="text-lg font-semibold mb-4 text-left">
+              Edit Role
+            </h2>
+
+            {/* DROPDOWN */}
+            <select
+              value={selectedRoleId}
+              onChange={(e) => {
+                setSelectedRoleId(e.target.value);
+                setRoleError("");
+              }}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4"
+            >
+              <option value="">Select Role</option>
+
+              {agentRoles?.map((role) => (
+                <option key={role.id} value={role.id}>
+                  {role.name}
+                </option>
+              ))}
+            </select>
+            {roleError && (
+              <ErrorMessage message={roleError} type="error" />
+            )}
+            {/* Buttons */}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setRoleError("");
+                  setSelectedRoleId("");
+                }}
+                className="px-4 py-2 border rounded-lg cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleUpdateRole}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
+              >
+                Save
+              </button>
+            </div>
+
+          </div>
+        </div>
       )}
 
     </DashboardLayout>

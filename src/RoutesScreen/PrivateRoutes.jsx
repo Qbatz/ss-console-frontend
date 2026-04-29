@@ -3,10 +3,11 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { RoleProvider } from "../Context/RoleContext";
 import { HostelProvider } from "../Context/HostelListContext";
 import { SubscriptionProvider } from "../Context/SubscriptionContext";
+
 import Home from "../components/dashboard/Home";
 import Proprietors from "../components/ProprietorsScreen/Proprietors";
 import Roles from "../components/RoleScreen/RoleList";
-import IamAdminUser from "../components/AdminUser/AdminUserList";
+import UserInfo from "../components/AdminUser/UserInfo";
 import Properties from "../components/PropertiesScreen/Properties";
 import Subscription from "../components/SubscriptionScreen/subscription";
 import Manageplans from "../components/SubscriptionScreen/ManagePlans ";
@@ -25,7 +26,7 @@ import DemoRequests from "../components/DemoRequestsScreen/DemoRequests";
 import { PlanProvider } from "../Context/PlanContexts";
 import AddEditPlan from "../components/SubscriptionScreen/AddPlan";
 import CreateOffer from "../components/SubscriptionScreen/CreateOffer";
-
+import IamAdminUser from "../components/AdminUser/AdminUserList";
 import TransactionsPage from "../components/TransactionList/TransactionDetails";
 import TrailPage from "../components/SubscriptionScreen/TrialUsers";
 
@@ -102,6 +103,7 @@ const PrivateRoutesScreen = () => {
                     <Route path="/trial-users/:roleId" element={<TrailPage/>} />
 
                     <Route path="/tenant-Bill/:roleId" element={< TenantRecurring/>} />
+                    <Route path="/iam-user/:agentId" element={<UserInfo />} />
                  
 
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import OverviewSubscriptions from "./OverviewSubscription";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
@@ -26,18 +26,58 @@ import { useOwners } from "../../Context/OwnersContext";
 import { useRole } from "../../Context/RoleContext";
 import { usePlan } from "../../Context/PlanContexts";
 import { useSubscription } from "../../Context/SubscriptionContext";
+import Circle from "../../assets/menucircle.png";
 const PropertyOverview = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError } = useHostel();
-  const { owners, totalItems, totalPages, getOwners, getOwnerById } = useOwners();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, } = useHostel();
+  const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription } = useSubscription();
   const [hostelData, setHostelData] = useState(null);
+  const [dropdownPlans, setDropdownPlans] = useState([]);
+  const [selectedPlan, setSelectedPlan] = useState("");
+  const [selectedExpandablePlan, setSelectedExpandablePlan] = useState("");
+  const [paidBy, setPaidBy] = useState("");
+  const [paidByError, setPaidByError] = useState("");
+  const [paidAmountError, setPaidAmountError] = useState("");
+  const [showTrialPlanDropdown, setShowTrialPlanDropdown] = useState(false);
+  const [openMenu, setOpenMenu] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedTenantId, setSelectedTenantId] = useState(null);
+  const [phone, setPhone] = useState("");
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenants");
 
   const { canWrite: canResetWrite } = usePermission("Reset hostel");
-  const { plans, getPlans } = usePlan();
-  console.log("plans", plans)
+  const { plans, getPlans, getPlansDropdown } = usePlan();
+  console.log("paidBy", paidBy)
+  useEffect(() => {
+    getPlansDropdown().then((res) => {
+      if (res?.success) {
+        setDropdownPlans(res.data);
+      }
+    });
+  }, []);
+  const paidByUsers = [
+    {
+      id: hostelData?.ownerInfo?.ownerId,
+      name: hostelData?.ownerInfo?.fullName,
+      role: "Owner"
+    },
+
+    ...(hostelData?.masters || []).map(m => ({
+      id: m.userId,
+      name: m.fullName,
+      role: "Master"
+    })),
+
+    ...(hostelData?.staffs || []).map(s => ({
+      id: s.userId,
+      name: s.fullName,
+      role: "Staff"
+    }))
+  ];
+  const trialPlans = dropdownPlans?.trialPlans || [];
+  console.log("dropdownPlans", dropdownPlans)
   useEffect(() => {
     getPlans()
   }, [])
@@ -54,7 +94,7 @@ const PropertyOverview = () => {
   const [days, setDays] = useState("");
   const [daysError, setDaysError] = useState("")
   const [planCode, setPlanCode] = useState("");
-  console.log("planCode",planCode)
+  console.log("planCode", planCode)
   const [paidAmount, setPaidAmount] = useState("");
   const [discountAmount, setDiscountAmount] = useState("");
   const [paymentProof, setPaymentProof] = useState(null);
@@ -64,41 +104,44 @@ const PropertyOverview = () => {
   const [planError, setPlanError] = useState("")
   const [proofError, setProofError] = useState("")
   const [showTrialConfirm, setShowTrialConfirm] = useState(false);
-const [showDropdown, setShowDropdown] = useState(false);
-const dropdownRef = useRef(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedPlanCode, setSelectedPlanCode] = useState("");
+  const dropdownRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
-
+  const [showPaidByDropdown, setShowPaidByDropdown] = useState(false);
+  const [showPlanDropdown, setShowPlanDropdown] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const loginType = localStorage.getItem("login_type");
   const showInvoices = loginType === "normal";
-const { hostelId } = useParams();
+  const { hostelId } = useParams();
 
   // const hostelData = location.state?.hostelData;
   useEffect(() => {
-  const fetchData = async () => {
-    if (!hostelId) return;
+    const fetchData = async () => {
+      if (!hostelId) return;
 
-    const res = await getHostelById(hostelId);
+      const res = await getHostelById(hostelId);
 
-    if (res?.success) {
-      setHostelData(res.data);
-    }
-  };
+      if (res?.success) {
+        setHostelData(res.data);
+      }
+    };
 
-  fetchData();
-}, [hostelId]);
+    fetchData();
+  }, [hostelId]);
   const trialPlan = location.state?.trialPlan;
   console.log("trialPlan", trialPlan)
   useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setShowDropdown(false);
-    }
-  };
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
 
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => document.removeEventListener("mousedown", handleClickOutside);
-}, []);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleHardReset = async () => {
 
@@ -135,7 +178,7 @@ const { hostelId } = useParams();
     }
   };
   const plan = hostelData?.currentSubscription?.planName;
-  console.log("Plandetails", hostelData);
+  console.log("recurringStatus", hostelData?.recurringStatus);
 
   const handleOwnerClick = async (item) => {
 
@@ -150,14 +193,30 @@ const { hostelId } = useParams();
     }
 
   };
+
+
+
   const handleTrialOnly = async () => {
-    console.log("trialPlan?.trialExtendable", trialPlan?.trialExtendable)
+
+    // if (!selectedPlanCode) {
+    //   alert("Please select a plan");
+    //   return;
+    // }
+    let hasError = false;
+
+    if (!selectedPlanCode) {
+      setPlanError("Please Select Plancode");
+      hasError = true;
+    }
+
+
+
+    if (hasError) return;
     const payload = {
-      isTrial: trialPlan?.trialExtendable,
       trialDays: 0,
       paidAmount: Number(paidAmount || 0),
       discountAmount: Number(discountAmount || 0),
-      planCode: trialPlan?.hostelPlan?.currentPlanCode
+      planCode: selectedPlanCode
     };
 
     const res = await createSubscription(
@@ -174,6 +233,7 @@ const { hostelId } = useParams();
 
       setTimeout(() => {
         setShowSuccess(false);
+        setShowTrialConfirm(false);
       }, 1000);
 
     } else {
@@ -182,25 +242,29 @@ const { hostelId } = useParams();
       setMessage(res?.message);
       setShowSuccess(true);
 
-
       setTimeout(() => {
         setShowSuccess(false);
       }, 1000);
     }
   };
   const handleTrialWithDays = async () => {
-    if (!days) {
-      setDaysError("Please Enter Days");
-      return;
+    let hasError = false;
+    if (!selectedExpandablePlan) {
+      setPlanError("Please select a plan");
+      hasError = true;
     }
 
+    if (!days) {
+      setDaysError("Please Enter Days");
+      hasError = true;
+    }
+    if (hasError) return;
+
     const payload = {
-      isTrial: trialPlan?.trialExtendable,
       trialDays: Number(days),
       paidAmount: Number(paidAmount || 0),
       discountAmount: Number(discountAmount || 0),
-      planCode: trialPlan?.hostelPlan?.currentPlanCode
-      ,
+      planCode: selectedExpandablePlan   // 🔥 FIX
     };
 
     const res = await createSubscription(
@@ -217,6 +281,7 @@ const { hostelId } = useParams();
 
       setTimeout(() => {
         setShowSuccess(false);
+        setShowTrialModal(false);
       }, 1000);
 
     } else {
@@ -227,9 +292,11 @@ const { hostelId } = useParams();
 
       setTimeout(() => {
         setShowSuccess(false);
+
       }, 1000);
     }
   };
+
 
   const resetPlanForm = () => {
     setPlanCode("");
@@ -238,7 +305,14 @@ const { hostelId } = useParams();
     setPaymentProof(null);
     setProofError("")
     setPlanError("")
+    setPaidBy("")
+    setPaidByError("")
+    setPaidAmountError("")
+
   };
+  const selectedPlanothers = dropdownPlans?.otherPlans?.find(
+    (p) => p.planCode === planCode
+  );
   const handleSubscription = async () => {
 
     let hasError = false;
@@ -252,15 +326,24 @@ const { hostelId } = useParams();
       setProofError("Please upload proof");
       hasError = true;
     }
+    if (!paidAmount) {
+      setPaidAmountError("Please enter paid amount");
+      hasError = true;
+    }
+    if (!paidBy) {
+      setPaidByError("Please select Paid By");
+      hasError = true;
+    }
 
     if (hasError) return;
 
     const payload = {
-      isTrial: trialPlan?.trialExtendable,
+
       trialDays: 0,
       planCode: planCode,
       paidAmount: Number(paidAmount),
-      discountAmount: Number(discountAmount || 0)
+      discountAmount: Number(discountAmount || 0),
+      paidBy
     };
     console.log("payload", payload)
     const res = await createSubscription(
@@ -293,57 +376,48 @@ const { hostelId } = useParams();
       }, 1000);
     }
   };
-  // const handleSubscription = async () => {
-  //   let hasError = false;
+const handleDeleteTenant = async () => {
 
-  //   if (!planCode) {
-  //     setPlanError("Please Select Plancode");
-  //     hasError = true;
-  //   }
+  const selectedTenant = hostelData?.tenantList?.find(
+    t => t.customerId === selectedTenantId
+  );
 
-  //   if (!paymentProof) {
-  //     setProofError("Please upload proof");
-  //     hasError = true;
-  //   }
+  if (!selectedTenant) return;
 
-  //   if (hasError) return;
-  //   const payload = {
-  //     isTrial: false,
-  //     trialDays: 0,
-  //     planCode: planCode,
-  //     paidAmount: Number(paidAmount),
-  //     discountAmount: Number(discountAmount || 0)
-  //   };
+  const res = await deleteTenant(
+    hostelId,
+    selectedTenant.customerId,
+    phone // 🔥 input value
+  );
 
-  //   await createSubscription(
-  //     trialPlan?.hostelId,
-  //     payload,
-  //     paymentProof
-  //   );
-  //    if (res?.success) {
-  //     setModalType("success");
-  //     setMessage(res.message);
-  //     setShowSuccess(true);
+  if (res?.success) {
+    setModalType("success");
+    setMessage(res.message);
+    setShowSuccess(true);
 
-  //     getHostels(page, pageSize, searchText);
+    const updated = await getHostelById(hostelId);
+    if (updated?.success) {
+      setHostelData(updated.data);
+    }
 
-  //     setTimeout(() => {
-  //       setShowSuccess(false);
-  //     }, 1000);
+    setTimeout(() => {
+      setShowSuccess(false);
+      setShowDeleteModal(false);
+      setPhone("");
+    }, 1200);
 
-  //   } else {
+  } else {
+    setMenuError(res?.message);
+  }
+};
 
-  //     setModalType("error");
-  //     setMessage(res?.message);
-  //     setShowSuccess(true);
-
-  //     setTimeout(() => {
-  //       setShowSuccess(false);
-  //     }, 1000);
-  //   }
-  // };
-
-  if (!hostelData) return <div className="p-5">Loading...</div>;
+  if (!hostelData) {
+    return (
+      <div className="flex items-center justify-center h-[300px]">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -357,9 +431,9 @@ const { hostelId } = useParams();
 
 
         <div className="flex items-center ">
-          {/* <span className="text-xl cursor-pointer"  onClick={() => navigate(-1)}> ←  </span> */}
+
           <img src={arrowleft} height={20} width={20} className="text-xl cursor-pointer"
-            // onClick={() => navigate(-1)}
+
             onClick={() => navigate(`/properties/${adminDetails?.roleId}`, {
               state: { skipApi: true }
             })}
@@ -407,16 +481,16 @@ const { hostelId } = useParams();
                   Trial Extend
                 </button> */}
                 <button
-                  disabled={trialPlan?.trialExtendable === false}
+                  disabled={trialPlan?.canAddTrial === false}
                   onClick={() => setShowTrialConfirm(true)}
                   className={`px-2 py-[2px] font-medium rounded text-[10px] whitespace-nowrap
-    ${trialPlan?.trialExtendable === false
+    ${trialPlan?.canAddTrial === false
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-green-600 text-white cursor-pointer hover:bg-green-700"
                     }
   `}
                   title={
-                    trialPlan?.trialExtendable === false
+                    trialPlan?.canAddTrial === false
                       ? "Trial cannot be extended"
                       : ""
                   }
@@ -433,10 +507,10 @@ const { hostelId } = useParams();
                   Trial + Days
                 </button> */}
                 <button
-                  disabled={trialPlan?.trialExtendable === false}
+                  disabled={trialPlan?.canAddExpandableTrial === false}
                   onClick={() => setShowTrialModal(true)}
                   className={`px-3 py-1 rounded text-[10px] whitespace-nowrap
-    ${trialPlan?.trialExtendable === false
+    ${trialPlan?.canAddExpandableTrial === false
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-yellow-500 text-white cursor-pointer hover:bg-yellow-600"
                     }
@@ -757,6 +831,12 @@ const { hostelId } = useParams();
                             <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
                           </div>
                         </th>
+                        <th className="px-4 py-3 text-left">
+                          <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-sans">
+                            Action
+                            <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
+                          </div>
+                        </th>
 
                       </tr>
                     </thead>
@@ -789,7 +869,47 @@ const { hostelId } = useParams();
                                 {item.currentStatus || "N/A"}
                               </span>
                             </td>
+                            <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap relative">
+                              <div className="relative">
+                              <img
+  src={Circle}
+  className="w-5 h-5 cursor-pointer"
+  onClick={(e) => {
+    const rect = e.target.getBoundingClientRect();
 
+    setMenuPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX,
+    });
+
+    setOpenMenu(openMenu === index ? null : index);
+  }}
+/>
+
+                               {openMenu === index && (
+  <div
+    className="fixed w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
+    style={{
+      top: menuPosition.top,
+      left: menuPosition.left,
+    }}
+  >
+    <button
+      onClick={() => {
+        setSelectedTenantId(item.customerId);
+        setPhone(item.mobile);
+        setShowDeleteModal(true);
+        setOpenMenu(null);
+      }}
+      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600"
+    >
+      Delete
+    </button>
+  </div>
+)}
+                              </div>
+
+                            </td>
                           </tr>
                         ))
                       ) : (
@@ -932,107 +1052,7 @@ const { hostelId } = useParams();
           </div>
         </div>
       )}
-      {/* {showSharing && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 relative">
-
-           
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                Detailed Sharing Breakdown
-              </h2>
-
-              <button
-                onClick={() => setShowSharing(false)}
-                className="text-gray-400 hover:text-gray-600 text-xl"
-              >
-                ✕
-              </button>
-            </div>
-
-
-        
-            <div className="border rounded-xl p-4 mb-4">
-              <div className="flex justify-between mb-2">
-                <p className="font-semibold">1-Sharing</p>
-                <span className="text-sm text-gray-500">2 Rooms Available</span>
-              </div>
-
-              <div className="grid grid-cols-3 text-sm">
-                <div>
-                  <p className="text-gray-500">Rooms</p>
-                  <p className="font-semibold text-lg">7</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500">Total Beds</p>
-                  <p className="font-semibold text-lg">7</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500">Occupied</p>
-                  <p className="font-semibold text-lg text-green-600">5</p>
-                </div>
-              </div>
-            </div>
-
-
-          
-            <div className="border rounded-xl p-4 mb-4">
-              <div className="flex justify-between mb-2">
-                <p className="font-semibold">2-Sharing</p>
-                <span className="text-sm text-gray-500">1 Room Available</span>
-              </div>
-
-              <div className="grid grid-cols-3 text-sm">
-                <div>
-                  <p className="text-gray-500">Rooms</p>
-                  <p className="font-semibold text-lg">5</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500">Total Beds</p>
-                  <p className="font-semibold text-lg">10</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500">Occupied</p>
-                  <p className="font-semibold text-lg text-green-600">8</p>
-                </div>
-              </div>
-            </div>
-
-
-           
-            <div className="border rounded-xl p-4">
-              <div className="flex justify-between mb-2">
-                <p className="font-semibold">3-Sharing</p>
-                <span className="text-sm text-gray-500">2 Rooms Available</span>
-              </div>
-
-              <div className="grid grid-cols-3 text-sm">
-                <div>
-                  <p className="text-gray-500">Rooms</p>
-                  <p className="font-semibold text-lg">12</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500">Total Beds</p>
-                  <p className="font-semibold text-lg">36</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500">Occupied</p>
-                  <p className="font-semibold text-lg text-green-600">30</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      )} */}
       {showBillingRule && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
 
@@ -1150,6 +1170,9 @@ const { hostelId } = useParams();
           onClick={() => {
             setShowTrialModal(false);
             setDaysError("");
+            setSelectedExpandablePlan("");
+            setPlanError("");
+            setDays("")
           }}
         >
           <div
@@ -1157,10 +1180,70 @@ const { hostelId } = useParams();
             onClick={(e) => e.stopPropagation()}
           >
             {/* Title */}
-            <h2 className="text-lg font-semibold mb-4">
+            <h2 className="text-lg font-semibold mb-4 text-left">
               Extend Trial
             </h2>
+            <div className="relative">
 
+              {/* BOX */}
+              <div
+                onClick={() => setShowPlanDropdown(!showPlanDropdown)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 flex justify-between items-center cursor-pointer"
+              >
+                <span className="text-sm ">
+                  {dropdownPlans?.expandableTrialPlans?.find(p => p.planCode === selectedExpandablePlan)
+                    ? `${dropdownPlans.expandableTrialPlans.find(p => p.planCode === selectedExpandablePlan).planName} - ${selectedExpandablePlan}`
+                    : "Select Plan"}
+                </span>
+
+                <svg
+                  className={`w-4 h-4 text-gray-500 transition-transform ${showPlanDropdown ? "rotate-180" : ""
+                    }`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </div>
+
+              {/* DROPDOWN */}
+              {showPlanDropdown && (
+                <div className="absolute w-full mt-1 bg-white border rounded-lg shadow-md max-h-40 overflow-y-auto z-50">
+
+                  <div
+                    onClick={() => {
+                      setSelectedExpandablePlan("");
+                      setShowPlanDropdown(false);
+                    }}
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm text-left"
+                  >
+                    Select Plan
+                  </div>
+
+                  {dropdownPlans?.expandableTrialPlans?.map((plan) => (
+                    <div
+                      key={plan.planId}
+                      onClick={() => {
+                        setSelectedExpandablePlan(plan.planCode);
+                        setPlanError("");
+                        setShowPlanDropdown(false);
+                      }}
+                      className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm text-left"
+                    >
+                      {plan.planName} - {plan.planCode} ({plan.duration} days)
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {planError && (
+              <div className="mb-3">
+                <ErrorMessage message={planError} type="error" />
+              </div>
+            )}
             {/* Input */}
             <input
               type="number"
@@ -1170,15 +1253,23 @@ const { hostelId } = useParams();
                 setDays(e.target.value);
                 setDaysError("");
               }}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-4"
             />
             {daysError && (
-              <ErrorMessage message={daysError} type="error" />
+              <div className="mb-3">
+                <ErrorMessage message={daysError} type="error" />
+              </div>
             )}
             {/* Buttons */}
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 mt-2">
               <button
-                onClick={() => setShowTrialModal(false)}
+                onClick={() => {
+                  setShowTrialModal(false);
+                  setDaysError("");
+                  setSelectedExpandablePlan("");
+                  setPlanError("");
+                  setDays("")
+                }}
                 className="px-4 py-2 border rounded-lg text-gray-600"
               >
                 Cancel
@@ -1210,97 +1301,171 @@ const { hostelId } = useParams();
             onClick={(e) => e.stopPropagation()}
           >
             {/* Title */}
-            <h2 className="text-lg font-semibold mb-4">
+            <h2 className="text-lg font-semibold mb-4 text-left">
               Buy Subscription Plan
             </h2>
 
             {/* Plan Code */}
-    <div className="relative w-full" ref={dropdownRef}>
+            <div className="relative w-full" ref={dropdownRef}>
 
-  {/* SELECT BOX */}
-  <div
-    onClick={() => setShowDropdown(!showDropdown)}
-    className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer mb-3 flex items-center justify-between bg-white"
-  >
-    {/* Selected text */}
-    <span
-      className={`text-sm ${
-        planCode ? "text-gray-800" : "text-gray-400"
-      }`}
-    >
-      {plans.find(p => p.planCode === planCode)?.planName || "Select Plan"}
-    </span>
+              {/* SELECT BOX */}
+              <div
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer mb-3 flex items-center justify-between bg-white"
+              >
+                {/* Selected text */}
+                <span className={`text-sm ${planCode ? "text-gray-800" : "text-gray-400"}`}>
+                  {dropdownPlans?.otherPlans?.find(p => p.planCode === planCode)?.planName || "Select Plan"}
+                </span>
 
-    {/* Arrow */}
-    <svg
-      className={`w-4 h-4 text-gray-500 transition-transform ${
-        showDropdown ? "rotate-180" : ""
-      }`}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <path d="M6 9l6 6 6-6" />
-    </svg>
-  </div>
+                {/* Arrow */}
+                <svg
+                  className={`w-4 h-4 text-gray-500 transition-transform ${showDropdown ? "rotate-180" : ""
+                    }`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </div>
 
-  {/* DROPDOWN LIST */}
-  {showDropdown && (
-    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow max-h-40 overflow-y-auto">
+              {/* DROPDOWN LIST */}
+              {showDropdown && (
+                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow max-h-40 overflow-y-auto">
 
-      {plans?.length > 0 ? (
-        plans.map((plan) => (
-          <div
-            key={plan.planId}
-            onClick={() => {
-              setPlanCode(plan.planCode);   // ✅ store code
-              setShowDropdown(false);
-            }}
-            className={`px-3 py-2 cursor-pointer text-sm flex justify-between items-center
-              ${
-                plan.planCode === planCode
-                  ? "bg-blue-50 text-blue-600"
-                  : "hover:bg-gray-100"
-              }`}
-          >
-            <span>{plan.planName}</span>
+                  {dropdownPlans?.otherPlans?.length > 0 ? (
+                    dropdownPlans.otherPlans.map((plan) => (
+                      <div
+                        key={plan.planId}
+                        onClick={() => {
+                          setPlanCode(plan.planCode);
+                          setShowDropdown(false);
+                        }}
+                        className={`px-3 py-2 cursor-pointer text-sm flex justify-between items-center
+        ${plan.planCode === planCode
+                            ? "bg-blue-50 text-blue-600"
+                            : "hover:bg-gray-100"
+                          }`}
+                      >
+                        <span>{plan.planName}</span>
 
-            {/* selected tick */}
-            {plan.planCode === planCode && (
-              <span className="text-blue-600">✔</span>
-            )}
-          </div>
-        ))
-      ) : (
-        <div className="px-3 py-2 text-sm text-gray-400">
-          No Plans Available
-        </div>
-      )}
+                        {plan.planCode === planCode && (
+                          <span className="text-blue-600">✔</span>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="px-3 py-2 text-sm text-gray-400">
+                      No Plans Available
+                    </div>
+                  )}
 
-    </div>
-  )}
+                </div>
+              )}
 
-</div>
+            </div>
             {planError && (
               <ErrorMessage message={planError} type="error" />
             )}
-            {/* Paid Amount */}
+            {/* <select
+  value={paidBy}
+  onChange={(e) => {
+    setPaidBy(e.target.value);
+    setPaidByError("");
+  }}
+  className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3"
+>
+  <option value="">Select Paid By</option>
+
+  {paidByUsers.map((user) => (
+    <option key={user.id} value={user.id}>
+      {user.name} ({user.role})
+    </option>
+  ))}
+</select> */}
+            <div className="relative w-full">
+
+              {/* SELECT BOX */}
+              <div
+                onClick={() => setShowPaidByDropdown(!showPaidByDropdown)}
+                className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer flex items-center justify-between bg-white"
+              >
+                <span className={`text-sm ${paidBy ? "text-gray-800" : "text-gray-400"}`}>
+                  {paidByUsers.find(u => u.id === paidBy)?.name || "Select Paid By"}
+                </span>
+
+                {/* 🔥 Arrow */}
+                <svg
+                  className={`w-4 h-4 text-gray-500 transition-transform ${showPaidByDropdown ? "rotate-180" : ""
+                    }`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </div>
+
+              {/* DROPDOWN */}
+              {showPaidByDropdown && (
+                <div className="absolute w-full bg-white border rounded-lg shadow mt-1 max-h-40 overflow-y-auto z-[9999]">
+
+                  {paidByUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      onClick={() => {
+                        setPaidBy(user.id);
+                        setShowPaidByDropdown(false);
+                        setPaidByError("");
+                      }}
+                      className={`px-3 py-2 cursor-pointer text-sm flex justify-between
+            ${paidBy === user.id
+                          ? "bg-blue-50 text-blue-600"
+                          : "hover:bg-gray-100"}
+          `}
+                    >
+                      <span>{user.name} ({user.role})</span>
+
+                      {paidBy === user.id && <span>✔</span>}
+                    </div>
+                  ))}
+
+                </div>
+              )}
+
+            </div>
+
+            {paidByError && (
+              <ErrorMessage message={paidByError} type="error" />
+            )}
+
             <input
               type="number"
-              placeholder="Paid Amount"
+              placeholder={
+                selectedPlanothers
+                  ? `₹${selectedPlanothers.price}`
+                  : "Paid Amount"
+              }
               value={paidAmount}
-              onChange={(e) => setPaidAmount(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3"
+              onChange={(e) => {
+                setPaidAmount(e.target.value);
+                setPaidAmountError("");
+              }}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-3"
             />
-
+            {paidAmountError && (
+              <ErrorMessage message={paidAmountError} type="error" />
+            )}
             {/* Discount */}
             <input
               type="number"
               placeholder="Discount Amount"
               value={discountAmount}
               onChange={(e) => setDiscountAmount(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-3"
             />
 
             {/* File Upload */}
@@ -1312,7 +1477,7 @@ const { hostelId } = useParams();
               }}
               className="w-full mb-4"
             /> */}
-            <div className="w-full mb-4">
+            <div className="w-full mt-4">
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
 
                 {/* Hidden input */}
@@ -1355,7 +1520,7 @@ const { hostelId } = useParams();
               <ErrorMessage message={proofError} type="error" />
             )}
             {/* Buttons */}
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 mt-2">
               <button
                 onClick={() => {
                   setShowPlanModal(false);
@@ -1382,28 +1547,93 @@ const { hostelId } = useParams();
       {showTrialConfirm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
-          {/* Overlay */}
+
           <div
             className="absolute inset-0 bg-black/40"
-            onClick={() => setShowTrialConfirm(false)}
+            onClick={() => {
+              setShowTrialConfirm(false);
+              setPlanError("");
+              setSelectedPlanCode("")
+              setShowTrialPlanDropdown("")
+            }}
           ></div>
 
           {/* Modal */}
           <div className="relative bg-white rounded-xl shadow-xl w-[350px] p-5 z-[10000]">
 
-            <h2 className="text-lg font-semibold mb-2">
-              Extend Trial
-            </h2>
 
-            <p className="text-sm text-gray-600 mb-4">
-              Do you want to extend the trial?
-            </p>
 
+            <div className="mb-4 relative">
+
+              <label className="text-sm text-gray-600 mb-1 block text-left">
+                Select Plan
+              </label>
+
+              {/* SELECT BOX */}
+              <div
+                onClick={() => setShowTrialPlanDropdown(!showTrialPlanDropdown)}
+                className="w-full border rounded-lg px-3 py-2 text-sm flex justify-between items-center cursor-pointer bg-white"
+              >
+                <span className={`${selectedPlanCode ? "text-gray-800" : "text-gray-400"}`}>
+                  {dropdownPlans?.trialPlans?.find(p => p.planCode === selectedPlanCode)?.planName
+                    ? `${dropdownPlans.trialPlans.find(p => p.planCode === selectedPlanCode).planName} - ${selectedPlanCode}`
+                    : "Select Plan"}
+                </span>
+
+                {/* 🔽 Arrow */}
+                <svg
+                  className={`w-4 h-4 text-gray-500 transition-transform ${showTrialPlanDropdown ? "rotate-180" : ""
+                    }`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </div>
+
+              {/* DROPDOWN LIST */}
+              {showTrialPlanDropdown && (
+                <div
+                  className="absolute mt-1 w-full bg-white border rounded-lg shadow-md max-h-40 overflow-y-auto z-[10001] text-left"
+                >
+                  {dropdownPlans?.trialPlans?.map((plan) => (
+                    <div
+                      key={plan.planId}
+                      onClick={() => {
+                        setSelectedPlanCode(plan.planCode);
+                        setPlanError("");
+                        setShowTrialPlanDropdown(false);
+                      }}
+                      className={`px-3 py-2 cursor-pointer text-sm
+                  ${selectedPlanCode === plan.planCode
+                          ? "bg-blue-50 text-blue-600"
+                          : "hover:bg-gray-100"}
+                `}
+                    >
+                      {plan.planName} - {plan.planCode} ({plan.duration} days)
+                    </div>
+                  ))}
+                </div>
+              )}
+
+            </div>
+
+            {planError && (
+              <ErrorMessage message={planError} type="error" />
+            )}
             <div className="flex justify-end gap-2">
 
               {/* Cancel */}
               <button
-                onClick={() => setShowTrialConfirm(false)}
+                onClick={() => {
+                  setShowTrialConfirm(false);
+                  setPlanError("");
+                  setSelectedPlanCode("")
+                  setShowTrialPlanDropdown("")
+
+                }}
                 className="px-4 py-2 border rounded-lg text-sm"
               >
                 Cancel
@@ -1411,11 +1641,13 @@ const { hostelId } = useParams();
 
               {/* OK */}
               <button
+
                 onClick={async () => {
-                  await handleTrialOnly();   // ✅ API call
-                  setShowTrialConfirm(false);
+                  await handleTrialOnly();
+
                 }}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm"
+                className="px-4 py-2 rounded-lg text-sm bg-green-600 text-white cursor-pointer"
+
               >
                 OK
               </button>
@@ -1424,6 +1656,62 @@ const { hostelId } = useParams();
           </div>
         </div>
       )}
+  {showDeleteModal && (
+  <div
+    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+    onClick={() => {
+      setShowDeleteModal(false);
+      setMenuError("");
+      setPhone("");
+    }}
+  >
+    <div
+      className="bg-white rounded-2xl shadow-xl w-[400px] p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-semibold text-gray-800 mb-3">
+        Delete Tenant
+      </h2>
+
+      <p className="text-gray-500 text-sm mb-4">
+        Please enter tenant mobile number to confirm
+      </p>
+
+      {/* 🔥 PHONE INPUT */}
+      <input
+        type="text"
+        placeholder="Enter Phone Number"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3"
+      />
+
+      {menuError && (
+        <ErrorMessage message={menuError} type="error" />
+      )}
+
+      <div className="flex justify-end gap-3 mt-4">
+        <button
+          onClick={() => {
+            setShowDeleteModal(false);
+            setMenuError("");
+            setPhone("");
+          }}
+          className="px-4 py-2 border rounded-lg text-gray-600"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleDeleteTenant}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };

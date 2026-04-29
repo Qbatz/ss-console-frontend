@@ -647,6 +647,67 @@ const getRecurringMonth = async (month, year) => {
     setLoading(false);
   }
 };
+const updateBillingRule = async (hostelId, payload) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.put(
+      `/v2/hostels/billing-rule/${hostelId}`,
+      payload
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        message: "Billing rule updated successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const deleteHostel = async (hostelId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.delete(
+      `/v2/hostels/${hostelId}`
+    );
+
+    if (res.status === 200 || res.status === 204) {
+      return {
+        success: true,
+        message: "Hostel deleted successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <HostelContext.Provider
       value={{
@@ -654,7 +715,7 @@ const getRecurringMonth = async (month, year) => {
         loading,
         errorMsg,
         getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice,getRecurringByHostelId,
-        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth
+        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,deleteHostel
       }}
     >
       {children}
