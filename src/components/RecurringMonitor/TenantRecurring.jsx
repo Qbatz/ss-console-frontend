@@ -679,7 +679,13 @@ const TenantRecurring = () => {
                     ))}
                   </select>
                 </div>
-
+<div className="mb-3">
+  <img
+    src={Filter}
+    className="w-4 h-4 cursor-pointer"
+    onClick={() => setShowFilterDrawer(true)}
+  />
+</div>
               </div>
 
               <div className="flex items-center gap-2">

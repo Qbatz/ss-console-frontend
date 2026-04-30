@@ -16,6 +16,7 @@ import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
 import { usePlan } from "../../Context/PlanContexts";
+import AssignStaffModal from "./AssignStaffDesign";
 
 
 const Properties = () => {
@@ -70,6 +71,8 @@ const Properties = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteHostelId, setDeleteHostelId] = useState(null);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+// const [selectedHostel, setSelectedHostel] = useState(null);
   console.log("startDate", startDate)
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState({
@@ -156,29 +159,7 @@ const Properties = () => {
   }
 
 
-  // let totalRecords =
-  //   searchText.trim() !== "" || statusFilter !== ""
-  //     ? displayData.length
-  //     : hostels?.totalHostels || 0;
-
-  // let totalPages = Math.ceil(totalRecords / pageSize) || 1;
-
-  // const start = totalRecords === 0 ? 0 : (page - 1) * pageSize + 1;
-  // const end = Math.min(page * pageSize, totalRecords);
-
-
-  // const isNextDisabled = page >= totalPages - 1;
-  //   const handlePropertyClick = async (item) => {
-  // setTrialPlan(item)
-  //     const res = await getHostelById(item.hostelId);
-  //     console.log("res", res)
-  //     if (res?.success) {
-  //       navigate(`/property-overview/${item.hostelId}`, {
-  //         state: { hostelData: res.data,trialPlan }
-  //       });
-
-  //     }
-  //   };
+  
   const handlePropertyClick = async (item) => {
     const res = await getHostelById(item.hostelId);
 
@@ -205,9 +186,13 @@ const Properties = () => {
 
     exportHostels(searchText, start, end);
   };
+ 
   const handleCreateSubscription = async (item) => {
+   const firstPlan = dropdownPlans?.trialPlans?.[0];
 
-    if (!selectedTrialPlan) {
+   
+
+    if (!firstPlan) {
       setPlanError("Please select a plan");
       return;
     }
@@ -216,7 +201,7 @@ const Properties = () => {
       trialDays: 0,
       paidAmount: 0,
       discountAmount: 0,
-      planCode: selectedTrialPlan
+      planCode:  firstPlan?.planCode
     };
 
     const res = await createSubscription(
@@ -225,7 +210,7 @@ const Properties = () => {
     );
 
     if (res?.success) {
-      setShowTrialPopup(false); // close popup
+      setShowTrialPopup(false);
       setModalType("success");
       setMessage(res.message);
       setShowSuccess(true);
@@ -239,172 +224,7 @@ const Properties = () => {
       setPlanError(res?.message);
     }
   };
-  //   const handleCreateSubscription = async (item) => {
-
-  //   const payload = {
-  //     // isTrial: item?.trialExtendable,
-  //     trialDays: 0,
-  //     paidAmount:0,
-  //     discountAmount:0,
-
-  //   };
-
-  //   const res = await createSubscription( 
-  //     item?.hostelId,
-  //     payload
-  //   );
-  // console.log("payload",payload)
-  //   if (res?.success) {
-  //     setModalType("success");
-  //     setMessage(res.message);
-  //     setShowSuccess(true);
-
-  //     getHostels(page, pageSize, searchText);
-
-  //     setTimeout(() => {
-  //       setShowSuccess(false);
-  //     }, 1000);
-
-  //   } else {
-  //     setMenuError(res?.message);
-  //     setModalType("error");
-  //     setMessage(res?.message);
-  //     setShowSuccess(true);
-
-  //     setTimeout(() => {
-  //       setShowSuccess(false);
-  //     }, 1000);
-  //   }
-  // };
-
-
-  // const handleCreateSubscription = async (item) => {
-
-  //    const payload = {
-  //     isTrial: true,
-  //     trialDays: 0,
-  //     paidAmount: Number(paidAmount || 0),
-  //     discountAmount: Number(discountAmount || 0)
-  //   };
-
-  //   await createSubscription(
-  //     trialPlan?.hostelId,
-  //     payload
-
-  //   );
-  //    if (res?.success) {
-
-  //       setModalType("success");
-  //       setMessage(res.message);
-  //       setShowSuccess(true);
-  //       getHostels(page, pageSize, searchText);
-  //       setTimeout(() => {
-  //         setShowSuccess(false);
-
-  //       }, 1000);
-  //     } else {
-  //       setMenuError(res.message)
-  //       setModalType("error");
-  //       setMessage(res.message);
-  //       setShowSuccess(true);
-
-  //       setTimeout(() => {
-  //         setShowSuccess(false);
-
-  //       }, 1000);
-  //     }
-  // };
-  // const handleHardReset = async () => {
-
-  //   if (!selectedHostel?.hostelId) return;
-
-  //   const enteredId = noteText.trim();
-
-  //   if (!enteredId) {
-  //     setHostelError("Please Enter Hostel ID");
-  //     return;
-  //   }
-
-  //   const res = await hardResetHostel(
-  //     selectedHostel.hostelId,
-  //     enteredId
-  //   );
-
-  //   if (res?.success) {
-  //     setModalType("success");
-  //     setMessage(res?.message);
-  //     getHostels(page, pageSize, searchText);
-
-  //     setShowNoteModal(false);
-  //     setShowSuccess(true);
-  //     setNoteText("");
-  //     setHostelError("");
-
-  //     setTimeout(() => {
-  //       setShowSuccess(false);
-  //     }, 1500);
-
-  //   } else {
-  //     setHostelError(res?.message || "Please Enter Valid Hostel ID");
-  //   }
-  // };
-  //   const handleHardReset = async () => {
-  //   if (!selectedHostel?.hostelId) return;
-
-  //   const enteredId = noteText.trim();
-
-
-  //   if (!enteredId) {
-  //     setHostelError("Please Enter Hostel ID");
-  //     return;
-  //   }
-
-
-  //   const res = await hardResetHostel(enteredId);
-
-  //   if (res?.success) {
-  //     setModalType("success");
-  //     setMessage(res?.message);
-  //     getHostels(page, pageSize, searchText);
-
-  //     setShowNoteModal(false);
-  //     setShowSuccess(true);
-  //     setNoteText("");
-  //     setHostelError("");
-
-  //     setTimeout(() => {
-  //       setShowSuccess(false);
-  //     }, 1500);
-
-  //   } else {
-  //     setHostelError(res?.message || "Please Enter Valid Hostel ID");
-  //   }
-  // };
-  // const handleHardReset = async () => {
-  //   if (!selectedHostel?.hostelId) return;
-
-  //   const enteredId = noteText.trim();
-  //   const actualId = selectedHostel.hostelId;
-
-
-  //   const res = await hardResetHostel(enteredId);
-
-  //   if (res?.success) {
-  //     setModalType("success");
-  //     setMessage(res?.message);
-  //     getHostels(page, pageSize, searchText);
-  //     setShowNoteModal(false);
-  //     setShowSuccess(true);
-  //     setNoteText("");
-
-  //   setTimeout(() => {
-  //     setShowSuccess(false);
-  //   }, 1500);
-
-  //   } else {
-  //     setHostelError(res?.message || "Please Enter Valid Hostel ID")
-  //   }
-  // };
+  
 
   console.log("hostels", hostels)
   const formatDateToDDMMYYYY = (date) => {
@@ -956,6 +776,16 @@ const Properties = () => {
 >
   Delete
 </button>
+   <button
+  onClick={() => {
+    setSelectedHostel(item);
+    setShowAssignModal(true);
+    setOpenMenu(false);
+  }}
+  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+>
+  Assign Staff
+</button>
 
                                     </div>
                                   )}
@@ -1213,103 +1043,42 @@ const Properties = () => {
           </div>
         )}
         {showTrialPopup && (
-          <div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-            onClick={() => {
-              setShowTrialPopup(false);
-              setSelectedTrialPlan("");
-              setPlanError("");
-            }}
-          >
-            <div
-              className="bg-white rounded-xl shadow-xl w-[350px] p-6"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 className="text-lg font-semibold mb-4 text-left">Select Trial Plan</h2>
+  <div
+    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+    onClick={() => setShowTrialPopup(false)}
+  >
+    <div
+      className="bg-white rounded-2xl shadow-xl w-[380px] p-6 text-center"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-semibold text-gray-800 mb-2">
+        Extend Trial
+      </h2>
 
-              {/* DROPDOWN */}
-              <div className="relative">
-
-                {/* SELECT BOX */}
-                <div
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 flex justify-between items-center cursor-pointer"
-                >
-                  <span className="text-sm">
-                    {dropdownPlans?.trialPlans?.find(p => p.planCode === selectedTrialPlan)?.planName
-                      ? `${dropdownPlans.trialPlans.find(p => p.planCode === selectedTrialPlan).planName} - ${selectedTrialPlan}`
-                      : "Select Plan"}
-                  </span>
-
-
-                  <svg
-                    className={`w-4 h-4 text-gray-500 transition-transform ${showDropdown ? "rotate-180" : ""
-                      }`}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </div>
-
-                {/* DROPDOWN LIST */}
-                {showDropdown && (
-                  <div className="absolute mt-1 w-full bg-white border rounded-lg shadow-md max-h-40 overflow-y-auto z-50">
-
-                    <div
-                      onClick={() => {
-                        setSelectedTrialPlan("");
-                        setShowDropdown(false);
-                      }}
-                      className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                    >
-                      Select Plan
-                    </div>
-
-                    {dropdownPlans?.trialPlans?.map((plan) => (
-                      <div
-                        key={plan.planId}
-                        onClick={() => {
-                          setSelectedTrialPlan(plan.planCode);
-                          setPlanError("");
-                          setShowDropdown(false);
-                        }}
-                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                      >
-                        {plan.planName} - {plan.planCode} ({plan.duration} days)
-                      </div>
-                    ))}
-                  </div>
+      <p className="text-sm text-gray-500 mb-6">
+        Are you sure you want to extend the trial?
+      </p>
+{planError && (
+                  <ErrorMessage message={planError} type="error" />
                 )}
-              </div>
+      <div className="flex justify-center gap-4">
+        <button
+          onClick={() => setShowTrialPopup(false)}
+          className="px-6 py-2 border border-gray-300 rounded-xl text-gray-700"
+        >
+          Cancel
+        </button>
 
-              {planError && <ErrorMessage message={planError} type="error" />}
-
-              {/* BUTTONS */}
-              <div className="flex justify-end gap-3 mt-4">
-                <button
-                  onClick={() => {
-                    setShowTrialPopup(false);
-                    setSelectedTrialPlan("");
-                    setPlanError("");
-                  }}
-                  className="px-4 py-2 border rounded-lg"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={() => handleCreateSubscription(selectedItem)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg"
-                >
-                  Submit
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <button
+          onClick={() => handleCreateSubscription(selectedItem)}
+          className="px-6 py-2 bg-green-600 text-white rounded-xl"
+        >
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 {showDeleteModal && (
     <div
       className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
@@ -1320,7 +1089,7 @@ const Properties = () => {
     >
       <div
         className="bg-white rounded-xl p-5 w-[350px]"
-        onClick={(e) => e.stopPropagation()}   // 🔥 inside click close aagadhu
+        onClick={(e) => e.stopPropagation()} 
       >
         <h2 className="text-sm font-semibold mb-2">
         Delete Hostel?
@@ -1355,6 +1124,27 @@ const Properties = () => {
       </div>
     </div>
 )}
+<AssignStaffModal
+  show={showAssignModal}
+  onClose={() => setShowAssignModal(false)}
+  staffList={[
+    { id: 1, name: "Saranya M" },
+    { id: 2, name: "Arun T" }
+  ]}
+  reasonList={[
+    "Support",
+    "Follow-up",
+    "Technical Issue"
+  ]}
+  onConfirm={(data) => {
+    console.log("Assign Payload:", {
+      hostelId: selectedHostel?.hostelId,
+      ...data
+    });
+
+    setShowAssignModal(false);
+  }}
+/>
       </DashboardLayout>
     </>
   );
