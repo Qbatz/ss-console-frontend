@@ -194,29 +194,20 @@ const PropertyOverview = () => {
 
   };
 
-
-
   const handleTrialOnly = async () => {
 
-    // if (!selectedPlanCode) {
-    //   alert("Please select a plan");
-    //   return;
-    // }
-    let hasError = false;
+    const firstPlan = dropdownPlans?.trialPlans?.[0];
 
-    if (!selectedPlanCode) {
-      setPlanError("Please Select Plancode");
-      hasError = true;
+    if (!firstPlan) {
+      setMenuError("No trial plan available");
+      return;
     }
 
-
-
-    if (hasError) return;
     const payload = {
       trialDays: 0,
-      paidAmount: Number(paidAmount || 0),
-      discountAmount: Number(discountAmount || 0),
-      planCode: selectedPlanCode
+      paidAmount: 0,
+      discountAmount: 0,
+      planCode: firstPlan?.planCode
     };
 
     const res = await createSubscription(
@@ -228,7 +219,11 @@ const PropertyOverview = () => {
       setModalType("success");
       setMessage(res.message);
       setShowSuccess(true);
+const updated = await getHostelById(hostelId);
 
+if (updated?.success) {
+  setHostelData(updated.data);
+}
       await getHostels(1, 10, "");
 
       setTimeout(() => {
@@ -237,7 +232,6 @@ const PropertyOverview = () => {
       }, 1000);
 
     } else {
-      setMenuError(res?.message);
       setModalType("error");
       setMessage(res?.message);
       setShowSuccess(true);
@@ -248,23 +242,29 @@ const PropertyOverview = () => {
     }
   };
   const handleTrialWithDays = async () => {
+
     let hasError = false;
-    if (!selectedExpandablePlan) {
-      setPlanError("Please select a plan");
-      hasError = true;
-    }
 
     if (!days) {
       setDaysError("Please Enter Days");
       hasError = true;
     }
+
     if (hasError) return;
+
+    // 🔥 first plan auto pick
+    const firstPlan = dropdownPlans?.expandableTrialPlans?.[0];
+
+    if (!firstPlan) {
+      setDaysError("No expandable trial plan available");
+      return;
+    }
 
     const payload = {
       trialDays: Number(days),
-      paidAmount: Number(paidAmount || 0),
-      discountAmount: Number(discountAmount || 0),
-      planCode: selectedExpandablePlan   // 🔥 FIX
+      paidAmount: 0,
+      discountAmount: 0,
+      planCode: firstPlan.planCode
     };
 
     const res = await createSubscription(
@@ -278,10 +278,15 @@ const PropertyOverview = () => {
       setShowSuccess(true);
 
       await getHostels(1, 10, "");
+const updated = await getHostelById(hostelId);
 
+if (updated?.success) {
+  setHostelData(updated.data);
+}
       setTimeout(() => {
         setShowSuccess(false);
         setShowTrialModal(false);
+        setDays(""); // reset
       }, 1000);
 
     } else {
@@ -292,10 +297,109 @@ const PropertyOverview = () => {
 
       setTimeout(() => {
         setShowSuccess(false);
-
       }, 1000);
     }
   };
+  // const handleTrialOnly = async () => {
+
+  //   // if (!selectedPlanCode) {
+  //   //   alert("Please select a plan");
+  //   //   return;
+  //   // }
+  //   let hasError = false;
+
+  //   if (!selectedPlanCode) {
+  //     setPlanError("Please Select Plancode");
+  //     hasError = true;
+  //   }
+
+
+
+  //   if (hasError) return;
+  //   const payload = {
+  //     trialDays: 0,
+  //     paidAmount: Number(paidAmount || 0),
+  //     discountAmount: Number(discountAmount || 0),
+  //     planCode: selectedPlanCode
+  //   };
+
+  //   const res = await createSubscription(
+  //     trialPlan?.hostelId,
+  //     payload
+  //   );
+
+  //   if (res?.success) {
+  //     setModalType("success");
+  //     setMessage(res.message);
+  //     setShowSuccess(true);
+
+  //     await getHostels(1, 10, "");
+
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //       setShowTrialConfirm(false);
+  //     }, 1000);
+
+  //   } else {
+  //     setMenuError(res?.message);
+  //     setModalType("error");
+  //     setMessage(res?.message);
+  //     setShowSuccess(true);
+
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1000);
+  //   }
+  // };
+  // const handleTrialWithDays = async () => {
+  //   let hasError = false;
+  //   if (!selectedExpandablePlan) {
+  //     setPlanError("Please select a plan");
+  //     hasError = true;
+  //   }
+
+  //   if (!days) {
+  //     setDaysError("Please Enter Days");
+  //     hasError = true;
+  //   }
+  //   if (hasError) return;
+
+  //   const payload = {
+  //     trialDays: Number(days),
+  //     paidAmount: Number(paidAmount || 0),
+  //     discountAmount: Number(discountAmount || 0),
+  //     planCode: selectedExpandablePlan   // 🔥 FIX
+  //   };
+
+  //   const res = await createSubscription(
+  //     trialPlan?.hostelId,
+  //     payload
+  //   );
+
+  //   if (res?.success) {
+  //     setModalType("success");
+  //     setMessage(res.message);
+  //     setShowSuccess(true);
+
+  //     await getHostels(1, 10, "");
+
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //       setShowTrialModal(false);
+  //     }, 1000);
+
+  //   } else {
+  //     setDaysError(res?.message);
+  //     setModalType("error");
+  //     setMessage(res?.message);
+  //     setShowSuccess(true);
+
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+
+  //     }, 1000);
+  //   }
+  // };
 
 
   const resetPlanForm = () => {
@@ -358,7 +462,11 @@ const PropertyOverview = () => {
       setShowSuccess(true);
 
       await getHostels(1, 10, "");
+const updated = await getHostelById(hostelId);
 
+if (updated?.success) {
+  setHostelData(updated.data);
+}
       setTimeout(() => {
         setShowSuccess(false);
         setShowPlanModal(false)
@@ -376,40 +484,40 @@ const PropertyOverview = () => {
       }, 1000);
     }
   };
-const handleDeleteTenant = async () => {
+  const handleDeleteTenant = async () => {
 
-  const selectedTenant = hostelData?.tenantList?.find(
-    t => t.customerId === selectedTenantId
-  );
+    const selectedTenant = hostelData?.tenantList?.find(
+      t => t.customerId === selectedTenantId
+    );
 
-  if (!selectedTenant) return;
+    if (!selectedTenant) return;
 
-  const res = await deleteTenant(
-    hostelId,
-    selectedTenant.customerId,
-    phone // 🔥 input value
-  );
+    const res = await deleteTenant(
+      hostelId,
+      selectedTenant.customerId,
+      phone // 🔥 input value
+    );
 
-  if (res?.success) {
-    setModalType("success");
-    setMessage(res.message);
-    setShowSuccess(true);
+    if (res?.success) {
+      setModalType("success");
+      setMessage(res.message);
+      setShowSuccess(true);
 
-    const updated = await getHostelById(hostelId);
-    if (updated?.success) {
-      setHostelData(updated.data);
+      const updated = await getHostelById(hostelId);
+      if (updated?.success) {
+        setHostelData(updated.data);
+      }
+
+      setTimeout(() => {
+        setShowSuccess(false);
+        setShowDeleteModal(false);
+        setPhone("");
+      }, 1200);
+
+    } else {
+      setMenuError(res?.message);
     }
-
-    setTimeout(() => {
-      setShowSuccess(false);
-      setShowDeleteModal(false);
-      setPhone("");
-    }, 1200);
-
-  } else {
-    setMenuError(res?.message);
-  }
-};
+  };
 
   if (!hostelData) {
     return (
@@ -871,42 +979,42 @@ const handleDeleteTenant = async () => {
                             </td>
                             <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap relative">
                               <div className="relative">
-                              <img
-  src={Circle}
-  className="w-5 h-5 cursor-pointer"
-  onClick={(e) => {
-    const rect = e.target.getBoundingClientRect();
+                                <img
+                                  src={Circle}
+                                  className="w-5 h-5 cursor-pointer"
+                                  onClick={(e) => {
+                                    const rect = e.target.getBoundingClientRect();
 
-    setMenuPosition({
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX,
-    });
+                                    setMenuPosition({
+                                      top: rect.bottom + window.scrollY,
+                                      left: rect.left + window.scrollX,
+                                    });
 
-    setOpenMenu(openMenu === index ? null : index);
-  }}
-/>
+                                    setOpenMenu(openMenu === index ? null : index);
+                                  }}
+                                />
 
-                               {openMenu === index && (
-  <div
-    className="fixed w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
-    style={{
-      top: menuPosition.top,
-      left: menuPosition.left,
-    }}
-  >
-    <button
-      onClick={() => {
-        setSelectedTenantId(item.customerId);
-        setPhone(item.mobile);
-        setShowDeleteModal(true);
-        setOpenMenu(null);
-      }}
-      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600"
-    >
-      Delete
-    </button>
-  </div>
-)}
+                                {openMenu === index && (
+                                  <div
+                                    className="fixed w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
+                                    style={{
+                                      top: menuPosition.top,
+                                      left: menuPosition.left,
+                                    }}
+                                  >
+                                    <button
+                                      onClick={() => {
+                                        setSelectedTenantId(item.customerId);
+                                        setPhone(item.mobile);
+                                        setShowDeleteModal(true);
+                                        setOpenMenu(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                )}
                               </div>
 
                             </td>
@@ -964,7 +1072,7 @@ const handleDeleteTenant = async () => {
             <PropertyAmenities hostelData={hostelData} />
           )}
           {activeTab === "Configuration" && (
-            <ReccuringBill hostelData={hostelData} />
+            <ReccuringBill hostelData={hostelData} refreshHostel={fetchData}  />
           )}
 
 
@@ -1164,7 +1272,7 @@ const handleDeleteTenant = async () => {
           </div>
         </div>
       )}
-      {showTrialModal && (
+      {/* {showTrialModal && (
         <div
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
           onClick={() => {
@@ -1179,13 +1287,13 @@ const handleDeleteTenant = async () => {
             className="bg-white rounded-xl shadow-xl w-[350px] p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Title */}
+           
             <h2 className="text-lg font-semibold mb-4 text-left">
               Extend Trial
             </h2>
             <div className="relative">
 
-              {/* BOX */}
+            
               <div
                 onClick={() => setShowPlanDropdown(!showPlanDropdown)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 flex justify-between items-center cursor-pointer"
@@ -1208,7 +1316,7 @@ const handleDeleteTenant = async () => {
                 </svg>
               </div>
 
-              {/* DROPDOWN */}
+            
               {showPlanDropdown && (
                 <div className="absolute w-full mt-1 bg-white border rounded-lg shadow-md max-h-40 overflow-y-auto z-50">
 
@@ -1244,7 +1352,7 @@ const handleDeleteTenant = async () => {
                 <ErrorMessage message={planError} type="error" />
               </div>
             )}
-            {/* Input */}
+            
             <input
               type="number"
               placeholder="Enter days"
@@ -1260,7 +1368,7 @@ const handleDeleteTenant = async () => {
                 <ErrorMessage message={daysError} type="error" />
               </div>
             )}
-            {/* Buttons */}
+        
             <div className="flex justify-end gap-3 mt-2">
               <button
                 onClick={() => {
@@ -1281,6 +1389,62 @@ const handleDeleteTenant = async () => {
 
                 }}
                 className="px-4 py-2 bg-yellow-500 text-white rounded-lg cursor-pointer"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )} */}
+      {showTrialModal && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+          onClick={() => {
+            setShowTrialModal(false);
+            setDays("");
+            setDaysError("");
+          }}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl w-[320px] p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold mb-4 text-left">
+              Extend Trial
+            </h2>
+
+            <input
+              type="number"
+              placeholder="Enter days"
+              value={days}
+              onChange={(e) => {
+                setDays(e.target.value);
+                setDaysError("");
+              }}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            />
+
+            {daysError && (
+              <div className="mt-2">
+                <ErrorMessage message={daysError} type="error" />
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => {
+                  setShowTrialModal(false);
+                  setDays("");
+                  setDaysError("");
+                }}
+                className="px-4 py-2 border rounded-lg text-gray-600"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleTrialWithDays}
+                className="px-4 py-2 bg-yellow-500 text-white rounded-lg"
               >
                 Submit
               </button>
@@ -1544,7 +1708,7 @@ const handleDeleteTenant = async () => {
           </div>
         </div>
       )}
-      {showTrialConfirm && (
+      {/* {showTrialConfirm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
 
@@ -1558,7 +1722,7 @@ const handleDeleteTenant = async () => {
             }}
           ></div>
 
-          {/* Modal */}
+         
           <div className="relative bg-white rounded-xl shadow-xl w-[350px] p-5 z-[10000]">
 
 
@@ -1569,7 +1733,7 @@ const handleDeleteTenant = async () => {
                 Select Plan
               </label>
 
-              {/* SELECT BOX */}
+           
               <div
                 onClick={() => setShowTrialPlanDropdown(!showTrialPlanDropdown)}
                 className="w-full border rounded-lg px-3 py-2 text-sm flex justify-between items-center cursor-pointer bg-white"
@@ -1580,7 +1744,7 @@ const handleDeleteTenant = async () => {
                     : "Select Plan"}
                 </span>
 
-                {/* 🔽 Arrow */}
+             
                 <svg
                   className={`w-4 h-4 text-gray-500 transition-transform ${showTrialPlanDropdown ? "rotate-180" : ""
                     }`}
@@ -1593,7 +1757,6 @@ const handleDeleteTenant = async () => {
                 </svg>
               </div>
 
-              {/* DROPDOWN LIST */}
               {showTrialPlanDropdown && (
                 <div
                   className="absolute mt-1 w-full bg-white border rounded-lg shadow-md max-h-40 overflow-y-auto z-[10001] text-left"
@@ -1625,7 +1788,7 @@ const handleDeleteTenant = async () => {
             )}
             <div className="flex justify-end gap-2">
 
-              {/* Cancel */}
+             
               <button
                 onClick={() => {
                   setShowTrialConfirm(false);
@@ -1639,7 +1802,7 @@ const handleDeleteTenant = async () => {
                 Cancel
               </button>
 
-              {/* OK */}
+             
               <button
 
                 onClick={async () => {
@@ -1655,63 +1818,101 @@ const handleDeleteTenant = async () => {
             </div>
           </div>
         </div>
+      )} */}
+      {showTrialConfirm && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setShowTrialConfirm(false)}
+          ></div>
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-xl shadow-xl w-[320px] p-5 z-[10000] text-center">
+
+            <h2 className="text-sm font-semibold mb-3">
+              Extend Trial
+            </h2>
+
+            <p className="text-xs text-gray-500 mb-4">
+              Are you sure you want to extend the trial?
+            </p>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowTrialConfirm(false)}
+                className="px-4 py-2 border rounded-lg text-sm"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleTrialOnly}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
       )}
-  {showDeleteModal && (
-  <div
-    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-    onClick={() => {
-      setShowDeleteModal(false);
-      setMenuError("");
-      setPhone("");
-    }}
-  >
-    <div
-      className="bg-white rounded-2xl shadow-xl w-[400px] p-6"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">
-        Delete Tenant
-      </h2>
-
-      <p className="text-gray-500 text-sm mb-4">
-        Please enter tenant mobile number to confirm
-      </p>
-
-      {/* 🔥 PHONE INPUT */}
-      <input
-        type="text"
-        placeholder="Enter Phone Number"
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3"
-      />
-
-      {menuError && (
-        <ErrorMessage message={menuError} type="error" />
-      )}
-
-      <div className="flex justify-end gap-3 mt-4">
-        <button
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
           onClick={() => {
             setShowDeleteModal(false);
             setMenuError("");
             setPhone("");
           }}
-          className="px-4 py-2 border rounded-lg text-gray-600"
         >
-          Cancel
-        </button>
+          <div
+            className="bg-white rounded-2xl shadow-xl w-[400px] p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold text-gray-800 mb-3">
+              Delete Tenant
+            </h2>
 
-        <button
-          onClick={handleDeleteTenant}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-        >
-          Submit
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            <p className="text-gray-500 text-sm mb-4">
+              Please enter tenant mobile number to confirm
+            </p>
+
+            {/* 🔥 PHONE INPUT */}
+            <input
+              type="text"
+              placeholder="Enter Phone Number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3"
+            />
+
+            {menuError && (
+              <ErrorMessage message={menuError} type="error" />
+            )}
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setMenuError("");
+                  setPhone("");
+                }}
+                className="px-4 py-2 border rounded-lg text-gray-600"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleDeleteTenant}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };

@@ -15,8 +15,8 @@ import Item from "antd/es/list/Item";
 import Change from "../../assets/change.png"
 
 
-const RecurringBill = ({ hostelData }) => {
-  const { getRecurringHostels, generateRecurringInvoice, updateBillingRule } = useHostel();
+const RecurringBill = ({ hostelData,refreshHostel  }) => {
+  const { getRecurringHostels, generateRecurringInvoice, updateBillingRule,getHostelById } = useHostel();
   const [reccuringData, setReccuringData] = useState([])
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
@@ -124,6 +124,22 @@ const RecurringBill = ({ hostelData }) => {
   const isJoiningBased =
     hostelData?.currentBillingRules?.typeOfBilling === "JOINING_DATE_BASED";
 
+   useEffect(() => {
+  const refreshHostel = async () => {
+    const res = await getHostelById(hostelData?.hostelId);
+
+    if (res?.success) {
+      setHostelData(res.data);
+    }
+  };
+
+  window.addEventListener("hostelUpdated", refreshHostel);
+
+  return () => {
+    window.removeEventListener("hostelUpdated", refreshHostel);
+  };
+}, [hostelData?.hostelId]);
+
   const handleUpdateSchedule = async () => {
 
     const currentModel = String(hostelData?.currentBillingRules?.billingModel || "");
@@ -173,10 +189,17 @@ const RecurringBill = ({ hostelData }) => {
       setShowSuccess(true);
       setModalType("success");
       setMessage(res.message);
+       const updated = await getHostelById(hostelData?.hostelId);
+
+  if (updated?.success) {
+    window.dispatchEvent(new Event("hostelUpdated"));
+  }
       setTimeout(() => {
         setShowSuccess(false);
         setShowScheduleModal(false);
       }, 1000);
+      
+      
     } else {
       setShowSuccess(true);
       setModalType("error");
