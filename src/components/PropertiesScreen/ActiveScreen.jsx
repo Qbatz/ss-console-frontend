@@ -130,6 +130,7 @@ useEffect(() => {
                 <th className="px-4 py-3 text-left">User</th>
                 <th className="px-4 py-3 text-left">Date</th>
                 <th className="px-4 py-3 text-left">Time</th>
+                <th className="px-4 py-3 text-left">Platform</th>
                 <th className="px-4 py-3 text-left">Source</th>
                 <th className="px-4 py-3 text-left">Type</th>
               </tr>
@@ -150,6 +151,7 @@ useEffect(() => {
                     <td className="px-4 py-2 text-[12px] text-left">{item.userName}</td>
                     <td className="px-4 py-2 text-[12px] text-left">{item.activityDate}</td>
                     <td className="px-4 py-2 text-[12px] text-left">{item.activityTime}</td>
+                      <td className="px-4 py-2 text-[12px] text-left">{item?.platform || "N/A"}</td>
                     <td className="px-4 py-2 text-[12px] text-left">{item.source}</td>
                     <td className="px-4 py-2 text-[12px] text-left">{item.activityType}</td>
 
