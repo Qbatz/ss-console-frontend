@@ -112,13 +112,13 @@ const PropertyOverview = () => {
   const [showPaidByDropdown, setShowPaidByDropdown] = useState(false);
   const [showPlanDropdown, setShowPlanDropdown] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const [showAgentModal, setShowAgentModal] = useState(false);
   const loginType = localStorage.getItem("login_type");
   const showInvoices = loginType === "normal";
   const { hostelId } = useParams();
 
   // const hostelData = location.state?.hostelData;
-  useEffect(() => {
-    const fetchData = async () => {
+   const fetchData = async () => {
       if (!hostelId) return;
 
       const res = await getHostelById(hostelId);
@@ -127,7 +127,7 @@ const PropertyOverview = () => {
         setHostelData(res.data);
       }
     };
-
+  useEffect(() => {
     fetchData();
   }, [hostelId]);
   const trialPlan = location.state?.trialPlan;
@@ -558,7 +558,7 @@ if (updated?.success) {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
 
             {/* Left */}
-            <div className="flex items-center gap-4">
+           <div className="flex items-center gap-3">
 
               <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold">
                 {hostelData.initials}
@@ -606,14 +606,6 @@ if (updated?.success) {
                   Trial Extend
                 </button>
 
-                {/* 2️⃣ Trial + Days */}
-                {/* <button
-                 disabled={trialPlan?.trialExtendable === false}
-                  onClick={() => setShowTrialModal(true)}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded text-[10px] whitespace-nowrap cursor-pointer"
-                >
-                  Trial + Days
-                </button> */}
                 <button
                   disabled={trialPlan?.canAddExpandableTrial === false}
                   onClick={() => setShowTrialModal(true)}
@@ -627,24 +619,14 @@ if (updated?.success) {
                   Trial + Days
                 </button>
 
-                {/* 3️⃣ Subscription */}
+             
                 <button
                   onClick={() => setShowPlanModal(true)}
                   className="bg-blue-600 text-white px-3 py-1 rounded text-[10px] whitespace-nowrap cursor-pointer"
                 >
                   Buy Plan
                 </button>
-                {/* <button
-                  onClick={() => setShowPlanModal(true)}
-                  disabled={trialPlan?.trialExtendable === true}
-                  className={`px-3 py-1 rounded text-[10px] whitespace-nowrap
-    ${trialPlan?.trialExtendable === true
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-600 text-white cursor-pointer"}
-  `}
-                >
-                  Buy Plan
-                </button> */}
+               
 
               </div>
             </div>
@@ -692,7 +674,7 @@ if (updated?.success) {
                 <p className="text-[#1D1D1D] text-left font-sans font-medium text-sm">Region / City</p>
                 <div className="flex items-center gap-2 mt-1">
                   <img src={locationImg} className="w-4 h-4" />
-                  <p className="text-sm font-medium text-blue-600 flex items-center">
+                  <p className="text-sm font-medium text-blue-600 flex items-center text-start">
                     {hostelData.city}, {hostelData.state}
                     <img src={Arrow} className="w-3 h-3" />
                   </p>
@@ -721,7 +703,28 @@ if (updated?.success) {
                 </div>
               </div>
             </div>
+<div className="flex items-start gap-3">
+  <div>
+    <p className="text-[#1D1D1D] text-left font-sans font-medium text-sm">
+      Current Agent
+    </p>
 
+    <div className="flex items-center gap-2 mt-1">
+      <p className="text-sm font-medium text-blue-600 truncate max-w-[120px]">
+        {hostelData?.relationalAgents?.[0]?.agentName || "N/A"}
+      </p>
+
+      {hostelData?.relationalAgents?.length > 0 && (
+        <button
+          onClick={() => setShowAgentModal(true)}
+          className="text-[10px] px-2 py-[2px] bg-blue-100 text-blue-600 rounded whitespace-nowrap"
+        >
+          View
+        </button>
+      )}
+    </div>
+  </div>
+</div>
 
             {/* Status */}
             <div className="flex items-start gap-3">
@@ -1913,6 +1916,65 @@ if (updated?.success) {
           </div>
         </div>
       )}
+      {showAgentModal && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+
+    {/* Overlay */}
+    <div
+      className="absolute inset-0 bg-black/40"
+      onClick={() => setShowAgentModal(false)}
+    ></div>
+
+    {/* Modal */}
+    <div className="relative bg-white rounded-xl shadow-xl w-[600px] max-h-[80vh] overflow-y-auto p-5 z-[10000]">
+
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Agent Details</h2>
+        <button
+          onClick={() => setShowAgentModal(false)}
+          className="text-gray-500 hover:text-black cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Table */}
+      <table className="w-full text-sm border rounded-xl">
+        <thead className="bg-gray-100 text-xs uppercase text-gray-600">
+          <tr>
+            <th className="px-3 py-2 text-left whitespace-nowrap">Agent Name</th>
+            <th className="px-3 py-2 text-left whitespace-nowrap">Reason</th>
+            <th className="px-3 py-2 text-left whitespace-nowrap">Created By</th>
+            <th className="px-3 py-2 text-left whitespace-nowrap">Date</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {hostelData?.relationalAgents?.length > 0 ? (
+            hostelData.relationalAgents.map((item, i) => (
+              <tr key={i} className="border-t">
+                <td className="px-3 py-2 text-left ">{item.agentName}</td>
+                <td className="px-3 py-2 text-left">{item.reason}</td>
+                <td className="px-3 py-2 text-left">{item.createdBy}</td>
+                <td className="px-3 py-2 text-left">
+                  {item.createdAtDate} {item.createdAtTime}
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4" className="text-center py-4 text-gray-400">
+                No Data Found
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };

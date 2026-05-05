@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import SsIcon from "../../assets/SsIcon.png";
 import mailImg from "../../assets/Mail.png";
 import notificationImg from "../../assets/Bell.png";
@@ -26,8 +26,22 @@ const DashboardLayout = ({ children }) => {
   const [openSales, setOpenSales] = useState(false);
 
   const [recurringOpen, setRecurringOpen] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const location = useLocation();
+  const menuRef = useRef(null);
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setShowProfileMenu(false);
+    }
+  };
 
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   useEffect(() => {
     if (
@@ -44,7 +58,18 @@ const DashboardLayout = ({ children }) => {
     getDashboard()
   }, [])
 
+  const handleLogout = () => {
+    // 🔥 clear tokens
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("mock_token");
+    localStorage.removeItem("login_type");
 
+    // redirect flag clear
+    sessionStorage.removeItem("redirecting");
+
+    // 🔥 go to login page
+    window.location.replace("/");
+  };
   useEffect(() => {
     if (
       location.pathname.includes("/Recurring-Bill") ||
@@ -73,6 +98,7 @@ const DashboardLayout = ({ children }) => {
           <span className="text-blue-600 font-semibold text-lg">
             Smartstay
           </span>
+         
         </div>
 
         {/* Search */}
@@ -99,12 +125,41 @@ const DashboardLayout = ({ children }) => {
           </div>
 
           <img src={notificationImg} className="w-[18px] h-[18px]" />
+<div className="relative" ref={menuRef}>
 
-          {/* <img
-            src="https://i.pravatar.cc/40"
-            className="w-8 h-8 rounded-full object-cover"
-          /> */}
-          {adminDetails?.profilePic ? (
+  {/* PROFILE */}
+  <div
+    onClick={() => setShowProfileMenu(!showProfileMenu)}
+    className="cursor-pointer"
+  >
+    {adminDetails?.profilePic ? (
+      <img
+        src={adminDetails.profilePic}
+        className="w-8 h-8 rounded-full object-cover"
+        alt="profile"
+      />
+    ) : (
+      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold">
+        {adminDetails?.initials || "NA"}
+      </div>
+    )}
+  </div>
+
+  {/* DROPDOWN */}
+  {showProfileMenu && (
+  <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-md z-[9999]">
+    <button
+      onClick={handleLogout}
+      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-500 cursor-pointer"
+    >
+      Logout
+    </button>
+  </div>
+)}
+
+</div>
+        
+          {/* {adminDetails?.profilePic ? (
             <img
               src={adminDetails.profilePic}
               className="w-8 h-8 rounded-full object-cover"
@@ -114,7 +169,7 @@ const DashboardLayout = ({ children }) => {
             <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold">
               {adminDetails?.initials || "NA"}
             </div>
-          )}
+          )} */}
         </div>
       </div>
 

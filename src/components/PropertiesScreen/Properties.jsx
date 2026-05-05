@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext,useRef } from "react";
 import AddBtn from "../../assets/add.png"
 import Search from "../../assets/Search.png";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
@@ -24,6 +24,7 @@ const Properties = () => {
   const { createSubscription } = useSubscription();
   const { getPlansDropdown } = usePlan();
   const [dropdownPlans, setDropdownPlans] = useState([]);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const location = useLocation();
   const { roleId } = useParams();
 
@@ -72,6 +73,7 @@ const Properties = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteHostelId, setDeleteHostelId] = useState(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const menuRef = useRef(null);
 // const [selectedHostel, setSelectedHostel] = useState(null);
   console.log("startDate", startDate)
   const navigate = useNavigate();
@@ -85,7 +87,19 @@ const Properties = () => {
   console.log("Typed Value:", errorMsg);
   console.log("Selected Hostel ID:", accessError);
 
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setOpenMenu(null);
+    }
+  };
 
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   const [debouncedSearch, setDebouncedSearch] = useState(searchText);
 
@@ -748,13 +762,27 @@ const Properties = () => {
                                     src={Circle}
                                     alt="circle"
                                     className="w-5 h-5 cursor-pointer"
-                                    onClick={() =>
-                                      setOpenMenu(openMenu === item.hostelId ? null : item.hostelId)
-                                    }
+                                   onClick={(e) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+
+  setMenuPosition({
+    top: rect.bottom + 5,
+    left: rect.right - 150,
+  });
+
+  setOpenMenu(openMenu === item.hostelId ? null : item.hostelId);
+}}
                                   />
 
                                   {openMenu === item.hostelId && (
-                                    <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                                   <div
+                                    ref={menuRef} 
+  className="fixed w-36 bg-white border rounded-lg shadow-lg z-[9999]"
+  style={{
+    top: menuPosition.top,
+    left: menuPosition.left,
+  }}
+>
 
                                       <button
                                         onClick={() => {
@@ -1127,23 +1155,11 @@ const Properties = () => {
 <AssignStaffModal
   show={showAssignModal}
   onClose={() => setShowAssignModal(false)}
-  staffList={[
-    { id: 1, name: "Saranya M" },
-    { id: 2, name: "Arun T" }
-  ]}
-  reasonList={[
-    "Support",
-    "Follow-up",
-    "Technical Issue"
-  ]}
-  onConfirm={(data) => {
-    console.log("Assign Payload:", {
-      hostelId: selectedHostel?.hostelId,
-      ...data
-    });
-
-    setShowAssignModal(false);
-  }}
+  selectedHostel={selectedHostel}
+  setModalType={setModalType}
+  setMessage={setMessage}
+  setShowSuccess={setShowSuccess}
+  refreshData={() => getHostels(page, pageSize, searchText)}
 />
       </DashboardLayout>
     </>

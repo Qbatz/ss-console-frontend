@@ -1411,13 +1411,13 @@ const TenantRecurring = () => {
                         </div>
 
                         {/* Active Tenants */}
-                        <div className="flex items-center gap-3">
+                        {/* <div className="flex items-center gap-3">
                           <img src={team} className="w-4 h-4 opacity-60" />
                           <span className="text-gray-500 w-28 text-left">Active Tenants</span>
                           <span className="font-medium text-gray-800 text-left">
                             {selectedItem?.activeTenantCount || "N/A"}
                           </span>
-                        </div>
+                        </div> */}
 
                       </div>
                     </div>

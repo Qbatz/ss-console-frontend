@@ -708,6 +708,66 @@ const deleteHostel = async (hostelId) => {
     setLoading(false);
   }
 };
+const assignRelationalAgent = async (hostelId, payload) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      `/v2/relational-agent/${hostelId}`,
+      payload
+    );
+
+    if (res.status === 200 || res.status === 201) {
+      return {
+        success: true,
+        message: "Staff assigned successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const getRelationalReasons = async () => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.get(
+      "/v2/relational-agent/reasons"
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data || []
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <HostelContext.Provider
       value={{
@@ -715,7 +775,7 @@ const deleteHostel = async (hostelId) => {
         loading,
         errorMsg,
         getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice,getRecurringByHostelId,
-        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,deleteHostel
+        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,deleteHostel,assignRelationalAgent,getRelationalReasons
       }}
     >
       {children}

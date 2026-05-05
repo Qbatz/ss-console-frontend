@@ -36,7 +36,7 @@ const IamAdminUser = () => {
   const [roleError, setRoleError] = useState("")
 
 
-  console.log("agents", agents)
+  console.log("agentDetails", agentDetails)
 
   useEffect(() => {
     const handleClickOutside = () => setMenuOpen(null);
@@ -148,6 +148,31 @@ const IamAdminUser = () => {
       setTimeout(() => setShowSuccess(false), 1500);
     }
   };
+  const TableSkeleton = () => {
+  return (
+    <>
+      {[...Array(6)].map((_, i) => (
+        <tr key={i} className="border-b animate-pulse">
+          <td className="px-4 py-3">
+            <div className="h-3 w-24 bg-gray-200 rounded"></div>
+          </td>
+          <td className="px-2 py-3">
+            <div className="h-3 w-32 bg-gray-200 rounded"></div>
+          </td>
+          <td className="px-2 py-3">
+            <div className="h-3 w-20 bg-gray-200 rounded"></div>
+          </td>
+          <td className="px-2 py-3">
+            <div className="h-3 w-28 bg-gray-200 rounded"></div>
+          </td>
+          <td className="px-2 py-3">
+            <div className="h-3 w-6 bg-gray-200 rounded"></div>
+          </td>
+        </tr>
+      ))}
+    </>
+  );
+};
   // const handleUpdateRole = async () => {
   //   if (!selectedRoleId) {
   //     setRoleError("Please select a role");
@@ -280,11 +305,7 @@ const IamAdminUser = () => {
             <div className="px-2 md:px-4">
               <div className="bg-white border border-gray-300 rounded-xl overflow-hidden shadow-sm relative">
 
-                {loading && (
-                  <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-                    <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                )}
+               
 
                 {/* ⭐ Fixed height container */}
                 <div className="max-h-[400px] overflow-y-auto">
@@ -332,7 +353,10 @@ const IamAdminUser = () => {
                     </thead>
 
                     <tbody>
-                      {filteredAgents?.length > 0 ? (
+                        {loading ? (
+    <TableSkeleton />
+                        ) :
+                      filteredAgents?.length > 0 ? (
                         filteredAgents.map((user, index) => (
                           <tr
                             // key={index}
@@ -417,7 +441,7 @@ const IamAdminUser = () => {
 
                                   const rect = e.currentTarget.getBoundingClientRect();
                                   const spaceBelow = window.innerHeight - rect.bottom;
-                                  const dropdownHeight = 70; // approx height
+                                  const dropdownHeight = 120; // approx height
 
                                   const openUp = spaceBelow < dropdownHeight;
 

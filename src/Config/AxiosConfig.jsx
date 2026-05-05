@@ -37,34 +37,82 @@ axiosInstance.interceptors.request.use((config) => {
 // });
 
 
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+
+   
+//     if (error?.response?.status === 401) {
+
+//       const isAlreadyRedirecting = sessionStorage.getItem("redirecting");
+
+//       if (!isAlreadyRedirecting) {
+//         sessionStorage.setItem("redirecting", "true");
+
+//         localStorage.removeItem("access_token");
+//         localStorage.removeItem("mock_token");
+
+//         window.location.replace("/");
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
 
-    // if (error?.response?.status === 401) {
+  async (error) => {
+    const originalRequest = error.config;
 
-    //   const mockToken = localStorage.getItem("mock_token");
+  
+    if (error?.response?.status === 401 && !originalRequest._retry) {
 
-    //   localStorage.removeItem("mock_token");
-    //   localStorage.removeItem("access_token");
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = "Bearer " + token;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
 
-    //   if (mockToken) {
-    //     window.location.replace("/internal/login");
-    //   } else {
-    //     window.location.replace("/");
-    //   }
-    // }
-    if (error?.response?.status === 401) {
+      originalRequest._retry = true;
+      isRefreshing = true;
 
-      const isAlreadyRedirecting = sessionStorage.getItem("redirecting");
+      const refreshToken = localStorage.getItem("refreshToken");
 
-      if (!isAlreadyRedirecting) {
-        sessionStorage.setItem("redirecting", "true");
+      try {
+        const res = await axios.post(
+          `${ConfigV2.apiBaseUrl}/refresh-token`,
+          { refreshToken }
+        );
 
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("mock_token");
+        const newAccessToken = res.data.accessToken;
 
+        localStorage.setItem("access_token", newAccessToken);
+
+        axiosInstance.defaults.headers.Authorization =
+          "Bearer " + newAccessToken;
+
+        processQueue(null, newAccessToken);
+
+        originalRequest.headers.Authorization =
+          "Bearer " + newAccessToken;
+
+        return axiosInstance(originalRequest);
+
+      } catch (err) {
+        processQueue(err, null);
+
+        localStorage.clear();
         window.location.replace("/");
+
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
       }
     }
 
