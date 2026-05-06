@@ -1063,7 +1063,7 @@ if (updated?.success) {
             <ProductSupport hostelData={hostelData} />
           )}
           {activeTab === "staffs" && (
-            <StaffScreen hostelData={hostelData} />
+            <StaffScreen hostelData={hostelData} refreshHostel={fetchData} />
           )}
           {activeTab === "invoices" && (
             <InvoicesScreen hostelData={hostelData} />

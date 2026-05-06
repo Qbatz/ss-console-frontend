@@ -291,6 +291,8 @@ useEffect(() => {
             </div>
             <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} activeIcon={Billings}
               inactiveIcon={Billings} />
+              <SidebarItem title="Invoice-Redemption" to={`/invoice-redemption/${adminDetails?.roleId}`} activeIcon={Billings}
+              inactiveIcon={Billings} />
 
             {/* <SidebarItem title="Monthly Recurring" count="0" to={`/Recurring-Bill/${adminDetails?.roleId}`} /> */}
 
@@ -340,6 +342,8 @@ useEffect(() => {
 
 
             <SidebarItem title="Tenants Summary" count="0" to={`/tenantList/${adminDetails?.roleId}`} activeIcon={Users}
+              inactiveIcon={Users} />
+               <SidebarItem title="Table Customization" count="0" to={`/tableCustomize/${adminDetails?.roleId}`} activeIcon={Users}
               inactiveIcon={Users} />
 
             <SidebarItem title="Support Tickets" count="0" to={`/supportTicket/${adminDetails?.roleId}`} activeIcon={Support}

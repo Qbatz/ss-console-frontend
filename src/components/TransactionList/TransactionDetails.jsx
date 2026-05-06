@@ -48,7 +48,7 @@ const TransactionsPage = () => {
       setPage((prev) => prev + 1);
     }
   };
-
+console.log("selectedTxn",selectedTxn)
   const handlePrev = () => {
     if (page > 1) {
       setPage((prev) => prev - 1);

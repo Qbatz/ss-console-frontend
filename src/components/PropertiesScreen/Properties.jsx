@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext,useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import AddBtn from "../../assets/add.png"
 import Search from "../../assets/Search.png";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
@@ -74,7 +74,7 @@ const Properties = () => {
   const [deleteHostelId, setDeleteHostelId] = useState(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const menuRef = useRef(null);
-// const [selectedHostel, setSelectedHostel] = useState(null);
+  // const [selectedHostel, setSelectedHostel] = useState(null);
   console.log("startDate", startDate)
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState({
@@ -87,19 +87,19 @@ const Properties = () => {
   console.log("Typed Value:", errorMsg);
   console.log("Selected Hostel ID:", accessError);
 
-useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (menuRef.current && !menuRef.current.contains(event.target)) {
-      setOpenMenu(null);
-    }
-  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenu(null);
+      }
+    };
 
-  document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const [debouncedSearch, setDebouncedSearch] = useState(searchText);
 
@@ -173,7 +173,7 @@ useEffect(() => {
   }
 
 
-  
+
   const handlePropertyClick = async (item) => {
     const res = await getHostelById(item.hostelId);
 
@@ -200,11 +200,11 @@ useEffect(() => {
 
     exportHostels(searchText, start, end);
   };
- 
-  const handleCreateSubscription = async (item) => {
-   const firstPlan = dropdownPlans?.trialPlans?.[0];
 
-   
+  const handleCreateSubscription = async (item) => {
+    const firstPlan = dropdownPlans?.trialPlans?.[0];
+
+
 
     if (!firstPlan) {
       setPlanError("Please select a plan");
@@ -215,7 +215,7 @@ useEffect(() => {
       trialDays: 0,
       paidAmount: 0,
       discountAmount: 0,
-      planCode:  firstPlan?.planCode
+      planCode: firstPlan?.planCode
     };
 
     const res = await createSubscription(
@@ -238,7 +238,7 @@ useEffect(() => {
       setPlanError(res?.message);
     }
   };
-  
+
 
   console.log("hostels", hostels)
   const formatDateToDDMMYYYY = (date) => {
@@ -277,23 +277,23 @@ useEffect(() => {
 
   };
   const handleDeleteHostel = async () => {
-  const res = await deleteHostel(deleteHostelId);
+    const res = await deleteHostel(deleteHostelId);
 
-  if (res?.success) {
-    setModalType("success");
-    setMessage(res.message);
-    setShowSuccess(true);
+    if (res?.success) {
+      setModalType("success");
+      setMessage(res.message);
+      setShowSuccess(true);
 
-    getHostels(page, pageSize, searchText);
+      getHostels(page, pageSize, searchText);
 
-    setTimeout(() => {
-      setShowSuccess(false);
-      setShowDeleteModal(false);
-    }, 1500);
-  } else {
-    setMenuError(res.message);
-  }
-};
+      setTimeout(() => {
+        setShowSuccess(false);
+        setShowDeleteModal(false);
+      }, 1500);
+    } else {
+      setMenuError(res.message);
+    }
+  };
 
   return (
     <>
@@ -670,7 +670,17 @@ useEffect(() => {
                                 )}
 
                                 <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 text-sm font-semibold uppercase">
-                                  {item.initials || "NA"}
+                                  {item.hostelImage ? (
+                                    <img
+                                      src={item.hostelImage}
+                                      alt="hostel"
+                                      className="w-9 h-9 rounded-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 text-sm font-semibold uppercase">
+                                      {item.initials || "NA"}
+                                    </div>
+                                  )}
                                 </div>
 
                                 <div
@@ -762,27 +772,27 @@ useEffect(() => {
                                     src={Circle}
                                     alt="circle"
                                     className="w-5 h-5 cursor-pointer"
-                                   onClick={(e) => {
-  const rect = e.currentTarget.getBoundingClientRect();
+                                    onClick={(e) => {
+                                      const rect = e.currentTarget.getBoundingClientRect();
 
-  setMenuPosition({
-    top: rect.bottom + 5,
-    left: rect.right - 150,
-  });
+                                      setMenuPosition({
+                                        top: rect.bottom + 5,
+                                        left: rect.right - 150,
+                                      });
 
-  setOpenMenu(openMenu === item.hostelId ? null : item.hostelId);
-}}
+                                      setOpenMenu(openMenu === item.hostelId ? null : item.hostelId);
+                                    }}
                                   />
 
                                   {openMenu === item.hostelId && (
-                                   <div
-                                    ref={menuRef} 
-  className="fixed w-36 bg-white border rounded-lg shadow-lg z-[9999]"
-  style={{
-    top: menuPosition.top,
-    left: menuPosition.left,
-  }}
->
+                                    <div
+                                      ref={menuRef}
+                                      className="fixed w-36 bg-white border rounded-lg shadow-lg z-[9999]"
+                                      style={{
+                                        top: menuPosition.top,
+                                        left: menuPosition.left,
+                                      }}
+                                    >
 
                                       <button
                                         onClick={() => {
@@ -794,26 +804,26 @@ useEffect(() => {
                                       >
                                         Reset Expense
                                       </button>
-                                    <button
-  onClick={() => {
-    setDeleteHostelId(item.hostelId);
-    setShowDeleteModal(true);
-    setOpenMenu(false);
-  }}
-  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 cursor-pointer"
->
-  Delete
-</button>
-   <button
-  onClick={() => {
-    setSelectedHostel(item);
-    setShowAssignModal(true);
-    setOpenMenu(false);
-  }}
-  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
->
-  Assign Staff
-</button>
+                                      <button
+                                        onClick={() => {
+                                          setDeleteHostelId(item.hostelId);
+                                          setShowDeleteModal(true);
+                                          setOpenMenu(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 cursor-pointer"
+                                      >
+                                        Delete
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setSelectedHostel(item);
+                                          setShowAssignModal(true);
+                                          setOpenMenu(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                                      >
+                                        Assign Staff
+                                      </button>
 
                                     </div>
                                   )}
@@ -854,8 +864,8 @@ useEffect(() => {
                                   }}
                                   alt="money"
                                   className={`w-5 h-5 ${canWrite === true && item?.canAddTrial === true
-                                      ? "cursor-pointer"
-                                      : "opacity-40 cursor-not-allowed"
+                                    ? "cursor-pointer"
+                                    : "opacity-40 cursor-not-allowed"
                                     }`}
                                 />
                                 {/* // )} */}
@@ -1071,96 +1081,96 @@ useEffect(() => {
           </div>
         )}
         {showTrialPopup && (
-  <div
-    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-    onClick={() => setShowTrialPopup(false)}
-  >
-    <div
-      className="bg-white rounded-2xl shadow-xl w-[380px] p-6 text-center"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <h2 className="text-lg font-semibold text-gray-800 mb-2">
-        Extend Trial
-      </h2>
+          <div
+            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+            onClick={() => setShowTrialPopup(false)}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl w-[380px] p-6 text-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Extend Trial
+              </h2>
 
-      <p className="text-sm text-gray-500 mb-6">
-        Are you sure you want to extend the trial?
-      </p>
-{planError && (
-                  <ErrorMessage message={planError} type="error" />
-                )}
-      <div className="flex justify-center gap-4">
-        <button
-          onClick={() => setShowTrialPopup(false)}
-          className="px-6 py-2 border border-gray-300 rounded-xl text-gray-700"
-        >
-          Cancel
-        </button>
+              <p className="text-sm text-gray-500 mb-6">
+                Are you sure you want to extend the trial?
+              </p>
+              {planError && (
+                <ErrorMessage message={planError} type="error" />
+              )}
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={() => setShowTrialPopup(false)}
+                  className="px-6 py-2 border border-gray-300 rounded-xl text-gray-700"
+                >
+                  Cancel
+                </button>
 
-        <button
-          onClick={() => handleCreateSubscription(selectedItem)}
-          className="px-6 py-2 bg-green-600 text-white rounded-xl"
-        >
-          Confirm
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-{showDeleteModal && (
-    <div
-      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-      onClick={() => {
-      setShowDeleteModal(false);
-      setMenuError("");
-    }}
-    >
-      <div
-        className="bg-white rounded-xl p-5 w-[350px]"
-        onClick={(e) => e.stopPropagation()} 
-      >
-        <h2 className="text-sm font-semibold mb-2">
-        Delete Hostel?
-        </h2>
-  
-        <p className="text-sm text-gray-500 mb-4">
-         Are you sure you want to delete this hostel?
-        </p>
-  {menuError && (
+                <button
+                  onClick={() => handleCreateSubscription(selectedItem)}
+                  className="px-6 py-2 bg-green-600 text-white rounded-xl"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {showDeleteModal && (
+          <div
+            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+            onClick={() => {
+              setShowDeleteModal(false);
+              setMenuError("");
+            }}
+          >
+            <div
+              className="bg-white rounded-xl p-5 w-[350px]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-sm font-semibold mb-2">
+                Delete Hostel?
+              </h2>
+
+              <p className="text-sm text-gray-500 mb-4">
+                Are you sure you want to delete this hostel?
+              </p>
+              {menuError && (
                 <ErrorMessage message={menuError} type="error" />
               )}
-        <div className="flex justify-end gap-2">
-  
-          <button
-            onClick={() => {
-            setShowDeleteModal(false);
-            setMenuError("");
-          }}
-            className="px-3 py-1 border rounded text-sm cursor-pointer"
-          >
-            Cancel
-          </button>
-  
-          <button
-              onClick={handleDeleteHostel}
-            className="px-3 py-1 bg-red-600 text-white rounded text-sm cursor-pointer"
-          >
-            Delete
-          </button>
-  
-        </div>
-      </div>
-    </div>
-)}
-<AssignStaffModal
-  show={showAssignModal}
-  onClose={() => setShowAssignModal(false)}
-  selectedHostel={selectedHostel}
-  setModalType={setModalType}
-  setMessage={setMessage}
-  setShowSuccess={setShowSuccess}
-  refreshData={() => getHostels(page, pageSize, searchText)}
-/>
+              <div className="flex justify-end gap-2">
+
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setMenuError("");
+                  }}
+                  className="px-3 py-1 border rounded text-sm cursor-pointer"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleDeleteHostel}
+                  className="px-3 py-1 bg-red-600 text-white rounded text-sm cursor-pointer"
+                >
+                  Delete
+                </button>
+
+              </div>
+            </div>
+          </div>
+        )}
+        <AssignStaffModal
+          show={showAssignModal}
+          onClose={() => setShowAssignModal(false)}
+          selectedHostel={selectedHostel}
+          setModalType={setModalType}
+          setMessage={setMessage}
+          setShowSuccess={setShowSuccess}
+          refreshData={() => getHostels(page, pageSize, searchText)}
+        />
       </DashboardLayout>
     </>
   );
