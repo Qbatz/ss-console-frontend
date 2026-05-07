@@ -935,6 +935,12 @@ if (updated?.success) {
                             <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
                           </div>
                         </th>
+                          <th className="px-4 py-3 text-left">
+                          <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-sans">
+                            Joining Date
+                            <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
+                          </div>
+                        </th>
 
                         <th className="px-4 py-3 text-left">
                           <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-sans">
@@ -973,6 +979,9 @@ if (updated?.success) {
 
                             <td className="px-4 py-2 text-left font-medium text-[12px]">
                               {item.mobile || "N/A"}
+                            </td>
+                             <td className="px-4 py-2 text-left font-medium text-[12px]">
+                              {item.joiningDate || "N/A"}
                             </td>
 
                             <td className="px-4 py-2 text-left font-medium text-[12px]">
