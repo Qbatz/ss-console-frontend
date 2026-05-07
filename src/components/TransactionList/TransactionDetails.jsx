@@ -48,7 +48,7 @@ const TransactionsPage = () => {
       setPage((prev) => prev + 1);
     }
   };
-
+console.log("selectedTxn",selectedTxn)
   const handlePrev = () => {
     if (page > 1) {
       setPage((prev) => prev - 1);
@@ -317,7 +317,7 @@ const TransactionsPage = () => {
         setHoveredProof("");
       }}
     >
-      {item.paymentProofFileName || "View Proof"} {/* 👈 முக்கிய change */}
+      {item.paymentProofFileName || "View Proof"}
     </span>
   ) : (
     "--"
@@ -474,7 +474,7 @@ const TransactionsPage = () => {
     <div className="grid grid-cols-[20px_120px_1fr] items-center gap-x-4">
       <img src={Single} alt="owner" className="w-4 h-4 opacity-70" />
       <span className="text-gray-500">Owner</span>
-      <span className="font-semibold text-gray-900">{selectedTxn.createdBy}</span>
+      <span className="font-semibold text-gray-900">{selectedTxn.paidBy}</span>
     </div>
 
     <div className="grid grid-cols-[20px_120px_1fr] items-start gap-x-4">

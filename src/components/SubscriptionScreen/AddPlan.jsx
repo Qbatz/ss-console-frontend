@@ -55,6 +55,7 @@ const AddEditPlan = () => {
   const [planError,setPlanError] =useState("")
   const [priceError,setPriceError] =useState("")
   const [durationError,setDurationError] =useState("")
+  const [gstPercentage,setGstPercentage] = useState("")
 
   // INIT FEATURES
   useEffect(() => {
@@ -157,7 +158,8 @@ console.log("initial:", initialAddons);
       discountPercentage: Number(discount),
       shouldShow,
       canCustomize,
-      planFeatures
+      planFeatures,
+      gstPercentage:gstPercentage
     };
 
     console.log("FINAL PAYLOAD:", payload);
@@ -602,7 +604,16 @@ if (editData) {
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
+  <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-black-500 text-left">Gst (%)</label>
+                  <input
+                    type="text"
+                    value={gstPercentage}
+                    onChange={(e) => setGstPercentage(e.target.value)}
+                    placeholder="Enter discount"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
               </div>
 
               {/* SWITCHES */}

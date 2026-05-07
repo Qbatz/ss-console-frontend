@@ -259,6 +259,7 @@ useEffect(() => {
 
                   <SidebarItem
                     title="Demo Requests"
+                    count={dashboardData?.demoRequestCount || 0}
                     to={`/demo-requests/${adminDetails?.roleId}`}
                     activeIcon={Subscription}
                     inactiveIcon={Subscription}
@@ -290,6 +291,8 @@ useEffect(() => {
 
             </div>
             <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} activeIcon={Billings}
+              inactiveIcon={Billings} />
+              <SidebarItem title="Invoice-Redemption" to={`/invoice-redemption/${adminDetails?.roleId}`} activeIcon={Billings}
               inactiveIcon={Billings} />
 
             {/* <SidebarItem title="Monthly Recurring" count="0" to={`/Recurring-Bill/${adminDetails?.roleId}`} /> */}
@@ -341,6 +344,8 @@ useEffect(() => {
 
             <SidebarItem title="Tenants Summary" count="0" to={`/tenantList/${adminDetails?.roleId}`} activeIcon={Users}
               inactiveIcon={Users} />
+               {/* <SidebarItem title="Table Customization" count="0" to={`/tableCustomize/${adminDetails?.roleId}`} activeIcon={Users}
+              inactiveIcon={Users} /> */}
 
             <SidebarItem title="Support Tickets" count="0" to={`/supportTicket/${adminDetails?.roleId}`} activeIcon={Support}
               inactiveIcon={Support} />
@@ -366,7 +371,7 @@ useEffect(() => {
         )}
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-6 mt-1 md:px-2 bg-white scrollbar-hide pb-14">
+       <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-6 mt-1 md:px-2 bg-white pb-14">
           <div className="w-full">
             {children}
           </div>

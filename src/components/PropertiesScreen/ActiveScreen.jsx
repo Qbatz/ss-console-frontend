@@ -182,7 +182,7 @@ useEffect(() => {
       {/* More Button */}
 
      
-      {!isMore && activities.length > 0 && (
+      {!isMore && defaultActivities.length > 0 && (
   <div className="flex justify-end mt-2">
     <button
       onClick={handleMoreClick}

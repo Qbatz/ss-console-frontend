@@ -768,6 +768,92 @@ const getRelationalReasons = async () => {
     setLoading(false);
   }
 };
+const updateTableColumns = async (payload) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.put("/v2/table-columns", payload);
+
+    if (res.status === 200) {
+      return { success: true, message: "Columns updated successfully" };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
+const resetTableColumns = async (payload) => {
+  try {
+    const res = await axiosInstance.put(
+      "/v2/table-columns/reset",
+      payload
+    );
+    
+
+    if (res.status === 200) {
+      
+      return { success: true , data: res?.data};
+    }
+
+    return { success: false };
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+  
+};
+const getTableColumns = async (page = 1, size = 10, name = "") => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.get("/v2/table-columns", {
+      params: {
+        page,
+        size,
+        name
+      }
+    });
+
+    if (res.status === 200) {
+      return { success: true, data: res.data };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
+const getInvoiceRedemption = async (page = 1, size = 10, name = "") => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.get("/v2/invoice-redemption", {
+      params: {
+        page,
+        size,
+        name,
+      },
+    });
+
+    if (res.status === 200) {
+      return { success: true, data: res.data };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <HostelContext.Provider
       value={{
@@ -775,7 +861,7 @@ const getRelationalReasons = async () => {
         loading,
         errorMsg,
         getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice,getRecurringByHostelId,
-        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,deleteHostel,assignRelationalAgent,getRelationalReasons
+        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns,resetTableColumns,getTableColumns,getInvoiceRedemption
       }}
     >
       {children}

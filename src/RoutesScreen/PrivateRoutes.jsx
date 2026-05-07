@@ -29,8 +29,9 @@ import CreateOffer from "../components/SubscriptionScreen/CreateOffer";
 import IamAdminUser from "../components/AdminUser/AdminUserList";
 import TransactionsPage from "../components/TransactionList/TransactionDetails";
 import TrailPage from "../components/SubscriptionScreen/TrialUsers";
-
+import TableCustomization from "../components/TableCustomizationScreen/TableCustomization";
 import TenantRecurring from "../components/RecurringMonitor/TenantRecurring";
+import InvoiceRedemption from "../components/InvoiceRedemption/InvoiceRedemption";
 
 const PrivateRoute = ({ children }) => {
   const token =
@@ -104,6 +105,9 @@ const PrivateRoutesScreen = () => {
 
                     <Route path="/tenant-Bill/:roleId" element={< TenantRecurring/>} />
                     <Route path="/iam-user/:agentId" element={<UserInfo />} />
+                      <Route path="/tableCustomize/:agentId" element={<TableCustomization />} />
+                        <Route path="/invoice-redemption/:agentId" element={<InvoiceRedemption />} />
+                 
                  
 
 
