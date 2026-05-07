@@ -792,9 +792,11 @@ const resetTableColumns = async (payload) => {
       "/v2/table-columns/reset",
       payload
     );
+    
 
     if (res.status === 200) {
-      return { success: true };
+      
+      return { success: true , data: res?.data};
     }
 
     return { success: false };
@@ -828,7 +830,7 @@ const getTableColumns = async (page = 1, size = 10, name = "") => {
     setLoading(false);
   }
 };
-const getInvoiceRedemption = async (page = 0, size = 10, name = "") => {
+const getInvoiceRedemption = async (page = 1, size = 10, name = "") => {
   try {
     setLoading(true);
 

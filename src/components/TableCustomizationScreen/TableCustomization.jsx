@@ -37,6 +37,8 @@ const TableCustomization = () => {
   const [dragIndex, setDragIndex] = useState(null);
   const [search, setSearch] = useState("");
   console.log("tableError", tableError)
+  const [expandedHostel, setExpandedHostel] = useState({});
+  const [expandedUsers, setExpandedUsers] = useState({});
   const handleDrop = (dropId) => {
     if (!dragIndex) return;
 
@@ -95,45 +97,65 @@ const TableCustomization = () => {
   console.log("selectedRow", selectedRow)
   const fetchColumns = async () => {
 
-
-    const res = await getTableColumns(page, rowsPerPage, debouncedSearch);
+    const res = await getTableColumns(
+      page,
+      rowsPerPage,
+      debouncedSearch
+    );
 
     if (res.success) {
+
+      // 🔥 DIRECT HOSTEL LIST
       const hostelList = res?.data?.hostelList || [];
 
-      let allTableColumns = [];
+      // 🔥 NO FLATTEN
+      setSelectedColumns(hostelList);
 
-      hostelList.forEach(hostel => {
-        hostel.usersList?.forEach(user => {
-          user.tableColumns?.forEach(tc => {
-            allTableColumns.push({
-              tableColumnId: tc?.tableColumnId,
-              hostelId: tc?.hostelId,
-              hostelName: hostel?.hostelName,
-              userId: tc?.userId,
-              userName: user?.userName,
-              moduleName: tc?.moduleName,
-              columns: tc?.columns || [],
-            });
-            // allTableColumns.push({
-            //   ...tc,
-            //   hostelName: hostel?.hostelName,
-            //   userName: user?.userName
-            // });
-          });
-        });
-      });
-
-      // const filtered = allTableColumns.filter(
-      //   item => item.moduleName === "MODULE_TENANT"
-      // );
-      setSelectedColumns(allTableColumns);
-      setTotalRecords(res.data.totalItems);
+      // 🔥 TOTAL COUNT
+      setTotalRecords(res?.data?.totalItems || 0);
     }
-
-
-
   };
+  // const fetchColumns = async () => {
+
+
+  //   const res = await getTableColumns(page, rowsPerPage, debouncedSearch);
+
+  //   if (res.success) {
+  //     const hostelList = res?.data?.hostelList || [];
+
+  //     let allTableColumns = [];
+
+  //     hostelList.forEach(hostel => {
+  //       hostel.usersList?.forEach(user => {
+  //         user.tableColumns?.forEach(tc => {
+  //           allTableColumns.push({
+  //             tableColumnId: tc?.tableColumnId,
+  //             hostelId: tc?.hostelId,
+  //             hostelName: hostel?.hostelName,
+  //             userId: tc?.userId,
+  //             userName: user?.userName,
+  //             moduleName: tc?.moduleName,
+  //             columns: tc?.columns || [],
+  //           });
+  //           // allTableColumns.push({
+  //           //   ...tc,
+  //           //   hostelName: hostel?.hostelName,
+  //           //   userName: user?.userName
+  //           // });
+  //         });
+  //       });
+  //     });
+
+  //     // const filtered = allTableColumns.filter(
+  //     //   item => item.moduleName === "MODULE_TENANT"
+  //     // );
+  //     setSelectedColumns(allTableColumns);
+  //     setTotalRecords(res.data.totalItems);
+  //   }
+
+
+
+  // };
   useEffect(() => {
     fetchColumns();
   }, [page, rowsPerPage, debouncedSearch]);
@@ -291,42 +313,140 @@ const TableCustomization = () => {
 
                 ) : (
 
-                  selectedColumns.map((item) => (
-                    <tr
-                      key={item.tableColumnId}
-                      className="border-t border-gray-300 hover:bg-gray-50 transition"
-                    >
-                      <td className="px-4 py-2 text-left text-[12px]">
-                        {item.hostelName}
-                      </td>
+                  selectedColumns.map((hostel) => (
 
-                      <td className="px-4 py-2 text-left text-[12px]">
-                        {item.userName}
-                      </td>
+                    <React.Fragment key={hostel.hostelId}>
 
-                      <td className="px-4 py-2 text-left text-[12px]">
-                        {item.moduleName}
-                      </td>
 
-                      <td className="px-4 py-2 cursor-pointer">
-                        <Setting3
-                         
-                          size="22"
-                          color="#4B4B4B"
-                          onClick={() => {
+                      <tr className="border-t bg-gray-50">
 
-                            setColumnSearch("");
+                        <td className="px-4 py-3 font-medium text-[13px]">
 
-                            setSelectedRow({
-                              ...item,
-                              columns: item?.columns || []
-                            });
+                          <div
+                            className="flex items-center gap-2 cursor-pointer"
+                            onClick={() =>
+                              setExpandedHostel(
+                                expandedHostel === hostel.hostelId
+                                  ? null
+                                  : hostel.hostelId
+                              )
+                            }
+                          >
 
-                            setShowModal(true);
-                          }}
-                        />
-                      </td>
-                    </tr>
+                            <span className="text-[11px]">
+                              {expandedHostel === hostel.hostelId
+                                ? "▼"
+                                : "▶"}
+                            </span>
+
+                            <span>{hostel.hostelName}</span>
+
+                          </div>
+
+                        </td>
+
+                        <td></td>
+                        <td></td>
+                        <td></td>
+
+                      </tr>
+
+                      {/* 🔥 USER ROWS */}
+                      {/* 🔥 USER ROWS */}
+                      {expandedHostel === hostel.hostelId &&
+                        hostel.usersList?.map((user) => (
+
+                          <React.Fragment key={user.userId}>
+
+                            {/* USER DROPDOWN */}
+                            <tr className="border-t bg-white">
+
+                              <td className="px-10 py-2 text-[12px]">
+
+                                <div
+                                  className="flex items-center gap-2 cursor-pointer"
+                                  onClick={() =>
+                                    setExpandedUsers((prev) => ({
+                                      ...prev,
+                                      [user.userId]: !prev[user.userId],
+                                    }))
+                                  }
+                                >
+
+                                  <span className="text-[10px]">
+                                    {expandedUsers[user.userId]
+                                      ? "▼"
+                                      : "▶"}
+                                  </span>
+
+                                  <span className="font-medium">
+                                    {user.userName}
+                                  </span>
+
+                                </div>
+
+                              </td>
+
+                              <td></td>
+                              <td></td>
+                              <td></td>
+
+                            </tr>
+
+                            {/* MODULE ROWS */}
+                            {expandedUsers[user.userId] &&
+                              user.tableColumns?.map((item) => (
+
+                                <tr
+                                  key={item.tableColumnId}
+                                  className="border-t hover:bg-gray-50 transition"
+                                >
+
+                                  <td className="px-16 py-2 text-[12px] text-gray-500">
+
+                                  </td>
+
+                                  <td className="px-4 py-2 text-[12px]">
+                                    {user.userName}
+                                  </td>
+
+                                  <td className="px-4 py-2 text-[12px]">
+                                    {item.moduleName}
+                                  </td>
+
+                                  <td className="px-4 py-2">
+
+                                    <Setting3
+                                      size="22"
+                                      color="#4B4B4B"
+                                      className="cursor-pointer"
+                                      onClick={() => {
+
+                                        setColumnSearch("");
+
+                                        setSelectedRow({
+                                          ...item,
+                                          hostelName: hostel.hostelName,
+                                          userName: user.userName,
+                                          columns: item?.columns || [],
+                                        });
+
+                                        setShowModal(true);
+                                      }}
+                                    />
+
+                                  </td>
+
+                                </tr>
+
+                              ))}
+
+                          </React.Fragment>
+
+                        ))}
+
+                    </React.Fragment>
+
                   ))
 
                 )}

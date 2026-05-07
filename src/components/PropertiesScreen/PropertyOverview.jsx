@@ -46,6 +46,12 @@ const PropertyOverview = () => {
   const [phone, setPhone] = useState("");
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenants");
+    const {
+  canRead: canSubscriptionRead,
+  canWrite: canSubscriptionWrite,
+  canUpdate: canSubscriptionUpdate,
+  canDelete: canSubscriptionDelete,
+} = usePermission("Subscriptions");
 
   const { canWrite: canResetWrite } = usePermission("Reset hostel");
   const { plans, getPlans, getPlansDropdown } = usePlan();
@@ -59,8 +65,8 @@ const PropertyOverview = () => {
   }, []);
   const paidByUsers = [
     {
-      id: hostelData?.ownerInfo?.ownerId,
-      name: hostelData?.ownerInfo?.fullName,
+      id: hostelData?.owner?.userId,
+      name: hostelData?.owner?.fullName,
       role: "Owner"
     },
 
@@ -589,24 +595,38 @@ if (updated?.success) {
                   Trial Extend
                 </button> */}
                 <button
-                  disabled={trialPlan?.canAddTrial === false}
-                  onClick={() => setShowTrialConfirm(true)}
-                  className={`px-2 py-[2px] font-medium rounded text-[10px] whitespace-nowrap
-    ${trialPlan?.canAddTrial === false
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-green-600 text-white cursor-pointer hover:bg-green-700"
-                    }
+  disabled={
+    trialPlan?.canAddTrial === false ||
+    !canSubscriptionWrite
+  }
+  onClick={() => {
+    if (
+      trialPlan?.canAddTrial !== false &&
+      canSubscriptionWrite
+    ) {
+      setShowTrialConfirm(true);
+    }
+  }}
+  className={`px-2 py-[2px] font-medium rounded text-[10px] whitespace-nowrap
+    ${
+      trialPlan?.canAddTrial === false ||
+      !canSubscriptionWrite
+        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+        : "bg-green-600 text-white cursor-pointer hover:bg-green-700"
+    }
   `}
-                  title={
-                    trialPlan?.canAddTrial === false
-                      ? "Trial cannot be extended"
-                      : ""
-                  }
-                >
-                  Trial Extend
-                </button>
+  title={
+    trialPlan?.canAddTrial === false
+      ? "Trial cannot be extended"
+      : !canSubscriptionWrite
+      ? "No permission"
+      : ""
+  }
+>
+  Trial Extend
+</button>
 
-                <button
+                {/* <button
                   disabled={trialPlan?.canAddExpandableTrial === false}
                   onClick={() => setShowTrialModal(true)}
                   className={`px-3 py-1 rounded text-[10px] whitespace-nowrap
@@ -617,16 +637,49 @@ if (updated?.success) {
   `}
                 >
                   Trial + Days
-                </button>
-
+                </button> */}
+<button
+  disabled={
+    trialPlan?.canAddExpandableTrial === false ||
+    !canSubscriptionWrite
+  }
+  onClick={() => {
+    if (
+      trialPlan?.canAddExpandableTrial !== false &&
+      canSubscriptionWrite
+    ) {
+      setShowTrialModal(true);
+    }
+  }}
+  className={`px-3 py-1 rounded text-[10px] whitespace-nowrap
+    ${
+      trialPlan?.canAddExpandableTrial === false ||
+      !canSubscriptionWrite
+        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+        : "bg-yellow-500 text-white cursor-pointer hover:bg-yellow-600"
+    }
+  `}
+>
+  Trial + Days
+</button>
              
-                <button
-                  onClick={() => setShowPlanModal(true)}
-                  className="bg-blue-600 text-white px-3 py-1 rounded text-[10px] whitespace-nowrap cursor-pointer"
-                >
-                  Buy Plan
-                </button>
-               
+               <button
+  disabled={!canSubscriptionWrite}
+  onClick={() => {
+    if (canSubscriptionWrite) {
+      setShowPlanModal(true);
+    }
+  }}
+  className={`px-3 py-1 rounded text-[10px] whitespace-nowrap
+    ${
+      canSubscriptionWrite
+        ? "bg-blue-600 text-white cursor-pointer hover:bg-blue-700"
+        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+    }
+  `}
+>
+  Buy Plan
+</button>
 
               </div>
             </div>
@@ -861,7 +914,7 @@ if (updated?.success) {
                 "subscriptions",
                 "Product Support",
                 "staffs",
-                "invoices",
+                "Invoice Redemption",
                 "activity",
                 "Amenities",
                 "Configuration"
@@ -1011,20 +1064,30 @@ if (updated?.success) {
                                     className="fixed w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
                                     style={{
                                       top: menuPosition.top,
-                                      left: menuPosition.left,
+                                      left: menuPosition.left -120,
                                     }}
                                   >
-                                    <button
-                                      onClick={() => {
-                                        setSelectedTenantId(item.customerId);
-                                        setPhone(item.mobile);
-                                        setShowDeleteModal(true);
-                                        setOpenMenu(null);
-                                      }}
-                                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600"
-                                    >
-                                      Delete
-                                    </button>
+                                   <button
+      disabled={!canDelete}
+      onClick={() => {
+
+        if (!canDelete) return;
+
+        setSelectedTenantId(item.customerId);
+        setPhone(item.mobile);
+        setShowDeleteModal(true);
+        setOpenMenu(null);
+      }}
+      className={`w-full text-left px-4 py-2 text-sm
+        ${
+          canDelete
+            ? "hover:bg-gray-100 text-red-600 cursor-pointer"
+            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+        }
+      `}
+    >
+      Delete
+    </button>
                                   </div>
                                 )}
                               </div>
@@ -1074,7 +1137,7 @@ if (updated?.success) {
           {activeTab === "staffs" && (
             <StaffScreen hostelData={hostelData} refreshHostel={fetchData} />
           )}
-          {activeTab === "invoices" && (
+          {activeTab === "Invoice Redemption" && (
             <InvoicesScreen hostelData={hostelData} />
           )}
           {activeTab === "activity" && (
@@ -1233,7 +1296,7 @@ if (updated?.success) {
                 setNoteText("");
                 setHostelError("");
               }}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 cursor-pointer"
             >
               ✕
             </button>

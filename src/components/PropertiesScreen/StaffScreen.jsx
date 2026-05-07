@@ -7,6 +7,7 @@ import Eye from "../../assets/eye.png";
 import EyeClose from "../../assets/EyeIcon.png";
 import Arrow from "../../assets/direction-down 01.png";
 import { useHostel } from "../../Context/HostelListContext";
+import Circle from "../../assets/menucircle.png"
 
 
 const StaffScreen = ({ hostelData, refreshHostel, }) => {
@@ -62,6 +63,7 @@ const { updateTableColumns,resetTableColumns } = useHostel();
 const [selectedColumns, setSelectedColumns] = useState([]);
 const [search, setSearch] = useState("");
 const [dragIndex, setDragIndex] = useState(null);
+const [selectedModule, setSelectedModule] = useState("");
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -155,13 +157,23 @@ const [dragIndex, setDragIndex] = useState(null);
   const res = await updateTableColumns(payload);
 
   if (res.success) {
-     refreshHostel();
-    setShowDrawer(false);
+    setModalType("success");
+      setMessage(res.message);
+      setShowSuccess(true);
+ refreshHostel()
+      setTimeout(() => {
+        setShowSuccess(false);
+        setShowDrawer(false);
+       
+      }, 1500);
+    //  refreshHostel();
+    
   } else {
     console.log(res.message);
   }
 };
 console.log("selectedUser",selectedUser)
+
 const handleResetColumns = async () => {
   const payload = {
     hostelId: hostelData?.hostelId,
@@ -172,7 +184,16 @@ const handleResetColumns = async () => {
   const res = await resetTableColumns(payload);
 
   if (res.success) {
-    refreshHostel();
+      setModalType("success");
+      setMessage(res.data);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+          refreshHostel();
+        // setShowDrawer(false);
+      }, 1500);
+  
     
   } else {
     console.log(res.message);
@@ -276,7 +297,7 @@ const handleResetColumns = async () => {
                             }}
                             className="text-gray-400 hover:text-gray-600 cursor-pointer"
                           >
-                            ⋮
+                            <img src={Circle} className="w-5 h-5"/>
                           </button>
 
                         </div>
@@ -305,16 +326,18 @@ const handleResetColumns = async () => {
                             </button>
            <button
   className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
-  onClick={() => {
-    const tenantColumns =
-      selectedUser?.tableColumns?.find(
-        t => t.moduleName === selectedUser?.tableColumns[0]?.moduleName
-      )?.columns || [];
+onClick={() => {
 
-    setSelectedColumns(tenantColumns);
-    setShowDrawer(true);
-    setOpenMenuIndex(null);
-  }}
+  const defaultModule =
+    selectedUser?.tableColumns?.[0];
+
+  setSelectedModule(defaultModule?.moduleName || "");
+
+  setSelectedColumns(defaultModule?.columns || []);
+
+  setShowDrawer(true);
+  setOpenMenuIndex(null);
+}}
 >
   Table Customization
 </button>
@@ -425,7 +448,7 @@ const handleResetColumns = async () => {
                             }}
                             className="text-gray-400 hover:text-gray-600 cursor-pointer"
                           >
-                            ⋮
+                            <img src={Circle} className="w-5 h-5"/>
                           </button>
                         </div>
                         {openMenuIndex !== null && menuPos && (
@@ -439,7 +462,7 @@ const handleResetColumns = async () => {
                             }}
                           >
                             <button
-                              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
                               onClick={() => {
                                 setShowResetModal(true);
                                 setOpenMenuIndex(null);
@@ -449,7 +472,7 @@ const handleResetColumns = async () => {
                               Reset Password
                             </button>
        <button
-  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
   onClick={() => {
     const tenantColumns =
       selectedUser?.tableColumns?.find(
@@ -609,10 +632,10 @@ const handleResetColumns = async () => {
     <div className="w-[400px] bg-white h-screen shadow-xl flex flex-col">
 
       {/* HEADER */}
-      <div className="px-5 py-4 border-b flex justify-between items-center">
+      {/* <div className="px-5 py-4 border-b flex justify-between items-center">
         <h2 className="text-[16px] font-semibold">Customize Tabs</h2>
         <button onClick={() => setShowDrawer(false)}>✕</button>
-      </div>
+      </div> */}
 
       {/* BODY */}
       <div className="flex-1 overflow-y-auto p-4">
@@ -624,7 +647,7 @@ const handleResetColumns = async () => {
   onClick={() => {
     const updated = selectedColumns.map(col => ({
       ...col,
-      selected: !isAllSelected, // 🔥 toggle
+      selected: !isAllSelected,
     }));
     setSelectedColumns(updated);
   }}
@@ -634,7 +657,42 @@ const handleResetColumns = async () => {
 </button>
         </div>
 
-        {/* SEARCH */}
+     <div className="mb-3">
+
+  <label className="text-[12px] font-medium text-gray-600 mb-1 block text-left">
+    Module
+  </label>
+
+  <select
+    value={selectedModule}
+    onChange={(e) => {
+
+      const moduleName = e.target.value;
+
+      setSelectedModule(moduleName);
+
+      const moduleData =
+        selectedUser?.tableColumns?.find(
+          item => item.moduleName === moduleName
+        );
+
+      setSelectedColumns(moduleData?.columns || []);
+    }}
+    className="w-full border rounded-lg px-3 py-2 text-sm bg-white outline-none"
+  >
+
+    {selectedUser?.tableColumns?.map((item) => (
+      <option
+        key={item.tableColumnId}
+        value={item.moduleName}
+      >
+        {item.moduleName}
+      </option>
+    ))}
+
+  </select>
+
+</div>
         <input
           type="text"
           placeholder="Search"
@@ -642,57 +700,79 @@ const handleResetColumns = async () => {
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        {/* LIST */}
-        <div className="space-y-2">
-         {(selectedColumns || [])
-  .map((col, index) => ({ ...col, originalIndex: index })) // 🔥 keep original index
-  .filter(col =>
-    col.fieldName.toLowerCase().includes(search.toLowerCase())
-  )
-  .map((col, i) => (
-    <div
-      key={col.fieldName}
-      className="flex items-center gap-3"
-      draggable
-      onDragStart={() => setDragIndex(col.originalIndex)} // 🔥 FIX
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={() => {
-        if (dragIndex === null) return;
+    
+        {selectedColumns?.length === 0 ? (
 
-        const newItems = [...selectedColumns];
+  <div className="flex items-center justify-center h-[200px] text-gray-400 text-sm border rounded-lg">
+    No columns available for this module
+  </div>
 
-        const [draggedItem] = newItems.splice(dragIndex, 1);
-        newItems.splice(col.originalIndex, 0, draggedItem); // 🔥 FIX
+) : (
 
-        const updated = newItems.map((item, index) => ({
-          ...item,
-          order: index + 1,
-        }));
+  <div className="space-y-2">
 
-        setSelectedColumns(updated);
-        setDragIndex(null);
-      }}
-    >
-      <span className="cursor-grab active:cursor-grabbing">☰</span>
+    {(selectedColumns || [])
+      .map((col, index) => ({ ...col, originalIndex: index }))
+      .filter(col =>
+        col.fieldName.toLowerCase().includes(search.toLowerCase())
+      )
+      .map((col, i) => (
+        <div
+          key={col.fieldName}
+          className="flex items-center gap-3"
+          draggable
+          onDragStart={() => setDragIndex(col.originalIndex)}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={() => {
 
-      <input
-        type="checkbox"
-        checked={col.selected}
-        onChange={(e) => {
-          const updated = [...selectedColumns];
-          updated[col.originalIndex].selected = e.target.checked; // 🔥 FIX
-          setSelectedColumns(updated);
-        }}
-      />
+            if (dragIndex === null) return;
 
-      <span>{col.fieldName}</span>
-    </div>
-  ))}
+            const newItems = [...selectedColumns];
+
+            const [draggedItem] = newItems.splice(dragIndex, 1);
+
+            newItems.splice(col.originalIndex, 0, draggedItem);
+
+            const updated = newItems.map((item, index) => ({
+              ...item,
+              order: index + 1,
+            }));
+
+            setSelectedColumns(updated);
+            setDragIndex(null);
+          }}
+        >
+
+          <span className="cursor-grab active:cursor-grabbing">
+            ☰
+          </span>
+
+          <input
+            type="checkbox"
+            checked={col.selected}
+            onChange={(e) => {
+
+              const updated = [...selectedColumns];
+
+              updated[col.originalIndex].selected =
+                e.target.checked;
+
+              setSelectedColumns(updated);
+            }}
+          />
+
+          <span>{col.fieldName}</span>
+
         </div>
+      ))}
+
+  </div>
+
+)}
       </div>
 
       {/* FOOTER */}
-      <div className="p-4 border-t flex justify-between">
+      <div className="p-4 border-t flex justify-between cursor-pointer">
         <button
          onClick={handleResetColumns}
         >
@@ -701,7 +781,7 @@ const handleResetColumns = async () => {
 
         <button
           onClick={handleSaveColumns}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
         >
           Save
         </button>
