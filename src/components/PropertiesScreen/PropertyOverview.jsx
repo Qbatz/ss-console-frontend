@@ -1138,7 +1138,7 @@ if (updated?.success) {
             <StaffScreen hostelData={hostelData} refreshHostel={fetchData} />
           )}
           {activeTab === "Invoice Redemption" && (
-            <InvoicesScreen hostelData={hostelData} />
+            <InvoicesScreen hostelData={hostelData} refreshHostel={fetchData}/>
           )}
           {activeTab === "activity" && (
             <PropertyActive hostelData={hostelData} />
@@ -1535,19 +1535,21 @@ if (updated?.success) {
             resetPlanForm();
           }}
         >
-          <div
-            className="bg-white rounded-xl shadow-xl w-[400px] p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div
+  className="bg-white rounded-xl shadow-xl w-[400px] max-h-[90vh] overflow-y-auto p-6"
+  onClick={(e) => e.stopPropagation()}
+>
             {/* Title */}
             <h2 className="text-lg font-semibold mb-4 text-left">
               Buy Subscription Plan
             </h2>
 
-            {/* Plan Code */}
-            <div className="relative w-full" ref={dropdownRef}>
-
-              {/* SELECT BOX */}
+       
+            <div className="relative w-full text-left" ref={dropdownRef}>
+        <label className="block text-sm text-gray-600 mb-1 text-left">
+    Plan Name
+  </label>
+         
               <div
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer mb-3 flex items-center justify-between bg-white"
@@ -1581,6 +1583,7 @@ if (updated?.success) {
                         onClick={() => {
                           setPlanCode(plan.planCode);
                           setShowDropdown(false);
+                          setPlanError("")
                         }}
                         className={`px-3 py-2 cursor-pointer text-sm flex justify-between items-center
         ${plan.planCode === planCode
@@ -1608,25 +1611,13 @@ if (updated?.success) {
             {planError && (
               <ErrorMessage message={planError} type="error" />
             )}
-            {/* <select
-  value={paidBy}
-  onChange={(e) => {
-    setPaidBy(e.target.value);
-    setPaidByError("");
-  }}
-  className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3"
->
-  <option value="">Select Paid By</option>
+    
+   
+            <div className="relative w-full text-left">
 
-  {paidByUsers.map((user) => (
-    <option key={user.id} value={user.id}>
-      {user.name} ({user.role})
-    </option>
-  ))}
-</select> */}
-            <div className="relative w-full">
-
-              {/* SELECT BOX */}
+               <label className="block text-sm text-gray-600 mb-1 text-left">
+    Staffs
+  </label>
               <div
                 onClick={() => setShowPaidByDropdown(!showPaidByDropdown)}
                 className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer flex items-center justify-between bg-white"
@@ -1680,25 +1671,45 @@ if (updated?.success) {
             {paidByError && (
               <ErrorMessage message={paidByError} type="error" />
             )}
+<div className="w-full mt-3">
 
-            <input
-              type="number"
-              placeholder={
-                selectedPlanothers
-                  ? `₹${selectedPlanothers.price}`
-                  : "Paid Amount"
-              }
-              value={paidAmount}
-              onChange={(e) => {
-                setPaidAmount(e.target.value);
-                setPaidAmountError("");
-              }}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-3"
-            />
-            {paidAmountError && (
-              <ErrorMessage message={paidAmountError} type="error" />
-            )}
-            {/* Discount */}
+  {/* LABEL + GST INFO */}
+  <div className="flex items-center justify-between mb-1">
+    <label className="block text-sm text-gray-600 text-left">
+      Paid Amount
+    </label>
+
+    {/* {selectedPlanothers && (
+      <span className="text-xs text-gray-500">
+        ₹{selectedPlanothers.price} + {selectedPlanothers.gst}% GST
+      </span>
+    )} */}
+  </div>
+
+  <input
+    type="number"
+    placeholder={
+      selectedPlanothers
+        ? `₹${selectedPlanothers.finalPrice}`
+        : "Paid Amount"
+    }
+    value={paidAmount}
+    onChange={(e) => {
+      setPaidAmount(e.target.value);
+      setPaidAmountError("");
+    }}
+    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+  />
+
+  {paidAmountError && (
+    <ErrorMessage message={paidAmountError} type="error" />
+  )}
+</div>
+           <div className="w-full mt-3">
+  <label className="block text-sm text-gray-600 mb-1 text-left">
+    Discount Amount
+  </label>
+
             <input
               type="number"
               placeholder="Discount Amount"
@@ -1706,6 +1717,7 @@ if (updated?.success) {
               onChange={(e) => setDiscountAmount(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-3"
             />
+            </div>
 
             {/* File Upload */}
             {/* <input

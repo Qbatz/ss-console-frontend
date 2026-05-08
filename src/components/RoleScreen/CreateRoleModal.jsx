@@ -365,7 +365,7 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
         {/* Header */}
         <div className="flex justify-between items-start px-6 py-4 border-b border-gray-300">
           <div>
-            <h2 className="text-[15px] font-semibold font-inter text-start">{selectedRole ? "Edit Role" : "Update Role"}
+            <h2 className="text-[15px] font-semibold font-inter text-start">{selectedRole ? "Update Role" : "Create Role"}
             </h2>
             <p className="text-sm text-gray-500">
               Fill in the details to create a new admin user
@@ -548,7 +548,7 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
             Cancel
           </button>
           <button className="px-5 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700" onClick={handleCreate}>
-            Update Role
+           {selectedRole ? "Update Role" : "Create Role"}
           </button>
         </div>
       </div>
