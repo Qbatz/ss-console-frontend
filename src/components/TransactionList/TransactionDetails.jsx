@@ -35,6 +35,10 @@ const TransactionsPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [hoveredProof, setHoveredProof] = useState("");
   const [previewPos, setPreviewPos] = useState({ x: 0, y: 0 });
+  const [menuPos, setMenuPos] = useState({
+  top: 0,
+  left: 0
+});
   const { RangePicker } = DatePicker;
   const formatDate = (date) => {
     if (!date) return "";
@@ -336,25 +340,50 @@ console.log("selectedTxn",selectedTxn)
                           <img
                             src={MenuCircle}
                             className="w-4 h-4 cursor-pointer"
+                            // onClick={(e) => {
+                            //   e.stopPropagation();
+                            //   setOpenMenu(openMenu === item.historyId ? null : item.historyId);
+                            // }}
                             onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenMenu(openMenu === item.historyId ? null : item.historyId);
-                            }}
+
+  e.stopPropagation();
+
+  const rect = e.currentTarget.getBoundingClientRect();
+
+  setMenuPos({
+    top: rect.bottom + 5,
+    left: rect.left - 100
+  });
+
+  setOpenMenu(
+    openMenu === item.historyId
+      ? null
+      : item.historyId
+  );
+}}
                           />
-                          {openMenu === item.historyId && (
-                            <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-50">
-                              <button
-                                onClick={() => {
-                                  setSelectedTxn(item);
-                                  setShowModal(true);
-                                  setOpenMenu(null);
-                                }}
-                                className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                              >
-                                View Details
-                              </button>
-                            </div>
-                          )}
+                        {openMenu === item.historyId && (
+  <div
+    className="fixed w-32 bg-white border rounded shadow z-[99999]"
+    style={{
+      top: menuPos.top,
+      left: menuPos.left
+    }}
+  >
+
+    <button
+      onClick={() => {
+        setSelectedTxn(item);
+        setShowModal(true);
+        setOpenMenu(null);
+      }}
+      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+    >
+      View Details
+    </button>
+
+  </div>
+)}
 
                         </td>
 
@@ -474,7 +503,7 @@ console.log("selectedTxn",selectedTxn)
     <div className="grid grid-cols-[20px_120px_1fr] items-center gap-x-4">
       <img src={Single} alt="owner" className="w-4 h-4 opacity-70" />
       <span className="text-gray-500">Owner</span>
-      <span className="font-semibold text-gray-900">{selectedTxn.paidBy}</span>
+      <span className="font-semibold text-gray-900">{selectedTxn.ownerInfo.fullName}</span>
     </div>
 
     <div className="grid grid-cols-[20px_120px_1fr] items-start gap-x-4">

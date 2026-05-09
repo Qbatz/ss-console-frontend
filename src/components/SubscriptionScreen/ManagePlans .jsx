@@ -345,7 +345,7 @@ const ManagePlans = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             {plans.map((plan) => {
-              const yearlyPrice = plan.price * 12;
+              const yearlyPrice = plan.finalPrice * 12;
 
               const uniqueFeatures = [
                 ...new Map(
@@ -423,58 +423,46 @@ const ManagePlans = () => {
 
                     </div>
 
-                    {/* PLAN TYPE */}
+                   
 
-
-                    {/* PRICE (ALWAYS TOP ALIGNED) */}
-                    {/* <div className="mb-5 text-left">
-          <span className=" font-bold text-[20px]  text-gray-900 ">
-            ₹{plan.price}
-          </span>
-          <span className="text-sm text-gray-500 ml-2">/month</span>
-
-          <p className="text-xs text-gray-400 mt-1 text-center">
-            billed yearly as ₹{yearlyPrice}
-          </p>
-        </div> */}
+                
                     <div className="mb-5 text-left">
+  <div className="flex items-start gap-2">
 
-                      {/* PRICE LINE */}
-                      <div className="mb-5 text-left">
+    {/* FINAL PRICE */}
+    <span className="font-bold text-[22px] text-gray-900 leading-none">
+      ₹{plan.finalPrice}
+    </span>
 
-                        <div className="flex items-start gap-2">
+    {/* MONTH + GST INFO */}
+    <div className="flex flex-col leading-tight">
+      <span className="text-sm text-gray-500">
+        /month
+      </span>
 
-                          {/* PRICE */}
-                          <span className="font-bold text-[22px] text-gray-900 leading-none">
-                            ₹{plan.price}
-                          </span>
+     
+    </div>
+    
 
-                          {/* MONTH + BILLED */}
-                          <div className="flex flex-col leading-tight">
-                            <span className="text-sm text-gray-500">
-                              /month
-                            </span>
-
-                            <span className="text-xs text-gray-400 mt-1">
+  </div>
+   <span className="text-xs text-gray-400 mt-1">
                               billed yearly as ₹{yearlyPrice}
                             </span>
-                          </div>
 
-                        </div>
+  <p className="text-xs text-gray-400 mt-1">
 
-                      </div>
+ ₹{plan.price} + {plan.gst}% GST
 
-
-
-                    </div>
+ </p>
+</div>
 
                     {/* FEATURES */}
                     <ul className="space-y-3 text-sm text-gray-600 min-h-[180px]">
                       {uniqueFeatures.map((f, i) => (
-                        <li key={i} className="flex items-start gap-3">
+                        <li key={i} className="flex items-start gap-3 text-left whitespace-nowrap">
                           {/* <span className="text-blue-600 mt-1 text-xs">■</span> */}
                           <img src={Tick} className="w-4 h-4 mt-0" />
-                          {f.featureName}
+                            {f.featureName}
                         </li>
                       ))}
                     </ul>

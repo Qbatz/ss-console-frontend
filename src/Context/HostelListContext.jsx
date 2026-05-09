@@ -854,6 +854,157 @@ const getInvoiceRedemption = async (page = 1, size = 10, name = "") => {
     setLoading(false);
   }
 };
+const getHostelInvoiceRedemption = async (
+  hostelId,
+  page = 0,
+  size = 10
+) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.get(
+      `/v2/invoice-redemption/${hostelId}`,
+      {
+        params: {
+          page,
+          size
+        }
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const updateInvoiceRedemption = async (
+  invoiceRedemptionId,
+  amount
+) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.put(
+      `/v2/invoice-redemption/${invoiceRedemptionId}`,
+      {
+        amount
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const deleteInvoiceRedemption = async (
+  invoiceRedemptionId
+) => {
+
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.delete(
+      `/v2/invoice-redemption/${invoiceRedemptionId}`
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
+const resetUserPin = async (userId) => {
+
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.put(
+      `/v2/users/reset-pin/${userId}`
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
   return (
     <HostelContext.Provider
       value={{
@@ -861,7 +1012,9 @@ const getInvoiceRedemption = async (page = 1, size = 10, name = "") => {
         loading,
         errorMsg,
         getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice,getRecurringByHostelId,
-        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns,resetTableColumns,getTableColumns,getInvoiceRedemption
+        bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,
+        deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns
+        ,resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,deleteInvoiceRedemption,resetUserPin
       }}
     >
       {children}

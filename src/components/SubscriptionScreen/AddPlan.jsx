@@ -77,6 +77,7 @@ const AddEditPlan = () => {
       setDiscount(editData.discountPercentage);
       setCanCustomize(editData.canCustomize);
       setShouldShow(editData.shouldShow);
+      setGstPercentage(editData.gst)
 
 
       const addonData = editData.planFeatures.map(f => ({
@@ -190,9 +191,10 @@ if (editData) {
     planType?.trim() !== editData.planType?.trim() ||
     Number(price || 0) !== Number(editData.price || 0) ||
     Number(duration || 0) !== Number(editData.duration || 0) ||
-    Number(discount || 0) !== Number(editData.discountPercentage || 0);
+    Number(discount || 0) !== Number(editData.discountPercentage || 0) ||
+      Number(gstPercentage || 0) !== Number(editData.gst || 0);
 
-  // ❌ No changes
+
   if (
     newFeatures.length === 0 &&
     editedFeatures.length === 0 &&
