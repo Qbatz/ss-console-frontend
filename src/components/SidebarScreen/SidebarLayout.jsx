@@ -344,8 +344,8 @@ useEffect(() => {
 
             <SidebarItem title="Tenants Summary" count="0" to={`/tenantList/${adminDetails?.roleId}`} activeIcon={Users}
               inactiveIcon={Users} />
-               {/* <SidebarItem title="Table Customization" count="0" to={`/tableCustomize/${adminDetails?.roleId}`} activeIcon={Users}
-              inactiveIcon={Users} /> */}
+               <SidebarItem title="Table Customization" count="0" to={`/tableCustomize/${adminDetails?.roleId}`} activeIcon={Users}
+              inactiveIcon={Users} />
 
             <SidebarItem title="Support Tickets" count="0" to={`/supportTicket/${adminDetails?.roleId}`} activeIcon={Support}
               inactiveIcon={Support} />

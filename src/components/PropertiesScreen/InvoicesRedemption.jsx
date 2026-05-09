@@ -165,12 +165,12 @@ import React, { useEffect, useState, useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { useHostel } from "../../Context/HostelListContext";
 import Circle from "../../assets/menucircle.png";
-import ErrorMessage from "../../components/ErrorMessage/ErrorMessage";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import { usePermission } from "../../Utils/permissionHelper";
 import LoginImg from "../../assets/LoginImg.png";
 
-const InvoicesScreen = ({ hostelData, refreshHostel }) => {
+const InvoicesRedemption = ({ hostelData, refreshHostel }) => {
   const { canRead, canWrite, canUpdate, canDelete } =
       usePermission("Invoices");
   const defaultInvoiceRedemptions = hostelData?.invoiceRedemptions || [];
@@ -715,4 +715,4 @@ const [deleteId, setDeleteId] = useState(null);
   );
 };
 
-export default InvoicesScreen;
+export default InvoicesRedemption;

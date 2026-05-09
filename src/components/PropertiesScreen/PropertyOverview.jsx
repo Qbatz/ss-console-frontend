@@ -11,7 +11,7 @@ import arrowleft from "../../assets/arrow-up.png";
 import ViewImg from "../../assets/View.png";
 import ProductSupport from "./ProductSupport";
 import StaffScreen from "./StaffScreen";
-import InvoicesScreen from "./InvoicesScreen";
+import InvoicesRedemption from "./InvoicesRedemption";
 import PropertyActive from "./ActiveScreen";
 import swap from "../../assets/arrowswap.png";
 import Star from "../../assets/star.png"
@@ -27,6 +27,7 @@ import { useRole } from "../../Context/RoleContext";
 import { usePlan } from "../../Context/PlanContexts";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import Circle from "../../assets/menucircle.png";
+import InvoiceView from "./InvoiceView";
 const PropertyOverview = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, } = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
@@ -914,6 +915,7 @@ if (updated?.success) {
                 "subscriptions",
                 "Product Support",
                 "staffs",
+                "Invoice",
                 "Invoice Redemption",
                 "activity",
                 "Amenities",
@@ -1137,8 +1139,11 @@ if (updated?.success) {
           {activeTab === "staffs" && (
             <StaffScreen hostelData={hostelData} refreshHostel={fetchData} />
           )}
+           {activeTab === "Invoice" && (
+            <InvoiceView hostelData={hostelData} refreshHostel={fetchData} />
+          )}
           {activeTab === "Invoice Redemption" && (
-            <InvoicesScreen hostelData={hostelData} refreshHostel={fetchData}/>
+            <InvoicesRedemption hostelData={hostelData} refreshHostel={fetchData}/>
           )}
           {activeTab === "activity" && (
             <PropertyActive hostelData={hostelData} />
