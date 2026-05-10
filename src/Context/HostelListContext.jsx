@@ -1005,6 +1005,41 @@ const resetUserPin = async (userId) => {
   }
 
 };
+const getInvoicesByHostelId = async (
+  hostelId,
+  page = 0,
+  size = 10
+) => {
+
+  try {
+
+    const response = await api.get(
+      `/v2/invoice/${hostelId}`,
+      {
+        params: {
+          page,
+          size,
+        },
+      }
+    );
+  console.log("response.data",response.data)
+    return response.data;
+  
+
+  } catch (error) {
+
+    console.log("getInvoicesByHostelId error", error);
+
+    return {
+      success: false,
+      message:
+        error?.response?.data?.message ||
+        "Something went wrong",
+    };
+
+  }
+
+};
   return (
     <HostelContext.Provider
       value={{
@@ -1013,8 +1048,8 @@ const resetUserPin = async (userId) => {
         errorMsg,
         getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice,getRecurringByHostelId,
         bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,
-        deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns
-        ,resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,deleteInvoiceRedemption,resetUserPin
+        deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns,
+        resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId
       }}
     >
       {children}

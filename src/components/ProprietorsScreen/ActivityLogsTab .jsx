@@ -17,7 +17,7 @@ const ActivityLogsTab = ({ activities }) => {
               <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">EVENT TYPE</th>
               <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">DETAILS</th>
               <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">ADMIN / USER</th>
-               <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">Platform</th>
+              <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">Platform</th>
               <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">ACTIONS</th>
             </tr>
 
@@ -49,8 +49,8 @@ const ActivityLogsTab = ({ activities }) => {
                   <td className="px-4 py-2 text-left font-medium text-[12px]">
                     {item.userName}
                   </td>
-                   <td className="px-4 py-2 text-left font-medium text-[12px]">
-                    {item.platform}
+                  <td className="px-4 py-2 text-left font-medium text-[12px]">
+                    {item.platform || "N/A"}
                   </td>
 
                   <td className="px-4 py-2 text-left font-medium text-[12px]">
