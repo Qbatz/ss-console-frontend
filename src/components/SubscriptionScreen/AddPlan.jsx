@@ -829,7 +829,7 @@ const removeAddon = (index) => {
               <div className="flex justify-between mb-4">
                 <h2 className="font-medium">Core Features</h2>
                 <span className="text-xs bg-blue-100 px-2 py-1 rounded-full">
-                  BASIC PACKAGE
+                  ADVANCE PACKAGE
                 </span>
               </div>
 
