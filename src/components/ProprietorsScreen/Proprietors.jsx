@@ -12,7 +12,7 @@ import Menucircle from "../../assets/menucircle.png";
 
 const Proprietors = () => {
 
-  const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById, updateOwnerMobile, deleteOwner } = useOwners();
+  const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById, updateOwnerMobile, deleteOwner,ownerCount,activeCount } = useOwners();
   const navigate = useNavigate();
  
   const { canRead, canWrite, canUpdate, canDelete } =
@@ -23,6 +23,9 @@ const Proprietors = () => {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
   const [expiryFilter, setExpiryFilter] = useState("ALL");
+  const [filterType, setFilterType] = useState("ALL");
+  const [activeFilter, setActiveFilter] = useState("ALL");
+const [propertyFilter, setPropertyFilter] = useState("ALL");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortBy, setSortBy] = useState("JOINING_DATE");
@@ -34,6 +37,7 @@ const Proprietors = () => {
   const [mobile, setMobile] = useState("");
   const [error, setError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   
 
 
@@ -86,7 +90,7 @@ const Proprietors = () => {
     ...filters
   });
 
-}, [page, size, debouncedSearch, sortBy, direction, expiryFilter]);
+}, [page, size, debouncedSearch, sortBy, direction, filterType]);
   // useEffect(() => {
 
   //   if (skipFirstApi) {
@@ -126,17 +130,52 @@ const Proprietors = () => {
   // }, [page, size, debouncedSearch, sortBy, direction, expiryFilter]);
 
 
-  const getFilterParams = () => {
-    if (expiryFilter === "EXPIRED") {
-      return { isPropertiesExpired: true, isAboutToExpire: undefined };
-    }
+  // const getFilterParams = () => {
+  //   if (expiryFilter === "EXPIRED") {
+  //     return { isPropertiesExpired: true, isAboutToExpire: undefined };
+  //   }
 
-    if (expiryFilter === "ABOUT_TO_EXPIRE") {
-      return { isPropertiesExpired: undefined, isAboutToExpire: true };
-    }
+  //   if (expiryFilter === "ABOUT_TO_EXPIRE") {
+  //     return { isPropertiesExpired: undefined, isAboutToExpire: true };
+  //   }
 
-    return { isPropertiesExpired: undefined, isAboutToExpire: undefined };
-  };
+  //   return { isPropertiesExpired: undefined, isAboutToExpire: undefined };
+  // };
+const getFilterParams = () => {
+
+  switch (filterType) {
+
+    case "EXPIRED":
+      return {
+        isPropertiesExpired: true
+      };
+
+    case "ABOUT_TO_EXPIRE":
+      return {
+        isAboutToExpire: true
+      };
+
+    case "ACTIVE":
+      return {
+        isActive: true
+      };
+
+    // case "INACTIVE":
+    //   return {
+    //     isActive: false
+    //   };
+
+    case "NO_PROPERTIES":
+      return {
+        hasNoProperties: true
+      };
+
+    default:
+      return {};
+
+  }
+
+};
 
 
   console.log("page", page);
@@ -262,12 +301,12 @@ const Proprietors = () => {
 
             <div className="border border-gray-300 rounded-xl p-4 bg-white">
               <p className="text-gray-500 text-sm">Total Proprietors</p>
-              <p className="text-xl font-semibold mt-1">{totalItems}</p>
+              <p className="text-xl font-semibold mt-1">{ownerCount}</p>
             </div>
 
             <div className="border border-gray-300 rounded-xl p-4 bg-white">
               <p className="text-gray-500 text-sm">Active</p>
-              <p className="text-xl font-semibold mt-1">--</p>
+              <p className="text-xl font-semibold mt-1">{activeCount}</p>
             </div>
 
           </div>
@@ -276,27 +315,79 @@ const Proprietors = () => {
           {/* Filter Row */}
           <div className="flex justify-between items-center">
 
-            <div className="flex gap-2">
-              {/* <select className="border border-gray-300 rounded-md px-3 py-2 text-[14px]">
-              <option>All</option>
-            </select> */}
-              <select
-                value={expiryFilter}
-                onChange={(e) => {
-                  setPage(1);
-                  setExpiryFilter(e.target.value);
-                }}
-                className="border border-gray-300 px-3 py-2 rounded-lg text-xs font-sans"
-              >
-                <option value="ALL">ALL</option>
-                <option value="EXPIRED">isProperties expired</option>
-                <option value="ABOUT_TO_EXPIRE">About to expire</option>
-              </select>
+           <div className="relative">
 
-              {/* <button className="border border-gray-300 px-3 py-2 rounded-md text-[14px]">
-              Filter
-            </button> */}
-            </div>
+  {/* SELECT BUTTON */}
+  <button
+    onClick={() =>
+      setShowFilterDropdown(!showFilterDropdown)
+    }
+    className="
+      border border-gray-300
+      px-3 py-2
+      rounded-lg
+      text-xs
+      font-sans
+      bg-white
+      min-w-[180px]
+      text-left
+      flex justify-between items-center
+    "
+  >
+    <span>{filterType}</span>
+
+    <span>⌄</span>
+  </button>
+
+  {/* DROPDOWN */}
+  {showFilterDropdown && (
+
+    <div
+      className="
+        absolute z-50 mt-1
+        w-full
+        bg-white
+        border border-gray-200
+        rounded-xl
+        shadow-lg
+        max-h-[180px]
+        overflow-y-auto
+      "
+    >
+
+      {[
+        "ALL",
+        "EXPIRED",
+        "ABOUT_TO_EXPIRE",
+        "ACTIVE",
+        // "INACTIVE",
+        "NO_PROPERTIES"
+      ].map((item) => (
+
+        <div
+          key={item}
+          onClick={() => {
+            setFilterType(item);
+            setPage(1);
+            setShowFilterDropdown(false);
+          }}
+          className="
+            px-3 py-2
+            text-xs
+            cursor-pointer
+            hover:bg-blue-50
+          "
+        >
+          {item}
+        </div>
+
+      ))}
+
+    </div>
+
+  )}
+
+</div>
 
             <div className="flex items-center gap-2">
               <button

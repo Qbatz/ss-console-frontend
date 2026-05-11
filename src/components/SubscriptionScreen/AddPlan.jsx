@@ -56,6 +56,9 @@ const AddEditPlan = () => {
   const [priceError,setPriceError] =useState("")
   const [durationError,setDurationError] =useState("")
   const [gstPercentage,setGstPercentage] = useState("")
+  const [finalAmount, setFinalAmount] = useState(0);
+ 
+  const [deletedFeatures, setDeletedFeatures] = useState([]);
 
   // INIT FEATURES
   useEffect(() => {
@@ -65,7 +68,7 @@ const AddEditPlan = () => {
       const exists = editData?.planFeatures?.some(
         pf => pf.featureName === f
       );
-      initial[f] = editData ? exists : true;
+      initial[f] = editData ? exists : false;
     });
 
     if (editData) {
@@ -78,6 +81,7 @@ const AddEditPlan = () => {
       setCanCustomize(editData.canCustomize);
       setShouldShow(editData.shouldShow);
       setGstPercentage(editData.gst)
+      setFinalAmount(editData.finalPrice)
 
 
       const addonData = editData.planFeatures.map(f => ({
@@ -170,8 +174,10 @@ console.log("initial:", initialAddons);
     
 if (editData) {
 
+  // ✅ NEW FEATURES
   const newFeatures = addons.filter(a => !a.planFeatureId);
 
+  // ✅ EDITED FEATURES
   const editedFeatures = addons.filter(a => {
     const initial = initialAddons.find(
       i => i.planFeatureId === a.planFeatureId
@@ -185,6 +191,38 @@ if (editData) {
     );
   });
 
+  // ✅ DELETED FEATURES
+ // ✅ DELETE EXISTING FEATURES
+
+
+console.log("deletedFeatures", deletedFeatures);
+
+// ✅ DELETE EXISTING FEATURES
+if (deletedFeatures.length > 0) {
+
+  const deleteRes = await Promise.all(
+    deletedFeatures.map(async (f) => {
+
+      console.log("Deleting ID:", f.planFeatureId);
+
+      const res = await deactivatePlanFeature(
+        f.planFeatureId
+      );
+
+      console.log("DELETE RES:", res);
+
+      return res;
+    })
+  );
+
+  console.log("ALL DELETE RES:", deleteRes);
+}
+
+  console.log("newFeatures", newFeatures);
+  console.log("editedFeatures", editedFeatures);
+  console.log("deletedFeatures", deletedFeatures);
+
+  // ✅ OTHER FIELD CHECK
   const otherFieldsChanged =
     planName?.trim() !== editData.planName?.trim() ||
     planCode?.trim() !== editData.planCode?.trim() ||
@@ -192,12 +230,13 @@ if (editData) {
     Number(price || 0) !== Number(editData.price || 0) ||
     Number(duration || 0) !== Number(editData.duration || 0) ||
     Number(discount || 0) !== Number(editData.discountPercentage || 0) ||
-      Number(gstPercentage || 0) !== Number(editData.gst || 0);
+    Number(gstPercentage || 0) !== Number(editData.gst || 0);
 
-
+  // ✅ NO CHANGES
   if (
     newFeatures.length === 0 &&
     editedFeatures.length === 0 &&
+    deletedFeatures.length === 0 &&
     !otherFieldsChanged
   ) {
     setModalType("error");
@@ -206,37 +245,60 @@ if (editData) {
     return;
   }
 
-  // ✅ ANY feature change (new OR edit)
-  if (
-    (newFeatures.length > 0 || editedFeatures.length > 0) &&
-    !otherFieldsChanged
-  ) {
-    const featuresToSend = [...newFeatures, ...editedFeatures];
+  // ✅ ADD NEW FEATURES
+  if (newFeatures.length > 0) {
 
-   await Promise.all(
-  featuresToSend.map(f =>
-    addPlanFeature(editData.planId, {
-      planFeatureId: f.planFeatureId, // 🔥 IMPORTANT
-      featureName: f.name,
-      price: Number(f.price || 0)
-    })
-  )
-);
-
-    setModalType("success");
-    setMessage("Feature updated successfully");
-    setShowSuccess(true);
-
-    setTimeout(() => {
-      setShowSuccess(false);
-      navigate(-1);
-    }, 800);
-
-    return;
+    await Promise.all(
+      newFeatures.map(f =>
+        addPlanFeature(editData.planId, {
+          featureName: f.name,
+          price: Number(f.price || 0)
+        })
+      )
+    );
   }
 
-  // ✅ other fields change → updatePlan
-  res = await updatePlan(editData.planId, payload);
+  // ✅ UPDATE EXISTING FEATURES
+  if (editedFeatures.length > 0) {
+
+    await Promise.all(
+      editedFeatures.map(f =>
+        addPlanFeature(editData.planId, {
+          planFeatureId: f.planFeatureId,
+          featureName: f.name,
+          price: Number(f.price || 0)
+        })
+      )
+    );
+  }
+
+
+  
+
+  // ✅ UPDATE PLAN ONLY IF OTHER FIELDS CHANGED
+  if (otherFieldsChanged) {
+
+    res = await updatePlan(editData.planId, payload);
+
+    if (!res?.success) {
+      setModalType("error");
+      setMessage(res.message || "Update failed");
+      setShowSuccess(true);
+      return;
+    }
+  }
+
+  // ✅ SUCCESS
+  setModalType("success");
+  setMessage("Updated Successfully");
+  setShowSuccess(true);
+
+  setTimeout(() => {
+    setShowSuccess(false);
+    navigate(-1);
+  }, 800);
+
+  return;
 }
     else {
 
@@ -339,12 +401,82 @@ if (editData) {
   // };
 
 
-  const toggleFeature = (name) => {
-    setFeatures(prev => ({
-      ...prev,
-      [name]: !prev[name],
-    }));
-  };
+  // const toggleFeature = (name) => {
+  //   setFeatures(prev => ({
+  //     ...prev,
+  //     [name]: !prev[name],
+  //   }));
+  // };
+const toggleFeature = (name) => {
+
+  const isEnabled = features[name];
+
+  // OFF
+  if (isEnabled) {
+
+    const existingAddon = addons.find(
+      (a) => a.name === name
+    );
+
+    // existing feature track
+    if (existingAddon?.planFeatureId) {
+
+      setDeletedFeatures((prev) => [
+        ...prev,
+        existingAddon
+      ]);
+    }
+
+    // remove addon
+    setAddons((prev) =>
+      prev.filter((a) => a.name !== name)
+    );
+  }
+
+  // ON
+  else {
+
+    const exists = addons.some(
+      (a) => a.name === name
+    );
+
+    if (!exists) {
+
+      const existingInitial = initialAddons.find(
+        (a) => a.name === name
+      );
+
+      setAddons((prev) => [
+        ...prev,
+        {
+          name,
+          price: existingInitial?.price || "",
+          planFeatureId:
+            existingInitial?.planFeatureId || null,
+        },
+      ]);
+
+      // remove deleted state
+      if (existingInitial?.planFeatureId) {
+
+       setDeletedFeatures((prev) => {
+  const exists = prev.some(
+    (f) => f.planFeatureId === addon.planFeatureId
+  );
+
+  if (exists) return prev;
+
+  return [...prev, addon];
+});
+      }
+    }
+  }
+
+  setFeatures((prev) => ({
+    ...prev,
+    [name]: !prev[name],
+  }));
+};
 
 
   const addAddon = () => {
@@ -381,18 +513,42 @@ if (editData) {
   //     setAddons(addons.filter((_, i) => i !== index));
   //   }
   // };
-  const removeAddon = (index) => {
-    const addon = addons[index];
+  // const removeAddon = (index) => {
+  //   const addon = addons[index];
 
 
-    if (editData && addon.planFeatureId) {
-      setSelectedAddonIndex(index);
-      setShowRemoveModal(true);
-    } else {
+  //   if (editData && addon.planFeatureId) {
+  //     setSelectedAddonIndex(index);
+  //     setShowRemoveModal(true);
+  //   } else {
 
-      setAddons(addons.filter((_, i) => i !== index));
-    }
-  };
+  //     setAddons(addons.filter((_, i) => i !== index));
+  //   }
+  // };
+const removeAddon = (index) => {
+
+  const addon = addons[index];
+
+  // existing feature
+  if (addon.planFeatureId) {
+
+    setDeletedFeatures((prev) => [
+      ...prev,
+      addon
+    ]);
+  }
+
+  // remove UI
+  setAddons((prev) =>
+    prev.filter((_, i) => i !== index)
+  );
+
+  // toggle false
+  setFeatures((prev) => ({
+    ...prev,
+    [addon.name]: false,
+  }));
+};
   const handleConfirmRemoveAddon = async () => {
     const index = selectedAddonIndex;
     const addon = addons[index];
@@ -612,10 +768,29 @@ if (editData) {
                     type="text"
                     value={gstPercentage}
                     onChange={(e) => setGstPercentage(e.target.value)}
-                    placeholder="Enter discount"
+                    placeholder="Enter Gst"
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
+
+                {editData && (
+  <div className="flex flex-col gap-1">
+    <label className="text-xs font-medium text-black-500 text-left">
+      Final Amount
+    </label>
+
+    <input
+      type="text"
+      value={finalAmount}
+      readOnly
+      className="
+        border border-gray-300 rounded-lg
+        px-3 py-2 text-sm bg-gray-100
+        cursor-not-allowed
+      "
+    />
+  </div>
+)}
               </div>
 
               {/* SWITCHES */}
@@ -708,60 +883,58 @@ if (editData) {
               ) : (
                 <>
                   {/* ✅ SCROLL AREA */}
-                  <div className="flex-1 overflow-y-auto pr-1 space-y-3">
-                    {addons.map((addon, i) => (
-                      <div
-                        key={i}
-                        className="border border-gray-200 p-4 rounded-xl bg-gray-50"
-                      >
+                 <div className="flex-1 overflow-y-auto pr-1 space-y-2">
 
-                        {/* FEATURE NAME */}
-                        <div className="mb-3 text-left">
-                          <label className="text-[11px] font-semibold text-gray-400 tracking-wide text-left">
-                            FEATURE NAME
-                          </label>
+{addons.map((addon, i) => (
+  <div
+    key={i}
+    className="flex items-center justify-between border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 gap-2"
+  >
 
-                          <input
-                            placeholder="Enter feature name"
-                            value={addon.name}
-                            onChange={(e) =>
-                              updateAddon(i, "name", e.target.value)
-                            }
-                            className="mt-1 w-full border border-gray-200 bg-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
+    <input
+      type="text"
+      value={addon.name}
+      onChange={(e) => {
 
-                        {/* PRICE */}
-                        <div className="mb-3 text-left">
-                          <label className="text-[11px] font-semibold text-gray-400 tracking-wide ">
-                            PRICE
-                          </label>
+        const value = e.target.value;
 
-                          <div className="mt-1 flex items-center border border-gray-200 bg-white rounded-lg px-3 py-2">
-                            <span className="text-gray-500 text-sm mr-1">₹</span>
-                            <input
-                              value={addon.price}
-                              onChange={(e) =>
-                                updateAddon(i, "price", e.target.value)
-                              }
-                              className="w-full outline-none text-sm"
-                              placeholder="0"
-                            />
-                          </div>
-                        </div>
+        // old feature false
+        if (addon.name) {
+          setFeatures((prev) => ({
+            ...prev,
+            [addon.name]: false,
+          }));
+        }
 
-                        {/* REMOVE BUTTON */}
-                        <button
-                          onClick={() => removeAddon(i)}
-                          className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-500 text-sm py-2 rounded-lg hover:bg-red-100 transition cursor-pointer"
-                        >
-                          <img src={trash} className="w-4 h-4" />
-                          Remove Add-on
-                        </button>
+        // update addon
+        updateAddon(i, "name", value);
 
-                      </div>
-                    ))}
-                  </div>
+        // new feature true
+        if (value) {
+          setFeatures((prev) => ({
+            ...prev,
+            [value]: true,
+          }));
+        }
+      }}
+      placeholder="Enter feature name"
+      className="flex-1 bg-transparent outline-none text-sm text-gray-700"
+    />
+
+    <button
+      onClick={() => removeAddon(i)}
+      className="p-1 hover:bg-red-100 rounded cursor-pointer"
+    >
+      <img
+        src={trash}
+        className="w-4 h-4"
+      />
+    </button>
+
+  </div>
+))}
+
+</div>
 
                   {/* ADD BUTTON */}
                   <button
@@ -776,7 +949,7 @@ if (editData) {
             </div>
 
             {/* LIVE PREVIEW */}
-            <div className="bg-white p-5 rounded-xl border border-gray-300">
+            {/* <div className="bg-white p-5 rounded-xl border border-gray-300">
               <p className="text-xs text-gray-400 mb-2">LIVE PREVIEW</p>
 
               <div className="bg-blue-600 text-white p-4 rounded-xl shadow">
@@ -785,7 +958,7 @@ if (editData) {
                   ₹{totalPrice} /month
                 </h2>
               </div>
-            </div>
+            </div> */}
 
           </div>
         </div>

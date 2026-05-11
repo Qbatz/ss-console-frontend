@@ -1076,7 +1076,7 @@ if (updated?.success) {
         if (!canDelete) return;
 
         setSelectedTenantId(item.customerId);
-        setPhone(item.mobile);
+        // setPhone(item.mobile);
         setShowDeleteModal(true);
         setOpenMenu(null);
       }}
@@ -1962,22 +1962,31 @@ if (updated?.success) {
             className="bg-white rounded-2xl shadow-xl w-[400px] p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-semibold text-gray-800 mb-3">
+            <h2 className="text-lg font-semibold text-gray-800 mb-3 text-left">
               Delete Tenant
             </h2>
 
-            <p className="text-gray-500 text-sm mb-4">
+            <p className="text-gray-500 text-sm mb-4 text-left">
               Please enter tenant mobile number to confirm
             </p>
 
             {/* 🔥 PHONE INPUT */}
-            <input
-              type="text"
-              placeholder="Enter Phone Number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3"
-            />
+           <input
+  type="text"
+  placeholder="Enter Phone Number"
+  value={phone}
+  onChange={(e) => {
+   
+    const value = e.target.value.replace(/\D/g, "");
+
+   
+    if (value.length <= 10) {
+      setPhone(value);
+    }
+  }}
+  maxLength={10}
+  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3"
+/>
 
             {menuError && (
               <ErrorMessage message={menuError} type="error" />

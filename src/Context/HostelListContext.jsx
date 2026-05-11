@@ -1040,6 +1040,42 @@ const getInvoicesByHostelId = async (
   }
 
 };
+const deleteInvoice = async (payload) => {
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.delete(
+      "/v2/invoice",
+      {
+        data: payload
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
   return (
     <HostelContext.Provider
       value={{
@@ -1049,7 +1085,8 @@ const getInvoicesByHostelId = async (
         getHostels,getHostelById,hardResetHostel,accessError,deleteHostelExpense,getHostelActivities,getRecurringHostels,generateRecurringInvoice,getRecurringByHostelId,
         bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,
         deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns,
-        resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId
+        resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,
+        deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice
       }}
     >
       {children}
