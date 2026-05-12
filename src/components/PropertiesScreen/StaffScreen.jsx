@@ -371,11 +371,16 @@ setPinError(res.message)
                             </button>
 
 
-                            <button
-  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
-  onClick={() => {
+                           <button
+  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+  onMouseDown={(e) => {
+    e.preventDefault();
+
     setShowResetPinModal(true);
-    setOpenMenuIndex(null);
+
+    setTimeout(() => {
+      setOpenMenuIndex(null);
+    }, 0);
   }}
 >
   Reset Pin

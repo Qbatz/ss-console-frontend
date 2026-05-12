@@ -7,21 +7,25 @@ export const OwnersProvider = ({ children }) => {
 
   const [owners, setOwners] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
+  const [ownerCount, setOwnerCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [accessError,setAccessError] = useState("")
-  
+  const [accessError, setAccessError] = useState("")
+   const [activeCount, setActiveCount] = useState("")
+
   const getErrorMessage = (error) =>
     error?.response?.data?.message ||
     error?.response?.data ||
     "Something went wrong";
-    
+
   const getOwners = async ({
     page = 1,
     size = 10,
     name = "",
     isPropertiesExpired,
     isAboutToExpire,
+    isActive,
+    hasNoProperties,
     sortBy = "createdAt",
     direction = "desc"
   } = {}) => {
@@ -36,6 +40,8 @@ export const OwnersProvider = ({ children }) => {
           name,
           isPropertiesExpired,
           isAboutToExpire,
+          isActive,
+          hasNoProperties,
           sortBy,
           direction
         }
@@ -45,277 +51,279 @@ export const OwnersProvider = ({ children }) => {
         setOwners(res.data.content || []);
         setTotalItems(res.data.totalItems || 0);
         setTotalPages(res.data.totalPages || 0);
+        setOwnerCount(res.data.ownersCount || 0)
+        setActiveCount(res.data.activeCount || 0)
       }
-      console.log("res",res)
+      console.log("res", res)
 
-    } 
+    }
     // catch (err) {
     //   console.log(err);
     //   console.log("err",err)
     // } 
-     catch (error) {
-    const msg = getErrorMessage(error);
-   
-    setAccessError(msg)
-    console.log("accessError",accessError)
-    return { success: false, message: msg };
-  }
+    catch (error) {
+      const msg = getErrorMessage(error);
+
+      setAccessError(msg)
+      console.log("accessError", accessError)
+      return { success: false, message: msg };
+    }
     finally {
       setLoading(false);
     }
   };
-const changeOwnerPassword = async (payload) => {
-  try {
-    setLoading(true);
+  const changeOwnerPassword = async (payload) => {
+    try {
+      setLoading(true);
 
-    const res = await axiosInstance.post(
-      "/v2/owners/change-password",
-      payload
-    );
+      const res = await axiosInstance.post(
+        "/v2/owners/change-password",
+        payload
+      );
 
-    if (res?.status === 200 || res?.status === 201) {
-      return {
-        success: true,
-        data: res.data,
-        message: res.data?.message || "Password changed successfully",
-      };
-    }
-
-    return { success: false };
-
-  } catch (error) {
-
-    const msg =
-      error?.response?.data?.message ||
-      error?.response?.data ||
-      "Failed to change password";
-
-    console.log("CHANGE PASSWORD ERROR 👉", msg);
-
-    return {
-      success: false,
-      message: msg,
-    };
-
-  } finally {
-    setLoading(false);
-  }
-};
-
-const getOwnerById = async (ownerId) => {
-  try {
-
-    setLoading(true);
-
-    const res = await axiosInstance.get(`/v2/owners/${ownerId}`);
-
-    if (res.status === 200) {
-      return { success: true, data: res.data };
-    }
-
-    return { success: false };
-
-  } catch (error) {
-
-    const msg = getErrorMessage(error);
-    return { success: false, message: msg };
-
-  } finally {
-    setLoading(false);
-  }
-};
-const getTenantSummary = async ({
-  page = 0,
-  size = 10,
-  tenantName = ""
-} = {}) => {
-
-  try {
-
-    setLoading(true);
-
-    const res = await axiosInstance.get("/v2/tenants/tenant-summary", {
-      params: {
-        page,
-        size,
-        tenantName
+      if (res?.status === 200 || res?.status === 201) {
+        return {
+          success: true,
+          data: res.data,
+          message: res.data?.message || "Password changed successfully",
+        };
       }
-    });
 
-    if (res.status === 200) {
+      return { success: false };
 
-      return {
-        success: true,
-        data: res.data
-      };
+    } catch (error) {
 
-    }
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data ||
+        "Failed to change password";
 
-    return { success: false };
-
-  } catch (error) {
-
-    const msg = getErrorMessage(error);
- setAccessError(msg)
-    return {
-      success: false,
-      message: msg
-    };
-
-  } finally {
-
-    setLoading(false);
-
-  }
-
-};
-const updateOwnerEmail = async (ownerId, payload) => {
-
-  try {
-
-    setLoading(true);
-
-    const res = await axiosInstance.put(
-      `/v2/owners/${ownerId}`,
-      payload
-    );
-
-    if (res.status === 200) {
+      console.log("CHANGE PASSWORD ERROR 👉", msg);
 
       return {
-        success: true,
-        data: res.data,
-        message: "Email updated successfully"
+        success: false,
+        message: msg,
       };
 
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return { success: false };
+  const getOwnerById = async (ownerId) => {
+    try {
 
-  } catch (error) {
+      setLoading(true);
 
-    const msg = getErrorMessage(error);
+      const res = await axiosInstance.get(`/v2/owners/${ownerId}`);
 
-    return {
-      success: false,
-      message: msg
-    };
+      if (res.status === 200) {
+        return { success: true, data: res.data };
+      }
 
-  } finally {
+      return { success: false };
 
-    setLoading(false);
+    } catch (error) {
 
-  }
+      const msg = getErrorMessage(error);
+      return { success: false, message: msg };
 
-};
-const deleteTenant = async (hostelId, customerId, tenantMobile) => {
-  try {
+    } finally {
+      setLoading(false);
+    }
+  };
+  const getTenantSummary = async ({
+    page = 0,
+    size = 10,
+    tenantName = ""
+  } = {}) => {
 
-    setLoading(true);
+    try {
 
-    const res = await axiosInstance.delete(
-      `/v2/tenants/${hostelId}/${customerId}`,
-      {
-        data: {
-          tenantMobile: tenantMobile
+      setLoading(true);
+
+      const res = await axiosInstance.get("/v2/tenants/tenant-summary", {
+        params: {
+          page,
+          size,
+          tenantName
         }
+      });
+
+      if (res.status === 200) {
+
+        return {
+          success: true,
+          data: res.data
+        };
+
       }
-    );
 
-    if (res.status === 200) {
+      return { success: false };
+
+    } catch (error) {
+
+      const msg = getErrorMessage(error);
+      setAccessError(msg)
       return {
-        success: true,
-        message: res.data?.message || "Tenant deleted successfully"
+        success: false,
+        message: msg
       };
+
+    } finally {
+
+      setLoading(false);
+
     }
 
-    return { success: false };
+  };
+  const updateOwnerEmail = async (ownerId, payload) => {
 
-  } catch (error) {
+    try {
 
-    const msg = getErrorMessage(error);
+      setLoading(true);
 
-    return {
-      success: false,
-      message: msg
-    };
+      const res = await axiosInstance.put(
+        `/v2/owners/${ownerId}`,
+        payload
+      );
 
-  } finally {
+      if (res.status === 200) {
 
-    setLoading(false);
+        return {
+          success: true,
+          data: res.data,
+          message: "Email updated successfully"
+        };
 
-  }
-};
-const updateOwnerMobile = async (ownerId, mobileNumber) => {
-  try {
-    setLoading(true);
-
-    const res = await axiosInstance.put(
-      `/v2/owners/mobile/${ownerId}`,
-      {
-        mobileNumber: mobileNumber
       }
-    );
 
-    if (res.status === 200) {
+      return { success: false };
+
+    } catch (error) {
+
+      const msg = getErrorMessage(error);
+
       return {
-        success: true,
-        data: res.data,
-        message: res.data?.message || "Mobile updated successfully"
+        success: false,
+        message: msg
       };
+
+    } finally {
+
+      setLoading(false);
+
     }
 
-    return { success: false };
+  };
+  const deleteTenant = async (hostelId, customerId, tenantMobile) => {
+    try {
 
-  } catch (error) {
+      setLoading(true);
 
-    const msg =
-      error?.response?.data?.message ||
-      error?.response?.data ||
-      "Failed to update mobile";
+      const res = await axiosInstance.delete(
+        `/v2/tenants/${hostelId}/${customerId}`,
+        {
+          data: {
+            tenantMobile: tenantMobile
+          }
+        }
+      );
 
-    return {
-      success: false,
-      message: msg
-    };
+      if (res.status === 200) {
+        return {
+          success: true,
+          message: res.data?.message || "Tenant deleted successfully"
+        };
+      }
 
-  } finally {
-    setLoading(false);
-  }
-};
-const deleteOwner = async (ownerId) => {
-  try {
-    setLoading(true);
+      return { success: false };
 
-    const res = await axiosInstance.delete(
-      `/v2/owners/${ownerId}`
-    );
+    } catch (error) {
 
-    if (res.status === 200) {
+      const msg = getErrorMessage(error);
+
       return {
-        success: true,
-        message: res.data?.message || "Owner deleted successfully"
+        success: false,
+        message: msg
       };
+
+    } finally {
+
+      setLoading(false);
+
     }
+  };
+  const updateOwnerMobile = async (ownerId, mobileNumber) => {
+    try {
+      setLoading(true);
 
-    return { success: false };
+      const res = await axiosInstance.put(
+        `/v2/owners/mobile/${ownerId}`,
+        {
+          mobileNumber: mobileNumber
+        }
+      );
 
-  } catch (error) {
+      if (res.status === 200) {
+        return {
+          success: true,
+          data: res.data,
+          message: res.data?.message || "Mobile updated successfully"
+        };
+      }
 
-    const msg =
-      error?.response?.data?.message ||
-      error?.response?.data ||
-      "Failed to delete owner";
+      return { success: false };
 
-    return {
-      success: false,
-      message: msg
-    };
+    } catch (error) {
 
-  } finally {
-    setLoading(false);
-  }
-};
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data ||
+        "Failed to update mobile";
+
+      return {
+        success: false,
+        message: msg
+      };
+
+    } finally {
+      setLoading(false);
+    }
+  };
+  const deleteOwner = async (ownerId) => {
+    try {
+      setLoading(true);
+
+      const res = await axiosInstance.delete(
+        `/v2/owners/${ownerId}`
+      );
+
+      if (res.status === 200) {
+        return {
+          success: true,
+          message: res.data?.message || "Owner deleted successfully"
+        };
+      }
+
+      return { success: false };
+
+    } catch (error) {
+
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data ||
+        "Failed to delete owner";
+
+      return {
+        success: false,
+        message: msg
+      };
+
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <OwnersContext.Provider
@@ -323,10 +331,11 @@ const deleteOwner = async (ownerId) => {
         owners,
         totalItems,
         totalPages,
-        loading,accessError,
-        getOwners,changeOwnerPassword,getOwnerById,getTenantSummary,updateOwnerEmail,deleteTenant,updateOwnerMobile,deleteOwner   
+        ownerCount,
+        loading, accessError,
+        getOwners, changeOwnerPassword, getOwnerById, getTenantSummary, updateOwnerEmail, deleteTenant, updateOwnerMobile, deleteOwner,activeCount
       }}
-      
+
     >
       {children}
     </OwnersContext.Provider>
