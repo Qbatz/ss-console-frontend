@@ -391,7 +391,16 @@ const DemoRequests = () => {
                   ) : data.length > 0 ? (
 
                  data.map((item, index) => {
-                
+                  const allowedStatuses =
+    statusConfig.find(
+      (s) => s.currentStatus === item.demoRequestStatus
+    )?.allowedStatuses || [];
+
+  const canAssignStaff =
+    allowedStatuses.some(
+      (s) => s.key === "ASSIGNED"
+    );
+    console.log("canAssignStaff",canAssignStaff)
                   return(
 
                   
@@ -460,8 +469,7 @@ const DemoRequests = () => {
                               >
                                 Assign Staff
                               </button> */}
-
-  {item.demoRequestStatus === "ASSIGNED" && (
+{canAssignStaff && (
   <button
     onClick={() => {
       setSelectedItem(item);
@@ -492,20 +500,7 @@ const DemoRequests = () => {
 >
   Assign Staff
 </button> */}
-{item.demoRequestStatus !== "REJECTED" &&
- item.demoRequestStatus !== "CLOSED" && (
-  <button
-    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-    onClick={() => {
-      setSelectedId(item.requestId);
-      setSelectedItem(item);
-      setOpenStatusModal(true);
-    }}
-  >
-    Change Status
-  </button>
-)}
-                              {/* <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                              <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                                 onClick={() => {
                                   setSelectedId(item.requestId);
                                   setSelectedItem(item);
@@ -513,7 +508,7 @@ const DemoRequests = () => {
                                 }}
                               >
                                 Change Status
-                              </button> */}
+                              </button>
                               <button
                                 className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                                 onClick={() => {
