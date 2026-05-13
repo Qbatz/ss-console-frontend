@@ -39,26 +39,16 @@ const Subscription = () => {
     }
 
   };
-  // const fetchSubscriptions = async (pageNo = 1, searchText = "") => {
+ 
 
-  //   const res = await getSubscriptions(pageNo, size, searchText);
-
-  //   if(res.success){
-
-  //     setSubscriptions(res.data.content || []);
-  //     setTotalItems(res.data.totalItems || 0);
-  //     setTotalPages(res.data.totalPages || 0);
-
-  //   }
-
-  // };
+ 
   const start = totalItems === 0 ? 0 : (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
   useEffect(() => {
 
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-    }, 500);   // 500ms delay
+    }, 500);  
 
     return () => clearTimeout(timer);
 
@@ -232,7 +222,7 @@ const Subscription = () => {
 
                         {loading ? (
 
-                          // 🔥 Skeleton Loader
+                        
                           Array.from({ length: size }).map((_, i) => (
                             <tr key={i} className="animate-pulse text-[12px]">
 
@@ -342,7 +332,7 @@ const Subscription = () => {
 
                   <span>
                     Total Record Count :{" "}
-                    <span className="text-blue-600">{size}</span>
+                    <span className="text-blue-600">{subscriptions?.length || 0}</span>
                   </span>
 
                   <div className="flex items-center gap-4">

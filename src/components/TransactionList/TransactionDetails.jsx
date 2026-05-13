@@ -10,9 +10,9 @@ import Refresh from "../../assets/RefreshButton.png";
 import { usePermission } from "../../Utils/permissionHelper";
 import LoginImg from "../../assets/LoginImg.png";
 import Single from "../../assets/single.png";
- import Location from "../../assets/locationGrey.png"
- import Call from "../../assets/call.png";
- import Team from "../../assets/Team.png";
+import Location from "../../assets/locationGrey.png"
+import Call from "../../assets/call.png";
+import Team from "../../assets/Team.png";
 
 
 const TransactionsPage = () => {
@@ -36,9 +36,9 @@ const TransactionsPage = () => {
   const [hoveredProof, setHoveredProof] = useState("");
   const [previewPos, setPreviewPos] = useState({ x: 0, y: 0 });
   const [menuPos, setMenuPos] = useState({
-  top: 0,
-  left: 0
-});
+    top: 0,
+    left: 0
+  });
   const { RangePicker } = DatePicker;
   const formatDate = (date) => {
     if (!date) return "";
@@ -52,7 +52,7 @@ const TransactionsPage = () => {
       setPage((prev) => prev + 1);
     }
   };
-console.log("selectedTxn",selectedTxn)
+  console.log("selectedTxn", selectedTxn)
   const handlePrev = () => {
     if (page > 1) {
       setPage((prev) => prev - 1);
@@ -60,7 +60,7 @@ console.log("selectedTxn",selectedTxn)
   };
   const handleSizeChange = (e) => {
     setSize(Number(e.target.value));
-    setPage(0); // reset page
+    setPage(0);
   };
   useEffect(() => {
     fetchData();
@@ -236,7 +236,7 @@ console.log("selectedTxn",selectedTxn)
                       <tr key={index} className="border-t border-gray-300">
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-                        {index + 1}
+                          {index + 1}
                         </td>
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
@@ -266,14 +266,8 @@ console.log("selectedTxn",selectedTxn)
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
                           {item.paymentType || "-"}
                         </td>
-                        {/* <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-                          __
-                        </td> */}
-                        {/* <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-         __
-        </td> */}
 
-                        {/* <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
+                        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
                           {item.paymentProof ? (
                             <span
                               className="text-blue-600 cursor-pointer underline"
@@ -294,39 +288,12 @@ console.log("selectedTxn",selectedTxn)
                                 setHoveredProof("");
                               }}
                             >
-                              View Proof
+                              {item.paymentProofFileName || "View Proof"}
                             </span>
                           ) : (
                             "--"
                           )}
-                        </td> */}
-                        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-  {item.paymentProof ? (
-    <span
-      className="text-blue-600 cursor-pointer underline"
-      onMouseEnter={(e) => {
-        setHoveredProof(item.paymentProof); // 👉 image URL
-        setPreviewPos({
-          x: e.clientX + 20,
-          y: e.clientY - 20,
-        });
-      }}
-      onMouseMove={(e) => {
-        setPreviewPos({
-          x: e.clientX + 20,
-          y: e.clientY - 20,
-        });
-      }}
-      onMouseLeave={() => {
-        setHoveredProof("");
-      }}
-    >
-      {item.paymentProofFileName || "View Proof"}
-    </span>
-  ) : (
-    "--"
-  )}
-</td>
+                        </td>
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
                           {item.orderStatus}
@@ -340,50 +307,47 @@ console.log("selectedTxn",selectedTxn)
                           <img
                             src={MenuCircle}
                             className="w-4 h-4 cursor-pointer"
-                            // onClick={(e) => {
-                            //   e.stopPropagation();
-                            //   setOpenMenu(openMenu === item.historyId ? null : item.historyId);
-                            // }}
+
                             onClick={(e) => {
 
-  e.stopPropagation();
+                              e.stopPropagation();
 
-  const rect = e.currentTarget.getBoundingClientRect();
+                              const rect = e.currentTarget.getBoundingClientRect();
 
-  setMenuPos({
-    top: rect.bottom + 5,
-    left: rect.left - 100
-  });
+                              setMenuPos({
+                                top: rect.bottom + 5,
+                                left: rect.left - 100
+                              });
 
-  setOpenMenu(
-    openMenu === item.historyId
-      ? null
-      : item.historyId
-  );
-}}
+                              setOpenMenu(
+                                openMenu === item.historyId
+                                  ? null
+                                  : item.historyId
+                              );
+                            }}
                           />
-                        {openMenu === item.historyId && (
-  <div
-    className="fixed w-32 bg-white border rounded shadow z-[99999]"
-    style={{
-      top: menuPos.top,
-      left: menuPos.left
-    }}
-  >
+                          {openMenu === item.historyId && (
+                            <div
+                              className="fixed w-32 bg-white border rounded shadow z-[99999]"
+                              style={{
+                                top: menuPos.top,
+                                left: menuPos.left
+                              }}
+                            >
 
-    <button
-      onClick={() => {
-        setSelectedTxn(item);
-        setShowModal(true);
-        setOpenMenu(null);
-      }}
-      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-    >
-      View Details
-    </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedTxn(item);
+                                  setShowModal(true);
+                                  setOpenMenu(null);
+                                }}
+                                className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                              >
+                                View Details
+                              </button>
 
-  </div>
-)}
+                            </div>
+                          )}
 
                         </td>
 
@@ -410,7 +374,7 @@ console.log("selectedTxn",selectedTxn)
             {/* Total Count */}
             <span>
               Total Record Count :
-              <span className="text-blue-600 ml-1">{totalItems}</span>
+              <span className="text-blue-600 ml-1">{data.length || 0}</span>
             </span>
 
             <div className="flex items-center gap-4">
@@ -493,45 +457,45 @@ console.log("selectedTxn",selectedTxn)
                 <p><b>Mobile:</b> {selectedTxn.mobile || "-"}</p>
                 <p><b>Active Tenants:</b> 42</p>
               </div> */}
-            
-            <div className="text-sm text-left">
-  <p className="text-[13px] font-semibold tracking-[1px] text-gray-500 uppercase mb-4">
-    Property Info
-  </p>
 
-  <div className="space-y-4">
-    <div className="grid grid-cols-[20px_120px_1fr] items-center gap-x-4">
-      <img src={Single} alt="owner" className="w-4 h-4 opacity-70" />
-      <span className="text-gray-500">Owner</span>
-      <span className="font-semibold text-gray-900">{selectedTxn.ownerInfo.fullName}</span>
-    </div>
+              <div className="text-sm text-left">
+                <p className="text-[13px] font-semibold tracking-[1px] text-gray-500 uppercase mb-4">
+                  Property Info
+                </p>
 
-    <div className="grid grid-cols-[20px_120px_1fr] items-start gap-x-4">
-      <img src={Location}alt="location" className="w-4 h-4 mt-1 opacity-70" />
-      <span className="text-gray-500">Location</span>
-      <span className="font-semibold text-gray-900">
-        {selectedTxn.city}, {selectedTxn.state}
-      </span>
-    </div>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-[20px_120px_1fr] items-center gap-x-4">
+                    <img src={Single} alt="owner" className="w-4 h-4 opacity-70" />
+                    <span className="text-gray-500">Owner</span>
+                    <span className="font-semibold text-gray-900">{selectedTxn.ownerInfo.fullName}</span>
+                  </div>
 
-    <div className="grid grid-cols-[20px_120px_1fr] items-center gap-x-4">
-      <img src={Call} alt="mobile" className="w-4 h-4 opacity-70" />
-      <span className="text-gray-500">Mobile</span>
-      <span className="font-semibold text-gray-900">
-        {selectedTxn.mobile || "-"}
-      </span>
-    </div>
+                  <div className="grid grid-cols-[20px_120px_1fr] items-start gap-x-4">
+                    <img src={Location} alt="location" className="w-4 h-4 mt-1 opacity-70" />
+                    <span className="text-gray-500">Location</span>
+                    <span className="font-semibold text-gray-900">
+                      {selectedTxn.city}, {selectedTxn.state}
+                    </span>
+                  </div>
 
-    {/* <div className="grid grid-cols-[20px_120px_1fr] items-center gap-x-4">
+                  <div className="grid grid-cols-[20px_120px_1fr] items-center gap-x-4">
+                    <img src={Call} alt="mobile" className="w-4 h-4 opacity-70" />
+                    <span className="text-gray-500">Mobile</span>
+                    <span className="font-semibold text-gray-900">
+                      {selectedTxn.mobile || "-"}
+                    </span>
+                  </div>
+
+                  {/* <div className="grid grid-cols-[20px_120px_1fr] items-center gap-x-4">
       <img src={Team} alt="tenants" className="w-4 h-4 opacity-70" />
       <span className="text-gray-500">Active Tenants</span>
       <span className="font-semibold text-gray-900">42</span>
     </div> */}
-  </div>
-</div>
+                </div>
+              </div>
 
               {/* PAYMENT BOX */}
-              
+
               {/* <div className="bg-blue-100 rounded-lg p-4 text-sm mb-4 mt-3">
                 <div className="flex justify-between">
                   <div>
@@ -564,58 +528,58 @@ console.log("selectedTxn",selectedTxn)
               </div> */}
               <div className="bg-gray-100 rounded-xl p-4 text-sm mt-3 mb-4 border border-gray-200">
 
-  {/* TITLE */}
- <p className="text-[11px] text-gray-400 pb-2 mb-4 font-semibold tracking-wider border-b border-gray-300 text-left">
-  PAYMENT INFO
-</p>
-  {/* ROWS */}
-  <div className="space-y-3">
+                {/* TITLE */}
+                <p className="text-[11px] text-gray-400 pb-2 mb-4 font-semibold tracking-wider border-b border-gray-300 text-left">
+                  PAYMENT INFO
+                </p>
+                {/* ROWS */}
+                <div className="space-y-3">
 
-    <div className="flex justify-between">
-      <p className="text-gray-500 text-xs">Payment Mode</p>
-      <p className="font-medium text-gray-800">
-        {selectedTxn.paymentMode || "Manual"}
-      </p>
-    </div>
+                  <div className="flex justify-between">
+                    <p className="text-gray-500 text-xs">Payment Mode</p>
+                    <p className="font-medium text-gray-800">
+                      {selectedTxn.paymentMode || "Manual"}
+                    </p>
+                  </div>
 
-    <div className="flex justify-between">
-      <p className="text-gray-500 text-xs">Plan Name</p>
-      <p className="font-medium text-gray-800">
-        {selectedTxn.planName}
-      </p>
-    </div>
+                  <div className="flex justify-between">
+                    <p className="text-gray-500 text-xs">Plan Name</p>
+                    <p className="font-medium text-gray-800">
+                      {selectedTxn.planName}
+                    </p>
+                  </div>
 
-    <div className="flex justify-between">
-      <p className="text-gray-500 text-xs">Amount</p>
-      <p className="font-medium text-gray-800">
-        ₹ {selectedTxn.totalAmount}
-      </p>
-    </div>
+                  <div className="flex justify-between">
+                    <p className="text-gray-500 text-xs">Amount</p>
+                    <p className="font-medium text-gray-800">
+                      ₹ {selectedTxn.totalAmount}
+                    </p>
+                  </div>
 
-    <div className="flex justify-between">
-      <p className="text-gray-500 text-xs">Discount Added</p>
-      <p className="font-medium text-gray-800">
-        ₹ {selectedTxn.discountAmount || 0}
-      </p>
-    </div>
+                  <div className="flex justify-between">
+                    <p className="text-gray-500 text-xs">Discount Added</p>
+                    <p className="font-medium text-gray-800">
+                      ₹ {selectedTxn.discountAmount || 0}
+                    </p>
+                  </div>
 
-    <div className="flex justify-between">
-      <p className="text-gray-500 text-xs">Final Paid</p>
-      <p className="font-semibold text-gray-900">
-        ₹ {selectedTxn.totalAmount}
-      </p>
-    </div>
+                  <div className="flex justify-between">
+                    <p className="text-gray-500 text-xs">Final Paid</p>
+                    <p className="font-semibold text-gray-900">
+                      ₹ {selectedTxn.totalAmount}
+                    </p>
+                  </div>
 
-    <div className="flex justify-between">
-      <p className="text-gray-500 text-xs">Collected by</p>
-      <p className="font-medium text-gray-800">
-        {selectedTxn.collectedBy || "-"}
-      </p>
-    </div>
+                  <div className="flex justify-between">
+                    <p className="text-gray-500 text-xs">Collected by</p>
+                    <p className="font-medium text-gray-800">
+                      {selectedTxn.collectedBy || "-"}
+                    </p>
+                  </div>
 
-  </div>
-</div>
-              
+                </div>
+              </div>
+
 
               {/* IMAGE */}
               <div className="rounded-lg overflow-hidden border border-gray-300">

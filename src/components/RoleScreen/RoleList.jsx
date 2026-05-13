@@ -59,7 +59,7 @@ const Roles = () => {
     if (!deleteRole) return;
 
     try {
-      // setDeleteLoading(true);
+  
 
       const res = await deleteAgentRole(deleteRole.id);
 
@@ -223,7 +223,7 @@ const Roles = () => {
             <span className="text-gray-600">
               Total Record Count :{" "}
               <span className="text-blue-600 font-medium">
-                {totalRecords.toString().padStart(2, "0")}
+                {paginatedData.length || 0}
               </span>
             </span>
 

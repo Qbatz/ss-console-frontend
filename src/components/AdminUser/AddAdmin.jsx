@@ -53,11 +53,20 @@ const AddAdmin = ({ isOpen, onClose }) => {
 
 
 
+    // if (!email.trim()) {
+    //   setEmailError("Email is required");
+    //   hasError = true;
+    // }
     if (!email.trim()) {
       setEmailError("Email is required");
       hasError = true;
     }
-
+    else if (
+      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)
+    ) {
+      setEmailError("Please enter a valid email address");
+      hasError = true;
+    }
     if (!selectedRole?.id) {
       setRoleError("Please select a role");
       hasError = true;

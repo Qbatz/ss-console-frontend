@@ -371,7 +371,8 @@ useEffect(() => {
         )}
 
         {/* Scrollable Content */}
-       <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-6 mt-1 md:px-2 bg-white pb-14">
+       {/* <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-6 mt-1 md:px-2 bg-white pb-14"> */}
+       <div className="flex-1 overflow-y-scroll [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-6 mt-1 md:px-2 bg-white pb-14">
           <div className="w-full">
             {children}
           </div>

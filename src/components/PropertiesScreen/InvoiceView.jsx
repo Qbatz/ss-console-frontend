@@ -13,7 +13,7 @@ import Circle from "../../assets/menucircle.png";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 
-const InvoiceView = ({ hostelData,refreshHostel }) => {
+const InvoiceView = ({ hostelData, refreshHostel }) => {
 
     const { getInvoicesByHostelId, deleteInvoice } = useHostel();
     const defaultInvoices = hostelData?.invoices || [];
@@ -34,8 +34,8 @@ const InvoiceView = ({ hostelData,refreshHostel }) => {
     const [selectedInvoice, setSelectedInvoice] = useState(null);
     const [amountError, setAmountError] = useState("")
     const [modalType, setModalType] = useState("success");
-      const [showSuccess, setShowSuccess] = useState(false);
-      const [message, setMessage] = useState("");
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [message, setMessage] = useState("");
 
 
     const invoices = isMore
@@ -93,23 +93,23 @@ const InvoiceView = ({ hostelData,refreshHostel }) => {
 
         if (res?.success) {
 
-            
-              setModalType("success");
-      setMessage(res.data);
-      setShowSuccess(true);
-      refreshHostel()
 
-      setTimeout(() => {
-        
-        setShowSuccess(false);
-        setShowDeleteModal(false);
-            setDeleteAmount("");
+            setModalType("success");
+            setMessage(res.data);
+            setShowSuccess(true);
+            refreshHostel()
 
-            setSelectedInvoice(null);
+            setTimeout(() => {
 
-            fetchInvoices(page);
+                setShowSuccess(false);
+                setShowDeleteModal(false);
+                setDeleteAmount("");
 
-      }, 800);
+                setSelectedInvoice(null);
+
+                fetchInvoices(page);
+
+            }, 800);
 
         }
         else {
@@ -121,12 +121,12 @@ const InvoiceView = ({ hostelData,refreshHostel }) => {
 
     return (
         <>
-<Toast
-        show={showSuccess}
-        message={message}
-        type={modalType}
+            <Toast
+                show={showSuccess}
+                message={message}
+                type={modalType}
 
-      />
+            />
             <div className="p-5">
 
                 <div
@@ -774,84 +774,84 @@ const InvoiceView = ({ hostelData,refreshHostel }) => {
                 </div>
 
             </div>
-          {showDeleteModal && (
+            {showDeleteModal && (
 
-  <div
-    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30"
-    onClick={() => {
-      setShowDeleteModal(false);
-      setAmountError("");
-    }}
-  >
+                <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30"
+                    onClick={() => {
+                        setShowDeleteModal(false);
+                        setAmountError("");
+                    }}
+                >
 
-    <div
-      className="bg-white rounded-2xl w-[350px] p-5 shadow-xl"
-      onClick={(e) => e.stopPropagation()}
-    >
+                    <div
+                        className="bg-white rounded-2xl w-[350px] p-5 shadow-xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
 
-      <h2 className="text-lg font-semibold mb-4 text-left">
-        Delete Invoice
-      </h2>
+                        <h2 className="text-lg font-semibold mb-4 text-left">
+                            Delete Invoice
+                        </h2>
 
-      <div className="mb-4">
+                        <div className="mb-4">
 
-        <label className="text-sm text-gray-600 block mb-2 text-left">
-          Amount
-        </label>
+                            <label className="text-sm text-gray-600 block mb-2 text-left">
+                                Amount
+                            </label>
 
-        <input
-          type="number"
-          value={deleteAmount}
-          onChange={(e) => {
-            setDeleteAmount(e.target.value);
-            setAmountError("");
-          }}
-          placeholder="Enter amount"
-          className="
+                            <input
+                                type="number"
+                                value={deleteAmount}
+                                onChange={(e) => {
+                                    setDeleteAmount(e.target.value);
+                                    setAmountError("");
+                                }}
+                                placeholder="Enter amount"
+                                className="
             w-full border border-gray-300
             rounded-lg px-3 py-2 text-sm
             outline-none
           "
-        />
+                            />
 
-      </div>
+                        </div>
 
-      {amountError && (
-        <ErrorMessage message={amountError} type="error" />
-      )}
+                        {amountError && (
+                            <ErrorMessage message={amountError} type="error" />
+                        )}
 
-      <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-2">
 
-        <button
-          onClick={() => {
-            setShowDeleteModal(false);
-            setDeleteAmount("");
-          }}
-          className="
+                            <button
+                                onClick={() => {
+                                    setShowDeleteModal(false);
+                                    setDeleteAmount("");
+                                }}
+                                className="
             px-4 py-2 border border-gray-300
             rounded-lg text-sm
           "
-        >
-          Cancel
-        </button>
+                            >
+                                Cancel
+                            </button>
 
-        <button
-          onClick={handleDeleteInvoice}
-          className="
+                            <button
+                                onClick={handleDeleteInvoice}
+                                className="
             px-4 py-2 bg-red-600
             text-white rounded-lg text-sm
           "
-        >
-          Delete
-        </button>
+                            >
+                                Delete
+                            </button>
 
-      </div>
+                        </div>
 
-    </div>
+                    </div>
 
-  </div>
+                </div>
 
-)}
+            )}
         </>
 
 
