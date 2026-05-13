@@ -287,7 +287,7 @@ setModalType("success");
           <div className="text-sm text-gray-600">
             Total Record Count :{" "}
             <span className="text-blue-600 font-semibold">
-              {totalRecords}
+              {data?.length || 0}
             </span>
           </div>
 

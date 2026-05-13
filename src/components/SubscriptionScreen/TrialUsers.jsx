@@ -418,7 +418,7 @@ const TrailPage = () => {
         {/* Footer */}
         <div className="flex justify-between items-center mt-3 text-sm">
           <p>
-            Total Record Count : <span className="text-blue-600">69</span>
+            Total Record Count : <span className="text-blue-600">{data.length || 0}</span>
           </p>
 
           <div className="flex items-center gap-2">

@@ -8,6 +8,7 @@ import { usePermission } from "../../Utils/permissionHelper";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import Menucircle from "../../assets/menucircle.png";
+import Arrow from "../../assets/direction-down 01.png"
 
 
 const Proprietors = () => {
@@ -38,7 +39,7 @@ const [propertyFilter, setPropertyFilter] = useState("ALL");
   const [error, setError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-  
+  const dropdownRef = useRef(null);
 
 
   console.log("owners", owners)
@@ -91,6 +92,28 @@ const [propertyFilter, setPropertyFilter] = useState("ALL");
   });
 
 }, [page, size, debouncedSearch, sortBy, direction, filterType]);
+
+
+
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target)
+    ) {
+      setShowFilterDropdown(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+  };
+}, []);
   // useEffect(() => {
 
   //   if (skipFirstApi) {
@@ -336,10 +359,10 @@ const getFilterParams = () => {
   >
     <span>{filterType}</span>
 
-    <span>⌄</span>
+    <img src={Arrow} className="w-5 h-5"/>
   </button>
 
-  {/* DROPDOWN */}
+  <div className="relative" ref={dropdownRef}>
   {showFilterDropdown && (
 
     <div
@@ -386,6 +409,7 @@ const getFilterParams = () => {
     </div>
 
   )}
+  </div>
 
 </div>
 
@@ -644,7 +668,7 @@ const getFilterParams = () => {
 
               <span className="text-gray-600">
                 Total Record Count :
-                <span className="text-blue-600 font-medium"> {size}</span>
+                <span className="text-blue-600 font-medium">{owners?.length || 0}</span>
               </span>
 
               <div className="flex items-center gap-3">

@@ -14,7 +14,7 @@ import CommentBox from "../../assets/message-2.png";
 import Notes from "../../assets/notes.png"
 const DemoRequests = () => {
 
-  const { getDemoRequests, loading, getAgentsDropdown, updateDemoRequestStatus, addDemoRequestComment } = useSubscription();
+  const { getDemoRequests, loading, getAgentsDropdown, updateDemoRequestStatus, addDemoRequestComment,getDemoRequestStatus } = useSubscription();
   const { adminDetails, agents, getAllAgents, assignStaff } = useRole();
   const dropdownRef = useRef(null);
   const [data, setData] = useState([]);
@@ -44,6 +44,20 @@ const DemoRequests = () => {
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
+  const [statusConfig, setStatusConfig] = useState([]);
+
+
+  useEffect(() => {
+  const fetchStatuses = async () => {
+    const res = await getDemoRequestStatus();
+
+    if (res.success) {
+      setStatusConfig(res.data);
+    }
+  };
+
+  fetchStatuses();
+}, []);
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -376,7 +390,12 @@ const DemoRequests = () => {
 
                   ) : data.length > 0 ? (
 
-                    data.map((item, index) => (
+                 data.map((item, index) => {
+                
+                  return(
+
+                  
+                      
                       <tr key={item.requestId} className="text-[13px] hover:bg-gray-50">
 
                         <td className="px-4 py-2 ">
@@ -396,7 +415,11 @@ const DemoRequests = () => {
                         </td>
 
                         <td className="px-4 py-2 text-[12px] text-left">
-                          {item.assignedTo || "Un Assigned"}
+                          {item.assignedTo === null
+                            ? "Un Assigned"
+                            : item.assignedTo?.trim() === ""
+                              ? "N/A"
+                              : item.assignedTo}
                         </td>
 
                         <td className="px-4 py-2 text-[12px] text-left">
@@ -427,7 +450,7 @@ const DemoRequests = () => {
                                 left: openMenu.x - 120
                               }}
                             >
-                              <button
+                              {/* <button
                                 onClick={() => {
                                   setSelectedItem(item);
                                   setShowModal(true);
@@ -436,15 +459,61 @@ const DemoRequests = () => {
                                 className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                               >
                                 Assign Staff
-                              </button>
-                              <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                              </button> */}
+
+  {item.demoRequestStatus === "ASSIGNED" && (
+  <button
+    onClick={() => {
+      setSelectedItem(item);
+      setShowModal(true);
+      setOpenMenu(null);
+    }}
+    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+  >
+    Assign Staff
+  </button>
+)}
+
+                              {/* <button
+  disabled={!canAssignStaff}
+  onClick={() => {
+    if (!canAssignStaff) return;
+
+    setSelectedItem(item);
+    setShowModal(true);
+    setOpenMenu(null);
+  }}
+  className={`w-full text-left px-4 py-2 text-sm
+    ${
+      canAssignStaff
+        ? "hover:bg-gray-100 cursor-pointer"
+        : "opacity-50 cursor-not-allowed text-gray-400"
+    }`}
+>
+  Assign Staff
+</button> */}
+{item.demoRequestStatus !== "REJECTED" &&
+ item.demoRequestStatus !== "CLOSED" && (
+  <button
+    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+    onClick={() => {
+      setSelectedId(item.requestId);
+      setSelectedItem(item);
+      setOpenStatusModal(true);
+    }}
+  >
+    Change Status
+  </button>
+)}
+                              {/* <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                                 onClick={() => {
                                   setSelectedId(item.requestId);
+                                  setSelectedItem(item);
                                   setOpenStatusModal(true);
                                 }}
                               >
                                 Change Status
-                              </button>
+                              </button> */}
                               <button
                                 className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                                 onClick={() => {
@@ -461,7 +530,7 @@ const DemoRequests = () => {
                         </td>
 
                       </tr>
-                    ))
+                 )})
 
                   ) : (
 
@@ -486,7 +555,7 @@ const DemoRequests = () => {
 
             <span>
               Total Record Count :
-              <span className="text-blue-600 ml-1">{pageSize}</span>
+              <span className="text-blue-600 ml-1">{data.length || 0}</span>
             </span>
 
             <div className="flex items-center gap-4">
@@ -580,7 +649,7 @@ const DemoRequests = () => {
                 {openDropdown && (
                   <div className="absolute mt-2 w-full bg-white rounded-xl shadow-lg border max-h-44 overflow-y-auto z-[9999] text-left">
 
-                    {agentList.map((agent) => (
+                    {/* {agentList.map((agent) => (
                       <div
                         key={agent.agentId}
                         onClick={() => {
@@ -595,8 +664,23 @@ const DemoRequests = () => {
                       >
                         {agent.agentName}
                       </div>
+                    ))} */}
+                    {agentList.map((agent) => (
+                      <div
+                        key={agent.agentId}
+                        onClick={() => {
+                          setDropdownValue(agent.agentId);
+                          setOpenDropdown(false);
+                        }}
+                        className={`px-4 py-2 cursor-pointer text-sm
+      ${dropdownValue === agent.agentId
+                            ? "bg-blue-600 text-white"
+                            : "hover:bg-gray-100"
+                          }`}
+                      >
+                        {agent.agentName?.trim() || "Name not entered"}
+                      </div>
                     ))}
-
                   </div>
                 )}
 
@@ -640,6 +724,7 @@ const DemoRequests = () => {
         onClose={() => setOpenStatusModal(false)}
         demoRequestId={selectedId}
         refreshList={fetchData}
+        currentStatus={selectedItem?.demoRequestStatus}
       />
       {showCommentModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">

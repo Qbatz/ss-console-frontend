@@ -908,7 +908,8 @@ const Properties = () => {
                   Total Record Count :{" "}
                   <span className="text-blue-600 font-medium">
                     {/* {pageSize} */}
-                    {hostels?.totalHostels}
+                    {/* {hostels?.totalHostels} */}
+                    {displayData?.length || 0}
                   </span>
                 </span>
 

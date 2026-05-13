@@ -344,7 +344,7 @@ const ManagePlans = () => {
           {/* GRID */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            {plans.map((plan) => {
+           {plans?.activePlans?.map((plan) => {
               const yearlyPrice = plan.finalPrice * 12;
 
               const uniqueFeatures = [
