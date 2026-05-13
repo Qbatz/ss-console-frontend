@@ -29,7 +29,7 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    const [deleteAmount, setDeleteAmount] = useState("");
+    const [deletePhone, setDeletePhone] = useState("");
 
     const [selectedInvoice, setSelectedInvoice] = useState(null);
     const [amountError, setAmountError] = useState("")
@@ -81,11 +81,21 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
 
     }, [page, size, isMore]);
     const handleDeleteInvoice = async () => {
+         if (!deletePhone) {
+        setAmountError("Mobile number is required");
+        return;
+    }
+
+    // 10 digit validation
+    if (deletePhone.length !== 10) {
+        setAmountError("Mobile number must be 10 digits");
+        return;
+    }
 
         const payload = [
             {
                 invoiceId: selectedInvoice?.invoiceId,
-                amount: Number(deleteAmount)
+                tenantMobile: Number(deletePhone)
             }
         ];
 
@@ -103,7 +113,7 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
 
                 setShowSuccess(false);
                 setShowDeleteModal(false);
-                setDeleteAmount("");
+                setDeletePhone("");
 
                 setSelectedInvoice(null);
 
@@ -793,43 +803,45 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
                             Delete Invoice
                         </h2>
 
-                        <div className="mb-4">
+                        <label className="text-sm text-gray-600 block mb-2 text-left">
+  Phone Number
+</label>
 
-                            <label className="text-sm text-gray-600 block mb-2 text-left">
-                                Amount
-                            </label>
+<input
+  type="text"
+  value={deletePhone}
+  maxLength={10}
+  onChange={(e) => {
+    const value = e.target.value;
 
-                            <input
-                                type="number"
-                                value={deleteAmount}
-                                onChange={(e) => {
-                                    setDeleteAmount(e.target.value);
-                                    setAmountError("");
-                                }}
-                                placeholder="Enter amount"
-                                className="
-            w-full border border-gray-300
-            rounded-lg px-3 py-2 text-sm
-            outline-none
-          "
-                            />
-
-                        </div>
+    // numbers மட்டும் allow
+    if (/^\d*$/.test(value)) {
+      setDeletePhone(value);
+      setAmountError("");
+    }
+  }}
+  placeholder="Enter phone number"
+  className="
+    w-full border border-gray-300
+    rounded-lg px-3 py-2 text-sm
+    outline-none
+  "
+/>
 
                         {amountError && (
                             <ErrorMessage message={amountError} type="error" />
                         )}
 
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-2 mt-2">
 
                             <button
                                 onClick={() => {
                                     setShowDeleteModal(false);
-                                    setDeleteAmount("");
+                                    setDeletePhone("");
                                 }}
                                 className="
             px-4 py-2 border border-gray-300
-            rounded-lg text-sm
+            rounded-lg text-sm cursor-pointer
           "
                             >
                                 Cancel
@@ -839,7 +851,7 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
                                 onClick={handleDeleteInvoice}
                                 className="
             px-4 py-2 bg-red-600
-            text-white rounded-lg text-sm
+            text-white rounded-lg text-sm cursor-pointer
           "
                             >
                                 Delete

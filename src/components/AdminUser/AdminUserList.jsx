@@ -3,7 +3,7 @@ import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import Search from "../../assets/Search.png";
 import AddAdmin from "./AddAdmin";
 import { useRole } from "../../Context/RoleContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import swap from "../../assets/arrowswap.png";
 import LoginImg from "../../assets/LoginImg.png";
 import Add from "../../assets/add_admin.png";
@@ -14,9 +14,10 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 
 
+
 const IamAdminUser = () => {
   const navigate = useNavigate();
-  const { getAdminDetails, loading, agents, getAllAgents, accessError, deactivateAgent, reactivateAgent, getAgentDetails, getAgentRoles, agentRoles, updateAdminRole } = useRole();
+  const { getAdminDetails, loading, agents, getAllAgents, accessError, deactivateAgent, reactivateAgent, getAgentDetails, getAgentRoles, agentRoles, updateAdminRole, getAgentRoleDropdown } = useRole();
 
   const [admin, setAdmin] = useState(null);
   const [open, setOpen] = useState(false);
@@ -34,8 +35,17 @@ const IamAdminUser = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState("");
   const [roleError, setRoleError] = useState("")
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [openRoleDropdown, setOpenRoleDropdown] = useState(false);
+  const [roleOptions, setRoleOptions] = useState([]);
+  const {
+    adminRoleId,
+    filterRoleId
+  } = useParams();
 
-
+  const [roleId, setRoleId] = useState(filterRoleId || "");
   console.log("agentDetails", agentDetails)
 
   useEffect(() => {
@@ -46,37 +56,42 @@ const IamAdminUser = () => {
   useEffect(() => {
     getAgentRoles()
   }, [])
-  console.log("agentRoles", agentRoles)
   useEffect(() => {
-    getAllAgents()
-  }, [])
-  useEffect(() => {
-    const fetchAdmin = async () => {
-      const res = await getAdminDetails();
+    const fetchRoleDropdown = async () => {
+      const res = await getAgentRoleDropdown();
 
       if (res.success) {
-        setAdmin(res.data);
-      } else {
-        console.log(res.message);
+        setRoleOptions(res.data);
       }
     };
 
-    fetchAdmin();
+    fetchRoleDropdown();
   }, []);
-  const activeAgents = agents?.activeAgents || [];
-  const inactiveAgents = agents?.inActiveAgents
-    || [];
-  let filteredAgents = [];
+  useEffect(() => {
+    if (filterRoleId) {
+      setRoleId(filterRoleId);
 
-  if (status === "ACTIVE") {
-    filteredAgents = activeAgents;
-  } else if (status === "INACTIVE") {
-    filteredAgents = inactiveAgents
-      ;
-  } else {
-    filteredAgents = [...activeAgents, ...inactiveAgents];
-  }
-  console.log("accessError", accessError)
+      navigate(`/iam-admin-user/${adminRoleId}`, {
+        replace: true
+      });
+    }
+  }, [filterRoleId]);
+
+
+
+  useEffect(() => {
+    getAllAgents({
+      name: search,
+      isActive: status === "ACTIVE",
+      roleId: roleId ? Number(roleId) : "",
+      page,
+      size: pageSize
+    });
+  }, [search, status, roleId, page, pageSize]);
+
+
+  const filteredAgents = agents?.agentList || [];
+
   const adminList = Array.isArray(admin) ? admin : [admin];
   const handleDeactivate = async (agentId) => {
 
@@ -118,7 +133,7 @@ const IamAdminUser = () => {
       return;
     }
 
-    // 🔥 No changes check
+
     if (Number(selectedRoleId) === selectedUser.roleId) {
       setRoleError("No changes detected");
       return;
@@ -138,6 +153,7 @@ const IamAdminUser = () => {
       setMessage(res.message);
       setShowSuccess(true);
       await getAllAgents();
+      setShowEditModal(false);
 
       setTimeout(() => setShowSuccess(false), 1500);
     } else {
@@ -148,65 +164,59 @@ const IamAdminUser = () => {
       setTimeout(() => setShowSuccess(false), 1500);
     }
   };
+  const handleReactivate = async () => {
+    const res = await reactivateAgent(selectedUser.agentId);
+
+    if (res.success) {
+      setModalType("success");
+      setMessage(res.message);
+
+
+      setStatus("ACTIVE");
+
+      await getAllAgents({
+        name: search,
+        isActive: true,
+        page: 1,
+        size: 10
+      });
+    } else {
+      setModalType("error");
+      setMessage(res.message);
+    }
+
+    setShowSuccess(true);
+
+    setTimeout(() => setShowSuccess(false), 1500);
+
+    setShowReactivateModal(false);
+  };
   const TableSkeleton = () => {
-  return (
-    <>
-      {[...Array(6)].map((_, i) => (
-        <tr key={i} className="border-b animate-pulse">
-          <td className="px-4 py-3">
-            <div className="h-3 w-24 bg-gray-200 rounded"></div>
-          </td>
-          <td className="px-2 py-3">
-            <div className="h-3 w-32 bg-gray-200 rounded"></div>
-          </td>
-          <td className="px-2 py-3">
-            <div className="h-3 w-20 bg-gray-200 rounded"></div>
-          </td>
-          <td className="px-2 py-3">
-            <div className="h-3 w-28 bg-gray-200 rounded"></div>
-          </td>
-          <td className="px-2 py-3">
-            <div className="h-3 w-6 bg-gray-200 rounded"></div>
-          </td>
-        </tr>
-      ))}
-    </>
-  );
-};
-  // const handleUpdateRole = async () => {
-  //   if (!selectedRoleId) {
-  //     setRoleError("Please select a role");
-  //     return
-  //   }
+    return (
+      <>
+        {[...Array(6)].map((_, i) => (
+          <tr key={i} className="border-b border-gray-300 animate-pulse">
+            <td className="px-4 py-3">
+              <div className="h-3 w-24 bg-gray-200 rounded"></div>
+            </td>
+            <td className="px-2 py-3">
+              <div className="h-3 w-32 bg-gray-200 rounded"></div>
+            </td>
+            <td className="px-2 py-3">
+              <div className="h-3 w-20 bg-gray-200 rounded"></div>
+            </td>
+            <td className="px-2 py-3">
+              <div className="h-3 w-28 bg-gray-200 rounded"></div>
+            </td>
+            <td className="px-2 py-3">
+              <div className="h-3 w-6 bg-gray-200 rounded"></div>
+            </td>
+          </tr>
+        ))}
+      </>
+    );
+  };
 
-  //   const payload = {
-  //     roleId: Number(selectedRoleId)
-  //   };
-
-  //   const res = await updateAdminRole(
-  //     selectedUser.agentId,
-  //     payload
-  //   );
-
-  //   if (res?.success) {
-  //     setModalType("success");
-  //     setMessage(res.message);
-  //     setShowSuccess(true);   
-  //       await getAllAgents();
-  //     setTimeout(() => setShowSuccess(false), 1500);
-  //   } else {
-  //     setModalType("error");
-  //     setMessage(res.message);
-  //     setShowSuccess(true);   
-  //     setTimeout(() => setShowSuccess(false), 1500);
-  //   }
-
-
-
-
-
-
-  // };
 
   return (
     <DashboardLayout>
@@ -261,38 +271,73 @@ const IamAdminUser = () => {
                   /> Add Admin User
                 </button>
               </div>
+
             </div>
 
 
             <div className="px-2 md:px-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="relative w-full md:w-auto">
-                {/* <select className="appearance-none border  border-gray-200 rounded-lg px-3 py-2 text-sm bg-white w-full md:w-auto">
 
-                  <option>All</option>
-                  <option>Active</option>
-                  <option>Inactive</option>
-                </select> */}
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="appearance-none border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white w-full md:w-auto"
-                >
+              <div className="flex gap-3">
 
-                  <option value="ACTIVE">Active</option>
-                  <option value="INACTIVE">Inactive</option>
-                </select>
-                <img
-                  src={DownArrow}
-                  alt="down"
-                  className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 object-contain cursor-pointer"
-                />
+                <div className="relative w-full md:w-auto">
+
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="appearance-none border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white w-full md:w-auto"
+                  >
+
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                  </select>
+                  <img
+                    src={DownArrow}
+                    alt="down"
+                    className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 object-contain cursor-pointer"
+                  />
+                </div>
+
+
+
+                <div className="relative w-full md:w-auto">
+                  <select
+                    value={roleId}
+                    onChange={(e) => {
+                      setRoleId(e.target.value);
+                      setPage(1);
+                    }}
+                    className="appearance-none border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white w-full md:w-auto"
+                  >
+                    <option value="">All Roles</option>
+
+                    {roleOptions?.map((role) => (
+                      <option
+                        key={role.roleId}
+                        value={role.roleId}
+                      >
+                        {role.roleName}
+                      </option>
+                    ))}
+                  </select>
+
+                  <img
+                    src={DownArrow}
+                    alt="down"
+                    className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4"
+                  />
+                </div>
+
               </div>
-
               <div className="relative w-full md:w-64">
                 <input
                   type="text"
-                  placeholder="Search..."
-                  className="w-full border  border-gray-200 rounded-lg pl-4 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  placeholder="Search by name..."
+                  className="w-full border border-gray-200 rounded-lg pl-4 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="absolute right-3 top-2.5 text-gray-400 text-sm">
                   <img src={Search} alt="Search"
@@ -301,21 +346,21 @@ const IamAdminUser = () => {
               </div>
             </div>
 
-            {/* Table Section */}
+
             <div className="px-2 md:px-4">
               <div className="bg-white border border-gray-300 rounded-xl overflow-hidden shadow-sm relative">
 
-               
 
-                {/* ⭐ Fixed height container */}
+
+
                 <div className="max-h-[400px] overflow-y-auto">
 
                   <table className="min-w-full text-sm">
 
-                    {/* Header */}
+
                     <thead className="bg-[#F8F9FF] text-xs font-semibold text-gray-500 sticky top-0 z-10">
                       <tr>
-                        {/* <th className="px-6 py-3 text-left">NAME</th> */}
+
                         <th className="px-4 py-3 text-left whitespace-nowrap">
                           <div className="flex items-center gap-1 font-semibold text-xs uppercase text-[#6B7280] font-inter">
                             NAME
@@ -340,224 +385,230 @@ const IamAdminUser = () => {
                             <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
                           </div>
                         </th>
-                        {/* <th className="px-2 py-3 text-left">
-                <div className="flex items-center gap-1 font-semibold text-xs uppercase text-[#6B7280] font-inter whitespace-nowrap">
-                CREATED ON
-                  <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
-                </div>
-              </th> */}
 
-                        {/* <th className="px-2 py-3 text-left font-semibold text-xs uppercase text-[#6B7280] font-inter">STATUS</th> */}
+
                         <th className="px-2 py-3 text-left font-semibold text-xs uppercase text-[#6B7280] font-inter">ACTIONS</th>
                       </tr>
                     </thead>
 
                     <tbody>
-                        {loading ? (
-    <TableSkeleton />
-                        ) :
-                      filteredAgents?.length > 0 ? (
-                        filteredAgents.map((user, index) => (
-                          <tr
-                            // key={index}
-                            key={user.agentId}
-                            className="border-b last:border-0 hover:bg-gray-50 border-gray-300"
-                          >
-                            {/* <td className="px-4 py-1 text-left font-semibold text-xs whitespace-nowrap text-blue-700">
-                              {user?.fullName}
-                            </td> */}
+                      {loading ? (
+                        <TableSkeleton />
+                      ) :
+                        filteredAgents?.length > 0 ? (
+                          filteredAgents.map((user, index) => (
+                            <tr
 
-                            <td
-                              onClick={() => navigate(`/iam-user/${user.agentId}`)}
-                              className="px-4 py-1 text-left font-semibold text-xs whitespace-nowrap text-blue-700 cursor-pointer hover:underline"
+                              key={user.agentId}
+                              className="border-b last:border-0 hover:bg-gray-50 border-gray-300"
                             >
-                              {user?.fullName}
-                            </td>
 
-                            <td className="px-2 py-1 text-left font-semibold text-xs whitespace-nowrap">
-                              {user?.email}
-                            </td>
 
-                            <td className="px-2 py-1 text-left font-semibold text-xs whitespace-nowrap">
-                              {user?.roleName || "N/A"}
-                            </td>
-
-                            <td className="px-2 py-1 text-left font-semibold text-xs whitespace-nowrap">
-                              {user?.lastActiveDate} {user?.lastActiveTime}
-                            </td>
-
-                            {/* <td className="px-2 py-2 text-left font-medium text-xs whitespace-nowrap">
-                {user?.createdDate || "-"}
-              </td> */}
-
-                            {/* <td className="px-2 py-4">
-                <span className="flex items-center gap-2 text-green-600 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  Active
-                </span>
-              </td> */}
-
-                            {/* <td
-                              className="px-1 py-4 text-gray-500 cursor-pointer"
-                            onClick={() => handleDeactivate(user.agentId)}
-                            >
-                              ⋮
-                            </td> */}
-                            {/* <td className="px-1 py-4  relative">
-
-                              <span
-                                className="cursor-pointer"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setMenuOpen(menuOpen === user.agentId ? null : user.agentId);
-                                }}
+                              <td
+                                onClick={() => navigate(`/iam-user/${user.agentId}`)}
+                                className="px-4 py-1 text-left font-semibold text-xs whitespace-nowrap text-blue-700 cursor-pointer hover:underline"
                               >
-                                ⋮
-                              </span>
+                                {user?.fullName || "N/A"}
+                              </td>
 
-                              {menuOpen === user.agentId && (
-                                <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                              <td className="px-2 py-1 text-left font-semibold text-xs whitespace-nowrap">
+                                {user?.email}
+                              </td>
 
-                                  <button
-                                    onClick={() => {
-                                      setSelectedUser(user);
-                                      setConfirmOpen(true);
-                                      setMenuOpen(null);
-                                    }}
-                                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                  >
-                                    Deactivate
-                                  </button>
+                              <td className="px-2 py-1 text-left font-semibold text-xs whitespace-nowrap">
+                                {user?.roleName || "N/A"}
+                              </td>
 
-                                </div>
-                              )}
+                              <td className="px-2 py-1 text-left font-semibold text-xs whitespace-nowrap">
+                                {user?.lastActiveDate && user?.lastActiveTime
+                                  ? `${user.lastActiveDate} ${user.lastActiveTime}`
+                                  : "N/A"}
+                              </td>
 
-                            </td> */}
-                            <td className="px-1 py-4 relative">
-                              <span
-                                className="cursor-pointer"
-                                onClick={(e) => {
-                                  e.stopPropagation();
 
-                                  const rect = e.currentTarget.getBoundingClientRect();
-                                  const spaceBelow = window.innerHeight - rect.bottom;
-                                  const dropdownHeight = 120; // approx height
 
-                                  const openUp = spaceBelow < dropdownHeight;
 
-                                  setDropdownPosition({
-                                    top: openUp
-                                      ? rect.top + window.scrollY - dropdownHeight
-                                      : rect.bottom + window.scrollY,
-                                    left: rect.right - 140 // adjust width
-                                  });
 
-                                  setMenuOpen(menuOpen === user.agentId ? null : user.agentId);
-                                }}
-                              >
-                                ⋮
-                              </span>
+                              <td className="px-1 py-4 relative">
+                                <span
+                                  className="cursor-pointer"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
 
-                              {menuOpen === user.agentId && (
-                                <div
-                                  className="fixed w-36 bg-white border rounded-lg shadow-lg z-[9999]"
-                                  style={{
-                                    top: dropdownPosition.top,
-                                    left: dropdownPosition.left
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    const spaceBelow = window.innerHeight - rect.bottom;
+                                    const dropdownHeight = 120;
+
+                                    const openUp = spaceBelow < dropdownHeight;
+
+                                    setDropdownPosition({
+                                      top: openUp
+                                        ? rect.top + window.scrollY - dropdownHeight
+                                        : rect.bottom + window.scrollY,
+                                      left: rect.right - 140
+                                    });
+
+                                    setMenuOpen(menuOpen === user.agentId ? null : user.agentId);
                                   }}
                                 >
+                                  ⋮
+                                </span>
 
-
-                                  {status !== "INACTIVE" ? (
-                                    <button
-                                      onClick={() => {
-                                        setSelectedUser(user);
-                                        setConfirmOpen(true);
-                                        setMenuOpen(null);
-                                      }}
-                                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                    >
-                                      Deactivate
-                                    </button>
-                                  ) : (
-                                    /* INACTIVE → show reactivate */
-                                    // <button
-                                    //   onClick={async () => {
-                                    //     const res = await reactivateAgent(user.agentId);
-
-                                    //     if (res.success) {
-                                    //       alert(res.message);
-                                    //     } else {
-                                    //       alert(res.message);
-                                    //     }
-
-                                    //     setMenuOpen(null);
-                                    //   }}
-                                    //   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
-                                    // >
-                                    //   Reactivate
-                                    // </button>
-                                    <button
-                                      onClick={() => {
-                                        setSelectedUser(user);
-                                        setShowReactivateModal(true);
-                                        setMenuOpen(null);
-                                      }}
-                                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
-                                    >
-                                      Reactivate
-                                    </button>
-                                  )}
-                                  <button
-                                    onClick={() => handleOpenDetails(user)}
-                                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600 cursor-pointer"
-                                  >
-                                    View Details
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      setSelectedUser(user);
-                                      setSelectedRoleId(user.roleId); // current role set
-                                      setShowEditModal(true);
-                                      setMenuOpen(null);
+                                {menuOpen === user.agentId && (
+                                  <div
+                                    className="fixed w-36 bg-white border rounded-lg shadow-lg z-[9999]"
+                                    style={{
+                                      top: dropdownPosition.top,
+                                      left: dropdownPosition.left
                                     }}
-                                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                                   >
-                                    Edit
-                                  </button>
 
 
-                                </div>
+                                    {status !== "INACTIVE" ? (
+                                      <button
+                                        onClick={() => {
+                                          setSelectedUser(user);
+                                          setConfirmOpen(true);
+                                          setMenuOpen(null);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                      >
+                                        Deactivate
+                                      </button>
+                                    ) : (
 
-                              )}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        !loading && (
-                          <tr>
-                            <td colSpan="7" className="text-center py-6 text-gray-400">
-                              No Admin Found
-                            </td>
-                          </tr>
-                        )
-                      )}
+
+                                      <button
+                                        onClick={() => {
+                                          setSelectedUser(user);
+                                          setShowReactivateModal(true);
+                                          setMenuOpen(null);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
+                                      >
+                                        Reactivate
+                                      </button>
+                                    )}
+                                    <button
+                                      onClick={() => handleOpenDetails(user)}
+                                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600 cursor-pointer"
+                                    >
+                                      View Details
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setSelectedUser(user);
+                                        setSelectedRoleId(user.roleId);
+                                        setShowEditModal(true);
+                                        setMenuOpen(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                                    >
+                                      Edit
+                                    </button>
+
+
+                                  </div>
+
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          !loading && (
+                            <tr>
+                              <td colSpan="7" className="text-center py-6 text-gray-400">
+                                No Admin Found
+                              </td>
+                            </tr>
+                          )
+                        )}
                     </tbody>
 
                   </table>
+                </div>
+
+
+              </div>
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-4 py-4">
+
+
+                <div className="text-sm font-medium text-gray-700">
+                  Total Record Count :
+                  <span className="text-blue-600 font-semibold ml-1">
+                    {filteredAgents.length || 0}
+                  </span>
+                </div>
+
+
+                <div className="flex items-center gap-4">
+
+
+                  <select
+                    value={agents?.pageSize || 10}
+                    onChange={(e) => {
+                      setPage(1);
+
+                      getAllAgents({
+                        name: search,
+                        isActive: status === "ACTIVE",
+                        page: 0,
+                        size: Number(e.target.value)
+                      });
+                    }}
+                    className="border rounded-md px-2 py-1 text-sm"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+
+                  </select>
+
+
+
+                  <button
+                    disabled={page === 1}
+                    onClick={() => setPage((prev) => prev - 1)}
+                    className={`text-xl
+    ${page === 1
+                        ? "text-gray-300 cursor-not-allowed"
+                        : "text-black cursor-pointer"
+                      }`}
+                  >
+                    ‹
+                  </button>
+
+
+                  <div className="w-12 h-10 border border-black rounded-xl flex items-center justify-center text-sm font-medium">
+                    {page}
+                  </div>
+
+
+                  <button
+                    disabled={page >= agents?.totalPages}
+                    onClick={() => setPage((prev) => prev + 1)}
+                    className={`text-xl
+    ${page >= agents?.totalPages
+                        ? "text-gray-300 cursor-not-allowed"
+                        : "text-black cursor-pointer"
+                      }`}
+                  >
+                    ›
+                  </button>
+
                 </div>
               </div>
             </div>
             {showReactivateModal && (
               <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
-                {/* Overlay */}
+
                 <div
                   className="absolute inset-0 bg-black/30"
                   onClick={() => setShowReactivateModal(false)}
                 ></div>
 
-                {/* Modal Box */}
+
                 <div className="relative bg-white rounded-xl shadow-xl w-[350px] p-5 z-[10000]">
 
                   <h2 className="text-lg font-semibold mb-2">
@@ -570,7 +621,7 @@ const IamAdminUser = () => {
 
                   <div className="flex justify-end gap-2">
 
-                    {/* Cancel */}
+
                     <button
                       onClick={() => setShowReactivateModal(false)}
                       className="px-4 py-2 border rounded-lg text-sm"
@@ -578,26 +629,9 @@ const IamAdminUser = () => {
                       Cancel
                     </button>
 
-                    {/* Confirm */}
+
                     <button
-                      onClick={async () => {
-                        const res = await reactivateAgent(selectedUser.agentId);
-
-                        if (res.success) {
-
-                          setModalType("success");
-                          setMessage(res.message);
-                        } else {
-                          setModalType("error");
-                          setShowSuccess(true);
-                          setMessage(res.message);
-                        }
-                        setShowSuccess(true);
-
-                        setTimeout(() => setShowSuccess(false), 1500);
-
-                        setShowReactivateModal(false);
-                      }}
+                      onClick={handleReactivate}
                       className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
                     >
                       Yes, Reactivate
@@ -628,7 +662,7 @@ const IamAdminUser = () => {
                     Are you sure you want to deactivate this admin user?
                   </p>
 
-                  {/* Buttons */}
+
                   <div className="flex justify-end gap-3">
 
                     <button
@@ -653,130 +687,20 @@ const IamAdminUser = () => {
                 </div>
               </div>
             )}
-            {/* {showDetailsModal && (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
-   
-    <div
-      className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-      onClick={() => setShowDetailsModal(false)}
-    ></div>
-
-  
-    <div className="relative bg-white rounded-2xl shadow-2xl w-[500px] max-h-[90vh] overflow-y-auto p-6 z-[10000]">
-
-     
-      <div className="flex justify-between items-center mb-5 border-b pb-3">
-        <h2 className="text-xl font-semibold">Agent Details</h2>
-        <button
-          onClick={() => setShowDetailsModal(false)}
-          className="text-gray-500 hover:text-black"
-        >
-          ✕
-        </button>
-      </div>
-
-     
-      <div className="flex items-center gap-4 mb-5">
-        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
-          {agentDetails?.initials}
-        </div>
-        <div>
-          <p className="font-semibold text-base">
-            {agentDetails?.fullName}
-          </p>
-          <p className="text-sm text-gray-500">
-            {agentDetails?.roleName}
-          </p>
-        </div>
-      </div>
-
-   
-      <div className="grid grid-cols-2 gap-3 text-sm mb-5">
-
-        <div>
-          <p className="text-gray-500 text-left">Email</p>
-          <p className="font-medium">{agentDetails?.email || "-"}</p>
-        </div>
-
-        <div>
-          <p className="text-gray-500 ">Mobile</p>
-          <p className="font-medium">{agentDetails?.mobile || "-"}</p>
-        </div>
-
-        <div>
-          <p className="text-gray-500 text-left">Created By</p>
-          <p className="font-medium text-left">{agentDetails?.createdBy || "-"}</p>
-        </div>
-
-        <div>
-          <p className="text-gray-500 text-left">Created Date</p>
-          <p className="font-medium text-left">
-            {agentDetails?.createdAtDate} {agentDetails?.createdAtTime}
-          </p>
-        </div>
-
-      </div>
-
-   
-      <div>
-        <h3 className="font-semibold mb-3 text-left">Recent Activities</h3>
-
-        <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2">
-
-          {agentDetails?.agentActivities?.length > 0 ? (
-            agentDetails.agentActivities.map((activity, index) => (
-              <div
-                key={index}
-                className="border rounded-lg p-3 flex justify-between items-center"
-              >
-                <div>
-                  <p className="font-medium text-sm">
-                    {activity.activityType}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {activity.description}
-                  </p>
-                </div>
-
-                <div className="text-xs text-gray-400 text-right">
-                  <p>{activity.createdAtDate}</p>
-                  <p>{activity.createdAtTime}</p>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-sm">No activities found</p>
-          )}
-
-        </div>
-      </div>
-
-      <div className="mt-6 text-right">
-        <button
-          onClick={() => setShowDetailsModal(false)}
-          className="px-5 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm"
-        >
-          Close
-        </button>
-      </div>
-
-    </div>
-  </div>
-)} */}
             {showDetailsModal && (
               <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
-                {/* Overlay */}
+
                 <div
                   className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                   onClick={() => setShowDetailsModal(false)}
                 ></div>
 
-                {/* Modal */}
+
                 <div className="relative bg-white rounded-2xl shadow-2xl w-[520px] max-h-[90vh] overflow-y-auto z-[10000]">
 
-                  {/* Header */}
+
                   <div className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-2xl">
                     <h2 className="text-lg font-semibold">Agent Details</h2>
                     <button
@@ -789,7 +713,7 @@ const IamAdminUser = () => {
 
                   <div className="p-6">
 
-                    {/* Profile */}
+
                     <div className="flex items-center gap-4 mb-6">
 
                       <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
@@ -807,7 +731,7 @@ const IamAdminUser = () => {
 
                     </div>
 
-                    {/* Info Grid */}
+
                     <div className="grid grid-cols-2 gap-4 text-sm mb-6">
 
                       <div className="bg-blue-50 rounded-xl p-3">
@@ -843,7 +767,7 @@ const IamAdminUser = () => {
 
                     </div>
 
-                    {/* Activities */}
+
                     <div>
                       <h3 className="font-semibold mb-3 text-gray-800">
                         Recent Activities
@@ -881,7 +805,7 @@ const IamAdminUser = () => {
                       </div>
                     </div>
 
-                    {/* Footer */}
+
                     <div className="mt-6 text-right">
                       <button
                         onClick={() => setShowDetailsModal(false)}
@@ -896,14 +820,21 @@ const IamAdminUser = () => {
               </div>
             )}
           </div>
-          <AddAdmin isOpen={open} onClose={() => setOpen(false)} />
+          <AddAdmin isOpen={open} onClose={() => setOpen(false)} refreshList={() =>
+            getAllAgents({
+              name: search,
+              isActive: status === "ACTIVE",
+              page,
+              size: 10
+            })
+          } />
 
         </>
       )}
       {showEditModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
-          {/* Overlay */}
+
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => {
@@ -913,55 +844,86 @@ const IamAdminUser = () => {
             }}
           ></div>
 
-          {/* Modal */}
+
           <div
-            className="bg-white rounded-xl shadow-xl w-[350px] p-5 z-[10000]"
+            className="bg-white rounded-xl shadow-xl w-[320px] p-4 z-[10000]"
             onClick={(e) => e.stopPropagation()}
           >
 
-            <h2 className="text-lg font-semibold mb-4 text-left">
+            <h2 className="text-[15px] font-semibold mb-3 text-left">
               Edit Role
             </h2>
 
-            {/* DROPDOWN */}
-            <select
-              value={selectedRoleId}
-              onChange={(e) => {
-                setSelectedRoleId(e.target.value);
-                setRoleError("");
-              }}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4"
-            >
-              <option value="">Select Role</option>
 
-              {agentRoles?.map((role) => (
-                <option key={role.id} value={role.id}>
-                  {role.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative w-full mb-3">
+
+
+              <div
+                onClick={() => setOpenRoleDropdown(!openRoleDropdown)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[12px] font-medium cursor-pointer flex items-center justify-between bg-white"
+              >
+                <span>
+                  {selectedRoleId
+                    ? agentRoles.find(
+                      (r) => r.id === Number(selectedRoleId)
+                    )?.name
+                    : "Select Role"}
+                </span>
+
+                <span className="text-gray-500 text-xs">▼</span>
+              </div>
+
+
+              {openRoleDropdown && (
+                <div className="absolute z-[9999] mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-[140px] overflow-y-auto">
+
+                  {agentRoles?.map((role) => (
+                    <div
+                      key={role.id}
+                      onClick={() => {
+                        setSelectedRoleId(role.id);
+                        setRoleError("");
+                        setOpenRoleDropdown(false);
+                      }}
+                      className={`px-3 py-2 text-[12px] cursor-pointer hover:bg-blue-50
+            ${Number(selectedRoleId) === role.id
+                          ? "bg-blue-100 text-blue-600 font-medium"
+                          : ""
+                        }`}
+                    >
+                      {role.name}
+                    </div>
+                  ))}
+
+                </div>
+              )}
+            </div>
+
             {roleError && (
               <ErrorMessage message={roleError} type="error" />
             )}
-            {/* Buttons */}
-            <div className="flex justify-end gap-3">
+
+
+            <div className="flex justify-end gap-2 mt-3">
+
               <button
                 onClick={() => {
                   setShowEditModal(false);
                   setRoleError("");
                   setSelectedRoleId("");
                 }}
-                className="px-4 py-2 border rounded-lg cursor-pointer"
+                className="px-3 py-1.5 border rounded-lg text-[12px] cursor-pointer"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleUpdateRole}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
+                className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[12px] cursor-pointer"
               >
                 Save
               </button>
+
             </div>
 
           </div>

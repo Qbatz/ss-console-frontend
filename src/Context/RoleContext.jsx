@@ -256,28 +256,81 @@ const getAdminDetails = async () => {
     setLoading(false);
   }
 };
-const getAllAgents = async () => {
+const getAllAgents = async ({
+  name = "",
+  isActive = true,
+  roleId = "",
+  page = 1,
+  size = 10
+} = {}) => {
+
   try {
+
     setLoading(true);
     setErrorMsg("");
 
-    const res = await api.get("/v2/admin/get-all-agents");
+    const res = await api.get("/v2/admin/get-all-agents", {
+      params: {
+        name,
+        isActive,
+        roleId: roleId || undefined,
+        page,
+        size
+      }
+    });
 
     if (res.status === 200) {
+
       setAgents(res.data || []);
-      return { success: true, data: res.data };
+
+      return {
+        success: true,
+        data: res.data
+      };
     }
 
     return { success: false };
+
   } catch (error) {
+
     const msg = getErrorMessage(error);
+
     setErrorMsg(msg);
-    setAccessError(msg)
-    return { success: false, message: msg };
+    setAccessError(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
   } finally {
+
     setLoading(false);
+
   }
 };
+// const getAllAgents = async () => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await api.get("/v2/admin/get-all-agents");
+
+//     if (res.status === 200) {
+//       setAgents(res.data || []);
+//       return { success: true, data: res.data };
+//     }
+
+//     return { success: false };
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+//     setErrorMsg(msg);
+//     setAccessError(msg)
+//     return { success: false, message: msg };
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 const deactivateAgent = async (agentId) => {
   try {
     setLoading(true);
@@ -389,6 +442,34 @@ const updateAdminRole = async (agentId, payload) => {
     setLoading(false);
   }
 };
+const getAgentRoleDropdown = async () => {
+  try {
+    setLoading(true);
+
+    const res = await api.get("/v2/agent-role/dropdown");
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data || []
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <RoleContext.Provider
@@ -401,7 +482,7 @@ const updateAdminRole = async (agentId, payload) => {
         fetchModules,
         getAgentRoles,createAgentRole,createAdmin,
         updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError,deactivateAgent, adminPermissions,
-        assignStaff,reactivateAgent,getAgentDetails,updateAdminRole
+        assignStaff,reactivateAgent,getAgentDetails,updateAdminRole,getAgentRoleDropdown
       }}
     >
       {children}

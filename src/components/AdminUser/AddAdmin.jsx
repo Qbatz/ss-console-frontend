@@ -5,7 +5,7 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 
 
-const AddAdmin = ({ isOpen, onClose }) => {
+const AddAdmin = ({ isOpen, onClose,refreshList }) => {
   const { agentRoles, getAgentRoles, createAdmin } = useRole();
 
   useEffect(() => {
@@ -90,7 +90,7 @@ const AddAdmin = ({ isOpen, onClose }) => {
     const res = await createAdmin(payload);
 
     if (res.success) {
-
+ await refreshList();
       setModalType("success");
       setMessage(res?.message);
       setShowSuccess(true);
@@ -251,7 +251,7 @@ const AddAdmin = ({ isOpen, onClose }) => {
               Cancel
             </button>
 
-            <button className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700" onClick={handleAddUser}>
+            <button className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 cursor-pointer" onClick={handleAddUser}>
               Add User
             </button>
           </div>
