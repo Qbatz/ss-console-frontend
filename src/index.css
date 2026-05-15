@@ -32,9 +32,20 @@ body,
   overflow: hidden;
 }
 /* Tailwind theme */
+/* @theme {
+  --font-gilroy: "Gilroy", sans-serif;
+
+  --color-ss-blue: oklch(0.4818 0.2377 265.7);
+  --color-ss-white: oklch(1 0 0);
+} */
 @theme {
   --font-gilroy: "Gilroy", sans-serif;
 
   --color-ss-blue: oklch(0.4818 0.2377 265.7);
   --color-ss-white: oklch(1 0 0);
+
+ --color-bg-soft: #F6F8FC;
+--color-border-soft: #E6E8F0;
+--color-text-dark: #1D1D1D;
+--color-primary-btn: #2563EB;
 }

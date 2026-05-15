@@ -82,15 +82,13 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
     }
   }, [selectedRole]);
 
+const handlePermissionChange = (moduleId, field, value) => {
+  setPermissions((prev) => {
+    const existing = prev.find((p) => p.moduleId === moduleId);
 
-
-  const handlePermissionChange = (moduleId, field, value) => {
-    setPermissions((prev) => {
-      const existing = prev.find((p) => p.moduleId === moduleId);
-
-      let updatedPermission = existing
-        ? { ...existing }
-        : {
+    let updatedPermission = existing
+      ? { ...existing }
+      : {
           moduleId,
           canRead: false,
           canWrite: false,
@@ -98,40 +96,82 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
           canDelete: false,
         };
 
-      updatedPermission[field] = value;
+    updatedPermission[field] = value;
 
-      // Rule 1: if Add/Edit/Delete checked → auto enable View
-      if (
-        (field === "canUpdate" || field === "canDelete") &&
-        value === true
-      ) {
-        updatedPermission.canRead = true;
-      }
+    // auto enable view
+    if (
+      (field === "canWrite" ||
+        field === "canUpdate" ||
+        field === "canDelete") &&
+      value === true
+    ) {
+      updatedPermission.canRead = true;
+    }
 
-      // Rule 2: if View unchecked → disable all
-      if (field === "canRead" && value === false) {
-        updatedPermission.canWrite = false;
-        updatedPermission.canUpdate = false;
-        updatedPermission.canDelete = false;
-      }
+    // if view unchecked -> disable all
+    if (field === "canRead" && value === false) {
+      updatedPermission.canWrite = false;
+      updatedPermission.canUpdate = false;
+      updatedPermission.canDelete = false;
+    }
 
-      const newPermissions = [
-        ...prev.filter((p) => p.moduleId !== moduleId),
-        updatedPermission,
-      ];
+    return [
+      ...prev.filter((p) => p.moduleId !== moduleId),
+      updatedPermission,
+    ];
+  });
 
-      // 🔥 VERY IMPORTANT
-      // Remove module if all permissions are false
-      return newPermissions.filter(
-        (p) =>
-          p.canRead ||
-          p.canWrite ||
-          p.canUpdate ||
-          p.canDelete
-      );
-    });
-    setPermissionError("")
-  };
+  setPermissionError("");
+};
+
+  // const handlePermissionChange = (moduleId, field, value) => {
+  //   setPermissions((prev) => {
+  //     const existing = prev.find((p) => p.moduleId === moduleId);
+
+  //     let updatedPermission = existing
+  //       ? { ...existing }
+  //       : {
+  //         moduleId,
+  //         canRead: false,
+  //         canWrite: false,
+  //         canUpdate: false,
+  //         canDelete: false,
+  //       };
+
+  //     updatedPermission[field] = value;
+
+  //     // Rule 1: if Add/Edit/Delete checked → auto enable View
+  //     if (
+  //       (field === "canUpdate" || field === "canDelete") &&
+  //       value === true
+  //     ) {
+  //       updatedPermission.canRead = true;
+  //     }
+
+  //     // Rule 2: if View unchecked → disable all
+  //     if (field === "canRead" && value === false) {
+  //       updatedPermission.canWrite = false;
+  //       updatedPermission.canUpdate = false;
+  //       updatedPermission.canDelete = false;
+  //     }
+
+  //     const newPermissions = [
+  //       ...prev.filter((p) => p.moduleId !== moduleId),
+  //       updatedPermission,
+  //     ];
+
+  //     // 🔥 VERY IMPORTANT
+  //     // Remove module if all permissions are false
+  //     return newPermissions.filter(
+  //       (p) =>
+  //         p.canRead ||
+  //         p.canWrite ||
+  //         p.canUpdate ||
+  //         p.canDelete
+  //     );
+  //   });
+  //   setPermissionError("")
+  // };
 
 
   // const handlePermissionChange = (moduleId, field, value) => {
