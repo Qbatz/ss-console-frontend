@@ -80,7 +80,8 @@ const PrivateRoutesScreen = () => {
                   <Routes>
                     <Route path="/home/:roleId" element={<Home />} />
                     <Route path="/proprietors/:roleId" element={<Proprietors />} />
-                    <Route path="/iam-admin-user/:roleId" element={<IamAdminUser />} />
+                    {/* <Route path="/iam-admin-user/:roleId" element={<IamAdminUser />} /> */}
+                    <Route path="/iam-admin-user/:adminRoleId/:filterRoleId?" element={<IamAdminUser />} />
                     <Route path="/roles/:roleId" element={<Roles />} />
                     <Route path="/properties/:roleId" element={<Properties />} />
                     <Route path="/subscription/:roleId" element={<Subscription />} />

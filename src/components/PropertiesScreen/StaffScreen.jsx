@@ -28,13 +28,14 @@ const StaffScreen = ({ hostelData, refreshHostel, }) => {
   // ];
   const mastersList = [
     {
-      fullName: owner?.fullName,
-      email: owner?.emailId,
-      mobileNo: owner?.mobileNo,
-      updatedAt: "—",
-      userId: owner?.userId,
-      isOwner: true,
-    },
+  fullName: owner?.fullName,
+  email: owner?.emailId,
+  mobileNo: owner?.mobileNo,
+  updatedAt: "—",
+  userId: owner?.userId,
+  isOwner: true,
+  tableColumns: owner?.tableColumns || [],
+},
     ...(masters || []).map(m => ({
       ...m,
       email: m.email || m.emailId // 🔥 normalize

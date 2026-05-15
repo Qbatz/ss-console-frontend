@@ -7,9 +7,10 @@ import Team from "../../assets/Team.png";
 import Edit from "../../assets/editicon.png";
 import Trash from "../../assets/trash.png";
 import LoginImg from "../../assets/LoginImg.png";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const Roles = () => {
-  const { agentRoles, getAgentRoles, getAgentRoleById, loading, deleteAgentRole, errorMsg, accessError } = useRole();
+  const { agentRoles, getAgentRoles, getAgentRoleById, loading, deleteAgentRole, errorMsg, accessError,adminDetails } = useRole();
   console.log("agentRoles", agentRoles)
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
@@ -20,6 +21,7 @@ const Roles = () => {
   const totalPages = Math.ceil(totalRecords / pageSize);
   const [deleteRole, setDeleteRole] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const navigate = useNavigate();
 
   console.log("accessError", accessError)
   useEffect(() => {
@@ -153,11 +155,22 @@ const Roles = () => {
                             {role.description || "N/A"}
                           </td>
 
-                          <td className="px-4 py-3 text-center">
+                          {/* <td className="px-4 py-3 text-center">
                             <span className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-xs">
                               <img src={Team} alt="Team" className="w-4 h-4" /> {role.userCount}
                             </span>
-                          </td>
+                          </td> */}
+                          <td className="px-4 py-3 text-center">
+  <span
+    onClick={() =>
+     navigate(`/iam-admin-user/${adminDetails?.roleId}/${role.id}`)
+    }
+    className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-xs cursor-pointer hover:bg-blue-100"
+  >
+    <img src={Team} alt="Team" className="w-4 h-4" />
+    {role.userCount}
+  </span>
+</td>
 
                           <td className="px-4 py-3 text-black-600">
                             {role.created || "N/A"}

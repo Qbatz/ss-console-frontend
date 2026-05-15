@@ -257,16 +257,7 @@ const UpdateStatusModal = ({ open, onClose, demoRequestId, refreshList, currentS
                 {filteredStatuses.map((item) => (
                   <div
                     key={item.key}
-                    // onClick={() => {
-                    //   setSelectedStatus(item.key);
-
-                    //   setForm({
-                    //     ...form,
-                    //     demoRequestStatus: item.key
-                    //   });
-
-                    //   setOpenStatus(false);
-                    // }}
+                 
                     onClick={() => {
 
                       let updatedForm = {

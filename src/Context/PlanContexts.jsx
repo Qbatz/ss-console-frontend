@@ -183,13 +183,39 @@ const getPlansDropdown = async () => {
     setLoading(false);
   }
 };
+const reactivatePlan = async (planId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.put(
+      `/v2/plans/reactivate-plan/${planId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data || "Plan reactivated successfully",
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+    return { success: false, message: msg };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <PlanContext.Provider
       value={{
         plans,
         loading,
         errorMsg,
-        getPlans,createPlan,updatePlan,deactivatePlan,deactivatePlanFeature,addPlanFeature,accessError,getPlansDropdown
+        getPlans,createPlan,updatePlan,deactivatePlan,deactivatePlanFeature,addPlanFeature,accessError,
+        getPlansDropdown,reactivatePlan
       }}
     >
       {children}
