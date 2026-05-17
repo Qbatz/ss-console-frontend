@@ -35,7 +35,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
               Current
             </h3>
 
-            <div className="bg-white border border-[#E6E8F0] rounded-xl overflow-hidden">
+           <div className="bg-white border border-[#E6E8F0] rounded-xl overflow-x-auto">
 
               <table className="w-full text-sm">
 
@@ -50,54 +50,67 @@ const OverviewSubscriptions = ({ hostelData }) => {
                     <th className="px-4 py-3 text-right font-semibold text-[12px] uppercase text-[#6B7280] font-sans">ACTIONS</th>
                   </tr> */}
                   <tr>
-                    <th className="px-4 py-3 text-left">
+                    <th className="px-4 py-3 text-left whitespace-nowrap">
                       <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
                         SUB PLAN
                         <img src={swap} className="w-3 h-3 opacity-70" />
                       </div>
                     </th>
 
-                    <th className="px-4 py-3 text-left">
+                    <th className="px-4 py-3 text-left whitespace-nowrap">
                       <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
                         BILLING CYCLE
                         <img src={swap} className="w-3 h-3 opacity-70" />
                       </div>
                     </th>
 
-                    <th className="px-4 py-3 text-left">
+                    <th className="px-4 py-3 text-left whitespace-nowrap">
                       <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                        AMOUNT
+                        PLAN AMOUNT
                         <img src={swap} className="w-3 h-3 opacity-70" />
                       </div>
                     </th>
-
-                    <th className="px-4 py-3 text-left">
+ <th className="px-4 py-3 text-left whitespace-nowrap">
+                      <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
+                        PAID AMOUNT
+                        <img src={swap} className="w-3 h-3 opacity-70" />
+                      </div>
+                      
+                    </th>
+                     <th className="px-4 py-3 text-left whitespace-nowrap">
+                      <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
+                        DISCOUNT AMOUNT
+                        <img src={swap} className="w-3 h-3 opacity-70" />
+                      </div>
+                      
+                    </th>
+                    <th className="px-4 py-3 text-left whitespace-nowrap">
                       <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
                         DUE DATE
                         <img src={swap} className="w-3 h-3 opacity-70" />
                       </div>
                     </th>
 
-                    <th className="px-4 py-3 text-left">
+                    {/* <th className="px-4 py-3 text-left whitespace-nowrap">
                       <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
                         STATEMENTS
                         <img src={swap} className="w-3 h-3 opacity-70" />
                       </div>
-                    </th>
+                    </th> */}
 
-                    <th className="px-4 py-3 text-left">
+                    <th className="px-4 py-3 text-left whitespace-nowrap">
                       <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
                         RENEWAL STATUS
                         <img src={swap} className="w-3 h-3 opacity-70" />
                       </div>
                     </th>
 
-                    <th className="px-4 py-3 text-right">
+                    {/* <th className="px-4 py-3 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
                         ACTIONS
                         <img src={swap} className="w-3 h-3 opacity-70" />
                       </div>
-                    </th>
+                    </th> */}
                   </tr>
                 </thead>
 
@@ -121,27 +134,33 @@ const OverviewSubscriptions = ({ hostelData }) => {
                   {currentSub ? (
                     <tr className="hover:bg-gray-50">
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                         {currentSub.planName || "N/A"}
                       </td>
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                         {currentSub.planStartsAt} - {currentSub.planEndsAt}
                       </td>
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                         ₹ {currentSub.planAmount ?? 0}
                       </td>
+                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                        ₹ {currentSub.paidAmount ?? 0}
+                      </td>
+                       <td className="px-4 py-2 text-left font-medium text-[12px]">
+                        ₹ {currentSub.discountAmount ?? 0}
+                      </td>
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap" >
                         {currentSub.planEndsAt || "N/A"}
                       </td>
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+                      {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                         ---
-                      </td>
+                      </td> */}
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                         <span
                           className={`px-2 py-0.5 rounded-full text-xs font-medium ${hostelData?.subscriptionStatus?.toLowerCase() === "active"
                             ? "bg-green-100 text-green-700"
@@ -152,9 +171,9 @@ const OverviewSubscriptions = ({ hostelData }) => {
                         </span>
                       </td>
 
-                      <td className="px-4 py-2 text-center font-medium text-[12px]">
+                      {/* <td className="px-4 py-2 text-center font-medium text-[12px]">
                         ⋮
-                      </td>
+                      </td> */}
 
                     </tr>
                   ) : (
@@ -178,7 +197,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
               History
             </h3>
 
-            <div className="bg-white border border-[#E6E8F0] rounded-xl overflow-hidden">
+            <div className="bg-white border border-[#E6E8F0] rounded-xl overflow-x-auto">
 
 
               <div className="max-h-[320px] overflow-y-auto">
@@ -196,88 +215,106 @@ const OverviewSubscriptions = ({ hostelData }) => {
                       <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">ACTIONS</th>
                     </tr> */}
                     <tr>
-                      <th className="px-4 py-3 text-left">
+                      <th className="px-4 py-3 text-left whitespace-nowrap">
                         <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
                           SUB PLAN
                           <img src={swap} className="w-3 h-3 opacity-70" />
                         </div>
                       </th>
 
-                      <th className="px-4 py-3 text-left">
+                      <th className="px-4 py-3 text-left whitespace-nowrap">
                         <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
                           BILLING CYCLE
                           <img src={swap} className="w-3 h-3 opacity-70" />
                         </div>
                       </th>
 
-                      <th className="px-4 py-3 text-left">
+                      <th className="px-4 py-3 text-left whitespace-nowrap">
                         <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                          AMOUNT
+                         PLAN AMOUNT
+                          <img src={swap} className="w-3 h-3 opacity-70" />
+                        </div>
+                      </th>
+                       <th className="px-4 py-3 text-left whitespace-nowrap">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
+                         PAID AMOUNT
+                          <img src={swap} className="w-3 h-3 opacity-70" />
+                        </div>
+                      </th>
+                        <th className="px-4 py-3 text-left whitespace-nowrap">
+                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
+                         DISCOUNT AMOUNT
                           <img src={swap} className="w-3 h-3 opacity-70" />
                         </div>
                       </th>
 
-                      <th className="px-4 py-3 text-left">
+                      <th className="px-4 py-3 text-left whitespace-nowrap">
                         <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
                           DUE DATE
                           <img src={swap} className="w-3 h-3 opacity-70" />
                         </div>
                       </th>
 
-                      <th className="px-4 py-3 text-left">
+                      {/* <th className="px-4 py-3 text-left whitespace-nowrap">
                         <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
                           STATEMENTS
                           <img src={swap} className="w-3 h-3 opacity-70" />
                         </div>
-                      </th>
+                      </th> */}
 
-                      <th className="px-4 py-3 text-left">
+                      {/* <th className="px-4 py-3 text-left whitespace-nowrap">
                         <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
                           RENEWAL STATUS
                           <img src={swap} className="w-3 h-3 opacity-70" />
                         </div>
-                      </th>
+                      </th> */}
 
-                      <th className="px-4 py-3 text-right">
+                      {/* <th className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
                           ACTIONS
                           <img src={swap} className="w-3 h-3 opacity-70" />
                         </div>
-                      </th>
+                      </th> */}
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-gray-200">
 
                     {hostelData?.subscriptions && hostelData.subscriptions.length > 0 ? (
                       hostelData.subscriptions.map((sub) => (
                         <tr key={sub.subscriptionId} className="hover:bg-gray-50">
 
-                          <td className="px-4 py-3">{sub.planName || "N/A"}</td>
+                          <td className="px-4 py-3 whitespace-nowrap">{sub.planName || "N/A"}</td>
 
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 whitespace-nowrap">
                             {sub.planStartsAt || "N/A"} - {sub.planEndsAt || "N/A"}
                           </td>
 
-                          <td className="px-4 py-2 text-left font-medium text-[12px]">
+                          <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                             ₹ {sub.planAmount ?? 0}
                           </td>
+                          <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                            ₹ {sub.paidAmount ?? 0}
+                          </td>
+                          <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                            ₹ {sub.discountAmount ?? 0}
+                          </td>
 
-                          <td className="px-4 py-2 text-left font-medium text-[12px]">
+                          <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                             {sub.planEndsAt || "N/A"}
                           </td>
 
-                          <td className="px-4 py-2 text-left font-medium text-[12px]">
+                          {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                             ---
-                          </td>
+                          </td> */}
 
-                          <td className="px-4 py-2 text-left font-medium text-[12px]">
+                          {/* <td className="px-4 py-2 text-left font-medium text-[12px]">
                             Active
-                          </td>
+                          </td> */}
 
-                          <td className="px-4 py-2 text-center font-medium text-[12px]">
+                          {/* <td className="px-4 py-2 text-center font-medium text-[12px]">
                             ⋮
-                          </td>
+                          </td> */}
 
                         </tr>
                       ))

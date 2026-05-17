@@ -13,7 +13,7 @@ import Arrow from "../../assets/direction-down 01.png"
 
 const Proprietors = () => {
 
-  const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById, updateOwnerMobile, deleteOwner,ownerCount,activeCount } = useOwners();
+  const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById, updateOwnerMobile, deleteOwner,ownerCount,activeCount ,changeOwnerPassword } = useOwners();
   const navigate = useNavigate();
  
   const { canRead, canWrite, canUpdate, canDelete } =
@@ -40,7 +40,24 @@ const [propertyFilter, setPropertyFilter] = useState("ALL");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  const [menuPosition, setMenuPosition] = useState({
+  top: 0,
+  left: 0,
+});
+const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
 
+const [newPassword, setNewPassword] = useState("");
+const [confirmPassword, setConfirmPassword] = useState("");
+
+const [newPasswordError, setNewPasswordError] = useState("");
+const [confirmPasswordError, setConfirmPasswordError] = useState("");
+const [finalError, setFinalError] = useState("");
+
+const [showNewPassword, setShowNewPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const [modalType, setModalType] = useState("success");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [message, setMessage] = useState("");
 
   console.log("owners", owners)
 
@@ -56,7 +73,7 @@ const [propertyFilter, setPropertyFilter] = useState("ALL");
  
   useEffect(() => {
 
-  // 🔥 back வந்தா reset pannum
+  
   if (isBackNavigation) {
     setPage(1);
     setSize(10);
@@ -93,7 +110,58 @@ const [propertyFilter, setPropertyFilter] = useState("ALL");
 
 }, [page, size, debouncedSearch, sortBy, direction, filterType]);
 
+const handleResetPassword = async () => {
 
+  let hasError = false;
+
+  setNewPasswordError("");
+  setConfirmPasswordError("");
+  setFinalError("");
+
+  if (!newPassword) {
+    setNewPasswordError("Please enter new password");
+    hasError = true;
+  }
+
+  if (!confirmPassword) {
+    setConfirmPasswordError("Please enter confirm password");
+    hasError = true;
+  }
+
+  if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+    setFinalError("Password mismatch");
+    hasError = true;
+  }
+
+  if (hasError) return;
+
+  const res = await changeOwnerPassword({
+    userId: selectedOwner?.ownerId,
+    password: newPassword,
+    confirmPassword: confirmPassword,
+  });
+
+  if (res.success) {
+
+    setModalType("success");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+    setShowResetPasswordModal(false);
+
+    setNewPassword("");
+    setConfirmPassword("");
+
+  } else {
+
+    setFinalError(res.message);
+
+  }
+};
 
 useEffect(() => {
   const handleClickOutside = (event) => {
@@ -288,7 +356,11 @@ const getFilterParams = () => {
   };
   return (
     <DashboardLayout>
-
+ <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
+      />
       {(canRead === false || accessError === "Access Restricted") ? (
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
@@ -611,18 +683,32 @@ const getFilterParams = () => {
                         <td className="px-4 py-1 relative">
 
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenMenuId(
-                                openMenuId === item.ownerId ? null : item.ownerId
-                              );
-                            }}
+                           onClick={(e) => {
+  e.stopPropagation();
+
+  const rect = e.currentTarget.getBoundingClientRect();
+
+  setMenuPosition({
+    top: rect.bottom + 5,
+    left: rect.right - 120,
+  });
+
+  setOpenMenuId(
+    openMenuId === item.ownerId ? null : item.ownerId
+  );
+}}
                           >
                             <img src={Menucircle} className="w-5 h-5 cursor-pointer" />
                           </button>
 
                           {openMenuId === item.ownerId && (
-                            <div className="absolute right-0 mt-1 w-24 bg-white border rounded shadow z-10">
+                          <div
+  className="fixed w-35 bg-white border border-gray-200 rounded-lg shadow-xl z-[9999]"
+  style={{
+    top: menuPosition.top,
+    left: menuPosition.left,
+  }}
+>
 
                               <button
                                 onClick={() => {
@@ -645,6 +731,16 @@ const getFilterParams = () => {
                               >
                                 Delete
                               </button>
+        <button
+  onClick={() => {
+    setSelectedOwner(item);
+    setShowResetPasswordModal(true);
+    setOpenMenuId(null);
+  }}
+  className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
+>
+  Reset Password
+</button>
 
                             </div>
                           )}
@@ -664,7 +760,10 @@ const getFilterParams = () => {
 
 
             {/* Pagination */}
-            <div className="flex justify-between items-center px-4 py-3 border-t border-gray-300 text-sm">
+           
+
+          </div>
+ <div className="flex justify-between items-center px-4 py-3  text-sm">
 
               <span className="text-gray-600">
                 Total Record Count :
@@ -709,9 +808,6 @@ const getFilterParams = () => {
               </div>
 
             </div>
-
-          </div>
-
         </div>
       )}
       {showModal && (
@@ -809,6 +905,141 @@ const getFilterParams = () => {
 
       </div>
     </div>
+  </div>
+)}
+{showResetPasswordModal && (
+<div
+  className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+  onClick={() => {
+    setShowResetPasswordModal(false);
+
+    setNewPassword("");
+    setConfirmPassword("");
+
+    setNewPasswordError("");
+    setConfirmPasswordError("");
+    setFinalError("");
+  }}
+>
+
+  <div
+  className="bg-white rounded-3xl w-[500px] p-5 shadow-2xl relative"
+  onClick={(e) => e.stopPropagation()}
+>
+
+      <h2 className="text-[22px] font-semibold text-gray-800 mb-3 text-left">
+        Reset Password for {selectedOwner?.fullName}
+      </h2>
+
+      <p className="text-gray-500 text-[15px] mb-8 leading-7 text-left">
+        This will generate a new temporary password and invalidate the current login credentials.
+      </p>
+
+      {/* New Password */}
+      <div className="mb-6">
+
+        <label className="block text-[15px] font-medium mb-2 text-left">
+          New Password <span className="text-red-500">*</span>
+        </label>
+
+        <div className="relative">
+
+          <input
+            type={showNewPassword ? "text" : "password"}
+            placeholder="Enter new password"
+            value={newPassword}
+            // onChange={(e) => setNewPassword(e.target.value)}
+                      onChange={(e) => {
+  setNewPassword(e.target.value);
+  setNewPasswordError("");
+  setFinalError("")
+}}
+            className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowNewPassword(!showNewPassword)}
+            className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400"
+          >
+            👁
+          </button>
+
+        </div>
+ {newPasswordError && (
+              <ErrorMessage message={newPasswordError} type="error" />
+            )}
+      </div>
+
+      {/* Confirm Password */}
+      <div className="mb-8">
+
+        <label className="block text-[15px] font-medium mb-2 text-left">
+          Confirm Password <span className="text-red-500">*</span>
+        </label>
+
+        <div className="relative">
+
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Confirm password"
+            value={confirmPassword}
+            onChange={(e) => {
+  setConfirmPassword(e.target.value);
+  setConfirmPasswordError("");
+  setFinalError("")
+}}
+            className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
+          />
+
+          <button
+            type="button"
+            onClick={() =>
+              setShowConfirmPassword(!showConfirmPassword)
+            }
+            className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400"
+          >
+            👁
+          </button>
+
+        </div>
+{confirmPasswordError && (
+              <ErrorMessage message={confirmPasswordError} type="error" />
+            )}
+      </div>
+
+      {/* Buttons */}
+      {finalError && (
+              <ErrorMessage message={finalError} type="error" />
+            )}
+      <div className="flex justify-end gap-4">
+
+        <button
+        onClick={() => {
+  setShowResetPasswordModal(false);
+
+  setNewPassword("");
+  setConfirmPassword("");
+
+  setNewPasswordError("");
+  setConfirmPasswordError("");
+  setFinalError("");
+}}
+          className="px-8 py-3 border border-gray-300 rounded-2xl text-[16px] font-medium hover:bg-gray-50"
+        >
+          Cancel
+        </button>
+
+        <button onClick={handleResetPassword }
+          className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-[16px] font-medium"
+        >
+          Continue
+        </button>
+
+      </div>
+
+    </div>
+
   </div>
 )}
     </DashboardLayout>
