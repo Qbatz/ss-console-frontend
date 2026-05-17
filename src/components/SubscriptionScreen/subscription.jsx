@@ -8,6 +8,7 @@ import LoginImg from "../../assets/LoginImg.png";
 import { usePermission } from "../../Utils/permissionHelper";
 import Arrow from "../../assets/direction-down 01.png";
 import ArrowRight from "../../assets/arrow-right.png";
+import Circle from "../../assets/menucircle.png"
 
 const Subscription = () => {
   const { getSubscriptions, loading, errorMsg, accessError } = useSubscription();
@@ -24,6 +25,7 @@ const Subscription = () => {
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [responseCard,setResponseCard] = useState([])
 
 
   const fetchSubscriptions = async (pageNo = 1, searchText = "") => {
@@ -36,6 +38,7 @@ const Subscription = () => {
       setSubscriptions(res.data.content || []);
       setTotalItems(res.data.totalItems || 0);
       setTotalPages(res.data.totalPages || 0);
+      setResponseCard(res.data || [])
     }
 
   };
@@ -144,22 +147,22 @@ const Subscription = () => {
 
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
                     <p className="text-gray-500 text-sm font-gilroy">Active Properties</p>
-                    <h2 className="text-2xl font-bold mt-2">0</h2>
+                    <h2 className="text-2xl font-bold mt-2">{responseCard?.activePropertiesCount || 0}</h2>
                   </div>
 
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
                     <p className="text-gray-500 text-sm font-gilroy">Expired Properties</p>
-                    <h2 className="text-2xl font-bold mt-2">0</h2>
+                    <h2 className="text-2xl font-bold mt-2">{responseCard?.expiredPropertiesCount || 0}</h2>
                   </div>
 
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
                     <p className="text-gray-500 text-sm font-gilroy">Basic</p>
-                    <h2 className="text-2xl font-bold mt-2">0</h2>
+                    <h2 className="text-2xl font-bold mt-2">{responseCard?.otherPlansCount || 0}</h2>
                   </div>
 
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
                     <p className="text-gray-500 text-sm font-gilroy">Trial</p>
-                    <h2 className="text-2xl font-bold mt-2">0</h2>
+                    <h2 className="text-2xl font-bold mt-2">{responseCard?.trialPlansCount || 0}</h2>
                   </div>
 
                 </div>
@@ -214,7 +217,7 @@ const Subscription = () => {
                           <th className="px-4 py-3 text-left">Plan Type</th>
                           <th className="px-4 py-3 text-left">Start Date</th>
                           <th className="px-4 py-3 text-left">Expiry Date</th>
-                          <th className="px-4 py-3 text-center">Actions</th>
+                          <th className="px-4 py-3 text-left">Actions</th>
                         </tr>
                       </thead>
 
@@ -266,7 +269,7 @@ const Subscription = () => {
                           subscriptions.map((item, index) => (
                             <tr key={item.subscriptionId} className="hover:bg-gray-50 text-[12px]">
 
-                              <td className="px-4 py-2">
+                              <td className="px-4 py-2 text-left">
                                 {(page - 1) * size + index + 1}
                               </td>
 
@@ -282,20 +285,20 @@ const Subscription = () => {
                                 {item.status}
                               </td> */}
 
-                              <td className="px-4 py-2">
+                              <td className="px-4 py-2 text-left">
                                 {item.planName}
                               </td>
 
-                              <td className="px-4 py-2">
+                              <td className="px-4 py-2 text-left">
                                 {item.planStartsAt}
                               </td>
 
-                              <td className="px-4 py-2">
+                              <td className="px-4 py-2 text-left">
                                 {item.planEndsAt}
                               </td>
 
                               <td className="px-4 py-2 text-center">
-                                ⋮
+                                <img src={Circle} className="w-4 h-4 cursor-pointer"/>
                               </td>
 
                             </tr>

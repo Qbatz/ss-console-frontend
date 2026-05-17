@@ -559,7 +559,7 @@ if (updated?.success) {
         </div>
 
 
-       <div className="bg-bg-soft border border-border-soft rounded-xl p-5">
+        <div className="bg-[#F6F8FC] border border-[#E6E8F0] rounded-xl p-5">
 
           {/* Top Section */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -823,7 +823,7 @@ if (updated?.success) {
                 }}
                 className={`px-3 py-[2px] rounded text-[12px] font-medium 
   ${canResetWrite === true
-                    ? "bg-primary-btn hover:bg-blue-700 text-white cursor-pointer"
+                    ? "bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
               >
                 Reset
@@ -1342,7 +1342,7 @@ if (updated?.success) {
 
               <button
                 onClick={handleHardReset}
-                className="w-full bg-primary-btn hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition cursor-pointer"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition cursor-pointer"
               >
                 Submit
               </button>

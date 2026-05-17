@@ -277,13 +277,27 @@ const handlePermissionChange = (moduleId, field, value) => {
     if (selectedRole) {
       const isNameSame = roleName === initialRoleName;
 
-      const isPermissionSame =
-        JSON.stringify(
-          [...permissions].sort((a, b) => a.moduleId - b.moduleId)
-        ) ===
-        JSON.stringify(
-          [...initialPermissions].sort((a, b) => a.moduleId - b.moduleId)
-        );
+      // const isPermissionSame =
+      //   JSON.stringify(
+      //     [...permissions].sort((a, b) => a.moduleId - b.moduleId)
+      //   ) ===
+      //   JSON.stringify(
+      //     [...initialPermissions].sort((a, b) => a.moduleId - b.moduleId)
+      //   );
+      const normalizePermissions = (list) =>
+  [...list]
+    .map((p) => ({
+      moduleId: p.moduleId,
+      canRead: !!p.canRead,
+      canWrite: !!p.canWrite,
+      canUpdate: !!p.canUpdate,
+      canDelete: !!p.canDelete,
+    }))
+    .sort((a, b) => a.moduleId - b.moduleId);
+
+const isPermissionSame =
+  JSON.stringify(normalizePermissions(permissions)) ===
+  JSON.stringify(normalizePermissions(initialPermissions));
 
       if (isNameSame && isPermissionSame) {
         setModalType("error");
