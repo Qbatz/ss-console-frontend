@@ -1,84 +1,87 @@
 import React from "react";
+import msgBox from "../../assets/message-2.png";
 
 const ActivityLogsTab = ({ activities }) => {
 
-  return (
-    <div className="overflow-x-auto">
+ return (
+  <div className="bg-white rounded-xl px-4 py-3">
 
-      <div className="max-h-[300px] overflow-y-auto border border-[#E6E8F0] rounded-xl">
+    <div className="max-h-[300px] overflow-y-auto pr-2 space-y-8">
 
-        <table className="min-w-full text-sm">
+      {activities?.activities?.length > 0 ? (
 
-          {/* Header */}
-          <thead className="bg-[#F8F9FF] sticky top-0 z-20">
+        activities.activities.map((item, i) => (
 
-            <tr>
-              <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">DATE</th>
-              <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">EVENT TYPE</th>
-              <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">DETAILS</th>
-              <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">ADMIN / USER</th>
-              <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">Platform</th>
-              <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter">ACTIONS</th>
-            </tr>
+          <div
+            key={item.activityId}
+            className="flex gap-4"
+          >
 
-          </thead>
+            {/* Timeline */}
+            <div className="flex flex-col items-center">
 
-          <tbody className="divide-y divide-gray-200">
+              <div className="w-10 h-10 rounded-full bg-[#EEF3FF] border border-[#D8E3FF] flex items-center justify-center">
 
-            {activities?.activities?.length > 0 ? (
+                <img
+                  src={msgBox}
+                  alt="activity"
+                  className="w-5 h-5 opacity-70"
+                />
 
-              activities.activities.map((item) => (
+              </div>
 
-                <tr
-                  key={item.activityId}
-                  className="border-t hover:bg-gray-50"
-                >
+              {i !== activities.activities.length - 1 && (
+                <div className="w-[1px] flex-1 bg-gray-200 mt-1"></div>
+              )}
 
-                  <td className="px-4 py-2 text-left font-medium text-[12px]">
-                    {item.activityDate}
-                  </td>
+            </div>
 
-                  <td className="px-4 py-2 text-left font-medium text-[12px]">
-                    {item.activityType}
-                  </td>
+            {/* Content */}
+            <div className="pb-6 text-left">
 
-                  <td className="px-4 py-2 text-left font-medium text-[12px]">
-                    {item.description}
-                  </td>
+              <h3 className="text-[15px] font-semibold text-gray-800">
+                {item.userName}
+              </h3>
 
-                  <td className="px-4 py-2 text-left font-medium text-[12px]">
-                    {item.userName}
-                  </td>
-                  <td className="px-4 py-2 text-left font-medium text-[12px]">
-                    {item.platform || "N/A"}
-                  </td>
+              <p className="text-[13px] text-gray-600 mt-1 leading-6">
+                {item.description}
+              </p>
 
-                  <td className="px-4 py-2 text-left font-medium text-[12px]">
-                    ⋮
-                  </td>
+              {/* Tags */}
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
 
-                </tr>
+                <span className="px-2 py-[2px] text-[11px] font-medium bg-blue-50 text-blue-600 rounded-full">
+                  {item.activityType}
+                </span>
 
-              ))
+                <span className="px-2 py-[2px] text-[11px] font-medium bg-gray-100 text-gray-600 rounded-full">
+                  {item.platform || "N/A"}
+                </span>
 
-            ) : (
+              </div>
 
-              <tr>
-                <td colSpan="5" className="text-center py-10 text-gray-500">
-                  No Activity Found
-                </td>
-              </tr>
+              <p className="text-[12px] text-gray-400 mt-2">
+                Added at {item.activityDate}, {item.activityTime}
+              </p>
 
-            )}
+            </div>
 
-          </tbody>
+          </div>
 
-        </table>
+        ))
 
-      </div>
+      ) : (
+
+        <div className="text-center py-10 text-gray-400">
+          No Activity Found
+        </div>
+
+      )}
 
     </div>
-  );
+
+  </div>
+);
 };
 
 export default ActivityLogsTab;

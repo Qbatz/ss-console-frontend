@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef  } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import MenuCircle from "../../assets/menucircle.png"
 import { useSubscription } from "../../Context/SubscriptionContext";
@@ -18,7 +18,7 @@ import Team from "../../assets/Team.png";
 const TransactionsPage = () => {
 
   const [totalItems, setTotalItems] = useState(0);
-  const { getOrderHistory, loading, accessError } = useSubscription();
+  const { getOrderHistory, loading, accessError,verifyPayment } = useSubscription();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Hostel Transactions");
   const [data, setData] = useState([]);
@@ -39,6 +39,35 @@ const TransactionsPage = () => {
     top: 0,
     left: 0
   });
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [showVerifyDrawer, setShowVerifyDrawer] = useState(false);
+
+const [selectedVerifyItem, setSelectedVerifyItem] = useState(null);
+const [verifyResponse, setVerifyResponse] = useState(null);
+const menuRef = useRef(null);
+useEffect(() => {
+
+  const handleClickOutside = (event) => {
+
+    if (
+      menuRef.current &&
+      !menuRef.current.contains(event.target)
+    ) {
+
+      setOpenMenu(null);
+      setShowVerifyDrawer(false);
+
+    }
+
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+
+}, []);
   const { RangePicker } = DatePicker;
   const formatDate = (date) => {
     if (!date) return "";
@@ -95,6 +124,19 @@ const TransactionsPage = () => {
   const start = totalItems === 0 ? 0 : (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
 
+ const handleVerifyPayment = async (item) => {
+
+  const res = await verifyPayment(item.historyId);
+
+  if (res) {
+
+    setVerifyResponse(res.data || res);
+    setSelectedVerifyItem(item);
+    setShowVerifyDrawer(true);
+
+  }
+
+};
   return (
     <DashboardLayout>
       {(canRead === false || accessError === "Access Restricted") ? (
@@ -116,13 +158,7 @@ const TransactionsPage = () => {
       ) : (
         <div className="p-6 min-h-screen">
 
-          {/* Header */}
-          {/* <div className="flex justify-between items-center mb-6 border-b border-gray-300">
-        <h2 className="text-lg font-semibold">Transactions</h2>
-        <button className="text-blue-600 text-sm font-medium">
-          Manage Plans
-        </button>
-      </div> */}
+
           <div className="border-b border-gray-200 mb-3 pb-2">
 
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -138,7 +174,7 @@ const TransactionsPage = () => {
 
               </div>
 
-              {/* RIGHT SIDE BUTTON */}
+
               <button className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit cursor-pointer">
                 Manage Plans
               </button>
@@ -146,7 +182,7 @@ const TransactionsPage = () => {
             </div>
 
           </div>
-          {/* Cards */}
+
           <div className="flex gap-4 mb-4">
             <div className="bg-white border border-gray-300 rounded-lg p-4 w-64">
               <p className="text-sm text-gray-500">Total Revenue</p>
@@ -159,7 +195,7 @@ const TransactionsPage = () => {
             </div>
           </div>
 
-          {/* Filters */}
+
           <div className="flex justify-between items-center mb-3">
 
             <div className="flex items-center gap-3">
@@ -193,15 +229,15 @@ const TransactionsPage = () => {
             </div>
           </div>
 
-          {/* Table */}
+
           <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
 
-            {/* Wrapper with fixed height */}
+
             <div className="max-h-[350px] overflow-y-auto">
 
               <table className="w-full text-sm">
 
-                {/* Sticky Header */}
+
                 <thead className="bg-gray-100 text-gray-600 sticky top-0 z-10">
                   <tr>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left">ID</th>
@@ -328,6 +364,7 @@ const TransactionsPage = () => {
                           />
                           {openMenu === item.historyId && (
                             <div
+                             ref={menuRef}
                               className="fixed w-32 bg-white border rounded shadow z-[99999]"
                               style={{
                                 top: menuPos.top,
@@ -345,6 +382,19 @@ const TransactionsPage = () => {
                               >
                                 View Details
                               </button>
+                            {/* {item.canVerifyPayment === true && ( */}
+
+ <button
+  onClick={() => {
+    handleVerifyPayment(item);
+    setOpenMenu(null);
+  }}
+  className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+>
+  Verify Payment
+</button>
+
+{/* // )} */}
 
                             </div>
                           )}
@@ -608,6 +658,92 @@ const TransactionsPage = () => {
           />
         </div>
       )}
+{showVerifyDrawer && (
+
+  <>
+
+    {/* Backdrop */}
+    <div
+      className="fixed inset-0 bg-black/30 z-40"
+      onClick={() => setShowVerifyDrawer(false)}
+    />
+
+    {/* Compact Drawer */}
+    <div className="fixed top-10 right-6 w-[380px] bg-[#FAFBFC] rounded-3xl shadow-2xl z-50 overflow-hidden animate-in slide-in-from-right duration-300">
+
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-5 border-b border-[#E6E8F0] bg-white">
+
+        <h2 className="text-[20px] font-semibold text-gray-800">
+          Payment Verification
+        </h2>
+
+        <button
+          onClick={() => setShowVerifyDrawer(false)}
+          className="w-9 h-9 rounded-full hover:bg-gray-100 text-gray-500 hover:text-black flex items-center justify-center text-2xl transition"
+        >
+          ×
+        </button>
+
+      </div>
+
+      {/* Content */}
+      {/* Content */}
+<div className="p-6 bg-[#FAFBFC]">
+
+  {verifyResponse?.isPaid ? (
+
+  <>
+    <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+      <span className="text-green-600 text-5xl">✓</span>
+    </div>
+
+    <h3 className="mt-6 text-[20px] font-semibold text-[#1F2937]">
+      Payment Success
+    </h3>
+
+    <p className="mt-3 text-[15px] text-gray-500 leading-7">
+      This payment has been made successfully.
+    </p>
+  </>
+
+) : (
+
+  <>
+    <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+      <span className="text-red-600 text-5xl">✕</span>
+    </div>
+
+    <h3 className="mt-6 text-[20px] font-semibold text-[#1F2937]">
+      Payment Failed
+    </h3>
+
+    <p className="mt-3 text-[15px] text-gray-500 leading-7">
+      Payment verification failed.
+    </p>
+  </>
+
+)}
+
+</div>
+
+      {/* Footer */}
+      <div className="px-6 pb-6 pt-2 bg-[#FAFBFC]">
+
+        <button
+          onClick={() => setShowVerifyDrawer(false)}
+          className="w-full bg-[#2563EB] hover:bg-[#1E4FD8] text-white py-3 rounded-2xl text-sm font-semibold transition"
+        >
+          Close
+        </button>
+
+      </div>
+
+    </div>
+
+  </>
+
+)}
     </DashboardLayout>
   );
 };
