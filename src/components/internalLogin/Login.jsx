@@ -146,7 +146,7 @@ const verifyToken = async () => {
   try {
 
     const res = await axios.get(
-      `${ConfigV2.apiBaseUrl}/v2/admin/`,
+      `${ConfigV2.apiBaseUrl}/v2/admin`,
       {
         headers: {
           Authorization: "Bearer " + token,

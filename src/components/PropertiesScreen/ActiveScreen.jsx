@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useHostel } from "../../Context/HostelListContext";
 import LoginImg from "../../assets/LoginImg.png";
 import { usePermission } from "../../Utils/permissionHelper";
+import msgBox from "../../assets/message-2.png";
+import Arrow from "../../assets/arrow-right.png"
 
 function PropertyActive({ hostelData }) {
 
@@ -115,7 +117,7 @@ useEffect(() => {
 
    
 
-     <div className="bg-white border border-[#E6E8F0] rounded-xl overflow-hidden">
+     {/* <div className="bg-white border border-[#E6E8F0] rounded-xl overflow-hidden">
 
      
       <div className="max-h-[350px] overflow-y-auto">
@@ -175,23 +177,108 @@ useEffect(() => {
 
         </div>
 
+      </div> */}
+      <div className="bg-white rounded-xl px-4 py-2">
+
+  <div className="max-h-[350px] overflow-y-auto y-8">
+
+    {tableData.length > 0 ? (
+
+      tableData.map((item, i) => (
+
+        <div
+          key={item.activityId}
+          className="flex gap-4"
+        >
+
+          {/* Timeline */}
+          <div className="flex flex-col items-center">
+
+            <div className="w-10 h-10 rounded-full bg-[#EEF3FF] border border-[#D8E3FF] flex items-center justify-center">
+
+              {/* <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 text-[#2563EB]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 10h8M8 14h5m-9 5h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg> */}
+              <img src={msgBox} className="w-4 h-4"/>
+
+            </div>
+
+            {i !== tableData.length - 1 && (
+              <div className="w-[1px] flex-1 bg-gray-200 mt-1"></div>
+            )}
+
+          </div>
+
+          {/* Content */}
+          <div className="pb-6 text-left">
+
+            <h3 className="text-[15px] font-semibold text-gray-800">
+              {item.userName}
+            </h3>
+
+            <p className="text-[13px] text-gray-600 mt-1 leading-6">
+              {item.description}
+            </p>
+ <div className="flex items-center gap-2 mt-2 flex-wrap">
+
+  <span className="px-2 py-[2px] text-[11px] font-medium bg-blue-50 text-blue-600 rounded-full">
+    {item.activityType}
+  </span>
+
+  <span className="px-2 py-[2px] text-[11px] font-medium bg-gray-100 text-gray-600 rounded-full">
+    {item.platform}
+  </span>
+
+</div>
+            <p className="text-[12px] text-gray-400 mt-2">
+              Added at {item.activityDate}, {item.activityTime}
+            </p>
+
+          </div>
+
+        </div>
+
+      ))
+
+    ) : (
+
+      <div className="text-center py-10 text-gray-400">
+        No Activities Found
       </div>
+
+    )}
+
+  </div>
+
+</div>
   </>
 
             )}
-      {/* More Button */}
+     
 
      
-      {!isMore && defaultActivities.length > 0 && (
-  <div className="flex justify-end mt-2">
-    <button
-      onClick={handleMoreClick}
-      className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition"
-    >
-      More
-      <span className="text-lg leading-none">›</span>
-    </button>
-  </div>
+      {!isMore && defaultActivities?.length >= 50 && (
+ <div className="mt-4">
+
+  <button
+    onClick={handleMoreClick}
+    className="w-full bg-[#EEF2FF] hover:bg-[#E4E9FF] text-[#2563EB] text-sm font-medium py-3 rounded-md transition cursor-pointer"
+  >
+    See More
+  </button>
+
+</div>
 )}
 
 
@@ -203,7 +290,7 @@ useEffect(() => {
 
           <span>
             Total Record Count :{" "}
-            <span className="text-blue-600">{size}</span>
+            <span className="text-blue-600">{tableData.length || 0}</span>
           </span>
 
           <div className="flex items-center gap-4">
@@ -221,11 +308,11 @@ useEffect(() => {
               <option value={50}>50</option>
             </select>
 
-            <button
+            <button className="cursor-pointer"
               disabled={page === 1}
               onClick={() => setPage((p) => p - 1)}
             >
-              ◀
+              <img src={Arrow} className="w-4 h-4"/>
             </button>
 
             <span className="border px-3 py-1 rounded bg-gray-50">
@@ -236,7 +323,7 @@ useEffect(() => {
               disabled={page >= totalPages}
               onClick={() => setPage((p) => p + 1)}
             >
-              ▶
+              <img src={Arrow} className="w-4 h-4 rotate-[-180deg]"/>
             </button>
 
             <span className="text-gray-400">

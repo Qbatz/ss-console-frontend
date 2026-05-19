@@ -236,7 +236,7 @@ const getAdminDetails = async () => {
     setLoading(true);
     setErrorMsg("");
 
-    const res = await api.get("/v2/admin/");
+    const res = await api.get("/v2/admin");
 
     if (res.status === 200) {
       setAdminPermissions(res.data.permissions || []);

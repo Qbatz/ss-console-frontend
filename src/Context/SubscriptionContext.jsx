@@ -165,7 +165,7 @@ export const SubscriptionProvider = ({ children }) => {
       setErrorMsg("");
 
       const res = await axiosInstance.post(
-        "/v2/demo-request/",
+        "/v2/demo-request",
         payload
       );
 
@@ -318,13 +318,54 @@ const addDemoRequestComment = async (demoRequestId, comment) => {
     setLoading(false);
   }
 };
+const verifyPayment = async (orderHistoryId) => {
+
+  try {
+
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      `/v2/order-history/verify/${orderHistoryId}`
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data,
+        message: "Payment verified successfully"
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
   return (
     <SubscriptionContext.Provider
       value={{
         loading,
         errorMsg,
         createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, 
-        getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment
+        getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment
       }}
     >
       {children}

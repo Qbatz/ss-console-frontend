@@ -17,7 +17,7 @@ export const DashboardProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const res = await axiosInstance.get("/v2/dashboard/");
+      const res = await axiosInstance.get("/v2/dashboard");
 
       if (res.status === 200) {
         setDashboardData(res.data);
