@@ -544,38 +544,7 @@ useEffect(() => {
                 </div>
               </div>
 
-              {/* PAYMENT BOX */}
-
-              {/* <div className="bg-blue-100 rounded-lg p-4 text-sm mb-4 mt-3">
-                <div className="flex justify-between">
-                  <div>
-                    <p className="text-gray-500 text-xs text-start">Plan</p>
-                    <p className="font-medium">{selectedTxn.planName}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-gray-500 text-xs text-start">Billing Cycle</p>
-                    <p className="font-medium">2+1 - Pre-paid</p>
-                  </div>
-                </div>
-
-                <div className="flex justify-between mt-3">
-                  <div>
-                    <p className="text-gray-500 text-xs">Amount</p>
-                    <p>₹{selectedTxn.totalAmount}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-gray-500 text-xs">Discount</p>
-                    <p className="font-semibold">₹{selectedTxn.discountAmount}</p>
-                  </div>
-                </div>
-
-                <div className="mt-3 item-start">
-                  <p className="text-gray-500 text-xs">Final Paid</p>
-                  <p className="font-semibold">₹{selectedTxn.totalAmount}</p>
-                </div>
-              </div> */}
+             
               <div className="bg-gray-100 rounded-xl p-4 text-sm mt-3 mb-4 border border-gray-200">
 
                 {/* TITLE */}
@@ -629,15 +598,49 @@ useEffect(() => {
 
                 </div>
               </div>
+<div className="mt-4">
 
+  
+  {selectedTxn.paymentUrl && (
 
-              {/* IMAGE */}
-              <div className="rounded-lg overflow-hidden border border-gray-300">
+    <div className="mb-3 text-left">
+
+      <p className="text-[11px] text-gray-500 uppercase font-semibold mb-1">
+        Payment Link
+      </p>
+
+      <a
+        href={selectedTxn.paymentUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 text-sm underline break-all hover:text-blue-800"
+      >
+        {selectedTxn.paymentUrl}
+      </a>
+
+    </div>
+
+  )}
+
+  
+  <div className="rounded-lg overflow-hidden border border-gray-300">
+
+    <img
+      src={selectedTxn.paymentProof}
+      className="w-full h-auto object-contain"
+    />
+
+  </div>
+
+</div>
+
+              
+              {/* <div className="rounded-lg overflow-hidden border border-gray-300">
                 <img
                   src={selectedTxn.paymentProof}
                   className="w-full h-auto object-contain"
                 />
-              </div>
+              </div> */}
 
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef  } from "react";
 import {
     Calendar,
     ReceiptItem,
@@ -36,8 +36,28 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
     const [modalType, setModalType] = useState("success");
     const [showSuccess, setShowSuccess] = useState(false);
     const [message, setMessage] = useState("");
+    const menuRef = useRef(null);
 
+useEffect(() => {
 
+  const handleClickOutside = (e) => {
+
+    if (
+      menuRef.current &&
+      !menuRef.current.contains(e.target)
+    ) {
+      setOpenMenu(null);
+    }
+
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+
+}, []);
     const invoices = isMore
         ? invoiceData
         : defaultInvoices;
@@ -448,7 +468,10 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
                                                 )}
 
                                             </td>
-                                            <td className="px-5 py-2 text-xs relative">
+                                            <td
+  className="px-5 py-2 text-xs relative"
+  ref={openMenu === item.invoiceId ? menuRef : null}
+>
 
                                                 <div className="flex items-center justify-start">
 
@@ -483,7 +506,7 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
           w-full text-left
           px-3 py-2 text-sm
           hover:bg-red-50
-          text-red-600
+          text-red-600 cursor-pointer
         "
                                                             onClick={() => {
 

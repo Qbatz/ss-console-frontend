@@ -359,13 +359,46 @@ const verifyPayment = async (orderHistoryId) => {
   }
 
 };
+const deleteDemoRequest = async (demoRequestId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.delete(
+      `/v2/demo-request/${demoRequestId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+        message: "Demo request deleted successfully"
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <SubscriptionContext.Provider
       value={{
         loading,
         errorMsg,
         createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, 
-        getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment
+        getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment,deleteDemoRequest
       }}
     >
       {children}

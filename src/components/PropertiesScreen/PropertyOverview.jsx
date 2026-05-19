@@ -424,6 +424,21 @@ if (updated?.success) {
   const selectedPlanothers = dropdownPlans?.otherPlans?.find(
     (p) => p.planCode === planCode
   );
+  useEffect(() => {
+  const handleClickOutside = (e) => {
+
+    if (!e.target.closest(".menu-container")) {
+      setOpenMenu(null);
+    }
+
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
   const handleSubscription = async () => {
 
     let hasError = false;
@@ -1045,54 +1060,56 @@ if (updated?.success) {
                               </span>
                             </td>
                             <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap relative">
-                              <div className="relative">
-                                <img
-                                  src={Circle}
-                                  className="w-5 h-5 cursor-pointer"
-                                  onClick={(e) => {
-                                    const rect = e.target.getBoundingClientRect();
+                             <div className="relative menu-container">
 
-                                    setMenuPosition({
-                                      top: rect.bottom + window.scrollY,
-                                      left: rect.left + window.scrollX,
-                                    });
+  <img
+    src={Circle}
+    alt="menu"
+    className="w-5 h-5 cursor-pointer"
+    onClick={(e) => {
+      e.stopPropagation();
 
-                                    setOpenMenu(openMenu === index ? null : index);
-                                  }}
-                                />
+      setMenuPosition({
+        top: e.clientY + 5,
+        left: e.clientX,
+      });
 
-                                {openMenu === index && (
-                                  <div
-                                    className="fixed w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
-                                    style={{
-                                      top: menuPosition.top,
-                                      left: menuPosition.left -120,
-                                    }}
-                                  >
-                                   <button
-      disabled={!canDelete}
-      onClick={() => {
+      setOpenMenu(openMenu === index ? null : index);
+    }}
+  />
 
-        if (!canDelete) return;
-
-        setSelectedTenantId(item.customerId);
-        // setPhone(item.mobile);
-        setShowDeleteModal(true);
-        setOpenMenu(null);
+  {openMenu === index && (
+    <div
+      className="fixed w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
+      style={{
+        top: menuPosition.top,
+        left: menuPosition.left - 120,
       }}
-      className={`w-full text-left px-4 py-2 text-sm
-        ${
-          canDelete
-            ? "hover:bg-gray-100 text-red-600 cursor-pointer"
-            : "bg-gray-100 text-gray-400 cursor-not-allowed"
-        }
-      `}
     >
-      Delete
-    </button>
-                                  </div>
-                                )}
-                              </div>
+      <button
+        disabled={!canDelete}
+        onClick={() => {
+
+          if (!canDelete) return;
+
+          setSelectedTenantId(item.customerId);
+          setShowDeleteModal(true);
+          setOpenMenu(null);
+        }}
+        className={`w-full text-left px-4 py-2 text-sm
+          ${
+            canDelete
+              ? "hover:bg-gray-100 text-red-600 cursor-pointer"
+              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+          }
+        `}
+      >
+        Delete
+      </button>
+    </div>
+  )}
+
+</div>
 
                             </td>
                           </tr>
