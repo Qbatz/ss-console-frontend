@@ -14,7 +14,7 @@ import CommentBox from "../../assets/message-2.png";
 import Notes from "../../assets/notes.png"
 const DemoRequests = () => {
 
-  const { getDemoRequests, loading, getAgentsDropdown, updateDemoRequestStatus, addDemoRequestComment,getDemoRequestStatus } = useSubscription();
+  const { getDemoRequests, loading, getAgentsDropdown, updateDemoRequestStatus, addDemoRequestComment,getDemoRequestStatus,deleteDemoRequest} = useSubscription();
   const { adminDetails, agents, getAllAgents, assignStaff } = useRole();
   const dropdownRef = useRef(null);
   const [data, setData] = useState([]);
@@ -45,6 +45,8 @@ const DemoRequests = () => {
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
   const [statusConfig, setStatusConfig] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [deleteLoading, setDeleteLoading] = useState(false);
 
 
   useEffect(() => {
@@ -234,6 +236,41 @@ const DemoRequests = () => {
       }, 1500);
     }
   };
+  const handleDeleteDemoRequest = async () => {
+  if (!selectedItem?.requestId) return;
+
+  setDeleteLoading(true);
+
+  const res = await deleteDemoRequest(selectedItem.requestId);
+
+  if (res.success) {
+
+    setModalType("success");
+    setMessage(res.message || "Deleted Successfully");
+    setShowSuccess(true);
+
+    setShowDeleteModal(false);
+    setOpenMenu(null);
+
+    fetchData();
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+  } else {
+
+    setModalType("error");
+    setMessage(res.message || "Failed to delete");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+  }
+
+  setDeleteLoading(false);
+};
   //   const handleAddComment = async () => {
   //   if (!commentText) return;
 
@@ -291,7 +328,7 @@ const DemoRequests = () => {
             {/* Left side card */}
             <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300 w-full max-w-xs">
               <p className="text-gray-500 text-sm font-gilroy">DemoRequestCount</p>
-              <h2 className="text-2xl font-bold mt-2">0</h2>
+              <h2 className="text-2xl font-bold mt-2">{totalItems || 0}</h2>
             </div>
 
             {/* Right side button */}
@@ -391,16 +428,16 @@ const DemoRequests = () => {
                   ) : data.length > 0 ? (
 
                  data.map((item, index) => {
-                  const allowedStatuses =
-    statusConfig.find(
-      (s) => s.currentStatus === item.demoRequestStatus
-    )?.allowedStatuses || [];
+  //                 const allowedStatuses =
+  //   statusConfig.find(
+  //     (s) => s.currentStatus === item.demoRequestStatus
+  //   )?.allowedStatuses || [];
 
-  const canAssignStaff =
-    allowedStatuses.some(
-      (s) => s.key === "ASSIGNED"
-    );
-    console.log("canAssignStaff",canAssignStaff)
+  // const canAssignStaff =
+  //   allowedStatuses.some(
+  //     (s) => s.key === "ASSIGNED"
+  //   );
+  //   console.log("canAssignStaff",canAssignStaff)
                   return(
 
                   
@@ -469,7 +506,7 @@ const DemoRequests = () => {
                               >
                                 Assign Staff
                               </button> */}
-{canAssignStaff && (
+{item?.canAssignStaff && (
   <button
     onClick={() => {
       setSelectedItem(item);
@@ -519,6 +556,16 @@ const DemoRequests = () => {
                               >
                                 Add Comments
                               </button>
+                               <button
+  className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-red-500 cursor-pointer"
+  onClick={() => {
+    setSelectedItem(item);
+    setShowDeleteModal(true);
+    setOpenMenu(null);
+  }}
+>
+  Delete
+</button>
                             </div>
                           )}
 
@@ -713,6 +760,7 @@ const DemoRequests = () => {
       <DemoRequestDrawer
         open={openDrawer}
         onClose={() => setOpenDrawer(false)}
+        fetchData={fetchData}
       />
       <UpdateStatusModal
         open={openStatusModal}
@@ -845,6 +893,48 @@ const DemoRequests = () => {
           </div>
         </div>
       )}
+      {showDeleteModal && (
+  <div
+    className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]"
+    onClick={() => {
+      setShowDeleteModal(false);
+    }}
+  >
+    <div
+      className="bg-white rounded-xl w-[380px] p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      <h2 className="text-lg font-semibold text-left mb-2">
+        Delete Demo Request
+      </h2>
+
+      <p className="text-sm text-gray-500 text-left mb-6">
+        Are you sure you want to delete this demo request?
+      </p>
+
+      <div className="flex justify-end gap-3">
+
+        <button
+          onClick={() => setShowDeleteModal(false)}
+          className="px-4 py-2 border border-gray-300 rounded-lg"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleDeleteDemoRequest}
+          disabled={deleteLoading}
+          className="px-4 py-2 bg-red-500 text-white rounded-lg"
+        >
+          {deleteLoading ? "Deleting..." : "Delete"}
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };

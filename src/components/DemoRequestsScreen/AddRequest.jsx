@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
-const DemoRequestDrawer = ({ open, onClose }) => {
+const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
   const states = [
     "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
     "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
@@ -17,14 +17,15 @@ const DemoRequestDrawer = ({ open, onClose }) => {
   const { createDemoRequest, loading, } = useSubscription();
   const [search, setSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-  const [modalType, setModalType] = useState("success");
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [message, setMessage] = useState("");
+
   const [nameError, setNameError] = useState("")
   const [mobileError, setMobileError] = useState("")
   const [countryError, setCountryError] = useState("")
   const [tenantError, setTenantError] = useState("")
   const [hostelError, setHostelError] = useState("")
+  const [modalType, setModalType] = useState("success");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [message, setMessage] = useState("");
 
   const filteredStates = states.filter((s) =>
     s.toLowerCase().includes(search.toLowerCase())
@@ -105,6 +106,41 @@ const DemoRequestDrawer = ({ open, onClose }) => {
 
     return valid;
   };
+  const handleCloseDrawer = () => {
+
+    // reset form
+    setFormData({
+      name: "",
+      email: "",
+      contactNo: "",
+      countryCode: "+91",
+      organization: "",
+      noOfHostels: "",
+      noOfTenants: "",
+      city: "",
+      state: "",
+      country: "",
+      comments: "",
+      requestedDate: "",
+      requestedTime: ""
+    });
+
+    // reset search
+    setSearch("");
+
+    // reset errors
+    setNameError("");
+    setMobileError("");
+    setCountryError("");
+    setTenantError("");
+    setHostelError("");
+
+
+    setShowDropdown(false);
+
+
+    onClose();
+  };
 
   const handleSubmit = async () => {
     const isValid = validateForm();
@@ -122,67 +158,102 @@ const DemoRequestDrawer = ({ open, onClose }) => {
     const res = await createDemoRequest(payload);
 
     if (res.success) {
-      onClose();
+      setModalType("success");
+      setMessage(res?.data);
+      setShowSuccess(true);
+      fetchData()
+
+      setTimeout(() => {
+        setShowSuccess(false);
+        handleCloseDrawer();
+
+      }, 1500);
+
+    }
+    else {
+      setModalType("error");
+      setMessage(res?.message);
+      setShowSuccess(true);
+
+
+      setTimeout(() => {
+        setShowSuccess(false);
+
+
+      }, 1500);
     }
   };
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <>
+      <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
 
-      <div
-        className="absolute inset-0 bg-black/20"
-        onClick={onClose}></div>
+      />
+      <div className="fixed inset-0 z-50">
 
 
-      <div className="relative w-full flex justify-end p-4">
+        <div
+          className="absolute inset-0 bg-black/20"
+          onClick={handleCloseDrawer}
+        />
 
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl h-full max-h-[95vh] overflow-y-auto p-6">
+        {/* Drawer */}
+        <div className="absolute right-0 top-0 h-full w-full max-w-md">
 
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Add Demo Request</h2>
-            <button className="cursor-pointer" onClick={onClose}>✖</button>
-          </div>
+          <div
+            className="h-full bg-white shadow-xl overflow-y-auto p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
 
-          <div className="space-y-4">
 
-            {/* Name */}
-            <div className="flex items-start text-left gap-3">
-              <label className="w-40 text-[12px] font-medium">
-                Name <span className="text-red-500">*</span>
-              </label>
-              <div className="w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Add Demo Request</h2>
+              <button className="cursor-pointer" onClick={handleCloseDrawer}>✖</button>
+            </div>
+
+            <div className="space-y-4">
+
+              {/* Name */}
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">
+                  Name <span className="text-red-500">*</span>
+                </label>
+                <div className="w-full">
+                  <input
+                    name="name"
+                    placeholder="Enter Name"
+                    value={formData.name}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setNameError("");
+                    }}
+                    className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                  />
+                  {nameError && <ErrorMessage message={nameError} type="error" />}
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">
+                  Email ID
+                </label>
                 <input
-                  name="name"
-                  placeholder="Enter Name"
-                  value={formData.name}
-                  onChange={(e) => {
-                    handleChange(e);
-                    setNameError("");
-                  }}
+                  name="email"
+                  placeholder="Enter Email"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
                 />
-                {nameError && <ErrorMessage message={nameError} type="error" />}
               </div>
-            </div>
 
-            {/* Email */}
-            <div className="flex items-start text-left gap-3">
-              <label className="w-40 text-[12px] font-medium">
-                Email ID
-              </label>
-              <input
-                name="email"
-                placeholder="Enter Email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-              />
-            </div>
-
-            {/* Contact Number */}
-            {/* <div className="flex items-start text-left gap-3">
+              {/* Contact Number */}
+              {/* <div className="flex items-start text-left gap-3">
     <label className="w-40 text-sm font-medium whitespace-nowrap">
       Contact Number <span className="text-red-500">*</span>
     </label>
@@ -215,212 +286,213 @@ const DemoRequestDrawer = ({ open, onClose }) => {
       {mobileError && <ErrorMessage message={mobileError} type="error" />}
     </div>
   </div> */}
-            <div className="flex items-start text-left gap-3">
-              <label className="w-40 text-[12px] font-medium whitespace-nowrap">
-                Contact Number <span className="text-red-500">*</span>
-              </label>
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium whitespace-nowrap">
+                  Contact Number <span className="text-red-500">*</span>
+                </label>
 
-              <div className="w-full">
-                <div className="flex border border-gray-300 rounded overflow-hidden">
+                <div className="w-full">
+                  <div className="flex border border-gray-300 rounded overflow-hidden">
 
-                  {/* FIXED HERE */}
-                  <div className="px-3 bg-gray-100 border-r flex items-center justify-center">
-                    <select
-                      name="countryCode"
+                    {/* FIXED HERE */}
+                    <div className="px-3 bg-gray-100 border-r flex items-center justify-center">
+                      <select
+                        name="countryCode"
 
-                      value={formData.countryCode}
-                      onChange={handleChange}
-                      className="bg-transparent outline-none text-sm rounded"
-                    >
-                      <option value="+91">+91</option>
-                    </select>
+                        value={formData.countryCode}
+                        onChange={handleChange}
+                        className="bg-transparent outline-none text-sm rounded"
+                      >
+                        <option value="+91">+91</option>
+                      </select>
+                    </div>
+
+                    <input
+                      name="contactNo"
+                      value={formData.contactNo}
+                      placeholder="Enter Mobile"
+                      // onChange={(e) => {
+                      //   const value = e.target.value.replace(/\D/g, "");
+                      //   setFormData({ ...formData, contactNo: value });
+                      //   setMobileError("");
+                      // }}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                        setFormData({ ...formData, contactNo: value });
+                        setMobileError("");
+                      }}
+                      className="w-full p-2 outline-none placeholder:text-sm rounded"
+                    />
                   </div>
 
-                  <input
-                    name="contactNo"
-                    value={formData.contactNo}
-                    placeholder="Enter Mobile"
-                    // onChange={(e) => {
-                    //   const value = e.target.value.replace(/\D/g, "");
-                    //   setFormData({ ...formData, contactNo: value });
-                    //   setMobileError("");
-                    // }}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, "").slice(0, 10);
-                      setFormData({ ...formData, contactNo: value });
-                      setMobileError("");
-                    }}
-                    className="w-full p-2 outline-none placeholder:text-sm rounded"
-                  />
+                  {mobileError && <ErrorMessage message={mobileError} type="error" />}
                 </div>
-
-                {mobileError && <ErrorMessage message={mobileError} type="error" />}
               </div>
-            </div>
 
-            {/* Organization */}
-            <div className="flex items-start text-left gap-3">
-              <label className="w-40 text-[12px] font-medium">Organization</label>
-              <input
-                name="organization"
-                placeholder="Enter organization"
-                value={formData.organization}
-                onChange={handleChange}
-                className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-              />
-            </div>
-
-            {/* No of Hostels */}
-            <div className="flex items-start text-left gap-3">
-              <label className="w-40 text-[12px] font-medium">
-                No. of Hostels
-              </label>
-              <div className="w-full">
+              {/* Organization */}
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">Organization</label>
                 <input
-                  name="noOfHostels"
-                  placeholder="Enter number of Hostels"
-                  value={formData.noOfHostels}
-                  onChange={(e) => {
-                    handleChange(e);
-                    setHostelError("");
-                  }}
-                  className={`w-full border p-2 rounded placeholder:text-sm ${hostelError ? "border-red-500" : "border-gray-300"
-                    }`}
-                />
-                {hostelError && <ErrorMessage message={hostelError} type="error" />}
-              </div>
-            </div>
-
-            {/* No of Tenants */}
-            <div className="flex items-start text-left gap-3">
-              <label className="w-40 text-[12px] font-medium">
-                No. of Tenants
-              </label>
-              <div className="w-full">
-                <input
-                  name="noOfTenants"
-                  placeholder="Enter number of Tenants"
-                  value={formData.noOfTenants}
-                  onChange={(e) => {
-                    handleChange(e);
-                    setTenantError("");
-                  }}
-                  className={`w-full border p-2 rounded placeholder:text-sm ${tenantError ? "border-red-500" : "border-gray-300"
-                    }`}
-                />
-                {tenantError && <ErrorMessage message={tenantError} type="error" />}
-              </div>
-            </div>
-
-            {/* City */}
-            <div className="flex items-start text-left gap-3">
-              <label className="w-40 text-[12px] font-medium">City</label>
-              <input
-                name="city"
-                value={formData.city}
-                placeholder="Enter City"
-                onChange={handleChange}
-                className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-              />
-            </div>
-
-            {/* State */}
-            <div className="flex items-start text-left gap-3">
-              <label className="w-40 text-[12px] font-medium">State</label>
-
-              <div className="relative w-full">
-                <input
-                  value={search}
-                  placeholder="Select State"
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setFormData({ ...formData, state: "" });
-                    setShowDropdown(true);
-                  }}
-                  onFocus={() => setShowDropdown(true)}
+                  name="organization"
+                  placeholder="Enter organization"
+                  value={formData.organization}
+                  onChange={handleChange}
                   className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
                 />
-
-                {showDropdown && (
-                  <div className="absolute z-50 w-full bg-white border rounded mt-1 max-h-40 overflow-y-auto shadow">
-                    {filteredStates.map((state, index) => (
-                      <div
-                        key={index}
-                        onClick={() => {
-                          setFormData({ ...formData, state });
-                          setSearch(state);
-                          setShowDropdown(false);
-                        }}
-                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                      >
-                        {state}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
-            </div>
 
-            {/* Country */}
-            <div className="flex items-start text-left gap-3">
-              <label className="w-40 text-[12px] font-medium">Country</label>
-              <input
-                name="country"
-                placeholder="Enter Country"
-                value={formData.country}
-                onChange={handleChange}
-                className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-              />
-            </div>
+              {/* No of Hostels */}
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">
+                  No. of Hostels
+                </label>
+                <div className="w-full">
+                  <input
+                    name="noOfHostels"
+                    placeholder="Enter number of Hostels"
+                    value={formData.noOfHostels}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setHostelError("");
+                    }}
+                    className={`w-full border p-2 rounded placeholder:text-sm ${hostelError ? "border-red-500" : "border-gray-300"
+                      }`}
+                  />
+                  {hostelError && <ErrorMessage message={hostelError} type="error" />}
+                </div>
+              </div>
 
-            {/* Date */}
-            <div className="flex items-start text-left gap-3">
-              <label className="w-40 text-[12px] font-medium">Requested Date</label>
-              <input
-                type="date"
-                name="requestedDate"
-                onChange={handleChange}
-                className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-              />
-            </div>
+              {/* No of Tenants */}
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">
+                  No. of Tenants
+                </label>
+                <div className="w-full">
+                  <input
+                    name="noOfTenants"
+                    placeholder="Enter number of Tenants"
+                    value={formData.noOfTenants}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setTenantError("");
+                    }}
+                    className={`w-full border p-2 rounded placeholder:text-sm ${tenantError ? "border-red-500" : "border-gray-300"
+                      }`}
+                  />
+                  {tenantError && <ErrorMessage message={tenantError} type="error" />}
+                </div>
+              </div>
 
-            {/* Time */}
-            <div className="flex items-start text-left gap-3">
-              <label className="w-40 text-[12px] font-medium">Requested Time</label>
-              <input
-                type="time"
-                name="requestedTime"
-                onChange={handleChange}
-                className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-              />
-            </div>
+              {/* City */}
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">City</label>
+                <input
+                  name="city"
+                  value={formData.city}
+                  placeholder="Enter City"
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                />
+              </div>
 
-            {/* Comments */}
-            <div className="flex items-start text-left gap-3">
-              <label className="w-40 text-[12px] font-medium">Comments</label>
-              <textarea
-                name="comments"
-                placeholder="Enter Comments"
-                onChange={handleChange}
-                className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-              />
-            </div>
-            <div className="flex justify-end gap-3 mt-4">
-              <button onClick={onClose} className="px-4 py-2 border rounded">
-                Cancel
-              </button>
+              {/* State */}
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">State</label>
 
-              <button
-                onClick={handleSubmit}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-              >
-                {loading ? "Saving..." : "Submit"}
-              </button>
+                <div className="relative w-full">
+                  <input
+                    value={search}
+                    placeholder="Select State"
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setFormData({ ...formData, state: "" });
+                      setShowDropdown(true);
+                    }}
+                    onFocus={() => setShowDropdown(true)}
+                    className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                  />
+
+                  {showDropdown && (
+                    <div className="absolute z-50 w-full bg-white border rounded mt-1 max-h-40 overflow-y-auto shadow">
+                      {filteredStates.map((state, index) => (
+                        <div
+                          key={index}
+                          onClick={() => {
+                            setFormData({ ...formData, state });
+                            setSearch(state);
+                            setShowDropdown(false);
+                          }}
+                          className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          {state}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Country */}
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">Country</label>
+                <input
+                  name="country"
+                  placeholder="Enter Country"
+                  value={formData.country}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                />
+              </div>
+
+              {/* Date */}
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">Requested Date</label>
+                <input
+                  type="date"
+                  name="requestedDate"
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                />
+              </div>
+
+              {/* Time */}
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">Requested Time</label>
+                <input
+                  type="time"
+                  name="requestedTime"
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                />
+              </div>
+
+              {/* Comments */}
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">Comments</label>
+                <textarea
+                  name="comments"
+                  placeholder="Enter Comments"
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                />
+              </div>
+              <div className="flex justify-end gap-3 mt-4">
+                <button onClick={handleCloseDrawer} className="px-4 py-2 border rounded">
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleSubmit}
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  {loading ? "Saving..." : "Submit"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

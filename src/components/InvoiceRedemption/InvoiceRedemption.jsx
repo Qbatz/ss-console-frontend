@@ -164,7 +164,8 @@ setModalType("success");
                 <tr>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Source Invoice</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Target Invoice</th>
-                  <th className="px-3 py-2 text-left whitespace-nowrap">Hostel</th>
+                  <th className="px-3 py-2 text-left whitespace-nowrap">Hostel Name</th>
+                  <th className="px-3 py-2 text-left whitespace-nowrap">Tenant Name</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Amount</th>
                   {/* <th className="px-3 py-2 text-left whitespace-nowrap">Reference</th>
                     <th className="px-3 py-2 text-left whitespace-nowrap">Reason</th> */}
@@ -200,6 +201,7 @@ setModalType("success");
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.sourceInvoiceNumber}</td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.targetInvoiceNumber}</td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.hostelName}</td>
+                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.tenantName}</td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.redemptionAmount}</td>
                       {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.referenceNumber}</td>
                         <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.reason}</td> */}
