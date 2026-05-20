@@ -560,7 +560,9 @@ const Properties = () => {
                         <th className="px-4 py-3 w-[120px] text-center">
                           PlatForm
                         </th>
-
+ <th className="px-4 py-3 w-[120px] text-left whitespace-nowrap">
+                          Relational Agent
+                        </th>
                         <th className="px-4 py-3 w-[120px] text-center">
                           Status
                         </th>
@@ -737,7 +739,9 @@ const Properties = () => {
                             <td className="px-4 py-2 text-center">
                               {item.platform || "----"}
                             </td>
-
+                             <td className="px-4 py-2 text-center text-left whitespace-nowrap">
+  {item?.relationalAgents?.[0]?.agentName || "----"}
+</td>
                             <td className="px-4 py-2 text-center">
                               <span
                                 className={`flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap w-fit mx-auto ${item.subscriptionIsActive
@@ -755,122 +759,160 @@ const Properties = () => {
                               </span>
                             </td>
 
-                            <td className="px-4 py-2 text-center">
-                              <div className="flex items-center justify-center gap-2">
-                                <img
-                                  src={noteAdd}
-                                  alt="noteAdd"
-                                  className="w-5 h-5 cursor-pointer"
-                                // onClick={() => {
-                                //   setSelectedHostel(item);
-                                //   setShowNoteModal(true);
-                                // }}
-                                />
-                                {/* <img src={Circle} alt="circle" className="w-5 h-5 cursor-pointer" /> */}
-                                <div className="relative">
-                                  <img
-                                    src={Circle}
-                                    alt="circle"
-                                    className="w-5 h-5 cursor-pointer"
-                                    onClick={(e) => {
-                                      const rect = e.currentTarget.getBoundingClientRect();
+                          <td className="px-4 py-2 text-center">
 
-                                      setMenuPosition({
-                                        top: rect.bottom + 5,
-                                        left: rect.right - 150,
-                                      });
+  <div className="flex items-center justify-center gap-2">
 
-                                      setOpenMenu(openMenu === item.hostelId ? null : item.hostelId);
-                                    }}
-                                  />
+    <img
+      src={noteAdd}
+      alt="noteAdd"
+      className="w-5 h-5 cursor-pointer"
+    />
 
-                                  {openMenu === item.hostelId && (
-                                    <div
-                                      ref={menuRef}
-                                      className="fixed w-36 bg-white border rounded-lg shadow-lg z-[9999]"
-                                      style={{
-                                        top: menuPosition.top,
-                                        left: menuPosition.left,
-                                      }}
-                                    >
+    <div className="relative">
 
-                                      <button
-                                        onClick={() => {
-                                          setSelectedHostelId(item.hostelId);
-                                          setShowResetModal(true);
-                                          setOpenMenu(false)
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                                      >
-                                        Reset Expense
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          setDeleteHostelId(item.hostelId);
-                                          setShowDeleteModal(true);
-                                          setOpenMenu(false);
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 cursor-pointer"
-                                      >
-                                        Delete
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          setSelectedHostel(item);
-                                          setShowAssignModal(true);
-                                          setOpenMenu(false);
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                                      >
-                                        Assign Staff
-                                      </button>
+      <button
+        onClick={(e) => {
 
-                                    </div>
-                                  )}
-                                </div>
-                                {/* <img
-                                    src={Money}
-                                    onClick={() => handleCreateSubscription(item)}
-                                    alt="money"
-                                    className="w-5 h-5 cursor-pointer"
-                                  /> */}
-                                {/* <img
-                                  src={Money}
-                                  onClick={() => {
-                                    if (canWrite === true) handleCreateSubscription(item);
-                                  }}
-                                  alt="money"
-                                  className={`w-5 h-5 ${canWrite === true ? "cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
-                                /> */}
-                                {/* {item?.hostelPlan?.currentPlan === "Trial" && item?.isTrial === "true" && ( */}
-                                {/* <img
-    src={Money}
-    onClick={() => {
-         console.log("clicked", item , canWrite) ;
-      if (canWrite === true && item?.canAddTrial === true ) {
-     
-        handleCreateSubscription(item);
-    }}}
-    alt="money"
-    className={`w-5 h-5 ${(canWrite === true && item?.canAddTrial === true) ? "cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
-  /> */}
-                                <img
-                                  src={Money}
-                                  onClick={() => {
-                                    if (canWrite === true && item?.canAddTrial === true) {
-                                      setSelectedItem(item);
-                                      setShowTrialPopup(true);
-                                    }
-                                  }}
-                                  alt="money"
-                                  className={`w-5 h-5 ${canWrite === true && item?.canAddTrial === true
-                                    ? "cursor-pointer"
-                                    : "opacity-40 cursor-not-allowed"
-                                    }`}
-                                />
-                                {/* // )} */}
-                              </div>
-                            </td>
+          e.stopPropagation();
+
+          const rect =
+            e.currentTarget.getBoundingClientRect();
+
+          const viewportHeight =
+            window.innerHeight;
+
+          const menuHeight = 120;
+
+          const spaceBelow =
+            viewportHeight - rect.bottom;
+
+          setMenuPosition({
+
+            top:
+              spaceBelow < menuHeight
+                ? rect.top - menuHeight
+                : rect.bottom + 5,
+
+            left: rect.right - 150,
+
+          });
+
+          setOpenMenu(
+            openMenu === item.hostelId
+              ? null
+              : item.hostelId
+          );
+
+        }}
+        className={`
+          p-1.5 rounded-full
+          transition-all duration-150
+          active:scale-90
+
+          ${
+            openMenu === item.hostelId
+              ? "bg-[#EEF2FF]"
+              : "hover:bg-gray-100"
+          }
+        `}
+      >
+
+        <img
+          src={Circle}
+          alt="circle"
+          className={`
+            w-5 h-5 transition-transform duration-150
+            ${
+              openMenu === item.hostelId
+                ? "scale-110"
+                : ""
+            }
+          `}
+        />
+
+      </button>
+
+      {openMenu === item.hostelId && (
+
+        <div
+          ref={menuRef}
+          className="fixed w-36 bg-white border border-gray-200 rounded-xl shadow-xl z-[9999] overflow-hidden"
+          style={{
+            top: menuPosition.top,
+            left: menuPosition.left,
+          }}
+        >
+
+          <button
+            onClick={() => {
+              setSelectedHostelId(item.hostelId);
+              setShowResetModal(true);
+              setOpenMenu(false);
+            }}
+            className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            Reset Expense
+          </button>
+
+          <button
+            onClick={() => {
+              setDeleteHostelId(item.hostelId);
+              setShowDeleteModal(true);
+              setOpenMenu(false);
+            }}
+            className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-600 transition-colors cursor-pointer"
+          >
+            Delete
+          </button>
+
+          <button
+            onClick={() => {
+              setSelectedHostel(item);
+              setShowAssignModal(true);
+              setOpenMenu(false);
+            }}
+            className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            Assign Staff
+          </button>
+
+        </div>
+
+      )}
+
+    </div>
+
+    <img
+      src={Money}
+      onClick={() => {
+
+        if (
+          canWrite === true &&
+          item?.canAddTrial === true
+        ) {
+
+          setSelectedItem(item);
+          setShowTrialPopup(true);
+
+        }
+
+      }}
+      alt="money"
+      className={`
+        w-5 h-5 transition-transform duration-150
+        ${
+          canWrite === true &&
+          item?.canAddTrial === true
+            ? "cursor-pointer hover:scale-110 active:scale-95"
+            : "opacity-40 cursor-not-allowed"
+        }
+      `}
+    />
+
+  </div>
+
+</td>
 
                           </tr>
 

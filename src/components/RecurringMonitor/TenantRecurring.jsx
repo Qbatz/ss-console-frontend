@@ -467,7 +467,7 @@ const TenantRecurring = () => {
     `}
               >
                 <img
-                  src={!isTableView ? Building : buildingWhite}
+                  src={!isTableView ? Avatar : Avatar}
                   className="w-4 h-4 cursor-pointer"
                 />
               </button>
@@ -480,7 +480,7 @@ const TenantRecurring = () => {
     `}
               >
                 <img
-                  src={isTableView ? Avatar : Avatar}
+                  src={isTableView ? Building : buildingWhite}
                   className={`w-4 h-4 cursor-pointer ${!isTableView ? "opacity-60" : ""}`}
                 />
               </button>

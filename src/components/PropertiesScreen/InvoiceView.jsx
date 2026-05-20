@@ -36,6 +36,10 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
     const [modalType, setModalType] = useState("success");
     const [showSuccess, setShowSuccess] = useState(false);
     const [message, setMessage] = useState("");
+    const [menuPosition, setMenuPosition] = useState({
+  top: 0,
+  left: 0,
+});
     const menuRef = useRef(null);
 
 useEffect(() => {
@@ -479,27 +483,59 @@ useEffect(() => {
                                                         src={Circle}
                                                         className="w-4 h-4 cursor-pointer"
                                                         alt="menu"
-                                                        onClick={() =>
-                                                            setOpenMenu(
-                                                                openMenu === item.invoiceId
-                                                                    ? null
-                                                                    : item.invoiceId
-                                                            )
-                                                        }
+                                                        // onClick={() =>
+                                                        //     setOpenMenu(
+                                                        //         openMenu === item.invoiceId
+                                                        //             ? null
+                                                        //             : item.invoiceId
+                                                        //     )
+                                                        // }
+                                                        onClick={(e) => {
+
+  e.stopPropagation();
+
+  const rect = e.currentTarget.getBoundingClientRect();
+
+  const viewportHeight = window.innerHeight;
+
+  const menuHeight = 50;
+
+  const spaceBelow = viewportHeight - rect.bottom;
+
+  setMenuPosition({
+    top:
+      spaceBelow < menuHeight
+        ? rect.top - menuHeight
+        : rect.bottom + 5,
+
+    left: rect.left - 90,
+  });
+
+  setOpenMenu(
+    openMenu === item.invoiceId
+      ? null
+      : item.invoiceId
+  );
+
+}}
                                                     />
 
                                                 </div>
 
                                                 {openMenu === item.invoiceId && (
 
-                                                    <div
-                                                        className="
-        absolute right-5 top-8
-        bg-white border border-gray-200
-        rounded-lg shadow-lg z-50
-        min-w-[120px]
-      "
-                                                    >
+                                                  <div
+  className="
+    fixed
+    bg-white border border-gray-200
+    rounded-lg shadow-lg z-[99999]
+    min-w-[120px]
+  "
+  style={{
+    top: menuPosition.top,
+    left: menuPosition.left -30,
+  }}
+>
 
                                                         <button
                                                             className="

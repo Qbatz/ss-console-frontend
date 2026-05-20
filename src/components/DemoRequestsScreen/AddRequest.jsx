@@ -26,6 +26,7 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   const filteredStates = states.filter((s) =>
     s.toLowerCase().includes(search.toLowerCase())
@@ -88,6 +89,15 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
       setMobileError("Enter valid mobile number");
       valid = false;
     }
+    if (
+  formData.email &&
+  !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
+) {
+
+  setEmailError("Enter valid email address");
+  valid = false;
+
+}
 
     if (!formData.countryCode) {
       setCountryError("Country code is required");
@@ -144,6 +154,20 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
 
   const handleSubmit = async () => {
     const isValid = validateForm();
+  if (!formData.contactNo) {
+
+  setMobileError("Mobile number is required");
+  valid = false;
+
+} else if (
+  !/^[6-9]\d{9}$/.test(formData.contactNo) ||
+  /^(\d)\1{9}$/.test(formData.contactNo)
+) {
+
+  setMobileError("Enter valid mobile number");
+  valid = false;
+
+}
 
     if (!isValid) return;
 
@@ -224,33 +248,57 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
                   Name <span className="text-red-500">*</span>
                 </label>
                 <div className="w-full">
-                  <input
-                    name="name"
-                    placeholder="Enter Name"
-                    value={formData.name}
-                    onChange={(e) => {
-                      handleChange(e);
-                      setNameError("");
-                    }}
-                    className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-                  />
+                 <input
+  name="name"
+  placeholder="Enter Name"
+  value={formData.name}
+  onChange={(e) => {
+
+    const value = e.target.value;
+
+
+    if (/^[A-Za-z\s]*$/.test(value)) {
+
+      handleChange({
+        target: {
+          name: "name",
+          value,
+        },
+      });
+
+      setNameError("");
+    }
+
+  }}
+  className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+/>
                   {nameError && <ErrorMessage message={nameError} type="error" />}
                 </div>
               </div>
 
               {/* Email */}
-              <div className="flex items-start text-left gap-3">
-                <label className="w-40 text-[12px] font-medium">
-                  Email ID
-                </label>
-                <input
-                  name="email"
-                  placeholder="Enter Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-                />
-              </div>
+             <div className="flex items-start text-left gap-3">
+  <label className="w-40 text-[12px] font-medium">
+    Email ID
+  </label>
+
+  <div className="w-full">
+    <input
+      name="email"
+      placeholder="Enter Email"
+      value={formData.email}
+      onChange={(e) => {
+        handleChange(e);
+        setEmailError("");
+      }}
+      className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+    />
+
+    {emailError && (
+      <ErrorMessage message={emailError} type="error" />
+    )}
+  </div>
+</div>
 
               {/* Contact Number */}
               {/* <div className="flex items-start text-left gap-3">

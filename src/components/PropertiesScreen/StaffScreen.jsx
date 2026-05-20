@@ -91,23 +91,60 @@ const StaffScreen = ({ hostelData, refreshHostel, }) => {
   const isAllSelected =
     selectedColumns.length > 0 &&
     selectedColumns.every(col => col.selected);
+const handleMenuClick = (index, event) => {
 
-  const handleMenuClick = (index, event) => {
-    const rect = event.currentTarget.getBoundingClientRect();
+  const rect = event.currentTarget.getBoundingClientRect();
 
-    // same row click → toggle close
-    if (openMenuIndex === index) {
-      setOpenMenuIndex(null);
-      return;
-    }
+  if (openMenuIndex === index) {
+    setOpenMenuIndex(null);
+    return;
+  }
 
-    setMenuPos({
-      top: rect.bottom + window.scrollY,
-      left: rect.right + window.scrollX,
-    });
+  const viewportHeight = window.innerHeight;
 
-    setOpenMenuIndex(index);
-  };
+  const menuHeight = 120;
+
+  const spaceBelow = viewportHeight - rect.bottom;
+setMenuPos({
+
+  top:
+    spaceBelow < menuHeight
+      ? rect.top - menuHeight
+      : rect.bottom + 5,
+
+  left: rect.right - 10,
+
+});
+  // setMenuPos({
+
+  //   top:
+  //     spaceBelow < menuHeight
+  //       ? rect.top - menuHeight
+  //       : rect.bottom + 5,
+
+  //   left: rect.right - 170,
+
+  // });
+
+  setOpenMenuIndex(index);
+
+};
+  // const handleMenuClick = (index, event) => {
+  //   const rect = event.currentTarget.getBoundingClientRect();
+
+  //   // same row click → toggle close
+  //   if (openMenuIndex === index) {
+  //     setOpenMenuIndex(null);
+  //     return;
+  //   }
+
+  //   setMenuPos({
+  //     top: rect.bottom + window.scrollY,
+  //     left: rect.right + window.scrollX,
+  //   });
+
+  //   setOpenMenuIndex(index);
+  // };
   const handleChangePassword = async () => {
     let hasError = false;
     if (!newPassword) {
@@ -335,11 +372,12 @@ setPinError(res.message)
                         {openMenuIndex !== null && menuPos && (
                           <div
                             ref={menuRef}
-                            className="fixed z-50 w-44 bg-white border border-gray-200 rounded-lg shadow-lg"
+                           className="fixed z-50 w-44 bg-white border border-gray-200 rounded-xl shadow bg-white overflow-hidden"
                             style={{
                               top: menuPos.top,
                               left: menuPos.left,
-                              transform: "translateX(-100%)",
+                             transform: "translateX(-100%)",
+marginLeft: "-8px",
                             }}
                           >
                             <button
@@ -372,7 +410,7 @@ setPinError(res.message)
                             </button>
 
 
-                           <button
+                           {/* <button
   className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
   onMouseDown={(e) => {
     e.preventDefault();
@@ -382,6 +420,18 @@ setPinError(res.message)
     setTimeout(() => {
       setOpenMenuIndex(null);
     }, 0);
+  }}
+>
+  Reset Pin
+</button> */}
+<button
+  className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+  onClick={() => {
+
+    setShowResetPinModal(true);
+
+    setOpenMenuIndex(null);
+
   }}
 >
   Reset Pin
@@ -496,7 +546,7 @@ setPinError(res.message)
                             <img src={Circle} className="w-5 h-5" />
                           </button>
                         </div>
-                        {openMenuIndex !== null && menuPos && (
+                        {/* {openMenuIndex !== null && menuPos && (
                           <div
                             ref={menuRef}
                             className="fixed z-50 w-44 bg-white border border-gray-200 rounded-lg shadow-lg"
@@ -533,7 +583,7 @@ setPinError(res.message)
                             </button>
 
                           </div>
-                        )}
+                        )} */}
                       </td>
 
                     </tr>
@@ -664,97 +714,129 @@ setPinError(res.message)
         </div>
       )}
       {/* BODY */}
-      {showDrawer && (
-        <div className="fixed inset-0 z-50 flex">
+     {showDrawer && (
+  <div className="fixed inset-0 z-50 flex">
 
-          {/* BACKDROP */}
-          <div
-            className="flex-1 bg-black/30"
-            onClick={() => setShowDrawer(false)}
-          ></div>
+    {/* BACKDROP */}
+    <div
+      className="flex-1 bg-black/30"
+      onClick={() => setShowDrawer(false)}
+    ></div>
 
-          {/* RIGHT DRAWER */}
-          <div className="w-[400px] bg-white h-screen shadow-xl flex flex-col">
+    {/* DRAWER */}
+    <div className="w-[400px] bg-white h-screen shadow-xl flex flex-col">
 
-            {/* HEADER */}
-            {/* <div className="px-5 py-4 border-b flex justify-between items-center">
-        <h2 className="text-[16px] font-semibold">Customize Tabs</h2>
-        <button onClick={() => setShowDrawer(false)}>✕</button>
-      </div> */}
+      {/* BODY */}
+      <div className="flex-1 overflow-y-auto p-4">
 
-            {/* BODY */}
-            <div className="flex-1 overflow-y-auto p-4">
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-4">
 
-              <div className="flex justify-between mb-3">
-                <span className="font-medium">Customize Tabs</span>
+          <span className="font-semibold text-[20px] text-gray-800">
+            Customize Tabs
+          </span>
 
-                <button
-                  onClick={() => {
-                    const updated = selectedColumns.map(col => ({
-                      ...col,
-                      selected: !isAllSelected,
-                    }));
-                    setSelectedColumns(updated);
-                  }}
-                  className="text-blue-600 text-sm font-medium"
+          {selectedUser?.tableColumns?.length > 0 && (
+            <button
+              onClick={() => {
+
+                const updated = selectedColumns.map(col => ({
+                  ...col,
+                  selected: !isAllSelected,
+                }));
+
+                setSelectedColumns(updated);
+
+              }}
+              className="text-blue-600 text-sm font-medium cursor-pointer"
+            >
+              ✓ {isAllSelected ? "Unselect all" : "Select all"}
+            </button>
+          )}
+
+        </div>
+
+        {/* MODULE */}
+        <div className="mb-4">
+
+          <label className="text-[12px] font-medium text-gray-600 mb-1 block text-left">
+            Module
+          </label>
+
+          <select
+            value={selectedModule || ""}
+            onChange={(e) => {
+
+              const moduleName = e.target.value;
+
+              setSelectedModule(moduleName);
+
+              const moduleData =
+                selectedUser?.tableColumns?.find(
+                  item => item.moduleName === moduleName
+                );
+
+              setSelectedColumns(moduleData?.columns || []);
+
+            }}
+            className="w-full border rounded-lg px-3 py-2 text-sm bg-white outline-none"
+          >
+
+            {selectedUser?.tableColumns?.length > 0 ? (
+
+              selectedUser?.tableColumns?.map((item) => (
+                <option
+                  key={item.tableColumnId}
+                  value={item.moduleName}
                 >
-                  ✓ {isAllSelected ? "Unselect all" : "Select all"}
-                </button>
-              </div>
+                  {item.moduleName}
+                </option>
+              ))
 
-              <div className="mb-3">
+            ) : (
 
-                <label className="text-[12px] font-medium text-gray-600 mb-1 block text-left">
-                  Module
-                </label>
+              <option value="" disabled>
+                No modules available
+              </option>
 
-                <select
-                  value={selectedModule}
-                  onChange={(e) => {
+            )}
 
-                    const moduleName = e.target.value;
+          </select>
 
-                    setSelectedModule(moduleName);
+        </div>
 
-                    const moduleData =
-                      selectedUser?.tableColumns?.find(
-                        item => item.moduleName === moduleName
-                      );
+        {/* SEARCH */}
+        {selectedUser?.tableColumns?.length > 0 && (
+          <input
+            type="text"
+            placeholder="Search"
+            className="border px-3 py-2 rounded-lg mb-4 w-full outline-none"
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        )}
 
-                    setSelectedColumns(moduleData?.columns || []);
-                  }}
-                  className="w-full border rounded-lg px-3 py-2 text-sm bg-white outline-none"
-                >
+        {/* EMPTY STATE */}
+        {selectedColumns?.length === 0 ? (
 
-                  {selectedUser?.tableColumns?.map((item) => (
-                    <option
-                      key={item.tableColumnId}
-                      value={item.moduleName}
-                    >
-                      {item.moduleName}
-                    </option>
-                  ))}
+          <div className="border border-dashed border-gray-300 rounded-xl h-[260px] flex flex-col items-center justify-center bg-gray-50">
 
-                </select>
+            <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3 text-2xl">
+              📂
+            </div>
 
-              </div>
-              <input
-                type="text"
-                placeholder="Search"
-                className="border px-3 py-2 rounded mb-3 w-full"
-                onChange={(e) => setSearch(e.target.value)}
-              />
+            <p className="text-gray-700 font-medium text-sm">
+              No Columns Found
+            </p>
 
+            <p className="text-gray-400 text-xs mt-1 text-center px-6">
+              No table columns are available for the selected module.
+            </p>
 
-              {selectedColumns?.length === 0 ? (
+          </div>
 
-                <div className="flex items-center justify-center h-[200px] text-gray-400 text-sm border rounded-lg">
-                  No columns available for this module
-                </div>
+        ) : (
 
-              ) : (
-
-                <div className="space-y-2">
+          <div className="space-y-2">
 
                   {(selectedColumns || [])
                     .map((col, index) => ({ ...col, originalIndex: index }))
@@ -813,28 +895,34 @@ setPinError(res.message)
 
                 </div>
 
-              )}
-            </div>
+        )}
 
-            {/* FOOTER */}
-            <div className="p-4 border-t flex justify-between cursor-pointer">
-              <button
-                onClick={handleResetColumns}
-              >
-                Reset
-              </button>
+      </div>
 
-              <button
-                onClick={handleSaveColumns}
-                className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
-              >
-                Save
-              </button>
-            </div>
+      {/* FOOTER */}
+      {selectedUser?.tableColumns?.length > 0 && (
+        <div className="p-4 border-t flex justify-between">
 
-          </div>
+          <button
+            onClick={handleResetColumns}
+            className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50 cursor-pointer"
+          >
+            Reset
+          </button>
+
+          <button
+            onClick={handleSaveColumns}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 cursor-pointer"
+          >
+            Save
+          </button>
+
         </div>
       )}
+
+    </div>
+  </div>
+)}
       {showResetPinModal && (
   <div
     className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"

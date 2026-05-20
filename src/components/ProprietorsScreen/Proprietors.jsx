@@ -682,24 +682,60 @@ const getFilterParams = () => {
 
                         <td className="px-4 py-1 relative">
 
-                          <button
-                           onClick={(e) => {
-  e.stopPropagation();
+        <button
+  onClick={(e) => {
 
-  const rect = e.currentTarget.getBoundingClientRect();
+    e.stopPropagation();
 
-  setMenuPosition({
-    top: rect.bottom + 5,
-    left: rect.right - 120,
-  });
+    const rect = e.currentTarget.getBoundingClientRect();
 
-  setOpenMenuId(
-    openMenuId === item.ownerId ? null : item.ownerId
-  );
-}}
-                          >
-                            <img src={Menucircle} className="w-5 h-5 cursor-pointer" />
-                          </button>
+    const viewportHeight = window.innerHeight;
+
+    const menuHeight = 100;
+
+    const spaceBelow = viewportHeight - rect.bottom;
+
+    setMenuPosition({
+
+      top:
+        spaceBelow < menuHeight
+          ? rect.top - menuHeight
+          : rect.bottom + 15,
+
+      left: rect.right - 130,
+
+    });
+
+    setOpenMenuId(
+      openMenuId === item.ownerId ? null : item.ownerId
+    );
+
+  }}
+  className={`
+    p-1.5 rounded-full
+    transition-all duration-150
+    active:scale-90
+
+    ${
+      openMenuId === item.ownerId
+        ? "bg-[#EEF2FF]"
+        : "hover:bg-gray-100"
+    }
+  `}
+>
+  <img
+    src={Menucircle}
+    className={`
+      w-5 h-5 cursor-pointer
+      transition-transform duration-150
+      ${
+        openMenuId === item.ownerId
+          ? "scale-110"
+          : ""
+      }
+    `}
+  />
+</button>
 
                           {openMenuId === item.ownerId && (
                           <div
