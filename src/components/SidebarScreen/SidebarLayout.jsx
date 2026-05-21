@@ -502,10 +502,11 @@ const SidebarItem = ({
     <NavLink
       to={to}
       className={`flex items-center justify-between px-1 py-2 rounded-lg cursor-pointer transition text-[12px]
-        ${isActive
-          ? "bg-blue-50 text-blue-600 font-medium"
-          : "hover:bg-gray-100 text-gray-600"
-        }`}
+  ${
+    isActive
+      ? "bg-blue-50 text-black font-medium"
+      : "hover:bg-gray-100 text-gray-600"
+  }`}
     >
       <div className="flex items-center gap-3">
         {activeIcon && inactiveIcon && (
