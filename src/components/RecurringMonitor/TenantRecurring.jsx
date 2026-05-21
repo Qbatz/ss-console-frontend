@@ -81,6 +81,7 @@ const TenantRecurring = () => {
     recurringPendingCount: 0,
     subscriptionExpiredCount: 0
   });
+  const customerDropdownRef = useRef(null);
 
   const [resStatusOptions, setResStatusOptions] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -150,6 +151,22 @@ const TenantRecurring = () => {
       setHostelBasedTrue([])
     }
   };
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      customerDropdownRef.current &&
+      !customerDropdownRef.current.contains(event.target)
+    ) {
+      setOpenCustomerDropdown(null);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
   useEffect(() => {
     fetchRecurring();
   }, [page, size, filter, search, statusFilter, appliedSystemFilter, billingModelFilterBy, isTableView]);
@@ -881,6 +898,7 @@ const TenantRecurring = () => {
                                       {/* DROPDOWN */}
                                       {openCustomerDropdown && (
                                         <div
+                                         ref={customerDropdownRef}
                                           className="fixed w-64 bg-white border rounded-lg shadow-lg z-[99999]"
                                           style={{
                                             top: dropdownPosition.top,

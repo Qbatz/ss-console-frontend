@@ -169,7 +169,7 @@ const PropertyOverview = () => {
     if (res?.success) {
       setModalType("success");
       setMessage(res?.message);
-fetchData()
+
 
       setShowNoteModal(false);
       setShowSuccess(true);
@@ -189,11 +189,11 @@ fetchData()
 
   const handleOwnerClick = async (item) => {
 
-    const res = await getOwnerById(item.ownerInfo.ownerId);
+    const res = await getOwnerById(item.owner.userId);
 
     if (res?.success) {
 
-      navigate(`/ProprietorsOverview/${item.ownerInfo.ownerId}`, {
+      navigate(`/ProprietorsOverview/${item.owner.userId}`, {
         state: { ownerData: res.data }
       });
 
@@ -540,7 +540,6 @@ if (updated?.success) {
       setMenuError(res?.message);
     }
   };
- 
 
   if (!hostelData) {
     return (
@@ -595,7 +594,7 @@ if (updated?.success) {
                 <p className="text-sm text-gray-500 flex items-center gap-1">
                   {hostelData.hostelId} |
                   <span className="text-blue-600 cursor-pointer hover:underline" onClick={() => handleOwnerClick(hostelData)}>
-                    {hostelData.ownerInfo?.fullName}
+                    {hostelData.owner?.fullName}
                   </span>
 
                   <img src={Arrow} className="w-3 h-3 ml-1" />
@@ -1067,35 +1066,25 @@ if (updated?.success) {
     src={Circle}
     alt="menu"
     className="w-5 h-5 cursor-pointer"
- onClick={(e) => {
-  e.stopPropagation();
+    onClick={(e) => {
+      e.stopPropagation();
 
-  const viewportHeight = window.innerHeight;
-  const spaceBelow = viewportHeight - e.clientY;
+      setMenuPosition({
+        top: e.clientY + 5,
+        left: e.clientX,
+      });
 
-  const menuHeight = 50;
-
-  setMenuPosition({
-    top:
-      spaceBelow < menuHeight
-        ? e.clientY - menuHeight
-        : e.clientY + 5,
-
-    left: e.clientX,
-  });
-
-  setOpenMenu(openMenu === index ? null : index);
-}}
+      setOpenMenu(openMenu === index ? null : index);
+    }}
   />
 
   {openMenu === index && (
     <div
-    className="absolute w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
-     style={{
-  position: "fixed",
-  top: menuPosition.top,
-  left: menuPosition.left - 120,
-}}
+      className="fixed w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
+      style={{
+        top: menuPosition.top,
+        left: menuPosition.left - 120,
+      }}
     >
       <button
         disabled={!canDelete}
