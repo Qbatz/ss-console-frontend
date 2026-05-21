@@ -395,68 +395,107 @@ const [deleteId, setDeleteId] = useState(null);
                         {item.createdAtDate} {item.createdAtTime}
                       </td>
                       <td className="px-4 py-2 text-left font-medium text-[11px] whitespace-nowrap">{item.createdBy}</td>
-                      <td className="px-4 py-2">
+                     <td className="px-4 py-2">
 
-                        <div className="relative flex justify-center">
+  <div className="relative flex justify-center">
 
-                          <img
-                            src={Circle}
-                            className="w-5 h-5 cursor-pointer"
-                            onClick={(e) => {
+    <button
+      onClick={(e) => {
 
-                              const rect = e.currentTarget.getBoundingClientRect();
+        e.stopPropagation();
 
-                              setOpenMenuId(
-                                openMenuId === item.id
-                                  ? null
-                                  : {
-                                    id: item.id,
-                                    top: rect.bottom + 5,
-                                    left: rect.left - 90
-                                  }
-                              );
-                            }}
-                          />
+        const rect =
+          e.currentTarget.getBoundingClientRect();
 
-                        </div>
+        const viewportHeight =
+          window.innerHeight;
 
-                        {openMenuId?.id === item.id && (
-                          <div
-                            ref={menuRef}
-                            className="fixed bg-white border border-gray-200 rounded-lg shadow-lg w-28 z-[99999]"
-                            style={{
-                              top: openMenuId.top,
-                              left: openMenuId.left
-                            }}
-                          >
+        const menuHeight = 90;
 
-                            <button
-                              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                              onClick={() => {
-                                setSelectedItem(item);
-                                setEditAmount(item.redemptionAmount);
-                                setShowEditModal(true);
-                                setOpenMenuId(null);
-                              }}
-                            >
-                              Edit
-                            </button>
+        const spaceBelow =
+          viewportHeight - rect.bottom;
 
-                           <button
-  className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 cursor-pointer"
-  onClick={() => {
-    setDeleteId(item.id);
-    setShowDeleteModal(true);
-    setOpenMenuId(null);
-  }}
->
-  Delete
-</button>
+        setOpenMenuId(
+          openMenuId?.id === item.id
+            ? null
+            : {
+                id: item.id,
 
-                          </div>
-                        )}
+                top:
+                  spaceBelow < menuHeight
+                    ? rect.top - menuHeight + 40
+                    : rect.bottom + 8,
 
-                      </td>
+                left: rect.left - 90
+              }
+        );
+
+      }}
+      className={`
+        p-1.5 rounded-full
+        transition-all duration-200
+
+        ${
+          openMenuId?.id === item.id
+            ? "bg-[#EEF2FF]"
+            : "hover:bg-gray-100"
+        }
+      `}
+    >
+
+      <img
+        src={Circle}
+        className="w-5 h-5 cursor-pointer"
+      />
+
+    </button>
+
+  </div>
+
+  {openMenuId?.id === item.id && (
+
+    <div
+      ref={menuRef}
+      className="
+        fixed w-28 bg-white rounded-xl z-[99999]
+        border border-gray-100
+        shadow-[0_12px_35px_rgba(0,0,0,0.18)]
+        overflow-hidden
+      "
+      style={{
+        top: openMenuId.top,
+        left: openMenuId.left
+      }}
+    >
+
+      <button
+        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+        onClick={() => {
+          setSelectedItem(item);
+          setEditAmount(item.redemptionAmount);
+          setShowEditModal(true);
+          setOpenMenuId(null);
+        }}
+      >
+        Edit
+      </button>
+
+      <button
+        className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 cursor-pointer"
+        onClick={() => {
+          setDeleteId(item.id);
+          setShowDeleteModal(true);
+          setOpenMenuId(null);
+        }}
+      >
+        Delete
+      </button>
+
+    </div>
+
+  )}
+
+</td>
                     </tr>
                   ))
                 )}

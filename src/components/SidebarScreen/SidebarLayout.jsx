@@ -243,9 +243,9 @@ useEffect(() => {
                 }}
                 className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100"
               >
-                <div className="flex items-center gap-5">
+                <div className="flex items-center gap-3">
                   <img src={Users} className="w-5 h-5" />
-                  <span>Sales</span>
+                  <span className="text-[12px]">Sales</span>
                 </div>
 
                 <span className={`transform transition ${openSales ? "rotate-180" : ""}`}>
@@ -255,35 +255,35 @@ useEffect(() => {
 
               {/* Children */}
               {openSales && (
-                <div className="ml-3 mt-1 space-y-1">
+                <div className="ml-7 mt-1 space-y-1">
 
                   <SidebarItem
                     title="Demo Requests"
                     count={dashboardData?.demoRequestCount || 0}
                     to={`/demo-requests/${adminDetails?.roleId}`}
-                    activeIcon={Subscription}
-                    inactiveIcon={Subscription}
+                    // activeIcon={Subscription}
+                    // inactiveIcon={Subscription}
                   />
 
                   <SidebarItem
                     title="Subscriptions"
                     to={`/subscription/${adminDetails?.roleId}`}
-                    activeIcon={Subscription}
-                    inactiveIcon={Subscription}
+                    // activeIcon={Subscription}
+                    // inactiveIcon={Subscription}
                   />
 
                   <SidebarItem
                     title="Trial Users"
                     to={`/trial-users/${adminDetails?.roleId}`}
-                    activeIcon={Users}
-                    inactiveIcon={Users}
+                    // activeIcon={Users}
+                    // inactiveIcon={Users}
                   />
 
                   <SidebarItem
                     title="Transactions"
                     to={`/transactions/${adminDetails?.roleId}`}
-                    activeIcon={Billings}
-                    inactiveIcon={Billings}
+                    // activeIcon={Billings}
+                    // inactiveIcon={Billings}
                   />
 
                 </div>
@@ -309,13 +309,13 @@ useEffect(() => {
               <div
                 onClick={() => {
                   setRecurringOpen(!recurringOpen);
-                  setOpenSales(false); // 🔥 close other
+                  setOpenSales(false);
                 }}
                 className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg"
               >
-                <div className="flex items-center gap-5">
+                <div className="flex items-center gap-3">
                   <img src={Subscription} className="w-5 h-5" />
-                  <span className="font-medium">Recurring Monitor</span>
+                  <span className="text-[12px]">Recurring Monitor</span>
                 </div>
 
                 <span className={`transform transition ${recurringOpen ? "rotate-180" : ""}`}>
@@ -501,13 +501,14 @@ const SidebarItem = ({
   return (
     <NavLink
       to={to}
-      className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition
-        ${isActive
-          ? "bg-blue-50 text-blue-600 font-medium"
-          : "hover:bg-gray-100 text-gray-600"
-        }`}
+      className={`flex items-center justify-between px-1 py-2 rounded-lg cursor-pointer transition text-[12px]
+  ${
+    isActive
+      ? "bg-blue-50 text-black font-medium"
+      : "hover:bg-gray-100 text-gray-600"
+  }`}
     >
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-3">
         {activeIcon && inactiveIcon && (
           <img
             src={isActive ? activeIcon : inactiveIcon}
@@ -519,7 +520,7 @@ const SidebarItem = ({
       </div>
 
       {count && (
-        <span className="text-xs bg-gray-100 px-2 rounded-full text-blue-500">
+        <span className="text-xs bg-gray-100 px-2 rounded-full text-blue-500 text-[11px]">
           {count}
         </span>
       )}

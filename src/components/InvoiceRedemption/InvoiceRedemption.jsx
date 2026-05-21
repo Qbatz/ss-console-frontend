@@ -27,6 +27,10 @@ const [modalType, setModalType] = useState("success");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 const [deleteId, setDeleteId] = useState(null);
   const totalPages = Math.ceil(totalRecords / rowsPerPage);
+  const [menuPos, setMenuPos] = useState({
+  top: 0,
+  left: 0
+});
 
   const fetchData = async () => {
     const res = await getInvoiceRedemption(
@@ -155,9 +159,9 @@ setModalType("success");
         </div>
 
         {/* TABLE */}
-        <div className="bg-white rounded-xl border border-gray-300 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-300 shadow-sm overflow-visible">
 
-          <div className="max-h-[400px] overflow-y-auto">
+         <div className="max-h-[400px] overflow-y-auto table-wrapper">
             <table className="w-full text-sm">
 
               <thead className="bg-[#F8F9FF] sticky top-0 z-10 text-gray-600">
@@ -212,68 +216,94 @@ setModalType("success");
                         {item.createdAtDate} {item.createdAtTime}
                       </td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.createdBy}</td>
-                      <td className="px-4 py-2">
+                   <td className="px-4 py-2 relative overflow-visible">
 
-                        <div className="relative flex justify-center">
+  <div className="flex justify-center">
 
-                          <img
-                            src={Circle}
-                            className="w-5 h-5 cursor-pointer"
-                            onClick={(e) => {
+    <img
+      src={Circle}
+      className="w-5 h-5 cursor-pointer"
+     onClick={(e) => {
 
-                              const rect = e.currentTarget.getBoundingClientRect();
+  e.stopPropagation();
 
-                              setOpenMenuId(
-                                openMenuId?.id === item.id
-                                  ? null
-                                  : {
-                                    id: item.id,
-                                    top: rect.bottom + 5,
-                                    left: rect.left - 90
-                                  }
-                              );
-                            }}
-                          />
+  const rect =
+    e.currentTarget.getBoundingClientRect();
 
-                        </div>
+  const viewportHeight =
+    window.innerHeight;
 
-                        {openMenuId?.id === item.id && (
-                          <div
-                            ref={menuRef}
-                            className="fixed bg-white border border-gray-200 rounded-lg shadow-lg w-28 z-[99999]"
-                            style={{
-                              top: openMenuId.top,
-                              left: openMenuId.left
-                            }}
-                          >
+  const menuHeight = 90;
 
-                          <button
-  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-  onClick={() => {
-    setSelectedItem(item);
-    setEditAmount(item.redemptionAmount);
-    setShowEditModal(true);
-    setOpenMenuId(null);
-  }}
->
-  Edit
-</button>
+  const spaceBelow =
+    viewportHeight - rect.bottom;
 
-                           <button
-  className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 cursor-pointer"
-  onClick={() => {
-    setDeleteId(item.id);
-    setShowDeleteModal(true);
-    setOpenMenuId(null);
-  }}
->
-  Delete
-</button>
+  setMenuPos({
 
-                          </div>
-                        )}
+    top:
+      spaceBelow < menuHeight
+        ? rect.top - menuHeight + 40
+        : rect.bottom + 8,
 
-                      </td>
+    left: rect.left - 100
+
+  });
+
+  setOpenMenuId(
+    openMenuId === item.id
+      ? null
+      : item.id
+  );
+}}
+    />
+
+  </div>
+
+  {openMenuId === item.id && (
+
+  <div
+    ref={menuRef}
+    className="
+      fixed w-28 bg-white rounded-xl
+      border border-gray-100
+      shadow-[0_12px_35px_rgba(0,0,0,0.18)]
+      overflow-hidden
+      z-[99999]
+    "
+    style={{
+      top: menuPos.top,
+      left: menuPos.left
+    }}
+  >
+
+      <button
+        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+        onClick={() => {
+          setSelectedItem(item);
+          setEditAmount(item.redemptionAmount);
+          setShowEditModal(true);
+          setOpenMenuId(null);
+        }}
+      >
+        Edit
+      </button>
+
+      <button
+        className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 cursor-pointer"
+        onClick={() => {
+          setDeleteId(item.id);
+          setShowDeleteModal(true);
+          setOpenMenuId(null);
+        }}
+      >
+        Delete
+      </button>
+
+    </div>
+
+  )}
+
+</td>
                     </tr>
                   ))
                 )}

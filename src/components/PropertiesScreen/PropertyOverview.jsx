@@ -169,7 +169,7 @@ const PropertyOverview = () => {
     if (res?.success) {
       setModalType("success");
       setMessage(res?.message);
-
+fetchData()
 
       setShowNoteModal(false);
       setShowSuccess(true);
@@ -540,6 +540,7 @@ if (updated?.success) {
       setMenuError(res?.message);
     }
   };
+ 
 
   if (!hostelData) {
     return (
@@ -1066,25 +1067,35 @@ if (updated?.success) {
     src={Circle}
     alt="menu"
     className="w-5 h-5 cursor-pointer"
-    onClick={(e) => {
-      e.stopPropagation();
+ onClick={(e) => {
+  e.stopPropagation();
 
-      setMenuPosition({
-        top: e.clientY + 5,
-        left: e.clientX,
-      });
+  const viewportHeight = window.innerHeight;
+  const spaceBelow = viewportHeight - e.clientY;
 
-      setOpenMenu(openMenu === index ? null : index);
-    }}
+  const menuHeight = 50;
+
+  setMenuPosition({
+    top:
+      spaceBelow < menuHeight
+        ? e.clientY - menuHeight
+        : e.clientY + 5,
+
+    left: e.clientX,
+  });
+
+  setOpenMenu(openMenu === index ? null : index);
+}}
   />
 
   {openMenu === index && (
     <div
-      className="fixed w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
-      style={{
-        top: menuPosition.top,
-        left: menuPosition.left - 120,
-      }}
+    className="absolute w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
+     style={{
+  position: "fixed",
+  top: menuPosition.top,
+  left: menuPosition.left - 120,
+}}
     >
       <button
         disabled={!canDelete}

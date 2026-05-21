@@ -214,7 +214,7 @@ const Subscription = () => {
                           <th className="px-4 py-3 text-left">Property Name</th>
                           {/* <th className="px-4 py-3 text-left">Proprietor</th>
                           <th className="px-4 py-3 text-left">Status</th> */}
-                          <th className="px-4 py-3 text-left">Plan Type</th>
+                          <th className="px-4 py-3 text-left">Plan Name</th>
                           <th className="px-4 py-3 text-left">Start Date</th>
                           <th className="px-4 py-3 text-left">Expiry Date</th>
                           <th className="px-4 py-3 text-left">Actions</th>

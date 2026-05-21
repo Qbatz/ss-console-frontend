@@ -203,6 +203,7 @@ const [deleteLoading, setDeleteLoading] = useState(false);
       setModalType("success");
       setMessage(res.message);
       setShowSuccess(true);
+      fetchData()
 
       setTimeout(() => {
         setShowSuccess(false);
@@ -370,8 +371,10 @@ const [deleteLoading, setDeleteLoading] = useState(false);
                   <tr>
                     <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">ID</th>
                     <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Name</th>
+                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Mobile No</th>
                     <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Organization</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Date</th>
+                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase whitespace-nowrap">Requested Date</th>
+                      <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase whitespace-nowrap">Presented At</th>
                     <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Assigned Staff</th>
                     <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Status</th>
                     {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Conversion</th> */}
@@ -451,14 +454,98 @@ const [deleteLoading, setDeleteLoading] = useState(false);
                         <td className="px-4 py-2 text-[12px] text-left">
                           {item.name || "----"}
                         </td>
+                         {/* <td className="px-4 py-2 text-[12px] text-left">
+                          {item.contactNo || "----"}
+                        </td> */}
+                        <td className="px-4 py-2 text-[12px] text-left">
+  <div className="flex flex-col">
+    
+    <span>
+      {item.contactNo || "----"}
+    </span>
+
+    {item.emailId && (
+      <span className="text-[11px] text-gray-500 whitespace-nowrap">
+        {item.emailId}
+      </span>
+    )}
+
+  </div>
+</td>
 
                         <td className="px-4 py-2 text-[12px] text-left ">
                           {item.organization || "----"}
                         </td>
 
-                        <td className="px-4 py-2 text-[12px] text-left">
+                        {/* <td className="px-4 py-2 text-[12px] text-left">
                           {item.requestedDate || "----"}
-                        </td>
+                        </td> */}
+                        {/* <td className="px-4 py-2 text-[12px] text-left">
+  <div className="flex flex-col">
+
+    <span>
+      {item.requestedDate || "----"}
+    </span>
+
+    <span className="text-[11px] text-gray-500">
+      {item.requestedTime || "----"}
+    </span>
+
+  </div>
+</td> */}
+
+<td className="px-4 py-2 text-[12px] text-left">
+  {(item.requestedDate || item.requestedTime) ? (
+    <div className="flex flex-col">
+
+      {item.requestedDate && (
+        <span>{item.requestedDate}</span>
+      )}
+
+      {item.requestedTime && (
+        <span className="text-[11px] text-gray-500">
+          {item.requestedTime}
+        </span>
+      )}
+
+    </div>
+  ) : (
+    "----"
+  )}
+</td>
+
+                      {/* <td className="px-4 py-2 text-[12px] text-left">
+  <div className="flex flex-col">
+
+    <span>
+      {item.presentedAtDate || "----"}
+    </span>
+
+    <span className="text-[11px] text-gray-500">
+      {item.presentedAtTime || "----"}
+    </span>
+
+  </div>
+</td> */}
+<td className="px-4 py-2 text-[12px] text-left">
+  {(item.presentedAtDate || item.presentedAtTime) ? (
+    <div className="flex flex-col">
+
+      {item.presentedAtDate && (
+        <span>{item.presentedAtDate}</span>
+      )}
+
+      {item.presentedAtTime && (
+        <span className="text-[11px] text-gray-500">
+          {item.presentedAtTime}
+        </span>
+      )}
+
+    </div>
+  ) : (
+    "----"
+  )}
+</td>
 
                         <td className="px-4 py-2 text-[12px] text-left">
                           {item.assignedTo === null
@@ -472,104 +559,136 @@ const [deleteLoading, setDeleteLoading] = useState(false);
                           {item.demoRequestStatus}
                         </td>
 
-                        <td className="px-4 py-2 relative">
+                       <td className="px-4 py-2 relative">
 
-                          <img
-                            src={Circle}
-                            alt="menu"
-                            className="w-5 h-5 cursor-pointer menu-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenMenu({
-                                id: item.requestId,
-                                x: e.clientX,
-                                y: e.clientY
-                              });
-                            }}
-                          />
-
-                          {openMenu?.id === item.requestId && (
-                            <div
-                              className="fixed w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-[99999]"
-                              style={{
-                                top: openMenu.y + 5,
-                                left: openMenu.x - 120
-                              }}
-                            >
-                              {/* <button
-                                onClick={() => {
-                                  setSelectedItem(item);
-                                  setShowModal(true);
-                                  setOpenMenu(null);
-                                }}
-                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                              >
-                                Assign Staff
-                              </button> */}
-{item?.canAssignStaff && (
   <button
-    onClick={() => {
-      setSelectedItem(item);
-      setShowModal(true);
-      setOpenMenu(null);
-    }}
-    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-  >
-    Assign Staff
-  </button>
-)}
+  onClick={(e) => {
 
-                              {/* <button
-  disabled={!canAssignStaff}
-  onClick={() => {
-    if (!canAssignStaff) return;
+    e.stopPropagation();
 
-    setSelectedItem(item);
-    setShowModal(true);
-    setOpenMenu(null);
+    const rect =
+      e.currentTarget.getBoundingClientRect();
+
+    const viewportHeight =
+      window.innerHeight;
+
+    const menuHeight = 180;
+
+    const spaceBelow =
+      viewportHeight - rect.bottom;
+
+    const openUpwards =
+      spaceBelow < menuHeight;
+
+    setOpenMenu({
+
+      id:
+        openMenu?.id === item.requestId
+          ? null
+          : item.requestId,
+
+      x: rect.right - 145,
+
+      y: openUpwards
+        ? rect.top - menuHeight + 40
+        : rect.bottom + 8,
+
+    });
+
   }}
-  className={`w-full text-left px-4 py-2 text-sm
+  className={`
+    p-2 rounded-full
+    transition-all duration-200
+
     ${
-      canAssignStaff
-        ? "hover:bg-gray-100 cursor-pointer"
-        : "opacity-50 cursor-not-allowed text-gray-400"
-    }`}
+      openMenu?.id === item.requestId
+        ? "bg-[#EEF2FF] scale-110"
+        : "hover:bg-gray-100"
+    }
+  `}
 >
-  Assign Staff
-</button> */}
-                              <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                                onClick={() => {
-                                  setSelectedId(item.requestId);
-                                  setSelectedItem(item);
-                                  setOpenStatusModal(true);
-                                }}
-                              >
-                                Change Status
-                              </button>
-                              <button
-                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                                onClick={() => {
-                                  setSelectedItem(item);
-                                  setComments(item.demoRequestComments || []);
-                                  setShowCommentModal(true);
-                                }}
-                              >
-                                Add Comments
-                              </button>
-                               <button
-  className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-red-500 cursor-pointer"
-  onClick={() => {
-    setSelectedItem(item);
-    setShowDeleteModal(true);
-    setOpenMenu(null);
+
+  <img
+    src={Circle}
+    alt="menu"
+    className={`
+      w-5 h-5 transition-all duration-200 cursor-pointer
+
+      ${
+        openMenu?.id === item.requestId
+          ? "animate-pulse"
+          : ""
+      }
+    `}
+  />
+
+</button>
+
+  {openMenu?.id === item.requestId && (
+
+   <div
+  className="fixed w-40 bg-white border border-gray-200 rounded-xl shadow-xl z-[99999] overflow-hidden"
+  style={{
+    top: openMenu.y,
+    left: openMenu.x,
   }}
 >
-  Delete
-</button>
-                            </div>
-                          )}
 
-                        </td>
+      {item?.canAssignStaff && (
+        <button
+          onClick={() => {
+            setSelectedItem(item);
+            setShowModal(true);
+            setOpenMenu(null);
+          }}
+          className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+        >
+          Assign Staff
+        </button>
+      )}
+
+      <button
+        className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+        onClick={() => {
+          setSelectedId(item.requestId);
+          setSelectedItem(item);
+          setOpenStatusModal(true);
+          setOpenMenu(null);
+        }}
+      >
+        Change Status
+      </button>
+
+      <button
+        className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+        onClick={() => {
+          setSelectedItem(item);
+          setComments(
+            item.demoRequestComments || []
+          );
+          setShowCommentModal(true);
+          setOpenMenu(null);
+        }}
+      >
+        Add Comments
+      </button>
+
+      <button
+        className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-500 transition-colors cursor-pointer"
+        onClick={() => {
+          setSelectedItem(item);
+          setShowDeleteModal(true);
+          setOpenMenu(null);
+        }}
+      >
+        Delete
+      </button>
+
+    </div>
+
+  )}
+
+</td>
 
                       </tr>
                  )})

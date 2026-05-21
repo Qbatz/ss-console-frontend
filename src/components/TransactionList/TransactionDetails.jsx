@@ -339,7 +339,7 @@ useEffect(() => {
                           {item.collectedBy || "__"}
                         </td>
 
-                        <td className="px-4 py-2 relative">
+                        {/* <td className="px-4 py-2 relative">
                           <img
                             src={MenuCircle}
                             className="w-4 h-4 cursor-pointer"
@@ -382,7 +382,7 @@ useEffect(() => {
                               >
                                 View Details
                               </button>
-                            {/* {item.canVerifyPayment === true && ( */}
+                           
 
  <button
   onClick={() => {
@@ -394,14 +394,118 @@ useEffect(() => {
   Verify Payment
 </button>
 
-{/* // )} */}
+
 
                             </div>
                           )}
 
-                        </td>
+                        </td> */}
 
+<td className="px-4 py-2 relative">
 
+  <button
+    onClick={(e) => {
+
+      e.stopPropagation();
+
+      const rect =
+        e.currentTarget.getBoundingClientRect();
+
+      const viewportHeight =
+        window.innerHeight;
+
+      const menuHeight = 100;
+
+      const spaceBelow =
+        viewportHeight - rect.bottom;
+
+      setMenuPos({
+
+        top:
+          spaceBelow < menuHeight
+            ? rect.top - menuHeight + 40
+            : rect.bottom + 8,
+
+        left: rect.left - 100,
+
+      });
+
+      setOpenMenu(
+        openMenu === item.historyId
+          ? null
+          : item.historyId
+      );
+
+    }}
+    className={`
+      p-2 rounded-full
+      transition-all duration-200
+
+      ${
+        openMenu === item.historyId
+          ? "bg-[#EEF2FF] scale-110"
+          : "hover:bg-gray-100"
+      }
+    `}
+  >
+
+    <img
+      src={MenuCircle}
+      className={`
+        w-4 h-4 transition-all duration-200 cursor-pointer
+
+        ${
+          openMenu === item.historyId
+            ? "animate-pulse"
+            : ""
+        }
+      `}
+    />
+
+  </button>
+
+  {openMenu === item.historyId && (
+
+    <div
+      ref={menuRef}
+    className="
+  fixed w-32 bg-white rounded-xl z-[99999]
+  border border-gray-100
+  shadow-[0_10px_35px_rgba(0,0,0,0.18)]
+  overflow-hidden
+"
+      style={{
+        top: menuPos.top,
+        left: menuPos.left
+      }}
+    >
+
+      <button
+        onClick={() => {
+          setSelectedTxn(item);
+          setShowModal(true);
+          setOpenMenu(null);
+        }}
+        className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+      >
+        View Details
+      </button>
+
+      <button
+        onClick={() => {
+          handleVerifyPayment(item);
+          setOpenMenu(null);
+        }}
+        className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+      >
+        Verify Payment
+      </button>
+
+    </div>
+
+  )}
+
+</td>
                       </tr>
                     ))
                   ) : (
