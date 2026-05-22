@@ -11,7 +11,9 @@ import Search from "../../assets/Search.png";
 import DemoRequestDrawer from "./AddRequest";
 import UpdateStatusModal from "./UpdateStatusModal";
 import CommentBox from "../../assets/message-2.png";
-import Notes from "../../assets/notes.png"
+import Notes from "../../assets/notes.png";
+import  SupportTicketOverview from "../DemoRequestsScreen/SupportTicketOverview";
+
 const DemoRequests = () => {
 
   const { getDemoRequests, loading, getAgentsDropdown, updateDemoRequestStatus, addDemoRequestComment,getDemoRequestStatus,deleteDemoRequest} = useSubscription();
@@ -47,7 +49,7 @@ const DemoRequests = () => {
   const [statusConfig, setStatusConfig] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 const [deleteLoading, setDeleteLoading] = useState(false);
-
+const [openOverview, setOpenOverview] = useState(false);
 
   useEffect(() => {
   const fetchStatuses = async () => {
@@ -451,9 +453,20 @@ const [deleteLoading, setDeleteLoading] = useState(false);
                           {(page - 1) * size + index + 1}
                         </td>
 
-                        <td className="px-4 py-2 text-[12px] text-left">
+                        {/* <td className="px-4 py-2 text-[12px] text-left">
                           {item.name || "----"}
-                        </td>
+                        </td> */}
+                        <td className="px-4 py-2 text-[12px] text-left">
+  <button
+    onClick={() => {
+      setSelectedItem(item);
+      setOpenOverview(true);
+    }}
+    className="text-blue-600 hover:underline cursor-pointer"
+  >
+    {item.name || "----"}
+  </button>
+</td>
                          {/* <td className="px-4 py-2 text-[12px] text-left">
                           {item.contactNo || "----"}
                         </td> */}
@@ -1054,6 +1067,11 @@ const [deleteLoading, setDeleteLoading] = useState(false);
     </div>
   </div>
 )}
+<SupportTicketOverview
+  open={openOverview}
+  onClose={() => setOpenOverview(false)}
+  selectedItem={selectedItem}
+/>
     </DashboardLayout>
   );
 };

@@ -822,7 +822,7 @@ const Properties = () => {
           src={Circle}
           alt="circle"
           className={`
-            w-5 h-5 transition-transform duration-150
+            w-5 h-5 transition-transform duration-150 cursor-pointer
             ${
               openMenu === item.hostelId
                 ? "scale-110"
@@ -883,7 +883,7 @@ const Properties = () => {
 
     </div>
 
-    <img
+    {/* <img
       src={Money}
       onClick={() => {
 
@@ -908,7 +908,7 @@ const Properties = () => {
             : "opacity-40 cursor-not-allowed"
         }
       `}
-    />
+    /> */}
 
   </div>
 
