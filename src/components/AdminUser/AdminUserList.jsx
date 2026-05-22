@@ -397,25 +397,37 @@ const IamAdminUser = () => {
                       ) :
                         filteredAgents?.length > 0 ? (
                           filteredAgents.map((user, index) => (
-                            <tr
+                            // <tr
 
-                              key={user.agentId}
-                              className="border-b last:border-0 hover:bg-gray-50 border-gray-300"
-                            >
+                            //   key={user.agentId}
+                            //   className="border-b last:border-0 hover:bg-gray-50 border-gray-300"
+                            // >
+                            <tr
+  key={user.agentId}
+  className={`
+    border-b last:border-0 border-gray-300
+
+    ${
+      user?.isLoggedInUser
+        ? "bg-blue-50"
+        : "hover:bg-gray-50"
+    }
+  `}
+>
 
 
                               <td
                                 onClick={() => navigate(`/iam-user/${user.agentId}`)}
-                                className="px-4 py-1 text-left font-semibold text-xs whitespace-nowrap text-blue-700 cursor-pointer hover:underline"
+                                className="px-4 py-2 text-left font-semibold text-xs whitespace-nowrap text-blue-700 cursor-pointer hover:underline"
                               >
                                 {user?.fullName || "N/A"}
                               </td>
 
-                              <td className="px-2 py-1 text-left font-semibold text-xs whitespace-nowrap">
+                              <td className="px-2 py-2 text-left font-semibold text-xs whitespace-nowrap">
                                 {user?.email}
                               </td>
 
-                              <td className="px-2 py-1 text-left font-semibold text-xs whitespace-nowrap">
+                              <td className="px-2 py-2 text-left font-semibold text-xs whitespace-nowrap">
                                 {user?.roleName || "N/A"}
                               </td>
 
@@ -429,7 +441,8 @@ const IamAdminUser = () => {
 
 
 
-                              <td className="px-1 py-4 relative">
+                              <td className="px-1 py-2 relative">
+                                {!user?.isLoggedInUser && (
                                 <span
                                   className="cursor-pointer"
                                   onClick={(e) => {
@@ -453,8 +466,10 @@ const IamAdminUser = () => {
                                 >
                                   ⋮
                                 </span>
-
-                                {menuOpen === user.agentId && (
+                                )}
+                                {/* {menuOpen === user.agentId && ( */}
+                                  {!user?.isLoggedInUser &&
+    menuOpen === user.agentId && (
                                   <div
                                     className="fixed w-36 bg-white border rounded-lg shadow-lg z-[9999]"
                                     style={{

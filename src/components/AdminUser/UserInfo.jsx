@@ -19,6 +19,11 @@ const UserInfo = () => {
   const [agentDetails, setAgentDetails] = useState(null);
   const [openMenu, setOpenMenu] = useState(null);
   const [activeTab, setActiveTab] = useState("activity");
+  const [menuDirection, setMenuDirection] = useState("top");
+  const [menuPos, setMenuPos] = useState({
+  top: 0,
+  left: 0
+});
 console.log("agentDetails",agentDetails)
   useEffect(() => {
     const fetchDetails = async () => {
@@ -128,86 +133,206 @@ const subscriptions = agentDetails?.subscriptions || [];
               Managing Properties
             </h4>
 
-        <div className="border border-gray-200 rounded-lg bg-white overflow-visible">
-  {agentDetails?.hostelRelations?.length > 0 ? (
+   <div className="border border-gray-200 rounded-2xl bg-white max-h-[400px] flex flex-col overflow-visible">
 
-    agentDetails.hostelRelations.map((item, index, arr) => (
-      <div
-        key={item.id}
-        className="relative flex items-center justify-between px-4 py-4 border-b last:border-b-0 border-gray-200"
-      >
-      <div className="flex items-center gap-3 w-full min-w-0">
+  {/* SCROLL AREA */}
+<div
+  className="overflow-y-auto flex-1 pr-1 overflow-x-visible"
+  style={{
+    scrollbarColor: "#D9E9FF transparent"
+  }}
+>
+    {agentDetails?.hostelRelations?.length > 0 ? (
 
-  {/* IMAGE */}
-  <div className="w-11 h-11 rounded-full bg-gray-300 overflow-hidden shrink-0">
-    <img
-      src={Crown}
-      alt="Property"
-      className="w-full h-full object-cover"
-    />
-  </div>
+      agentDetails.hostelRelations.map((item, index) => (
 
-  {/* TEXT AREA */}
-  <div className="flex flex-col min-w-0 flex-1">
-
-    {/* Hostel Name */}
-    <p className="text-[13px] font-semibold text-gray-900 truncate text-left">
-      {item.hostelName}
-    </p>
-
-    {/* Agent + Badge */}
-  <div className="flex items-center gap-2 mt-1 min-w-0 relative group">
-
-  {/* NAME */}
-  <p className="text-[11px] text-gray-600 truncate flex-1">
-    {item.agentName}
-  </p>
-
-  {/* TOOLTIP */}
-  <div className="absolute left-0 top-full mt-1 hidden group-hover:block bg-black text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-50">
-    {item.agentName}
-  </div>
-
-  {/* BADGE */}
-  <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-[2px] rounded-full whitespace-nowrap shrink-0">
-    {item.reason}
-  </span>
-
-</div>
-
-  </div>
-</div>
-
-        {/* MENU */}
-        <button
-          className="text-gray-700 cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpenMenu(openMenu === index ? null : index);
-          }}
+        <div
+          key={item.id}
+          className={`flex items-start justify-between px-4 py-4
+          ${index !== agentDetails.hostelRelations.length - 1
+              ? "border-b border-gray-100"
+              : ""
+            }`}
         >
-          ⋮
-        </button>
 
-        {openMenu === index && (
-          <div className="absolute z-50 bg-white border border-gray-200 rounded-md shadow-lg p-2 w-36 right-2 top-12">
-            <button className="w-full text-left text-[11px] px-3 py-2 bg-gray-50 border-l-2 border-blue-600">
-              Change Access
-            </button>
+          {/* LEFT */}
+          <div className="flex items-start gap-3 min-w-0">
 
-            <button className="w-full text-left text-[11px] px-3 py-2 text-gray-500">
-              Renew Subscription
-            </button>
+            {/* IMAGE */}
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-blue-100 shrink-0 flex items-center justify-center">
+
+              {item.mainImage ? (
+
+                <img
+                  src={item.mainImage}
+                  alt="Property"
+                  className="w-full h-full object-cover"
+                />
+
+              ) : (
+
+                <span className="text-[18px] font-semibold text-[#2563EB] uppercase">
+                  {item.initials || "NA"}
+                </span>
+
+              )}
+
+            </div>
+
+            {/* CONTENT */}
+            <div className="min-w-0">
+
+              {/* NAME */}
+              <p className="text-[14px] font-semibold text-gray-900 truncate text-left">
+                {item.hostelName}
+              </p>
+
+              {/* LOCATION + PLAN */}
+              <div className="mt-1">
+
+                <div className="flex items-center gap-2 flex-wrap">
+
+                  {/* LOCATION */}
+                  <div className="relative group flex items-center gap-1">
+
+                    <div className="w-2 h-2 rounded-full bg-orange-400"></div>
+
+                    <span className="text-[12px] text-gray-500 cursor-default">
+                      {item.city}
+                    </span>
+
+                    {/* TOOLTIP */}
+                    <div className="absolute left-0 top-full mt-2 hidden group-hover:block bg-gray-900 text-white text-[10px] px-3 py-2 rounded-lg shadow-lg whitespace-nowrap z-50">
+                      {item.fullAddress}
+                    </div>
+
+                  </div>
+
+                  {/* PLAN */}
+                  <span
+                    className={`text-[10px] px-2 py-[2px] rounded-full font-medium flex items-center gap-1
+                    ${item.planName === "Premium"
+                        ? "bg-orange-50 text-orange-600"
+                        : item.planName === "Trial"
+                          ? "bg-yellow-50 text-yellow-700"
+                          : "bg-blue-50 text-blue-600"
+                      }`}
+                  >
+                    {item.planName !== "Trial" && "👑"}
+
+                    {item.planName}
+                  </span>
+
+                </div>
+
+                {/* EXPIRES */}
+                {item.aboutToExpire && (
+                  <div className="mt-2 text-left">
+
+                    <span className="text-[10px] px-2 py-[3px] rounded-full bg-red-50 text-red-600 font-medium inline-flex">
+
+                      {item.expiringInDays === 0
+                        ? "Expires today"
+                        : `Expires in ${item.expiringInDays} day${item.expiringInDays !== 1 ? "s" : ""}`
+                      }
+
+                    </span>
+
+                  </div>
+                )}
+
+              </div>
+
+            </div>
+
           </div>
-        )}
-      </div>
-    ))
 
-  ) : (
-    <p className="text-gray-400 text-sm p-4 text-center">
-      No Properties Found
-    </p>
-  )}
+          {/* MENU */}
+          <div className="relative">
+
+            <button
+              className="text-gray-500 text-lg leading-none cursor-pointer"
+ onClick={(e) => {
+
+  e.stopPropagation();
+
+  const rect =
+    e.currentTarget.getBoundingClientRect();
+
+  const viewportHeight =
+    window.innerHeight;
+
+  const menuHeight = 100;
+
+  const spaceBelow =
+    viewportHeight - rect.bottom;
+
+  setMenuDirection(
+    spaceBelow < menuHeight
+      ? "top"
+      : "bottom"
+  );
+
+  setMenuPos({
+    top:
+      spaceBelow < menuHeight
+        ? rect.top - menuHeight
+        : rect.bottom + 8,
+
+    left: rect.left - 120
+  });
+
+  setOpenMenu(
+    openMenu === index
+      ? null
+      : index
+  );
+}}
+            >
+              ⋮
+            </button>
+
+            {/* DROPDOWN */}
+    {openMenu === index && (
+  <div
+    className="
+      fixed z-[99999]
+      bg-white border border-gray-200
+      rounded-xl shadow-lg py-1 w-40
+    "
+   style={{
+  top: menuPos.top,
+  left: menuPos.left
+}}
+  >
+
+                <button className="w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50">
+                  Change Access
+                </button>
+
+                <button className="w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50">
+                  Renew Subscription
+                </button>
+
+              </div>
+            )}
+
+          </div>
+
+        </div>
+
+      ))
+
+    ) : (
+
+      <div className="py-10 text-center text-gray-400 text-sm">
+        No Properties Found
+      </div>
+
+    )}
+
+  </div>
+
 </div>
           </div>
 
@@ -244,7 +369,7 @@ const subscriptions = agentDetails?.subscriptions || [];
 
             {activeTab === "activity" ? (
 
-            <div className="relative pl-5 max-h-[400px] overflow-y-auto pr-2">
+            <div className="relative pl-5 max-h-[400px] overflow-y-auto pr-2 text-left">
   {agentDetails?.agentActivities?.length > 0 ? (
 
     agentDetails.agentActivities.map((activity, index, arr) => (

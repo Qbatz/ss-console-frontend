@@ -65,45 +65,88 @@ export const SubscriptionProvider = ({ children }) => {
     }
   };
 
+const getSubscriptions = async (
+  page = 1,
+  size = 10,
+  hostelName = "",
+  filterBy = "ALL"
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
 
-  const getSubscriptions = async (page = 1, size = 10, hostelName = "") => {
-    try {
-      setLoading(true);
-      setErrorMsg("");
-
-      const res = await axiosInstance.get("/v2/subscription", {
-        params: {
-          page,
-          size,
-          hostelName
-        }
-      });
-
-      if (res.status === 200) {
-        return {
-          success: true,
-          data: res.data
-        };
+    const res = await axiosInstance.get("/v2/subscription", {
+      params: {
+        page,
+        size,
+        hostelName,
+        filterBy
       }
+    });
 
-      return { success: false };
-
-    }
-    catch (error) {
-
-      const msg = getErrorMessage(error);
-      setErrorMsg(msg);
-      setAccessError(msg);
-     
+    if (res.status === 200) {
       return {
-        success: false,
-        message: msg
+        success: true,
+        data: res.data
       };
-
-    } finally {
-      setLoading(false);
     }
-  };
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+    setAccessError(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+  // const getSubscriptions = async (page = 1, size = 10, hostelName = "") => {
+  //   try {
+  //     setLoading(true);
+  //     setErrorMsg("");
+
+  //     const res = await axiosInstance.get("/v2/subscription", {
+  //       params: {
+  //         page,
+  //         size,
+  //         hostelName
+  //       }
+  //     });
+
+  //     if (res.status === 200) {
+  //       return {
+  //         success: true,
+  //         data: res.data
+  //       };
+  //     }
+
+  //     return { success: false };
+
+  //   }
+  //   catch (error) {
+
+  //     const msg = getErrorMessage(error);
+  //     setErrorMsg(msg);
+  //     setAccessError(msg);
+     
+  //     return {
+  //       success: false,
+  //       message: msg
+  //     };
+
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const getDemoRequests = async (page = 1, size = 10, name = "") => {
     try {
       setLoading(true);

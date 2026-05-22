@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { useNavigate } from "react-router-dom";
 import { useSubscription } from "../../Context/SubscriptionContext";
@@ -8,14 +8,14 @@ import LoginImg from "../../assets/LoginImg.png";
 import { usePermission } from "../../Utils/permissionHelper";
 import Arrow from "../../assets/direction-down 01.png";
 import ArrowRight from "../../assets/arrow-right.png";
-import Circle from "../../assets/menucircle.png"
+import Circle from "../../assets/menucircle.png";
 
 const Subscription = () => {
   const { getSubscriptions, loading, errorMsg, accessError } = useSubscription();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Subscriptions");
 
-  const {adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole} = useRole();
+  const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole } = useRole();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("subscriptions");
   const [subscriptions, setSubscriptions] = useState([]);
@@ -25,40 +25,88 @@ const Subscription = () => {
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [responseCard,setResponseCard] = useState([])
+  const [responseCard, setResponseCard] = useState([])
+  const [filterBy, setFilterBy] = useState("ALL");
+  const [openFilter, setOpenFilter] = useState(false);
+  const filterRef = useRef(null);
 
+  const fetchSubscriptions = async (
+    pageNo = 1,
+    searchText = "",
+    filterType = "ALL"
+  ) => {
 
-  const fetchSubscriptions = async (pageNo = 1, searchText = "") => {
-
-
-
-    const res = await getSubscriptions(pageNo, size, searchText);
+    const res = await getSubscriptions(
+      pageNo,
+      size,
+      searchText,
+      filterType
+    );
 
     if (res.success) {
       setSubscriptions(res.data.content || []);
       setTotalItems(res.data.totalItems || 0);
       setTotalPages(res.data.totalPages || 0);
-      setResponseCard(res.data || [])
+      setResponseCard(res.data || []);
+    }
+  };
+
+
+  useEffect(() => {
+
+  const handleClickOutside = (event) => {
+
+    if (
+      filterRef.current &&
+      !filterRef.current.contains(event.target)
+    ) {
+      setOpenFilter(false);
     }
 
   };
- 
 
- 
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+
+}, []);
+
+  // const fetchSubscriptions = async (pageNo = 1, searchText = "") => {
+
+
+
+  //   const res = await getSubscriptions(pageNo, size, searchText);
+
+  //   if (res.success) {
+  //     setSubscriptions(res.data.content || []);
+  //     setTotalItems(res.data.totalItems || 0);
+  //     setTotalPages(res.data.totalPages || 0);
+  //     setResponseCard(res.data || [])
+  //   }
+
+  // };
+
+
+
   const start = totalItems === 0 ? 0 : (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
   useEffect(() => {
 
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-    }, 500);  
+    }, 500);
 
     return () => clearTimeout(timer);
 
   }, [search]);
+  // useEffect(() => {
+  //   fetchSubscriptions(page, debouncedSearch);
+  // }, [page, size, debouncedSearch]);
   useEffect(() => {
-    fetchSubscriptions(page, debouncedSearch);
-  }, [page, size, debouncedSearch]);
+    fetchSubscriptions(page, debouncedSearch, filterBy);
+  }, [page, size, debouncedSearch, filterBy]);
   return (
     <DashboardLayout>
       <div className="p-6 pt-1">
@@ -111,9 +159,9 @@ const Subscription = () => {
             </button> */}
             <button
               onClick={() => navigate(`/manage-plans/${adminDetails?.roleId}`)}
-             
+
               className="px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit bg-blue-600 text-white cursor-pointer"
-         >
+            >
               Manage Plans
             </button>
 
@@ -166,26 +214,91 @@ const Subscription = () => {
                   </div>
 
                 </div>
+<div className="mb-4 bg-white py-3">
 
+  <div className="flex justify-between items-center gap-3">
 
-                <div className="mb-4 bg-white py-3">
+    {/* LEFT SIDE FILTER */}
+    <div className="relative w-[220px]" ref={filterRef}> 
+
+  {/* SELECT BUTTON */}
+  <button
+    onClick={() => setOpenFilter(!openFilter)}
+    className="w-full border border-gray-300 px-4 py-2 rounded-lg text-sm bg-white flex items-center justify-between"
+  >
+    {filterBy
+      ?.replaceAll("_", " ")
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase())}
+
+   <img src={Arrow} className="w-4 h-4 cursor-pointer"/>
+  </button>
+
+  {/* DROPDOWN */}
+  {openFilter && (
+    <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-[180px] overflow-y-auto">
+
+      {responseCard?.filterOptions?.map((item) => (
+        <div
+          key={item}
+          onClick={() => {
+            setFilterBy(item);
+            setPage(1);
+            setOpenFilter(false);
+          }}
+          className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50
+            ${filterBy === item ? "bg-blue-600 text-white" : ""}
+          `}
+        >
+          {item
+            .replaceAll("_", " ")
+            .toLowerCase()
+            .replace(/\b\w/g, (c) => c.toUpperCase())}
+        </div>
+      ))}
+
+    </div>
+  )}
+
+</div>
+
+    {/* RIGHT SIDE SEARCH */}
+    <input
+      type="text"
+      value={search}
+      onChange={(e) => {
+        setSearch(e.target.value);
+        setPage(1);
+      }}
+      placeholder="Search..."
+      className="border border-gray-300 px-4 py-2 rounded-lg text-sm w-64"
+    />
+
+  </div>
+
+</div>
+
+                {/* <div className="mb-4 bg-white py-3">
                   <div className="flex justify-end items-center">
-                    {/* <div className="flex gap-3">
-              <select className="border border-gray-300 px-3 py-1 rounded-lg text-xs font-sans">
-                <option>All</option>
-                <option>Active</option>
-                <option>Expired</option>
-              </select>
-
-              <select className="border border-gray-300 px-3 py-2 rounded-lg text-xs font-sans">
-                <option>This Month</option>
-                <option>Last Month</option>
-              </select>
-
-              <button className="border border-gray-300 px-4 py-2 rounded-lg text-xs font-sans">
-                Filter
-              </button>
-            </div> */}
+                    <div className="flex gap-3">
+              <select
+    value={filterBy}
+    onChange={(e) => {
+      setFilterBy(e.target.value);
+      setPage(1);
+    }}
+    className="border border-gray-300 px-4 py-2 rounded-lg text-sm min-w-[220px] bg-white cursor-pointer outline-none"
+  >
+    {responseCard?.filterOptions?.map((item) => (
+      <option key={item} value={item}>
+        {item
+          .replaceAll("_", " ")
+          .toLowerCase()
+          .replace(/\b\w/g, (c) => c.toUpperCase())}
+      </option>
+    ))}
+  </select>
+            </div>
 
                     <input
                       type="text"
@@ -198,7 +311,7 @@ const Subscription = () => {
                       className="border border-gray-300 px-4 py-2 rounded-lg text-sm w-64"
                     />
                   </div>
-                </div>
+                </div> */}
 
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-300">
@@ -225,7 +338,7 @@ const Subscription = () => {
 
                         {loading ? (
 
-                        
+
                           Array.from({ length: size }).map((_, i) => (
                             <tr key={i} className="animate-pulse text-[12px]">
 
@@ -298,7 +411,7 @@ const Subscription = () => {
                               </td>
 
                               <td className="px-4 py-2 text-center">
-                                <img src={Circle} className="w-4 h-4 cursor-pointer"/>
+                                <img src={Circle} className="w-4 h-4 cursor-pointer" />
                               </td>
 
                             </tr>
