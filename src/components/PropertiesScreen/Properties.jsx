@@ -39,14 +39,29 @@ const Properties = () => {
   const skipApi = location.state?.skipApi;
   const { RangePicker } = DatePicker;
   const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
-  const [dateRange, setDateRange] = useState([]);
+  // const [dateRange, setDateRange] = useState([]);
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Hostels");
   console.log("canRead", canRead)
-  const [page, setPage] = useState(1);
-  const [searchText, setSearchText] = useState("");
+  // const [page, setPage] = useState(1);
+  // const [searchText, setSearchText] = useState("");
   const [pageSize, setPageSize] = useState(10);
-  const [statusFilter, setStatusFilter] = useState("");
+  // const [statusFilter, setStatusFilter] = useState("");
+  const [page, setPage] = useState(
+  location.state?.currentPage || 1
+);
+
+const [searchText, setSearchText] = useState(
+  location.state?.currentSearch || ""
+);
+
+const [dateRange, setDateRange] = useState(
+  location.state?.currentDateRange || []
+);
+
+const [statusFilter, setStatusFilter] = useState(
+  location.state?.currentStatusFilter || ""
+);
   const isStatusFiltering = statusFilter !== "";
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
@@ -137,25 +152,51 @@ const Properties = () => {
   //   getHostels(page, pageSize, debouncedSearch, start, end);
 
   // }, [page, pageSize, debouncedSearch, dateRange]);
+  // useEffect(() => {
+
+  //   let start = "";
+  //   let end = "";
+
+  //   if (dateRange && dateRange.length === 2) {
+  //     start = dateRange[0].format("DD-MM-YYYY");
+  //     end = dateRange[1].format("DD-MM-YYYY");
+  //   }
+
+  //   getHostels(page, pageSize, debouncedSearch, start, end);
+
+  // }, [page, pageSize, debouncedSearch, dateRange]);
   useEffect(() => {
 
-    let start = "";
-    let end = "";
+  let start = "";
+  let end = "";
 
-    if (dateRange && dateRange.length === 2) {
-      start = dateRange[0].format("DD-MM-YYYY");
-      end = dateRange[1].format("DD-MM-YYYY");
-    }
+  if (dateRange && dateRange.length === 2) {
+    start = dateRange[0].format("DD-MM-YYYY");
+    end = dateRange[1].format("DD-MM-YYYY");
+  }
 
-    getHostels(page, pageSize, debouncedSearch, start, end);
+  getHostels(page, pageSize, debouncedSearch, start, end);
 
-  }, [page, pageSize, debouncedSearch, dateRange]);
+}, [page, pageSize, debouncedSearch, dateRange]);
 
-  useEffect(() => {
-    if (location.state?.skipApi) {
-      navigate(location.pathname, { replace: true });
-    }
-  }, []);
+ useEffect(() => {
+
+  if (skipFirstApi) {
+    setSkipFirstApi(false);
+    return;
+  }
+
+  let start = "";
+  let end = "";
+
+  if (dateRange && dateRange.length === 2) {
+    start = dateRange[0].format("DD-MM-YYYY");
+    end = dateRange[1].format("DD-MM-YYYY");
+  }
+
+  getHostels(page, pageSize, debouncedSearch, start, end);
+
+}, [page, pageSize, debouncedSearch, dateRange]);
 
 
   console.log("hostels", hostels);
@@ -178,12 +219,23 @@ const Properties = () => {
     const res = await getHostelById(item.hostelId);
 
     if (res?.success) {
+      // navigate(`/property-overview/${item.hostelId}`, {
+      //   state: {
+      //     hostelData: res.data,
+      //     trialPlan: item
+      //   }
+      // });
       navigate(`/property-overview/${item.hostelId}`, {
-        state: {
-          hostelData: res.data,
-          trialPlan: item
-        }
-      });
+  state: {
+    hostelData: res.data,
+    trialPlan: item,
+
+    currentPage: page,
+    currentSearch: searchText,
+    currentDateRange: dateRange,
+    currentStatusFilter: statusFilter,
+  }
+});
     }
   };
 

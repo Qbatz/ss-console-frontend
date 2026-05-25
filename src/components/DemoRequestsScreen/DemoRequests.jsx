@@ -13,12 +13,19 @@ import UpdateStatusModal from "./UpdateStatusModal";
 import CommentBox from "../../assets/message-2.png";
 import Notes from "../../assets/notes.png";
 import  SupportTicketOverview from "../DemoRequestsScreen/SupportTicketOverview";
+import { DatePicker } from "antd";
+import dayjs from "dayjs";
+import MarkAsLostDrawer from "./MarkAsLostDrawer";
 
 const DemoRequests = () => {
 
-  const { getDemoRequests, loading, getAgentsDropdown, updateDemoRequestStatus, addDemoRequestComment,getDemoRequestStatus,deleteDemoRequest} = useSubscription();
+  const { getDemoRequests, loading, getAgentsDropdown, updateDemoRequestStatus, addDemoRequestComment,getDemoRequestStatus,deleteDemoRequest,getDemoRequestComments} = useSubscription();
   const { adminDetails, agents, getAllAgents, assignStaff } = useRole();
   const dropdownRef = useRef(null);
+  const statusDropdownRef = useRef(null);
+
+const agentDropdownRef = useRef(null);
+  const { RangePicker } = DatePicker;
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
@@ -51,6 +58,49 @@ const DemoRequests = () => {
 const [deleteLoading, setDeleteLoading] = useState(false);
 const [openOverview, setOpenOverview] = useState(false);
 
+// const [startDate, setStartDate] = useState("");
+// const [endDate, setEndDate] = useState("");
+const [statusFilter, setStatusFilter] = useState("");
+const [agentFilter, setAgentFilter] = useState("");
+const [openStatusDropdown, setOpenStatusDropdown] = useState(false);
+
+const [openAgentDropdown, setOpenAgentDropdown] = useState(false);
+const [allComments, setAllComments] =
+  useState([]);
+
+const [dateRange, setDateRange] = useState([]);
+const [showMarkLostDrawer, setShowMarkLostDrawer] =
+  useState(false);
+const startDate = dateRange?.[0]
+  ? dayjs(dateRange[0]).format("DD-MM-YYYY")
+  : "";
+
+const endDate = dateRange?.[1]
+  ? dayjs(dateRange[1]).format("DD-MM-YYYY")
+  : "";
+
+  const fetchAllComments = async (
+  requestId
+) => {
+
+  const res =
+    await getDemoRequestComments(
+      requestId
+    );
+
+  if (res?.success) {
+
+    setAllComments(
+    res?.data?.demoRequestComments ||
+    res?.data ||
+    []
+  );
+
+  }
+
+};
+
+
   useEffect(() => {
   const fetchStatuses = async () => {
     const res = await getDemoRequestStatus();
@@ -62,7 +112,7 @@ const [openOverview, setOpenOverview] = useState(false);
 
   fetchStatuses();
 }, []);
-
+console.log("statusConfig",statusConfig)
   useEffect(() => {
     const fetchAgents = async () => {
       const res = await getAgentsDropdown();
@@ -74,20 +124,60 @@ const [openOverview, setOpenOverview] = useState(false);
 
     fetchAgents();
   }, []);
+useEffect(() => {
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setOpenDropdown(false);
-      }
-    };
+  const handleClickOutside = (event) => {
 
-    document.addEventListener("mousedown", handleClickOutside);
+    // STATUS
+    if (
+      statusDropdownRef.current &&
+      !statusDropdownRef.current.contains(event.target)
+    ) {
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+      setOpenStatusDropdown(false);
+
+    }
+
+    // AGENT
+    if (
+      agentDropdownRef.current &&
+      !agentDropdownRef.current.contains(event.target)
+    ) {
+
+      setOpenAgentDropdown(false);
+
+    }
+
+  };
+
+  document.addEventListener(
+    "mousedown",
+    handleClickOutside
+  );
+
+  return () => {
+
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+  };
+
+}, []);
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+  //       setOpenDropdown(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (!e.target.closest(".menu-btn")) {
@@ -102,28 +192,99 @@ const [openOverview, setOpenOverview] = useState(false);
   useEffect(() => {
     getAllAgents()
   }, [])
-  const fetchData = async () => {
-    setTableLoading(true);
-    const res = await getDemoRequests(page, size, search);
+  // const dropdownRef = useRef(null);
 
-    if (res?.success) {
-      setData(res.data.demoRequestList || []);
-      setTotalItems(res.data.totalItems);
-      setTotalPages(res.data.totalPages);
-      setPageSize(res.data.pageSize)
-      // setComments(res.data.demoRequestList.demoRequestComments || [])
+useEffect(() => {
+
+  const handleClickOutside = (event) => {
+
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target)
+    ) {
+
+      setOpenAgentDropdown(false);
+
     }
-    // setTableLoading(false);
-    setTimeout(() => {
-      setTableLoading(false);
-    }, 400);
-
 
   };
 
+  document.addEventListener(
+    "mousedown",
+    handleClickOutside
+  );
+
+  return () => {
+
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+  };
+
+}, []);
+  const fetchData = async () => {
+
+  setTableLoading(true);
+
+  const res = await getDemoRequests(
+  page,
+  size,
+  search,
+  startDate,
+  endDate,
+  statusFilter,
+  agentFilter
+);
+
+  if (res?.success) {
+
+    setData(res.data.demoRequestList || []);
+    setTotalItems(res.data.totalItems);
+    setTotalPages(res.data.totalPages);
+    setPageSize(res.data.pageSize);
+
+  }
+
+  setTimeout(() => {
+    setTableLoading(false);
+  }, 400);
+
+};
+  // const fetchData = async () => {
+  //   setTableLoading(true);
+  //   const res = await getDemoRequests(page, size, search);
+
+  //   if (res?.success) {
+  //     setData(res.data.demoRequestList || []);
+  //     setTotalItems(res.data.totalItems);
+  //     setTotalPages(res.data.totalPages);
+  //     setPageSize(res.data.pageSize)
+  //     // setComments(res.data.demoRequestList.demoRequestComments || [])
+  //   }
+  //   // setTableLoading(false);
+  //   setTimeout(() => {
+  //     setTableLoading(false);
+  //   }, 400);
+
+
+  // };
+
+  // useEffect(() => {
+  //   fetchData();
+  // }, [page, size, search]);
   useEffect(() => {
-    fetchData();
-  }, [page, size, search]);
+  fetchData();
+}, [
+  page,
+  size,
+  search,
+  startDate,
+  endDate,
+  statusFilter,
+  agentFilter
+]);
 
   const start = totalItems === 0 ? 0 : (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
@@ -157,7 +318,9 @@ const [openOverview, setOpenOverview] = useState(false);
 
     const res = await assignStaff(
       selectedItem.requestId,
-      dropdownValue
+      dropdownValue,
+      commentText
+      
     );
     console.log("Response", res);
 
@@ -168,7 +331,7 @@ const [openOverview, setOpenOverview] = useState(false);
       setModalType("success");
       setMessage("Updated Successfully");
       setShowSuccess(true);
-
+setCommentText("")
       setTimeout(() => {
         setShowSuccess(false);
 
@@ -340,7 +503,176 @@ const [openOverview, setOpenOverview] = useState(false);
             </button>
 
           </div>
-          <div className="flex justify-end">
+  {/* FILTERS */}
+<div className="flex flex-wrap gap-3 mb-4">
+
+  
+  <RangePicker
+  value={dateRange}
+  inputReadOnly={true}
+  format="DD-MM-YYYY"
+  onChange={(dates) => {
+    setDateRange(dates || []);
+    setPage(1);
+  }}
+  className="h-[36px] rounded-lg"
+/>
+ 
+  {/* <select
+    value={statusFilter}
+    onChange={(e) => {
+      setStatusFilter(e.target.value);
+      setPage(1);
+    }}
+    className="border border-gray-300 rounded-lg px-3 py-2 text-sm min-w-[180px]"
+  >
+    <option value="">All Status</option>
+
+    {statusConfig.map((item) => (
+      <option
+        key={item.currentStatus}
+        value={item.currentStatus}
+      >
+        {item.currentStatus}
+      </option>
+    ))}
+  </select> */}
+ <div className="relative min-w-[180px]" ref={statusDropdownRef }>
+
+  <div
+    onClick={() => {
+
+      setOpenStatusDropdown(!openStatusDropdown);
+
+      setOpenAgentDropdown(false);
+
+    }}
+    className="border border-gray-300 rounded-lg px-3 py-1 cursor-pointer bg-white flex justify-between items-center h-[36px]"
+  >
+    <span className="text-sm truncate">
+      {statusFilter || "All Status"}
+    </span>
+
+    <img src={Arrow} className="w-4 h-4" />
+  </div>
+
+  {openStatusDropdown && (
+    <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-xl z-[9999] max-h-[220px] overflow-y-auto">
+
+      <div
+        onClick={() => {
+          setStatusFilter("");
+          setOpenStatusDropdown(false);
+        }}
+        className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm border-b"
+      >
+        All Status
+      </div>
+
+      {statusConfig?.map((item) => (
+        <div
+          key={item.currentStatus}
+          onClick={() => {
+            setStatusFilter(item.currentStatus);
+            setOpenStatusDropdown(false);
+            setPage(1);
+          }}
+          className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm text-left"
+        >
+          {item.currentStatus}
+        </div>
+      ))}
+
+    </div>
+  )}
+
+</div>
+
+ 
+  <div className="relative min-w-[180px]"  ref={agentDropdownRef }>
+
+  
+    <div
+      onClick={() =>
+        setOpenAgentDropdown(!openAgentDropdown)
+      }
+      className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white flex justify-between items-center"
+    >
+      <span className="text-sm truncate">
+        {
+          agentList.find(
+            (a) => a.agentId === agentFilter
+          )?.agentName || "All Agents"
+        }
+      </span>
+
+      <img src={Arrow} className="w-4 h-4"/>
+    </div>
+
+   
+    {openAgentDropdown && (
+      <div
+        className="
+          absolute
+          top-full
+          left-0
+          mt-1
+          w-full
+          bg-white
+          border
+          border-gray-300
+          rounded-lg
+          shadow-xl
+          max-h-[220px]
+          overflow-y-auto
+          z-[9999]
+        "
+      >
+
+       
+        <div
+          onClick={() => {
+            setAgentFilter("");
+            setOpenAgentDropdown(false);
+          }}
+          className="
+            px-3
+            py-2
+            hover:bg-gray-100
+            cursor-pointer
+            text-sm
+            border-b
+          "
+        >
+          All Agents
+        </div>
+
+        
+        {agentList.map((agent) => (
+          <div
+            key={agent.agentId}
+            onClick={() => {
+              setAgentFilter(agent.agentId);
+              setOpenAgentDropdown(false);
+            }}
+            className="
+              px-3
+              py-2
+              hover:bg-gray-100
+              cursor-pointer
+              text-sm
+              break-words text-left
+            "
+          >
+            {agent.agentName}
+          </div>
+        ))}
+
+      </div>
+    )}
+
+  </div>
+  <div className="flex justify-end">
             <div className="relative w-64 mb-3">
               <img
                 src={Search}
@@ -362,30 +694,97 @@ const [openOverview, setOpenOverview] = useState(false);
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]">
+</div>
+ 
+<div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col max-h-[calc(100vh-230px)]">
 
-            <div className="max-h-[420px] overflow-y-auto">
+  {/* TABLE SCROLL */}
+  <div className="overflow-x-auto overflow-y-auto max-h-[420px]">
 
-              <table className="w-full text-sm">
+    <table className="min-w-max text-sm">
 
+      {/* HEADER */}
+      <thead className="bg-gray-100 text-gray-600 uppercase text-xs sticky top-0 z-40">
 
-                <thead className="bg-gray-100 text-gray-600 uppercase text-xs sticky top-0 z-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">ID</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Name</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Mobile No</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Organization</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase whitespace-nowrap">Requested Date</th>
-                      <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase whitespace-nowrap">Presented At</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Assigned Staff</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Status</th>
-                    {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Conversion</th> */}
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-inter uppercase">Actions</th>
-                  </tr>
-                </thead>
+        <tr>
 
+          <th
+            className="
+              sticky
+              left-0
+              z-30
+              bg-gray-100
+              px-4
+              py-3
+              w-[70px]
+              min-w-[70px]
+            "
+          >
+            ID
+          </th>
 
-                <tbody className="divide-y divide-gray-200">
+          <th
+            className="
+              sticky
+              left-[70px]
+              z-30
+              bg-gray-100
+              px-4
+              py-3
+              w-[180px]
+              min-w-[180px]
+              max-w-[180px] text-left
+            "
+          >
+            NAME
+          </th>
+
+          <th className="px-4 py-3 text-left whitespace-nowrap">
+            MOBILE NO
+          </th>
+
+          <th className="px-4 py-3 text-left whitespace-nowrap">
+            ORGANIZATION
+          </th>
+
+          <th className="px-4 py-3 text-left whitespace-nowrap">
+            REGION/CITY
+          </th>
+
+          <th className="px-4 py-3 text-left whitespace-nowrap">
+            SOURCE
+          </th>
+
+          <th className="px-4 py-3 text-left whitespace-nowrap">
+            REQUESTED DATE
+          </th>
+
+          <th className="px-4 py-3 text-left whitespace-nowrap">
+            PRESENTED AT
+          </th>
+
+          <th className="px-4 py-3 text-left whitespace-nowrap">
+            ASSIGNED STAFF
+          </th>
+
+          <th className="px-4 py-3 text-left whitespace-nowrap">
+            STATUS
+          </th>
+
+          <th className="px-4 py-3 text-left whitespace-nowrap">
+            CONVERSION RESULT
+          </th>
+
+          <th className="px-4 py-3 text-left whitespace-nowrap">
+            ACTIONS
+          </th>
+
+        </tr>
+
+      </thead>
+
+      {/* BODY */}
+       <tbody className="divide-y divide-gray-200">
 
                   {tableLoading ? (
 
@@ -447,16 +846,13 @@ const [openOverview, setOpenOverview] = useState(false);
 
                   
                       
-                      <tr key={item.requestId} className="text-[13px] hover:bg-gray-50">
+                     <tr key={item.requestId} className="group text-[13px] hover:bg-gray-50">
 
-                        <td className="px-4 py-2 ">
-                          {(page - 1) * size + index + 1}
-                        </td>
+ <td className="sticky left-0 z-20 bg-white group-hover:bg-gray-50 px-4 py-2 w-[70px] min-w-[70px]">
+  {(page - 1) * size + index + 1}
+</td>
 
-                        {/* <td className="px-4 py-2 text-[12px] text-left">
-                          {item.name || "----"}
-                        </td> */}
-                        <td className="px-4 py-2 text-[12px] text-left">
+<td className="sticky left-[70px] z-20 bg-white group-hover:bg-gray-50 px-4 py-2 w-[180px] min-w-[180px] max-w-[180px] text-left">
   <button
     onClick={() => {
       setSelectedItem(item);
@@ -488,6 +884,28 @@ const [openOverview, setOpenOverview] = useState(false);
 
                         <td className="px-4 py-2 text-[12px] text-left ">
                           {item.organization || "----"}
+                        </td>
+    <td className="px-4 py-2 text-[12px] text-left overflow-visible">
+  {item.city ? (
+    <div className="relative inline-block">
+      
+      <span className="peer cursor-pointer">
+        {item.city}
+      </span>
+
+      <div className="absolute left-0 bottom-6 z-[9999] hidden peer-hover:block bg-black text-white text-[11px] px-2 py-1 rounded whitespace-nowrap shadow-lg">
+        {item.city}
+        {item.state ? `, ${item.state}` : ""}
+        {item.country ? `, ${item.country}` : ""}
+      </div>
+
+    </div>
+  ) : (
+    "----"
+  )}
+</td>
+ <td className="px-4 py-2 text-[12px] text-left ">
+                          {item.source || "----"}
                         </td>
 
                         {/* <td className="px-4 py-2 text-[12px] text-left">
@@ -571,6 +989,9 @@ const [openOverview, setOpenOverview] = useState(false);
                         <td className="px-4 py-2 text-[12px] text-left">
                           {item.demoRequestStatus}
                         </td>
+                         <td className="px-4 py-2 text-[12px] text-left">
+                          {item.convertedToPlanName || "----"}
+                        </td>
 
                        <td className="px-4 py-2 relative">
 
@@ -646,7 +1067,24 @@ const [openOverview, setOpenOverview] = useState(false);
     left: openMenu.x,
   }}
 >
+ <button
+        className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+      onClick={async () => {
 
+  setSelectedItem(item);
+
+  await fetchAllComments(
+    item.requestId
+  );
+
+  setShowCommentModal(true);
+
+  setOpenMenu(null);
+
+}}
+      >
+        Add Notes
+      </button>
       {item?.canAssignStaff && (
         <button
           onClick={() => {
@@ -671,20 +1109,35 @@ const [openOverview, setOpenOverview] = useState(false);
       >
         Change Status
       </button>
+{item?.canMarkDropped && (
 
-      <button
-        className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-        onClick={() => {
-          setSelectedItem(item);
-          setComments(
-            item.demoRequestComments || []
-          );
-          setShowCommentModal(true);
-          setOpenMenu(null);
-        }}
-      >
-        Add Comments
-      </button>
+  <button
+    onClick={() => {
+
+      setSelectedItem(item);
+
+      setShowMarkLostDrawer(true);
+
+      setOpenMenu(null);
+
+    }}
+    className="
+      w-full
+      text-left
+      px-4
+      py-2.5
+      text-sm
+      hover:bg-red-50
+      text-red-500
+      transition-colors
+      cursor-pointer
+    "
+  >
+    Mark as Lost
+  </button>
+
+)}
+     
 
       <button
         className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-500 transition-colors cursor-pointer"
@@ -718,11 +1171,11 @@ const [openOverview, setOpenOverview] = useState(false);
 
                 </tbody>
 
-              </table>
+    </table>
 
-            </div>
+  </div>
 
-          </div>
+</div>
 
 
           <div className="flex justify-between items-center px-4 py-3 text-sm">
@@ -783,111 +1236,269 @@ const [openOverview, setOpenOverview] = useState(false);
 
         </div>
         {showModal && (
+  <div className="fixed inset-0 z-[9999]">
+
+    {/* OVERLAY */}
+    <div
+      className="absolute inset-0 bg-black/40"
+      onClick={() => {
+        setShowModal(false);
+        setAssignError("");
+        setDropdownValue("");
+        setCommentText("")
+      }}
+    />
+
+    
+    <div
+      className="
+        fixed
+        top-3
+        right-3
+        bottom-3
+        w-[420px]
+        bg-white
+        rounded-2xl
+        shadow-2xl
+        flex
+        flex-col
+        overflow-hidden
+      "
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+
+        <div>
+          <h2 className="text-[18px] font-semibold text-left">
+            Assign Staff
+          </h2>
+
+          <p className="text-[12px] text-gray-500 mt-1">
+            Select agent for this request
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            setShowModal(false);
+            setAssignError("");
+            setDropdownValue("");
+            setCommentText("")
+          }}
+          className="text-red-500 text-lg cursor-pointer"
+        >
+          ✕
+        </button>
+
+      </div>
+
+      {/* BODY */}
+      <div className="flex-1 px-5 py-5 overflow-y-auto">
+
+        <label className="text-[13px] font-medium text-left block mb-2">
+          Assign Staff <span className="text-red-500">*</span>
+        </label>
+
+        {/* CUSTOM DROPDOWN */}
+        <div
+          className="relative"
+          ref={dropdownRef}
+        >
+
           <div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]"
-            onClick={() => {
-              setShowModal(false);
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenDropdown(!openDropdown);
               setAssignError("");
-              setDropdownValue("");
             }}
+            className="
+              w-full
+              border
+              border-gray-300
+              rounded-xl
+              px-4
+              py-3
+              flex
+              justify-between
+              items-center
+              cursor-pointer
+              bg-white
+            "
           >
+
+            <span className="text-sm ">
+
+              {
+                agentList.find(
+                  (a) => a.agentId === dropdownValue
+                )?.agentName || "Select Staff"
+              }
+
+            </span>
+
+            <img
+              src={Arrow}
+              className="w-5 h-5"
+            />
+
+          </div>
+
+          {/* DROPDOWN */}
+          {openDropdown && (
+
             <div
-              className="bg-white rounded-xl w-[400px] p-6"
-              onClick={(e) => e.stopPropagation()}
+              className="
+                absolute
+                mt-2
+                w-full
+                bg-white
+                rounded-xl
+                shadow-xl
+                border
+                max-h-60
+                overflow-y-auto
+                z-[9999]
+              "
             >
 
-              <h2 className="text-lg font-semibold mb-4 text-left">
-                Assign Staff<span className="text-red-500"> *</span>
-              </h2>
+              {agentList.map((agent) => (
 
-              {/* 🔽 CUSTOM DROPDOWN */}
-              <div className="relative mb-4" ref={dropdownRef}>
-
-                {/* Selected box */}
                 <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenDropdown(!openDropdown);
-                    setAssignError("")
+                  key={agent.agentId}
+                  onClick={() => {
+                    setDropdownValue(agent.agentId);
+                    setOpenDropdown(false);
                   }}
-                  className="w-full border-1 border-gray-300 rounded-xl px-4 py-2 flex justify-between items-center cursor-pointer text-left"
+                  className={`
+                    px-4 py-3 text-sm cursor-pointer transition-all text-left
+
+                    ${
+                      dropdownValue === agent.agentId
+                        ? "bg-blue-600 text-white"
+                        : "hover:bg-gray-100"
+                    }
+                  `}
                 >
-                  <span className="text-sm">
-                    {agentList.find(a => a.agentId === dropdownValue)?.agentName || "Select Staff"}
-                  </span>
-                  {/* <span>▾</span> */}
-                  <img src={Arrow} className="w-[25px] h-[25px]" />
+
+                  {agent.agentName?.trim() ||
+                    "Name not entered"}
+
                 </div>
 
-                {/* Dropdown list */}
-                {openDropdown && (
-                  <div className="absolute mt-2 w-full bg-white rounded-xl shadow-lg border max-h-44 overflow-y-auto z-[9999] text-left">
-
-                    {/* {agentList.map((agent) => (
-                      <div
-                        key={agent.agentId}
-                        onClick={() => {
-                          setDropdownValue(agent.agentId);
-                          setOpenDropdown(false);
-                        }}
-                        className={`px-4 py-2 cursor-pointer text-sm
-                  ${dropdownValue === agent.agentId
-                            ? "bg-blue-600 text-white"
-                            : "hover:bg-gray-100"
-                          }`}
-                      >
-                        {agent.agentName}
-                      </div>
-                    ))} */}
-                    {agentList.map((agent) => (
-                      <div
-                        key={agent.agentId}
-                        onClick={() => {
-                          setDropdownValue(agent.agentId);
-                          setOpenDropdown(false);
-                        }}
-                        className={`px-4 py-2 cursor-pointer text-sm
-      ${dropdownValue === agent.agentId
-                            ? "bg-blue-600 text-white"
-                            : "hover:bg-gray-100"
-                          }`}
-                      >
-                        {agent.agentName?.trim() || "Name not entered"}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-              </div>
-              {assignError && (
-                <ErrorMessage message={assignError} type="error" />
-              )}
-              {/* BUTTONS */}
-              <div className="flex justify-end gap-3">
-
-                <button
-                  onClick={() => {
-                    setShowModal(false);
-                    setAssignError("");
-                    setDropdownValue("");
-                  }}
-                  className="px-4 py-2 border rounded-lg"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={handleAssignStaff}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-                >
-                  Save
-                </button>
-
-              </div>
+              ))}
 
             </div>
+
+          )}
+
+        </div>
+
+        {/* ERROR */}
+        {assignError && (
+          <div className="mt-2">
+            <ErrorMessage
+              message={assignError}
+              type="error"
+            />
           </div>
         )}
+{/* ADDITIONAL COMMENTS */}
+<div className="mt-5">
+
+  <label className="text-[13px] font-medium text-left block mb-2">
+    Additional Comments
+  </label>
+
+  <div
+    className="
+      border border-gray-300
+      rounded-xl
+      p-3
+      bg-white
+    "
+  >
+
+    <textarea
+      placeholder="Type your comments here..."
+      value={commentText}
+      onChange={(e) => {
+        setCommentText(e.target.value);
+      }}
+      className="
+        w-full
+        h-[110px]
+        resize-none
+        outline-none
+        text-sm
+        placeholder:text-gray-400
+      "
+    />
+
+    {/* TOOLBAR */}
+    <div className="flex justify-end gap-3 mt-2 text-gray-400 text-sm">
+
+      <button className="font-semibold">
+        B
+      </button>
+
+      <button className="italic">
+        I
+      </button>
+
+      <button className="underline">
+        U
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+      </div>
+
+      {/* FOOTER */}
+      <div className="border-t border-gray-200 px-5 py-4 flex justify-end gap-3">
+
+        <button
+          onClick={() => {
+            setShowModal(false);
+            setAssignError("");
+            setDropdownValue("");
+            setCommentText("")
+          }}
+          className="
+            px-4 py-2
+            border border-gray-300
+            rounded-lg
+            text-sm
+            hover:bg-gray-50
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleAssignStaff}
+          className="
+            px-5 py-2
+            bg-blue-600
+            hover:bg-blue-700
+            text-white
+            rounded-lg
+            text-sm
+          "
+        >
+          Save
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
       </>
       <DemoRequestDrawer
         open={openDrawer}
@@ -901,130 +1512,153 @@ const [openOverview, setOpenOverview] = useState(false);
         refreshList={fetchData}
         currentStatus={selectedItem?.demoRequestStatus}
       />
-      {showCommentModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
+{showCommentModal && (
+  <div className="fixed inset-0 z-[9999]">
 
-          {/* Overlay */}
-          <div
-            className="absolute inset-0"
-            onClick={() => {
-              setShowCommentModal(false);
+    {/* Overlay */}
+    <div
+      className="absolute inset-0 bg-black/40"
+      onClick={() => {
+        setShowCommentModal(false);
+        setCommentError("");
+        setCommentText("");
+        
+      }}
+    />
+
+    {/* Drawer */}
+    <div
+      className="fixed top-3 right-3 bottom-3 w-[420px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200">
+
+        <h2 className="flex items-center gap-2 text-[16px] font-semibold">
+          <img src={Notes} className="w-4 h-4" />
+          Internal Notes
+        </h2>
+
+        <button
+          onClick={() => {
+            setShowCommentModal(false);
+            setCommentError("");
+            setCommentText("");
+            
+          }}
+          className="text-red-500 text-lg cursor-pointer"
+        >
+          ✕
+        </button>
+
+      </div>
+
+      {/* BODY */}
+      <div className="flex-1 flex flex-col px-5 py-4 overflow-hidden">
+
+        {/* LABEL */}
+        <label className="text-xs text-gray-500 mb-2 block text-left">
+          Additional Comments <span className="text-red-500">*</span>
+        </label>
+
+        {/* TEXTAREA BOX */}
+        <div className="border border-gray-300 rounded-xl p-3">
+
+          <textarea
+            placeholder="Comment here"
+            value={commentText}
+            onChange={(e) => {
+              setCommentText(e.target.value);
               setCommentError("");
-              setCommentText("")
-
             }}
-          ></div>
+            className="w-full text-sm h-24 resize-none outline-none"
+          />
 
-          {/* Modal */}
-          <div
-            className="relative bg-white rounded-xl w-[420px] shadow-xl z-[10000]"
-            onClick={(e) => e.stopPropagation()}
+          {/* Toolbar */}
+          <div className="flex justify-end gap-3 mt-2 text-gray-400 text-sm">
+            <button>B</button>
+            <button>I</button>
+            <button>U</button>
+          </div>
+
+        </div>
+
+        {commentError && (
+          <ErrorMessage message={commentError} type="error" />
+        )}
+
+        {/* ADD BUTTON */}
+        <div className="flex justify-end mt-3">
+          <button
+            onClick={handleAddComment}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm cursor-pointer flex items-center gap-2"
           >
+            ➤ Add
+          </button>
+        </div>
 
-            {/* HEADER */}
-            <div className="flex justify-between items-center px-5 py-3 border-b border-gray-300">
+      
+        <p className="text-[11px] text-gray-400 mt-5 mb-3 text-left">
+          ALL COMMENTS
+        </p>
 
-              <h2 className="flex items-center gap-2 text-sm font-semibold">
-                <img src={Notes} className="w-4 h-4" />
-                Internal Notes
-              </h2>
+        {/* COMMENTS LIST */}
+        <div className="flex-1 overflow-y-auto pr-1">
 
-              <button
-                onClick={() => {
-                  setShowCommentModal(false);
-                  setCommentError("");
-                  setCommentText("");
-                }}
-                className="text-red-500 text-lg cursor-pointer"
+          <div className="space-y-5">
+
+            {allComments.map((item, index) => (
+
+              <div
+                key={item.demoRequestCommentsId}
+                className="flex gap-3"
               >
-                ✕
-              </button>
 
-            </div>
+                {/* LEFT ICON */}
+                <div className="flex flex-col items-center">
 
-            {/* BODY */}
-            <div className="p-5">
-
-              <label className="text-xs text-gray-500 mb-1 block text-left">
-                Additional Comments <span className="text-red-500">*</span>
-              </label>
-
-              {/* TEXTAREA */}
-              <textarea
-                placeholder="Comment here"
-                value={commentText}
-                onChange={(e) => {
-                  setCommentText(e.target.value);
-                  setCommentError("");
-                }}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm h-24 resize-none"
-              />
-
-              {/* ADD BUTTON */}
-              {commentError && (
-                <ErrorMessage message={commentError} type="error" />
-              )}
-              <div className="flex justify-end mt-3" >
-                <button onClick={handleAddComment}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm cursor-pointer"
-                >
-                  ➤ Add
-                </button>
-              </div>
-
-              {/* COMMENTS LIST */}
-              <p className="text-[11px] text-gray-400 mt-5 mb-2 text-left">
-                ALL COMMENTS
-              </p>
-
-              <div className="space-y-4 max-h-[100px] overflow-y-auto">
-
-                {comments.map((item, index) => (
-                  <div key={item.demoRequestCommentsId} className="flex gap-3">
-
-                    {/* LEFT ICON + LINE */}
-                    <div className="flex flex-col items-center">
-
-                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                        <img src={CommentBox} className="w-4 h-4" />
-                      </div>
-
-                      {index !== comments.length - 1 && (
-                        <div className="w-[1px] flex-1 bg-gray-300 mt-1"></div>
-                      )}
-                    </div>
-
-
-                    <div className="flex-1 bg-gray-50 rounded-lg p-3 border border-gray-300">
-
-
-                      <p className="text-sm font-medium text-gray-800 text-left">
-                        {item.comment}
-                      </p>
-
-
-                      <p className="text-xs text-gray-500 mt-1 text-left">
-                        {item.createdAtDate} , {item.createdAtTime}
-                      </p>
-
-
-                      <p className="text-xs text-gray-400 text-left">
-                        Added by {item.createdBy}
-                      </p>
-
-                    </div>
+                  <div className="w-9 h-9 rounded-full bg-[#EEF3FF] flex items-center justify-center border border-[#DCE6FF]">
+                    <img src={CommentBox} className="w-4 h-4" />
                   </div>
-                ))}
+
+                  {index !== allComments.length - 1 && (
+                    <div className="w-[1px] flex-1 bg-gray-200 mt-1"></div>
+                  )}
+
+                </div>
+
+                {/* COMMENT CARD */}
+                <div className="flex-1">
+
+                  <p className="text-sm font-semibold text-gray-800 text-left">
+                    {item.comment}
+                  </p>
+
+                  <p className="text-xs text-gray-500 mt-1 text-left">
+                    {item.createdAtDate} , {item.createdAtTime}
+                  </p>
+
+                  <p className="text-xs text-gray-400 mt-2 text-left">
+                    Added by {item.createdBy}
+                  </p>
+
+                </div>
 
               </div>
 
-            </div>
-
-
+            ))}
 
           </div>
+
         </div>
-      )}
+
+      </div>
+
+    </div>
+
+  </div>
+)}
       {showDeleteModal && (
   <div
     className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]"
@@ -1071,6 +1705,35 @@ const [openOverview, setOpenOverview] = useState(false);
   open={openOverview}
   onClose={() => setOpenOverview(false)}
   selectedItem={selectedItem}
+  commentText={commentText}
+  setCommentText={setCommentText}
+  handleAddComment={handleAddComment}
+  allComments={allComments}
+fetchAllComments={fetchAllComments}
+  onAssignStaff={() => {
+
+    setOpenOverview(false);
+
+    setTimeout(() => {
+      setShowModal(true);
+    }, 200);
+
+  }}
+/>
+<MarkAsLostDrawer
+  open={showMarkLostDrawer}
+  onClose={() =>
+    setShowMarkLostDrawer(false)
+  }
+  fetchData={fetchData}
+  selectedItem={selectedItem}
+  dropReasons={
+    statusConfig?.find(
+      (item) =>
+        item.currentStatus ===
+        "DROPPED"
+    )?.dropReasons || []
+  }
 />
     </DashboardLayout>
   );

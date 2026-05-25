@@ -147,34 +147,94 @@ const getSubscriptions = async (
   //     setLoading(false);
   //   }
   // };
-  const getDemoRequests = async (page = 1, size = 10, name = "") => {
-    try {
-      setLoading(true);
-      setErrorMsg("");
+  // const getDemoRequests = async (page = 1, size = 10, name = "") => {
+  //   try {
+  //     setLoading(true);
+  //     setErrorMsg("");
 
-      const res = await axiosInstance.get("/v2/demo-request", {
-        params: { page, size, name }
-      });
+  //     const res = await axiosInstance.get("/v2/demo-request", {
+  //       params: { page, size, name }
+  //     });
 
-      if (res.status === 200) {
-        return {
-          success: true,
-          data: res.data
-        };
+  //     if (res.status === 200) {
+  //       return {
+  //         success: true,
+  //         data: res.data
+  //       };
+  //     }
+
+  //     return { success: false };
+
+  //   } catch (error) {
+  //     const msg = getErrorMessage(error);
+  //     setErrorMsg(msg);
+
+  //     return { success: false, message: msg };
+
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const getDemoRequests = async (
+  page = 1,
+  size = 10,
+  name = "",
+  startDate = "",
+  endDate = "",
+  status = "",
+  agentId = ""
+) => {
+
+  try {
+
+    setLoading(true);
+
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      "/v2/demo-request",
+      {
+        params: {
+          page,
+          size,
+          name,
+          startDate,
+          endDate,
+          status,
+          agentId
+        }
       }
+    );
 
-      return { success: false };
+    if (res.status === 200) {
 
-    } catch (error) {
-      const msg = getErrorMessage(error);
-      setErrorMsg(msg);
+      return {
+        success: true,
+        data: res.data
+      };
 
-      return { success: false, message: msg };
-
-    } finally {
-      setLoading(false);
     }
-  };
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
   const getAgentsDropdown = async () => {
     try {
       setLoading(true);
@@ -435,13 +495,174 @@ const deleteDemoRequest = async (demoRequestId) => {
     setLoading(false);
   }
 };
+const getDemoType = async () => {
+
+  try {
+
+    setLoading(true);
+
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      "/v2/demo-request/demo-type"
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
+const getDropReasons = async () => {
+
+  try {
+
+    setLoading(true);
+
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      "/v2/demo-request/drop-reason"
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
+const getDemoRequestComments = async (
+  demoRequestId
+) => {
+
+  try {
+
+    const res = await api.get(
+      `/v2/demo-request/comment/${demoRequestId}`
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  }
+
+};
+const dropDemoRequest = async (
+  demoRequestId,
+  payload
+) => {
+
+  try {
+
+    setLoading(true);
+
+    setErrorMsg("");
+
+    const res = await axiosInstance.put(
+      `/v2/demo-request/drop/${demoRequestId}`,
+      payload
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data,
+        message: "Request dropped successfully"
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
   return (
     <SubscriptionContext.Provider
       value={{
         loading,
         errorMsg,
         createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, 
-        getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment,deleteDemoRequest
+        getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment,deleteDemoRequest,getDemoType,getDropReasons,getDemoRequestComments,dropDemoRequest
       }}
     >
       {children}

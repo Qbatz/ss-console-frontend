@@ -31,14 +31,36 @@ const StaffScreen = ({ hostelData, refreshHostel, }) => {
   fullName: owner?.fullName,
   email: owner?.emailId,
   mobileNo: owner?.mobileNo,
-  updatedAt: "—",
+  // updatedAt: "—",
+  updatedAt:
+  owner?.lastUpdateDate && owner?.lastUpdateTime
+    ? (
+        <>
+          <div>{owner.lastUpdateDate}</div>
+          <div className="text-gray-500 text-[11px]">
+            {owner.lastUpdateTime}
+          </div>
+        </>
+      )
+    : "—",
   userId: owner?.userId,
   isOwner: true,
   tableColumns: owner?.tableColumns || [],
 },
     ...(masters || []).map(m => ({
       ...m,
-      email: m.email || m.emailId // 🔥 normalize
+      updatedAt:
+  m?.lastUpdateDate && m?.lastUpdateTime
+    ? (
+        <>
+          <div>{m.lastUpdateDate}</div>
+          <div className="text-gray-500 text-[11px]">
+            {m.lastUpdateTime}
+          </div>
+        </>
+      )
+    : "—",
+      email: m.email || m.emailId 
     })),
   ];
   const { updateTableColumns, resetTableColumns,resetUserPin } = useHostel();
@@ -345,9 +367,9 @@ setPinError(res.message)
                         {item.mobileNo || "N/A"}
                       </td>
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px]">
-                        {item.updatedAt || "—"}
-                      </td>
+                     <td className="px-4 py-2 text-left font-medium text-[12px]">
+  {item.updatedAt || "—"}
+</td>
 
                       <td className="px-4 py-2 text-left font-medium text-[12px] relative">
                         <div className="flex justify-end gap-3">
@@ -477,12 +499,12 @@ marginLeft: "-8px",
                     </div>
                   </th>
                   {/* <th className="px-4 py-3 text-left">ROLE ASSIGN</th> */}
-                  <th className="px-4 py-3 text-left">
+                  {/* <th className="px-4 py-3 text-left">
                     <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
                       ROLE ASSIGN
                       <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
                     </div>
-                  </th>
+                  </th> */}
                   <th className="px-4 py-3 text-left">
                     <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
                       Mail
@@ -492,6 +514,12 @@ marginLeft: "-8px",
                   <th className="px-4 py-3 text-left">
                     <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
                       Mobile number
+                      <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
+                    </div>
+                  </th>
+                   <th className="px-4 py-3 text-left">
+                    <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
+                     Profile Last Update
                       <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
                     </div>
                   </th>
@@ -516,9 +544,9 @@ marginLeft: "-8px",
                         {item.fullName || item.firstName}
                       </td>
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+                      {/* <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.role || "—"}
-                      </td>
+                      </td> */}
 
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.emailId || "N/A"}
@@ -527,6 +555,19 @@ marginLeft: "-8px",
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.mobileNo || "N/A"}
                       </td>
+                     <td className="px-4 py-2 text-left font-medium text-[12px]">
+  {item.lastUpdateDate ? (
+    <div className="flex flex-col">
+      <span>{item.lastUpdateDate}</span>
+
+      <span className="text-[11px] text-gray-500">
+        {item.lastUpdateTime}
+      </span>
+    </div>
+  ) : (
+    "—"
+  )}
+</td>
 
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
                         <div className="flex justify-end gap-3">

@@ -53,7 +53,7 @@ const PropertyOverview = () => {
   canWrite: canSubscriptionWrite,
   canUpdate: canSubscriptionUpdate,
   canDelete: canSubscriptionDelete,
-} = usePermission("Subscriptions");
+} = usePermission("Payments");
 
   const { canWrite: canResetWrite } = usePermission("Reset hostel");
   const { plans, getPlans, getPlansDropdown } = usePlan();
@@ -125,7 +125,7 @@ const PropertyOverview = () => {
   const showInvoices = loginType === "normal";
   const { hostelId } = useParams();
 
-  // const hostelData = location.state?.hostelData;
+ 
    const fetchData = async () => {
       if (!hostelId) return;
 
@@ -649,9 +649,21 @@ const handleSubscription = async () => {
 
           <img src={arrowleft} height={20} width={20} className="text-xl cursor-pointer"
 
-            onClick={() => navigate(`/properties/${adminDetails?.roleId}`, {
-              state: { skipApi: true }
-            })}
+            // onClick={() => navigate(`/properties/${adminDetails?.roleId}`, {
+            //   state: { skipApi: true }
+            // })}
+            onClick={() =>
+  navigate(`/properties/${adminDetails?.roleId}`, {
+    state: {
+      skipApi: true,
+
+      currentPage: location.state?.currentPage,
+      currentSearch: location.state?.currentSearch,
+      currentDateRange: location.state?.currentDateRange,
+      currentStatusFilter: location.state?.currentStatusFilter,
+    },
+  })
+}
           />
           <p className="text-[20px] leading-[48px] font-medium text-[#1F2937] font-sans ml-2">
             Property Overview
