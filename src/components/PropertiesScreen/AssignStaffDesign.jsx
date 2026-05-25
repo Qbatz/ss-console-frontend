@@ -261,7 +261,7 @@ const AssignStaffModal = ({
                 {/* Comment */}
                 <div className="mb-4 text-left">
                     <label className="text-sm text-gray-600">
-                        Additional Comments <span className="text-red-500">*</span>
+                        Additional Comments
                     </label>
 
                     <textarea

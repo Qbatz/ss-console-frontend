@@ -27,6 +27,8 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
   const [emailError, setEmailError] = useState("");
+  const[requestDateError,setRequestDateError] = useState("")
+  const [requestTimeError,setRequestTimeError] = useState("")
 
   const filteredStates = states.filter((s) =>
     s.toLowerCase().includes(search.toLowerCase())
@@ -76,6 +78,8 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
     // reset
     setNameError("");
     setMobileError("");
+      setRequestDateError("");
+  setRequestTimeError("");
 
     if (!formData.name) {
       setNameError("Name is required");
@@ -113,6 +117,16 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
       setTenantError("Tenants cannot be negative");
       valid = false;
     }
+     if (!formData.requestedDate) {
+    setRequestDateError("Requested date is required");
+    valid = false;
+  }
+
+ 
+  if (!formData.requestedTime) {
+    setRequestTimeError("Requested time is required");
+    valid = false;
+  }
 
     return valid;
   };
@@ -132,7 +146,8 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
       country: "",
       comments: "",
       requestedDate: "",
-      requestedTime: ""
+      requestedTime: "",
+      
     });
 
     // reset search
@@ -144,6 +159,8 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
     setCountryError("");
     setTenantError("");
     setHostelError("");
+    setRequestDateError("");
+    setRequestTimeError("")
 
 
     setShowDropdown(false);
@@ -493,27 +510,52 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
               </div>
 
               {/* Date */}
-              <div className="flex items-start text-left gap-3">
-                <label className="w-40 text-[12px] font-medium">Requested Date</label>
-                <input
-                  type="date"
-                  name="requestedDate"
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-                />
-              </div>
+             <div className="flex items-start text-left gap-3">
+  <label className="w-40 text-[12px] font-medium">
+    Requested Date <span className="text-red-500">*</span>
+  </label>
+
+  <div className="w-full">
+    <input
+      type="date"
+      name="requestedDate"
+      value={formData.requestedDate}
+      onChange={(e) => {
+        handleChange(e);
+        setRequestDateError("");
+      }}
+      className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+    />
+
+    {requestDateError && (
+      <ErrorMessage message={requestDateError} type="error" />
+    )}
+  </div>
+</div>
 
               {/* Time */}
-              <div className="flex items-start text-left gap-3">
-                <label className="w-40 text-[12px] font-medium">Requested Time</label>
-                <input
-                  type="time"
-                  name="requestedTime"
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-                />
-              </div>
+       <div className="flex items-start text-left gap-3">
+  <label className="w-40 text-[12px] font-medium">
+    Requested Time <span className="text-red-500">*</span>
+  </label>
 
+  <div className="w-full">
+    <input
+      type="time"
+      name="requestedTime"
+      value={formData.requestedTime}
+      onChange={(e) => {
+        handleChange(e);
+        setRequestTimeError("");
+      }}
+      className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+    />
+
+    {requestTimeError && (
+      <ErrorMessage message={requestTimeError} type="error" />
+    )}
+  </div>
+</div>
               {/* Comments */}
               <div className="flex items-start text-left gap-3">
                 <label className="w-40 text-[12px] font-medium">Comments</label>

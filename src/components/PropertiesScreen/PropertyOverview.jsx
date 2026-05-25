@@ -45,6 +45,7 @@ const PropertyOverview = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedTenantId, setSelectedTenantId] = useState(null);
   const [phone, setPhone] = useState("");
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenants");
     const {
@@ -52,7 +53,7 @@ const PropertyOverview = () => {
   canWrite: canSubscriptionWrite,
   canUpdate: canSubscriptionUpdate,
   canDelete: canSubscriptionDelete,
-} = usePermission("Subscriptions");
+} = usePermission("Payments");
 
   const { canWrite: canResetWrite } = usePermission("Reset hostel");
   const { plans, getPlans, getPlansDropdown } = usePlan();
@@ -124,7 +125,7 @@ const PropertyOverview = () => {
   const showInvoices = loginType === "normal";
   const { hostelId } = useParams();
 
-  // const hostelData = location.state?.hostelData;
+ 
    const fetchData = async () => {
       if (!hostelId) return;
 
@@ -439,39 +440,47 @@ if (updated?.success) {
     document.removeEventListener("mousedown", handleClickOutside);
   };
 }, []);
-  const handleSubscription = async () => {
+const handleSubscription = async () => {
 
-    let hasError = false;
+  // prevent double click
+  if (subscriptionLoading) return;
 
-    if (!planCode) {
-      setPlanError("Please Select Plancode");
-      hasError = true;
-    }
+  let hasError = false;
 
-    if (!paymentProof) {
-      setProofError("Please upload proof");
-      hasError = true;
-    }
-    if (!paidAmount) {
-      setPaidAmountError("Please enter paid amount");
-      hasError = true;
-    }
-    if (!paidBy) {
-      setPaidByError("Please select Paid By");
-      hasError = true;
-    }
+  if (!planCode) {
+    setPlanError("Please Select Plancode");
+    hasError = true;
+  }
 
-    if (hasError) return;
+  if (!paymentProof) {
+    setProofError("Please upload proof");
+    hasError = true;
+  }
+
+  if (!paidAmount) {
+    setPaidAmountError("Please enter paid amount");
+    hasError = true;
+  }
+
+  if (!paidBy) {
+    setPaidByError("Please select Paid By");
+    hasError = true;
+  }
+
+  if (hasError) return;
+
+  try {
+
+    setSubscriptionLoading(true);
 
     const payload = {
-
       trialDays: 0,
-      planCode: planCode,
+      planCode,
       paidAmount: Number(paidAmount),
       discountAmount: Number(discountAmount || 0),
       paidBy
     };
-    console.log("payload", payload)
+
     const res = await createSubscription(
       trialPlan?.hostelId,
       payload,
@@ -479,24 +488,27 @@ if (updated?.success) {
     );
 
     if (res?.success) {
+
       setModalType("success");
       setMessage(res.message);
       setShowSuccess(true);
 
       await getHostels(1, 10, "");
-const updated = await getHostelById(hostelId);
 
-if (updated?.success) {
-  setHostelData(updated.data);
-}
+      const updated = await getHostelById(hostelId);
+
+      if (updated?.success) {
+        setHostelData(updated.data);
+      }
+
       setTimeout(() => {
         setShowSuccess(false);
-        setShowPlanModal(false)
-        resetPlanForm()
-
+        setShowPlanModal(false);
+        resetPlanForm();
       }, 1000);
 
     } else {
+
       setModalType("error");
       setMessage(res?.message);
       setShowSuccess(true);
@@ -505,7 +517,80 @@ if (updated?.success) {
         setShowSuccess(false);
       }, 1000);
     }
-  };
+
+  } finally {
+
+    setSubscriptionLoading(false);
+
+  }
+};
+//   const handleSubscription = async () => {
+
+//     let hasError = false;
+
+//     if (!planCode) {
+//       setPlanError("Please Select Plancode");
+//       hasError = true;
+//     }
+
+//     if (!paymentProof) {
+//       setProofError("Please upload proof");
+//       hasError = true;
+//     }
+//     if (!paidAmount) {
+//       setPaidAmountError("Please enter paid amount");
+//       hasError = true;
+//     }
+//     if (!paidBy) {
+//       setPaidByError("Please select Paid By");
+//       hasError = true;
+//     }
+
+//     if (hasError) return;
+
+//     const payload = {
+
+//       trialDays: 0,
+//       planCode: planCode,
+//       paidAmount: Number(paidAmount),
+//       discountAmount: Number(discountAmount || 0),
+//       paidBy
+//     };
+//     console.log("payload", payload)
+//     const res = await createSubscription(
+//       trialPlan?.hostelId,
+//       payload,
+//       paymentProof
+//     );
+
+//     if (res?.success) {
+//       setModalType("success");
+//       setMessage(res.message);
+//       setShowSuccess(true);
+
+//       await getHostels(1, 10, "");
+// const updated = await getHostelById(hostelId);
+
+// if (updated?.success) {
+//   setHostelData(updated.data);
+// }
+//       setTimeout(() => {
+//         setShowSuccess(false);
+//         setShowPlanModal(false)
+//         resetPlanForm()
+
+//       }, 1000);
+
+//     } else {
+//       setModalType("error");
+//       setMessage(res?.message);
+//       setShowSuccess(true);
+
+//       setTimeout(() => {
+//         setShowSuccess(false);
+//       }, 1000);
+//     }
+//   };
   const handleDeleteTenant = async () => {
 
     const selectedTenant = hostelData?.tenantList?.find(
@@ -564,9 +649,21 @@ if (updated?.success) {
 
           <img src={arrowleft} height={20} width={20} className="text-xl cursor-pointer"
 
-            onClick={() => navigate(`/properties/${adminDetails?.roleId}`, {
-              state: { skipApi: true }
-            })}
+            // onClick={() => navigate(`/properties/${adminDetails?.roleId}`, {
+            //   state: { skipApi: true }
+            // })}
+            onClick={() =>
+  navigate(`/properties/${adminDetails?.roleId}`, {
+    state: {
+      skipApi: true,
+
+      currentPage: location.state?.currentPage,
+      currentSearch: location.state?.currentSearch,
+      currentDateRange: location.state?.currentDateRange,
+      currentStatusFilter: location.state?.currentStatusFilter,
+    },
+  })
+}
           />
           <p className="text-[20px] leading-[48px] font-medium text-[#1F2937] font-sans ml-2">
             Property Overview
@@ -582,9 +679,28 @@ if (updated?.success) {
             {/* Left */}
            <div className="flex items-center gap-3">
 
-              <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold">
+              {/* <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold">
                 {hostelData.initials}
-              </div>
+              </div> */}
+              <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-lg font-semibold">
+
+  {hostelData?.mainImage ? (
+
+    <img
+      src={hostelData.mainImage}
+      alt="profile"
+      className="w-full h-full object-cover"
+    />
+
+  ) : (
+
+    <span>
+      {hostelData?.initials}
+    </span>
+
+  )}
+
+</div>
 
               <div>
                 <h2 className="text-[24px] font-semibold text-gray-900 text-left font-sans" >
@@ -610,7 +726,7 @@ if (updated?.success) {
                 >
                   Trial Extend
                 </button> */}
-                <button
+                {/* <button
   disabled={
     trialPlan?.canAddTrial === false ||
     !canSubscriptionWrite
@@ -640,7 +756,7 @@ if (updated?.success) {
   }
 >
   Trial Extend
-</button>
+</button> */}
 
                 {/* <button
                   disabled={trialPlan?.canAddExpandableTrial === false}
@@ -1804,7 +1920,7 @@ if (updated?.success) {
                 Cancel
               </button>
 
-              <button
+              {/* <button
                 onClick={async () => {
                   await handleSubscription();
 
@@ -1812,7 +1928,20 @@ if (updated?.success) {
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
               >
                 Submit
-              </button>
+              </button> */}
+              <button
+  disabled={subscriptionLoading}
+  onClick={handleSubscription}
+  className={`px-4 py-2 rounded-lg text-white
+    ${
+      subscriptionLoading
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-blue-600 cursor-pointer"
+    }
+  `}
+>
+  {subscriptionLoading ? "Submit..." : "Submit"}
+</button>
             </div>
           </div>
         </div>

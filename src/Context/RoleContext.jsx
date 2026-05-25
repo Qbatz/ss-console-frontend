@@ -354,12 +354,13 @@ const deactivateAgent = async (agentId) => {
     setLoading(false);
   }
 };
-const assignStaff = async (demoRequestId, agentId) => {
+const assignStaff = async (demoRequestId, agentId,comments) => {
   try {
     const res = await api.put(
       `/v2/demo-request/assign/${demoRequestId}`,
       {
-        agentId: agentId
+        agentId: agentId,
+         comments: comments
       }
     );
 

@@ -3,16 +3,77 @@ import { useSubscription } from "../../Context/SubscriptionContext";
 import Arrow from "../../assets/direction-down 01.png";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
+import { usePlan } from "../../Context/PlanContexts";
 
 const UpdateStatusModal = ({ open, onClose, demoRequestId, refreshList, currentStatus }) => {
-  const { updateDemoRequestStatus, getAgentsDropdown, getDemoRequestStatus, getDemoRequests } = useSubscription();
+  const { updateDemoRequestStatus, getAgentsDropdown, getDemoRequestStatus, getDemoRequests,getDemoType,getDropReasons } = useSubscription();
+   const { getPlansDropdown } = usePlan();
   const [statusList, setStatusList] = useState([]);
   const [openStatus, setOpenStatus] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
+  const [demoTypes, setDemoTypes] = useState([]);
+  const [dropReasons, setDropReasons] = useState([]);
+  const [openDropReason, setOpenDropReason] =
+  useState(false);
+  const [plans, setPlans] = useState([]);
+const [openPlanDropdown, setOpenPlanDropdown] =
+  useState(false);
+  useEffect(() => {
 
+  const fetchPlans = async () => {
+
+    const res = await getPlansDropdown();
+
+    if (res.success) {
+
+      setPlans(
+        res.data?.otherPlans || []
+      );
+
+    }
+
+  };
+
+  fetchPlans();
+
+}, []);
+  useEffect(() => {
+
+  const fetchDropReasons = async () => {
+
+    const res = await getDropReasons();
+
+    if (res.success) {
+
+      setDropReasons(res.data);
+
+    }
+
+  };
+
+  fetchDropReasons();
+
+}, []);
+useEffect(() => {
+
+  const fetchDemoTypes = async () => {
+
+    const res = await getDemoType();
+
+    if (res.success) {
+
+      setDemoTypes(res.data);
+
+    }
+
+  };
+
+  fetchDemoTypes();
+
+}, []);
   useEffect(() => {
     const fetchStatus = async () => {
       const res = await getDemoRequestStatus();
@@ -29,13 +90,26 @@ const UpdateStatusModal = ({ open, onClose, demoRequestId, refreshList, currentS
     )?.allowedStatuses || [];
   console.log("setStatusList", statusList)
 
+  // const [form, setForm] = useState({
+  //   demoRequestStatus: "",
+  //   comments: "",
+  //   presentedBy: "",
+  //   presentedAt: "",
+  //   agentId: ""
+  // });
   const [form, setForm] = useState({
-    demoRequestStatus: "",
-    comments: "",
-    presentedBy: "",
-    presentedAt: "",
-    agentId: ""
-  });
+  demoRequestStatus: "",
+  comments: "",
+  presentedBy: "",
+  presentedAt: "",
+  agentId: "",
+
+  demoDate: "",
+  fromTime: "",
+  toTime: "",
+  demoType: "",
+  demoLink: ""
+});
 
   const [agents, setAgents] = useState([]);
   const [errors, setErrors] = useState({});
@@ -92,16 +166,16 @@ const UpdateStatusModal = ({ open, onClose, demoRequestId, refreshList, currentS
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
-  const formatDateTime = (dateTime) => {
-    if (!dateTime) return "";
-    const d = new Date(dateTime);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, "0");
-    const minutes = String(d.getMinutes()).padStart(2, "0");
-    return `${day}-${month}-${year} ${hours}:${minutes}`;
-  };
+  // const formatDateTime = (dateTime) => {
+  //   if (!dateTime) return "";
+  //   const d = new Date(dateTime);
+  //   const day = String(d.getDate()).padStart(2, "0");
+  //   const month = String(d.getMonth() + 1).padStart(2, "0");
+  //   const year = d.getFullYear();
+  //   const hours = String(d.getHours()).padStart(2, "0");
+  //   const minutes = String(d.getMinutes()).padStart(2, "0");
+  //   return `${day}-${month}-${year} ${hours}:${minutes}`;
+  // };
 
   const validate = () => {
 
@@ -122,7 +196,7 @@ const UpdateStatusModal = ({ open, onClose, demoRequestId, refreshList, currentS
 
     // COMPLETED -> presentedBy required
     if (
-      form.demoRequestStatus === "COMPLETED" &&
+      form.demoRequestStatus === "DEMO_COMPLETED" &&
       !form.presentedBy
     ) {
       err.presentedBy = "Agent is required";
@@ -130,7 +204,7 @@ const UpdateStatusModal = ({ open, onClose, demoRequestId, refreshList, currentS
 
     // COMPLETED -> presentedAt required
     if (
-      form.demoRequestStatus === "COMPLETED" &&
+      form.demoRequestStatus === "DEMO_COMPLETED" &&
       !form.presentedAt
     ) {
       err.presentedAt = "Presented date is required";
@@ -140,58 +214,272 @@ const UpdateStatusModal = ({ open, onClose, demoRequestId, refreshList, currentS
 
     return Object.keys(err).length === 0;
   };
-  const handleSubmit = async () => {
-    if (!validate()) return;
+  // const handleSubmit = async () => {
+  //   if (!validate()) return;
 
-    let payload = {
-      demoRequestStatus: form.demoRequestStatus,
-      comments: form.comments,
-    };
+  //   let payload = {
+  //     demoRequestStatus: form.demoRequestStatus,
+  //     comments: form.comments,
+  //   };
 
-    // ASSIGNED
-    if (form.demoRequestStatus === "ASSIGNED") {
+  //   // ASSIGNED
+  //   if (form.demoRequestStatus === "ASSIGNED") {
 
-      payload.agentId = form.agentId;
-    }
+  //     payload.agentId = form.agentId;
+  //   }
 
-    // COMPLETED
-    if (form.demoRequestStatus === "COMPLETED") {
+  //   // COMPLETED
+  //   if (form.demoRequestStatus === "COMPLETED") {
 
-      payload.presentedBy = form.presentedBy;
+  //     payload.presentedBy = form.presentedBy;
 
-      payload.presentedAt = formatDateTime(
-        form.presentedAt
-      );
-    }
+  //     payload.presentedAt = formatDateTime(
+  //       form.presentedAt
+  //     );
+  //   }
 
-    const res = await updateDemoRequestStatus(
-      demoRequestId,
-      payload
+  //   const res = await updateDemoRequestStatus(
+  //     demoRequestId,
+  //     payload
+  //   );
+
+  //   if (res.success) {
+  //     setModalType("success");
+  //     setMessage(res?.message);
+  //     setShowSuccess(true);
+  //     await refreshList();
+
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //       resetForm();
+
+  //       onClose();
+
+
+
+  //     }, 1500);
+
+
+
+  //   }
+  //   else {
+
+  //   }
+  // };
+//   const handleSubmit = async () => {
+
+//   if (!validate()) return;
+
+//   let payload = {
+//     demoRequestStatus: form.demoRequestStatus,
+//     comments: form.comments,
+//   };
+
+//   // ASSIGNED
+//   if (form.demoRequestStatus === "ASSIGNED") {
+
+//     payload.agentId = form.agentId;
+
+//   }
+
+//   // COMPLETED
+//   if (form.demoRequestStatus === "COMPLETED") {
+
+//     payload.presentedBy = form.presentedBy;
+
+//     payload.presentedAt = formatDateTime(
+//       form.presentedAt
+//     );
+
+//   }
+
+//   // DEMO SCHEDULED
+//   if (form.demoRequestStatus === "DEMO_SCHEDULED") {
+
+//     payload.agentId = form.agentId;
+
+//     payload.demoFrom = `${form.demoDate}T${form.fromTime}:00`;
+
+//     payload.demoTo = `${form.demoDate}T${form.toTime}:00`;
+
+//     payload.demoType = form.demoType;
+
+//     payload.demoMeetLink = form.demoLink;
+
+//   }
+
+//   console.log("payload", payload);
+
+//   const res = await updateDemoRequestStatus(
+//     demoRequestId,
+//     payload
+//   );
+
+//   if (res.success) {
+
+//     setModalType("success");
+
+//     setMessage(res?.message);
+
+//     setShowSuccess(true);
+
+//     await refreshList();
+
+//     setTimeout(() => {
+
+//       setShowSuccess(false);
+
+//       resetForm();
+
+//       onClose();
+
+//     }, 1500);
+
+//   }
+
+// };
+const formatDateTime = (dateTime) => {
+
+  if (!dateTime) return "";
+
+  const d = new Date(dateTime);
+
+  const day = String(
+    d.getDate()
+  ).padStart(2, "0");
+
+  const month = String(
+    d.getMonth() + 1
+  ).padStart(2, "0");
+
+  const year = d.getFullYear();
+
+  const hours = String(
+    d.getHours()
+  ).padStart(2, "0");
+
+  const minutes = String(
+    d.getMinutes()
+  ).padStart(2, "0");
+
+  return `${day}-${month}-${year} ${hours}:${minutes}`;
+
+};
+
+const formatDemoDateTime = (date, time) => {
+
+  if (!date || !time) return "";
+
+  const [year, month, day] = date.split("-");
+
+  return `${day}-${month}-${year} ${time}`;
+
+};
+
+const handleSubmit = async () => {
+
+  if (!validate()) return;
+
+  let payload = {
+    demoRequestStatus: form.demoRequestStatus,
+    comments: form.comments,
+  };
+
+  // ASSIGNED
+  if (form.demoRequestStatus === "ASSIGNED") {
+
+    payload.agentId = form.agentId;
+
+  }
+
+  // COMPLETED
+  if (form.demoRequestStatus === "DEMO_COMPLETED") {
+
+    payload.presentedBy = form.presentedBy;
+
+    payload.presentedAt = formatDateTime(
+      form.presentedAt
     );
 
-    if (res.success) {
-      setModalType("success");
-      setMessage(res?.message);
-      setShowSuccess(true);
-      await refreshList();
-
-      setTimeout(() => {
-        setShowSuccess(false);
-        resetForm();
-
-        onClose();
+  }
 
 
+  // DEMO SCHEDULED
+  if (form.demoRequestStatus === "DEMO_SCHEDULED") {
 
-      }, 1500);
+    payload.agentId = form.agentId;
 
+  payload.demoFrom = formatDemoDateTime(
+  form.demoDate,
+  form.fromTime
+);
 
+payload.demoTo = formatDemoDateTime(
+  form.demoDate,
+  form.toTime
+);
 
-    }
-    else {
+    payload.demoType = form.demoType;
 
-    }
-  };
+    payload.demoMeetLink = form.demoLink;
+
+  }
+if (form.demoRequestStatus === "DROPPED") {
+
+  payload.dropReason = form.dropReason;
+
+}
+  if (form.demoRequestStatus === "CONVERTED") {
+
+  payload.planCode = form.planCode;
+
+}
+
+  const res = await updateDemoRequestStatus(
+    demoRequestId,
+    payload
+  );
+
+  if (res.success) {
+
+    setModalType("success");
+
+    setMessage(res?.message);
+
+    setShowSuccess(true);
+
+    await refreshList();
+
+    setTimeout(() => {
+
+      setShowSuccess(false);
+
+      resetForm();
+
+      onClose();
+
+    }, 1500);
+
+  } else {
+
+    setModalType("error");
+
+    setMessage(
+      res?.message || "Failed to update status"
+    );
+
+    setShowSuccess(true);
+    setTimeout(() => {
+
+      setShowSuccess(false);
+
+    
+
+    }, 1500);
+
+  }
+
+};
   // const handleSubmit = async () => {
   //   if (!validate()) return;
 
@@ -222,217 +510,556 @@ const UpdateStatusModal = ({ open, onClose, demoRequestId, refreshList, currentS
         type={modalType}
 
       />
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
+     <div className="fixed inset-0 z-[9999]">
 
+  {/* Overlay */}
+  <div
+    className="absolute inset-0 bg-black/40"
+    onClick={handleClose}
+  />
 
-        <div className="absolute inset-0 bg-black/30" onClick={handleClose}></div>
+  {/* Drawer */}
+  <div className="fixed top-3 right-3 bottom-3 w-[420px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
 
-        {/* Modal */}
-        <div className="relative bg-white w-full max-w-md rounded-xl p-6 shadow-lg">
+    {/* Header */}
+    <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
 
-          <h2 className="text-lg font-semibold mb-4">Update Status</h2>
+      <h2 className="text-[16px] font-semibold">
+        Update Status
+      </h2>
 
+      <button
+        onClick={handleClose}
+        className="text-red-500 text-lg cursor-pointer"
+      >
+        ✕
+      </button>
 
-          <div className="relative mt-2">
+    </div>
 
-            {/* Selected box */}
+    {/* Body */}
+    <div className="flex-1 overflow-y-auto px-5 py-4">
+
+      <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+      Select Status<span className="text-red-500">*</span>
+    </label>
+      <div className="relative mt-2">
+
+        <div
+          onClick={() => setOpenStatus(!openStatus)}
+          className="w-full border border-gray-300 rounded-xl px-4 py-3 flex justify-between items-center cursor-pointer"
+        >
+          <span className="text-sm ">
+            {
+              filteredStatuses.find(
+                (s) => s.key === selectedStatus
+              )?.value || "Select Status"
+            }
+          </span>
+        </div>
+
+        {openStatus && (
+          <div className="absolute mt-2 w-full bg-white border rounded-xl shadow max-h-40 overflow-y-auto z-50 text-left">
+
+            {filteredStatuses.map((item) => (
+              <div
+                key={item.key}
+                onClick={() => {
+
+                  let updatedForm = {
+                    ...form,
+                    demoRequestStatus: item.key
+                  };
+
+                  setSelectedAgent("");
+
+                  updatedForm = {
+                    ...updatedForm,
+                    presentedBy: "",
+                    agentId: ""
+                  };
+
+                  setSelectedStatus(item.key);
+
+                  setForm(updatedForm);
+
+                  setErrors({
+                    ...errors,
+                    demoRequestStatus: ""
+                  });
+
+                  setOpenStatus(false);
+
+                }}
+                className={`px-4 py-3 cursor-pointer text-sm
+                  ${
+                    selectedStatus === item.key
+                      ? "bg-blue-600 text-white"
+                      : "hover:bg-gray-100"
+                  }`}
+              >
+                {item.value}
+              </div>
+            ))}
+
+          </div>
+        )}
+
+      </div>
+
+      {errors.demoRequestStatus && (
+        <ErrorMessage
+          message={errors.demoRequestStatus}
+          type="error"
+        />
+      )}
+
+       {form.demoRequestStatus === "DEMO_SCHEDULED" && (
+
+  <div className="space-y-5">
+
+  {/* Demo Date */}
+  <div>
+
+    <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+      Demo Date <span className="text-red-500">*</span>
+    </label>
+
+    <div className="relative">
+
+      <input
+        type="date"
+        name="demoDate"
+        value={form.demoDate}
+        onChange={handleChange}
+        className="w-full h-[52px] border border-gray-300 rounded-2xl px-4 text-sm outline-none focus:border-blue-500"
+      />
+
+    </div>
+
+  </div>
+
+  {/* Time */}
+  <div className="grid grid-cols-2 gap-4">
+
+    <div>
+
+      <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+        From Time <span className="text-red-500">*</span>
+      </label>
+
+      <input
+        type="time"
+        name="fromTime"
+        value={form.fromTime}
+        onChange={handleChange}
+        className="w-full h-[52px] border border-gray-300 rounded-2xl px-4 text-sm outline-none focus:border-blue-500"
+      />
+
+    </div>
+
+    <div>
+
+      <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+        To Time <span className="text-red-500">*</span>
+      </label>
+
+      <input
+        type="time"
+        name="toTime"
+        value={form.toTime}
+        onChange={handleChange}
+        className="w-full h-[52px] border border-gray-300 rounded-2xl px-4 text-sm outline-none focus:border-blue-500"
+      />
+
+    </div>
+
+  </div>
+
+  {/* Demo Type */}
+  <div>
+
+    <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+      Demo Type <span className="text-red-500">*</span>
+    </label>
+
+   <select
+  name="demoType"
+  value={form.demoType}
+  onChange={handleChange}
+  className="w-full h-[52px] border border-gray-300 rounded-2xl px-4 text-sm outline-none focus:border-blue-500"
+>
+
+  <option value="">
+    Select Demo Type
+  </option>
+
+  {demoTypes.map((item) => (
+
+    <option
+      key={item.key}
+      value={item.key}
+    >
+      {item.value}
+    </option>
+
+  ))}
+
+</select>
+
+  </div>
+
+  {/* Link */}
+  <div>
+
+    <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+      Demo Platform / Link
+    </label>
+
+    <input
+      type="text"
+      name="demoLink"
+      value={form.demoLink}
+      onChange={handleChange}
+      placeholder="https://zoom.com/..."
+      className="w-full h-[52px] border border-gray-300 rounded-2xl px-4 text-sm outline-none focus:border-blue-500"
+    />
+
+  </div>
+
+</div>
+
+)}
+{form.demoRequestStatus === "DROPPED" && (
+  <div className="mt-4">
+
+    <label className="block text-sm font-medium mb-2 text-left">
+      Drop Reason <span className="text-red-500">*</span>
+    </label>
+
+   <div className="relative">
+
+  {/* SELECT BOX */}
+  <div
+    onClick={() =>
+      setOpenDropReason(!openDropReason)
+    }
+    className="
+      w-full
+      border
+      border-gray-300
+      rounded-xl
+      px-4
+      py-3
+      text-sm
+      cursor-pointer
+      flex
+      items-center
+      justify-between
+      bg-white
+    "
+  >
+
+    <span>
+      {form.dropReason
+        ? dropReasons.find(
+            (x) => x.key === form.dropReason
+          )?.value
+        : "Select Drop Reason"}
+    </span>
+
+    <span>⌄</span>
+
+  </div>
+
+  {/* DROPDOWN */}
+  {openDropReason && (
+    <div
+      className="
+        absolute
+        top-full
+        left-0
+        mt-1
+        w-full
+        bg-white
+        border
+        border-gray-300
+        rounded-xl
+        shadow-lg
+        max-h-[220px]
+        overflow-y-auto
+        z-[9999] text-left
+      "
+    >
+
+      {dropReasons.map((item) => (
+
+        <div
+          key={item.key}
+          onClick={() => {
+
+            setForm({
+              ...form,
+              dropReason: item.key
+            });
+
+            setOpenDropReason(false);
+
+          }}
+          className="
+            px-4
+            py-3
+            text-sm
+            cursor-pointer
+            hover:bg-gray-100
+          "
+        >
+          {item.value}
+        </div>
+
+      ))}
+
+    </div>
+  )}
+
+</div>
+
+  </div>
+)}
+{form.demoRequestStatus === "CONVERTED" && (
+
+  <div className="mt-4">
+
+    <label className="block text-sm font-medium mb-2 text-left">
+      Plan Code <span className="text-red-500">*</span>
+    </label>
+
+    <div className="relative">
+
+      {/* SELECT BOX */}
+      <div
+        onClick={() =>
+          setOpenPlanDropdown(!openPlanDropdown)
+        }
+        className="
+          w-full
+          border
+          border-gray-300
+          rounded-xl
+          px-4
+          py-3
+          text-sm
+          cursor-pointer
+          flex
+          items-center
+          justify-between
+          bg-white
+        "
+      >
+
+        <span>
+          {form.planCode
+            ? plans.find(
+                (x) =>
+                  x.planCode === form.planCode
+              )?.planCode
+            : "Select Plan"}
+        </span>
+
+        <span>⌄</span>
+
+      </div>
+
+      {/* DROPDOWN */}
+      {openPlanDropdown && (
+        <div
+          className="
+            absolute
+            top-full
+            left-0
+            mt-1
+            w-full
+            bg-white
+            border
+            border-gray-300
+            rounded-xl
+            shadow-lg
+            max-h-[220px]
+            overflow-y-auto
+            z-[9999]
+          "
+        >
+
+          {plans.map((item) => (
+
             <div
-              onClick={() => setOpenStatus(!openStatus)}
-              className="w-full border border-gray-300 rounded px-4 py-2 flex justify-between items-center cursor-pointer"
-            >
-              <span className="text-sm">
-                {
-                  filteredStatuses.find(
-                    (s) => s.key === selectedStatus
-                  )?.value || "Select Status"
-                }
+              key={item.planId}
+              onClick={() => {
 
-              </span>
+                setForm({
+                  ...form,
+                  planCode: item.planCode
+                });
+
+                setOpenPlanDropdown(false);
+
+              }}
+              className="
+                px-4
+                py-3
+                text-sm
+                cursor-pointer
+                hover:bg-gray-100
+              "
+            >
+              {item.planCode}
             </div>
 
-            {/* Dropdown */}
-            {openStatus && (
-              <div className="absolute mt-2 w-full bg-white border rounded shadow max-h-40 overflow-y-auto z-50">
+          ))}
 
-                {filteredStatuses.map((item) => (
-                  <div
-                    key={item.key}
-                 
-                    onClick={() => {
+        </div>
+      )}
 
-                      let updatedForm = {
-                        ...form,
-                        demoRequestStatus: item.key
-                      };
+    </div>
 
-                      setSelectedAgent("");
+  </div>
 
-                      updatedForm = {
-                        ...updatedForm,
-                        presentedBy: "",
-                        agentId: ""
-                      };
+)}
+      <textarea
+        name="comments"
+        placeholder="Comments"
+        onChange={handleChange}
+        className="w-full border border-gray-300 rounded-xl p-3 mt-4 text-sm h-28 resize-none"
+      />
 
-                      setSelectedStatus(item.key);
+      {/* AGENT */}
+      {(form.demoRequestStatus === "ASSIGNED" ||
+        form.demoRequestStatus === "DEMO_COMPLETED") && (
 
-                      setForm(updatedForm);
+        <div className="relative mt-4" ref={dropdownRef}>
 
-                      // error clear
-                      setErrors({
-                        ...errors,
-                        demoRequestStatus: ""
-                      });
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenDropdown(!openDropdown);
+            }}
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 flex justify-between items-center cursor-pointer"
+          >
 
-                      setOpenStatus(false);
-                    }}
-                    className={`px-4 py-2 cursor-pointer text-sm text-left
-            ${selectedStatus === item.key
-                        ? "bg-blue-500 text-white"
-                        : "hover:bg-gray-100"
-                      }`}
-                  >
-                    {item.value}
-                  </div>
-                ))}
+            <span className="text-sm">
+              {
+                agentList.find(
+                  a => a.agentId === selectedAgent
+                )?.agentName || "Select Agent"
+              }
+            </span>
 
-              </div>
-            )}
+            <img src={Arrow} className="w-5 h-5" />
+
           </div>
-          {errors.demoRequestStatus && (
-            <ErrorMessage message={errors.demoRequestStatus} type="error" />
+
+          {openDropdown && (
+            <div className="absolute mt-2 w-full bg-white rounded-xl shadow-lg border max-h-44 overflow-y-auto z-[9999]">
+
+              {agentList.map((agent) => (
+                <div
+                  key={agent.agentId}
+                  onClick={() => {
+
+                    setSelectedAgent(agent.agentId);
+
+                    setForm({
+                      ...form,
+
+                      ...(form.demoRequestStatus === "ASSIGNED" && {
+                        agentId: agent.agentId
+                      }),
+
+                      ...(form.demoRequestStatus === "DEMO_COMPLETED" && {
+                        presentedBy: agent.agentId
+                      })
+
+                    });
+
+                    setErrors({
+                      ...errors,
+                      agentId: "",
+                      presentedBy: ""
+                    });
+
+                    setOpenDropdown(false);
+
+                  }}
+                  className={`px-4 py-3 cursor-pointer text-sm
+                    ${
+                      selectedAgent === agent.agentId
+                        ? "bg-blue-600 text-white"
+                        : "hover:bg-gray-100"
+                    }`}
+                >
+                  {agent.agentName}
+                </div>
+              ))}
+
+            </div>
           )}
-          {/* {errors.demoRequestStatus && <p className="text-red-500 text-xs">{errors.demoRequestStatus}</p>} */}
 
+        </div>
 
-          <textarea
-            name="comments"
-            placeholder="Comments"
+      )}
+
+      {errors.agentId && (
+        <ErrorMessage
+          message={errors.agentId}
+          type="error"
+        />
+      )}
+
+      {/* DATETIME */}
+      {form.demoRequestStatus === "DEMO_COMPLETED" && (
+        <>
+          <input
+            type="datetime-local"
+            name="presentedAt"
+            value={form.presentedAt}
             onChange={handleChange}
-            className="w-full border p-2 rounded mt-2"
+            className="w-full border border-gray-300 rounded-xl p-3 mt-4"
           />
 
-          {/* Conditional Fields */}
-          {(
-
-            form.demoRequestStatus === "ASSIGNED" ||
-            form.demoRequestStatus === "COMPLETED"
-          ) && (
-
-
-              <div className="relative mt-2" ref={dropdownRef}>
-
-
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenDropdown(!openDropdown);
-                  }}
-                  className="w-full border border-gray-300 rounded px-4 py-2 flex justify-between items-center cursor-pointer"
-                >
-                  <span className="text-sm">
-                    {agentList.find(a => a.agentId === selectedAgent)?.agentName || "Select Agent"}
-                  </span>
-
-                  <img src={Arrow} className="w-[20px] h-[20px]" />
-                </div>
-
-
-                {openDropdown && (
-                  <div className="absolute mt-2 w-full bg-white rounded shadow-lg border max-h-44 overflow-y-auto z-[9999]">
-
-                    {agentList.map((agent) => (
-                      <div
-                        key={agent.agentId}
-
-                        onClick={() => {
-
-                          setSelectedAgent(agent.agentId);
-
-                          setForm({
-                            ...form,
-
-                            ...(form.demoRequestStatus === "ASSIGNED" && {
-                              agentId: agent.agentId
-                            }),
-
-                            ...(form.demoRequestStatus === "COMPLETED" && {
-                              presentedBy: agent.agentId
-                            })
-                          });
-                          setErrors({
-                            ...errors,
-                            agentId: "",
-                            presentedBy: ""
-                          });
-                          setOpenDropdown(false);
-                        }}
-                        className={`px-4 py-2 cursor-pointer text-sm
-            ${selectedAgent === agent.agentId
-                            ? "bg-blue-600 text-white"
-                            : "hover:bg-gray-100"
-                          }`}
-                      >
-                        {agent.agentName}
-                      </div>
-                    ))}
-
-                  </div>
-                )}
-
-
-
-
-              </div>
-
-            )}
-          {errors.agentId && (
+          {errors.presentedAt && (
             <ErrorMessage
-              message={errors.agentId}
+              message={errors.presentedAt}
               type="error"
             />
           )}
-          {(
+        </>
+      )}
+  
 
-            form.demoRequestStatus === "COMPLETED"
-          ) && (
-              <>
-                {/* {errors.presentedBy && <p className="text-red-500 text-xs">{errors.presentedBy}</p>} */}
+    </div>
 
-                {errors.presentedBy && (
-                  <ErrorMessage
-                    message={errors.presentedBy}
-                    type="error"
-                  />
-                )}
-                <input
-                  type="datetime-local"
-                  name="presentedAt"
-                  value={form.presentedAt}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded mt-2"
-                />
-                {errors.presentedAt && (
-                  <ErrorMessage message={errors.presentedAt} type="error" />
-                )}
-                {/* {errors.presentedAt && <p className="text-red-500 text-xs">{errors.presentedAt}</p>} */}
-              </>
-            )}
+    {/* Footer */}
+    <div className="border-t border-gray-200 p-4 flex justify-end gap-3">
 
-          {/* Actions */}
-          <div className="flex justify-end gap-2 mt-4">
-            <button onClick={handleClose} className="px-4 py-2 border rounded">
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="bg-green-500 text-white px-4 py-2 rounded"
-            >
-              Update
-            </button>
-          </div>
+      <button
+        onClick={handleClose}
+        className="px-5 py-2 border rounded-xl"
+      >
+        Cancel
+      </button>
 
-        </div>
-      </div>
+      <button
+        onClick={handleSubmit}
+        className="bg-green-500 text-white px-5 py-2 rounded-xl"
+      >
+        Update
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
     </>
   );
 };
