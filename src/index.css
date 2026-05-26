@@ -49,3 +49,16 @@ body,
 --color-text-dark: #1D1D1D;
 --color-primary-btn: #2563EB;
 }
+@keyframes slideLeft {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slideLeft {
+  animation: slideLeft 0.25s ease;
+}

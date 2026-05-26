@@ -1,5 +1,7 @@
 import React, { useState,useEffect } from "react";
 import { useSubscription } from "../../Context/SubscriptionContext";
+import Toast from "../SuccessModal/ToastDesign";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 const MarkAsLostDrawer = ({
   open,
@@ -11,7 +13,22 @@ const MarkAsLostDrawer = ({
    const [dropReasons, setDropReasons] = useState([]);
     const [openDropReason, setOpenDropReason] =
     useState(false);
+    const [dropreasonError,setDropReasonError] = useState("")
+    const [modalType, setModalType] = useState("success");
+      const [showSuccess, setShowSuccess] = useState(false);
+      const [message, setMessage] = useState("");
+const handleClose = () => {
 
+  setSelectedReason("");
+
+  setComments("");
+
+  setOpenDropReason(false);
+  setDropReasonError("")
+
+  onClose()
+
+};
    useEffect(() => {
  
    const fetchDropReasons = async () => {
@@ -39,7 +56,17 @@ const MarkAsLostDrawer = ({
     useState("");
 
 
-    const handleSubmit = async () => {
+ const handleSubmit = async () => {
+
+  if (!selectedReason) {
+
+    setDropReasonError(
+      "Drop Reason is required"
+    );
+
+    return;
+
+  }
 
   const payload = {
 
@@ -55,10 +82,41 @@ const MarkAsLostDrawer = ({
       payload
     );
 
-  if (res?.success) {
+if (res?.success) {
 
-    onClose();
-    fetchData()
+  setModalType("success");
+
+  setMessage(
+    res.message
+  );
+
+  setShowSuccess(true);
+
+  fetchData();
+
+  setTimeout(() => {
+
+    setShowSuccess(false);
+
+    handleClose();
+
+  }, 1500);
+
+}else {
+
+    setModalType("error");
+
+    setMessage(
+      res.message
+    );
+
+    setShowSuccess(true);
+
+    setTimeout(() => {
+
+      setShowSuccess(false);
+
+    }, 1500);
 
   }
 
@@ -66,13 +124,19 @@ const MarkAsLostDrawer = ({
   if (!open) return null;
 
   return (
+    <>
+ <Toast
+          show={showSuccess}
+          message={message}
+          type={modalType}
 
+        />
     <div className="fixed inset-0 z-[99999]">
 
       {/* OVERLAY */}
       <div
         className="absolute inset-0 bg-black/40"
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       {/* DRAWER */}
@@ -111,7 +175,7 @@ const MarkAsLostDrawer = ({
           </div>
 
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="text-red-500 text-lg cursor-pointer"
           >
             ✕
@@ -230,6 +294,7 @@ const MarkAsLostDrawer = ({
   );
 
   setOpenDropReason(false);
+  setDropReasonError("")
 
 }}
           className="
@@ -251,16 +316,26 @@ const MarkAsLostDrawer = ({
 </div>
 
   </div>
+  {dropreasonError && (
+
+  
+
+    <ErrorMessage
+      message={dropreasonError}
+      type="error"
+    />
+
+ 
+
+)}
 
           {/* COMMENTS */}
-          <div>
+          <div className="mt-4">
 
             <label className="block text-sm font-medium mb-2 text-left">
 
               Additional Comments
-              <span className="text-red-500">
-                *
-              </span>
+              
 
             </label>
 
@@ -293,7 +368,7 @@ const MarkAsLostDrawer = ({
         <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
 
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="
               px-5
               py-2
@@ -327,6 +402,7 @@ const MarkAsLostDrawer = ({
       </div>
 
     </div>
+    </>
 
   );
 

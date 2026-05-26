@@ -27,9 +27,10 @@ import { useRole } from "../../Context/RoleContext";
 import { usePlan } from "../../Context/PlanContexts";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import Circle from "../../assets/menucircle.png";
+import ArrowSelect from "../../assets/direction-down 01.png";
 import InvoiceView from "./InvoiceView";
 const PropertyOverview = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, } = useHostel();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError,generateOrderHistory } = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription } = useSubscription();
@@ -46,6 +47,7 @@ const PropertyOverview = () => {
   const [selectedTenantId, setSelectedTenantId] = useState(null);
   const [phone, setPhone] = useState("");
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [generatedPaymentUrl, setGeneratedPaymentUrl] = useState("");
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenants");
     const {
@@ -121,6 +123,15 @@ const PropertyOverview = () => {
   const [showPlanDropdown, setShowPlanDropdown] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [showAgentModal, setShowAgentModal] = useState(false);
+  {/* STATE */}
+const [showPaymentDrawer, setShowPaymentDrawer] = useState(false);
+
+const [paymentPlan, setPaymentPlan] = useState("");
+const [paymentAmount, setPaymentAmount] = useState("");
+const [paymentDiscount, setPaymentDiscount] = useState("");
+
+const [paymentPlanError, setPaymentPlanError] = useState("");
+const [paymentAmountError, setPaymentAmountError] = useState("");
   const loginType = localStorage.getItem("login_type");
   const showInvoices = loginType === "normal";
   const { hostelId } = useParams();
@@ -440,6 +451,7 @@ if (updated?.success) {
     document.removeEventListener("mousedown", handleClickOutside);
   };
 }, []);
+console.log("hostelData",hostelData)
 const handleSubscription = async () => {
 
   // prevent double click
@@ -625,6 +637,98 @@ const handleSubscription = async () => {
       setMenuError(res?.message);
     }
   };
+//   const handleGeneratePayment = async () => {
+
+//   let hasError = false;
+// setGeneratedPaymentUrl(
+//   "https://paymentssandbox.zoho.in/paymentlinks/7ca871f6e7048883a46b4bde80b716108998f9601ac264723798872bf4281df3ac4f39cd635e9b5d0f973d8a0dac06e17b3023d49cb63166eb105e77b72ecf9a"
+// );
+//   if (!paymentPlan) {
+//     setPaymentPlanError("Please select plan");
+//     hasError = true;
+//   }
+
+//   if (!paymentAmount) {
+//     setPaymentAmountError("Please enter amount");
+//     hasError = true;
+//   }
+
+//   if (hasError) return;
+
+//   const payload = {
+//     planCode: paymentPlan,
+//     paidAmount: Number(paymentAmount),
+//     discountAmount: Number(paymentDiscount || 0)
+//   };
+
+//   const res = await generateOrderHistory(
+//     hostelId,
+//     payload
+//   );
+
+//   if (res?.success) {
+
+//     setModalType("success");
+//     setMessage("Payment generated successfully");
+//     setShowSuccess(true);
+
+//     setTimeout(() => {
+//       setShowSuccess(false);
+//       setShowPaymentDrawer(false);
+
+//       setPaymentPlan("");
+//       setPaymentAmount("");
+//       setPaymentDiscount("");
+
+//       setPaymentPlanError("");
+//       setPaymentAmountError("");
+//     }, 1000);
+
+//   } else {
+
+//     setModalType("error");
+//     setMessage(res?.message || "Something went wrong");
+//     setShowSuccess(true);
+
+//     setTimeout(() => {
+//       setShowSuccess(false);
+//     }, 1000);
+
+//   }
+// };
+const handleGeneratePayment = async () => {
+
+  let hasError = false;
+
+  if (!paymentPlan) {
+    setPaymentPlanError("Please select plan");
+    hasError = true;
+  }
+
+  if (!paymentAmount) {
+    setPaymentAmountError("Please enter amount");
+    hasError = true;
+  }
+
+  if (hasError) return;
+
+  // TEMPORARY HARD CODE
+  setGeneratedPaymentUrl(
+    "https://paymentssandbox.zoho.in/paymentlinks/7ca871f6e7048883a46b4bde80b716108998f9601ac264723798872bf4281df3ac4f39cd635e9b5d0f973d8a0dac06e17b3023d49cb63166eb105e77b72ecf9a"
+  );
+
+  const payload = {
+    planCode: paymentPlan,
+    paidAmount: Number(paymentAmount),
+    discountAmount: Number(paymentDiscount || 0)
+  };
+
+  await generateOrderHistory(
+    hostelId,
+    payload
+  );
+
+};
 
   if (!hostelData) {
     return (
@@ -772,12 +876,12 @@ const handleSubscription = async () => {
                 </button> */}
 <button
   disabled={
-    trialPlan?.canAddExpandableTrial === false ||
+    hostelData?.canAddExpandableTrial === false ||
     !canSubscriptionWrite
   }
   onClick={() => {
     if (
-      trialPlan?.canAddExpandableTrial !== false &&
+      hostelData?.canAddExpandableTrial !== false &&
       canSubscriptionWrite
     ) {
       setShowTrialModal(true);
@@ -785,7 +889,7 @@ const handleSubscription = async () => {
   }}
   className={`px-3 py-1 rounded text-[10px] whitespace-nowrap
     ${
-      trialPlan?.canAddExpandableTrial === false ||
+      hostelData?.canAddExpandableTrial === false ||
       !canSubscriptionWrite
         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
         : "bg-yellow-500 text-white cursor-pointer hover:bg-yellow-600"
@@ -811,6 +915,23 @@ const handleSubscription = async () => {
   `}
 >
   Buy Plan
+</button>
+
+<button
+  onClick={() => setShowPaymentDrawer(true)}
+  className="
+    px-3
+    py-1
+    rounded
+    text-[10px]
+    whitespace-nowrap
+    bg-green-600
+    text-white
+    cursor-pointer
+    hover:bg-green-700
+  "
+>
+  Generate Payment
 </button>
 
               </div>
@@ -2215,6 +2336,278 @@ const handleSubscription = async () => {
           )}
         </tbody>
       </table>
+
+    </div>
+  </div>
+)}
+{/* GENERATE PAYMENT DRAWER */}
+{showPaymentDrawer && (
+  <div className="fixed inset-0 z-[9999]">
+
+    {/* OVERLAY */}
+    <div
+      className="absolute inset-0 bg-black/40"
+      onClick={() => {
+        setShowPaymentDrawer(false);
+
+        setPaymentPlan("");
+        setPaymentAmount("");
+        setPaymentDiscount("");
+
+        setPaymentPlanError("");
+        setPaymentAmountError("");
+      }}
+    />
+
+    {/* DRAWER */}
+    <div
+     className="
+  absolute
+  top-4
+  right-4
+  bottom-4
+  w-[450px]
+  bg-white
+  shadow-2xl
+  rounded-2xl
+  flex
+  flex-col
+  animate-slideLeft
+"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      {/* HEADER */}
+      <div className="px-6 py-5 border-b border-gray-200 flex items-start justify-between">
+
+        <div>
+          <h2 className="text-[22px] font-semibold text-[#111827] text-left">
+            Generate Payment
+          </h2>
+
+          <p className="text-sm text-gray-500 mt-1">
+            Create payment for subscription plan
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            setShowPaymentDrawer(false);
+
+            setPaymentPlan("");
+            setPaymentAmount("");
+            setPaymentDiscount("");
+
+            setPaymentPlanError("");
+            setPaymentAmountError("");
+          }}
+          className="text-gray-400 hover:text-red-500 text-2xl cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* BODY */}
+      <div className="flex-1 overflow-y-auto px-6 py-5">
+
+        {/* PLAN */}
+        <div className="mb-5">
+
+          <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+            Plan Name <span className="text-red-500">*</span>
+          </label>
+
+        <div className="relative">
+
+  <select
+    value={paymentPlan}
+    onChange={(e) => {
+      setPaymentPlan(e.target.value);
+      setPaymentPlanError("");
+    }}
+    className="
+      w-full
+      h-[43px]
+      border
+      border-gray-300
+      rounded-xl
+      px-4
+      pr-12
+      outline-none
+      appearance-none
+      bg-white
+      focus:border-blue-500
+    "
+  >
+
+    <option value="">
+      Select Plan
+    </option>
+
+    {dropdownPlans?.otherPlans?.map((item) => (
+      <option
+        key={item.planId}
+        value={item.planCode}
+      >
+        {item.planName}
+      </option>
+    ))}
+
+  </select>
+
+  {/* CUSTOM ARROW */}
+  <div
+    className="
+      absolute
+      right-4
+      top-1/2
+      -translate-y-1/2
+      pointer-events-none
+      text-black
+      text-[12px]
+    "
+  >
+    <img src={ArrowSelect} className="w-4 h-4"/>
+  </div>
+
+</div>
+
+          {paymentPlanError && (
+            <p className="text-red-500 text-xs mt-1 text-left">
+              {paymentPlanError}
+            </p>
+          )}
+
+        </div>
+
+        {/* AMOUNT */}
+        <div className="mb-5">
+
+          <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+            Amount <span className="text-red-500">*</span>
+          </label>
+
+          <input
+            type="number"
+            placeholder="Enter Amount"
+            value={paymentAmount}
+            onChange={(e) => {
+              setPaymentAmount(e.target.value);
+              setPaymentAmountError("");
+            }}
+            className="
+              w-full
+              h-[43px]
+              border
+              border-gray-300
+              rounded-xl
+              px-4
+              outline-none
+              focus:border-blue-500
+            "
+          />
+
+          {paymentAmountError && (
+            <p className="text-red-500 text-xs mt-1 text-left">
+              {paymentAmountError}
+            </p>
+          )}
+
+        </div>
+
+        {/* DISCOUNT */}
+        <div className="mb-5">
+
+          <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+            Discount
+          </label>
+
+          <input
+            type="number"
+            placeholder="Enter Discount"
+            value={paymentDiscount}
+            onChange={(e) =>
+              setPaymentDiscount(e.target.value)
+            }
+            className="
+              w-full
+              h-[43px]
+              border
+              border-gray-300
+              rounded-xl
+              px-4
+              outline-none
+              focus:border-blue-500
+            "
+          />
+
+        </div>
+
+      </div>
+{generatedPaymentUrl && (
+  <div className="mt-5">
+
+    <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+      Payment URL
+    </label>
+
+    <div className="border border-gray-300 rounded-lg p-3 bg-gray-50 break-all text-left">
+
+      <a
+        href={generatedPaymentUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 underline text-sm"
+      >
+        {generatedPaymentUrl}
+      </a>
+
+    </div>
+
+  </div>
+)}
+      {/* FOOTER */}
+      <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+
+        <button
+          onClick={() => {
+            setShowPaymentDrawer(false);
+
+            setPaymentPlan("");
+            setPaymentAmount("");
+            setPaymentDiscount("");
+
+            setPaymentPlanError("");
+            setPaymentAmountError("");
+          }}
+          className="
+            px-5
+            py-2.5
+            border
+            border-gray-300
+            rounded-xl
+            text-gray-700
+            hover:bg-gray-100
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+         onClick={handleGeneratePayment}
+          className="
+            px-6
+            py-2.5
+            bg-blue-600
+            hover:bg-blue-700
+            text-white
+            rounded-xl
+          "
+        >
+          Generate
+        </button>
+
+      </div>
 
     </div>
   </div>

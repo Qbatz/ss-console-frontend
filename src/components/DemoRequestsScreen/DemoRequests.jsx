@@ -65,6 +65,7 @@ const [agentFilter, setAgentFilter] = useState("");
 const [openStatusDropdown, setOpenStatusDropdown] = useState(false);
 
 const [openAgentDropdown, setOpenAgentDropdown] = useState(false);
+const [demoData,setDemoData] = useState({})
 const [allComments, setAllComments] =
   useState([]);
 
@@ -244,6 +245,7 @@ useEffect(() => {
     setTotalItems(res.data.totalItems);
     setTotalPages(res.data.totalPages);
     setPageSize(res.data.pageSize);
+    setDemoData(res.data)
 
   }
 
@@ -368,7 +370,8 @@ setCommentText("")
       setModalType("success");
       setMessage(res.message);
       setShowSuccess(true);
-      fetchData()
+      // fetchData()
+      fetchAllComments()
 
       setTimeout(() => {
         setShowSuccess(false);
@@ -484,25 +487,113 @@ setCommentText("")
               DemoRequests
             </h1>
 
-            {/* Icon */}
+        <button
+  onClick={() => setOpenDrawer(true)}
+  className="
+    flex
+    items-center
+    gap-2
+    text-[#315CEC]
+    font-medium
+    text-sm
+    cursor-pointer
+  "
+>
+
+  {/* PLUS ICON */}
+  <div
+    className="
+      w-5
+      h-5
+      rounded-full
+      bg-[#315CEC]
+      text-white
+      flex
+      items-center
+      justify-center
+      text-[14px]
+      font-semibold
+    "
+  >
+    +
+  </div>
+
+  <span>Create Demo</span>
+
+</button>
 
 
           </div>
 
-          <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
 
-            {/* Left side card */}
-            <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300 w-full max-w-xs">
-              <p className="text-gray-500 text-sm font-gilroy">DemoRequestCount</p>
-              <h2 className="text-2xl font-bold mt-2">{totalItems || 0}</h2>
-            </div>
+  {/* LEFT CARDS */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
 
-            {/* Right side button */}
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-lg cursor-pointer" onClick={() => setOpenDrawer(true)}>
-              Add Request
-            </button>
+    {/* CARD 1 */}
+    <div className="bg-white p-5 rounded-xl border border-gray-300">
+      <p className="text-gray-500 text-sm font-gilroy">
+        Total Leads
+      </p>
 
-          </div>
+      <h2 className="text-3xl font-bold mt-2">
+       {demoData?.totalLeads}
+      </h2>
+    </div>
+
+    {/* CARD 2 */}
+    <div className="bg-white p-5 rounded-xl border border-gray-300">
+      <p className="text-gray-500 text-sm font-gilroy">
+        New Today
+      </p>
+
+      <h2 className="text-3xl font-bold mt-2">
+       {demoData?.newToday || 0}
+      </h2>
+    </div>
+
+    {/* CARD 3 */}
+    <div className="bg-white p-5 rounded-xl border border-gray-300">
+      <p className="text-gray-500 text-sm font-gilroy">
+        Contacted
+      </p>
+
+      <h2 className="text-3xl font-bold mt-2">
+      {demoData?.contacted}
+      </h2>
+    </div>
+
+    {/* CARD 4 */}
+    <div className="bg-white p-5 rounded-xl border border-gray-300">
+      <p className="text-gray-500 text-sm font-gilroy">
+        Demo Scheduled
+      </p>
+
+      <h2 className="text-3xl font-bold mt-2">
+       {demoData?.demoScheduled}
+      </h2>
+    </div>
+
+  </div>
+
+  {/* ADD BUTTON */}
+  {/* <button
+    className="
+      bg-blue-500
+      hover:bg-blue-600
+      text-white
+      px-5
+      py-3
+      rounded-lg
+      cursor-pointer
+      whitespace-nowrap
+    "
+    onClick={() => setOpenDrawer(true)}
+  >
+    Add Request
+  </button> */}
+
+</div>
   {/* FILTERS */}
 <div className="flex flex-wrap gap-3 mb-4">
 
@@ -1097,8 +1188,39 @@ setCommentText("")
           Assign Staff
         </button>
       )}
+{item?.demoRequestStatus !==
+  "CONVERTED" && (
 
-      <button
+  <button
+    className="
+      w-full
+      text-left
+      px-4
+      py-2.5
+      text-sm
+      hover:bg-gray-50
+      transition-colors
+      cursor-pointer
+    "
+    onClick={() => {
+
+      setSelectedId(
+        item.requestId
+      );
+
+      setSelectedItem(item);
+
+      setOpenStatusModal(true);
+
+      setOpenMenu(null);
+
+    }}
+  >
+    Change Status
+  </button>
+
+)}
+      {/* <button
         className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
         onClick={() => {
           setSelectedId(item.requestId);
@@ -1108,7 +1230,7 @@ setCommentText("")
         }}
       >
         Change Status
-      </button>
+      </button> */}
 {item?.canMarkDropped && (
 
   <button
@@ -1404,7 +1526,7 @@ setCommentText("")
             />
           </div>
         )}
-{/* ADDITIONAL COMMENTS */}
+
 <div className="mt-5">
 
   <label className="text-[13px] font-medium text-left block mb-2">
@@ -1458,7 +1580,7 @@ setCommentText("")
 </div>
       </div>
 
-      {/* FOOTER */}
+    
       <div className="border-t border-gray-200 px-5 py-4 flex justify-end gap-3">
 
         <button
@@ -1515,7 +1637,7 @@ setCommentText("")
 {showCommentModal && (
   <div className="fixed inset-0 z-[9999]">
 
-    {/* Overlay */}
+   
     <div
       className="absolute inset-0 bg-black/40"
       onClick={() => {
@@ -1526,7 +1648,7 @@ setCommentText("")
       }}
     />
 
-    {/* Drawer */}
+   
     <div
       className="fixed top-3 right-3 bottom-3 w-[420px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
       onClick={(e) => e.stopPropagation()}
@@ -1554,15 +1676,15 @@ setCommentText("")
 
       </div>
 
-      {/* BODY */}
+     
       <div className="flex-1 flex flex-col px-5 py-4 overflow-hidden">
 
-        {/* LABEL */}
+      
         <label className="text-xs text-gray-500 mb-2 block text-left">
           Additional Comments <span className="text-red-500">*</span>
         </label>
 
-        {/* TEXTAREA BOX */}
+        
         <div className="border border-gray-300 rounded-xl p-3">
 
           <textarea
@@ -1575,7 +1697,7 @@ setCommentText("")
             className="w-full text-sm h-24 resize-none outline-none"
           />
 
-          {/* Toolbar */}
+        
           <div className="flex justify-end gap-3 mt-2 text-gray-400 text-sm">
             <button>B</button>
             <button>I</button>
@@ -1588,7 +1710,7 @@ setCommentText("")
           <ErrorMessage message={commentError} type="error" />
         )}
 
-        {/* ADD BUTTON */}
+        
         <div className="flex justify-end mt-3">
           <button
             onClick={handleAddComment}
@@ -1603,7 +1725,7 @@ setCommentText("")
           ALL COMMENTS
         </p>
 
-        {/* COMMENTS LIST */}
+       
         <div className="flex-1 overflow-y-auto pr-1">
 
           <div className="space-y-5">
@@ -1615,7 +1737,7 @@ setCommentText("")
                 className="flex gap-3"
               >
 
-                {/* LEFT ICON */}
+                
                 <div className="flex flex-col items-center">
 
                   <div className="w-9 h-9 rounded-full bg-[#EEF3FF] flex items-center justify-center border border-[#DCE6FF]">
@@ -1628,7 +1750,7 @@ setCommentText("")
 
                 </div>
 
-                {/* COMMENT CARD */}
+               
                 <div className="flex-1">
 
                   <p className="text-sm font-semibold text-gray-800 text-left">

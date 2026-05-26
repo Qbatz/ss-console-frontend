@@ -18,7 +18,7 @@ const SupportTicketOverview = ({
   fetchAllComments
 }) => {
   if (!open) return null;
-console.log("allComments",allComments)
+console.log("selectedItem",selectedItem)
 const [showAllComments, setShowAllComments] =
   useState(false);
   const handleSeeAllComments = async () => {
@@ -257,15 +257,16 @@ const [showAllComments, setShowAllComments] =
    
 
     {/* ASSIGNED STAFF */}
+    {selectedItem?.canAssignStaff === true && (
     <div className="flex items-center">
 
       <p className="w-[100px] text-[12px] text-[#9CA3AF]">
-        Assigned Staff
+       Add Assigned 
       </p>
 
       <span className="mr-5 text-[#9CA3AF]">:</span>
 
-     <button
+     {/* <button
   onClick={onAssignStaff}
   className="
     text-[14px]
@@ -276,9 +277,26 @@ const [showAllComments, setShowAllComments] =
   "
 >
   Assign +
-</button>
+</button> */}
+{selectedItem?.canAssignStaff === true && (
+
+  <button
+    onClick={onAssignStaff}
+    className="
+      text-[14px]
+      font-semibold
+      text-[#2563EB]
+      cursor-pointer
+      hover:underline
+    "
+  >
+    Assign +
+  </button>
+
+)}
 
     </div>
+    )}
      <div className="flex items-center">
 
       <p className="w-[100px] text-[12px] text-[#9CA3AF] whitespace-nowrap">
@@ -455,40 +473,100 @@ const [showAllComments, setShowAllComments] =
 
             </div>
 
-            {/* RIGHT */}
-            <div
-              className="
-                flex-1
-                bg-[#FAFAFA]
-                border border-[#F1F1F1]
-                rounded-2xl
-                px-4 py-3
-              "
-            >
+           
+          <div
+  className="
+    flex-1
+    bg-white
+    border border-[#E5E7EB]
+    rounded-2xl
+    p-4
+    shadow-sm
+    hover:shadow-md
+    transition-all
+  "
+>
 
-              <p className="text-[15px] font-semibold text-[#111827] break-words text-left">
-                {item.comment || "No Comment"}
-              </p>
+  {/* STATUS */}
+  <div className="flex items-center justify-between gap-3 mb-3">
 
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-gray-500">
+    <div
+      className="
+        px-3
+        py-1
+        rounded-full
+        bg-[#EEF4FF]
+        text-[#315CEC]
+        text-[11px]
+        font-semibold
+        uppercase
+        w-fit
+      "
+    >
+      {item.status || "STATUS"}
+    </div>
 
-                <span>
-                  {item.createdAtDate}
-                </span>
+    <p className="text-[11px] text-gray-400 whitespace-nowrap">
+      {item.createdAtDate} • {item.createdAtTime}
+    </p>
 
-                <span>•</span>
+  </div>
 
-                <span>
-                  {item.createdAtTime}
-                </span>
+  {/* DESCRIPTION */}
+  {item.description && (
+    <div className="mb-3">
 
-              </div>
+      <p className="text-[12px] text-gray-400 font-medium text-left mb-1 uppercase tracking-wide">
+        Description
+      </p>
 
-              <p className="text-[12px] text-[#2563EB] mt-2 font-medium text-left">
-                Added by {item.createdBy}
-              </p>
+      <p className="text-[14px] text-[#374151] leading-6 text-left break-words">
+        {item.description}
+      </p>
 
-            </div>
+    </div>
+  )}
+
+  {/* COMMENT */}
+  {item.comment && (
+    <div
+      className="
+        bg-[#F9FAFB]
+        border border-[#F1F5F9]
+        rounded-xl
+        p-3
+      "
+    >
+
+      <p className="text-[12px] text-gray-400 font-medium text-left mb-1 uppercase tracking-wide">
+        Comment
+      </p>
+
+      <p className="text-[14px] text-[#111827] leading-6 text-left break-words whitespace-pre-wrap">
+        {item.comment}
+      </p>
+
+    </div>
+  )}
+
+  {/* UPDATED BY */}
+  <div className="mt-4 pt-3 border-t border-[#F3F4F6]">
+
+    <p className="text-[12px] text-left">
+
+      <span className="text-gray-400">
+        Updated by
+      </span>
+
+      <span className="text-[#2563EB] font-semibold ml-1">
+        {item.createdBy}
+      </span>
+
+    </p>
+
+  </div>
+
+</div>
 
           </div>
         )

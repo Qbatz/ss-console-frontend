@@ -1076,6 +1076,49 @@ const deleteInvoice = async (payload) => {
 
   }
 };
+
+const generateOrderHistory = async (
+  hostelId,
+  payload
+) => {
+  try {
+
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      `/v2/order-history/generate/${hostelId}`,
+      payload
+    );
+
+    if (res.status === 200 || res.status === 201) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
   return (
     <HostelContext.Provider
       value={{
@@ -1086,7 +1129,7 @@ const deleteInvoice = async (payload) => {
         bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,
         deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns,
         resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,
-        deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice
+        deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,generateOrderHistory
       }}
     >
       {children}
