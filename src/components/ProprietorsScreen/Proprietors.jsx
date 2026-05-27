@@ -8,7 +8,8 @@ import { usePermission } from "../../Utils/permissionHelper";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import Menucircle from "../../assets/menucircle.png";
-import Arrow from "../../assets/direction-down 01.png"
+import Arrow from "../../assets/direction-down 01.png";
+import AssignStaffModal from "../PropertiesScreen/AssignStaffDesign";
 
 
 const Proprietors = () => {
@@ -40,6 +41,7 @@ const [propertyFilter, setPropertyFilter] = useState("ALL");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  const [showAssignModal, setShowAssignModal] = useState(false);
   const [menuPosition, setMenuPosition] = useState({
   top: 0,
   left: 0,
@@ -298,10 +300,15 @@ const getFilterParams = () => {
   }, []);
   const handleUpdate = async () => {
 
-    if (!mobile) {
-      setError("Please enter mobile number");
-      return;
-    }
+   if (!mobile) {
+  setError("Please enter mobile number");
+  return;
+}
+
+if (!/^[6-9]\d{9}$/.test(mobile)) {
+  setError("Enter valid mobile number");
+  return;
+}
 
     const res = await updateOwnerMobile(
       selectedOwner.ownerId,
@@ -573,6 +580,13 @@ const getFilterParams = () => {
                         <img src={swap} className="w-3 h-3" />
                       </div>
                     </th>
+                    <th className="px-4 py-3 text-left text-[12px] font-semibold">
+                      <div className="flex items-center gap-1 cursor-pointer"
+                        onClick={() => handleSort("HOSTEL_COUNT")}>
+                         Relational Agent
+                        <img src={swap} className="w-3 h-3" />
+                      </div>
+                    </th>
 
                     {/* <th className="px-4 py-3 text-left text-[12px] font-semibold">
       Plan Status
@@ -675,7 +689,10 @@ const getFilterParams = () => {
                         <td className="px-4 py-1 text-blue-600 text-[12px] text-left">
                           {item.noOfProperties}
                         </td>
-
+                        
+                         <td className="px-4 py-2 text-center text-[12px] text-left whitespace-nowrap">
+  {item?.relationalAgents?.[0]?.agentName || "----"}
+</td>
                         <td className="px-4 py-1 text-[12px] text-left">
                           {item.lastActivityDate}
                         </td>
@@ -757,6 +774,16 @@ const getFilterParams = () => {
                               >
                                 Edit
                               </button>
+                              <button
+  onClick={() => {
+    setSelectedOwner(item);
+    setShowAssignModal(true);
+    setOpenMenuId(null);
+  }}
+  className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+>
+  Assign Staff
+</button>
                               <button
                                 onClick={() => {
                                   setSelectedOwner(item);
@@ -856,15 +883,24 @@ const getFilterParams = () => {
             </h2>
 
             <input
-              type="text"
-              value={mobile}
-              onChange={(e) => {
-                setMobile(e.target.value);
-                setError("");
-              }}
-              placeholder="Enter mobile number"
-              className="w-full border rounded px-3 py-2 text-sm mb-2"
-            />
+  type="text"
+  value={mobile}
+  onChange={(e) => {
+
+    // only numbers
+    const value = e.target.value.replace(/\D/g, "");
+
+    // max 10 digits
+    if (value.length <= 10) {
+      setMobile(value);
+    }
+
+    setError("");
+
+  }}
+  placeholder="Enter mobile number"
+  className="w-full border rounded px-3 py-2 text-sm mb-2"
+/>
 
             {/* {error && (
         <p className="text-red-500 text-xs mb-2">{error}</p>
@@ -1078,6 +1114,24 @@ const getFilterParams = () => {
 
   </div>
 )}
+<AssignStaffModal
+  show={showAssignModal}
+  onClose={() => setShowAssignModal(false)}
+  selectedHostel={selectedOwner}
+  setModalType={setModalType}
+  setMessage={setMessage}
+  setShowSuccess={setShowSuccess}
+  refreshData={() => {
+    getOwners({
+      page,
+      size,
+      name: search,
+      sortBy,
+      direction,
+      ...getFilterParams(),
+    });
+  }}
+/>
     </DashboardLayout>
   );
 };

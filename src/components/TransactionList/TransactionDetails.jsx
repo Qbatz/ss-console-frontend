@@ -13,6 +13,7 @@ import Single from "../../assets/single.png";
 import Location from "../../assets/locationGrey.png"
 import Call from "../../assets/call.png";
 import Team from "../../assets/Team.png";
+import { useNavigate } from "react-router-dom";
 
 
 const TransactionsPage = () => {
@@ -41,6 +42,7 @@ const TransactionsPage = () => {
   });
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [showVerifyDrawer, setShowVerifyDrawer] = useState(false);
+  const navigate = useNavigate();
 
 const [selectedVerifyItem, setSelectedVerifyItem] = useState(null);
 const [verifyResponse, setVerifyResponse] = useState(null);
@@ -283,9 +285,26 @@ useEffect(() => {
                           {item.paidBy}
                         </td>
 
-                        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-                          {item.hostelName}
-                        </td>
+                       <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
+
+  <span
+    onClick={() =>
+    navigate(`/property-overview/${item.hostelId}`, {
+  state: {
+    from: "transactions",
+
+    currentPage: page,
+    currentSearch: search,
+    currentDateRange: dateRange,
+  },
+})
+    }
+    className="text-blue-600 cursor-pointer hover:underline"
+  >
+    {item.hostelName}
+  </span>
+
+</td>
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
                           {item.city}, {item.state}

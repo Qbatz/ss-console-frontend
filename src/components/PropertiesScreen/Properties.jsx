@@ -918,7 +918,7 @@ const [statusFilter, setStatusFilter] = useState(
             Delete
           </button>
 
-          <button
+          {/* <button
             onClick={() => {
               setSelectedHostel(item);
               setShowAssignModal(true);
@@ -927,7 +927,7 @@ const [statusFilter, setStatusFilter] = useState(
             className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
           >
             Assign Staff
-          </button>
+          </button> */}
 
         </div>
 
