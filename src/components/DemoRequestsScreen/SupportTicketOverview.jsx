@@ -516,9 +516,7 @@ const [showAllComments, setShowAllComments] =
   {item.description && (
     <div className="mb-3">
 
-      <p className="text-[12px] text-gray-400 font-medium text-left mb-1 uppercase tracking-wide">
-        Description
-      </p>
+     
 
       <p className="text-[14px] text-[#374151] leading-6 text-left break-words">
         {item.description}

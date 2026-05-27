@@ -132,6 +132,7 @@ const [paymentDiscount, setPaymentDiscount] = useState("");
 
 const [paymentPlanError, setPaymentPlanError] = useState("");
 const [paymentAmountError, setPaymentAmountError] = useState("");
+const [paymentDiscountError, setPaymentDiscountError] = useState("");
   const loginType = localStorage.getItem("login_type");
   const showInvoices = loginType === "normal";
   const { hostelId } = useParams();
@@ -146,6 +147,9 @@ const [paymentAmountError, setPaymentAmountError] = useState("");
         setHostelData(res.data);
       }
     };
+    const selectedPaymentPlan = dropdownPlans?.otherPlans?.find(
+  (plan) => plan.planCode === paymentPlan
+);
   useEffect(() => {
     fetchData();
   }, [hostelId]);
@@ -696,6 +700,37 @@ const handleSubscription = async () => {
 
 //   }
 // };
+// const handleGeneratePayment = async () => {
+
+//   let hasError = false;
+
+//   if (!paymentPlan) {
+//     setPaymentPlanError("Please select plan");
+//     hasError = true;
+//   }
+
+//   if (!paymentAmount) {
+//     setPaymentAmountError("Please enter amount");
+//     hasError = true;
+//   }
+
+//   if (hasError) return;
+
+//   // TEMPORARY HARD CODE
+ 
+
+//   const payload = {
+//     planCode: paymentPlan,
+//     paidAmount: Number(paymentAmount),
+//     discountAmount: Number(paymentDiscount || 0)
+//   };
+
+//   await generateOrderHistory(
+//     hostelId,
+//     payload
+//   );
+
+// };
 const handleGeneratePayment = async () => {
 
   let hasError = false;
@@ -709,13 +744,12 @@ const handleGeneratePayment = async () => {
     setPaymentAmountError("Please enter amount");
     hasError = true;
   }
+  if (!paymentDiscount) {
+  setPaymentDiscountError("Please enter discount");
+  hasError = true;
+}
 
   if (hasError) return;
-
-  // TEMPORARY HARD CODE
-  setGeneratedPaymentUrl(
-    "https://paymentssandbox.zoho.in/paymentlinks/7ca871f6e7048883a46b4bde80b716108998f9601ac264723798872bf4281df3ac4f39cd635e9b5d0f973d8a0dac06e17b3023d49cb63166eb105e77b72ecf9a"
-  );
 
   const payload = {
     planCode: paymentPlan,
@@ -723,10 +757,33 @@ const handleGeneratePayment = async () => {
     discountAmount: Number(paymentDiscount || 0)
   };
 
-  await generateOrderHistory(
+  const res = await generateOrderHistory(
     hostelId,
     payload
   );
+
+  console.log("generate payment response", res);
+
+  if (res?.success) {
+
+    setGeneratedPaymentUrl(
+      res?.data?.paymentUrl || ""
+    );
+
+    setModalType("success");
+    setMessage("Payment generated successfully");
+    setShowSuccess(true);
+    setTimeout(()=>{
+      setShowSuccess(false);
+    },1500)
+
+  } else {
+
+    setModalType("error");
+    setMessage(res?.message || "Something went wrong");
+    setShowSuccess(true);
+
+  }
 
 };
 
@@ -2356,6 +2413,8 @@ const handleGeneratePayment = async () => {
 
         setPaymentPlanError("");
         setPaymentAmountError("");
+         setPaymentDiscountError("");
+         setGeneratedPaymentUrl("")
       }}
     />
 
@@ -2400,6 +2459,8 @@ const handleGeneratePayment = async () => {
 
             setPaymentPlanError("");
             setPaymentAmountError("");
+             setPaymentDiscountError("");
+             setGeneratedPaymentUrl("")
           }}
           className="text-gray-400 hover:text-red-500 text-2xl cursor-pointer"
         >
@@ -2421,10 +2482,19 @@ const handleGeneratePayment = async () => {
 
   <select
     value={paymentPlan}
-    onChange={(e) => {
-      setPaymentPlan(e.target.value);
-      setPaymentPlanError("");
-    }}
+    // onChange={(e) => {
+    //   setPaymentPlan(e.target.value);
+    //   setPaymentPlanError("");
+    // }}
+ onChange={(e) => {
+
+  setPaymentPlan(e.target.value);
+  setPaymentPlanError("");
+
+  // clear value
+  setPaymentAmount("");
+
+}}
     className="
       w-full
       h-[43px]
@@ -2473,10 +2543,11 @@ const handleGeneratePayment = async () => {
 </div>
 
           {paymentPlanError && (
-            <p className="text-red-500 text-xs mt-1 text-left">
-              {paymentPlanError}
-            </p>
-          )}
+  <ErrorMessage
+    message={paymentPlanError}
+    type="error"
+  />
+)}
 
         </div>
 
@@ -2487,7 +2558,7 @@ const handleGeneratePayment = async () => {
             Amount <span className="text-red-500">*</span>
           </label>
 
-          <input
+          {/* <input
             type="number"
             placeholder="Enter Amount"
             value={paymentAmount}
@@ -2505,14 +2576,29 @@ const handleGeneratePayment = async () => {
               outline-none
               focus:border-blue-500
             "
-          />
+          /> */}
+<input
+  type="number"
+  placeholder={
+    selectedPaymentPlan
+      ? `₹${selectedPaymentPlan.finalPrice}`
+      : "Amount"
+  }
+  value={paymentAmount}
+  onChange={(e) => {
+    setPaymentAmount(e.target.value);
+    setPaymentAmountError("");
+  }}
+  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+/>
 
-          {paymentAmountError && (
-            <p className="text-red-500 text-xs mt-1 text-left">
-              {paymentAmountError}
-            </p>
-          )}
-
+          
+ {paymentAmountError && (
+  <ErrorMessage
+    message={paymentAmountError}
+    type="error"
+  />
+)}
         </div>
 
         {/* DISCOUNT */}
@@ -2526,9 +2612,10 @@ const handleGeneratePayment = async () => {
             type="number"
             placeholder="Enter Discount"
             value={paymentDiscount}
-            onChange={(e) =>
-              setPaymentDiscount(e.target.value)
-            }
+           onChange={(e) => {
+  setPaymentDiscount(e.target.value);
+  setPaymentDiscountError("");
+}}
             className="
               w-full
               h-[43px]
@@ -2542,6 +2629,12 @@ const handleGeneratePayment = async () => {
           />
 
         </div>
+        {paymentDiscountError && (
+  <ErrorMessage
+    message={paymentDiscountError}
+    type="error"
+  />
+)}
 
       </div>
 {generatedPaymentUrl && (
@@ -2579,6 +2672,8 @@ const handleGeneratePayment = async () => {
 
             setPaymentPlanError("");
             setPaymentAmountError("");
+             setPaymentDiscountError("");
+             setGeneratedPaymentUrl("")
           }}
           className="
             px-5
