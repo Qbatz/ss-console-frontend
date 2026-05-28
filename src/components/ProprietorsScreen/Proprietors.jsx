@@ -841,31 +841,65 @@ if (!/^[6-9]\d{9}$/.test(mobile)) {
                     setSize(Number(e.target.value));
                     setPage(1);
                   }}
-                  className="border rounded-md px-2 py-1 text-sm"
+                  className="border rounded-md px-2 py-1 text-sm cursor-pointer"
                 >
                   <option value={10}>10</option>
                   <option value={20}>20</option>
                   <option value={50}>50</option>
+                  <option value={100}>100</option>
                 </select>
 
 
-                <button
-                  disabled={page <= 1}
-                  onClick={() => setPage(p => p - 1)}
-                >
-                  &#8249;
-                </button>
+               <button
+  disabled={page <= 1}
+  onClick={() => setPage(p => p - 1)}
+  className={`
+    px-2
+    py-1
+    rounded
 
-                <span className="border px-3 py-1 rounded-md bg-gray-100">
-                  {page}
-                </span>
+    ${
+      page <= 1
+        ? "text-gray-300 cursor-not-allowed"
+        : "text-textDark hover:bg-cardBg cursor-pointer"
+    }
+  `}
+>
+  &#8249;
+</button>
 
-                <button
-                  disabled={page >= totalPages}
-                  onClick={() => setPage(p => p + 1)}
-                >
-                  &#8250;
-                </button>
+<span
+  className="
+    border
+    border-borderSoft
+    px-3
+    py-1
+    rounded-card
+    bg-cardBg
+    text-cardTitle
+    font-medium
+  "
+>
+  {page}
+</span>
+
+<button
+  disabled={page >= totalPages}
+  onClick={() => setPage(p => p + 1)}
+  className={`
+    px-2
+    py-1
+    rounded
+
+    ${
+      page >= totalPages
+        ? "text-gray-300 cursor-not-allowed"
+        : "text-textDark hover:bg-cardBg cursor-pointer"
+    }
+  `}
+>
+  &#8250;
+</button>
 
 
               </div>

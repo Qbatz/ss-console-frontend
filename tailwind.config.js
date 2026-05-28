@@ -1,59 +1,46 @@
-// export default {
-//   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
-//   theme: {
-//     extend: {
-//       fontFamily: {
-//         sans: ['Inter', 'sans-serif'],
-//         gilroy: ['Gilroy', 'sans-serif'],
-//       },
-
-//       colors: {
-//         primarySoft: "#1E45E10D",
-//       },
-
-//       keyframes: {
-//         fadeIn: {
-//           "0%": { opacity: "0", transform: "translateY(10px)" },
-//           "100%": { opacity: "1", transform: "translateY(0px)" },
-//         },
-//       },
-
-//       animation: {
-//         fadeIn: "fadeIn 0.25s ease-out",
-//       },
-//     },
-//   },
-//   plugins: [],
-// };
-
+/** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
+
+  content: [
+    "./index.html",
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
 
   theme: {
     extend: {
-      fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        gilroy: ["Gilroy", "sans-serif"],
-      },
 
       colors: {
-        primarySoft: "#1E45E10D",
-
+        cardBg: "#F6F8FC",
         borderSoft: "#E6E8F0",
-        bgSoft: "#0c0cc6",
-        textDark: "#1D1D1D",
+        headingDark: "#1F2937",
+        primaryBlue: "#2563EB",
       },
 
-      keyframes: {
-        fadeIn: {
-          "0%": { opacity: "0", transform: "translateY(10px)" },
-          "100%": { opacity: "1", transform: "translateY(0px)" },
-        },
+      spacing: {
+        pageX: "8px",
       },
 
-      animation: {
-        fadeIn: "fadeIn 0.25s ease-out",
+      borderRadius: {
+        card: "12px",
       },
+
+      boxShadow: {
+        card: "0 1px 3px rgba(0,0,0,0.08)",
+      },
+
+      fontSize: {
+        pageTitle: "20px",
+      },
+
+      lineHeight: {
+        pageTitle: "48px",
+      },
+
+      fontFamily: {
+        gilroy: ["Gilroy", "sans-serif"],
+        inter: ["Inter", "sans-serif"],
+      },
+
     },
   },
 

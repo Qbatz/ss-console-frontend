@@ -1,9 +1,9 @@
-/* ✅ ALL IMPORTS MUST BE FIRST */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @import "tailwindcss";
 
 
-/* Fonts */
+
 @font-face {
   font-family: 'Gilroy';
   src: url('/fonts/Gilroy-Regular.woff2') format('woff2');
@@ -18,10 +18,86 @@
 
 
 
+@theme {
 
-body {
-  font-family: 'Inter', sans-serif;
+ 
+
+  --color-primarySoft: #1E45E10D;
+
+  --color-cardBg: #F6F8FC;
+  --color-borderSoft: #E6E8F0;
+
+  --color-textDark: #1D1D1D;
+  --color-headingDark: #1F2937;
+
+  --color-primaryBlue: #2563EB;
+
+  --color-successGreen: #16A34A;
+  --color-warningYellow: #EAB308;
+  --color-dangerRed: #DC2626;
+
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+
+  
+
+  --spacing-pageX: 8px;
+
+  --spacing-rowGap: 12px;
+  --spacing-sectionGap: 16px;
+
+  --spacing-cardPadding: 20px;
+
+  --spacing-avatar: 56px;
+
+  --spacing-iconXs: 14px;
+  --spacing-iconSm: 20px;
+  --spacing-iconMd: 32px;
+  --spacing-iconLg: 40px;
+
+ 
+
+  --text-pageTitle: 20px;
+
+  --text-sectionTitle: 24px;
+
+  --text-cardTitle: 14px;
+  --text-label: 14px;
+  --text-value: 14px;
+
+  --text-tableHeader: 12px;
+  --text-tableCell: 12px;
+
+  --text-profileInitial: 18px;
+
+
+
+  --leading-pageTitle: 48px;
+
+  
+
+  --radius-card: 12px;
+  --radius-modal: 20px;
+  --radius-pill: 999px;
+
+  
+
+  --shadow-card:
+    0 1px 3px rgba(0,0,0,0.08);
+
+  --shadow-modal:
+    0 10px 25px rgba(0,0,0,0.08);
+
+  --shadow-dropdown:
+    0 4px 12px rgba(0,0,0,0.08);
+
+ 
+
+  --font-gilroy: "Gilroy", sans-serif;
+  --font-inter: "Inter", sans-serif;
 }
+
+
 
 html,
 body,
@@ -29,27 +105,47 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
   overflow: hidden;
+  background: #fff;
+  color: #1D1D1D;
 }
-/* Tailwind theme */
-/* @theme {
-  --font-gilroy: "Gilroy", sans-serif;
 
-  --color-ss-blue: oklch(0.4818 0.2377 265.7);
-  --color-ss-white: oklch(1 0 0);
-} */
-@theme {
-  --font-gilroy: "Gilroy", sans-serif;
 
-  --color-ss-blue: oklch(0.4818 0.2377 265.7);
-  --color-ss-white: oklch(1 0 0);
 
- --color-bg-soft: #F6F8FC;
---color-border-soft: #E6E8F0;
---color-text-dark: #1D1D1D;
---color-primary-btn: #2563EB;
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+
+
 @keyframes slideLeft {
+
   from {
     transform: translateX(100%);
   }
@@ -61,4 +157,27 @@ body,
 
 .animate-slideLeft {
   animation: slideLeft 0.25s ease;
+}
+
+@keyframes fadeIn {
+
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out;
+}
+
+
+
+.ant-picker-dropdown {
+  margin-top: 18px !important;
 }

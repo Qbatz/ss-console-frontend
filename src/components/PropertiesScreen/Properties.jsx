@@ -1017,42 +1017,75 @@ const [statusFilter, setStatusFilter] = useState(
                       setPageSize(Number(e.target.value));
                       setPage(1);
                     }}
-                    className="border rounded-md px-2 py-1 text-sm"
+                    className="border rounded-md px-2 py-1 text-sm cursor-pointer"
                   >
                     <option value={10}>10</option>
                     <option value={20}>20</option>
                     <option value={50}>50</option>
+                    <option value={100}>100</option>
                   </select>
 
                   {/* Prev */}
-                  <button
-                    // disabled={page <= 1}
-                    disabled={hostels?.currentPage <= 1}
-                    onClick={() => setPage(prev => prev - 1)}
-                  >
-                    &#8249;
-                  </button>
+                  {/* PREV */}
+<button
+  disabled={hostels?.currentPage <= 1}
+  onClick={() => setPage(prev => prev - 1)}
+  className={`
+    px-2
+    py-1
+    rounded
 
+    ${
+      hostels?.currentPage <= 1
+        ? "text-gray-300 cursor-not-allowed"
+        : "text-textDark hover:bg-cardBg cursor-pointer"
+    }
+  `}
+>
+  &#8249;
+</button>
 
-                  <span className="border px-3 py-1 rounded-md bg-gray-100">
-                    {/* {page} */}
-                    {hostels?.currentPage}
-                  </span>
+{/* CURRENT PAGE */}
+<span
+  className="
+    border
+    border-borderSoft
+    px-3
+    py-1
+    rounded-card
+    bg-cardBg
+    text-cardTitle
+    font-medium
+  "
+>
+  {hostels?.currentPage}
+</span>
 
-                  <span className="text-gray-500">
-                    {/* {start} - {end} */}
-                    {hostels?.currentPage ?? 1} - {hostels?.totalPages ?? 1}
-                  </span>
+{/* TOTAL */}
+<span className="text-textDark/60 text-cardTitle">
+  {hostels?.currentPage ?? 1} - {hostels?.totalPages ?? 1}
+</span>
 
+{/* NEXT */}
+<button
+  disabled={
+    hostels?.currentPage >= hostels?.totalPages
+  }
+  onClick={() => setPage(prev => prev + 1)}
+  className={`
+    px-2
+    py-1
+    rounded
 
-
-                  <button
-                    // disabled={page >= totalPages || totalPages === 0}
-                    disabled={hostels?.currentPage >= hostels?.totalPages}
-                    onClick={() => setPage(prev => prev + 1)}
-                  >
-                    &#8250;
-                  </button>
+    ${
+      hostels?.currentPage >= hostels?.totalPages
+        ? "text-gray-300 cursor-not-allowed"
+        : "text-textDark hover:bg-cardBg cursor-pointer"
+    }
+  `}
+>
+  &#8250;
+</button>
 
 
                 </div>

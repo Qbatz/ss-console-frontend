@@ -5,8 +5,8 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import { usePlan } from "../../Context/PlanContexts";
 
-const UpdateStatusModal = ({ open, onClose, demoRequestId, refreshList, currentStatus }) => {
-  const { updateDemoRequestStatus, getAgentsDropdown, getDemoRequestStatus, getDemoRequests,getDemoType,getDropReasons } = useSubscription();
+const UpdateStatusModal = ({ open, onClose, demoRequestId, refreshList, currentStatus,currentStatusMobile }) => {
+  const { updateDemoRequestStatus, getAgentsDropdown, getDemoRequestStatus, getDemoRequests,getDemoType,getDropReasons,getOwnerByMobile } = useSubscription();
    const { getPlansDropdown } = usePlan();
   const [statusList, setStatusList] = useState([]);
   const [openStatus, setOpenStatus] = useState(false);
@@ -108,7 +108,8 @@ useEffect(() => {
   fromTime: "",
   toTime: "",
   demoType: "",
-  demoLink: ""
+  demoLink: "",
+  ownerMobileNumber: currentStatusMobile || ""
 });
 
   const [agents, setAgents] = useState([]);
@@ -118,8 +119,57 @@ useEffect(() => {
   const [selectedAgent, setSelectedAgent] = useState("");
   const dropdownRef = useRef(null);
   const [updateError, setUpdateError] = useState("")
-
+const [ownerData, setOwnerData] =
+  useState(null);
   console.log("selectedAgent", selectedAgent)
+  useEffect(() => {
+
+  if (open) {
+
+    setForm((prev) => ({
+      ...prev,
+      ownerMobileNumber:
+        currentStatusMobile || ""
+    }));
+
+  }
+
+}, [open, currentStatusMobile]);
+useEffect(() => {
+
+  const fetchOwner = async () => {
+
+    if (
+      form.demoRequestStatus ===
+        "TRIAL_STARTED" &&
+      form.ownerMobileNumber?.length >= 10
+    ) {
+
+      const res =
+        await getOwnerByMobile(
+          form.ownerMobileNumber
+        );
+
+      if (res?.success) {
+
+        setOwnerData(res.data?.[0] || null);
+
+      } else {
+
+        setOwnerData(null);
+
+      }
+
+    }
+
+  };
+
+  fetchOwner();
+
+}, [
+  form.demoRequestStatus,
+  form.ownerMobileNumber
+]);
   const resetForm = () => {
     setForm({
       demoRequestStatus: "",
@@ -429,11 +479,11 @@ if (form.demoRequestStatus === "DROPPED") {
   payload.dropReason = form.dropReason;
 
 }
-  if (form.demoRequestStatus === "CONVERTED") {
+//   if (form.demoRequestStatus === "CONVERTED") {
 
-  payload.planCode = form.planCode;
+//   payload.planCode = form.planCode;
 
-}
+// }
 
   const res = await updateDemoRequestStatus(
     demoRequestId,
@@ -826,7 +876,7 @@ if (form.demoRequestStatus === "DROPPED") {
 
   </div>
 )}
-{form.demoRequestStatus === "CONVERTED" && (
+{/* {form.demoRequestStatus === "CONVERTED" && (
 
   <div className="mt-4">
 
@@ -836,7 +886,7 @@ if (form.demoRequestStatus === "DROPPED") {
 
     <div className="relative">
 
-      {/* SELECT BOX */}
+      
       <div
         onClick={() =>
           setOpenPlanDropdown(!openPlanDropdown)
@@ -870,7 +920,7 @@ if (form.demoRequestStatus === "DROPPED") {
 
       </div>
 
-      {/* DROPDOWN */}
+   
       {openPlanDropdown && (
         <div
           className="
@@ -921,6 +971,123 @@ if (form.demoRequestStatus === "DROPPED") {
       )}
 
     </div>
+
+  </div>
+
+)} */}
+{form.demoRequestStatus ===
+  "TRIAL_STARTED" && (
+
+  <div className="mt-4">
+
+    <label
+      className="
+        block
+        text-sm
+        font-medium
+        text-gray-700
+        mb-2
+        text-left
+      "
+    >
+      Mobile Number
+      <span className="text-red-500">
+        *
+      </span>
+    </label>
+
+    <input
+      type="text"
+      value={form.ownerMobileNumber}
+      onChange={(e) => {
+
+        setForm({
+          ...form,
+          ownerMobileNumber:
+            e.target.value
+        });
+
+      }}
+      placeholder="Enter Mobile Number"
+      className="
+        w-full
+        h-[52px]
+        border
+        border-gray-300
+        rounded-2xl
+        px-4
+        text-sm
+        outline-none
+        focus:border-blue-500
+      "
+    />
+
+ {ownerData && (
+
+  <div
+    className="
+      mt-2
+      border
+      border-borderSoft
+      rounded-xl
+      bg-white
+      shadow-sm
+      overflow-hidden
+    "
+  >
+
+    <button
+      type="button"
+      className="
+        w-full
+        px-4
+        py-3
+        flex
+        items-center
+        justify-between
+        hover:bg-cardBg
+        transition-all
+      "
+      onClick={() => {
+
+        setForm({
+          ...form,
+          ownerName:
+            ownerData?.fullName || ""
+        });
+
+      }}
+    >
+
+      <div className="text-left">
+
+        <p
+          className="
+            text-sm
+            font-medium
+            text-headingDark
+          "
+        >
+          {ownerData?.fullName || "N/A"}
+        </p>
+
+        <p
+          className="
+            text-xs
+            text-textDark/60
+            mt-1
+          "
+        >
+          {ownerData?.emailId || "N/A"}
+        </p>
+
+      </div>
+
+    </button>
+
+  </div>
+
+)}
 
   </div>
 
