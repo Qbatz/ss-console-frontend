@@ -617,7 +617,23 @@ useEffect(() => {
                   <h2 className="font-semibold text-sm text-start">
                     TXN{selectedTxn.historyId}
                   </h2>
-                  <p className="text-green-600 text-xs">● Success</p>
+                 <p
+  className={`
+    text-xs font-medium
+    ${
+      selectedTxn?.orderStatus?.toUpperCase() === "PAID"
+        ? "text-green-600"
+        : "text-red-600"
+    }
+  `}
+>
+  ●
+  {
+    selectedTxn?.orderStatus?.toUpperCase() === "PAID"
+      ? " Success"
+      : " Failed"
+  }
+</p>
                 </div>
 
                 <button onClick={() => setShowModal(false)} className="cursor-pointer">✕</button>
