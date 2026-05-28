@@ -204,9 +204,40 @@ const Subscription = () => {
                   </div>
 
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
-                    <p className="text-gray-500 text-sm font-gilroy">Basic</p>
-                    <h2 className="text-2xl font-bold mt-2">{responseCard?.otherPlansCount || 0}</h2>
-                  </div>
+
+ 
+
+  <div className="flex items-center justify-between gap-4">
+
+   
+    <div className="flex-1 text-center  rounded-lg py-1">
+
+      <p className="text-[12px] text-blue-600 font-medium">
+        Basic
+      </p>
+
+      <h2 className="text-2xl font-bold mt-1 text-gray-900">
+        {responseCard?.basicPlansCount || 0}
+      </h2>
+
+    </div>
+
+    {/* ADVANCE */}
+    <div className="flex-1 text-center  rounded-lg py-1">
+
+      <p className="text-[11px] text-orange-600 font-medium">
+        Advance
+      </p>
+
+      <h2 className="text-2xl font-bold mt-1 text-gray-900">
+        {responseCard?.advancePlansCount || 0}
+      </h2>
+
+    </div>
+
+  </div>
+
+</div>
 
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
                     <p className="text-gray-500 text-sm font-gilroy">Trial</p>

@@ -708,13 +708,13 @@ const deleteHostel = async (hostelId) => {
     setLoading(false);
   }
 };
-const assignRelationalAgent = async (hostelId, payload) => {
+const assignRelationalAgent = async (parentId,payload) => {
   try {
     setLoading(true);
     setErrorMsg("");
 
     const res = await axiosInstance.post(
-      `/v2/relational-agent/${hostelId}`,
+      `/v2/relational-agent/${parentId}`,
       payload
     );
 

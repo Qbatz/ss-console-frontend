@@ -29,7 +29,7 @@ const AssignStaffModal = ({
     const [showReasonDropdown, setShowReasonDropdown] = useState(false);
     const [staffList, setStaffList] = useState([]);
     const [showStaffDropdown, setShowStaffDropdown] = useState(false);
-    console.log("staffList", staffList)
+    console.log("selectedHostel", selectedHostel)
     const resetForm = () => {
   setStaffId("");
   setReason("");
@@ -89,7 +89,7 @@ const AssignStaffModal = ({
 
         try {
             const res = await assignRelationalAgent(
-                selectedHostel?.hostelId,
+                selectedHostel?.parentId,
                 payload
             );
 
@@ -140,8 +140,12 @@ const AssignStaffModal = ({
     // };
 
     return (
-       <div
-  className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]"
+  <div
+  className="
+    fixed inset-0 z-[9999]
+    bg-black/40
+    flex justify-end
+  "
   onClick={() => {
     resetForm();
     onClose();
@@ -149,14 +153,26 @@ const AssignStaffModal = ({
 >
 
             {/* Modal */}
-          <div
-  className="bg-white rounded-xl w-[500px] max-h-[80vh] overflow-y-auto p-6"
+      <div
+  className="
+    bg-white
+    w-[500px]
+    h-[95vh]
+    mt-5
+    mr-5
+    mb-5
+    rounded-2xl
+    overflow-y-auto
+    p-6
+    shadow-2xl
+    animate-slideIn
+  "
   onClick={(e) => e.stopPropagation()}
 >
 
                 {/* Title */}
                 <h2 className="text-lg font-semibold mb-5 text-left">
-                    Assign
+                   Assign Staff
                 </h2>
 
                 {/* Staff */}

@@ -8,7 +8,8 @@ import Location from "../../assets/locationyellow.png";
 import Crown from "../../assets/crown.png";
 import Mail from "../../assets/Mail.png";
 import Mobile from "../../assets/mobile.png";
-import Message from "../../assets/message-2.png"
+import Message from "../../assets/message-2.png";
+import downArrow from "../../assets/direction-down 01.png"
 
 const UserInfo = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const UserInfo = () => {
   const [openMenu, setOpenMenu] = useState(null);
   const [activeTab, setActiveTab] = useState("activity");
   const [menuDirection, setMenuDirection] = useState("top");
+  const [expandedOwners, setExpandedOwners] = useState([]);
   const [menuPos, setMenuPos] = useState({
   top: 0,
   left: 0
@@ -42,6 +44,15 @@ console.log("agentDetails",agentDetails)
     return () => document.removeEventListener("click", handleClick);
   }, []);
 const subscriptions = agentDetails?.subscriptions || [];
+const toggleOwner = (id) => {
+
+  setExpandedOwners((prev) =>
+    prev.includes(id)
+      ? prev.filter((item) => item !== id)
+      : [...prev, id]
+  );
+
+};
 
   return (
     <DashboardLayout>
@@ -65,7 +76,7 @@ const subscriptions = agentDetails?.subscriptions || [];
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[355px_1fr] min-h-[calc(100vh-61px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-[455px_1fr] min-h-[calc(100vh-61px)]">
 
           <div className="px-4 sm:px-5 py-6 border-b lg:border-b-0 lg:border-r border-gray-200">
 
@@ -130,7 +141,7 @@ const subscriptions = agentDetails?.subscriptions || [];
 
             {/* Properties */}
             <h4 className="text-[13px] font-medium text-gray-800 mt-5 mb-3 text-start">
-              Managing Properties
+              Managing Clients
             </h4>
 
    <div className="border border-gray-200 rounded-2xl bg-white max-h-[400px] flex flex-col overflow-visible">
@@ -142,194 +153,268 @@ const subscriptions = agentDetails?.subscriptions || [];
     scrollbarColor: "#D9E9FF transparent"
   }}
 >
-    {agentDetails?.hostelRelations?.length > 0 ? (
+ {agentDetails?.hostelRelations?.length > 0 ? (
 
-      agentDetails.hostelRelations.map((item, index) => (
+  agentDetails.hostelRelations.map((relation, relationIndex) => {
 
-        <div
-          key={item.id}
-          className={`flex items-start justify-between px-4 py-4
-          ${index !== agentDetails.hostelRelations.length - 1
+    const isExpanded =
+      expandedOwners.includes(relation.id);
+
+    return (
+
+      <div
+        key={relation.id}
+        className={`
+          px-5 py-5
+          ${
+            relationIndex !==
+            agentDetails.hostelRelations.length - 1
               ? "border-b border-gray-100"
               : ""
-            }`}
+          }
+        `}
+      >
+
+        {/* OWNER HEADER */}
+        <div
+          onClick={() => toggleOwner(relation.id)}
+          className="
+            flex items-center justify-between
+            cursor-pointer
+            group
+          "
         >
 
-          {/* LEFT */}
-          <div className="flex items-start gap-3 min-w-0">
+          <div className="flex items-center gap-3">
 
-            {/* IMAGE */}
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-blue-100 shrink-0 flex items-center justify-center">
-
-              {item.mainImage ? (
-
-                <img
-                  src={item.mainImage}
-                  alt="Property"
-                  className="w-full h-full object-cover"
-                />
-
-              ) : (
-
-                <span className="text-[18px] font-semibold text-[#2563EB] uppercase">
-                  {item.initials || "NA"}
-                </span>
-
-              )}
-
+            {/* INITIAL */}
+            <div
+              className="
+                w-8 h-8
+                rounded-2xl
+                bg-gradient-to-br
+                from-blue-100
+                to-blue-50
+                flex items-center justify-center
+                border border-blue-100
+                shrink-0
+              "
+            >
+              <span className="text-[13px] font-bold text-[#2563EB] uppercase">
+                {relation?.owner?.initials || "NA"}
+              </span>
             </div>
 
-            {/* CONTENT */}
-            <div className="min-w-0">
+            {/* INFO */}
+            <div className="text-left">
 
-              {/* NAME */}
-              <p className="text-[14px] font-semibold text-gray-900 truncate text-left">
-                {item.hostelName}
+              <p className="text-[15px] font-semibold text-gray-900">
+                {relation?.owner?.fullName || "N/A"}
               </p>
 
-              {/* LOCATION + PLAN */}
-              <div className="mt-1">
-
-                <div className="flex items-center gap-2 flex-wrap">
-
-                  {/* LOCATION */}
-                  <div className="relative group flex items-center gap-1">
-
-                    <div className="w-2 h-2 rounded-full bg-orange-400"></div>
-
-                    <span className="text-[12px] text-gray-500 cursor-default">
-                      {item.city}
-                    </span>
-
-                    {/* TOOLTIP */}
-                    <div className="absolute left-0 top-full mt-2 hidden group-hover:block bg-gray-900 text-white text-[10px] px-3 py-2 rounded-lg shadow-lg whitespace-nowrap z-50">
-                      {item.fullAddress}
-                    </div>
-
-                  </div>
-
-                  {/* PLAN */}
-                  <span
-                    className={`text-[10px] px-2 py-[2px] rounded-full font-medium flex items-center gap-1
-                    ${item.planName === "Premium"
-                        ? "bg-orange-50 text-orange-600"
-                        : item.planName === "Trial"
-                          ? "bg-yellow-50 text-yellow-700"
-                          : "bg-blue-50 text-blue-600"
-                      }`}
-                  >
-                    {item.planName !== "Trial" && "👑"}
-
-                    {item.planName}
-                  </span>
-
-                </div>
-
-                {/* EXPIRES */}
-                {item.aboutToExpire && (
-                  <div className="mt-2 text-left">
-
-                    <span className="text-[10px] px-2 py-[3px] rounded-full bg-red-50 text-red-600 font-medium inline-flex">
-
-                      {item.expiringInDays === 0
-                        ? "Expires today"
-                        : `Expires in ${item.expiringInDays} day${item.expiringInDays !== 1 ? "s" : ""}`
-                      }
-
-                    </span>
-
-                  </div>
-                )}
-
-              </div>
+              <p className="text-[12px] text-gray-500">
+                {relation?.hostels?.length || 0} Properties
+              </p>
 
             </div>
 
           </div>
 
-          {/* MENU */}
-          <div className="relative">
-
-            <button
-              className="text-gray-500 text-lg leading-none cursor-pointer"
- onClick={(e) => {
-
-  e.stopPropagation();
-
-  const rect =
-    e.currentTarget.getBoundingClientRect();
-
-  const viewportHeight =
-    window.innerHeight;
-
-  const menuHeight = 100;
-
-  const spaceBelow =
-    viewportHeight - rect.bottom;
-
-  setMenuDirection(
-    spaceBelow < menuHeight
-      ? "top"
-      : "bottom"
-  );
-
-  setMenuPos({
-    top:
-      spaceBelow < menuHeight
-        ? rect.top - menuHeight
-        : rect.bottom + 8,
-
-    left: rect.left - 120
-  });
-
-  setOpenMenu(
-    openMenu === index
-      ? null
-      : index
-  );
-}}
-            >
-              ⋮
-            </button>
-
-            {/* DROPDOWN */}
-    {openMenu === index && (
-  <div
-    className="
-      fixed z-[99999]
-      bg-white border border-gray-200
-      rounded-xl shadow-lg py-1 w-40
-    "
-   style={{
-  top: menuPos.top,
-  left: menuPos.left
-}}
-  >
-
-                <button className="w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50">
-                  Change Access
-                </button>
-
-                <button className="w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50">
-                  Renew Subscription
-                </button>
-
-              </div>
-            )}
-
+          {/* ARROW */}
+          <div
+            className={`
+              text-gray-400 text-lg transition-transform duration-200
+              ${isExpanded ? "rotate-180" : ""}
+            `}
+          >
+            <img src={downArrow} className="w-4 h-4"/>
           </div>
 
         </div>
 
-      ))
+        {/* HOSTELS */}
+        {isExpanded && (
 
-    ) : (
+          <div className="mt-4 ml-4 border-l-2 border-gray-100 pl-5 space-y-4">
 
-      <div className="py-10 text-center text-gray-400 text-sm">
-        No Properties Found
+            {relation.hostels?.map((item) => (
+
+            <div
+  key={item.hostelId}
+  className="
+    bg-[#FCFCFD]
+    border border-gray-100
+    rounded-2xl
+    px-4 py-4
+    hover:border-blue-100
+    hover:shadow-sm
+    transition-all duration-200
+  "
+>
+
+  <div className="flex gap-3">
+
+    {/* INITIAL */}
+    <div
+      className="
+        w-8 h-8
+        rounded-2xl
+        bg-[#EAF2FF]
+        flex items-center justify-center
+        shrink-0
+      "
+    >
+      <span className="text-[12px] font-bold text-[#2563EB] uppercase">
+        {item.initials}
+      </span>
+    </div>
+
+    {/* CONTENT */}
+    <div className="flex-1 min-w-0 text-left">
+
+      {/* NAME + PLAN */}
+  <div className="flex items-center justify-between gap-2 w-full">
+
+  {/* HOSTEL NAME */}
+  <p
+  title={item.hostelName}
+  className="
+    text-[14px]
+    font-semibold
+    text-gray-800
+    w-[150px]
+    truncate
+    whitespace-nowrap
+    overflow-hidden
+  "
+>
+  {item.hostelName}
+</p>
+
+  {/* PLAN */}
+  <span
+    title={item.planName}
+    className={`
+      shrink-0
+      text-[10px]
+      px-3 py-[4px]
+      rounded-full
+      font-medium
+      whitespace-nowrap
+
+      ${
+        item.planName === "Premium"
+          ? "bg-orange-50 text-orange-600"
+          : item.planName === "Trial"
+          ? "bg-yellow-50 text-yellow-700"
+          : "bg-blue-50 text-blue-600"
+      }
+    `}
+  >
+    {item.planName || "N/A"}
+  </span>
+
+</div>
+
+      {/* CITY */}
+      <div className="mt-2 flex items-center gap-2">
+
+        <div className="w-2 h-2 rounded-full bg-orange-400 shrink-0"></div>
+
+        <div className="relative group w-fit">
+
+          <p className="text-[13px] text-gray-500 cursor-pointer">
+            {item.city}
+          </p>
+
+          {/* TOOLTIP */}
+          <div
+            className="
+              absolute
+              bottom-full
+              left-0
+              mb-2
+              hidden
+              group-hover:block
+              bg-gray-900
+              text-white
+              text-[10px]
+              px-3 py-2
+              rounded-xl
+              shadow-xl
+              whitespace-nowrap
+              z-[99999]
+            "
+          >
+            {item.fullAddress}
+          </div>
+
+        </div>
+
       </div>
 
-    )}
+      {/* EXPIRE */}
+      {item.aboutToExpire && (
+
+        <div className="mt-3 text-left">
+
+          <span
+            className="
+              inline-flex items-center gap-1
+              text-[9px]
+              px-3 py-[4px]
+              rounded-full
+              bg-red-50
+              text-red-600
+              font-medium
+            "
+          >
+            ⚠️
+
+            {item.expiringInDays === 0
+              ? "Expires today"
+              : `Expires in ${item.expiringInDays} day${
+                  item.expiringInDays !== 1
+                    ? "s"
+                    : ""
+                }`
+            }
+
+          </span>
+
+        </div>
+
+      )}
+
+    </div>
+
+  </div>
+
+</div>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </div>
+
+    );
+
+  })
+
+) : (
+
+  <div className="py-14 text-center">
+
+    <p className="text-sm text-gray-400">
+      No Properties Found
+    </p>
+
+  </div>
+
+)}
 
   </div>
 

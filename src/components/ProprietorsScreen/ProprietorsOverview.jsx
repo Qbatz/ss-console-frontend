@@ -59,7 +59,7 @@ const formatDateTime = (date, time) => {
   }) + " " + (time || "");
 };
  const handlePropertyClick = async (item) => {
-
+console.log("handlePropertyClick",item)
     const res = await getHostelById(item.hostelId);
     console.log("res", res)
     if (res?.success) {

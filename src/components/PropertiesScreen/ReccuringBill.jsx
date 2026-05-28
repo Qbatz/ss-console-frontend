@@ -213,6 +213,15 @@ const RecurringBill = ({ hostelData,refreshHostel  }) => {
 
 
   };
+  const SubscriptionStatus =
+  hostelData?.isSubscriptionActive === true
+    ? "Active"
+    : "Expired";
+
+const RecurringStatus =
+  hostelData?.recurringStatus === true
+    ? "Generated"
+    : "Pending";
   //     const handleUpdateSchedule = async () => {
   //   if (!confirmManual) return;
 
@@ -251,6 +260,7 @@ const RecurringBill = ({ hostelData,refreshHostel  }) => {
   //     setShowSuccess(false);
   //   }, 1000);
   // };
+  
   return (
     <div className="p-5">
       <Toast
@@ -392,36 +402,68 @@ const RecurringBill = ({ hostelData,refreshHostel  }) => {
       </div>
 
       {/* STATUS */}
-      <div className="flex items-center gap-3 mt-4 text-[13px]">
+      {/* <div className="flex items-center gap-3 mt-4 text-[13px]"> */}
 
-        {hostelData?.recurringStatus === true ? (
-          <>
-            {/* ACTIVE */}
-            <span className="flex items-center gap-1 bg-green-100 text-green-600 px-2 py-[2px] rounded-full">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              Active
-            </span>
+        {hostelData?.recurringHistory?.length > 0 && (
 
-            {/* GENERATED */}
-            <span className="flex items-center gap-1 bg-green-100 text-green-600 px-2 py-[2px] rounded-full">
-              ✔ Generated
-            </span>
-          </>
-        ) : (
-          <>
-            {/* EXPIRED */}
-            <span className="bg-red-100 text-red-600 px-2 py-[2px] rounded-full">
-              Expired
-            </span>
+  <div className="flex items-center gap-3 mt-4 text-[13px]">
 
-            {/* PENDING */}
-            <span className="bg-yellow-100 text-yellow-700 px-2 py-[2px] rounded-full">
-              Pending
-            </span>
-          </>
-        )}
+    {/* Subscription */}
+    <div className="flex items-center gap-2">
 
-      </div>
+      <p className="text-[12px] font-medium text-gray-500">
+        Subscription :
+      </p>
+
+      <span
+        className={`flex items-center gap-1 px-2 py-[2px] rounded-full text-[12px]
+          ${
+            SubscriptionStatus === "Active"
+              ? "bg-green-100 text-green-600"
+              : "bg-red-100 text-red-600"
+          }`}
+      >
+        <span
+          className={`w-2 h-2 rounded-full
+            ${
+              SubscriptionStatus === "Active"
+                ? "bg-green-500"
+                : "bg-red-500"
+            }`}
+        ></span>
+
+        {SubscriptionStatus}
+      </span>
+
+    </div>
+
+    {/* Recurring */}
+    <div className="flex items-center gap-2">
+
+      <p className="text-[12px] font-medium text-gray-500">
+        Recurring :
+      </p>
+
+      <span
+        className={`flex items-center gap-1 px-2 py-[2px] rounded-full text-[12px]
+          ${
+            RecurringStatus === "Generated"
+              ? "bg-green-100 text-green-600"
+              : "bg-yellow-100 text-yellow-700"
+          }`}
+      >
+        {RecurringStatus === "Generated" ? "✔" : "⏳"}
+
+        {RecurringStatus}
+      </span>
+
+    </div>
+
+  </div>
+
+)}
+
+      {/* </div> */}
 
       {/* TABLE TITLE */}
       <h3 className="text-[13px] font-semibold text-gray-600 mt-4 mb-2 text-left">

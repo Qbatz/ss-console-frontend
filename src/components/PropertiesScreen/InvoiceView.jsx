@@ -213,12 +213,23 @@ useEffect(() => {
                                         Due Date
                                     </th>
 
-                                    <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                        Status
-                                    </th>
-                                    <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                        Action
-                                    </th>
+                                    <th className="px-3 py-4 w-[140px] text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+  Status
+</th>
+                                   <th
+  className="
+    px-1 py-4
+    w-[50px]
+    text-center
+    text-[11px]
+    font-semibold
+    uppercase
+    tracking-wide
+    text-gray-500
+  "
+>
+  Action
+</th>
 
                                 </tr>
 
@@ -245,7 +256,7 @@ useEffect(() => {
                                                 <div className="flex items-center gap-3">
 
                                                     {/* DROPDOWN */}
-                                                    <div
+                                                    {/* <div
                                                         onClick={() =>
                                                             setExpandedInvoice(
                                                                 expandedInvoice === item.invoiceId
@@ -276,9 +287,9 @@ useEffect(() => {
                                                             <img src={ArrowDown2} className="w-3 h-3" />
                                                         </div>
 
-                                                    </div>
+                                                    </div> */}
 
-                                                    {/* ICON */}
+                                                   
                                                     <div
                                                         className="
                             w-9 h-9
@@ -473,7 +484,12 @@ useEffect(() => {
 
                                             </td>
                                             <td
-  className="px-5 py-2 text-xs relative"
+  className="
+    px-1 py-3
+    w-[50px]
+    text-center
+    relative
+  "
   ref={openMenu === item.invoiceId ? menuRef : null}
 >
 
