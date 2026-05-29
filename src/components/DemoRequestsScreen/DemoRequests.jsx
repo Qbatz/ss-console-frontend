@@ -919,6 +919,9 @@ setCommentText("")
           <th className="px-4 py-3 text-left whitespace-nowrap">
             SOURCE
           </th>
+          <th className="px-4 py-3 text-left whitespace-nowrap">
+            Owner Name
+          </th>
 
           <th className="px-4 py-3 text-left whitespace-nowrap">
             REQUESTED DATE
@@ -1072,6 +1075,20 @@ setCommentText("")
  <td className="px-4 py-2 text-[12px] text-left ">
                           {item.source || "----"}
                         </td>
+                       <td
+  className="
+    px-4
+    py-2
+    text-tableCell
+    text-left
+    text-headingDark
+    font-medium
+  "
+>
+
+  {item?.owner?.fullName || "-"}
+
+</td>
 
                         {/* <td className="px-4 py-2 text-[12px] text-left">
                           {item.requestedDate || "----"}

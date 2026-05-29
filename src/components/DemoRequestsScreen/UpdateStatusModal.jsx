@@ -97,7 +97,7 @@ useEffect(() => {
   //   presentedAt: "",
   //   agentId: ""
   // });
-  const [form, setForm] = useState({
+const [form, setForm] = useState({
   demoRequestStatus: "",
   comments: "",
   presentedBy: "",
@@ -109,7 +109,12 @@ useEffect(() => {
   toTime: "",
   demoType: "",
   demoLink: "",
-  ownerMobileNumber: currentStatusMobile || ""
+
+  ownerMobileNumber:
+    currentStatusMobile || "",
+
+  ownerParentId: "",
+  ownerName: ""
 });
 
   const [agents, setAgents] = useState([]);
@@ -152,9 +157,22 @@ useEffect(() => {
 
       if (res?.success) {
 
-        setOwnerData(res.data?.[0] || null);
+  const owner =
+    res.data?.[0] || null;
 
-      } else {
+  setOwnerData(owner);
+
+  setForm((prev) => ({
+    ...prev,
+
+    ownerParentId:
+      owner?.parentId || "",
+
+    ownerName:
+      owner?.fullName || ""
+  }));
+
+} else {
 
         setOwnerData(null);
 
@@ -433,6 +451,7 @@ const handleSubmit = async () => {
   let payload = {
     demoRequestStatus: form.demoRequestStatus,
     comments: form.comments,
+    
   };
 
   // ASSIGNED
@@ -477,6 +496,15 @@ payload.demoTo = formatDemoDateTime(
 if (form.demoRequestStatus === "DROPPED") {
 
   payload.dropReason = form.dropReason;
+
+}
+if (
+  form.demoRequestStatus ===
+  "TRIAL_STARTED"
+) {
+
+  payload.parentId =
+    form.ownerParentId;
 
 }
 //   if (form.demoRequestStatus === "CONVERTED") {
