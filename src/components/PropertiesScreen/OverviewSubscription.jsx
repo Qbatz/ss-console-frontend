@@ -9,361 +9,531 @@ const OverviewSubscriptions = ({ hostelData }) => {
   console.log("hostelData", hostelData)
   return (
     <>
-      {canRead === false ? (
+    {canRead === false ? (
 
-        <div className="flex flex-col items-center justify-center h-[350px] gap-4">
+  <div
+    className="
+      flex
+      flex-col
+      items-center
+      justify-center
+      h-[350px]
+      gap-4
+    "
+  >
 
-          <img
-            src={LoginImg}
-            alt="Access Restricted"
-            className="w-64 object-contain"
-          />
+    <img
+      src={LoginImg}
+      alt="Access Restricted"
+      className="
+        w-64
+        object-contain
+      "
+    />
 
-          <p className="text-red-600 text-lg font-medium">
-            Access Restricted
-          </p>
+    <p
+      className="
+        text-dangerRed
+        text-cardTitle
+        font-medium
+        font-inter
+      "
+    >
+      Access Restricted
+    </p>
 
-        </div>
+  </div>
 
-      ) : (
+) : (
 
-        <div className="px-5 py-4 space-y-8">
+  <div
+    className="
+      px-5
+      py-4
+      space-y-sectionGap
+    "
+  >
 
+    {/* CURRENT */}
+    <div>
 
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 text-left">
-              Current
-            </h3>
+      <h3
+        className="
+          text-cardTitle
+          font-semibold
+          text-headingDark
+          mb-3
+          font-inter text-start
+        "
+      >
+        Current
+      </h3>
 
-           <div className="bg-white border border-[#E6E8F0] rounded-xl overflow-x-auto">
+      <div
+        className="
+          bg-white
+          border
+          border-borderSoft
+          rounded-card
+          overflow-x-auto
+          shadow-card
+        "
+      >
 
-              <table className="w-full text-sm">
+        <table className="w-full">
 
-                <thead className="bg-[#F5F7FB] text-gray-500 text-xs">
-                  {/* <tr>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">SUB PLAN</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">BILLING CYCLE</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">AMOUNT</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">DUE DATE</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">STATEMENTS</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">RENEWAL STATUS</th>
-                    <th className="px-4 py-3 text-right font-semibold text-[12px] uppercase text-[#6B7280] font-sans">ACTIONS</th>
-                  </tr> */}
-                  <tr>
-                    <th className="px-4 py-3 text-left whitespace-nowrap">
-                      <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                        SUB PLAN
-                        <img src={swap} className="w-3 h-3 opacity-70" />
-                      </div>
-                    </th>
+          {/* HEADER */}
+          <thead
+            className="
+              bg-cardBg
+            "
+          >
 
-                    <th className="px-4 py-3 text-left whitespace-nowrap">
-                      <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                        BILLING CYCLE
-                        <img src={swap} className="w-3 h-3 opacity-70" />
-                      </div>
-                    </th>
+            <tr>
 
-                    <th className="px-4 py-3 text-left whitespace-nowrap">
-                      <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                        PLAN AMOUNT
-                        <img src={swap} className="w-3 h-3 opacity-70" />
-                      </div>
-                    </th>
- <th className="px-4 py-3 text-left whitespace-nowrap">
-                      <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                        PAID AMOUNT
-                        <img src={swap} className="w-3 h-3 opacity-70" />
-                      </div>
-                      
-                    </th>
-                     <th className="px-4 py-3 text-left whitespace-nowrap">
-                      <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                        DISCOUNT AMOUNT
-                        <img src={swap} className="w-3 h-3 opacity-70" />
-                      </div>
-                      
-                    </th>
-                    <th className="px-4 py-3 text-left whitespace-nowrap">
-                      <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                        DUE DATE
-                        <img src={swap} className="w-3 h-3 opacity-70" />
-                      </div>
-                    </th>
+              {[
+                "SUB PLAN",
+                "BILLING CYCLE",
+                "PLAN AMOUNT",
+                "PAID AMOUNT",
+                "DISCOUNT AMOUNT",
+                "DUE DATE",
+                "RENEWAL STATUS"
+              ].map((header) => (
 
-                    {/* <th className="px-4 py-3 text-left whitespace-nowrap">
-                      <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                        STATEMENTS
-                        <img src={swap} className="w-3 h-3 opacity-70" />
-                      </div>
-                    </th> */}
+                <th
+                  key={header}
+                  className="
+                    px-4
+                    py-3
+                    text-left
+                    whitespace-nowrap
+                  "
+                >
 
-                    <th className="px-4 py-3 text-left whitespace-nowrap">
-                      <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                        RENEWAL STATUS
-                        <img src={swap} className="w-3 h-3 opacity-70" />
-                      </div>
-                    </th>
+                  <div
+                    className="
+                      flex
+                      items-center
+                      gap-1
+                      font-semibold
+                      text-tableHeader
+                      uppercase
+                      text-textDark/60
+                      font-inter
+                    "
+                  >
 
-                    {/* <th className="px-4 py-3 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                        ACTIONS
-                        <img src={swap} className="w-3 h-3 opacity-70" />
-                      </div>
-                    </th> */}
-                  </tr>
-                </thead>
+                    {header}
 
-                {/* <tbody className="divide-y">
+                    <img
+                      src={swap}
+                      className="
+                        w-3
+                        h-3
+                        opacity-70
+                      "
+                    />
 
-              <tr className="hover:bg-gray-50">
-                <td className="px-4 py-2 text-left font-medium text-[12px]">N/A</td>
-                <td className="px-4 py-2 text-left font-medium text-[12px]">N/A</td>
-                <td className="px-4 py-2 text-left font-medium text-[12px]">N/A</td>
-                <td className="px-4 py-2 text-left font-medium text-[12px]">N/A</td>
-                <td className="px-4 py-2 text-left font-medium text-[12px]">---</td>
-                <td className="px-4 py-2 text-left font-medium text-[12px]">
-                 ---
+                  </div>
+
+                </th>
+
+              ))}
+
+            </tr>
+
+          </thead>
+
+          {/* BODY */}
+          <tbody
+            className="
+              divide-y
+              divide-borderSoft
+            "
+          >
+
+            {currentSub ? (
+
+              <tr
+                className="
+                  hover:bg-cardBg
+                  transition-all
+                "
+              >
+
+                <td
+                  className="
+                    px-4
+                    py-3
+                    text-tableCell
+                    font-medium
+                    whitespace-nowrap
+                    text-textDark
+                  "
+                >
+                  {currentSub.planName || "N/A"}
                 </td>
-                <td className="px-4 py-2 text-center font-medium text-[12px]">⋮</td>
+
+                <td
+                  className="
+                    px-4
+                    py-3
+                    text-tableCell
+                    font-medium
+                    whitespace-nowrap
+                    text-textDark
+                  "
+                >
+                  {currentSub.planStartsAt} - {currentSub.planEndsAt}
+                </td>
+
+                <td
+                  className="
+                    px-4
+                    py-3
+                    text-tableCell
+                    font-medium
+                    whitespace-nowrap
+                    text-textDark
+                  "
+                >
+                  ₹ {currentSub.planAmount ?? 0}
+                </td>
+
+                <td
+                  className="
+                    px-4
+                    py-3
+                    text-tableCell
+                    font-medium
+                    whitespace-nowrap
+                    text-textDark
+                  "
+                >
+                  ₹ {currentSub.paidAmount ?? 0}
+                </td>
+
+                <td
+                  className="
+                    px-4
+                    py-3
+                    text-tableCell
+                    font-medium
+                    whitespace-nowrap
+                    text-textDark
+                  "
+                >
+                  ₹ {currentSub.discountAmount ?? 0}
+                </td>
+
+                <td
+                  className="
+                    px-4
+                    py-3
+                    text-tableCell
+                    font-medium
+                    whitespace-nowrap
+                    text-textDark
+                  "
+                >
+                  {currentSub.planEndsAt || "N/A"}
+                </td>
+
+                <td
+                  className="
+                    px-4
+                    py-3
+                    whitespace-nowrap
+                  "
+                >
+
+                  <span
+                    className={`
+                      px-2
+                      py-1
+                      rounded-pill
+                      text-[11px]
+                      font-medium
+
+                      ${
+                        hostelData?.subscriptionStatus?.toLowerCase() === "active"
+                          ? "bg-green-50 text-successGreen"
+                          : "bg-red-50 text-dangerRed"
+                      }
+                    `}
+                  >
+                    {hostelData?.subscriptionStatus || "N/A"}
+                  </span>
+
+                </td>
+
               </tr>
 
-            </tbody> */}
-                <tbody className="divide-y">
+            ) : (
 
-                  {currentSub ? (
-                    <tr className="hover:bg-gray-50">
+              <tr>
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                        {currentSub.planName || "N/A"}
-                      </td>
+                <td
+                  colSpan={7}
+                  className="
+                    text-center
+                    py-6
+                    text-textDark/40
+                    text-cardTitle
+                  "
+                >
+                  No Current Subscription
+                </td>
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                        {currentSub.planStartsAt} - {currentSub.planEndsAt}
-                      </td>
+              </tr>
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                        ₹ {currentSub.planAmount ?? 0}
-                      </td>
-                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                        ₹ {currentSub.paidAmount ?? 0}
-                      </td>
-                       <td className="px-4 py-2 text-left font-medium text-[12px]">
-                        ₹ {currentSub.discountAmount ?? 0}
-                      </td>
+            )}
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap" >
-                        {currentSub.planEndsAt || "N/A"}
-                      </td>
+          </tbody>
 
-                      {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                        ---
-                      </td> */}
+        </table>
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${hostelData?.subscriptionStatus?.toLowerCase() === "active"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                            }`}
-                        >
-                          {hostelData?.subscriptionStatus || "N/A"}
-                        </span>
-                      </td>
+      </div>
 
-                      {/* <td className="px-4 py-2 text-center font-medium text-[12px]">
-                        ⋮
-                      </td> */}
+    </div>
 
-                    </tr>
-                  ) : (
-                    <tr>
-                      <td colSpan={7} className="text-center py-6 text-gray-400">
-                        No Current Subscription
-                      </td>
-                    </tr>
-                  )}
+    {/* HISTORY */}
+    <div>
 
-                </tbody>
-              </table>
+      <h3
+        className="
+          text-cardTitle
+          font-semibold
+          text-headingDark
+          mb-3
+          font-inter text-start
+        "
+      >
+        History
+      </h3>
 
-            </div>
-          </div>
+      <div
+        className="
+          bg-white
+          border
+          border-borderSoft
+          rounded-card
+          overflow-x-auto
+          shadow-card
+        "
+      >
 
+        <div
+          className="
+            max-h-[320px]
+            overflow-y-auto
+          "
+        >
 
+          <table className="w-full">
 
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 text-left">
-              History
-            </h3>
+            {/* HEADER */}
+            <thead
+              className="
+                bg-cardBg
+                sticky
+                top-0
+                z-10
+              "
+            >
 
-            <div className="bg-white border border-[#E6E8F0] rounded-xl overflow-x-auto">
+              <tr>
 
+                {[
+                  "SUB PLAN",
+                  "BILLING CYCLE",
+                  "PLAN AMOUNT",
+                  "PAID AMOUNT",
+                  "DISCOUNT AMOUNT",
+                  "DUE DATE"
+                ].map((header) => (
 
-              <div className="max-h-[320px] overflow-y-auto">
+                  <th
+                    key={header}
+                    className="
+                      px-4
+                      py-3
+                      text-left
+                      whitespace-nowrap
+                    "
+                  >
 
-                <table className="w-full text-sm">
+                    <div
+                      className="
+                        flex
+                        items-center
+                        gap-1
+                        font-semibold
+                        text-tableHeader
+                        uppercase
+                        text-textDark/60
+                        font-inter
+                      "
+                    >
 
-                  <thead className="bg-[#F5F7FB] text-gray-500 text-xs sticky top-0 z-10">
-                    {/* <tr>
-                      <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">SUB PLAN</th>
-                      <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">BILLING CYCLE</th>
-                      <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">AMOUNT</th>
-                      <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">DUE DATE</th>
-                      <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">STATEMENTS</th>
-                      <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">RENEWAL STATUS</th>
-                      <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans">ACTIONS</th>
-                    </tr> */}
-                    <tr>
-                      <th className="px-4 py-3 text-left whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                          SUB PLAN
-                          <img src={swap} className="w-3 h-3 opacity-70" />
-                        </div>
-                      </th>
+                      {header}
 
-                      <th className="px-4 py-3 text-left whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                          BILLING CYCLE
-                          <img src={swap} className="w-3 h-3 opacity-70" />
-                        </div>
-                      </th>
+                      <img
+                        src={swap}
+                        className="
+                          w-3
+                          h-3
+                          opacity-70
+                        "
+                      />
 
-                      <th className="px-4 py-3 text-left whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                         PLAN AMOUNT
-                          <img src={swap} className="w-3 h-3 opacity-70" />
-                        </div>
-                      </th>
-                       <th className="px-4 py-3 text-left whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                         PAID AMOUNT
-                          <img src={swap} className="w-3 h-3 opacity-70" />
-                        </div>
-                      </th>
-                        <th className="px-4 py-3 text-left whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                         DISCOUNT AMOUNT
-                          <img src={swap} className="w-3 h-3 opacity-70" />
-                        </div>
-                      </th>
+                    </div>
 
-                      <th className="px-4 py-3 text-left whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                          DUE DATE
-                          <img src={swap} className="w-3 h-3 opacity-70" />
-                        </div>
-                      </th>
+                  </th>
 
-                      {/* <th className="px-4 py-3 text-left whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                          STATEMENTS
-                          <img src={swap} className="w-3 h-3 opacity-70" />
-                        </div>
-                      </th> */}
+                ))}
 
-                      {/* <th className="px-4 py-3 text-left whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                          RENEWAL STATUS
-                          <img src={swap} className="w-3 h-3 opacity-70" />
-                        </div>
-                      </th> */}
+              </tr>
 
-                      {/* <th className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1 font-semibold text-[12px] uppercase text-[#6B7280]">
-                          ACTIONS
-                          <img src={swap} className="w-3 h-3 opacity-70" />
-                        </div>
-                      </th> */}
-                    </tr>
-                  </thead>
+            </thead>
 
-                  <tbody className="divide-y divide-gray-200">
+            {/* BODY */}
+            <tbody
+              className="
+                divide-y
+                divide-borderSoft
+              "
+            >
 
-                    {hostelData?.subscriptions && hostelData.subscriptions.length > 0 ? (
-                      hostelData.subscriptions.map((sub) => (
-                        <tr key={sub.subscriptionId} className="hover:bg-gray-50">
+              {hostelData?.subscriptions &&
+              hostelData.subscriptions.length > 0 ? (
 
-                          <td className="px-4 py-3 whitespace-nowrap">{sub.planName || "N/A"}</td>
+                hostelData.subscriptions.map((sub) => (
 
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            {sub.planStartsAt || "N/A"} - {sub.planEndsAt || "N/A"}
-                          </td>
+                  <tr
+                    key={sub.subscriptionId}
+                    className="
+                      hover:bg-cardBg
+                      transition-all
+                    "
+                  >
 
-                          <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                            ₹ {sub.planAmount ?? 0}
-                          </td>
-                          <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                            ₹ {sub.paidAmount ?? 0}
-                          </td>
-                          <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                            ₹ {sub.discountAmount ?? 0}
-                          </td>
+                    <td
+                      className="
+                        px-4
+                        py-3
+                        text-tableCell
+                        font-medium
+                        whitespace-nowrap
+                        text-textDark
+                      "
+                    >
+                      {sub.planName || "N/A"}
+                    </td>
 
-                          <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                            {sub.planEndsAt || "N/A"}
-                          </td>
+                    <td
+                      className="
+                        px-4
+                        py-3
+                        text-tableCell
+                        font-medium
+                        whitespace-nowrap
+                        text-textDark
+                      "
+                    >
+                      {sub.planStartsAt || "N/A"} - {sub.planEndsAt || "N/A"}
+                    </td>
 
-                          {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
-                            ---
-                          </td> */}
+                    <td
+                      className="
+                        px-4
+                        py-3
+                        text-tableCell
+                        font-medium
+                        whitespace-nowrap
+                        text-textDark
+                      "
+                    >
+                      ₹ {sub.planAmount ?? 0}
+                    </td>
 
-                          {/* <td className="px-4 py-2 text-left font-medium text-[12px]">
-                            Active
-                          </td> */}
+                    <td
+                      className="
+                        px-4
+                        py-3
+                        text-tableCell
+                        font-medium
+                        whitespace-nowrap
+                        text-textDark
+                      "
+                    >
+                      ₹ {sub.paidAmount ?? 0}
+                    </td>
 
-                          {/* <td className="px-4 py-2 text-center font-medium text-[12px]">
-                            ⋮
-                          </td> */}
+                    <td
+                      className="
+                        px-4
+                        py-3
+                        text-tableCell
+                        font-medium
+                        whitespace-nowrap
+                        text-textDark
+                      "
+                    >
+                      ₹ {sub.discountAmount ?? 0}
+                    </td>
 
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={7} className="text-center py-6 text-gray-400">
-                          No Data Found
-                        </td>
-                      </tr>
-                    )}
+                    <td
+                      className="
+                        px-4
+                        py-3
+                        text-tableCell
+                        font-medium
+                        whitespace-nowrap
+                        text-textDark
+                      "
+                    >
+                      {sub.planEndsAt || "N/A"}
+                    </td>
 
-                  </tbody>
+                  </tr>
 
-                </table>
+                ))
 
-              </div>
+              ) : (
 
-            </div>
-          </div>
+                <tr>
 
+                  <td
+                    colSpan={6}
+                    className="
+                      text-center
+                      py-6
+                      text-textDark/40
+                      text-cardTitle
+                    "
+                  >
+                    No Data Found
+                  </td>
 
+                </tr>
 
-          {/* <div className="flex justify-between items-center text-sm pt-2">
+              )}
 
-        <span className="text-gray-600">
-          Total Record Count :
-          <span className="text-blue-600 font-medium ml-1">05</span>
-        </span>
+            </tbody>
 
-        <div className="flex items-center gap-3">
-
-          <select className="border border-[#E6E8F0] rounded-md px-2 py-1">
-            <option>20</option>
-          </select>
-
-          <button className="text-gray-400">‹</button>
-
-          <span className="border px-3 py-1 rounded-md bg-gray-100">
-            1
-          </span>
-
-          <button className="text-blue-600">›</button>
+          </table>
 
         </div>
 
-      </div> */}
+      </div>
 
-        </div>
-      )}
+    </div>
+
+  </div>
+
+)}
     </>
   );
 };

@@ -525,77 +525,151 @@ setCommentText("")
 
           </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+   <div
+  className="
+    grid
+    grid-cols-1
+    sm:grid-cols-2
+    lg:grid-cols-5
+    gap-4
+    mb-6
+  "
+>
 
-  {/* LEFT CARDS */}
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
+  {[
+    {
+      title1: "Total Leads",
+      value1: demoData?.totalLeads || 0,
+      title2: "New Today",
+      value2: demoData?.newToday || 0,
+    },
+    {
+      title1: "Demo Completed",
+      value1: demoData?.demoCompleted || 0,
+      title2: "Converted",
+      value2: demoData?.converted || 0,
+    },
+    {
+      title1: "Contacted",
+      value1: demoData?.contacted || 0,
+      title2: "New",
+      value2: demoData?.new || 0,
+    },
+    {
+      title1: "Dropped",
+      value1: demoData?.dropped || 0,
+      title2: "Trial Started",
+      value2: demoData?.trialStarted || 0,
+    },
+    {
+      title1: "Demo Scheduled",
+      value1: demoData?.demoScheduled || 0,
+      title2: "Assigned",
+      value2: demoData?.assigned || 0,
+    },
+  ].map((item, index) => (
 
-    {/* CARD 1 */}
-    <div className="bg-white p-5 rounded-xl border border-gray-300">
-      <p className="text-gray-500 text-sm font-gilroy">
-        Total Leads
-      </p>
+    <div
+      key={index}
+      className="
+        bg-white
+        border
+        border-borderSoft
+        rounded-card
+        shadow-card
+        p-5
+        min-h-[150px]
+        flex
+        flex-col
+        justify-between
+      "
+    >
 
-      <h2 className="text-3xl font-bold mt-2">
-       {demoData?.totalLeads}
-      </h2>
+      {/* TOP */}
+      <div>
+
+        <p
+          className="
+            text-cardTitle
+            text-textDark/60
+            font-inter
+            text-center
+          "
+        >
+          {item.title1}
+        </p>
+
+        <h2
+          className="
+            text-sectionTitle
+            font-bold
+            text-headingDark
+            text-center
+            mt-2
+          "
+        >
+          {item.value1}
+        </h2>
+
+      </div>
+
+      {/* DIVIDER */}
+      <div
+        className="
+          border-t
+          border-borderSoft
+          my-4
+        "
+      />
+
+      {/* BOTTOM */}
+      <div>
+
+        <p
+          className="
+            text-cardTitle
+            text-textDark/60
+            font-inter
+            text-center
+          "
+        >
+          {item.title2}
+        </p>
+
+        <h2
+          className="
+            text-sectionTitle
+            font-bold
+            text-headingDark
+            text-center
+            mt-2
+          "
+        >
+          {item.value2}
+        </h2>
+
+      </div>
+
     </div>
 
-    {/* CARD 2 */}
-    <div className="bg-white p-5 rounded-xl border border-gray-300">
-      <p className="text-gray-500 text-sm font-gilroy">
-        New Today
-      </p>
-
-      <h2 className="text-3xl font-bold mt-2">
-       {demoData?.newToday || 0}
-      </h2>
-    </div>
-
-    {/* CARD 3 */}
-    <div className="bg-white p-5 rounded-xl border border-gray-300">
-      <p className="text-gray-500 text-sm font-gilroy">
-        Contacted
-      </p>
-
-      <h2 className="text-3xl font-bold mt-2">
-      {demoData?.contacted}
-      </h2>
-    </div>
-
-    {/* CARD 4 */}
-    <div className="bg-white p-5 rounded-xl border border-gray-300">
-      <p className="text-gray-500 text-sm font-gilroy">
-        Demo Scheduled
-      </p>
-
-      <h2 className="text-3xl font-bold mt-2">
-       {demoData?.demoScheduled}
-      </h2>
-    </div>
-
-  </div>
-
-  {/* ADD BUTTON */}
-  {/* <button
-    className="
-      bg-blue-500
-      hover:bg-blue-600
-      text-white
-      px-5
-      py-3
-      rounded-lg
-      cursor-pointer
-      whitespace-nowrap
-    "
-    onClick={() => setOpenDrawer(true)}
-  >
-    Add Request
-  </button> */}
+  ))}
 
 </div>
-  {/* FILTERS */}
-<div className="flex flex-wrap gap-3 mb-4">
+<p
+  className="
+    text-[11px]
+    text-primaryBlue
+    flex
+    items-center
+    gap-1
+    font-medium mb-5
+  "
+>
+  <span className="text-[10px]">ⓘ</span>
+
+  Based On Current Month
+</p>
+<div className="flex flex-wrap gap-3 mb-5">
 
   
   <RangePicker
@@ -845,6 +919,9 @@ setCommentText("")
           <th className="px-4 py-3 text-left whitespace-nowrap">
             SOURCE
           </th>
+          <th className="px-4 py-3 text-left whitespace-nowrap">
+            Owner Name
+          </th>
 
           <th className="px-4 py-3 text-left whitespace-nowrap">
             REQUESTED DATE
@@ -998,6 +1075,20 @@ setCommentText("")
  <td className="px-4 py-2 text-[12px] text-left ">
                           {item.source || "----"}
                         </td>
+                       <td
+  className="
+    px-4
+    py-2
+    text-tableCell
+    text-left
+    text-headingDark
+    font-medium
+  "
+>
+
+  {item?.owner?.fullName || "-"}
+
+</td>
 
                         {/* <td className="px-4 py-2 text-[12px] text-left">
                           {item.requestedDate || "----"}
@@ -1633,6 +1724,7 @@ setCommentText("")
         demoRequestId={selectedId}
         refreshList={fetchData}
         currentStatus={selectedItem?.demoRequestStatus}
+        currentStatusMobile={selectedItem?.contactNo}
       />
 {showCommentModal && (
   <div className="fixed inset-0 z-[9999]">

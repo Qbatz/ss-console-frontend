@@ -8,9 +8,10 @@ import Edit from "../../assets/editicon.png";
 import Trash from "../../assets/trash.png";
 import LoginImg from "../../assets/LoginImg.png";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 const Roles = () => {
-  const { agentRoles, getAgentRoles, getAgentRoleById, loading, deleteAgentRole, errorMsg, accessError,adminDetails } = useRole();
+  const { agentRoles, getAgentRoles, getAgentRoleById, loading, deleteAgentRole, errorMsg, accessError, adminDetails } = useRole();
   console.log("agentRoles", agentRoles)
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
@@ -21,6 +22,7 @@ const Roles = () => {
   const totalPages = Math.ceil(totalRecords / pageSize);
   const [deleteRole, setDeleteRole] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("")
   const navigate = useNavigate();
 
   console.log("accessError", accessError)
@@ -61,21 +63,21 @@ const Roles = () => {
     if (!deleteRole) return;
 
     try {
-  
+
 
       const res = await deleteAgentRole(deleteRole.id);
 
       if (!res.success) {
-        alert(res.message || "Delete failed");
+        setDeleteError(res.message || "Delete failed");
         return;
       }
 
-    
+
       setDeleteRole(null);
 
     } catch (err) {
-      console.log("Delete error:", err);
-      alert("Something went wrong");
+
+      setDeleteError("Something went wrong");
     } finally {
       setDeleteLoading(false);
     }
@@ -161,16 +163,16 @@ const Roles = () => {
                             </span>
                           </td> */}
                           <td className="px-4 py-3 text-center">
-  <span
-    onClick={() =>
-     navigate(`/iam-admin-user/${adminDetails?.roleId}/${role.id}`)
-    }
-    className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-xs cursor-pointer hover:bg-blue-100"
-  >
-    <img src={Team} alt="Team" className="w-4 h-4" />
-    {role.userCount}
-  </span>
-</td>
+                            <span
+                              onClick={() =>
+                                navigate(`/iam-admin-user/${adminDetails?.roleId}/${role.id}`)
+                              }
+                              className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-xs cursor-pointer hover:bg-blue-100"
+                            >
+                              <img src={Team} alt="Team" className="w-4 h-4" />
+                              {role.userCount}
+                            </span>
+                          </td>
 
                           <td className="px-4 py-3 text-black-600">
                             {role.created || "N/A"}
@@ -210,7 +212,7 @@ const Roles = () => {
                                     setOpenMenu(null);
                                   }}
                                 >
-                                  <img src={Trash} alt="Trash" className="w-4 h-4"/>
+                                  <img src={Trash} alt="Trash" className="w-4 h-4" />
                                   Delete
                                 </button>
 
@@ -303,11 +305,16 @@ const Roles = () => {
                 <p className="text-gray-500 text-sm sm:text-base mb-6">
                   Are you sure you want to delete "{deleteRole.name}"?
                 </p>
-
+{deleteError && (
+              <ErrorMessage message={deleteError} type="error" />
+            )}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
 
                   <button
-                    onClick={() => setDeleteRole(null)}
+onClick={() => {
+  setDeleteRole(null);
+  setDeleteError("");
+}}
                     disabled={deleteLoading}
                     className="w-full sm:w-1/2 border border-blue-600 text-blue-600 py-2.5 rounded-xl font-medium hover:bg-blue-50 transition cursor-pointer"
                   >

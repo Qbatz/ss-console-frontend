@@ -131,7 +131,7 @@ const getErrorMessage = (error) => {
       const res = await api.post("/v2/agent-role", payload);
 
       if (res.status === 200 || res.status === 201) {
-        await getAgentRoles(); // refresh list
+        await getAgentRoles(); 
         return { success: true, data: res.data };
       }
 
