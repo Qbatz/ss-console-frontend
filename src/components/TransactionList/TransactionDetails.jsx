@@ -14,12 +14,15 @@ import Location from "../../assets/locationGrey.png"
 import Call from "../../assets/call.png";
 import Team from "../../assets/Team.png";
 import { useNavigate } from "react-router-dom";
+import { useHostel } from "../../Context/HostelListContext";
+import Toast from "../SuccessModal/ToastDesign";
 
 
 const TransactionsPage = () => {
 
   const [totalItems, setTotalItems] = useState(0);
   const { getOrderHistory, loading, accessError,verifyPayment } = useSubscription();
+   const { sharePaymentLink} = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Hostel Transactions");
   const [data, setData] = useState([]);
@@ -47,6 +50,43 @@ const TransactionsPage = () => {
 const [selectedVerifyItem, setSelectedVerifyItem] = useState(null);
 const [verifyResponse, setVerifyResponse] = useState(null);
 const menuRef = useRef(null);
+  const [modalType, setModalType] = useState("success");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [message, setMessage] = useState("");
+const handleSharePayment = async () => {
+
+  if (!selectedTxn?.paymentUrl) {
+    return;
+  }
+
+  const res = await sharePaymentLink(
+    selectedTxn.hostelId,
+    selectedTxn.paymentUrl
+  );
+
+  if (res?.success) {
+
+    setModalType("success");
+    setMessage("Payment link shared successfully");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+  }
+  else{
+      setModalType("error");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+  }
+
+};
 useEffect(() => {
 
   const handleClickOutside = (event) => {
@@ -140,7 +180,13 @@ useEffect(() => {
 
 };
   return (
-    <DashboardLayout>
+    <DashboardLayout>  
+      <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
+
+      />
       {(canRead === false || accessError === "Access Restricted") ? (
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
@@ -656,7 +702,7 @@ useEffect(() => {
                   <div className="grid grid-cols-[20px_120px_1fr] items-center gap-x-4">
                     <img src={Single} alt="owner" className="w-4 h-4 opacity-70" />
                     <span className="text-gray-500">Owner</span>
-                    <span className="font-semibold text-gray-900">{selectedTxn.ownerInfo.fullName}</span>
+                    <span className="font-semibold text-gray-900">{selectedTxn?.ownerInfo?.fullName}</span>
                   </div>
 
                   <div className="grid grid-cols-[20px_120px_1fr] items-start gap-x-4">
@@ -742,24 +788,112 @@ useEffect(() => {
   
   {selectedTxn.paymentUrl && (
 
-    <div className="mb-3 text-left">
+  <div className="mb-4 text-left">
 
-      <p className="text-[11px] text-gray-500 uppercase font-semibold mb-1">
-        Payment Link
-      </p>
+    <p className="text-[11px] text-gray-500 uppercase font-semibold mb-2">
+      Payment Link
+    </p>
 
+    <div
+      className="
+        relative
+        border
+        border-gray-300
+        rounded-xl
+        bg-white
+        p-3
+        pr-24
+      "
+    >
+
+      {/* LINK */}
       <a
         href={selectedTxn.paymentUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-blue-600 text-sm underline break-all hover:text-blue-800"
+        className="
+          text-blue-600
+          text-sm
+          underline
+          break-all
+          hover:text-blue-800
+        "
       >
         {selectedTxn.paymentUrl}
       </a>
 
+      {/* RIGHT ACTIONS */}
+      <div
+        className="
+          absolute
+          top-2
+          right-2
+          flex
+          items-center
+          gap-2
+        "
+      >
+
+        {/* COPY */}
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(
+              selectedTxn.paymentUrl
+            );
+          }}
+          className="
+            w-8
+            h-8
+            rounded-full
+            bg-gray-100
+            hover:bg-gray-200
+            flex
+            items-center
+            justify-center
+            text-[14px]
+            cursor-pointer
+          "
+          title="Copy Link"
+        >
+          📋
+        </button>
+
+      
+        <button
+  onClick={handleSharePayment}
+  className="
+    w-8
+    h-8
+    rounded-full
+    bg-green-500
+    hover:bg-green-600
+    flex
+    items-center
+    justify-center
+    text-white
+    text-[14px]
+    cursor-pointer
+  "
+  title="Share on WhatsApp"
+>
+   <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 32 32"
+      className="w-5 h-5 fill-current"
+    >
+
+      <path d="M16 .396C7.164.396 0 7.56 0 16.396c0 2.82.737 5.57 2.137 7.992L0 32l7.828-2.053a15.93 15.93 0 0 0 8.172 2.242c8.836 0 16-7.164 16-16S24.836.396 16 .396zm0 29.09a13.1 13.1 0 0 1-6.672-1.832l-.477-.281-4.645 1.219 1.238-4.527-.312-.492a13.045 13.045 0 0 1-2.012-7.016c0-7.223 5.879-13.102 13.102-13.102 3.5 0 6.793 1.363 9.266 3.836a13.02 13.02 0 0 1 3.836 9.266c0 7.223-5.879 13.102-13.102 13.102zm7.188-9.844c-.394-.199-2.332-1.152-2.695-1.285-.363-.133-.629-.199-.895.199-.266.394-1.027 1.285-1.258 1.551-.23.266-.465.297-.859.098-.394-.199-1.664-.613-3.172-1.953-1.172-1.043-1.965-2.332-2.195-2.727-.23-.394-.024-.609.172-.808.176-.176.394-.465.594-.695.199-.23.266-.394.398-.66.133-.266.066-.496-.031-.695-.098-.199-.895-2.156-1.227-2.953-.324-.777-.652-.672-.895-.684l-.762-.012c-.266 0-.695.098-1.059.496-.363.394-1.391 1.359-1.391 3.312 0 1.953 1.426 3.84 1.625 4.105.199.266 2.809 4.289 6.805 6.016.949.41 1.688.656 2.266.84.953.305 1.82.262 2.504.159.764-.114 2.332-.953 2.66-1.875.328-.922.328-1.711.23-1.875-.098-.164-.363-.262-.758-.461z" />
+
+    </svg>
+</button>
+
+      </div>
+
     </div>
 
-  )}
+  </div>
+
+)}
 
   
   <div className="rounded-lg overflow-hidden border border-gray-300">

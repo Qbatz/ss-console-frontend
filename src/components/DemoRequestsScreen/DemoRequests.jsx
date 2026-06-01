@@ -16,6 +16,7 @@ import  SupportTicketOverview from "../DemoRequestsScreen/SupportTicketOverview"
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import MarkAsLostDrawer from "./MarkAsLostDrawer";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const DemoRequests = () => {
 
@@ -23,7 +24,7 @@ const DemoRequests = () => {
   const { adminDetails, agents, getAllAgents, assignStaff } = useRole();
   const dropdownRef = useRef(null);
   const statusDropdownRef = useRef(null);
-
+  const navigate = useNavigate();
 const agentDropdownRef = useRef(null);
   const { RangePicker } = DatePicker;
   const [data, setData] = useState([]);
@@ -544,28 +545,28 @@ setCommentText("")
       value2: demoData?.newToday || 0,
     },
     {
-      title1: "Demo Completed",
-      value1: demoData?.demoCompleted || 0,
-      title2: "Converted",
-      value2: demoData?.converted || 0,
+      title1: "New",
+      value1: demoData?.new  || 0,
+      title2: "Assigned",
+      value2:  demoData?.assigned || 0,
     },
     {
       title1: "Contacted",
       value1: demoData?.contacted || 0,
-      title2: "New",
-      value2: demoData?.new || 0,
+      title2: "Demo Scheduled",
+      value2: demoData?.demoScheduled || 0,
     },
     {
-      title1: "Dropped",
-      value1: demoData?.dropped || 0,
+      title1: "Demo Completed",
+      value1: demoData?.demoCompleted || 0,
       title2: "Trial Started",
       value2: demoData?.trialStarted || 0,
     },
     {
-      title1: "Demo Scheduled",
-      value1: demoData?.demoScheduled || 0,
-      title2: "Assigned",
-      value2: demoData?.assigned || 0,
+      title1: "Converted",
+      value1: demoData?.converted || 0,
+      title2: "Dropped",
+      value2: demoData?.dropped || 0,
     },
   ].map((item, index) => (
 
@@ -939,9 +940,9 @@ setCommentText("")
             STATUS
           </th>
 
-          <th className="px-4 py-3 text-left whitespace-nowrap">
+          {/* <th className="px-4 py-3 text-left whitespace-nowrap">
             CONVERSION RESULT
-          </th>
+          </th> */}
 
           <th className="px-4 py-3 text-left whitespace-nowrap">
             ACTIONS
@@ -1075,18 +1076,50 @@ setCommentText("")
  <td className="px-4 py-2 text-[12px] text-left ">
                           {item.source || "----"}
                         </td>
-                       <td
+   <td
   className="
     px-4
     py-2
     text-tableCell
     text-left
-    text-headingDark
     font-medium
   "
 >
 
+  {item?.isOwnerDeleted === true ? (
+
+    <span className="text-dangerRed">
+      Owner Deleted
+    </span>
+
+  ) : (
+
+   <span
+  className="
+    text-primaryBlue
+    cursor-pointer
+    hover:underline
+  "
+  onClick={() => {
+
+    // navigate(
+    //   `/ProprietorsOverview/${item?.owner?.ownerId}`
+    // );
+    navigate(
+  `/ProprietorsOverview/${item?.owner?.ownerId}`,
+  {
+    state: {
+      from: location.pathname
+    }
+  }
+);
+
+  }}
+>
   {item?.owner?.fullName || "-"}
+</span>
+
+  )}
 
 </td>
 
@@ -1171,9 +1204,9 @@ setCommentText("")
                         <td className="px-4 py-2 text-[12px] text-left">
                           {item.demoRequestStatus}
                         </td>
-                         <td className="px-4 py-2 text-[12px] text-left">
+                         {/* <td className="px-4 py-2 text-[12px] text-left">
                           {item.convertedToPlanName || "----"}
-                        </td>
+                        </td> */}
 
                        <td className="px-4 py-2 relative">
 

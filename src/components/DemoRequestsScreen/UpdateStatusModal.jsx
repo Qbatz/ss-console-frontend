@@ -1050,7 +1050,7 @@ if (
       "
     />
 
- {ownerData && (
+ {/* {ownerData && (
 
   <div
     className="
@@ -1109,6 +1109,93 @@ if (
           {ownerData?.emailId || "N/A"}
         </p>
 
+      </div>
+
+    </button>
+
+  </div>
+
+)} */}
+{ownerData && (
+
+  <div
+    className="
+      mt-2
+      border-2
+      border-primaryBlue
+      rounded-xl
+      bg-primarySoft
+      shadow-sm
+      overflow-hidden
+      ring-2
+      ring-primaryBlue/20
+    "
+  >
+
+    <button
+      type="button"
+      className="
+        w-full
+        px-4
+        py-3
+        flex
+        items-center
+        justify-between
+        hover:bg-blue-50
+        transition-all
+        duration-200
+      "
+      onClick={() => {
+
+        setForm({
+          ...form,
+          ownerName:
+            ownerData?.fullName || ""
+        });
+
+      }}
+    >
+
+      <div className="text-left">
+
+        <p
+          className="
+            text-sm
+            font-semibold
+            text-primaryBlue
+          "
+        >
+          {ownerData?.fullName || "N/A"}
+        </p>
+
+        <p
+          className="
+            text-xs
+            text-textDark/70
+            mt-1
+          "
+        >
+          {ownerData?.emailId || "N/A"}
+        </p>
+
+      </div>
+
+      {/* SELECTED ICON */}
+      <div
+        className="
+          w-6
+          h-6
+          rounded-full
+          bg-primaryBlue
+          text-white
+          flex
+          items-center
+          justify-center
+          text-[12px]
+          font-bold
+        "
+      >
+        ✓
       </div>
 
     </button>

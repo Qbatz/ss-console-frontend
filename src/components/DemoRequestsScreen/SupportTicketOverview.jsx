@@ -6,6 +6,7 @@ import single from "../../assets/single.png";
 import Group from "../../assets/team.png";
 import Location from "../../assets/locationGrey.png";
 import Phone from "../../assets/call.png";
+import { useNavigate } from "react-router-dom";
 
 
 const SupportTicketOverview = ({
@@ -21,6 +22,7 @@ const SupportTicketOverview = ({
 console.log("selectedItem",selectedItem)
 const [showAllComments, setShowAllComments] =
   useState(false);
+  const navigate = useNavigate();
   const handleSeeAllComments = async () => {
 
   console.log(
@@ -300,14 +302,18 @@ const [showAllComments, setShowAllComments] =
      <div className="flex items-center">
 
       <p className="w-[100px] text-[12px] text-[#9CA3AF] whitespace-nowrap">
-        Conversion Result
+        Owner Name
       </p>
 
       <span className="mr-5 text-[#9CA3AF]">:</span>
 
-      <p className="text-[14px] font-medium text-[#1D1D1D]">
-       {selectedItem?.convertedToPlanName || "N/A"}
-      </p>
+      <p className="text-[14px] font-medium text-[#1D1D1D]"  onClick={() =>
+        navigate(
+          `/ProprietorsOverview/${selectedItem?.owner?.ownerId}`
+        )
+      }>
+       {selectedItem?.owner?.fullName || "N/A"}
+      </p> 
 
     </div>
 
