@@ -16,6 +16,7 @@ import  SupportTicketOverview from "../DemoRequestsScreen/SupportTicketOverview"
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import MarkAsLostDrawer from "./MarkAsLostDrawer";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const DemoRequests = () => {
 
@@ -23,7 +24,7 @@ const DemoRequests = () => {
   const { adminDetails, agents, getAllAgents, assignStaff } = useRole();
   const dropdownRef = useRef(null);
   const statusDropdownRef = useRef(null);
-
+  const navigate = useNavigate();
 const agentDropdownRef = useRef(null);
   const { RangePicker } = DatePicker;
   const [data, setData] = useState([]);
@@ -544,28 +545,28 @@ setCommentText("")
       value2: demoData?.newToday || 0,
     },
     {
-      title1: "Demo Completed",
-      value1: demoData?.demoCompleted || 0,
-      title2: "Converted",
-      value2: demoData?.converted || 0,
+      title1: "New",
+      value1: demoData?.new  || 0,
+      title2: "Assigned",
+      value2:  demoData?.assigned || 0,
     },
     {
       title1: "Contacted",
       value1: demoData?.contacted || 0,
-      title2: "New",
-      value2: demoData?.new || 0,
+      title2: "Demo Scheduled",
+      value2: demoData?.demoScheduled || 0,
     },
     {
-      title1: "Dropped",
-      value1: demoData?.dropped || 0,
+      title1: "Demo Completed",
+      value1: demoData?.demoCompleted || 0,
       title2: "Trial Started",
       value2: demoData?.trialStarted || 0,
     },
     {
-      title1: "Demo Scheduled",
-      value1: demoData?.demoScheduled || 0,
-      title2: "Assigned",
-      value2: demoData?.assigned || 0,
+      title1: "Converted",
+      value1: demoData?.converted || 0,
+      title2: "Dropped",
+      value2: demoData?.dropped || 0,
     },
   ].map((item, index) => (
 
@@ -861,10 +862,44 @@ setCommentText("")
 
 </div>
  
-<div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col max-h-[calc(100vh-230px)]">
+<div
+  className="
+    bg-white
+    rounded-xl
+    shadow-sm
+    border
+    border-gray-200
+    flex
+    flex-col
+    max-h-[calc(100vh-230px)]
+
+    overflow-hidden
+  "
+>
 
   {/* TABLE SCROLL */}
-  <div className="overflow-x-auto overflow-y-auto max-h-[420px]">
+<div
+  className="
+    overflow-x-auto
+    overflow-y-auto
+    max-h-[420px]
+
+    [&::-webkit-scrollbar]:w-[10px]
+    [&::-webkit-scrollbar]:h-[10px]
+
+    [&::-webkit-scrollbar-track]:bg-[#EEF4FF]
+    [&::-webkit-scrollbar-track]:rounded-full
+
+    [&::-webkit-scrollbar-thumb]:bg-[#C9DAFF]
+    [&::-webkit-scrollbar-thumb]:rounded-full
+
+    [&::-webkit-scrollbar-thumb]:border-[2px]
+    [&::-webkit-scrollbar-thumb]:border-solid
+    [&::-webkit-scrollbar-thumb]:border-[#EEF4FF]
+
+    hover:[&::-webkit-scrollbar-thumb]:bg-[#B7CCFF]
+  "
+>
 
     <table className="min-w-max text-sm">
 
@@ -939,9 +974,9 @@ setCommentText("")
             STATUS
           </th>
 
-          <th className="px-4 py-3 text-left whitespace-nowrap">
+          {/* <th className="px-4 py-3 text-left whitespace-nowrap">
             CONVERSION RESULT
-          </th>
+          </th> */}
 
           <th className="px-4 py-3 text-left whitespace-nowrap">
             ACTIONS
@@ -1075,18 +1110,50 @@ setCommentText("")
  <td className="px-4 py-2 text-[12px] text-left ">
                           {item.source || "----"}
                         </td>
-                       <td
+   <td
   className="
     px-4
     py-2
     text-tableCell
     text-left
-    text-headingDark
     font-medium
   "
 >
 
+  {item?.isOwnerDeleted === true ? (
+
+    <span className="text-dangerRed">
+      Owner Deleted
+    </span>
+
+  ) : (
+
+   <span
+  className="
+    text-primaryBlue
+    cursor-pointer
+    hover:underline
+  "
+  onClick={() => {
+
+    // navigate(
+    //   `/ProprietorsOverview/${item?.owner?.ownerId}`
+    // );
+    navigate(
+  `/ProprietorsOverview/${item?.owner?.ownerId}`,
+  {
+    state: {
+      from: location.pathname
+    }
+  }
+);
+
+  }}
+>
   {item?.owner?.fullName || "-"}
+</span>
+
+  )}
 
 </td>
 
@@ -1171,9 +1238,9 @@ setCommentText("")
                         <td className="px-4 py-2 text-[12px] text-left">
                           {item.demoRequestStatus}
                         </td>
-                         <td className="px-4 py-2 text-[12px] text-left">
+                         {/* <td className="px-4 py-2 text-[12px] text-left">
                           {item.convertedToPlanName || "----"}
-                        </td>
+                        </td> */}
 
                        <td className="px-4 py-2 relative">
 
@@ -1416,27 +1483,61 @@ setCommentText("")
               </select>
 
 
-              <button
+              {/* <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => p - 1)}
                 className="cursor-pointer"
               >
                 <img src={ArrowRight} className="w-[15px] h-[15px]" />
-              </button>
-
+              </button> */}
+<button
+  disabled={page === 1 || data.length === 0}
+  onClick={() => setPage((p) => p - 1)}
+ className={`
+  ${
+    page === 1 || data.length === 0
+      ? "opacity-40 cursor-not-allowed"
+      : "cursor-pointer"
+  }
+`}
+>
+  <img
+    src={ArrowRight}
+    className="w-[15px] h-[15px]"
+  />
+</button>
 
               <span className="border px-3 py-1 rounded bg-gray-50">
                 {page}
               </span>
 
 
-              <button
+              {/* <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 className="cursor-pointer"
               >
                 <img src={ArrowRight} className="w-[15px] h-[15px] scale-x-[-1]" />
-              </button>
+              </button> */}
+              <button
+  disabled={
+    page >= totalPages ||
+    data.length === 0
+  }
+  onClick={() => setPage((p) => p + 1)}
+  className={`
+  ${
+    page >= totalPages || data.length === 0
+      ? "opacity-40 cursor-not-allowed"
+      : "cursor-pointer"
+  }
+`}
+>
+  <img
+    src={ArrowRight}
+    className="w-[15px] h-[15px] scale-x-[-1]"
+  />
+</button>
 
 
               <span className="text-gray-400">

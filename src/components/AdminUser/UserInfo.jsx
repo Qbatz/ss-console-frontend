@@ -208,9 +208,34 @@ const toggleOwner = (id) => {
             {/* INFO */}
             <div className="text-left">
 
-              <p className="text-[15px] font-semibold text-gray-900">
+              {/* <p className="text-[15px] font-semibold text-gray-900">
                 {relation?.owner?.fullName || "N/A"}
-              </p>
+              </p> */}
+              <p
+  onClick={(e) => {
+
+    e.stopPropagation();
+
+    navigate(
+      `/ProprietorsOverview/${relation?.owner?.ownerId}`,
+      {
+        state: {
+          from: location.pathname
+        }
+      }
+    );
+
+  }}
+  className="
+    text-[15px]
+    font-semibold
+    text-primaryBlue
+    cursor-pointer
+    hover:underline
+  "
+>
+  {relation?.owner?.fullName || "N/A"}
+</p>
 
               <p className="text-[12px] text-gray-500">
                 {relation?.hostels?.length || 0} Properties
@@ -275,17 +300,33 @@ const toggleOwner = (id) => {
       {/* NAME + PLAN */}
   <div className="flex items-center justify-between gap-2 w-full">
 
-  {/* HOSTEL NAME */}
-  <p
+  
+ <p
   title={item.hostelName}
+  onClick={(e) => {
+
+    e.stopPropagation();
+
+    navigate(
+      `/property-overview/${item.hostelId}`,
+      {
+        state: {
+          from: location.pathname
+        }
+      }
+    );
+
+  }}
   className="
     text-[14px]
     font-semibold
-    text-gray-800
+    text-primaryBlue
     w-[150px]
     truncate
     whitespace-nowrap
     overflow-hidden
+    cursor-pointer
+    hover:underline
   "
 >
   {item.hostelName}

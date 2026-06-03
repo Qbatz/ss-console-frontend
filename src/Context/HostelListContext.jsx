@@ -39,7 +39,7 @@ export const HostelProvider = ({ children }) => {
   //   }
   // };
   const getHostels = async (page = 1, size = 10, hostelName = "",  startDate = "",
-  endDate = ""
+  endDate = "",subActive = ""
 ) => {
   try {
     setLoading(true);
@@ -51,7 +51,11 @@ export const HostelProvider = ({ children }) => {
         size,
         hostelName,
         startDate,
-        endDate
+        endDate,
+         ...(subActive !== "" && {
+            subActive
+          })
+        
         
       }
     });
@@ -1119,6 +1123,47 @@ const generateOrderHistory = async (
 
   }
 };
+const sharePaymentLink = async (
+  hostelId,
+  paymentLink
+) => {
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.post(
+      `/v2/order-history/share/${hostelId}`,
+      {
+        paymentLink
+      }
+    );
+
+    if (res.status === 200 || res.status === 201) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
   return (
     <HostelContext.Provider
       value={{
@@ -1129,7 +1174,7 @@ const generateOrderHistory = async (
         bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,
         deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns,
         resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,
-        deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,generateOrderHistory
+        deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,generateOrderHistory,sharePaymentLink
       }}
     >
       {children}

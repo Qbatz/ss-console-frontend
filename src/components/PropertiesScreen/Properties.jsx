@@ -175,7 +175,23 @@ const [statusFilter, setStatusFilter] = useState(
     end = dateRange[1].format("DD-MM-YYYY");
   }
 
-  getHostels(page, pageSize, debouncedSearch, start, end);
+  let subActive = "";
+
+  if (statusFilter === "active") {
+    subActive = true;
+  }
+  else if (statusFilter === "inactive") {
+    subActive = false;
+  }
+
+  getHostels(
+    page,
+    pageSize,
+    debouncedSearch,
+    start,
+    end,
+    subActive
+  );
 
 }, [page, pageSize, debouncedSearch, dateRange]);
 
@@ -194,9 +210,31 @@ const [statusFilter, setStatusFilter] = useState(
     end = dateRange[1].format("DD-MM-YYYY");
   }
 
-  getHostels(page, pageSize, debouncedSearch, start, end);
+  let subActive = "";
 
-}, [page, pageSize, debouncedSearch, dateRange]);
+  if (statusFilter === "active") {
+    subActive = true;
+  } 
+  else if (statusFilter === "inactive") {
+    subActive = false;
+  }
+
+  getHostels(
+    page,
+    pageSize,
+    debouncedSearch,
+    start,
+    end,
+    subActive
+  );
+
+}, [
+  page,
+  pageSize,
+  debouncedSearch,
+  dateRange,
+  statusFilter
+]);
 
 
   console.log("hostels", hostels);
@@ -205,13 +243,7 @@ const [statusFilter, setStatusFilter] = useState(
 
   let displayData = hostels?.hostels || [];
 
-  if (statusFilter) {
-    displayData = displayData.filter(item =>
-      statusFilter === "active"
-        ? item.subscriptionIsActive
-        : !item.subscriptionIsActive
-    );
-  }
+ 
 
 
 
@@ -240,18 +272,64 @@ const [statusFilter, setStatusFilter] = useState(
   };
 
   // };
+  // const handleExport = () => {
+  //   let start = "";
+  //   let end = "";
+
+
+  //   if (dateRange && dateRange.length === 2) {
+  //     start = dateRange[0].format("DD-MM-YYYY");
+  //     end = dateRange[1].format("DD-MM-YYYY");
+  //   }
+
+  //   exportHostels(searchText, start, end);
+  // };
   const handleExport = () => {
-    let start = "";
-    let end = "";
 
+  let start = "";
+  let end = "";
 
-    if (dateRange && dateRange.length === 2) {
-      start = dateRange[0].format("DD-MM-YYYY");
-      end = dateRange[1].format("DD-MM-YYYY");
-    }
+  if (
+    dateRange &&
+    dateRange.length === 2
+  ) {
 
-    exportHostels(searchText, start, end);
-  };
+    start =
+      dateRange[0].format(
+        "DD-MM-YYYY"
+      );
+
+    end =
+      dateRange[1].format(
+        "DD-MM-YYYY"
+      );
+
+  }
+
+  let subActive = "";
+
+  if (
+    statusFilter === "active"
+  ) {
+
+    subActive = true;
+
+  } else if (
+    statusFilter === "inactive"
+  ) {
+
+    subActive = false;
+
+  }
+
+  exportHostels(
+    searchText,
+    start,
+    end,
+    subActive
+  );
+
+};
 
   const handleCreateSubscription = async (item) => {
     const firstPlan = dropdownPlans?.trialPlans?.[0];
@@ -427,17 +505,32 @@ const [statusFilter, setStatusFilter] = useState(
 
                   <div className="flex gap-3">
 
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => {
-                        setStatusFilter(e.target.value);
-                      }}
-                      className="border rounded-lg px-3 py-2 text-xs font-medium text-gray-700  border border-gray-300"
-                    >
-                      <option value="">All</option>
-                      {/* <option value="active">Active</option>
-              <option value="inactive">Inactive</option> */}
-                    </select>
+                   <select
+  value={statusFilter}
+  onChange={(e) => {
+    setStatusFilter(e.target.value);
+    setPage(1);
+  }}
+  className="
+    border rounded-lg px-3 py-2
+    text-xs font-medium text-gray-700
+    border-gray-300
+  "
+>
+
+  <option value="">
+    All
+  </option>
+
+  <option value="active">
+    Active
+  </option>
+
+  <option value="inactive">
+    Inactive
+  </option>
+
+</select>
 
                     {/* 
                   <select className="border rounded-lg px-3 py-2 text-xs font-medium leading-[150%] text-gray-700">
@@ -445,9 +538,7 @@ const [statusFilter, setStatusFilter] = useState(
                     <option>Last Month</option>
                   </select> */}
 
-                    <button className="border px-4 py-2 rounded-lg text-xs font-medium leading-[150%] text-gray-700 font-inter border border-gray-300">
-                      Filter
-                    </button>
+                    
 
                   </div>
                   {/* <div className="flex items-end gap-3">
@@ -585,7 +676,15 @@ const [statusFilter, setStatusFilter] = useState(
                         <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">
                           Name
                         </th>
-
+                        <th className="px-4 py-3 w-[120px] text-left">
+                          Status
+                        </th>
+                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">
+                          SubActiveDays
+                        </th>
+ <th className="px-4 py-3 w-[150px] whitespace-nowrap">
+                          Expiry On
+                        </th>
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">
                           Mobile.No
                         </th>
@@ -597,13 +696,9 @@ const [statusFilter, setStatusFilter] = useState(
                           Created On
                         </th>
 
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">
-                          SubActiveDays
-                        </th>
+                        
 
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">
-                          Expiry On
-                        </th>
+                       
 
                         <th className="px-1 py-3 w-[100px] whitespace-nowrap">
                           Last Action
@@ -615,9 +710,7 @@ const [statusFilter, setStatusFilter] = useState(
  <th className="px-4 py-3 w-[120px] text-left whitespace-nowrap">
                           Relational Agent
                         </th>
-                        <th className="px-4 py-3 w-[120px] text-center">
-                          Status
-                        </th>
+                        
 
                         <th className="px-4 py-3 w-[120px] text-center">
                           Actions
@@ -693,9 +786,9 @@ const [statusFilter, setStatusFilter] = useState(
 
                           <tr key={item.hostelId} className="group hover:bg-gray-50 text-[13px]">
 
-                            {/* Sticky ID */}
+                          
                             <td className="px-4 py-2 sticky left-0 bg-white z-30 w-[80px] group-hover:bg-gray-50">
-                              {/* {(page - 1) * pageSize + index + 1} */}
+                             
                               {(hostels?.currentPage - 1) * hostels?.sizePerPage + index + 1}
                             </td>
 
@@ -752,7 +845,28 @@ const [statusFilter, setStatusFilter] = useState(
                               </div>
 
                             </td>
-
+ <td className="px-4 py-2 text-center">
+                              <span
+                                className={`flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap w-fit mx-auto ${item.subscriptionIsActive
+                                  ? "bg-green-100 text-green-600"
+                                  : "bg-red-100 text-red-600"
+                                  }`}
+                              >
+                                <span
+                                  className={`w-2 h-2 rounded-full ${item.subscriptionIsActive
+                                    ? "bg-green-500"
+                                    : "bg-red-500"
+                                    }`}
+                                ></span>
+                                {item.subscriptionIsActive ? "Active" : "Inactive"}
+                              </span>
+                            </td>
+                             <td className="px-4 py-2">
+                              {item.noOfdaysSubscriptionActive || "----"}
+                            </td>
+                             <td className="px-4 py-2">
+                              {item.expiredOn || "----"}
+                            </td>
                             <td className="px-4 py-2 whitespace-nowrap">
                               {item.ownerInfo?.mobile}
                             </td>
@@ -763,13 +877,9 @@ const [statusFilter, setStatusFilter] = useState(
                               {item?.joinedOn}
                             </td>
 
-                            <td className="px-4 py-2">
-                              {item.noOfdaysSubscriptionActive || "----"}
-                            </td>
+                           
 
-                            <td className="px-4 py-2">
-                              {item.expiredOn || "----"}
-                            </td>
+                           
 
                             {/* <td className="px-1 py-2">
   <div className="flex flex-col">
@@ -791,25 +901,42 @@ const [statusFilter, setStatusFilter] = useState(
                             <td className="px-4 py-2 text-center">
                               {item.platform || "----"}
                             </td>
-                             <td className="px-4 py-2 text-center text-left whitespace-nowrap">
-  {item?.relationalAgents?.[0]?.agentName || "----"}
+                             <td
+  className="
+    px-4
+    py-2
+    text-center
+    text-left
+    whitespace-nowrap
+  "
+>
+
+  {item?.relationalAgents?.[0]?.agentId ? (
+
+    <span
+      onClick={() =>
+        navigate(
+          `/iam-user/${item.relationalAgents[0].agentId}`
+        )
+      }
+      className="
+        text-blue-600
+        cursor-pointer
+        hover:underline
+        font-medium
+      "
+    >
+      {item.relationalAgents[0].agentName}
+    </span>
+
+  ) : (
+
+    "----"
+
+  )}
+
 </td>
-                            <td className="px-4 py-2 text-center">
-                              <span
-                                className={`flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap w-fit mx-auto ${item.subscriptionIsActive
-                                  ? "bg-green-100 text-green-600"
-                                  : "bg-red-100 text-red-600"
-                                  }`}
-                              >
-                                <span
-                                  className={`w-2 h-2 rounded-full ${item.subscriptionIsActive
-                                    ? "bg-green-500"
-                                    : "bg-red-500"
-                                    }`}
-                                ></span>
-                                {item.subscriptionIsActive ? "Active" : "Inactive"}
-                              </span>
-                            </td>
+                           
 
                           <td className="px-4 py-2 text-center">
 

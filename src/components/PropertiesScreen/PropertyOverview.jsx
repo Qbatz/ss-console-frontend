@@ -29,8 +29,9 @@ import { useSubscription } from "../../Context/SubscriptionContext";
 import Circle from "../../assets/menucircle.png";
 import ArrowSelect from "../../assets/direction-down 01.png";
 import InvoiceView from "./InvoiceView";
+import CopyImg from "../../assets/copyImg.jpg"
 const PropertyOverview = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory } = useHostel();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory,sharePaymentLink} = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription } = useSubscription();
@@ -787,6 +788,36 @@ const PropertyOverview = () => {
     }
 
   };
+ const handleSharePayment = async () => {
+
+  if (!generatedPaymentUrl) {
+    return;
+  }
+
+  const res = await sharePaymentLink(
+    hostelId,
+    generatedPaymentUrl
+  );
+
+  if (res?.success) {
+
+    setModalType("success");
+    setMessage("Payment link shared successfully");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+  } else {
+
+    setModalType("error");
+    setMessage(res?.message || "Share failed");
+    setShowSuccess(true);
+
+  }
+
+};
 
   if (!hostelData) {
     return (
@@ -1071,6 +1102,7 @@ const PropertyOverview = () => {
   Generate Payment
 </button>
 
+
               </div>
             </div>
 
@@ -1332,7 +1364,7 @@ const PropertyOverview = () => {
 
       <div className="flex items-center gap-2 mt-1">
 
-        <p
+        {/* <p
           className="
             text-cardTitle
             font-medium
@@ -1342,7 +1374,32 @@ const PropertyOverview = () => {
           "
         >
           {hostelData?.relationalAgents?.[0]?.agentName || "N/A"}
-        </p>
+        </p> */}
+        <p
+  onClick={() => {
+
+    const agentId =
+      hostelData?.relationalAgents?.[0]?.agentId;
+
+    if (agentId) {
+
+      navigate(`/iam-user/${agentId}`);
+
+    }
+
+  }}
+  className="
+    text-cardTitle
+    font-medium
+    text-primaryBlue
+    truncate
+    max-w-[120px]
+    cursor-pointer
+    hover:underline
+  "
+>
+  {hostelData?.relationalAgents?.[0]?.agentName || "N/A"}
+</p>
 
         {hostelData?.relationalAgents?.length > 0 && (
 
@@ -1355,7 +1412,7 @@ const PropertyOverview = () => {
               bg-primarySoft
               text-primaryBlue
               rounded-pill
-              whitespace-nowrap
+              whitespace-nowrap cursor-pointer
             "
           >
             View
@@ -1942,82 +1999,98 @@ const PropertyOverview = () => {
 
                       <div className="relative menu-container">
 
-                        <img
-                          src={Circle}
-                          alt="menu"
-                          className="
-                            w-5
-                            h-5
-                            cursor-pointer
-                          "
-                          onClick={(e) => {
+                       <img
+  src={Circle}
+  alt="menu"
+  className="
+    w-5
+    h-5
+    cursor-pointer
+  "
+  onClick={(e) => {
 
-                            e.stopPropagation();
+    e.stopPropagation();
 
-                            setMenuPosition({
-                              top: e.clientY + 5,
-                              left: e.clientX,
-                            });
+    const rect =
+      e.currentTarget.getBoundingClientRect();
 
-                            setOpenMenu(
-                              openMenu === index
-                                ? null
-                                : index
-                            );
+    const menuHeight = 50; // menu approx height
+    const spaceBelow =
+      window.innerHeight - rect.bottom;
 
-                          }}
-                        />
+    const showAbove =
+      spaceBelow < menuHeight;
 
-                        {openMenu === index && (
+    setMenuPosition({
+      top: showAbove
+        ? rect.top - menuHeight
+        : rect.bottom + 5,
 
-                          <div
-                            className="
-                              fixed
-                              w-28
-                              bg-white
-                              border
-                              border-borderSoft
-                              rounded-card
-                              shadow-dropdown
-                              z-[9999]
-                            "
-                            style={{
-                              top: menuPosition.top,
-                              left: menuPosition.left - 120,
-                            }}
-                          >
+      left: rect.left,
+    });
 
-                            <button
-                              disabled={!canDelete}
-                              onClick={() => {
+    setOpenMenu(
+      openMenu === index
+        ? null
+        : index
+    );
 
-                                if (!canDelete) return;
+  }}
+/>
 
-                                setSelectedTenantId(item.customerId);
-                                setShowDeleteModal(true);
-                                setOpenMenu(null);
+{openMenu === index && (
 
-                              }}
-                              className={`
-                                w-full
-                                text-left
-                                px-4
-                                py-2
-                                text-cardTitle
+  <div
+    className="
+      fixed
+      w-28
+      bg-white
+      border
+      border-borderSoft
+      rounded-card
+      shadow-dropdown
+      z-[9999]
+    "
+    style={{
+      top: menuPosition.top,
+      left: menuPosition.left - 100,
+    }}
+  >
 
-                                ${
-                                  canDelete
-                                    ? "hover:bg-cardBg text-dangerRed cursor-pointer"
-                                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                }
-                              `}
-                            >
-                              Delete
-                            </button>
+    <button
+      disabled={!canDelete}
+      onClick={() => {
 
-                          </div>
+        if (!canDelete) return;
 
-                        )}
+        setSelectedTenantId(
+          item.customerId
+        );
+
+        setShowDeleteModal(true);
+        setOpenMenu(null);
+
+      }}
+      className={`
+        w-full
+        text-left
+        px-4
+        py-2
+        text-cardTitle
+
+        ${
+          canDelete
+            ? "hover:bg-cardBg text-dangerRed cursor-pointer"
+            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+        }
+      `}
+    >
+      Delete
+    </button>
+
+  </div>
+
+)}
 
                       </div>
 
@@ -3832,6 +3905,7 @@ const PropertyOverview = () => {
           if (value.length <= 10) {
             setPhone(value);
           }
+          setMenuError("")
 
         }}
         maxLength={10}
@@ -3937,7 +4011,7 @@ const PropertyOverview = () => {
       onClick={() => setShowAgentModal(false)}
     />
 
-    {/* MODAL */}
+    
     <div
       className="
         relative
@@ -3955,7 +4029,7 @@ const PropertyOverview = () => {
       "
     >
 
-      {/* HEADER */}
+     
       <div
         className="
           flex
@@ -3992,7 +4066,7 @@ const PropertyOverview = () => {
 
       </div>
 
-      {/* TABLE */}
+      
       <div
         className="
           overflow-x-auto
@@ -4003,7 +4077,7 @@ const PropertyOverview = () => {
 
         <table className="w-full">
 
-          {/* TABLE HEADER */}
+         
           <thead
             className="
               bg-cardBg
@@ -4052,7 +4126,7 @@ const PropertyOverview = () => {
 
           </thead>
 
-          {/* TABLE BODY */}
+          
           <tbody className="divide-y divide-borderSoft">
 
             {hostelData?.relationalAgents?.length > 0 ? (
@@ -4068,7 +4142,7 @@ const PropertyOverview = () => {
                 >
 
                   {/* AGENT NAME */}
-                  <td
+                  {/* <td
                     className="
                       px-4
                       py-3
@@ -4079,9 +4153,29 @@ const PropertyOverview = () => {
                     "
                   >
                     {item.agentName || "N/A"}
-                  </td>
+                  </td> */}
+                  <td
+  onClick={() => {
+    if (item.agentId) {
+      navigate(`/iam-user/${item.agentId}`);
+    }
+  }}
+  className="
+    px-4
+    py-3
+    text-cardTitle
+    font-small
+    text-primaryBlue
+    whitespace-nowrap
+    text-left
+    cursor-pointer
+    hover:underline
+  "
+>
+  {item.agentName || "N/A"}
+</td>
 
-                  {/* REASON */}
+                  
                   <td
                     className="
                       px-4
@@ -4470,7 +4564,7 @@ const PropertyOverview = () => {
 
         </div>
 
-        {/* AMOUNT */}
+        
         <div className="mb-5">
 
           <label
@@ -4532,7 +4626,7 @@ const PropertyOverview = () => {
 
         </div>
 
-        {/* DISCOUNT */}
+        
         <div className="mb-5">
 
           <label
@@ -4602,54 +4696,83 @@ const PropertyOverview = () => {
 
         )}
 
-        {/* PAYMENT URL */}
-        {generatedPaymentUrl && (
+      
+{generatedPaymentUrl && (
+  <div className="w-full mt-4">
 
-          <div className="mt-5">
+    <label
+      className="
+        block
+        text-cardTitle
+        text-textDark/70
+        mb-1
+        text-left
+        font-medium
+      "
+    >
+      Payment URL
+    </label>
 
-            <label
-              className="
-                block
-                text-cardTitle
-                font-medium
-                text-textDark
-                mb-2
-                text-left
-              "
-            >
-              Payment URL
-            </label>
+    <div className="relative">
 
-            <div
-              className="
-                border
-                border-borderSoft
-                rounded-card
-                p-3
-                bg-cardBg
-                break-all
-                text-left
-              "
-            >
+      <textarea
+        value={generatedPaymentUrl}
+        readOnly
+        rows={4}
+        className="
+          w-full
+          border
+          border-borderSoft
+          rounded-card
+          px-3
+          py-3
+          pr-12
+          text-primaryBlue
+          text-cardTitle
+          outline-none
+          resize-none
+        "
+      />
 
-              <a
-                href={generatedPaymentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="
-                  text-primaryBlue
-                  underline
-                  text-cardTitle
-                "
-              >
-                {generatedPaymentUrl}
-              </a>
+      
+      <button
+        onClick={() => {
+          navigator.clipboard.writeText(
+            generatedPaymentUrl
+          );
 
-            </div>
+          setModalType("success");
+          setMessage("Link copied");
+          setShowSuccess(true);
 
-          </div>
+          setTimeout(() => {
+            setShowSuccess(false);
+          }, 1200);
+        }}
+        className="
+          absolute
+          top-2
+          right-2
+          w-8
+          h-8
+          flex
+          items-center
+          justify-center
+          rounded-lg
+          bg-cardBg
+          hover:bg-gray-200
+          transition-all
+          duration-200
+          cursor-pointer
+        "
+      >
+        <img src={CopyImg} className="w-4 h-4"/>
+      </button>
 
-        )}
+    </div>
+
+  </div>
+)}
 
       </div>
 
@@ -4710,7 +4833,41 @@ const PropertyOverview = () => {
         >
           Generate
         </button>
+{generatedPaymentUrl && (
 
+  <button
+    onClick={handleSharePayment}
+    className="
+      w-10
+      h-10
+      flex
+      items-center
+      justify-center
+      rounded-full
+      bg-green-500
+      hover:bg-green-600
+      text-white
+      cursor-pointer
+      transition-all
+      duration-200
+      shadow-card
+    "
+    title="Share Payment Link"
+  >
+
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 32 32"
+      className="w-5 h-5 fill-current"
+    >
+
+      <path d="M16 .396C7.164.396 0 7.56 0 16.396c0 2.82.737 5.57 2.137 7.992L0 32l7.828-2.053a15.93 15.93 0 0 0 8.172 2.242c8.836 0 16-7.164 16-16S24.836.396 16 .396zm0 29.09a13.1 13.1 0 0 1-6.672-1.832l-.477-.281-4.645 1.219 1.238-4.527-.312-.492a13.045 13.045 0 0 1-2.012-7.016c0-7.223 5.879-13.102 13.102-13.102 3.5 0 6.793 1.363 9.266 3.836a13.02 13.02 0 0 1 3.836 9.266c0 7.223-5.879 13.102-13.102 13.102zm7.188-9.844c-.394-.199-2.332-1.152-2.695-1.285-.363-.133-.629-.199-.895.199-.266.394-1.027 1.285-1.258 1.551-.23.266-.465.297-.859.098-.394-.199-1.664-.613-3.172-1.953-1.172-1.043-1.965-2.332-2.195-2.727-.23-.394-.024-.609.172-.808.176-.176.394-.465.594-.695.199-.23.266-.394.398-.66.133-.266.066-.496-.031-.695-.098-.199-.895-2.156-1.227-2.953-.324-.777-.652-.672-.895-.684l-.762-.012c-.266 0-.695.098-1.059.496-.363.394-1.391 1.359-1.391 3.312 0 1.953 1.426 3.84 1.625 4.105.199.266 2.809 4.289 6.805 6.016.949.41 1.688.656 2.266.84.953.305 1.82.262 2.504.159.764-.114 2.332-.953 2.66-1.875.328-.922.328-1.711.23-1.875-.098-.164-.363-.262-.758-.461z" />
+
+    </svg>
+
+  </button>
+
+)}
       </div>
 
     </div>

@@ -199,8 +199,9 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
     const res = await createDemoRequest(payload);
 
     if (res.success) {
+      console.log("setModalType",message)
       setModalType("success");
-      setMessage(res?.data);
+      setMessage(res?.message);
       setShowSuccess(true);
       fetchData()
 

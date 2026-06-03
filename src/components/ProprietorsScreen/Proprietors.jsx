@@ -534,9 +534,44 @@ if (!/^[6-9]\d{9}$/.test(mobile)) {
 
 
           {/* Table Card */}
-          <div className="bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col">
+          <div
+  className="
+    bg-white
+    border
+    border-gray-300
+    rounded-xl
+    shadow-sm
+    flex
+    flex-col
 
-            <div className="max-h-[350px] overflow-y-auto">
+    overflow-hidden
+  "
+>
+
+            <div
+  className="
+    max-h-[350px]
+    overflow-y-auto
+    overflow-x-auto
+
+    pl-[1px]
+
+    [&::-webkit-scrollbar]:w-[10px]
+    [&::-webkit-scrollbar]:h-[10px]
+
+    [&::-webkit-scrollbar-track]:bg-[#EEF4FF]
+    [&::-webkit-scrollbar-track]:rounded-full
+
+    [&::-webkit-scrollbar-thumb]:bg-[#C9DAFF]
+    [&::-webkit-scrollbar-thumb]:rounded-full
+
+    [&::-webkit-scrollbar-thumb]:border-[2px]
+    [&::-webkit-scrollbar-thumb]:border-solid
+    [&::-webkit-scrollbar-thumb]:border-[#EEF4FF]
+
+    hover:[&::-webkit-scrollbar-thumb]:bg-[#B7CCFF]
+  "
+>
 
               <table className="min-w-full text-sm">
 
@@ -690,9 +725,45 @@ if (!/^[6-9]\d{9}$/.test(mobile)) {
                           {item.noOfProperties}
                         </td>
                         
-                         <td className="px-4 py-2 text-center text-[12px] text-left whitespace-nowrap">
+                         {/* <td className="px-4 py-2 text-center text-[12px] text-left whitespace-nowrap">
   {item?.relationalAgents?.[0]?.agentName || "----"}
+</td> */}
+<td
+  className="
+    px-4
+    py-2
+    text-[12px]
+    whitespace-nowrap
+    text-left
+  "
+>
+
+  {item?.relationalAgents?.[0]?.agentId ? (
+
+    <span
+      onClick={() =>
+        navigate(
+          `/iam-user/${item.relationalAgents[0].agentId}`
+        )
+      }
+      className="
+        text-blue-600
+        cursor-pointer
+        hover:underline
+        font-medium
+      "
+    >
+      {item.relationalAgents[0].agentName}
+    </span>
+
+  ) : (
+
+    "----"
+
+  )}
+
 </td>
+
                         <td className="px-4 py-1 text-[12px] text-left">
                           {item.lastActivityDate}
                         </td>
@@ -702,43 +773,40 @@ if (!/^[6-9]\d{9}$/.test(mobile)) {
         <button
   onClick={(e) => {
 
-    e.stopPropagation();
+  e.stopPropagation();
 
-    const rect = e.currentTarget.getBoundingClientRect();
+  const rect =
+    e.currentTarget.getBoundingClientRect();
 
-    const viewportHeight = window.innerHeight;
+  const viewportHeight =
+    window.innerHeight;
 
-    const menuHeight = 100;
+  // ACTUAL MENU HEIGHT
+  const menuHeight = 170;
 
-    const spaceBelow = viewportHeight - rect.bottom;
+  const spaceBelow =
+    viewportHeight - rect.bottom;
 
-    setMenuPosition({
+  const showAbove =
+    spaceBelow < menuHeight;
 
-      top:
-        spaceBelow < menuHeight
-          ? rect.top - menuHeight
-          : rect.bottom + 15,
+  setMenuPosition({
 
-      left: rect.right - 130,
+    top: showAbove
+      ? rect.top - menuHeight
+      : rect.bottom + 8,
 
-    });
+    left: rect.right - 160,
 
-    setOpenMenuId(
-      openMenuId === item.ownerId ? null : item.ownerId
-    );
+  });
 
-  }}
-  className={`
-    p-1.5 rounded-full
-    transition-all duration-150
-    active:scale-90
+  setOpenMenuId(
+    openMenuId === item.ownerId
+      ? null
+      : item.ownerId
+  );
 
-    ${
-      openMenuId === item.ownerId
-        ? "bg-[#EEF2FF]"
-        : "hover:bg-gray-100"
-    }
-  `}
+}}
 >
   <img
     src={Menucircle}

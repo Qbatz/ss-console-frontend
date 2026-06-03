@@ -16,10 +16,15 @@ const UpdateStatusModal = ({ open, onClose, demoRequestId, refreshList, currentS
   const [message, setMessage] = useState("");
   const [demoTypes, setDemoTypes] = useState([]);
   const [dropReasons, setDropReasons] = useState([]);
+  const [ownerLoading, setOwnerLoading] =
+  useState(false);
+  const [openOwnerDropdown, setOpenOwnerDropdown] =
+  useState(false);
   const [openDropReason, setOpenDropReason] =
   useState(false);
   const [plans, setPlans] = useState([]);
-const [openPlanDropdown, setOpenPlanDropdown] =
+const [openPlanDropdown, setOpenPlanDropdown] = useState(false);
+const [showOwnerDropdown, setShowOwnerDropdown] =
   useState(false);
   useEffect(() => {
 
@@ -150,6 +155,8 @@ useEffect(() => {
       form.ownerMobileNumber?.length >= 10
     ) {
 
+      setOwnerLoading(true);
+
       const res =
         await getOwnerByMobile(
           form.ownerMobileNumber
@@ -157,26 +164,32 @@ useEffect(() => {
 
       if (res?.success) {
 
-  const owner =
-    res.data?.[0] || null;
+        const owners =
+          res.data || [];
 
-  setOwnerData(owner);
+        setOwnerData(owners);
 
-  setForm((prev) => ({
-    ...prev,
+        if (owners.length > 0) {
 
-    ownerParentId:
-      owner?.parentId || "",
+         setForm((prev) => ({
+  ...prev,
+  ownerParentId: "",
+  ownerName: ""
+}));
 
-    ownerName:
-      owner?.fullName || ""
-  }));
+        }
 
-} else {
+      } else {
 
-        setOwnerData(null);
+        setOwnerData([]);
 
       }
+
+      setOwnerLoading(false);
+
+    } else {
+
+      setOwnerData([]);
 
     }
 
@@ -261,7 +274,38 @@ useEffect(() => {
     ) {
       err.agentId = "Agent is required";
     }
+if (
+  form.demoRequestStatus ===
+    "TRIAL_STARTED"
+) {
 
+  if (!form.ownerMobileNumber) {
+
+    err.ownerMobileNumber =
+      "Please enter mobile number";
+
+  }
+
+  else if (
+    form.ownerMobileNumber.length < 10
+  ) {
+
+    err.ownerMobileNumber =
+      "Please enter valid mobile number";
+
+  }
+
+  else if (
+    ownerData?.length > 0 &&
+    !form.ownerParentId
+  ) {
+
+    err.ownerParentId =
+      "Please select owner";
+
+  }
+
+}
     // COMPLETED -> presentedBy required
     if (
       form.demoRequestStatus === "DEMO_COMPLETED" &&
@@ -1025,32 +1069,55 @@ if (
     </label>
 
     <input
-      type="text"
-      value={form.ownerMobileNumber}
-      onChange={(e) => {
+  type="text"
+  value={form.ownerMobileNumber}
+onChange={(e) => {
 
-        setForm({
-          ...form,
-          ownerMobileNumber:
-            e.target.value
-        });
+  const value =
+    e.target.value
+      .replace(/\D/g, "")
+      .slice(0, 10);
 
-      }}
-      placeholder="Enter Mobile Number"
-      className="
-        w-full
-        h-[52px]
-        border
-        border-gray-300
-        rounded-2xl
-        px-4
-        text-sm
-        outline-none
-        focus:border-blue-500
-      "
-    />
+  setForm((prev) => ({
+    ...prev,
 
- {ownerData && (
+    ownerMobileNumber: value,
+
+    // CLEAR OLD SELECTED OWNER
+    ownerParentId: "",
+    ownerName: ""
+  }));
+
+  setErrors((prev) => ({
+    ...prev,
+    ownerParentId: "",
+    ownerMobileNumber: ""
+  }));
+
+}}
+  placeholder="Enter Mobile Number"
+  className="
+    w-full
+    h-[52px]
+    border
+    border-gray-300
+    rounded-2xl
+    px-4
+    text-sm
+    outline-none
+    focus:border-blue-500
+  "
+/>
+{errors.ownerMobileNumber && (
+
+  <ErrorMessage
+    message={errors.ownerMobileNumber}
+    type="error"
+  />
+
+)}
+
+ {/* {ownerData && (
 
   <div
     className="
@@ -1115,8 +1182,133 @@ if (
 
   </div>
 
-)}
+)} */}
+{/* OWNER DROPDOWN */}
+{/* OWNER LIST */}
+{ownerLoading ? (
 
+  <div
+    className="
+      mt-2
+      text-center
+      text-sm
+      text-gray-500
+    "
+  >
+    Loading...
+  </div>
+
+) : form.ownerMobileNumber?.length >= 10 ? (
+
+  ownerData?.length > 0 ? (
+
+    <div
+      className="
+        mt-3
+        border
+        border-borderSoft
+        rounded-2xl
+        overflow-hidden
+        bg-white
+        shadow-sm
+      "
+    >
+
+      {ownerData.map((owner, index) => (
+
+        <div
+          key={index}
+          onClick={() => {
+
+  setForm((prev) => ({
+    ...prev,
+
+    ownerName:
+      owner?.fullName || "",
+
+    ownerParentId:
+      owner?.parentId || ""
+  }));
+
+  setErrors((prev) => ({
+    ...prev,
+    ownerParentId: ""
+  }));
+
+}}
+          className={`
+            px-4
+            py-3
+            cursor-pointer
+            transition-all
+            border-b
+            border-borderSoft
+
+            ${
+              form.ownerParentId ===
+              owner?.parentId
+                ? "bg-primarySoft border-l-4 border-primaryBlue"
+                : "hover:bg-cardBg"
+            }
+          `}
+        >
+
+          <p
+            className="
+              text-sm
+              font-medium
+              text-headingDark
+            "
+          >
+            {owner?.fullName || "N/A"}
+          </p>
+
+          <p
+            className="
+              text-xs
+              text-textDark/60
+              mt-1
+            "
+          >
+            {owner?.emailId || "N/A"}
+          </p>
+
+        </div>
+
+      ))}
+
+    </div>
+
+  ) : (
+
+    <div
+      className="
+        mt-2
+        border
+        border-red-200
+        bg-red-50
+        rounded-2xl
+        px-4
+        py-3
+        text-sm
+        text-red-500
+        font-medium
+      "
+    >
+      No Data Found
+    </div>
+
+  )
+
+) : null}
+{errors.ownerParentId && (
+
+  <ErrorMessage
+    message={errors.ownerParentId}
+    type="error"
+  />
+
+)}
   </div>
 
 )}
