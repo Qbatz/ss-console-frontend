@@ -862,10 +862,44 @@ setCommentText("")
 
 </div>
  
-<div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col max-h-[calc(100vh-230px)]">
+<div
+  className="
+    bg-white
+    rounded-xl
+    shadow-sm
+    border
+    border-gray-200
+    flex
+    flex-col
+    max-h-[calc(100vh-230px)]
+
+    overflow-hidden
+  "
+>
 
   {/* TABLE SCROLL */}
-  <div className="overflow-x-auto overflow-y-auto max-h-[420px]">
+<div
+  className="
+    overflow-x-auto
+    overflow-y-auto
+    max-h-[420px]
+
+    [&::-webkit-scrollbar]:w-[10px]
+    [&::-webkit-scrollbar]:h-[10px]
+
+    [&::-webkit-scrollbar-track]:bg-[#EEF4FF]
+    [&::-webkit-scrollbar-track]:rounded-full
+
+    [&::-webkit-scrollbar-thumb]:bg-[#C9DAFF]
+    [&::-webkit-scrollbar-thumb]:rounded-full
+
+    [&::-webkit-scrollbar-thumb]:border-[2px]
+    [&::-webkit-scrollbar-thumb]:border-solid
+    [&::-webkit-scrollbar-thumb]:border-[#EEF4FF]
+
+    hover:[&::-webkit-scrollbar-thumb]:bg-[#B7CCFF]
+  "
+>
 
     <table className="min-w-max text-sm">
 
@@ -1449,27 +1483,61 @@ setCommentText("")
               </select>
 
 
-              <button
+              {/* <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => p - 1)}
                 className="cursor-pointer"
               >
                 <img src={ArrowRight} className="w-[15px] h-[15px]" />
-              </button>
-
+              </button> */}
+<button
+  disabled={page === 1 || data.length === 0}
+  onClick={() => setPage((p) => p - 1)}
+ className={`
+  ${
+    page === 1 || data.length === 0
+      ? "opacity-40 cursor-not-allowed"
+      : "cursor-pointer"
+  }
+`}
+>
+  <img
+    src={ArrowRight}
+    className="w-[15px] h-[15px]"
+  />
+</button>
 
               <span className="border px-3 py-1 rounded bg-gray-50">
                 {page}
               </span>
 
 
-              <button
+              {/* <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 className="cursor-pointer"
               >
                 <img src={ArrowRight} className="w-[15px] h-[15px] scale-x-[-1]" />
-              </button>
+              </button> */}
+              <button
+  disabled={
+    page >= totalPages ||
+    data.length === 0
+  }
+  onClick={() => setPage((p) => p + 1)}
+  className={`
+  ${
+    page >= totalPages || data.length === 0
+      ? "opacity-40 cursor-not-allowed"
+      : "cursor-pointer"
+  }
+`}
+>
+  <img
+    src={ArrowRight}
+    className="w-[15px] h-[15px] scale-x-[-1]"
+  />
+</button>
 
 
               <span className="text-gray-400">

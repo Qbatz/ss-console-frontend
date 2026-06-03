@@ -259,13 +259,27 @@ const Roles = () => {
               </select>
 
 
-              <button
-                disabled={page === 1}
-                onClick={() => setPage((prev) => prev - 1)}
-                className="text-gray-500 disabled:opacity-40 cursor-pointer"
-              >
-                &#8249;
-              </button>
+             <button
+  disabled={
+    page === 1 ||
+    data?.length === 0
+  }
+  onClick={() =>
+    setPage((prev) => prev - 1)
+  }
+  className={`
+    text-gray-500
+
+    ${
+      page === 1 ||
+      data?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  &#8249;
+</button>
 
 
               <span className="border px-3 py-1 rounded-md bg-gray-100">
@@ -273,13 +287,27 @@ const Roles = () => {
               </span>
 
 
-              <button
-                disabled={page >= totalPages}
-                onClick={() => setPage((prev) => prev + 1)}
-                className="text-gray-500 disabled:opacity-40 cursor-pointer"
-              >
-                &#8250;
-              </button>
+             <button
+  disabled={
+    page >= totalPages ||
+    data?.length === 0
+  }
+  onClick={() =>
+    setPage((prev) => prev + 1)
+  }
+  className={`
+    text-gray-500
+
+    ${
+      page >= totalPages ||
+      data?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  &#8250;
+</button>
 
             </div>
           </div>

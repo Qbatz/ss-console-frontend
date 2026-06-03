@@ -866,6 +866,8 @@ useEffect(() => {
                     onClick={() => {
                         setShowDeleteModal(false);
                         setAmountError("");
+                        setDeletePhone("")
+                        
                     }}
                 >
 
@@ -913,6 +915,7 @@ useEffect(() => {
                                 onClick={() => {
                                     setShowDeleteModal(false);
                                     setDeletePhone("");
+                                    setAmountError("")
                                 }}
                                 className="
             px-4 py-2 border border-gray-300

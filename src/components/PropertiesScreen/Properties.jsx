@@ -901,8 +901,40 @@ const [statusFilter, setStatusFilter] = useState(
                             <td className="px-4 py-2 text-center">
                               {item.platform || "----"}
                             </td>
-                             <td className="px-4 py-2 text-center text-left whitespace-nowrap">
-  {item?.relationalAgents?.[0]?.agentName || "----"}
+                             <td
+  className="
+    px-4
+    py-2
+    text-center
+    text-left
+    whitespace-nowrap
+  "
+>
+
+  {item?.relationalAgents?.[0]?.agentId ? (
+
+    <span
+      onClick={() =>
+        navigate(
+          `/iam-user/${item.relationalAgents[0].agentId}`
+        )
+      }
+      className="
+        text-blue-600
+        cursor-pointer
+        hover:underline
+        font-medium
+      "
+    >
+      {item.relationalAgents[0].agentName}
+    </span>
+
+  ) : (
+
+    "----"
+
+  )}
+
 </td>
                            
 

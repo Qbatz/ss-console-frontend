@@ -260,7 +260,7 @@ const TableCustomization = () => {
           setPage(1);
         }}
         type="text"
-        placeholder="Search hostel or user..."
+        placeholder="Search hostel"
         className="
           w-full
           pl-10
@@ -770,7 +770,7 @@ const TableCustomization = () => {
           <div className="text-sm text-gray-600">
             Total Record Count :{" "}
             <span className="text-blue-600 font-semibold">
-              {totalRecords}
+              {selectedColumns.length || 0}
             </span>
           </div>
 
@@ -787,9 +787,11 @@ const TableCustomization = () => {
                 }}
                 className="border rounded-md px-3 py-1 text-sm bg-white"
               >
-                <option value={5}>5</option>
+                
                 <option value={10}>10</option>
                 <option value={20}>20</option>
+                <option value={100}>100</option>
+
               </select>
             </div>
 
@@ -797,7 +799,7 @@ const TableCustomization = () => {
             <button
               onClick={() => setPage(prev => Math.max(prev - 1, 1))}
               disabled={page === 1}
-              className={`px-2 text-lg ${page === 1 ? "text-gray-300" : "text-gray-700 hover:text-black"
+              className={`px-2 text-lg ${page === 1 ? "text-gray-300 cursor-not-allowed" : "text-gray-700 hover:text-black cursor-pointer"
                 }`}
             >
               ‹
@@ -813,8 +815,8 @@ const TableCustomization = () => {
               onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
               disabled={page === totalPages}
               className={`px-2 text-lg ${page === totalPages
-                ? "text-gray-300"
-                : "text-gray-700 hover:text-black"
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-700 hover:text-black cursor-pointer"
                 }`}
             >
               ›

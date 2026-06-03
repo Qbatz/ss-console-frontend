@@ -345,9 +345,42 @@ const Subscription = () => {
                 </div> */}
 
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-300">
+              <div
+  className="
+    bg-white
+    rounded-xl
+    shadow-sm
+    border
+    border-gray-300
 
-                  <div className="max-h-[320px] overflow-y-auto">
+    overflow-hidden
+  "
+>
+
+                  <div
+  className="
+    max-h-[320px]
+    overflow-y-auto
+    overflow-x-auto
+
+    pl-[1px]
+
+    [&::-webkit-scrollbar]:w-[10px]
+    [&::-webkit-scrollbar]:h-[10px]
+
+    [&::-webkit-scrollbar-track]:bg-[#EEF4FF]
+    [&::-webkit-scrollbar-track]:rounded-full
+
+    [&::-webkit-scrollbar-thumb]:bg-[#C9DAFF]
+    [&::-webkit-scrollbar-thumb]:rounded-full
+
+    [&::-webkit-scrollbar-thumb]:border-[2px]
+    [&::-webkit-scrollbar-thumb]:border-solid
+    [&::-webkit-scrollbar-thumb]:border-[#EEF4FF]
+
+    hover:[&::-webkit-scrollbar-thumb]:bg-[#B7CCFF]
+  "
+>
 
                     <table className="w-full text-sm">
 
@@ -495,25 +528,68 @@ const Subscription = () => {
                       <option value={10}>10</option>
                       <option value={20}>20</option>
                       <option value={50}>50</option>
+                       <option value={100}>100</option>
                     </select>
 
-                    <button
+                    {/* <button
                       disabled={page === 1}
                       onClick={() => setPage((p) => p - 1)}
                     >
                       <img src={ArrowRight} alt="Arrow" className="w-[15px] h-[15px]" />
-                    </button>
+                    </button> */}
+                    <button
+  disabled={
+    page === 1 ||
+    subscriptions.length === 0
+  }
+  onClick={() => setPage((p) => p - 1)}
+  className={`
+    ${
+      page === 1 ||
+      subscriptions.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  <img
+    src={ArrowRight}
+    alt="Arrow"
+    className="w-[15px] h-[15px]"
+  />
+</button>
 
                     <span className="border px-3 py-1 rounded bg-gray-50">
                       {page}
                     </span>
 
-                    <button
+                    {/* <button
                       disabled={page >= totalPages}
                       onClick={() => setPage((p) => p + 1)}
                     >
                       <img src={ArrowRight} alt="Arrow" className="w-[15px] h-[15px] scale-x-[-1]" />
-                    </button>
+                    </button> */}
+                    <button
+  disabled={
+    page >= totalPages ||
+    subscriptions.length === 0
+  }
+  onClick={() => setPage((p) => p + 1)}
+  className={`
+    ${
+      page >= totalPages ||
+      subscriptions.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  <img
+    src={ArrowRight}
+    alt="Arrow"
+    className="w-[15px] h-[15px] scale-x-[-1]"
+  />
+</button>
 
                     <span className="text-gray-400">
                       {start} - {end}

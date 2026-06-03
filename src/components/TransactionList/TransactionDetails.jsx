@@ -331,7 +331,7 @@ useEffect(() => {
                           {item.paidBy}
                         </td>
 
-                       <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
+                       {/* <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
 
   <span
     onClick={() =>
@@ -350,11 +350,75 @@ useEffect(() => {
     {item.hostelName}
   </span>
 
-</td>
+</td> */}
+{item?.isHostelDeleted === true ? (
 
-                        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-                          {item.city}, {item.state}
-                        </td>
+  <td
+  colSpan={2}
+  className="
+    px-4
+    py-2
+    text-[12px]
+    whitespace-nowrap
+    text-center
+    align-middle
+  "
+>
+
+    <span
+    className="
+      text-red-500
+      font-medium
+      inline-block
+      mx-auto
+    "
+  >
+      Hostel Deleted
+    </span>
+
+  </td>
+
+) : (
+
+  <>
+  
+    <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
+
+      <span
+        onClick={() =>
+          navigate(
+            `/property-overview/${item.hostelId}`,
+            {
+              state: {
+                from: "transactions",
+
+                currentPage: page,
+                currentSearch: search,
+                currentDateRange: dateRange,
+              },
+            }
+          )
+        }
+        className="
+          text-blue-600
+          cursor-pointer
+          hover:underline
+        "
+      >
+        {item.hostelName}
+      </span>
+
+    </td>
+
+    <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
+
+      {item.city}, {item.state}
+
+    </td>
+
+  </>
+
+)}
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
                           {item.planType || item.planName || "-"}
@@ -610,15 +674,27 @@ useEffect(() => {
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
+                <option value={100}>100</option>
               </select>
 
               {/* Prev */}
-              <button className="cursor-pointer"
-                disabled={page === 1}
-                onClick={() => setPage((p) => p - 1)}
-              >
-                &#8249;
-              </button>
+             <button
+  disabled={
+    page === 1 ||
+    data.length === 0
+  }
+  onClick={() => setPage((p) => p - 1)}
+  className={`
+    ${
+      page === 1 ||
+      data.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  &#8249;
+</button>
 
               {/* Current Page */}
               <span className="border px-3 py-1 rounded bg-gray-50">
@@ -626,12 +702,23 @@ useEffect(() => {
               </span>
 
               {/* Next */}
-              <button
-                disabled={page >= resData?.totalPages}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                &#8250;
-              </button>
+             <button
+  disabled={
+    page >= resData?.totalPages ||
+    data.length === 0
+  }
+  onClick={() => setPage((p) => p + 1)}
+  className={`
+    ${
+      page >= resData?.totalPages ||
+      data.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  &#8250;
+</button>
 
               {/* Range */}
               <span className="text-gray-400">

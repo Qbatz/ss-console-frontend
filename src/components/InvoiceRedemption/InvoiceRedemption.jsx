@@ -158,10 +158,47 @@ setModalType("success");
           />
         </div>
 
-        {/* TABLE */}
-    <div className="bg-white rounded-xl border border-gray-300 shadow-sm overflow-visible">
+  
+<div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
-         <div className="max-h-[400px] overflow-y-auto table-wrapper">
+ {/* <div
+  className="
+    max-h-[400px]
+    overflow-y-auto
+    overflow-x-hidden
+
+    [&::-webkit-scrollbar]:w-[6px]
+
+    [&::-webkit-scrollbar-track]:bg-transparent
+
+    [&::-webkit-scrollbar-thumb]:bg-blue-100
+    [&::-webkit-scrollbar-thumb]:rounded-full
+
+    hover:[&::-webkit-scrollbar-thumb]:bg-blue-200
+  "
+> */}
+<div
+  className="
+    max-h-[400px]
+    overflow-y-auto
+    overflow-x-hidden
+
+    [&::-webkit-scrollbar]:w-[10px]
+
+    [&::-webkit-scrollbar-track]:bg-[#EEF4FF]
+    [&::-webkit-scrollbar-track]:rounded-full
+    [&::-webkit-scrollbar-track]:my-1
+
+    [&::-webkit-scrollbar-thumb]:bg-[#C9DAFF]
+    [&::-webkit-scrollbar-thumb]:rounded-full
+
+    [&::-webkit-scrollbar-thumb]:border-[2px]
+    [&::-webkit-scrollbar-thumb]:border-solid
+    [&::-webkit-scrollbar-thumb]:border-[#EEF4FF]
+
+    hover:[&::-webkit-scrollbar-thumb]:bg-[#B7CCFF]
+  "
+>
             <table className="w-full text-sm">
 
               <thead className="bg-[#F8F9FF] sticky top-0 z-10 text-gray-600">
@@ -173,7 +210,7 @@ setModalType("success");
                   <th className="px-3 py-2 text-left whitespace-nowrap">Amount</th>
                   {/* <th className="px-3 py-2 text-left whitespace-nowrap">Reference</th>
                     <th className="px-3 py-2 text-left whitespace-nowrap">Reason</th> */}
-                  <th className="px-3 py-2 text-left whitespace-nowrap">Redeemed At</th>
+                  {/* <th className="px-3 py-2 text-left whitespace-nowrap">Redeemed At</th> */}
                   <th className="px-3 py-2 text-left whitespace-nowrap">Created At</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Created By</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Action</th>
@@ -209,9 +246,9 @@ setModalType("success");
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.redemptionAmount}</td>
                       {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.referenceNumber}</td>
                         <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.reason}</td> */}
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                      {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                         {item.redeemedAtDate} {item.redeemedAtTime}
-                      </td>
+                      </td> */}
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                         {item.createdAtDate} {item.createdAtTime}
                       </td>
@@ -336,29 +373,62 @@ setModalType("success");
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
+               <option value={100}>100</option>
             </select>
 
-            <button
-              onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-              disabled={page === 1}
-              className="px-2 text-lg"
-            >
-              ‹
-            </button>
+           <button
+  onClick={() =>
+    setPage(prev =>
+      Math.max(prev - 1, 1)
+    )
+  }
+  disabled={
+    page === 1 ||
+    data?.length === 0
+  }
+  className={`
+    px-2
+    text-lg
+
+    ${
+      page === 1 ||
+      data?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  ‹
+</button>
 
             <div className="border px-3 py-1 rounded-md text-sm">
               {page}
             </div>
 
             <button
-              onClick={() =>
-                setPage(prev => Math.min(prev + 1, totalPages))
-              }
-              disabled={page === totalPages}
-              className="px-2 text-lg"
-            >
-              ›
-            </button>
+  onClick={() =>
+    setPage(prev =>
+      Math.min(prev + 1, totalPages)
+    )
+  }
+  disabled={
+    page === totalPages ||
+    data?.length === 0
+  }
+  className={`
+    px-2
+    text-lg
+
+    ${
+      page === totalPages ||
+      data?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  ›
+</button>
 
           </div>
         </div>
@@ -416,6 +486,7 @@ setModalType("success");
           onClick={() => {
             setShowEditModal(false);
             setSelectedItem(null);
+             setAmountError("");
           }}
           className="px-4 py-2 border rounded-lg cursor-pointer"
         >

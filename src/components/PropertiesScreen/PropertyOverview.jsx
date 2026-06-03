@@ -1999,82 +1999,98 @@ const PropertyOverview = () => {
 
                       <div className="relative menu-container">
 
-                        <img
-                          src={Circle}
-                          alt="menu"
-                          className="
-                            w-5
-                            h-5
-                            cursor-pointer
-                          "
-                          onClick={(e) => {
+                       <img
+  src={Circle}
+  alt="menu"
+  className="
+    w-5
+    h-5
+    cursor-pointer
+  "
+  onClick={(e) => {
 
-                            e.stopPropagation();
+    e.stopPropagation();
 
-                            setMenuPosition({
-                              top: e.clientY + 5,
-                              left: e.clientX,
-                            });
+    const rect =
+      e.currentTarget.getBoundingClientRect();
 
-                            setOpenMenu(
-                              openMenu === index
-                                ? null
-                                : index
-                            );
+    const menuHeight = 50; // menu approx height
+    const spaceBelow =
+      window.innerHeight - rect.bottom;
 
-                          }}
-                        />
+    const showAbove =
+      spaceBelow < menuHeight;
 
-                        {openMenu === index && (
+    setMenuPosition({
+      top: showAbove
+        ? rect.top - menuHeight
+        : rect.bottom + 5,
 
-                          <div
-                            className="
-                              fixed
-                              w-28
-                              bg-white
-                              border
-                              border-borderSoft
-                              rounded-card
-                              shadow-dropdown
-                              z-[9999]
-                            "
-                            style={{
-                              top: menuPosition.top,
-                              left: menuPosition.left - 120,
-                            }}
-                          >
+      left: rect.left,
+    });
 
-                            <button
-                              disabled={!canDelete}
-                              onClick={() => {
+    setOpenMenu(
+      openMenu === index
+        ? null
+        : index
+    );
 
-                                if (!canDelete) return;
+  }}
+/>
 
-                                setSelectedTenantId(item.customerId);
-                                setShowDeleteModal(true);
-                                setOpenMenu(null);
+{openMenu === index && (
 
-                              }}
-                              className={`
-                                w-full
-                                text-left
-                                px-4
-                                py-2
-                                text-cardTitle
+  <div
+    className="
+      fixed
+      w-28
+      bg-white
+      border
+      border-borderSoft
+      rounded-card
+      shadow-dropdown
+      z-[9999]
+    "
+    style={{
+      top: menuPosition.top,
+      left: menuPosition.left - 100,
+    }}
+  >
 
-                                ${
-                                  canDelete
-                                    ? "hover:bg-cardBg text-dangerRed cursor-pointer"
-                                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                }
-                              `}
-                            >
-                              Delete
-                            </button>
+    <button
+      disabled={!canDelete}
+      onClick={() => {
 
-                          </div>
+        if (!canDelete) return;
 
-                        )}
+        setSelectedTenantId(
+          item.customerId
+        );
+
+        setShowDeleteModal(true);
+        setOpenMenu(null);
+
+      }}
+      className={`
+        w-full
+        text-left
+        px-4
+        py-2
+        text-cardTitle
+
+        ${
+          canDelete
+            ? "hover:bg-cardBg text-dangerRed cursor-pointer"
+            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+        }
+      `}
+    >
+      Delete
+    </button>
+
+  </div>
+
+)}
 
                       </div>
 

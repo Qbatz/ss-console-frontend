@@ -237,7 +237,7 @@ const [showAllComments, setShowAllComments] =
     </div>
 
     {/* PRIORITY */}
-    <div className="flex items-center">
+    {/* <div className="flex items-center">
 
       <p className="w-[100px] text-[12px] text-[#9CA3AF]">
         Assigned Staff
@@ -253,7 +253,52 @@ const [showAllComments, setShowAllComments] =
 
       </div>
 
-    </div>
+    </div> */}
+    <div className="flex items-center">
+
+  <p className="w-[100px] text-[12px] text-[#9CA3AF]">
+    Assigned Staff
+  </p>
+
+  <span className="mr-5 text-[#9CA3AF]">:</span>
+
+  <div
+    onClick={() => {
+
+      if (selectedItem?.assignedToId) {
+
+        navigate(
+          `/iam-user/${selectedItem?.assignedToId}`
+        );
+
+      }
+
+    }}
+    className="
+      bg-[#EEF4FF]
+      text-[#2563EB]
+      text-[13px]
+      px-3
+      py-1
+      rounded-full
+      flex
+      items-center
+      gap-1
+      w-fit
+
+      cursor-pointer
+      hover:bg-[#DCE7FF]
+      transition-all
+    "
+  >
+
+    <div className="w-2 h-2 rounded-full bg-[#2563EB]"></div>
+
+    {selectedItem?.assignedTo || "N/A"}
+
+  </div>
+
+</div>
 
     {/* TYPE */}
    

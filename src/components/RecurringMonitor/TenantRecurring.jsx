@@ -1286,7 +1286,7 @@ const TenantRecurring = () => {
 
               <span>
                 Total Record Count :
-                <span className="text-blue-600 ml-1">{size}</span>
+                <span className="text-blue-600 ml-1">  {(isTableView ? hostelBasedTrue : data).length}</span>
               </span>
 
               <div className="flex items-center gap-4">
@@ -1303,16 +1303,34 @@ const TenantRecurring = () => {
                   <option value={10}>10</option>
                   <option value={20}>20</option>
                   <option value={50}>50</option>
+                  <option value={100}>100</option>
                 </select>
 
                 {/* Prev */}
-                <button
-                  onClick={() => setPage(p => Math.max(p - 1, 1))}
-                  disabled={page === 1}
-                  className="px-2"
-                >
-                  <img src={Arrow} className="w-4 h-4 cursor-pointer" />
-                </button>
+              <button
+  onClick={() =>
+    setPage(p => Math.max(p - 1, 1))
+  }
+  disabled={
+    page === 1 ||
+    data?.length === 0
+  }
+  className={`
+    px-2
+
+    ${
+      page === 1 ||
+      data?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  <img
+    src={Arrow}
+    className="w-4 h-4"
+  />
+</button>
 
                 {/* Current Page */}
                 <span className="border px-2 py-1 rounded bg-gray-50">
@@ -1320,13 +1338,32 @@ const TenantRecurring = () => {
                 </span>
 
                 {/* Next */}
-                <button
-                  onClick={() => setPage(p => Math.min(p + 1, totalPages))}
-                  disabled={page >= totalPages}
-                  className="px-2"
-                >
-                  <img src={Arrow} className="w-4 h-4 rotate-180 cursor-pointer" />
-                </button>
+             <button
+  onClick={() =>
+    setPage(p =>
+      Math.min(p + 1, totalPages)
+    )
+  }
+  disabled={
+    page >= totalPages ||
+    data?.length === 0
+  }
+  className={`
+    px-2
+
+    ${
+      page >= totalPages ||
+      data?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  <img
+    src={Arrow}
+    className="w-4 h-4 rotate-180"
+  />
+</button>
 
                 {/* Range */}
                 <span className="text-gray-400">

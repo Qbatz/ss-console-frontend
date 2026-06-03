@@ -511,7 +511,7 @@ const ManagePlans = () => {
                                       : "text-red-500 hover:bg-gray-100 cursor-pointer"
                                     }`}
                                 >
-                                  Delete
+                                  InActive
                                 </button>
                               )}
                               {activeTab === "inactive" && (
