@@ -306,25 +306,53 @@ useEffect(() => {
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
+              <option value={100}>100</option>
             </select>
-
-            <button className="cursor-pointer"
-              disabled={page === 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              <img src={Arrow} className="w-4 h-4"/>
-            </button>
+<button
+  disabled={
+    page === 1 ||
+    tableData?.length === 0
+  }
+  onClick={() => setPage((p) => p - 1)}
+  className={`
+    ${
+      page === 1 ||
+      tableData?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  <img
+    src={Arrow}
+    className="w-4 h-4"
+  />
+</button>
 
             <span className="border px-3 py-1 rounded bg-gray-50">
               {page}
             </span>
 
-            <button
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              <img src={Arrow} className="w-4 h-4 rotate-[-180deg]"/>
-            </button>
+           <button
+  disabled={
+    page >= totalPages ||
+    tableData?.length === 0
+  }
+  onClick={() => setPage((p) => p + 1)}
+  className={`
+    ${
+      page >= totalPages ||
+      tableData?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  <img
+    src={Arrow}
+    className="w-4 h-4 rotate-[-180deg]"
+  />
+</button>
 
             <span className="text-gray-400">
               {start} - {end}

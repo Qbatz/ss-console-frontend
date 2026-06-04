@@ -169,6 +169,7 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import { usePermission } from "../../Utils/permissionHelper";
 import LoginImg from "../../assets/LoginImg.png";
+import Arrow from "../../assets/arrow-right.png"
 
 const InvoicesRedemption = ({ hostelData, refreshHostel }) => {
   const { canRead, canWrite, canUpdate, canDelete } =
@@ -544,25 +545,54 @@ const [deleteId, setDeleteId] = useState(null);
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
+                <option value={100}>100</option>
               </select>
 
               <button
-                disabled={page === 0}
-                onClick={() => setPage((p) => p - 1)}
-              >
-                ◀
-              </button>
+  disabled={
+    page === 0 ||
+    tableData?.length === 0
+  }
+  onClick={() => setPage((p) => p - 1)}
+  className={`
+    ${
+      page === 0 ||
+      tableData?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+   <img
+      src={Arrow}
+      className="w-4 h-4"
+    />
+</button>
 
               <span className="border px-3 py-1 rounded bg-gray-50">
                 {page + 1}
               </span>
 
-              <button
-                disabled={page + 1 >= totalPages}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                ▶
-              </button>
+             <button
+  disabled={
+    page + 1 >= totalPages ||
+    tableData?.length === 0
+  }
+  onClick={() => setPage((p) => p + 1)}
+  className={`
+    ${
+      page + 1 >= totalPages ||
+      tableData?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+   <img
+      src={Arrow}
+      className="w-4 h-4 rotate-[-180deg]"
+    />
+</button>
 
             </div>
 

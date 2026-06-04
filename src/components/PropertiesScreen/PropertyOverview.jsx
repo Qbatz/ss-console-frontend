@@ -121,6 +121,7 @@ const PropertyOverview = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showPaidByDropdown, setShowPaidByDropdown] = useState(false);
+   const [showPaidByDropdownGenerate, setShowPaidByDropdownGenerate] = useState(false);
   const [showPlanDropdown, setShowPlanDropdown] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [showAgentModal, setShowAgentModal] = useState(false);
@@ -746,6 +747,10 @@ const PropertyOverview = () => {
     //   setPaymentAmountError("Please enter amount");
     //   hasError = true;
     // }
+      if (!paidBy) {
+      setPaidByError("Please select Paid By");
+      hasError = true;
+    }
     if (!paymentDiscount) {
       setPaymentDiscountError("Please enter discount");
       hasError = true;
@@ -756,7 +761,8 @@ const PropertyOverview = () => {
     const payload = {
       planCode: paymentPlan,
       // paidAmount: Number(paymentAmount),
-      discountAmount: Number(paymentDiscount || 0)
+      discountAmount: Number(paymentDiscount || 0),
+      paidBy
     };
 
     const res = await generateOrderHistory(
@@ -784,6 +790,9 @@ const PropertyOverview = () => {
       setModalType("error");
       setMessage(res?.message || "Something went wrong");
       setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500)
 
     }
 
@@ -4291,6 +4300,8 @@ const PropertyOverview = () => {
         setPaymentDiscountError("");
 
         setGeneratedPaymentUrl("");
+        setShowPaidByDropdownGenerate(false)
+        setPaidBy()
 
       }}
     />
@@ -4564,7 +4575,178 @@ const PropertyOverview = () => {
 
         </div>
 
-        
+        {/* PAID BY */}
+<div className="mb-5">
+
+  <label
+    className="
+      block
+      text-cardTitle
+      font-medium
+      text-textDark
+      mb-2
+      text-left
+    "
+  >
+    Paid By
+
+    <span className="text-dangerRed">
+      *
+    </span>
+
+  </label>
+
+  <div className="relative">
+
+    {/* SELECT BOX */}
+    <div
+      onClick={() =>
+        setShowPaidByDropdownGenerate(
+          !showPaidByDropdownGenerate
+        )
+      }
+      className="
+        w-full
+        h-[43px]
+        border
+        border-borderSoft
+        rounded-card
+        px-4
+        cursor-pointer
+        bg-white
+        flex
+        items-center
+        justify-between
+      "
+    >
+
+      <span
+        className={`
+          text-cardTitle
+          ${
+            paidBy
+              ? "text-textDark"
+              : "text-textDark/40"
+          }
+        `}
+      >
+
+        {
+          paidByUsers?.find(
+            item => item.id === paidBy
+          )?.name || "Select Paid By"
+        }
+
+      </span>
+
+      <img
+        src={ArrowSelect}
+        className={`
+          w-4
+          h-4
+          transition-transform
+          ${
+            showPaidByDropdownGenerate
+              ? "rotate-180"
+              : ""
+          }
+        `}
+      />
+
+    </div>
+
+    {/* DROPDOWN */}
+    {showPaidByDropdownGenerate && (
+
+      <div
+        className="
+          absolute
+          top-full
+          left-0
+          mt-2
+          w-full
+          bg-white
+          border
+          border-borderSoft
+          rounded-card
+          shadow-dropdown
+          max-h-48
+          overflow-y-auto
+          z-50
+        "
+      >
+
+        {paidByUsers?.map((item) => (
+
+          <div
+            key={item.id}
+            onClick={() => {
+
+              setPaidBy(item.id);
+
+              setPaidByError("");
+
+              setShowPaidByDropdownGenerate(false);
+
+            }}
+            className={`
+              px-4
+              py-3
+              cursor-pointer
+              text-cardTitle
+              flex
+              items-center
+              justify-between
+
+              ${
+                paidBy === item.id
+                  ? "bg-primarySoft text-primaryBlue"
+                  : "hover:bg-cardBg"
+              }
+            `}
+          >
+
+            <div className="flex flex-col">
+
+              <span>
+                {item.name}
+              </span>
+
+              <span
+                className="
+                  text-[11px]
+                  text-textDark/50
+                "
+              >
+                {item.role}
+              </span>
+
+            </div>
+
+            {paidBy === item.id && (
+              <span>✔</span>
+            )}
+
+          </div>
+
+        ))}
+
+      </div>
+
+    )}
+
+  </div>
+
+  {paidByError && (
+
+    <ErrorMessage
+      message={paidByError}
+      type="error"
+    />
+
+  )}
+
+</div>
         <div className="mb-5">
 
           <label
