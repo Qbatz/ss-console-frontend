@@ -2,8 +2,6 @@
 
 @import "tailwindcss";
 
-
-
 @font-face {
   font-family: 'Gilroy';
   src: url('/fonts/Gilroy-Regular.woff2') format('woff2');
@@ -16,11 +14,7 @@
   font-weight: 600;
 }
 
-
-
 @theme {
-
- 
 
   --color-primarySoft: #1E45E10D;
 
@@ -39,8 +33,6 @@
   --color-white: #FFFFFF;
   --color-black: #000000;
 
-  
-
   --spacing-pageX: 8px;
 
   --spacing-rowGap: 12px;
@@ -55,8 +47,6 @@
   --spacing-iconMd: 32px;
   --spacing-iconLg: 40px;
 
- 
-
   --text-pageTitle: 20px;
 
   --text-sectionTitle: 24px;
@@ -70,17 +60,11 @@
 
   --text-profileInitial: 18px;
 
-
-
   --leading-pageTitle: 48px;
-
-  
 
   --radius-card: 12px;
   --radius-modal: 20px;
   --radius-pill: 999px;
-
-  
 
   --shadow-card:
     0 1px 3px rgba(0,0,0,0.08);
@@ -91,13 +75,9 @@
   --shadow-dropdown:
     0 4px 12px rgba(0,0,0,0.08);
 
- 
-
   --font-gilroy: "Gilroy", sans-serif;
   --font-inter: "Inter", sans-serif;
 }
-
-
 
 html,
 body,
@@ -114,7 +94,9 @@ body {
   color: #1D1D1D;
 }
 
-
+/* =========================
+   SCROLLBAR
+========================= */
 
 ::-webkit-scrollbar {
   width: 6px;
@@ -130,7 +112,9 @@ body {
   background: transparent;
 }
 
-
+/* =========================
+   INPUT
+========================= */
 
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
@@ -142,7 +126,9 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-
+/* =========================
+   ANIMATIONS
+========================= */
 
 @keyframes slideLeft {
 
@@ -176,8 +162,133 @@ input[type=number] {
   animation: fadeIn 0.25s ease-out;
 }
 
-
+/* =========================
+   ANT DESIGN
+========================= */
 
 .ant-picker-dropdown {
   margin-top: 18px !important;
+}
+
+/* =========================
+   REUSABLE CLASSES
+========================= */
+
+/* CARD */
+
+.card-common {
+  @apply bg-white border border-borderSoft rounded-card shadow-card;
+}
+
+/* MODAL */
+
+.modal-overlay {
+  @apply fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4;
+}
+
+.modal-box {
+  @apply bg-white rounded-modal shadow-modal;
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* BUTTONS */
+
+.btn-primary {
+  @apply bg-primaryBlue text-white cursor-pointer transition-all duration-200 hover:opacity-90;
+}
+
+.btn-secondary {
+  @apply border border-borderSoft text-textDark cursor-pointer transition-all duration-200 hover:bg-cardBg;
+}
+
+.btn-danger {
+  @apply bg-dangerRed text-white cursor-pointer transition-all duration-200 hover:opacity-90;
+}
+
+.btn-disabled {
+  @apply bg-gray-300 text-gray-500 cursor-not-allowed;
+}
+.flex-center-col {
+  @apply flex flex-col items-center justify-center;
+}
+.error-title {
+  @apply text-dangerRed text-lg font-medium;
+}
+
+.scroll-container {
+  @apply flex-1 overflow-x-auto overflow-y-auto;
+}
+
+.input-common {
+  @apply w-full border border-borderSoft rounded-card px-3 py-2 outline-none focus:border-primaryBlue;
+}
+
+/* TABLE */
+
+.table-header {
+  @apply bg-[#F8F9FF] text-tableHeader uppercase text-textDark/60 font-semibold;
+}
+.table-sticky-head {
+  @apply sticky left-0 bg-[#F8F9FF] z-50;
+}
+
+.table-sticky-cell {
+  @apply sticky bg-white z-30;
+}
+
+.table-cell {
+  @apply text-tableCell text-textDark;
+}
+/* TOOLTIP */
+
+.tooltip-common {
+  @apply fixed bg-white shadow-lg border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 z-[9999] max-w-[400px] break-words;
+}
+.text-muted {
+  @apply text-gray-600;
+}
+.text-primary {
+  @apply text-blue-600 font-medium;
+}
+/* FLEX */
+
+.flex-center {
+  @apply flex items-center justify-center;
+}
+
+.flex-between {
+  @apply flex items-center justify-between;
+}
+
+/* ICON BUTTON */
+
+.icon-btn {
+  @apply w-8 h-8 flex items-center justify-center rounded-full cursor-pointer transition-all duration-200 hover:bg-cardBg;
+}
+
+/* DROPDOWN */
+
+.dropdown-common {
+  @apply bg-white border border-borderSoft rounded-card shadow-dropdown;
+}
+
+/* DELETE BUTTON */
+
+.delete-btn-disabled {
+  background: #fca5a5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.delete-btn-active {
+  background: #dc2626;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.delete-btn-active:hover {
+  background: #b91c1c;
+}
+.flex-col-layout {
+  @apply flex flex-col h-full min-h-0;
 }

@@ -25,6 +25,7 @@ const Properties = () => {
   const { getPlansDropdown } = usePlan();
   const [dropdownPlans, setDropdownPlans] = useState([]);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const [isDeleting, setIsDeleting] = useState(false);
   const location = useLocation();
   const { roleId } = useParams();
 
@@ -407,23 +408,34 @@ const [statusFilter, setStatusFilter] = useState(
 
   };
   const handleDeleteHostel = async () => {
-    const res = await deleteHostel(deleteHostelId);
 
-    if (res?.success) {
-      setModalType("success");
-      setMessage(res.message);
-      setShowSuccess(true);
+  if (isDeleting) return;
 
-      getHostels(page, pageSize, searchText);
+  setIsDeleting(true);
 
-      setTimeout(() => {
-        setShowSuccess(false);
-        setShowDeleteModal(false);
-      }, 1500);
-    } else {
-      setMenuError(res.message);
-    }
-  };
+  const res = await deleteHostel(deleteHostelId);
+
+  if (res?.success) {
+
+    setModalType("success");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    getHostels(page, pageSize, searchText);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+      setShowDeleteModal(false);
+      setIsDeleting(false);
+    }, 1500);
+
+  } else {
+
+    setMenuError(res.message);
+    setIsDeleting(false);
+
+  }
+};
 
   return (
     <>
@@ -432,7 +444,7 @@ const [statusFilter, setStatusFilter] = useState(
 
         {(canRead === false || accessError === "Access Restricted") ? (
 
-          <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+          <div className="flex-center-col h-[400px] gap-4">
 
             <img
               src={LoginImg}
@@ -440,7 +452,7 @@ const [statusFilter, setStatusFilter] = useState(
               className="w-64 object-contain"
             />
 
-            <p className="text-red-600 text-lg font-medium">
+           <p className="error-title">
               {accessError}
             </p>
 
@@ -464,172 +476,163 @@ const [statusFilter, setStatusFilter] = useState(
             {/* {!isFirstLoad && ( */}
 
 
-            <div className="flex flex-col h-full min-h-0">
+           <div className="flex-col-layout">
 
 
 
 
 
               {/* Header */}
-              <div className="flex justify-between items-center mb-6">
-                <h1 className="text-xl font-semibold font-sans">Properties</h1>
+              <div className="flex-between mb-6">
 
-                <button className="flex items-center gap-2 text-blue-600 px-4 py-2 rounded-lg text-sm hover:bg-blue-700 font-Inter">
-                  <img src={AddBtn} alt="add" className="w-4 h-4 object-contain" />
-                  Add Property
-                </button>
-              </div>
+  <h1 className="text-xl font-semibold font-inter">
+    Properties
+  </h1>
+
+  <button
+    className="
+      flex items-center gap-2
+      text-primaryBlue
+      px-4 py-2
+      rounded-lg
+      text-sm
+      font-inter
+      transition-all duration-200
+      hover:bg-primaryBlue
+      hover:text-white
+      cursor-pointer
+    "
+  >
+    <img
+      src={AddBtn}
+      alt="add"
+      className="w-4 h-4 object-contain"
+    />
+
+    Add Property
+  </button>
+
+</div>
 
               {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mb-6">
-                <div className="bg-white p-5 rounded-xl shadow-sm border-gray-300">
-                  <p className="text-gray-500 text-xs font-Gilroy">Total Properties</p>
-                  <h2 className="text-2xl font-bold text-base mt-1 font-Gilroy">{hostels?.totalHostels}</h2>
-                </div>
+             <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mb-6">
 
-                <div className="bg-white p-5 rounded-xl shadow-sm border-gray-300">
-                  <p className="text-gray-500 text-sm">Active Properties</p>
-                  <h2 className="text-2xl text-base font-bold mt-1">{hostels?.activeHostels}</h2>
-                </div>
+  <div className="card-common p-5">
 
-                <div className="bg-white p-5 rounded-xl shadow-sm border-gray-300">
-                  <p className="text-gray-500 text-sm">InActive Properties</p>
-                  <h2 className="text-2xl text-base font-bold mt-1">{hostels?.inactiveHostels}</h2>
-                </div>
+    <p className="text-gray-500 text-xs font-gilroy">
+      Total Properties
+    </p>
+
+    <h2 className="text-2xl font-bold text-base mt-1 font-gilroy">
+      {hostels?.totalHostels}
+    </h2>
+
+  </div>
+
+
+
+               <div className="card-common p-5">
+
+  <p className="text-gray-500 text-sm">
+    Active Properties
+  </p>
+
+  <h2 className="text-2xl text-base font-bold mt-1">
+    {hostels?.activeHostels}
+  </h2>
+
+</div>
+
+              <div className="card-common p-5">
+
+  <p className="text-gray-500 text-sm">
+    InActive Properties
+  </p>
+
+  <h2 className="text-2xl text-base font-bold mt-1">
+    {hostels?.inactiveHostels}
+  </h2>
+
+</div>
               </div>
 
 
-              <div className="sticky top-0 z-20 bg-white pb-4">
-                <div className="flex flex-wrap justify-between items-center gap-2 font-inter">
+           <div className="sticky top-0 z-20 bg-white pb-4">
 
+  <div className="flex-between flex-wrap gap-2 font-inter">
 
-                  <div className="flex gap-3">
+    <div className="flex gap-3">
 
-                   <select
-  value={statusFilter}
-  onChange={(e) => {
-    setStatusFilter(e.target.value);
-    setPage(1);
-  }}
-  className="
-    border rounded-lg px-3 py-2
-    text-xs font-medium text-gray-700
-    border-gray-300
-  "
->
+      <select
+        value={statusFilter}
+        onChange={(e) => {
+          setStatusFilter(e.target.value);
+          setPage(1);
+        }}
+        className="
+          border border-gray-300
+          rounded-lg
+          px-3 py-2
+          text-xs
+          font-medium
+          text-gray-700
+          outline-none
+        "
+      >
 
-  <option value="">
-    All
-  </option>
+        <option value="">
+          All
+        </option>
 
-  <option value="active">
-    Active
-  </option>
+        <option value="active">
+          Active
+        </option>
 
-  <option value="inactive">
-    Inactive
-  </option>
+        <option value="inactive">
+          Inactive
+        </option>
 
-</select>
+      </select>
 
-                    {/* 
-                  <select className="border rounded-lg px-3 py-2 text-xs font-medium leading-[150%] text-gray-700">
-                    <option className="text-[#1E45E1] font-medium font-inter ">This Month</option>
-                    <option>Last Month</option>
-                  </select> */}
+    </div>
 
-                    
+    <div className="flex items-end gap-3">
 
-                  </div>
-                  {/* <div className="flex items-end gap-3">
+      <div className="flex flex-col">
 
-                    
-                    <div className="flex flex-col">
-                      <label className="text-xs text-gray-500 mb-1">Start Date</label>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                      />
-                    </div>
+        <label className="text-xs text-gray-500 mb-1 text-left">
+          Select Date Range
+        </label>
 
-                 
-                    <div className="flex flex-col">
-                      <label className="text-xs text-gray-500 mb-1">End Date</label>
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                      />
-                    </div>
+        <RangePicker
+          value={dateRange}
+          onChange={(dates) => setDateRange(dates)}
+          format="DD-MM-YYYY"
+          className="h-[38px] rounded-lg"
+        />
 
+      </div>
 
-                    <button
-                      onClick={() =>
-                        exportHostels(
-                          searchText,
-                          formatDateToDDMMYYYY(startDate),
-                          formatDateToDDMMYYYY(endDate)
-                        )
-                      } className="px-4 py-2 rounded-lg text-sm text-white flex items-center gap-2 bg-green-600 hover:bg-green-700"
+      <button
+        onClick={handleExport}
+        className="
+          btn-primary
+          h-[38px]
+          px-5
+          rounded-lg
+          text-sm
+          flex
+          items-center
+          gap-2
+          shadow-sm
+        "
+      >
+        ⬇ Export
+      </button>
 
-                    >
-                      ⬇ Export
-                    </button>
+    </div>
 
-                  </div> */}
-                  <div className="flex items-end gap-3">
-                    <div className="flex flex-col">
-                      <label className="text-xs text-gray-500 mb-1 text-left">Select Date Range</label>
-
-                      <RangePicker
-                        value={dateRange}
-                        onChange={(dates) => setDateRange(dates)}
-                        format="DD-MM-YYYY"
-                        className="h-[38px] rounded-lg"
-                      />
-                    </div>
-                    {/* Start Date */}
-                    {/* <div className="flex flex-col">
-    <label className="text-xs text-gray-500 mb-1">Start Date</label>
-    <input
-      type="date"
-      value={startDate}
-      onChange={(e) => setStartDate(e.target.value)}
-      className="border border-gray-300 rounded-lg px-3 py-2 text-sm h-[38px] w-[180px]"
-    />
-  </div> */}
-
-                    {/* End Date */}
-                    {/* <div className="flex flex-col">
-    <label className="text-xs text-gray-500 mb-1">End Date</label>
-    <input
-      type="date"
-      value={endDate}
-      onChange={(e) => setEndDate(e.target.value)}
-      className="border border-gray-300 rounded-lg px-3 py-2 text-sm h-[38px] w-[180px]"
-    />
-  </div> */}
-
-                    {/* Export Button */}
-                    <button
-                      // onClick={() =>
-                      //   exportHostels(
-                      //     searchText,
-                      //     formatDateToDDMMYYYY(startDate),
-                      //     formatDateToDDMMYYYY(endDate)
-                      //   )
-                      // }
-                      onClick={handleExport}
-                      className="h-[38px] px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm flex items-center gap-2 shadow-sm cursor-pointer"
-                    >
-                      ⬇ Export
-                    </button>
-
-                  </div>
-                  <div className="relative">
+   <div className="relative">
                     <img
                       src={Search}
                       alt="Search"
@@ -646,8 +649,10 @@ const [statusFilter, setStatusFilter] = useState(
                       className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm font-medium leading-[150%] w-56"
                     />
                   </div>
-                </div>
-              </div>
+
+  </div>
+
+</div>
 
 
 
@@ -656,19 +661,25 @@ const [statusFilter, setStatusFilter] = useState(
 
               {/* <div className="bg-white rounded-xl shadow-sm border-gray-600 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]"> */}
 
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]">
+            <div
+  className="
+    card-common
+    overflow-hidden
+    flex-col-layout
+    max-h-[calc(100vh-230px)]
+  "
+>
 
-                <div className="flex-1 overflow-x-auto overflow-y-auto">
+               <div className="scroll-container">
 
-                  <table className="w-max min-w-full table-fixed text-sm text-left">
+                 <table className="w-max min-w-full table-fixed text-sm text-left">
 
-
-                    <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-40">
+  <thead className="table-header sticky top-0 z-40">
 
                       <tr>
 
                         {/* Sticky ID */}
-                        <th className="px-4 py-3 sticky left-0 bg-[#F8F9FF] z-50 w-[80px]">
+                       <th className="table-sticky-head px-4 py-3 w-[80px]">
                           ID
                         </th>
 
@@ -891,7 +902,7 @@ const [statusFilter, setStatusFilter] = useState(
                               {item.lastUpdateDate || item.lastUpdateTime ? (
                                 <div className="flex flex-col">
                                   <span>{item.lastUpdateDate || "----"}</span>
-                                  <span>{item.lastUpdateTime || "----"}</span>
+                                <span>{item.lastUpdateTime || "----"}</span>
                                 </div>
                               ) : (
                                 "----"
@@ -1106,15 +1117,13 @@ const [statusFilter, setStatusFilter] = useState(
 
 
                   {tooltip.visible && (
-                    <div
-                      className="fixed bg-white shadow-lg border border-gray-200 
-        rounded-lg px-3 py-2 text-xs text-gray-700 
-        z-[9999] max-w-[400px] break-words"
-                      style={{
-                        left: tooltip.x,
-                        top: tooltip.y,
-                      }}
-                    >
+                     <div
+    className="tooltip-common"
+    style={{
+      left: tooltip.x,
+      top: tooltip.y,
+    }}
+  >
                       {tooltip.text}
                     </div>
                   )}
@@ -1122,12 +1131,12 @@ const [statusFilter, setStatusFilter] = useState(
                 </div>
 
               </div>
-              <div className="flex justify-between items-center px-4 py-1 text-sm  bg-white">
+              <div className="flex-between px-4 py-1 text-sm bg-white">
 
                 {/* Total Count */}
-                <span className="text-gray-600">
+                <span className="text-muted">
                   Total Record Count :{" "}
-                  <span className="text-blue-600 font-medium">
+                  <span className="text-primary">
                     {/* {pageSize} */}
                     {/* {hostels?.totalHostels} */}
                     {displayData?.length || 0}
@@ -1285,56 +1294,77 @@ const [statusFilter, setStatusFilter] = useState(
             </div>
           </div>
         )} */}
-        {showResetModal && (
-          <div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-            onClick={() => {
-              setShowResetModal(false);
-              setOpenMenu(false);
-              setMenuError("")
-            }}
-          >
-            <div
-              className="bg-white rounded-2xl shadow-xl w-[420px] p-8 text-center"
-              onClick={(e) => e.stopPropagation()}
-            >
+       {showResetModal && (
 
-              <h2 className="text-xl font-semibold mb-3">
-                Reset Expense?
-              </h2>
+  <div
+    className="modal-overlay"
+    onClick={() => {
+      setShowResetModal(false);
+      setOpenMenu(false);
+      setMenuError("");
+    }}
+  >
 
-              <p className="text-gray-500 mb-8">
-                Are you sure you want to reset this expense?
-              </p>
-              {menuError && (
-                <ErrorMessage message={menuError} type="error" />
-              )}
-              <div className="flex justify-center gap-4 mt-1">
+    <div
+      className="modal-box w-[420px] p-8 text-center"
+      onClick={(e) => e.stopPropagation()}
+    >
 
-                <button
-                  // onClick={() => setShowResetModal(false)}
-                  onClick={() => {
-                    setShowResetModal(false);
-                    setOpenMenu(false);
-                    setMenuError("")
-                  }}
-                  className="px-6 py-3 border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 cursor-pointer"
-                >
-                  Cancel
-                </button>
+      <h2 className="text-xl font-semibold mb-3">
+        Reset Expense?
+      </h2>
 
-                <button
-                  onClick={handleResetExpense}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
-                >
-                  Delete
-                </button>
+      <p className="text-gray-500 mb-8">
+        Are you sure you want to reset this expense?
+      </p>
 
-              </div>
+      {menuError && (
+        <ErrorMessage
+          message={menuError}
+          type="error"
+        />
+      )}
 
-            </div>
-          </div>
-        )}
+      <div className="flex-center gap-4 mt-1">
+
+        <button
+          onClick={() => {
+            setShowResetModal(false);
+            setOpenMenu(false);
+            setMenuError("");
+          }}
+          className="
+            btn-secondary
+            px-6
+            py-3
+            rounded-lg
+            text-blue-600
+            border-blue-500
+            hover:bg-blue-50
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleResetExpense}
+          className="
+            btn-primary
+            px-6
+            py-3
+            rounded-lg
+          "
+        >
+          Delete
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+)}
         {showTrialPopup && (
           <div
             className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
@@ -1373,50 +1403,78 @@ const [statusFilter, setStatusFilter] = useState(
           </div>
         )}
         {showDeleteModal && (
-          <div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-            onClick={() => {
-              setShowDeleteModal(false);
-              setMenuError("");
-            }}
-          >
-            <div
-              className="bg-white rounded-xl p-5 w-[350px]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 className="text-sm font-semibold mb-2">
-                Delete Hostel?
-              </h2>
 
-              <p className="text-sm text-gray-500 mb-4">
-                Are you sure you want to delete this hostel?
-              </p>
-              {menuError && (
-                <ErrorMessage message={menuError} type="error" />
-              )}
-              <div className="flex justify-end gap-2">
+  <div
+    className="modal-overlay"
+    onClick={() => {
+      setShowDeleteModal(false);
+      setMenuError("");
+    }}
+  >
 
-                <button
-                  onClick={() => {
-                    setShowDeleteModal(false);
-                    setMenuError("");
-                  }}
-                  className="px-3 py-1 border rounded text-sm cursor-pointer"
-                >
-                  Cancel
-                </button>
+    <div
+      className="modal-box w-[350px] p-5"
+      onClick={(e) => e.stopPropagation()}
+    >
 
-                <button
-                  onClick={handleDeleteHostel}
-                  className="px-3 py-1 bg-red-600 text-white rounded text-sm cursor-pointer"
-                >
-                  Delete
-                </button>
+      <h2 className="text-sm font-semibold mb-2">
+        Delete Hostel?
+      </h2>
 
-              </div>
-            </div>
-          </div>
-        )}
+      <p className="text-sm text-gray-500 mb-4">
+        Are you sure you want to delete this hostel?
+      </p>
+
+      {menuError && (
+        <ErrorMessage
+          message={menuError}
+          type="error"
+        />
+      )}
+
+      <div className="flex justify-end gap-2">
+
+        <button
+          onClick={() => {
+            setShowDeleteModal(false);
+            setMenuError("");
+          }}
+          className="
+            btn-secondary
+            px-3
+            py-1
+            rounded
+            text-sm
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleDeleteHostel}
+          disabled={isDeleting}
+          className={`
+            px-3 py-1 rounded text-sm text-white
+
+            ${
+              isDeleting
+                ? "delete-btn-disabled"
+                : "delete-btn-active"
+            }
+          `}
+        >
+          {isDeleting
+            ? "Deleting..."
+            : "Delete"}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+)}
         <AssignStaffModal
           show={showAssignModal}
           onClose={() => setShowAssignModal(false)}
