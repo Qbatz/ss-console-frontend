@@ -78,6 +78,21 @@
   --font-gilroy: "Gilroy", sans-serif;
   --font-inter: "Inter", sans-serif;
 }
+/* TEXT COLORS */
+
+
+
+
+
+/* BACKGROUND COLORS */
+
+.bg-primary-soft {
+  @apply bg-blue-50;
+}
+
+.bg-primary-light {
+  @apply bg-[#EEF3FF];
+}
 
 html,
 body,
@@ -179,6 +194,9 @@ input[type=number] {
 .card-common {
   @apply bg-white border border-borderSoft rounded-card shadow-card;
 }
+.flex-end {
+  @apply flex justify-end;
+}
 
 /* MODAL */
 
@@ -220,7 +238,26 @@ input[type=number] {
 }
 
 .input-common {
-  @apply w-full border border-borderSoft rounded-card px-3 py-2 outline-none focus:border-primaryBlue;
+  @apply w-full border border-gray-300 rounded-card px-3 py-2 outline-none focus:border-primaryBlue;
+}
+.title-sm {
+  @apply text-[15px] font-semibold text-gray-800;
+}
+.btn-soft-primary {
+  @apply w-full bg-[#EEF2FF] hover:bg-[#E4E9FF] text-[#2563EB] text-sm font-medium py-3 rounded-md transition cursor-pointer;
+}
+.input-bordered {
+  @apply border border-gray-300 rounded px-2 py-1 text-sm;
+}
+.badge-primary {
+  @apply px-2 py-[2px] text-[11px] font-medium bg-blue-50 text-blue-600 rounded-full;
+}
+/* ICON WRAPPER */
+
+.icon-circle {
+  @apply flex-center w-10 h-10 rounded-full border;
+  background: #EEF3FF;
+  border-color: #D8E3FF;
 }
 
 /* TABLE */
@@ -249,6 +286,9 @@ input[type=number] {
 }
 .text-primary {
   @apply text-blue-600 font-medium;
+}
+.text-danger {
+  @apply text-red-600;
 }
 /* FLEX */
 

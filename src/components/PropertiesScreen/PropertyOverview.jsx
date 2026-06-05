@@ -1126,7 +1126,7 @@ const PropertyOverview = () => {
       alt="refresh"
     />
 
-    <span className="whitespace-nowrap text-textDark">
+    <span className="whitespace-nowrap text-textDark mr-5">
       {hostelData.createdAtDate}
     </span>
   </div>

@@ -198,6 +198,7 @@ const [deleteId, setDeleteId] = useState(null);
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
 
 
@@ -300,38 +301,87 @@ const [deleteId, setDeleteId] = useState(null);
   };
   const handleDeleteInvoiceRedemption = async (id) => {
 
-  const res = await deleteInvoiceRedemption(id);
+  if (isDeleting) return;
 
-  if (res.success) {
+  setIsDeleting(true);
+  setAmountError("");
 
-    setModalType("success");
-    setMessage(res?.data);
-    setShowSuccess(true);
+  try {
 
-    refreshHostel();
+    const res = await deleteInvoiceRedemption(id);
 
-    if (isMore) {
-      fetchInvoiceRedemptions(page);
+    if (res.success) {
+
+      setModalType("success");
+      setMessage(res?.data);
+      setShowSuccess(true);
+
+      refreshHostel();
+
+      if (isMore) {
+        fetchInvoiceRedemptions(page);
+      }
+
+      setShowDeleteModal(false);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
+    } else {
+
+      setModalType("error");
+      setMessage(res.message);
+      setAmountError(res.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
     }
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
+  } finally {
 
-  } else {
-
-    setModalType("error");
-    setMessage(res.message);
-    setAmountError(res.message)
-    setShowSuccess(true);
-
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
+    setIsDeleting(false);
 
   }
 
 };
+//   const handleDeleteInvoiceRedemption = async (id) => {
+
+//   const res = await deleteInvoiceRedemption(id);
+
+//   if (res.success) {
+
+//     setModalType("success");
+//     setMessage(res?.data);
+//     setShowSuccess(true);
+
+//     refreshHostel();
+
+//     if (isMore) {
+//       fetchInvoiceRedemptions(page);
+//     }
+
+//     setTimeout(() => {
+//       setShowSuccess(false);
+//     }, 1500);
+
+//   } else {
+
+//     setModalType("error");
+//     setMessage(res.message);
+//     setAmountError(res.message)
+//     setShowSuccess(true);
+
+//     setTimeout(() => {
+//       setShowSuccess(false);
+//     }, 1500);
+
+//   }
+
+// };
   return (
     <>
       <Toast
@@ -761,7 +811,7 @@ const [deleteId, setDeleteId] = useState(null);
           Cancel
         </button>
 
-        <button
+        {/* <button
           onClick={async () => {
 
             await handleDeleteInvoiceRedemption(deleteId);
@@ -771,7 +821,29 @@ const [deleteId, setDeleteId] = useState(null);
           className="px-4 py-2 bg-red-600 text-white rounded-lg cursor-pointer"
         >
           Delete
-        </button>
+        </button> */}
+        <button
+  onClick={async () => {
+
+    await handleDeleteInvoiceRedemption(deleteId);
+    setDeleteId(null);
+
+  }}
+  disabled={isDeleting}
+  className={`
+    px-4 py-2 rounded-lg text-white
+
+    ${
+      isDeleting
+        ? "delete-btn-disabled"
+        : "delete-btn-active"
+    }
+  `}
+>
+  {isDeleting
+    ? "Deleting..."
+    : "Delete"}
+</button>
 
       </div>
 

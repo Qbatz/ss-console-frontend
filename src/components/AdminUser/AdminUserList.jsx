@@ -560,19 +560,23 @@ const IamAdminUser = () => {
 
 
                   <select
-                    value={agents?.pageSize || 10}
-                    onChange={(e) => {
-                      setPage(1);
+  value={agents?.pageSize || 10}
+  onChange={(e) => {
+    const newSize = Number(e.target.value);
 
-                      getAllAgents({
-                        name: search,
-                        isActive: status === "ACTIVE",
-                        page: 0,
-                        size: Number(e.target.value)
-                      });
-                    }}
-                    className="border rounded-md px-2 py-1 text-sm"
-                  >
+    setPage(1);
+    setPageSize(newSize);
+
+    getAllAgents({
+      name: search,
+      isActive: status === "ACTIVE",
+      roleId: roleId ? Number(roleId) : "",
+      page: 1,
+      size: newSize
+    });
+  }}
+  className="border rounded-md px-2 py-1 text-sm"
+>
                     <option value={10}>10</option>
                     <option value={20}>20</option>
                     <option value={50}>50</option>
