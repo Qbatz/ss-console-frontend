@@ -852,8 +852,8 @@ const PropertyOverview = () => {
           <img
   src={arrowleft}
   className="
-    w-iconSm
-    h-iconSm
+    w-5
+    h-5
     cursor-pointer
   "
 
@@ -873,16 +873,14 @@ const PropertyOverview = () => {
               } else {
 
                 navigate(`/properties/${adminDetails?.roleId}`, {
-                  state: {
-                    skipApi: true,
-
-                    currentPage: location.state?.currentPage,
-                    currentSearch: location.state?.currentSearch,
-                    currentDateRange: location.state?.currentDateRange,
-                    currentStatusFilter:
-                      location.state?.currentStatusFilter,
-                  },
-                });
+  state: {
+    currentPage: location.state?.currentPage,
+    currentSearch: location.state?.currentSearch,
+    currentDateRange: location.state?.currentDateRange,
+    currentStatusFilter:
+      location.state?.currentStatusFilter,
+  },
+});
 
               }
 
@@ -897,286 +895,277 @@ const PropertyOverview = () => {
         <div className="bg-cardBg border border-borderSoft rounded-card shadow-card p-5 mt-2">
 
           {/* Top Section */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
 
-            {/* Left */}
-            <div className="flex items-center gap-3">
+  {/* LEFT */}
+  <div className="flex items-center gap-3 min-w-0 flex-1">
 
-              {/* <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold">
-                {hostelData.initials}
-              </div> */}
-              <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-lg font-semibold">
+    {/* PROFILE */}
+    <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-lg font-semibold shrink-0">
 
-                {hostelData?.mainImage ? (
+      {hostelData?.mainImage ? (
 
-                  <img
-                    src={hostelData.mainImage}
-                    alt="profile"
-                    className="w-full h-full object-cover"
-                  />
+        <img
+          src={hostelData.mainImage}
+          alt="profile"
+          className="w-full h-full object-cover"
+        />
 
-                ) : (
+      ) : (
 
-                  <span>
-                    {hostelData?.initials}
-                  </span>
+        <span>
+          {hostelData?.initials}
+        </span>
 
-                )}
+      )}
 
-              </div>
-
-              <div>
-               <h2
-  className="
-    text-sectionTitle
-    font-semibold
-    text-headingDark
-    text-left
-    font-inter
-  "
->
-                  {hostelData.hostelName}
-                </h2>
-
-             <p
-  className="
-    text-cardTitle
-    text-textDark/60
-    flex
-    items-center
-    gap-1
-    text-start
-    whitespace-nowrap
-  "
->
-  {hostelData.hostelId} |
-
-  <span
-    className="
-      text-primaryBlue
-      cursor-pointer
-      hover:underline
-    "
-    onClick={() => handleOwnerClick(hostelData)}
-  >
-    {hostelData.owner?.fullName}
-  </span>
-
-  <img
-    src={Arrow}
-    className="
-      w-3
-      h-3
-      ml-1
-    "
-  />
-</p>
-              </div>
-              <div className="flex gap-5 mt-4">
-
-                {/* 1️⃣ Trial Extend */}
-                {/* <button
-                disabled={trialPlan?.trialExtendable === false}
-                 onClick={() => setShowTrialConfirm(true)}
-                  className="bg-green-600 text-white px-2 py-[2px] font-medium rounded text-[10px] whitespace-nowrap cursor-pointer"
-                >
-                  Trial Extend
-                </button> */}
-                {/* <button
-  disabled={
-    trialPlan?.canAddTrial === false ||
-    !canSubscriptionWrite
-  }
-  onClick={() => {
-    if (
-      trialPlan?.canAddTrial !== false &&
-      canSubscriptionWrite
-    ) {
-      setShowTrialConfirm(true);
-    }
-  }}
-  className={`px-2 py-[2px] font-medium rounded text-[10px] whitespace-nowrap
-    ${
-      trialPlan?.canAddTrial === false ||
-      !canSubscriptionWrite
-        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-        : "bg-green-600 text-white cursor-pointer hover:bg-green-700"
-    }
-  `}
-  title={
-    trialPlan?.canAddTrial === false
-      ? "Trial cannot be extended"
-      : !canSubscriptionWrite
-      ? "No permission"
-      : ""
-  }
->
-  Trial Extend
-</button> */}
-
-                {/* <button
-                  disabled={trialPlan?.canAddExpandableTrial === false}
-                  onClick={() => setShowTrialModal(true)}
-                  className={`px-3 py-1 rounded text-[10px] whitespace-nowrap
-    ${trialPlan?.canAddExpandableTrial === false
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-yellow-500 text-white cursor-pointer hover:bg-yellow-600"
-                    }
-  `}
-                >
-                  Trial + Days
-                </button> */}
-               <button
-  disabled={
-    hostelData?.canAddExpandableTrial === false ||
-    !canSubscriptionWrite
-  }
-  onClick={() => {
-    if (
-      hostelData?.canAddExpandableTrial !== false &&
-      canSubscriptionWrite
-    ) {
-      setShowTrialModal(true);
-    }
-  }}
-  className={`
-    px-3
-    py-1
-    rounded-[6px]
-    text-[10px]
-    font-medium
-    whitespace-nowrap
-    transition-all
-    duration-200
-    shadow-card
-    font-inter
-    ${
-      hostelData?.canAddExpandableTrial === false ||
-      !canSubscriptionWrite
-        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-        : "bg-warningYellow text-white cursor-pointer hover:opacity-90"
-    }
-  `}
->
-  Trial + Days
-</button>
-
-              <button
-  disabled={!canSubscriptionWrite}
-  onClick={() => {
-    if (canSubscriptionWrite) {
-      setShowPlanModal(true);
-    }
-  }}
-  className={`
-    px-3
-    py-1
-    rounded-[6px]
-    text-[10px]
-    font-medium
-    whitespace-nowrap
-    transition-all
-    duration-200
-    shadow-card
-    font-inter
-    ${
-      canSubscriptionWrite
-        ? "bg-primaryBlue text-white cursor-pointer hover:opacity-90"
-        : "bg-gray-200 text-gray-400 cursor-not-allowed"
-    }
-  `}
->
-  Buy Plan
-</button>
-
-              <button
-  onClick={() => setShowPaymentDrawer(true)}
-  className="
-    px-3
-    py-1
-    rounded-[6px]
-    text-[10px]
-    font-medium
-    whitespace-nowrap
-    bg-successGreen
-    text-white
-    cursor-pointer
-    hover:opacity-90
-    transition-all
-    duration-200
-    shadow-card
-    font-inter
-  "
->
-  Generate Payment
-</button>
+    </div>
 
 
-              </div>
-            </div>
+    {/* CONTENT */}
+    <div className="min-w-0 flex-1">
+
+      {/* NAME + RIGHT */}
+      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
+
+        {/* NAME */}
+        <div className="min-w-0">
+
+          <h2
+            title={hostelData.hostelName}
+            className="
+              text-sectionTitle
+              font-semibold
+              text-headingDark
+              font-inter
+              truncate
+              whitespace-nowrap
+              overflow-hidden
+              max-w-[500px] text-left
+            "
+          >
+            {hostelData.hostelName}
+          </h2>
+
+          <p
+            className="
+              text-cardTitle
+              text-textDark/60
+              flex
+              items-center
+              gap-1
+              whitespace-nowrap
+              overflow-hidden
+              mt-1
+            "
+          >
+
+            <span className="shrink-0">
+              {hostelData.hostelId} |
+            </span>
+
+            <span
+              title={hostelData.owner?.fullName}
+              className="
+                text-primaryBlue
+                cursor-pointer
+                hover:underline
+                truncate
+                overflow-hidden
+                max-w-[260px]
+              "
+              onClick={() => handleOwnerClick(hostelData)}
+            >
+              {hostelData.owner?.fullName}
+            </span>
+
+            <img
+              src={Arrow}
+              className="w-3 h-3 ml-1 shrink-0"
+            />
+
+          </p>
+
+        </div>
 
 
-            {/* Right */}
-            <div className="flex items-center gap-3 text-[13px] text-gray-500 font-inter">
-  
-  <div className="flex items-center gap-2">
-    <img
-      src={refresh}
-      className="w-8 h-8 object-contain"
-      alt="refresh"
-    />
+        {/* RIGHT SECTION */}
+        <div className="flex items-center gap-3 shrink-0 flex-wrap mb-5">
 
-    <span className="whitespace-nowrap text-textDark mr-5">
-      {hostelData.createdAtDate}
-    </span>
-  </div>
+          {/* BUTTONS */}
+          <div className="flex items-center gap-2 flex-wrap">
 
-  {/* View */}
-  <button
-    className="
-      w-8
-      h-8
-      flex
-      items-center
-      justify-center
-      rounded-full
-      hover:bg-cardBg
-      transition-all
-      duration-200
-      cursor-pointer
-    "
-  >
-    <img
-      src={ViewImg}
-      width={18}
-      height={18}
-      alt="view"
-      className="object-contain"
-    />
-  </button>
+            {/* TRIAL */}
+            <button
+              disabled={
+                hostelData?.canAddExpandableTrial === false ||
+                !canSubscriptionWrite
+              }
+              onClick={() => {
 
-  {/* Menu */}
-  <button
-    className="
-      w-8
-      h-8
-      flex
-      items-center
-      justify-center
-      rounded-full
-      text-gray-400
-      hover:bg-cardBg
-      hover:text-textDark
-      transition-all
-      duration-200
-      cursor-pointer
-    "
-  >
-    ⋮
-  </button>
-</div>
+                if (
+                  hostelData?.canAddExpandableTrial !== false &&
+                  canSubscriptionWrite
+                ) {
+
+                  setShowTrialModal(true);
+
+                }
+
+              }}
+              className={`
+                px-3
+                py-1
+                rounded-[6px]
+                text-[10px]
+                font-medium
+                whitespace-nowrap
+                transition-all
+                duration-200
+                shadow-card
+                font-inter
+                ${
+                  hostelData?.canAddExpandableTrial === false ||
+                  !canSubscriptionWrite
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-warningYellow text-white cursor-pointer hover:opacity-90"
+                }
+              `}
+            >
+              Trial + Days
+            </button>
+
+
+            {/* BUY PLAN */}
+            <button
+              disabled={!canSubscriptionWrite}
+              onClick={() => {
+
+                if (canSubscriptionWrite) {
+
+                  setShowPlanModal(true);
+
+                }
+
+              }}
+              className={`
+                px-3
+                py-1
+                rounded-[6px]
+                text-[10px]
+                font-medium
+                whitespace-nowrap
+                transition-all
+                duration-200
+                shadow-card
+                font-inter
+                ${
+                  canSubscriptionWrite
+                    ? "bg-primaryBlue text-white cursor-pointer hover:opacity-90"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }
+              `}
+            >
+              Buy Plan
+            </button>
+
+
+            {/* PAYMENT */}
+            <button
+              onClick={() => setShowPaymentDrawer(true)}
+              className="
+                px-3
+                py-1
+                rounded-[6px]
+                text-[10px]
+                font-medium
+                whitespace-nowrap
+                bg-successGreen
+                text-white
+                cursor-pointer
+                hover:opacity-90
+                transition-all
+                duration-200
+                shadow-card
+                font-inter
+              "
+            >
+              Generate Payment
+            </button>
 
           </div>
+
+
+          {/* DATE */}
+          <div className="flex items-center gap-2">
+
+            <img
+              src={refresh}
+              className="w-8 h-8 object-contain"
+              alt="refresh"
+            />
+
+            <span className="whitespace-nowrap text-textDark text-[13px] font-inter">
+              {hostelData.createdAtDate}
+            </span>
+
+          </div>
+
+
+          {/* VIEW */}
+          <button
+            className="
+              w-8
+              h-8
+              flex
+              items-center
+              justify-center
+              rounded-full
+              hover:bg-cardBg
+              transition-all
+              duration-200
+              cursor-pointer
+            "
+          >
+            <img
+              src={ViewImg}
+              width={18}
+              height={18}
+              alt="view"
+              className="object-contain"
+            />
+          </button>
+
+
+          {/* MENU */}
+          <button
+            className="
+              w-8
+              h-8
+              flex
+              items-center
+              justify-center
+              rounded-full
+              text-gray-400
+              hover:bg-cardBg
+              hover:text-textDark
+              transition-all
+              duration-200
+              cursor-pointer
+            "
+          >
+            ⋮
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
 
           
@@ -1610,7 +1599,7 @@ const PropertyOverview = () => {
           text-sectionTitle
           font-semibold
           mt-1
-          text-headingDark
+          text-headingDark text-left
         "
       >
         {hostelData.noOfRooms} | {hostelData.noOfBeds}
@@ -1675,7 +1664,7 @@ const PropertyOverview = () => {
           text-sectionTitle
           font-semibold
           mt-1
-          text-headingDark
+          text-headingDark text-left
         "
       >
         0
@@ -1847,7 +1836,7 @@ const PropertyOverview = () => {
                     className="
                       px-4
                       py-3
-                      text-left
+                      text-left text-[12px]
                     "
                   >
 
@@ -1898,7 +1887,7 @@ const PropertyOverview = () => {
                     key={item.customerId || index}
                     className="
                       hover:bg-cardBg
-                      transition-all
+                      transition-all1 text-[12px]
                     "
                   >
 

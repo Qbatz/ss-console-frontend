@@ -392,12 +392,12 @@ const [deleteId, setDeleteId] = useState(null);
       />
       <div className="p-6 space-y-6">
 
-        <div className="bg-white rounded-xl border border-gray-300 shadow-sm overflow-visible">
+        <div className="card-container overflow-visible">
 
           <div className="max-h-[400px] overflow-y-auto">
             <table className="w-full text-sm">
 
-              <thead className="bg-[#F8F9FF] sticky top-0 z-10 text-gray-600">
+              <thead className="bg-light-blue sticky top-0 z-10 textgray">
                 <tr>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Source Invoice</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Target Invoice</th>
@@ -418,7 +418,7 @@ const [deleteId, setDeleteId] = useState(null);
                     <tr key={i} className="border-t">
                       {[...Array(9)].map((_, j) => (
                         <td key={j} className="px-3 py-3">
-                          <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="h-4 bg-gray rounded animate-pulse"></div>
                         </td>
                       ))}
                     </tr>

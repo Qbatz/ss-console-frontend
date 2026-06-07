@@ -76,7 +76,7 @@ useEffect(() => {
     <>
 {canRead === false ? (
 
- <div className="flex-center-col h-[350px] gap-4">
+  <div className="flex flex-col items-center justify-center h-[350px] gap-4">
 
     <img
       src={LoginImg}
@@ -84,7 +84,7 @@ useEffect(() => {
       className="w-64 object-contain"
     />
 
-    <p className="error-title">
+    <p className="text-red-600 text-lg font-medium">
       Access Restricted
     </p>
 
@@ -97,7 +97,7 @@ useEffect(() => {
   <>
   {isMore && (
 
-        <div className="flex-end mt-5 mb-3">
+        <div className="flex justify-end mb-3">
 
           <input
             type="text"
@@ -178,9 +178,9 @@ useEffect(() => {
         </div>
 
       </div> */}
-      <div className="card-common px-4 py-2">
+      <div className="bg-white rounded-xl px-4 py-2">
 
-  <div className="scroll-container max-h-[350px]">
+  <div className="max-h-[350px] overflow-y-auto y-8">
 
     {tableData.length > 0 ? (
 
@@ -192,20 +192,9 @@ useEffect(() => {
         >
 
           {/* Timeline */}
-          <div className="flex-center-col">
+          <div className="flex flex-col items-center">
 
-          <div
-  className="
-  
-    flex-center
-    w-10
-    h-10
-    rounded-full
-    bg-[#EEF3FF]
-    border
-    border-[#D8E3FF]
-  "
->
+            <div className="w-10 h-10 rounded-full bg-[#EEF3FF] border border-[#D8E3FF] flex items-center justify-center">
 
               {/* <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -234,7 +223,7 @@ useEffect(() => {
           {/* Content */}
           <div className="pb-6 text-left">
 
-            <h3 className="title-sm">
+            <h3 className="text-[15px] font-semibold text-gray-800">
               {item.userName}
             </h3>
 
@@ -243,7 +232,7 @@ useEffect(() => {
             </p>
  <div className="flex items-center gap-2 mt-2 flex-wrap">
 
-  <span className="badge-primary">
+  <span className="px-2 py-[2px] text-[11px] font-medium bg-blue-50 text-blue-600 rounded-full">
     {item.activityType}
   </span>
 
@@ -284,7 +273,7 @@ useEffect(() => {
 
   <button
     onClick={handleMoreClick}
-   className="btn-soft-primary"
+    className="w-full bg-[#EEF2FF] hover:bg-[#E4E9FF] text-[#2563EB] text-sm font-medium py-3 rounded-md transition cursor-pointer"
   >
     See More
   </button>
@@ -295,7 +284,7 @@ useEffect(() => {
 
      
 
-      {/* {isMore && (
+      {isMore && (
 
         <div className="flex justify-between items-center px-4 py-3 text-sm">
 
@@ -317,53 +306,25 @@ useEffect(() => {
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
-              <option value={100}>100</option>
             </select>
-<button
-  disabled={
-    page === 1 ||
-    tableData?.length === 0
-  }
-  onClick={() => setPage((p) => p - 1)}
-  className={`
-    ${
-      page === 1 ||
-      tableData?.length === 0
-        ? "opacity-40 cursor-not-allowed"
-        : "cursor-pointer"
-    }
-  `}
->
-  <img
-    src={Arrow}
-    className="w-4 h-4"
-  />
-</button>
+
+            <button className="cursor-pointer"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              <img src={Arrow} className="w-4 h-4"/>
+            </button>
 
             <span className="border px-3 py-1 rounded bg-gray-50">
               {page}
             </span>
 
-           <button
-  disabled={
-    page >= totalPages ||
-    tableData?.length === 0
-  }
-  onClick={() => setPage((p) => p + 1)}
-  className={`
-    ${
-      page >= totalPages ||
-      tableData?.length === 0
-        ? "opacity-40 cursor-not-allowed"
-        : "cursor-pointer"
-    }
-  `}
->
-  <img
-    src={Arrow}
-    className="w-4 h-4 rotate-[-180deg]"
-  />
-</button>
+            <button
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              <img src={Arrow} className="w-4 h-4 rotate-[-180deg]"/>
+            </button>
 
             <span className="text-gray-400">
               {start} - {end}
@@ -373,91 +334,7 @@ useEffect(() => {
 
         </div>
 
-      )} */}
-      {isMore && (
-
-  <div className="flex-between px-4 py-3 text-sm">
-
-    <span>
-      Total Record Count :{" "}
-
-      <span className="text-primary">
-        {tableData.length || 0}
-      </span>
-
-    </span>
-
-    <div className="flex items-center gap-4">
-
-      <select
-        value={size}
-        onChange={(e) => {
-          setSize(Number(e.target.value));
-          setPage(1);
-        }}
-        className="input-bordered"
-      >
-        <option value={10}>10</option>
-        <option value={20}>20</option>
-        <option value={50}>50</option>
-        <option value={100}>100</option>
-      </select>
-
-      <button
-        disabled={
-          page === 1 ||
-          tableData?.length === 0
-        }
-        onClick={() => setPage((p) => p - 1)}
-        className={`
-          ${
-            page === 1 ||
-            tableData?.length === 0
-              ? "opacity-40 cursor-not-allowed"
-              : "cursor-pointer"
-          }
-        `}
-      >
-        <img
-          src={Arrow}
-          className="w-4 h-4"
-        />
-      </button>
-
-      <span className="input-bordered bg-gray-50">
-        {page}
-      </span>
-
-      <button
-        disabled={
-          page >= totalPages ||
-          tableData?.length === 0
-        }
-        onClick={() => setPage((p) => p + 1)}
-        className={`
-          ${
-            page >= totalPages ||
-            tableData?.length === 0
-              ? "opacity-40 cursor-not-allowed"
-              : "cursor-pointer"
-          }
-        `}
-      >
-        <img
-          src={Arrow}
-          className="w-4 h-4 rotate-[-180deg]"
-        />
-      </button>
-
-      <span className="text-muted">
-        {start} - {end}
-      </span>
-
-    </div>
-
-  </div>
-
-)}
+      )}
 
     </>
   );

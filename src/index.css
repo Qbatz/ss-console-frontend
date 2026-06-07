@@ -1,6 +1,15 @@
+/* =========================
+   IMPORTS
+========================= */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @import "tailwindcss";
+
+
+/* =========================
+   FONTS
+========================= */
 
 @font-face {
   font-family: 'Gilroy';
@@ -14,57 +23,23 @@
   font-weight: 600;
 }
 
+
+/* =========================
+   THEME
+========================= */
+
 @theme {
 
-  --color-primarySoft: #1E45E10D;
-
-  --color-cardBg: #F6F8FC;
-  --color-borderSoft: #E6E8F0;
-
-  --color-textDark: #1D1D1D;
-  --color-headingDark: #1F2937;
-
   --color-primaryBlue: #2563EB;
-
   --color-successGreen: #16A34A;
   --color-warningYellow: #EAB308;
   --color-dangerRed: #DC2626;
 
-  --color-white: #FFFFFF;
-  --color-black: #000000;
-
-  --spacing-pageX: 8px;
-
-  --spacing-rowGap: 12px;
-  --spacing-sectionGap: 16px;
-
-  --spacing-cardPadding: 20px;
-
-  --spacing-avatar: 56px;
-
-  --spacing-iconXs: 14px;
-  --spacing-iconSm: 20px;
-  --spacing-iconMd: 32px;
-  --spacing-iconLg: 40px;
-
-  --text-pageTitle: 20px;
-
-  --text-sectionTitle: 24px;
-
-  --text-cardTitle: 14px;
-  --text-label: 14px;
-  --text-value: 14px;
-
-  --text-tableHeader: 12px;
-  --text-tableCell: 12px;
-
-  --text-profileInitial: 18px;
-
-  --leading-pageTitle: 48px;
+  --color-borderSoft: #E6E8F0;
+  --color-cardBg: #F6F8FC;
 
   --radius-card: 12px;
   --radius-modal: 20px;
-  --radius-pill: 999px;
 
   --shadow-card:
     0 1px 3px rgba(0,0,0,0.08);
@@ -72,27 +47,14 @@
   --shadow-modal:
     0 10px 25px rgba(0,0,0,0.08);
 
-  --shadow-dropdown:
-    0 4px 12px rgba(0,0,0,0.08);
-
   --font-gilroy: "Gilroy", sans-serif;
   --font-inter: "Inter", sans-serif;
 }
-/* TEXT COLORS */
 
 
-
-
-
-/* BACKGROUND COLORS */
-
-.bg-primary-soft {
-  @apply bg-blue-50;
-}
-
-.bg-primary-light {
-  @apply bg-[#EEF3FF];
-}
+/* =========================
+   BASE
+========================= */
 
 html,
 body,
@@ -109,6 +71,7 @@ body {
   color: #1D1D1D;
 }
 
+
 /* =========================
    SCROLLBAR
 ========================= */
@@ -120,12 +83,176 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: #d1d5db;
-  border-radius: 20px;
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+
+/* =========================
+   DRAWER SCROLL
+========================= */
+
+.drawer-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.drawer-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.drawer-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
+}
+
+
+/* =========================
+   BACKGROUND
+========================= */
+
+.bg-white-common {
+  @apply bg-white;
+}
+
+.bg-light-blue {
+  @apply bg-[#F8F9FF];
+}
+
+.bg-primary-soft {
+  @apply bg-blue-50;
+}
+
+.bg-primary-light {
+  @apply bg-[#EEF3FF];
+}
+.bg-gray {
+  @apply bg-gray-200;
+}
+
+
+/* =========================
+   FONT FAMILY
+========================= */
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+.card-container {
+  @apply bg-white rounded-xl border border-gray-300 shadow-sm;
+}
+.font-gilroy {
+  font-family: 'Gilroy', sans-serif;
+}
+
+
+/* =========================
+   FONT SIZE
+========================= */
+
+.text-xs-common {
+  @apply text-xs;
+}
+
+.text-sm-common {
+  @apply text-sm;
+}
+
+.text-md-common {
+  @apply text-[15px];
+}
+
+.text-tableHeader {
+  @apply text-[10px];
+}
+
+.text-tableCell {
+  @apply text-[11px];
+}
+
+
+/* =========================
+   FONT WEIGHT
+========================= */
+
+.font-medium-common {
+  @apply font-medium;
+}
+
+.font-semibold-common {
+  @apply font-semibold;
+}
+
+.font-bold-common {
+  @apply font-bold;
+}
+
+
+/* =========================
+   TEXT COLOR
+========================= */
+
+.text-main {
+  @apply text-gray-800;
+}
+
+.text-sub {
+  @apply text-gray-500;
+}
+
+.text-primary {
+  @apply text-blue-600;
+}
+
+.text-danger {
+  @apply text-red-600;
+}
+
+
+/* =========================
+   BORDER & RADIUS
+========================= */
+
+.border-soft {
+  @apply border border-gray-300;
+}
+
+.radius-md {
+  @apply rounded-xl;
+}
+
+
+/* =========================
+   FLEX
+========================= */
+
+.flex-center {
+  @apply flex items-center justify-center;
+}
+
+.flex-between {
+  @apply flex items-center justify-between;
+}
+
+.flex-end {
+  @apply flex justify-end;
+}
+
+.flex-center-col {
+  @apply flex flex-col items-center justify-center;
+}
+
+.flex-col-layout {
+  @apply flex flex-col h-full min-h-0;
+}
+
+.flex-center-relative {
+  @apply relative flex justify-center;
+}
+
 
 /* =========================
    INPUT
@@ -141,8 +268,293 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+.input-common {
+  @apply w-full border border-gray-300 rounded-xl px-3 py-2 outline-none focus:border-blue-600;
+}
+
+.input-bordered {
+  @apply border border-gray-300 rounded px-2 py-1 text-sm;
+}
+
+
 /* =========================
-   ANIMATIONS
+   CARD
+========================= */
+
+.card-common {
+  @apply bg-white border border-gray-300 rounded-xl shadow-sm;
+}
+
+
+/* =========================
+   BUTTON
+========================= */
+
+.btn-primary {
+  @apply bg-blue-600 text-white cursor-pointer transition-all duration-200 hover:opacity-90;
+}
+
+.btn-secondary {
+  @apply border border-gray-300 text-gray-700 cursor-pointer transition-all duration-200 hover:bg-gray-50;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white cursor-pointer transition-all duration-200 hover:opacity-90;
+}
+
+.btn-disabled {
+  @apply bg-gray-300 text-gray-500 cursor-not-allowed;
+}
+
+.btn-soft-primary {
+  @apply w-full bg-[#EEF2FF] hover:bg-[#E4E9FF]
+  text-[#2563EB] text-sm font-medium
+  py-3 rounded-md transition cursor-pointer;
+}
+
+
+/* =========================
+   MODAL
+========================= */
+
+.modal-overlay {
+  @apply fixed inset-0 bg-black/40 z-50;
+}
+
+.modal-box {
+  @apply bg-white rounded-[20px] shadow-lg;
+}
+
+
+/* =========================
+   TABLE
+========================= */
+
+.table-head {
+  @apply bg-[#F8F9FF]
+  sticky top-0 z-10
+  text-gray-600;
+}
+
+.table-header {
+  @apply bg-[#F8F9FF]
+  text-[12px]
+  uppercase
+  text-gray-500
+  font-semibold;
+}
+
+.table-head-cell {
+  @apply px-4 py-3
+  text-left
+  whitespace-nowrap;
+}
+
+.table-row {
+  @apply border-t border-gray-300
+  hover:bg-gray-50
+  transition;
+}
+
+.table-cell {
+  @apply text-[12px] text-gray-800;
+}
+
+.table-data {
+  @apply px-4 py-2
+  text-left
+  font-medium
+  text-[11px]
+  whitespace-nowrap;
+}
+
+.table-sticky-head {
+  @apply sticky left-0
+  bg-[#F8F9FF]
+  z-50;
+}
+
+.table-sticky-cell {
+  @apply sticky bg-white z-30;
+}
+
+
+/* =========================
+   BADGE
+========================= */
+
+.badge-primary {
+  @apply px-2 py-[2px]
+  text-[11px]
+  font-medium
+  bg-blue-50
+  text-blue-600
+  rounded-full;
+}
+
+
+/* =========================
+   ICON
+========================= */
+
+.icon-circle {
+  @apply flex items-center justify-center
+  w-10 h-10
+  rounded-full
+  border;
+}
+
+.icon-btn {
+  @apply w-8 h-8
+  flex items-center justify-center
+  rounded-full
+  cursor-pointer
+  transition-all duration-200
+  hover:bg-gray-100;
+}
+
+
+/* =========================
+   TOOLTIP
+========================= */
+
+.tooltip-common {
+  @apply fixed bg-white
+  shadow-lg
+  border border-gray-200
+  rounded-lg
+  px-3 py-2
+  text-xs text-gray-700
+  z-[9999]
+  max-w-[400px]
+  break-words;
+}
+
+.textgray {
+  @apply text-gray-600;
+}
+/* =========================
+   DROPDOWN
+========================= */
+
+.dropdown-common {
+  @apply bg-white
+  border border-gray-300
+  rounded-xl
+  shadow-md;
+}
+
+.dropdown-menu {
+  @apply fixed
+  w-28
+  bg-white
+  rounded-xl
+  z-[99999]
+  border border-gray-100
+  overflow-hidden;
+  
+  box-shadow: 0 12px 35px rgba(0,0,0,0.18);
+}
+
+.menu-popup {
+  @apply fixed
+  w-28
+  bg-white
+  rounded-xl
+  z-[99999]
+  border border-gray-100
+  overflow-hidden;
+
+  box-shadow: 0 12px 35px rgba(0,0,0,0.18);
+}
+
+.menu-item {
+  @apply w-full
+  text-left
+  px-4 py-2
+  text-sm
+  hover:bg-gray-100
+  cursor-pointer;
+}
+
+.menu-item-danger {
+  @apply w-full
+  text-left
+  px-4 py-2
+  text-sm
+  text-red-500
+  hover:bg-red-50
+  cursor-pointer;
+}
+
+
+/* =========================
+   PAGINATION
+========================= */
+
+.pagination-btn {
+  @apply cursor-pointer;
+}
+
+.pagination-btn-disabled {
+  @apply opacity-40 cursor-not-allowed;
+}
+
+.pagination-page {
+  @apply border
+  px-3 py-1
+  rounded
+  bg-gray-50;
+}
+
+
+/* =========================
+   EXTRA
+========================= */
+
+.more-btn {
+  @apply flex items-center gap-2
+  px-3 py-1.5
+  text-sm
+  font-medium
+  text-blue-600
+  bg-blue-50
+  border border-blue-200
+  rounded-md
+  hover:bg-blue-100
+  transition;
+}
+
+.modal-title {
+  @apply text-lg
+  font-semibold
+  mb-4
+  text-left;
+}
+
+.input-label {
+  @apply block
+  text-sm
+  text-gray-600
+  mb-1
+  text-left;
+}
+
+.title-sm {
+  @apply text-[15px]
+  font-semibold
+  text-gray-800;
+}
+
+.error-title {
+  @apply text-red-600
+  text-lg
+  font-medium;
+}
+
+
+/* =========================
+   ANIMATION
 ========================= */
 
 @keyframes slideLeft {
@@ -162,173 +574,17 @@ input[type=number] {
 
 @keyframes fadeIn {
 
-  0% {
+  from {
     opacity: 0;
     transform: translateY(10px);
   }
 
-  100% {
+  to {
     opacity: 1;
-    transform: translateY(0px);
+    transform: translateY(0);
   }
 }
 
 .animate-fadeIn {
   animation: fadeIn 0.25s ease-out;
-}
-
-/* =========================
-   ANT DESIGN
-========================= */
-
-.ant-picker-dropdown {
-  margin-top: 18px !important;
-}
-
-/* =========================
-   REUSABLE CLASSES
-========================= */
-
-/* CARD */
-
-.card-common {
-  @apply bg-white border border-borderSoft rounded-card shadow-card;
-}
-.flex-end {
-  @apply flex justify-end;
-}
-
-/* MODAL */
-
-.modal-overlay {
-  @apply fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4;
-}
-
-.modal-box {
-  @apply bg-white rounded-modal shadow-modal;
-  animation: fadeIn 0.25s ease-out;
-}
-
-/* BUTTONS */
-
-.btn-primary {
-  @apply bg-primaryBlue text-white cursor-pointer transition-all duration-200 hover:opacity-90;
-}
-
-.btn-secondary {
-  @apply border border-borderSoft text-textDark cursor-pointer transition-all duration-200 hover:bg-cardBg;
-}
-
-.btn-danger {
-  @apply bg-dangerRed text-white cursor-pointer transition-all duration-200 hover:opacity-90;
-}
-
-.btn-disabled {
-  @apply bg-gray-300 text-gray-500 cursor-not-allowed;
-}
-.flex-center-col {
-  @apply flex flex-col items-center justify-center;
-}
-.error-title {
-  @apply text-dangerRed text-lg font-medium;
-}
-
-.scroll-container {
-  @apply flex-1 overflow-x-auto overflow-y-auto;
-}
-
-.input-common {
-  @apply w-full border border-gray-300 rounded-card px-3 py-2 outline-none focus:border-primaryBlue;
-}
-.title-sm {
-  @apply text-[15px] font-semibold text-gray-800;
-}
-.btn-soft-primary {
-  @apply w-full bg-[#EEF2FF] hover:bg-[#E4E9FF] text-[#2563EB] text-sm font-medium py-3 rounded-md transition cursor-pointer;
-}
-.input-bordered {
-  @apply border border-gray-300 rounded px-2 py-1 text-sm;
-}
-.badge-primary {
-  @apply px-2 py-[2px] text-[11px] font-medium bg-blue-50 text-blue-600 rounded-full;
-}
-/* ICON WRAPPER */
-
-.icon-circle {
-  @apply flex-center w-10 h-10 rounded-full border;
-  background: #EEF3FF;
-  border-color: #D8E3FF;
-}
-
-/* TABLE */
-
-.table-header {
-  @apply bg-[#F8F9FF] text-tableHeader uppercase text-textDark/60 font-semibold;
-}
-.table-sticky-head {
-  @apply sticky left-0 bg-[#F8F9FF] z-50;
-}
-
-.table-sticky-cell {
-  @apply sticky bg-white z-30;
-}
-
-.table-cell {
-  @apply text-tableCell text-textDark;
-}
-/* TOOLTIP */
-
-.tooltip-common {
-  @apply fixed bg-white shadow-lg border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 z-[9999] max-w-[400px] break-words;
-}
-.text-muted {
-  @apply text-gray-600;
-}
-.text-primary {
-  @apply text-blue-600 font-medium;
-}
-.text-danger {
-  @apply text-red-600;
-}
-/* FLEX */
-
-.flex-center {
-  @apply flex items-center justify-center;
-}
-
-.flex-between {
-  @apply flex items-center justify-between;
-}
-
-/* ICON BUTTON */
-
-.icon-btn {
-  @apply w-8 h-8 flex items-center justify-center rounded-full cursor-pointer transition-all duration-200 hover:bg-cardBg;
-}
-
-/* DROPDOWN */
-
-.dropdown-common {
-  @apply bg-white border border-borderSoft rounded-card shadow-dropdown;
-}
-
-/* DELETE BUTTON */
-
-.delete-btn-disabled {
-  background: #fca5a5;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.delete-btn-active {
-  background: #dc2626;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.delete-btn-active:hover {
-  background: #b91c1c;
-}
-.flex-col-layout {
-  @apply flex flex-col h-full min-h-0;
 }

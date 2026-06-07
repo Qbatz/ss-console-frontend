@@ -440,16 +440,38 @@ const handleDelete = async () => {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-
+{/* 
             <div className="border border-gray-300 rounded-xl p-4 bg-white">
               <p className="text-gray-500 text-sm">Total Proprietors</p>
               <p className="text-xl font-semibold mt-1">{ownerCount}</p>
-            </div>
+            </div> */}
+           <div className="card-bg border-soft radius-md p-4">
 
-            <div className="border border-gray-300 rounded-xl p-4 bg-white">
+  <p className="text-sub">
+    Total Proprietors
+  </p>
+
+  <h2 className="text-main text-xl font-semibold">
+   {ownerCount}
+  </h2>
+
+</div>
+ <div className="card-bg border-soft radius-md p-4">
+
+  <p className="text-sub">
+   Active
+  </p>
+
+  <h2 className="text-main text-xl font-semibold">
+   {activeCount}
+  </h2>
+
+</div>
+
+            {/* <div className="border border-gray-300 rounded-xl p-4 bg-white">
               <p className="text-gray-500 text-sm">Active</p>
               <p className="text-xl font-semibold mt-1">{activeCount}</p>
-            </div>
+            </div> */}
 
           </div>
 

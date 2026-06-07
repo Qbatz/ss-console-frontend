@@ -17,6 +17,12 @@ import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
 import { usePlan } from "../../Context/PlanContexts";
 import AssignStaffModal from "./AssignStaffDesign";
+import PropertyIcon from "../../assets/ReceiptItem.png";
+import ActiveIcon from "../../assets/ActiveTrend.png";
+import InactiveIcon from "../../assets/trend-up.png";
+import CalendarIcon from "../../assets/calendarIcon.png";
+import UserIcon from "../../assets/user-block.png";
+import TrialIcon from "../../assets/timer.png";
 
 
 const Properties = () => {
@@ -37,9 +43,9 @@ const Properties = () => {
     });
   }, []);
   console.log("dropdownPlans", dropdownPlans)
-  const skipApi = location.state?.skipApi;
+  // const skipApi = location.state?.skipApi;
   const { RangePicker } = DatePicker;
-  const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
+  // const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
   // const [dateRange, setDateRange] = useState([]);
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Hostels");
@@ -52,17 +58,96 @@ const Properties = () => {
   location.state?.currentPage || 1
 );
 
-const [searchText, setSearchText] = useState(
-  location.state?.currentSearch || ""
-);
+// const [searchText, setSearchText] = useState(
+//   location.state?.currentSearch || ""
+// );
+const locationSearch =
+  location.state?.currentSearch;
 
-const [dateRange, setDateRange] = useState(
-  location.state?.currentDateRange || []
+// const [searchText, setSearchText] = useState(
+//   locationSearch ?? ""
+// );
+const [searchText, setSearchText] = useState(
+  sessionStorage.getItem("propertiesSearch") || ""
 );
 
 const [statusFilter, setStatusFilter] = useState(
-  location.state?.currentStatusFilter || ""
+  sessionStorage.getItem("propertiesStatus") || ""
 );
+
+const [dateRange, setDateRange] = useState(() => {
+
+  const stored =
+    sessionStorage.getItem("propertiesDate");
+
+  if (!stored) return [];
+
+  const parsed = JSON.parse(stored);
+
+  return [
+    dayjs(parsed[0]),
+    dayjs(parsed[1]),
+  ];
+
+});
+useEffect(() => {
+
+  sessionStorage.setItem(
+    "propertiesSearch",
+    searchText
+  );
+
+}, [searchText]);
+
+useEffect(() => {
+
+  sessionStorage.setItem(
+    "propertiesStatus",
+    statusFilter
+  );
+
+}, [statusFilter]);
+
+useEffect(() => {
+
+  if (dateRange?.length === 2) {
+
+    sessionStorage.setItem(
+      "propertiesDate",
+      JSON.stringify([
+        dateRange[0],
+        dateRange[1],
+      ])
+    );
+
+  }
+  else {
+
+    sessionStorage.removeItem(
+      "propertiesDate"
+    );
+
+  }
+
+}, [dateRange]);
+useEffect(() => {
+
+  if (!location.state?.currentPage) {
+
+    setSearchText("");
+    setDateRange([]);
+    setStatusFilter("");
+    setPage(1);
+
+  }
+
+}, []);
+
+// const [dateRange, setDateRange] = useState(
+//   location.state?.currentDateRange || []
+// );
+
+
   const isStatusFiltering = statusFilter !== "";
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
@@ -93,6 +178,7 @@ const [statusFilter, setStatusFilter] = useState(
   // const [selectedHostel, setSelectedHostel] = useState(null);
   console.log("startDate", startDate)
   const navigate = useNavigate();
+  
   const [tooltip, setTooltip] = useState({
     visible: false,
     text: "",
@@ -119,13 +205,15 @@ const [statusFilter, setStatusFilter] = useState(
 
   const [debouncedSearch, setDebouncedSearch] = useState(searchText);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchText);
-    }, 2000);
+useEffect(() => {
 
-    return () => clearTimeout(timer);
-  }, [searchText]);
+  const timer = setTimeout(() => {
+    setDebouncedSearch(searchText);
+  }, 500);
+
+  return () => clearTimeout(timer);
+
+}, [searchText]);
 
   // useEffect(() => {
   //   if (skipFirstApi) {
@@ -166,14 +254,46 @@ const [statusFilter, setStatusFilter] = useState(
   //   getHostels(page, pageSize, debouncedSearch, start, end);
 
   // }, [page, pageSize, debouncedSearch, dateRange]);
-  useEffect(() => {
+//   useEffect(() => {
+
+//   let start = "";
+//   let end = "";
+
+//   if (dateRange && dateRange.length === 2) {
+//     start = dateRange[0].format("DD-MM-YYYY");
+//     end = dateRange[1].format("DD-MM-YYYY");
+//   }
+
+//   let subActive = "";
+
+//   if (statusFilter === "active") {
+//     subActive = true;
+//   }
+//   else if (statusFilter === "inactive") {
+//     subActive = false;
+//   }
+
+//   getHostels(
+//     page,
+//     pageSize,
+//     debouncedSearch,
+//     start,
+//     end,
+//     subActive
+//   );
+
+// }, [page, pageSize, debouncedSearch, dateRange]);
+
+useEffect(() => {
 
   let start = "";
   let end = "";
 
   if (dateRange && dateRange.length === 2) {
+
     start = dateRange[0].format("DD-MM-YYYY");
     end = dateRange[1].format("DD-MM-YYYY");
+
   }
 
   let subActive = "";
@@ -181,41 +301,6 @@ const [statusFilter, setStatusFilter] = useState(
   if (statusFilter === "active") {
     subActive = true;
   }
-  else if (statusFilter === "inactive") {
-    subActive = false;
-  }
-
-  getHostels(
-    page,
-    pageSize,
-    debouncedSearch,
-    start,
-    end,
-    subActive
-  );
-
-}, [page, pageSize, debouncedSearch, dateRange]);
-
- useEffect(() => {
-
-  if (skipFirstApi) {
-    setSkipFirstApi(false);
-    return;
-  }
-
-  let start = "";
-  let end = "";
-
-  if (dateRange && dateRange.length === 2) {
-    start = dateRange[0].format("DD-MM-YYYY");
-    end = dateRange[1].format("DD-MM-YYYY");
-  }
-
-  let subActive = "";
-
-  if (statusFilter === "active") {
-    subActive = true;
-  } 
   else if (statusFilter === "inactive") {
     subActive = false;
   }
@@ -515,46 +600,384 @@ const [statusFilter, setStatusFilter] = useState(
 </div>
 
               {/* Stats Cards */}
-             <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mb-6">
+   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
 
-  <div className="card-common p-5">
+  {/* CARD 1 */}
 
-    <p className="text-gray-500 text-xs font-gilroy">
-      Total Properties
-    </p>
+  <div
+    className="
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px]
+    "
+  >
 
-    <h2 className="text-2xl font-bold text-base mt-1 font-gilroy">
-      {hostels?.totalHostels}
-    </h2>
+    <div>
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Total Properties
+      </p>
+
+      <h2 className="text-2xl text-[20px] text-left font-bold text-gray-800 mt-2 leading-none">
+        {hostels?.totalHostels}
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-success">
+
+      <img
+        src={PropertyIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
 
   </div>
 
 
+  {/* CARD 2 */}
 
-               <div className="card-common p-5">
+  <div
+    className="
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px]
+    "
+  >
 
-  <p className="text-gray-500 text-sm">
-    Active Properties
-  </p>
+    <div>
 
-  <h2 className="text-2xl text-base font-bold mt-1">
-    {hostels?.activeHostels}
-  </h2>
+      <p className="text-[11px] text-gray-500 font-medium">
+        Active Properties
+      </p>
+
+      <div className="flex items-center text-left gap-2 mt-2">
+
+        <h2 className="text-2xl text-[20px] font-bold text-gray-800 leading-none">
+          {hostels?.activeHostels}
+        </h2>
+
+        <span className="badge-primary">
+          ↑ 12%
+        </span>
+
+      </div>
+
+    </div>
+
+    <div className="stats-icon stats-icon-success">
+
+      <img
+        src={ActiveIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 3 */}
+
+  <div
+    className="
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px]
+    "
+  >
+
+    <div>
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Inactive Properties
+      </p>
+
+      <h2 className="text-2xl text-[20px] text-left font-bold text-gray-800 mt-2 leading-none">
+        {hostels?.inactiveHostels}
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-warning">
+
+      <img
+        src={InactiveIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 4 */}
+
+  <div
+    className="
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px]
+    "
+  >
+
+    <div>
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Used Today
+      </p>
+
+      <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
+        65
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-success">
+
+      <img
+        src={CalendarIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 5 */}
+
+  <div
+    className="
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px]
+    "
+  >
+
+    <div>
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Used 1-7 Days
+      </p>
+
+      <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
+        64
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-success">
+
+      <img
+        src={CalendarIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 6 */}
+
+  <div
+    className="
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px]
+    "
+  >
+
+    <div>
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Used Last 8-14 Days
+      </p>
+
+      <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
+        65
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-success">
+
+      <img
+        src={PropertyIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 7 */}
+
+  <div
+    className="
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px]
+    "
+  >
+
+    <div>
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Inactive 15-30 Days
+      </p>
+
+      <div className="flex items-center gap-2 mt-2">
+
+        <h2 className="text-2xl text-[20px] font-bold text-gray-800 leading-none">
+          12
+        </h2>
+
+        <span className="badge-primary">
+          ↑ 12%
+        </span>
+
+      </div>
+
+    </div>
+
+    <div className="stats-icon stats-icon-warning">
+
+      <img
+        src={UserIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 8 */}
+
+  <div
+    className="
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px]
+    "
+  >
+
+    <div>
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Inactive 30+ Days
+      </p>
+
+      <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
+        24
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-warning">
+
+      <img
+        src={UserIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 9 */}
+
+  <div
+    className="
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px]
+    "
+  >
+
+    <div>
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Never Used
+      </p>
+
+      <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
+        22
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-warning">
+
+      <img
+        src={InactiveIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 10 */}
+
+  <div
+    className="
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px]
+    "
+  >
+
+    <div>
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Trial Expiring Soon
+      </p>
+
+      <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
+        09
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-danger">
+
+      <img
+        src={TrialIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
 
 </div>
-
-              <div className="card-common p-5">
-
-  <p className="text-gray-500 text-sm">
-    InActive Properties
-  </p>
-
-  <h2 className="text-2xl text-base font-bold mt-1">
-    {hostels?.inactiveHostels}
-  </h2>
-
-</div>
-              </div>
 
 
            <div className="sticky top-0 z-20 bg-white pb-4">
@@ -642,10 +1065,17 @@ const [statusFilter, setStatusFilter] = useState(
                       type="text"
                       placeholder="Search..."
                       value={searchText}
-                      onChange={(e) => {
-                        setSearchText(e.target.value);
-                        setPage(1);
-                      }}
+                      // onChange={(e) => {
+                      //   setSearchText(e.target.value);
+                      //   setPage(1);
+                      // }}
+  onChange={(e) => {
+  const value = e.target.value;
+
+  setSearchText(value);
+
+  setPage(1);
+}}
                       className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm font-medium leading-[150%] w-56"
                     />
                   </div>
@@ -664,7 +1094,7 @@ const [statusFilter, setStatusFilter] = useState(
             <div
   className="
     card-common
-    overflow-hidden
+    overflow-auto
     flex-col-layout
     max-h-[calc(100vh-230px)]
   "

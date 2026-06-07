@@ -145,6 +145,7 @@ const AssignStaffModal = ({
     fixed inset-0 z-[9999]
     bg-black/40
     flex justify-end
+    p-4
   "
   onClick={() => {
     resetForm();
@@ -153,22 +154,21 @@ const AssignStaffModal = ({
 >
 
             {/* Modal */}
-      <div
+   <div
   className="
-    bg-white
     w-[500px]
-    h-[95vh]
-    mt-5
-    mr-5
-    mb-5
+    h-[calc(100vh-32px)]
+    bg-white
     rounded-2xl
-    overflow-y-auto
-    p-6
     shadow-2xl
-    animate-slideIn
+    overflow-y-auto
+    drawer-scroll
+    p-6
+    animate-slideLeft
   "
   onClick={(e) => e.stopPropagation()}
 >
+
 
                 {/* Title */}
                 <h2 className="text-lg font-semibold mb-5 text-left">
@@ -287,7 +287,11 @@ const AssignStaffModal = ({
                             setCommentError("");
                         }}
                         placeholder="Please Enter Comments"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 h-[80px]"
+                        className="
+    input-common
+    mt-1
+    h-[80px]
+  "
                     />
 
                     {commentError && <ErrorMessage message={commentError} type="error" />}
@@ -301,61 +305,123 @@ const AssignStaffModal = ({
   resetForm();
   onClose();
 }}
-                        className="px-4 py-2 text-gray-600 cursor-pointer"
+                         className=" px-4 py-2 cursor-pointer"
                     >
                         Cancel
                     </button>
 
                     <button
                         onClick={handleSubmit}
-                        className="px-5 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
+                       className="btn-primary px-5 py-2 rounded-lg"
                     >
                         Confirm
                     </button>
                 </div>
 {/* 🔥 Relational Agents History */}
 {selectedHostel?.relationalAgents?.length > 0 && (
-   <div className="mt-5 border-t border-gray-300 pt-4 h-[200px] overflow-y-auto pr-2">
 
-    <p className="text-xs font-semibold text-gray-500 mb-3 text-left">
+  <div className="mt-5 pt-4 border-t border-gray-200">
+
+    <p className="text-sm font-semibold text-gray-600 mb-4 text-left">
       ASSIGNED HISTORY
     </p>
 
-    <div className="flex flex-col gap-3">
-      {selectedHostel.relationalAgents.map((item, index) => (
-        <div key={index} className="flex gap-3">
+    <div className="flex flex-col gap-4 max-h-[260px] overflow-y-auto pr-2 drawer-scroll">
 
-          {/* ICON */}
-          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-            <img src={Message} className="w-3 h-3"/>
+      {selectedHostel.relationalAgents.map((item, index) => (
+
+        <div
+          key={index}
+          className="
+            relative
+            flex
+            gap-4
+            bg-white
+            border
+            border-gray-200
+            rounded-xl
+            p-4
+          "
+        >
+
+          {/* LEFT SIDE */}
+
+          <div className="relative flex flex-col items-center">
+
+            <div
+              className="
+                w-12
+                h-12
+                rounded-full
+                bg-[#EEF3FF]
+                flex
+                items-center
+                justify-center
+                shrink-0
+              "
+            >
+
+              <img
+                src={Message}
+                alt="message"
+                className="w-5 h-5"
+              />
+
+            </div>
+
+            {index !== selectedHostel.relationalAgents.length - 1 && (
+
+              <div
+                className="
+                  w-[1px]
+                  flex-1
+                  bg-gray-300
+                  mt-2
+                "
+              />
+
+            )}
+
           </div>
 
-          {/* CONTENT */}
-          <div className="flex-1 bg-gray-50 border border-gray-300 rounded-lg p-3">
+        
 
-            <p className="text-sm font-medium text-gray-800">
+          <div className="flex-1 text-left">
+
+            <h3 className="text-[13px] font-semibold text-gray-800">
               {item.agentName}
-            </p>
+            </h3>
 
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-sm text-gray-700 mt-1">
               {item.reason}
             </p>
 
             {item.comments && (
-              <p className="text-xs text-gray-600 mt-1">
+
+              <p className="text-sm text-gray-500 mt-1">
                 {item.comments}
               </p>
+
             )}
 
-            <p className="text-[10px] text-gray-400 mt-2">
-              {item.createdAtDate} • {item.createdAtTime}
-            </p>
+            <div className="mt-3">
+
+              <p className="text-sm text-gray-700">
+                {item.createdAtDate}, {item.createdAtTime}
+              </p>
+
+            </div>
 
           </div>
+
         </div>
+
       ))}
+
     </div>
+
   </div>
+
 )}
             </div>
         </div>
