@@ -23,18 +23,33 @@ import InactiveIcon from "../../assets/trend-up.png";
 import CalendarIcon from "../../assets/calendarIcon.png";
 import UserIcon from "../../assets/user-block.png";
 import TrialIcon from "../../assets/timer.png";
+import Arrow from "../../assets/direction-down 01.png";
 
 
 const Properties = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, deleteHostelExpense, exportHostels, deleteHostel } = useHostel();
-  const { createSubscription } = useSubscription();
+  const { createSubscription,getAgentsDropdown } = useSubscription();
   const { getPlansDropdown } = usePlan();
   const [dropdownPlans, setDropdownPlans] = useState([]);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [isDeleting, setIsDeleting] = useState(false);
   const location = useLocation();
   const { roleId } = useParams();
+const [agentList, setAgentList] = useState([])
+const agentDropdownRef = useRef(null);
+const [agentFilter, setAgentFilter] = useState("");
+const [openAgentDropdown, setOpenAgentDropdown] = useState(false);
+useEffect(() => {
+    const fetchAgents = async () => {
+      const res = await getAgentsDropdown();
+      if (res.success) {
 
+        setAgentList(res.data)
+      }
+    };
+
+    fetchAgents();
+  }, []);
   useEffect(() => {
     getPlansDropdown().then((res) => {
       if (res?.success) {
@@ -416,6 +431,36 @@ useEffect(() => {
   );
 
 };
+useEffect(() => {
+
+  const handleClickOutside = (event) => {
+
+    if (
+      agentDropdownRef.current &&
+      !agentDropdownRef.current.contains(event.target)
+    ) {
+
+      setOpenAgentDropdown(false);
+
+    }
+
+  };
+
+  document.addEventListener(
+    "mousedown",
+    handleClickOutside
+  );
+
+  return () => {
+
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+  };
+
+}, []);
 
   const handleCreateSubscription = async (item) => {
     const firstPlan = dropdownPlans?.trialPlans?.[0];
@@ -982,7 +1027,15 @@ useEffect(() => {
 
            <div className="sticky top-0 z-20 bg-white pb-4">
 
-  <div className="flex-between flex-wrap gap-2 font-inter">
+  <div
+  className="
+    flex
+    items-end
+    gap-4
+    flex-wrap
+    font-inter 
+  "
+>
 
     <div className="flex gap-3">
 
@@ -999,7 +1052,7 @@ useEffect(() => {
           text-xs
           font-medium
           text-gray-700
-          outline-none
+          outline-none h-[42px]
         "
       >
 
@@ -1018,7 +1071,178 @@ useEffect(() => {
       </select>
 
     </div>
+<div
+  className="
+    relative
+    w-[240px]
+    shrink-0
+  "
+  ref={agentDropdownRef}
+>
 
+  {/* SELECT BOX */}
+  <button
+    type="button"
+    onClick={() =>
+      setOpenAgentDropdown(
+        !openAgentDropdown
+      )
+    }
+    className="
+      w-full
+      h-[42px]
+      px-4
+      rounded-xl
+      border border-gray-300
+      bg-white
+      flex items-center justify-between
+      gap-3
+      text-sm
+      font-medium
+      text-gray-700
+      shadow-sm
+      hover:border-blue-400
+      transition-all
+      duration-200
+      cursor-pointer
+    "
+  >
+
+    <span
+      className="
+        truncate
+        text-left
+        flex-1
+      "
+    >
+      {
+        agentList.find(
+          (a) =>
+            a.agentId === agentFilter
+        )?.agentName || "All Agents"
+      }
+    </span>
+
+    <img
+      src={Arrow}
+      className={`
+        w-4 h-4 shrink-0
+        transition-transform duration-200
+        ${
+          openAgentDropdown
+            ? "rotate-180"
+            : ""
+        }
+      `}
+    />
+
+  </button>
+
+
+  {/* DROPDOWN */}
+  {openAgentDropdown && (
+
+    <div
+      className="
+        absolute
+        top-[48px]
+        left-0
+        w-full
+        bg-white
+        border border-gray-200
+        rounded-xl
+        shadow-[0_10px_30px_rgba(0,0,0,0.12)]
+        overflow-hidden
+        z-[9999]
+        animate-fadeIn
+      "
+    >
+
+      <div
+        className="
+          max-h-[240px]
+          overflow-y-auto
+        "
+      >
+
+        {/* ALL */}
+        <button
+          type="button"
+          onClick={() => {
+
+            setAgentFilter("");
+            setOpenAgentDropdown(false);
+
+          }}
+          className={`
+            w-full
+            px-4 py-3
+            text-sm
+            text-left
+            transition-all
+            duration-150
+            hover:bg-blue-50
+            cursor-pointer
+
+            ${
+              agentFilter === ""
+                ? "bg-blue-50 text-blue-600 font-semibold"
+                : "text-gray-700"
+            }
+          `}
+        >
+          All Agents
+        </button>
+
+
+        {/* AGENTS */}
+        {agentList.map((agent) => (
+
+          <button
+            key={agent.agentId}
+            type="button"
+            onClick={() => {
+
+              setAgentFilter(
+                agent.agentId
+              );
+
+              setOpenAgentDropdown(
+                false
+              );
+
+            }}
+            className={`
+              w-full
+              px-4 py-3
+              text-sm
+              text-left
+              transition-all
+              duration-150
+              hover:bg-blue-50
+              cursor-pointer
+              break-words
+
+              ${
+                agentFilter ===
+                agent.agentId
+                  ? "bg-blue-50 text-blue-600 font-semibold"
+                  : "text-gray-700"
+              }
+            `}
+          >
+            {agent.agentName}
+          </button>
+
+        ))}
+
+      </div>
+
+    </div>
+
+  )}
+
+</div>
     <div className="flex items-end gap-3">
 
       <div className="flex flex-col">
@@ -1087,20 +1311,30 @@ useEffect(() => {
 
 
 
-              {/* <div className="bg-white rounded-xl shadow-sm border flex flex-col h-[calc(100vh-230px)]"> */}
+             
 
-              {/* <div className="bg-white rounded-xl shadow-sm border-gray-600 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]"> */}
-
-            <div
+ <div
   className="
     card-common
-    overflow-auto
+    overflow-x-auto
+    overflow-y-visible
+
     flex-col-layout
+
     max-h-[calc(100vh-230px)]
+
+    relative
+    z-[1]
   "
 >
 
-               <div className="scroll-container">
+              <div
+  className="
+    scroll-container
+    overflow-visible
+    relative
+  "
+>
 
                  <table className="w-max min-w-full table-fixed text-sm text-left">
 
@@ -1114,7 +1348,7 @@ useEffect(() => {
                         </th>
 
                         {/* Sticky Name */}
-                        <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">
+                        <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-80 w-[100px]">
                           Name
                         </th>
                         <th className="px-4 py-3 w-[120px] text-left">
@@ -1153,9 +1387,27 @@ useEffect(() => {
                         </th>
                         
 
-                        <th className="px-4 py-3 w-[120px] text-center">
+                        {/* <th className="px-4 py-3 w-[120px] text-center">
                           Actions
-                        </th>
+                        </th> */}
+                        <th
+  className="
+    px-4 py-3
+    w-[120px]
+    text-center
+
+    sticky
+    right-0
+
+    bg-[#F8F9FF]
+
+    z-[90]
+
+  
+  "
+>
+  Actions
+</th>
 
                       </tr>
                     </thead>
@@ -1379,7 +1631,23 @@ useEffect(() => {
 </td>
                            
 
-                          <td className="px-4 py-2 text-center">
+                        <td
+  className="
+    px-4 py-2
+    text-center
+
+    sticky
+    right-0
+
+    bg-white
+
+    z-[50]
+
+    group-hover:bg-gray-50
+
+  
+  "
+>
 
   <div className="flex items-center justify-center gap-2">
 
@@ -1392,50 +1660,50 @@ useEffect(() => {
     <div className="relative">
 
       <button
-        onClick={(e) => {
+      onClick={(e) => {
 
-          e.stopPropagation();
+  e.stopPropagation();
 
-          const rect =
-            e.currentTarget.getBoundingClientRect();
+  const rect =
+    e.currentTarget.getBoundingClientRect();
 
-          const viewportHeight =
-            window.innerHeight;
+  const viewportHeight =
+    window.innerHeight;
 
-          const menuHeight = 120;
+  const viewportWidth =
+    window.innerWidth;
 
-          const spaceBelow =
-            viewportHeight - rect.bottom;
+  const menuWidth = 180;
 
-          setMenuPosition({
+  const menuHeight = 120;
 
-            top:
-              spaceBelow < menuHeight
-                ? rect.top - menuHeight
-                : rect.bottom + 5,
+  const spaceBelow =
+    viewportHeight - rect.bottom;
 
-            left: rect.right - 150,
+  const spaceRight =
+    viewportWidth - rect.right;
 
-          });
+  setMenuPosition({
 
-          setOpenMenu(
-            openMenu === item.hostelId
-              ? null
-              : item.hostelId
-          );
+    top:
+      spaceBelow < menuHeight
+        ? rect.top - menuHeight
+        : rect.bottom - 12,
 
-        }}
-        className={`
-          p-1.5 rounded-full
-          transition-all duration-150
-          active:scale-90
+    left:
+      spaceRight < menuWidth
+        ? rect.left - menuWidth - 24
+        : rect.right - menuWidth,
 
-          ${
-            openMenu === item.hostelId
-              ? "bg-[#EEF2FF]"
-              : "hover:bg-gray-100"
-          }
-        `}
+  });
+
+  setOpenMenu(
+    openMenu === item.hostelId
+      ? null
+      : item.hostelId
+  );
+
+}}
       >
 
         <img
@@ -1457,7 +1725,20 @@ useEffect(() => {
 
         <div
           ref={menuRef}
-          className="fixed w-36 bg-white border border-gray-200 rounded-xl shadow-xl z-[9999] overflow-hidden"
+ className="
+  fixed
+  w-[140px]
+
+  bg-white
+  border border-gray-200
+  rounded-2xl
+
+  shadow
+
+  overflow-hidden
+
+  z-[99999]
+"
           style={{
             top: menuPosition.top,
             left: menuPosition.left,
@@ -1724,10 +2005,19 @@ useEffect(() => {
             </div>
           </div>
         )} */}
-       {showResetModal && (
+ {showResetModal && (
 
   <div
-    className="modal-overlay"
+    className="
+      fixed inset-0
+      bg-black/40
+
+      flex
+      items-center
+      justify-center
+
+      z-[99999]
+    "
     onClick={() => {
       setShowResetModal(false);
       setOpenMenu(false);
@@ -1736,7 +2026,19 @@ useEffect(() => {
   >
 
     <div
-      className="modal-box w-[420px] p-8 text-center"
+      className="
+        bg-white
+        rounded-2xl
+        shadow-2xl
+
+        w-[420px]
+        max-w-[90%]
+
+        p-8
+        text-center
+
+        animate-fadeIn
+      "
       onClick={(e) => e.stopPropagation()}
     >
 
@@ -1755,7 +2057,7 @@ useEffect(() => {
         />
       )}
 
-      <div className="flex-center gap-4 mt-1">
+      <div className="flex justify-center gap-4 mt-1">
 
         <button
           onClick={() => {
@@ -1764,13 +2066,14 @@ useEffect(() => {
             setMenuError("");
           }}
           className="
-            btn-secondary
             px-6
             py-3
             rounded-lg
-            text-blue-600
+            border
             border-blue-500
+            text-blue-600
             hover:bg-blue-50
+            transition-all
           "
         >
           Cancel
@@ -1779,10 +2082,13 @@ useEffect(() => {
         <button
           onClick={handleResetExpense}
           className="
-            btn-primary
             px-6
             py-3
             rounded-lg
+            bg-blue-600
+            text-white
+            hover:bg-blue-700
+            transition-all
           "
         >
           Delete
@@ -1797,7 +2103,7 @@ useEffect(() => {
 )}
         {showTrialPopup && (
           <div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/40 flex items-center justify-center z-80"
             onClick={() => setShowTrialPopup(false)}
           >
             <div
@@ -1832,10 +2138,19 @@ useEffect(() => {
             </div>
           </div>
         )}
-        {showDeleteModal && (
+  {showDeleteModal && (
 
   <div
-    className="modal-overlay"
+    className="
+      fixed inset-0
+      bg-black/40
+
+      flex
+      items-center
+      justify-center
+
+      z-[99999]
+    "
     onClick={() => {
       setShowDeleteModal(false);
       setMenuError("");
@@ -1843,15 +2158,27 @@ useEffect(() => {
   >
 
     <div
-      className="modal-box w-[350px] p-5"
+      className="
+        bg-white
+        rounded-2xl
+        shadow-2xl
+
+        w-[380px]
+        max-w-[90%]
+
+        p-7
+        text-center
+
+        animate-fadeIn
+      "
       onClick={(e) => e.stopPropagation()}
     >
 
-      <h2 className="text-sm font-semibold mb-2">
+      <h2 className="text-[22px] font-semibold text-gray-800 mb-3">
         Delete Hostel?
       </h2>
 
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-gray-500 text-[15px] leading-6 mb-7">
         Are you sure you want to delete this hostel?
       </p>
 
@@ -1862,7 +2189,7 @@ useEffect(() => {
         />
       )}
 
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-center gap-4">
 
         <button
           onClick={() => {
@@ -1870,11 +2197,24 @@ useEffect(() => {
             setMenuError("");
           }}
           className="
-            btn-secondary
-            px-3
-            py-1
-            rounded
-            text-sm
+            min-w-[110px]
+            px-5
+            py-3
+
+            rounded-xl
+
+            border
+            border-gray-300
+
+            text-gray-700
+            font-medium
+
+            hover:bg-gray-50
+
+            transition-all
+            duration-200
+
+            cursor-pointer
           "
         >
           Cancel
@@ -1884,12 +2224,22 @@ useEffect(() => {
           onClick={handleDeleteHostel}
           disabled={isDeleting}
           className={`
-            px-3 py-1 rounded text-sm text-white
+            min-w-[110px]
+            px-5
+            py-3
+
+            rounded-xl
+
+            text-white
+            font-medium
+
+            transition-all
+            duration-200
 
             ${
               isDeleting
-                ? "delete-btn-disabled"
-                : "delete-btn-active"
+                ? "bg-red-300 cursor-not-allowed"
+                : "bg-red-600 hover:bg-red-700 cursor-pointer"
             }
           `}
         >
