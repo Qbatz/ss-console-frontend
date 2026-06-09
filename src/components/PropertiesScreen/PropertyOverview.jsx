@@ -30,6 +30,10 @@ import Circle from "../../assets/menucircle.png";
 import ArrowSelect from "../../assets/direction-down 01.png";
 import InvoiceView from "./InvoiceView";
 import CopyImg from "../../assets/copyImg.jpg"
+import CustImag from "../../assets/single.png";
+import CustTenImg from "../../assets/team.png"
+import LocationGrey from "../../assets/locationGrey.png";
+import Call from "../../assets/call.png";
 const PropertyOverview = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory,sharePaymentLink} = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
@@ -271,7 +275,7 @@ const PropertyOverview = () => {
     let hasError = false;
 
     if (!days) {
-      setDaysError("Please Enter Days");
+      setDaysError("Please Choose Days");
       hasError = true;
     }
 
@@ -2821,18 +2825,13 @@ const PropertyOverview = () => {
           </div>
         </div>
       )} */}
-     {showTrialModal && (
+  {showTrialModal && (
 
   <div
     className="
-      fixed
-      inset-0
+      fixed inset-0
       bg-black/40
-      flex
-      items-center
-      justify-center
-      z-50
-      px-4
+      z-[99999]
     "
     onClick={() => {
 
@@ -2843,75 +2842,502 @@ const PropertyOverview = () => {
     }}
   >
 
+    {/* DRAWER */}
     <div
       className="
-        bg-white
-        rounded-modal
-        shadow-modal
+        absolute
+        top-4
+        right-4
+        bottom-4
+
         w-full
-        max-w-[320px]
-        p-6
-        animate-fadeIn
+        max-w-[480px]
+
+        bg-white
+        rounded-2xl
+        shadow-2xl
+
+        flex
+        flex-col
+
+        overflow-hidden
+        animate-slideLeft
       "
       onClick={(e) => e.stopPropagation()}
     >
 
-      {/* TITLE */}
-      <h2
-        className="
-          text-cardTitle
-          font-semibold
-          text-headingDark
-          mb-4
-          text-left
-        "
-      >
-        Extend Trial
-      </h2>
-
-      {/* INPUT */}
-      <input
-        type="number"
-        placeholder="Enter days"
-        value={days}
-        onChange={(e) => {
-
-          setDays(e.target.value);
-          setDaysError("");
-
-        }}
-        className="
-          w-full
-          border
-          border-borderSoft
-          rounded-card
-          px-3
-          py-2
-          text-cardTitle
-          outline-none
-          focus:border-primaryBlue
-        "
-      />
-
-      {/* ERROR */}
-      {daysError && (
-
-        <div className="mt-2">
-          <ErrorMessage
-            message={daysError}
-            type="error"
-          />
-        </div>
-
-      )}
-
-      {/* BUTTONS */}
+      {/* HEADER */}
       <div
         className="
-          flex
-          justify-end
-          gap-3
-          mt-5
+          flex items-center justify-between
+          px-6 py-5
+          border-b border-gray-200
+          shrink-0
+        "
+      >
+
+        <h2
+          className="
+            text-[22px]
+            font-semibold
+            text-gray-800
+          "
+        >
+          Extend Trial Period
+        </h2>
+
+        <button
+          onClick={() => {
+
+            setShowTrialModal(false);
+            setDays("");
+            setDaysError("");
+
+          }}
+          className="
+            w-8 h-8
+            rounded-full
+            flex items-center justify-center
+            hover:bg-gray-100
+            text-gray-500
+            text-lg
+            cursor-pointer
+          "
+        >
+          ✕
+        </button>
+
+      </div>
+
+
+    
+      <div
+        className="
+          flex-1
+          overflow-y-auto
+          px-6 py-5
+        "
+      >
+
+        
+        <div
+  className="
+    bg-[#F9FAFB]
+    rounded-xl
+    p-5
+    mb-6
+    border border-[#F1F3F5]
+  "
+>
+
+  {/* TITLE */}
+  <p
+    className="
+      text-[13px]
+      font-semibold
+      text-[#6B7280]
+      tracking-wide
+      mb-5
+      text-left
+    "
+  >
+    PROPERTY INFO
+  </p>
+
+  {/* ROWS */}
+  <div className="space-y-4">
+
+    {/* CUSTOMER */}
+    <div className="flex items-start gap-3">
+
+      <img
+        src={CustImag}
+        className="w-4 h-4 mt-[2px] shrink-0"
+      />
+
+      <div className="flex items-center">
+
+        <p
+          className="
+            w-[150px]
+            text-[12px]
+            text-[#6B7280]
+            font-medium text-left
+          "
+        >
+          Customer Name
+        </p>
+
+        <p
+          className="
+            text-[12px]
+            font-semibold
+            text-[#111827] text-left
+          "
+        >
+          Arish Raj
+        </p>
+
+      </div>
+
+    </div>
+
+
+    {/* PROPERTY */}
+    <div className="flex items-start gap-3">
+
+      <img
+        src={CustTenImg}
+        className="w-4 h-4 mt-[2px] shrink-0"
+      />
+
+      <div className="flex items-center">
+
+        <p
+          className="
+            w-[150px]
+            text-[12px]
+            text-[#6B7280]
+            font-medium text-left
+          "
+        >
+          Property Name
+        </p>
+
+        <p
+          className="
+            text-[12px]
+            font-semibold
+            text-[#1D4ED8] text-left
+          "
+        >
+          Laksha Ladies Hostel
+        </p>
+
+      </div>
+
+    </div>
+
+
+    {/* LOCATION */}
+    <div className="flex items-start gap-3">
+
+      <img
+        src={LocationGrey}
+        className="w-4 h-4 mt-[2px] shrink-0"
+      />
+
+      <div className="flex items-center">
+
+        <p
+          className="
+            w-[150px]
+            text-[12px]
+            text-[#6B7280]
+            font-medium text-left
+          "
+        >
+          Location
+        </p>
+
+        <p
+          className="
+            text-[12px]
+            font-semibold
+            text-[#111827]
+          "
+        >
+          Solinganallur, Chennai
+        </p>
+
+      </div>
+
+    </div>
+
+
+    {/* MOBILE */}
+    <div className="flex items-start gap-3">
+
+      <img
+        src={Call}
+        className="w-4 h-4 mt-[2px] shrink-0"
+      />
+
+      <div className="flex items-center">
+
+        <p
+          className="
+            w-[150px]
+            text-[12px]
+            text-[#6B7280]
+            font-medium text-left
+          "
+        >
+          Mobile
+        </p>
+
+        <p
+          className="
+            text-[12px]
+            font-semibold
+            text-[#111827]
+          "
+        >
+          +91 98654 87475
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+      
+   <div className="flex items-start gap-3">
+
+  {/* LEFT */}
+  <div className="w-[140px] pt-1">
+
+    <label
+      className="
+        text-xs
+        font-medium
+        text-gray-700
+        leading-5
+        text-left
+        block
+      "
+    >
+      Extension
+      <br />
+      Duration
+      <span className="text-red-500 ml-1">
+        *
+      </span>
+    </label>
+
+  </div>
+
+
+  {/* RIGHT */}
+  <div className="pt-[2px]">
+
+    <div
+      className="
+        flex
+        items-center
+        gap-8
+        whitespace-nowrap
+      "
+    >
+
+      {[
+        { label: "+7 Days", value: 7 },
+        { label: "+10 Days", value: 10 },
+        { label: "+14 Days (Max)", value: 14 }
+      ].map((item) => (
+
+        <label
+          key={item.value}
+          className="
+            flex items-center gap-2
+            text-sm text-gray-700
+            cursor-pointer
+          "
+        >
+
+          <input
+            type="radio"
+            name="days"
+            value={item.value}
+            checked={Number(days) === item.value}
+            onChange={(e) => {
+
+              setDays(e.target.value);
+              setDaysError("");
+
+            }}
+            className="accent-blue-600"
+          />
+
+          {item.label}
+
+        </label>
+
+      ))}
+
+    </div>
+
+
+    <div className="text-left">
+
+  <button
+    className="
+      mt-3
+      block
+      text-xs
+      text-blue-600
+      hover:underline
+      cursor-pointer
+    "
+  >
+    Select Custom
+  </button>
+
+</div>
+
+  </div>
+
+</div>
+ {daysError && (
+
+          <div className="mt-4">
+
+            <ErrorMessage
+              message={daysError}
+              type="error"
+            />
+
+          </div>
+
+        )}
+        {/* REASON */}
+       <div className="flex items-start gap-6 mt-5">
+
+  {/* LABEL */}
+  <div className=" pt-3">
+
+    <label
+      className="
+        text-xs
+        font-medium
+        text-gray-700
+        text-left
+        block
+      "
+    >
+      Reason
+      <span className="text-red-500 ml-1">
+        *
+      </span>
+    </label>
+
+  </div>
+
+
+  {/* SELECT */}
+  <div className="flex-1">
+
+    <select
+      className="
+        w-full
+        h-[48px]
+        border
+        border-gray-300
+        rounded-xl
+        px-4
+        text-sm
+        text-gray-700
+        outline-none
+        bg-white
+        focus:border-blue-500
+      "
+    >
+
+      <option>
+        Sales Follow-up
+      </option>
+
+    </select>
+
+  </div>
+
+</div>
+
+
+        {/* REMARKS */}
+        <div className="flex items-start gap-6 mt-5">
+
+  {/* LABEL */}
+  <div className=" pt-3">
+
+    <label
+      className="
+        text-xs
+        font-medium
+        text-gray-700
+        text-left
+        block
+      "
+    >
+      Remarks
+    </label>
+
+  </div>
+
+
+  {/* TEXTAREA */}
+  <div className="flex-1">
+
+    <textarea
+      rows={4}
+      placeholder="Add internal notes..."
+      className="
+        w-full
+        min-h-[120px]
+        border
+        border-gray-300
+        rounded-xl
+        px-4
+        py-3
+        text-sm
+        text-gray-700
+        resize-none
+        outline-none
+        bg-white
+        placeholder:text-gray-400
+        focus:border-blue-500
+      "
+    />
+
+  </div>
+
+</div>
+
+
+        {/* INFO */}
+        <div
+          className="
+            bg-blue-50
+            border border-blue-100
+            rounded-xl
+            px-4 py-3
+            text-xs
+            text-blue-700
+          "
+        >
+          ℹ Maximum extension allowed: 14 days,
+          Max 1 times per customer.
+        </div>
+
+
+        {/* ERROR */}
+       
+
+      </div>
+
+
+      {/* FOOTER */}
+      <div
+        className="
+          px-6 py-5
+          border-t border-gray-200
+          flex justify-end gap-3
+          shrink-0
+          bg-white
         "
       >
 
@@ -2924,13 +3350,11 @@ const PropertyOverview = () => {
 
           }}
           className="
-            px-4
-            py-2
-            border
-            border-borderSoft
-            rounded-card
-            text-textDark/70
-            hover:bg-cardBg
+            px-5 py-2.5
+            rounded-xl
+            border border-gray-300
+            text-gray-600
+            hover:bg-gray-50
             cursor-pointer
           "
         >
@@ -2940,15 +3364,15 @@ const PropertyOverview = () => {
         <button
           onClick={handleTrialWithDays}
           className="
-            px-4
-            py-2
-            bg-warningYellow
+            px-5 py-2.5
+            rounded-xl
+            bg-blue-600
             text-white
-            rounded-card
+            hover:bg-blue-700
             cursor-pointer
           "
         >
-          Submit
+          Confirm Extension
         </button>
 
       </div>

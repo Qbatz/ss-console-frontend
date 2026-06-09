@@ -24,6 +24,7 @@ import CalendarIcon from "../../assets/calendarIcon.png";
 import UserIcon from "../../assets/user-block.png";
 import TrialIcon from "../../assets/timer.png";
 import Arrow from "../../assets/direction-down 01.png";
+import { createPortal } from "react-dom";
 
 
 const Properties = () => {
@@ -39,6 +40,7 @@ const [agentList, setAgentList] = useState([])
 const agentDropdownRef = useRef(null);
 const [agentFilter, setAgentFilter] = useState("");
 const [openAgentDropdown, setOpenAgentDropdown] = useState(false);
+const [filterOption, setFilterOption] = useState("TOTAL_PROPERTIES");
 useEffect(() => {
     const fetchAgents = async () => {
       const res = await getAgentsDropdown();
@@ -320,21 +322,29 @@ useEffect(() => {
     subActive = false;
   }
 
-  getHostels(
-    page,
-    pageSize,
-    debouncedSearch,
-    start,
-    end,
-    subActive
-  );
+ getHostels(
+  page,
+  pageSize,
+
+  debouncedSearch,
+
+  start,
+  end,
+
+  subActive,
+
+  agentFilter,
+
+ filterOption
+);
 
 }, [
   page,
   pageSize,
   debouncedSearch,
   dateRange,
-  statusFilter
+  statusFilter,
+  agentFilter,filterOption
 ]);
 
 
@@ -647,18 +657,32 @@ useEffect(() => {
               {/* Stats Cards */}
    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
 
-  {/* CARD 1 */}
+
 
   <div
-    className="
-      card-common
-      flex items-start justify-between
-      p-4 xl:p-5
-      min-h-[90px]
-    "
-  >
+  onClick={() => {
+    setFilterOption("TOTAL_PROPERTIES");
+    setPage(1);
+  }}
+  className={`
+    card-common
+    flex items-start justify-between
+    p-4 xl:p-5
+    min-h-[90px]
 
-    <div>
+    cursor-pointer
+    transition-all
+    duration-200
+
+    ${
+      filterOption === "TOTAL_PROPERTIES"
+        ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+        : "hover:border-blue-300 hover:shadow-md"
+    }
+  `}
+>
+
+    <div  >
 
       <p className="text-[11px] text-gray-500 font-medium">
         Total Properties
@@ -686,15 +710,23 @@ useEffect(() => {
   {/* CARD 2 */}
 
   <div
-    className="
+    className={`
       card-common
       flex items-start justify-between
       p-4 xl:p-5
-      min-h-[90px]
-    "
-  >
+      min-h-[90px] cursor-pointer
+      ${
+  filterOption === "ACTIVE_PROPERTIES"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+  onClick={() => {
+    setFilterOption("ACTIVE_PROPERTIES");
+    setPage(1);
+  }} >
 
-    <div>
+    <div >
 
       <p className="text-[11px] text-gray-500 font-medium">
         Active Properties
@@ -730,15 +762,23 @@ useEffect(() => {
   {/* CARD 3 */}
 
   <div
-    className="
+    className={`
       card-common
       flex items-start justify-between
       p-4 xl:p-5
-      min-h-[90px]
-    "
-  >
+      min-h-[90px] cursor-pointer
+      ${
+  filterOption === "INACTIVE_PROPERTIES"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+  onClick={() => {
+    setFilterOption("INACTIVE_PROPERTIES");
+    setPage(1);
+  }} >
 
-    <div>
+    <div >
 
       <p className="text-[11px] text-gray-500 font-medium">
         Inactive Properties
@@ -766,22 +806,30 @@ useEffect(() => {
   {/* CARD 4 */}
 
   <div
-    className="
+    className={`
       card-common
       flex items-start justify-between
       p-4 xl:p-5
-      min-h-[90px]
-    "
-  >
+      min-h-[90px] cursor-pointer
+      ${ 
+  filterOption === "USED_TODAY"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+   onClick={() => {
+    setFilterOption("USED_TODAY");
+    setPage(1);
+  }}>
 
-    <div>
+    <div >
 
       <p className="text-[11px] text-gray-500 font-medium">
         Used Today
       </p>
 
       <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
-        65
+        {hostels?.usedTodayCount}
       </h2>
 
     </div>
@@ -802,22 +850,30 @@ useEffect(() => {
   {/* CARD 5 */}
 
   <div
-    className="
+    className={`
       card-common
       flex items-start justify-between
       p-4 xl:p-5
-      min-h-[90px]
-    "
-  >
+      min-h-[90px] cursor-pointer
+       ${
+  filterOption === "USED_2TO7_DAYS"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+`}
+ onClick={() => {
+    setFilterOption("USED_2TO7_DAYS");
+    setPage(1);
+  }} >
 
-    <div>
+    <div  >
 
       <p className="text-[11px] text-gray-500 font-medium">
         Used 1-7 Days
       </p>
 
       <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
-        64
+        {hostels?.used2To7DaysCount}
       </h2>
 
     </div>
@@ -838,22 +894,30 @@ useEffect(() => {
   {/* CARD 6 */}
 
   <div
-    className="
+    className={`
       card-common
       flex items-start justify-between
       p-4 xl:p-5
-      min-h-[90px]
-    "
-  >
+      min-h-[90px] cursor-pointer
+       ${
+  filterOption === "USED_8TO14_DAYS"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+ onClick={() => {
+    setFilterOption("USED_8TO14_DAYS");
+    setPage(1);
+  }} >
 
-    <div>
+    <div >
 
       <p className="text-[11px] text-gray-500 font-medium">
         Used Last 8-14 Days
       </p>
 
       <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
-        65
+        {hostels?.used8To14DaysCount}
       </h2>
 
     </div>
@@ -874,24 +938,32 @@ useEffect(() => {
   {/* CARD 7 */}
 
   <div
-    className="
+    className={`
       card-common
       flex items-start justify-between
       p-4 xl:p-5
-      min-h-[90px]
-    "
-  >
+      min-h-[90px] cursor-pointer
+       ${
+  filterOption === "USED_15TO30_DAYS"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+ onClick={() => {
+    setFilterOption("USED_15TO30_DAYS");
+    setPage(1);
+  }} >
 
-    <div>
+    <div  >
 
       <p className="text-[11px] text-gray-500 font-medium">
-        Inactive 15-30 Days
+        Used 15-30 Days
       </p>
 
       <div className="flex items-center gap-2 mt-2">
 
         <h2 className="text-2xl text-[20px] font-bold text-gray-800 leading-none">
-          12
+          {hostels?.used15To30DaysCount}
         </h2>
 
         <span className="badge-primary">
@@ -918,22 +990,30 @@ useEffect(() => {
   {/* CARD 8 */}
 
   <div
-    className="
+    className={`
       card-common
       flex items-start justify-between
       p-4 xl:p-5
-      min-h-[90px]
-    "
-  >
+      min-h-[90px] cursor-pointer
+       ${
+  filterOption === "USED_30_DAYS_AGO"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+  onClick={() => {
+    setFilterOption("USED_30_DAYS_AGO");
+    setPage(1);
+  }} >
 
-    <div>
+    <div >
 
       <p className="text-[11px] text-gray-500 font-medium">
-        Inactive 30+ Days
+        Used 30+ Days
       </p>
 
       <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
-        24
+        {hostels?.used30DaysAgoCount}
       </h2>
 
     </div>
@@ -954,22 +1034,30 @@ useEffect(() => {
   {/* CARD 9 */}
 
   <div
-    className="
+    className={`
       card-common
       flex items-start justify-between
       p-4 xl:p-5
-      min-h-[90px]
-    "
-  >
+      min-h-[90px] cursor-pointer
+        ${
+  filterOption === "NEVER_USED"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+    onClick={() => {
+    setFilterOption("NEVER_USED");
+    setPage(1);
+  }}>
 
-    <div>
+    <div  >
 
       <p className="text-[11px] text-gray-500 font-medium">
         Never Used
       </p>
 
       <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
-        22
+        {hostels?.neverUsedCount}
       </h2>
 
     </div>
@@ -990,13 +1078,22 @@ useEffect(() => {
   {/* CARD 10 */}
 
   <div
-    className="
+    className={`
       card-common
       flex items-start justify-between
       p-4 xl:p-5
       min-h-[90px]
-    "
-  >
+      cursor-pointer
+        ${
+  filterOption === "TRIAL_EXPIRING_SOON"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+     onClick={() => {
+    setFilterOption("TRIAL_EXPIRING_SOON");
+    setPage(1);
+  }}>
 
     <div>
 
@@ -1005,7 +1102,7 @@ useEffect(() => {
       </p>
 
       <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
-        09
+        {hostels?.trialExpiringCount}
       </h2>
 
     </div>
@@ -1037,7 +1134,7 @@ useEffect(() => {
   "
 >
 
-    <div className="flex gap-3">
+    {/* <div className="flex gap-3">
 
       <select
         value={statusFilter}
@@ -1070,7 +1167,7 @@ useEffect(() => {
 
       </select>
 
-    </div>
+    </div> */}
 <div
   className="
     relative
@@ -1314,31 +1411,28 @@ useEffect(() => {
              
 
  <div
-  className="
-    card-common
-    overflow-x-auto
-    overflow-y-visible
-
-    flex-col-layout
-
-    max-h-[calc(100vh-230px)]
-
-    relative
-    z-[1]
-  "
+  className="card-common flex-col-layout relative z-[1]"
+  style={{ 
+    overflow: 'visible',
+    maxHeight: 'calc(100vh - 230px)',  
+    display: 'flex',
+    flexDirection: 'column'
+  }}
 >
 
-              <div
-  className="
-    scroll-container
-    overflow-visible
-    relative
-  "
+ <div
+  className="scroll-container relative"
+  style={{ 
+    overflowX: 'auto',
+    overflowY: 'auto', 
+    flex: 1,
+    minHeight: 0,
+  }}
 >
 
                  <table className="w-max min-w-full table-fixed text-sm text-left">
 
-  <thead className="table-header sticky top-0 z-40">
+  <thead className="table-header sticky top-0 z-[50]">
 
                       <tr>
 
@@ -1631,7 +1725,7 @@ useEffect(() => {
 </td>
                            
 
-                        <td
+   <td
   className="
     px-4 py-2
     text-center
@@ -1641,11 +1735,9 @@ useEffect(() => {
 
     bg-white
 
-    z-[50]
+    z-[10]
 
     group-hover:bg-gray-50
-
-  
   "
 >
 
@@ -1657,7 +1749,7 @@ useEffect(() => {
       className="w-5 h-5 cursor-pointer"
     />
 
-    <div className="relative">
+    <div className="static">
 
       <button
       onClick={(e) => {
@@ -1675,7 +1767,7 @@ useEffect(() => {
 
   const menuWidth = 180;
 
-  const menuHeight = 120;
+  const menuHeight = 100;
 
   const spaceBelow =
     viewportHeight - rect.bottom;
@@ -1685,17 +1777,17 @@ useEffect(() => {
 
   setMenuPosition({
 
-    top:
-      spaceBelow < menuHeight
-        ? rect.top - menuHeight
-        : rect.bottom - 12,
+  top:
+    spaceBelow < menuHeight
+      ? rect.top - menuHeight + window.scrollY
+      : rect.bottom + 8 + window.scrollY,
 
-    left:
-      spaceRight < menuWidth
-        ? rect.left - menuWidth - 24
-        : rect.right - menuWidth,
+  left:
+    spaceRight < menuWidth
+      ? rect.left - menuWidth + window.scrollX
+      : rect.right - menuWidth + window.scrollX,
 
-  });
+});
 
   setOpenMenu(
     openMenu === item.hostelId
@@ -1721,66 +1813,46 @@ useEffect(() => {
 
       </button>
 
-      {openMenu === item.hostelId && (
+     {openMenu === item.hostelId && createPortal(
+  <div
+    ref={menuRef}
+    style={{
+      position: "fixed",
+      top: menuPosition.top,
+      left: menuPosition.left,
+      width: "160px",
+      background: "white",
+      border: "1px solid #e5e7eb",
+      borderRadius: "16px",
+      boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+      overflow: "hidden",
+      zIndex: 999999,
+    }}
+  >
+    <button
+      onClick={() => {
+        setSelectedHostelId(item.hostelId);
+        setShowResetModal(true);
+        setOpenMenu(null);
+      }}
+      className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+    >
+      Reset Expense
+    </button>
 
-        <div
-          ref={menuRef}
- className="
-  fixed
-  w-[140px]
-
-  bg-white
-  border border-gray-200
-  rounded-2xl
-
-  shadow
-
-  overflow-hidden
-
-  z-[99999]
-"
-          style={{
-            top: menuPosition.top,
-            left: menuPosition.left,
-          }}
-        >
-
-          <button
-            onClick={() => {
-              setSelectedHostelId(item.hostelId);
-              setShowResetModal(true);
-              setOpenMenu(false);
-            }}
-            className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            Reset Expense
-          </button>
-
-          <button
-            onClick={() => {
-              setDeleteHostelId(item.hostelId);
-              setShowDeleteModal(true);
-              setOpenMenu(false);
-            }}
-            className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-600 transition-colors cursor-pointer"
-          >
-            Delete
-          </button>
-
-          {/* <button
-            onClick={() => {
-              setSelectedHostel(item);
-              setShowAssignModal(true);
-              setOpenMenu(false);
-            }}
-            className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            Assign Staff
-          </button> */}
-
-        </div>
-
-      )}
+    <button
+      onClick={() => {
+        setDeleteHostelId(item.hostelId);
+        setShowDeleteModal(true);
+        setOpenMenu(null);
+      }}
+      className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-600 transition-colors cursor-pointer"
+    >
+      Delete
+    </button>
+  </div>,
+  document.body
+)}
 
     </div>
 
@@ -1820,6 +1892,26 @@ useEffect(() => {
                         ))
 
                       )}
+                      {!loading && displayData?.length === 0 && (
+
+  <tr>
+
+    <td
+      colSpan={8}
+      className="
+        text-center
+        py-10
+        text-gray-400
+        text-sm
+        font-medium
+      "
+    >
+      No Data Found
+    </td>
+
+  </tr>
+
+)}
 
 
                     </tbody>
@@ -1842,6 +1934,7 @@ useEffect(() => {
                 </div>
 
               </div>
+              {hostels?.totalPages > 1&& (
               <div className="flex-between px-4 py-1 text-sm bg-white">
 
                 {/* Total Count */}
@@ -1937,6 +2030,7 @@ useEffect(() => {
 
                 </div>
               </div>
+              )}
 
             </div>
             {/* // )
