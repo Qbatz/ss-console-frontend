@@ -1138,16 +1138,19 @@ const handleDelete = async () => {
         >
           Delete
         </button> */}
-        <button
+     <button
   onClick={handleDelete}
   disabled={isDeleting}
   className={`
-    px-3 py-1 rounded text-sm text-white
+    px-3 py-1
+    rounded
+    text-sm
+    text-white
 
     ${
       isDeleting
-        ? "delete-btn-disabled"
-        : "delete-btn-active"
+        ? "bg-red-300 cursor-not-allowed"
+        : "bg-red-600 hover:bg-red-700 cursor-pointer"
     }
   `}
 >

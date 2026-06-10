@@ -224,7 +224,13 @@ body {
   @apply rounded-xl;
 }
 
+.delete-btn-active {
+  @apply bg-red-600 hover:bg-red-700 cursor-pointer;
+}
 
+.delete-btn-disabled {
+  @apply bg-red-300 cursor-not-allowed;
+}
 /* =========================
    FLEX
 ========================= */
@@ -587,4 +593,63 @@ input[type=number] {
 
 .animate-fadeIn {
   animation: fadeIn 0.25s ease-out;
+}
+/* =========================
+   TABLE SCROLLBAR
+========================= */
+
+.table-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #bfd3ff transparent;
+}
+
+/* width */
+.table-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* track */
+.table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 999px;
+}
+
+/* thumb */
+.table-scroll::-webkit-scrollbar-thumb {
+  background: #bfd3ff;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* hover */
+.table-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9dbdff;
+  background-clip: content-box;
+}
+/* =========================
+   ANT DATE PICKER
+========================= */
+
+/* =========================
+   ANT DATE PICKER
+========================= */
+
+.ant-picker {
+  border: 1px solid #e5e7eb !important;
+  box-shadow: none !important;
+}
+
+.ant-picker:hover,
+.ant-picker-focused {
+  border-color: #315CEC !important;
+}
+
+.ant-picker-dropdown {
+  z-index: 999999 !important;
+}
+
+.custom-date-popup .ant-picker-panel {
+  border-radius: 14px !important;
 }

@@ -1847,7 +1847,7 @@ setCommentText("")
       onClick={(e) => e.stopPropagation()}
     >
 
-      {/* HEADER */}
+    
       <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200">
 
         <h2 className="flex items-center gap-2 text-[16px] font-semibold">

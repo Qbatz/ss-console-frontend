@@ -738,9 +738,9 @@ useEffect(() => {
           {hostels?.activeHostels}
         </h2>
 
-        <span className="badge-primary">
+        {/* <span className="badge-primary">
           ↑ 12%
-        </span>
+        </span> */}
 
       </div>
 
@@ -966,9 +966,9 @@ useEffect(() => {
           {hostels?.used15To30DaysCount}
         </h2>
 
-        <span className="badge-primary">
+        {/* <span className="badge-primary">
           ↑ 12%
-        </span>
+        </span> */}
 
       </div>
 
