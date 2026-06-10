@@ -671,7 +671,7 @@ const [totalProperty,setTotalProperty] = useState("")
     {(page - 1) * size + index + 1}
   </span>
 </td> */}
-                            <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] shadow-[2px_0_5px_rgba(0,0,0,0.05)] gap-2">
+                            {/* <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] shadow-[2px_0_5px_rgba(0,0,0,0.05)] gap-2">
                               <input
                                 type="checkbox"
                                 checked={selectedIds.includes(item.hostelId)}
@@ -684,7 +684,30 @@ const [totalProperty,setTotalProperty] = useState("")
                               <span>
                                 {(page - 1) * size + index + 1}
                               </span>
-                            </td>
+                            </td> */}
+                            <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] shadow-[2px_0_5px_rgba(0,0,0,0.05)] gap-2">
+
+  <input
+    type="checkbox"
+    checked={selectedIds.includes(item.hostelId)}
+    onChange={() => handleSelect(item.hostelId)}
+    disabled={
+      item.recurringStatus ||
+      item.activeTenantCount === 0
+    }
+    className={
+      item.recurringStatus ||
+      item.activeTenantCount === 0
+        ? "cursor-not-allowed opacity-50"
+        : "cursor-pointer"
+    }
+  />
+
+  <span>
+    {(page - 1) * size + index + 1}
+  </span>
+
+</td>
 
 
                             <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] group-hover:bg-gray-50">
@@ -1063,7 +1086,7 @@ const [totalProperty,setTotalProperty] = useState("")
                           <img src={team} className="w-4 h-4 opacity-60" />
                           <span className="text-gray-500 w-28 text-left">Active Tenants</span>
                           <span className="font-medium text-gray-800 text-left">
-                            {selectedItem?.activeTenantCount || "N/A"}
+                            {selectedItem?.activeTenantCount || 0}
                           </span>
                         </div>
 
@@ -1344,13 +1367,37 @@ const [totalProperty,setTotalProperty] = useState("")
                       {/* Show only if BOTH are false */}
 
                       <button
-                        // onClick={() => handleGenerate(selectedItem)}
-                        onClick={() => handleGenerate([selectedItem.hostelId])}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg text-[12px] flex items-center gap-2 cursor-pointer"
-                      >
-                        <img src={refreshWhite} className="w-4 h-4" />
-                        Generate Recurring
-                      </button>
+  onClick={() =>
+    handleGenerate([
+      selectedItem.hostelId
+    ])
+  }
+  disabled={
+    selectedItem?.canGenerateRecurring === false
+  }
+  className={`
+    px-6
+    py-2
+    rounded-lg
+    text-[12px]
+    flex
+    items-center
+    gap-2
+
+    ${
+      selectedItem?.canGenerateRecurring === false
+        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+        : "bg-blue-600 text-white cursor-pointer"
+    }
+  `}
+>
+  <img
+    src={refreshWhite}
+    className="w-4 h-4"
+  />
+
+  Generate Recurring
+</button>
 
 
                     </div>

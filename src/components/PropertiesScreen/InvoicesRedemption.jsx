@@ -169,6 +169,7 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import { usePermission } from "../../Utils/permissionHelper";
 import LoginImg from "../../assets/LoginImg.png";
+import Arrow from "../../assets/arrow-right.png"
 
 const InvoicesRedemption = ({ hostelData, refreshHostel }) => {
   const { canRead, canWrite, canUpdate, canDelete } =
@@ -197,6 +198,7 @@ const [deleteId, setDeleteId] = useState(null);
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
 
 
@@ -299,38 +301,87 @@ const [deleteId, setDeleteId] = useState(null);
   };
   const handleDeleteInvoiceRedemption = async (id) => {
 
-  const res = await deleteInvoiceRedemption(id);
+  if (isDeleting) return;
 
-  if (res.success) {
+  setIsDeleting(true);
+  setAmountError("");
 
-    setModalType("success");
-    setMessage(res?.data);
-    setShowSuccess(true);
+  try {
 
-    refreshHostel();
+    const res = await deleteInvoiceRedemption(id);
 
-    if (isMore) {
-      fetchInvoiceRedemptions(page);
+    if (res.success) {
+
+      setModalType("success");
+      setMessage(res?.data);
+      setShowSuccess(true);
+
+      refreshHostel();
+
+      if (isMore) {
+        fetchInvoiceRedemptions(page);
+      }
+
+      setShowDeleteModal(false);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
+    } else {
+
+      setModalType("error");
+      setMessage(res.message);
+      setAmountError(res.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
     }
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
+  } finally {
 
-  } else {
-
-    setModalType("error");
-    setMessage(res.message);
-    setAmountError(res.message)
-    setShowSuccess(true);
-
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
+    setIsDeleting(false);
 
   }
 
 };
+//   const handleDeleteInvoiceRedemption = async (id) => {
+
+//   const res = await deleteInvoiceRedemption(id);
+
+//   if (res.success) {
+
+//     setModalType("success");
+//     setMessage(res?.data);
+//     setShowSuccess(true);
+
+//     refreshHostel();
+
+//     if (isMore) {
+//       fetchInvoiceRedemptions(page);
+//     }
+
+//     setTimeout(() => {
+//       setShowSuccess(false);
+//     }, 1500);
+
+//   } else {
+
+//     setModalType("error");
+//     setMessage(res.message);
+//     setAmountError(res.message)
+//     setShowSuccess(true);
+
+//     setTimeout(() => {
+//       setShowSuccess(false);
+//     }, 1500);
+
+//   }
+
+// };
   return (
     <>
       <Toast
@@ -341,12 +392,12 @@ const [deleteId, setDeleteId] = useState(null);
       />
       <div className="p-6 space-y-6">
 
-        <div className="bg-white rounded-xl border border-gray-300 shadow-sm overflow-visible">
+        <div className="card-container overflow-visible">
 
           <div className="max-h-[400px] overflow-y-auto">
             <table className="w-full text-sm">
 
-              <thead className="bg-[#F8F9FF] sticky top-0 z-10 text-gray-600">
+              <thead className="bg-light-blue sticky top-0 z-10 textgray">
                 <tr>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Source Invoice</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Target Invoice</th>
@@ -367,7 +418,7 @@ const [deleteId, setDeleteId] = useState(null);
                     <tr key={i} className="border-t">
                       {[...Array(9)].map((_, j) => (
                         <td key={j} className="px-3 py-3">
-                          <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="h-4 bg-gray rounded animate-pulse"></div>
                         </td>
                       ))}
                     </tr>
@@ -544,25 +595,54 @@ const [deleteId, setDeleteId] = useState(null);
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
+                <option value={100}>100</option>
               </select>
 
               <button
-                disabled={page === 0}
-                onClick={() => setPage((p) => p - 1)}
-              >
-                ◀
-              </button>
+  disabled={
+    page === 0 ||
+    tableData?.length === 0
+  }
+  onClick={() => setPage((p) => p - 1)}
+  className={`
+    ${
+      page === 0 ||
+      tableData?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+   <img
+      src={Arrow}
+      className="w-4 h-4"
+    />
+</button>
 
               <span className="border px-3 py-1 rounded bg-gray-50">
                 {page + 1}
               </span>
 
-              <button
-                disabled={page + 1 >= totalPages}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                ▶
-              </button>
+             <button
+  disabled={
+    page + 1 >= totalPages ||
+    tableData?.length === 0
+  }
+  onClick={() => setPage((p) => p + 1)}
+  className={`
+    ${
+      page + 1 >= totalPages ||
+      tableData?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+   <img
+      src={Arrow}
+      className="w-4 h-4 rotate-[-180deg]"
+    />
+</button>
 
             </div>
 
@@ -731,7 +811,7 @@ const [deleteId, setDeleteId] = useState(null);
           Cancel
         </button>
 
-        <button
+        {/* <button
           onClick={async () => {
 
             await handleDeleteInvoiceRedemption(deleteId);
@@ -741,7 +821,29 @@ const [deleteId, setDeleteId] = useState(null);
           className="px-4 py-2 bg-red-600 text-white rounded-lg cursor-pointer"
         >
           Delete
-        </button>
+        </button> */}
+        <button
+  onClick={async () => {
+
+    await handleDeleteInvoiceRedemption(deleteId);
+    setDeleteId(null);
+
+  }}
+  disabled={isDeleting}
+  className={`
+    px-4 py-2 rounded-lg text-white
+
+    ${
+      isDeleting
+        ? "delete-btn-disabled"
+        : "delete-btn-active"
+    }
+  `}
+>
+  {isDeleting
+    ? "Deleting..."
+    : "Delete"}
+</button>
 
       </div>
 

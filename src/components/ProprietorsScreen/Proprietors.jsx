@@ -60,6 +60,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   console.log("owners", owners)
 
@@ -338,15 +339,23 @@ if (!/^[6-9]\d{9}$/.test(mobile)) {
     setError("");
   }
 }, [showDeleteModal]);
-  const handleDelete = async () => {
+const handleDelete = async () => {
 
-    const res = await deleteOwner(selectedOwner.ownerId);
+  if (isDeleting) return;
+
+  setIsDeleting(true);
+  setError("");
+
+  try {
+
+    const res = await deleteOwner(
+      selectedOwner.ownerId
+    );
 
     if (res?.success) {
 
       setShowDeleteModal(false);
 
-     
       getOwners({
         page,
         size,
@@ -357,10 +366,41 @@ if (!/^[6-9]\d{9}$/.test(mobile)) {
       });
 
     } else {
-     
-      setError(res?.message)
+
+      setError(res?.message);
+
     }
-  };
+
+  } finally {
+
+    setIsDeleting(false);
+
+  }
+
+};
+  // const handleDelete = async () => {
+
+  //   const res = await deleteOwner(selectedOwner.ownerId);
+
+  //   if (res?.success) {
+
+  //     setShowDeleteModal(false);
+
+     
+  //     getOwners({
+  //       page,
+  //       size,
+  //       name: search,
+  //       sortBy,
+  //       direction,
+  //       ...getFilterParams()
+  //     });
+
+  //   } else {
+     
+  //     setError(res?.message)
+  //   }
+  // };
   return (
     <DashboardLayout>
  <Toast
@@ -400,16 +440,38 @@ if (!/^[6-9]\d{9}$/.test(mobile)) {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-
+{/* 
             <div className="border border-gray-300 rounded-xl p-4 bg-white">
               <p className="text-gray-500 text-sm">Total Proprietors</p>
               <p className="text-xl font-semibold mt-1">{ownerCount}</p>
-            </div>
+            </div> */}
+           <div className="card-bg border-soft radius-md p-4">
 
-            <div className="border border-gray-300 rounded-xl p-4 bg-white">
+  <p className="text-sub">
+    Total Proprietors
+  </p>
+
+  <h2 className="text-main text-xl font-semibold">
+   {ownerCount}
+  </h2>
+
+</div>
+ <div className="card-bg border-soft radius-md p-4">
+
+  <p className="text-sub">
+   Active
+  </p>
+
+  <h2 className="text-main text-xl font-semibold">
+   {activeCount}
+  </h2>
+
+</div>
+
+            {/* <div className="border border-gray-300 rounded-xl p-4 bg-white">
               <p className="text-gray-500 text-sm">Active</p>
               <p className="text-xl font-semibold mt-1">{activeCount}</p>
-            </div>
+            </div> */}
 
           </div>
 
@@ -1070,12 +1132,29 @@ if (!/^[6-9]\d{9}$/.test(mobile)) {
           Cancel
         </button>
 
-        <button
+        {/* <button
           onClick={handleDelete}
           className="px-3 py-1 bg-red-600 text-white rounded text-sm"
         >
           Delete
-        </button>
+        </button> */}
+        <button
+  onClick={handleDelete}
+  disabled={isDeleting}
+  className={`
+    px-3 py-1 rounded text-sm text-white
+
+    ${
+      isDeleting
+        ? "delete-btn-disabled"
+        : "delete-btn-active"
+    }
+  `}
+>
+  {isDeleting
+    ? "Deleting..."
+    : "Delete"}
+</button>
 
       </div>
     </div>

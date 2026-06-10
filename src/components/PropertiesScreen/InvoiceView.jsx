@@ -12,6 +12,7 @@ import { useHostel } from "../../Context/HostelListContext";
 import Circle from "../../assets/menucircle.png";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
+import Arrow from "../../assets/arrow-right.png"
 
 const InvoiceView = ({ hostelData, refreshHostel }) => {
 
@@ -809,7 +810,7 @@ useEffect(() => {
                             <span>
                                 Total Record Count :
                                 <span className="text-blue-600 ml-1">
-                                    {totalItems}
+                                    {invoices.length}
                                 </span>
                             </span>
 
@@ -831,24 +832,52 @@ useEffect(() => {
 
 
                                 <button
-                                    disabled={page === 1}
-                                    onClick={() => setPage((p) => p - 1)}
-                                >
-                                    ◀
-                                </button>
+  disabled={
+    page === 1 ||
+    invoices?.length === 0
+  }
+  onClick={() => setPage((p) => p - 1)}
+  className={`
+    ${
+      page === 1 ||
+      invoices?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  <img
+    src={Arrow}
+    className="w-4 h-4"
+  />
+</button>
 
 
-                                <span className="border px-3 py-1 rounded bg-gray-50">
-                                    {page}
-                                </span>
+<span className="border px-3 py-1 rounded bg-gray-50">
+  {page}
+</span>
 
 
-                                <button
-                                    disabled={page >= totalPages}
-                                    onClick={() => setPage((p) => p + 1)}
-                                >
-                                    ▶
-                                </button>
+<button
+  disabled={
+    page >= totalPages ||
+    invoices?.length === 0
+  }
+  onClick={() => setPage((p) => p + 1)}
+  className={`
+    ${
+      page >= totalPages ||
+      invoices?.length === 0
+        ? "opacity-40 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
+>
+  <img
+    src={Arrow}
+    className="w-4 h-4 rotate-[-180deg]"
+  />
+</button>
 
                             </div>
 

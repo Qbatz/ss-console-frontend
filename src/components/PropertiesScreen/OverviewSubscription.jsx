@@ -149,7 +149,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
           <tbody
             className="
               divide-y
-              divide-borderSoft
+              divide-borderSoft 
             "
           >
 
@@ -169,7 +169,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                     text-tableCell
                     font-medium
                     whitespace-nowrap
-                    text-textDark
+                    text-textDark text-left
                   "
                 >
                   {currentSub.planName || "N/A"}
@@ -182,7 +182,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                     text-tableCell
                     font-medium
                     whitespace-nowrap
-                    text-textDark
+                    text-textDark text-left
                   "
                 >
                   {currentSub.planStartsAt} - {currentSub.planEndsAt}
@@ -195,7 +195,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                     text-tableCell
                     font-medium
                     whitespace-nowrap
-                    text-textDark
+                    text-textDark text-left
                   "
                 >
                   ₹ {currentSub.planAmount ?? 0}
@@ -208,7 +208,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                     text-tableCell
                     font-medium
                     whitespace-nowrap
-                    text-textDark
+                    text-textDark text-left
                   "
                 >
                   ₹ {currentSub.paidAmount ?? 0}
@@ -221,7 +221,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                     text-tableCell
                     font-medium
                     whitespace-nowrap
-                    text-textDark
+                    text-textDark text-left
                   "
                 >
                   ₹ {currentSub.discountAmount ?? 0}
@@ -234,7 +234,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                     text-tableCell
                     font-medium
                     whitespace-nowrap
-                    text-textDark
+                    text-textDark text-left
                   "
                 >
                   {currentSub.planEndsAt || "N/A"}
@@ -244,7 +244,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                   className="
                     px-4
                     py-3
-                    whitespace-nowrap
+                    whitespace-nowrap text-left
                   "
                 >
 
@@ -426,7 +426,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                         text-tableCell
                         font-medium
                         whitespace-nowrap
-                        text-textDark
+                        text-textDark text-left
                       "
                     >
                       {sub.planName || "N/A"}
@@ -439,7 +439,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                         text-tableCell
                         font-medium
                         whitespace-nowrap
-                        text-textDark
+                        text-textDark text-left
                       "
                     >
                       {sub.planStartsAt || "N/A"} - {sub.planEndsAt || "N/A"}
@@ -452,7 +452,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                         text-tableCell
                         font-medium
                         whitespace-nowrap
-                        text-textDark
+                        text-textDark text-left
                       "
                     >
                       ₹ {sub.planAmount ?? 0}
@@ -465,7 +465,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                         text-tableCell
                         font-medium
                         whitespace-nowrap
-                        text-textDark
+                        text-textDark text-left
                       "
                     >
                       ₹ {sub.paidAmount ?? 0}
@@ -478,7 +478,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                         text-tableCell
                         font-medium
                         whitespace-nowrap
-                        text-textDark
+                        text-textDark text-left
                       "
                     >
                       ₹ {sub.discountAmount ?? 0}
@@ -491,7 +491,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                         text-tableCell
                         font-medium
                         whitespace-nowrap
-                        text-textDark
+                        text-textDark text-left
                       "
                     >
                       {sub.planEndsAt || "N/A"}

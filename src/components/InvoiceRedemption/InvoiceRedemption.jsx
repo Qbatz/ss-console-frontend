@@ -181,7 +181,7 @@ setModalType("success");
   className="
     max-h-[400px]
     overflow-y-auto
-    overflow-x-hidden
+   overflow-x-auto
 
     [&::-webkit-scrollbar]:w-[10px]
 

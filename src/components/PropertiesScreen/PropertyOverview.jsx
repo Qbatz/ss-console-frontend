@@ -30,6 +30,10 @@ import Circle from "../../assets/menucircle.png";
 import ArrowSelect from "../../assets/direction-down 01.png";
 import InvoiceView from "./InvoiceView";
 import CopyImg from "../../assets/copyImg.jpg"
+import CustImag from "../../assets/single.png";
+import CustTenImg from "../../assets/team.png"
+import LocationGrey from "../../assets/locationGrey.png";
+import Call from "../../assets/call.png";
 const PropertyOverview = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory,sharePaymentLink} = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
@@ -121,6 +125,7 @@ const PropertyOverview = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showPaidByDropdown, setShowPaidByDropdown] = useState(false);
+   const [showPaidByDropdownGenerate, setShowPaidByDropdownGenerate] = useState(false);
   const [showPlanDropdown, setShowPlanDropdown] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [showAgentModal, setShowAgentModal] = useState(false);
@@ -270,7 +275,7 @@ const PropertyOverview = () => {
     let hasError = false;
 
     if (!days) {
-      setDaysError("Please Enter Days");
+      setDaysError("Please Choose Days");
       hasError = true;
     }
 
@@ -746,6 +751,10 @@ const PropertyOverview = () => {
     //   setPaymentAmountError("Please enter amount");
     //   hasError = true;
     // }
+      if (!paidBy) {
+      setPaidByError("Please select Paid By");
+      hasError = true;
+    }
     if (!paymentDiscount) {
       setPaymentDiscountError("Please enter discount");
       hasError = true;
@@ -756,7 +765,8 @@ const PropertyOverview = () => {
     const payload = {
       planCode: paymentPlan,
       // paidAmount: Number(paymentAmount),
-      discountAmount: Number(paymentDiscount || 0)
+      discountAmount: Number(paymentDiscount || 0),
+      paidBy
     };
 
     const res = await generateOrderHistory(
@@ -784,6 +794,9 @@ const PropertyOverview = () => {
       setModalType("error");
       setMessage(res?.message || "Something went wrong");
       setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500)
 
     }
 
@@ -843,8 +856,8 @@ const PropertyOverview = () => {
           <img
   src={arrowleft}
   className="
-    w-iconSm
-    h-iconSm
+    w-5
+    h-5
     cursor-pointer
   "
 
@@ -864,16 +877,14 @@ const PropertyOverview = () => {
               } else {
 
                 navigate(`/properties/${adminDetails?.roleId}`, {
-                  state: {
-                    skipApi: true,
-
-                    currentPage: location.state?.currentPage,
-                    currentSearch: location.state?.currentSearch,
-                    currentDateRange: location.state?.currentDateRange,
-                    currentStatusFilter:
-                      location.state?.currentStatusFilter,
-                  },
-                });
+  state: {
+    currentPage: location.state?.currentPage,
+    currentSearch: location.state?.currentSearch,
+    currentDateRange: location.state?.currentDateRange,
+    currentStatusFilter:
+      location.state?.currentStatusFilter,
+  },
+});
 
               }
 
@@ -888,286 +899,277 @@ const PropertyOverview = () => {
         <div className="bg-cardBg border border-borderSoft rounded-card shadow-card p-5 mt-2">
 
           {/* Top Section */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
 
-            {/* Left */}
-            <div className="flex items-center gap-3">
+  {/* LEFT */}
+  <div className="flex items-center gap-3 min-w-0 flex-1">
 
-              {/* <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold">
-                {hostelData.initials}
-              </div> */}
-              <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-lg font-semibold">
+    {/* PROFILE */}
+    <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-lg font-semibold shrink-0">
 
-                {hostelData?.mainImage ? (
+      {hostelData?.mainImage ? (
 
-                  <img
-                    src={hostelData.mainImage}
-                    alt="profile"
-                    className="w-full h-full object-cover"
-                  />
+        <img
+          src={hostelData.mainImage}
+          alt="profile"
+          className="w-full h-full object-cover"
+        />
 
-                ) : (
+      ) : (
 
-                  <span>
-                    {hostelData?.initials}
-                  </span>
+        <span>
+          {hostelData?.initials}
+        </span>
 
-                )}
+      )}
 
-              </div>
-
-              <div>
-               <h2
-  className="
-    text-sectionTitle
-    font-semibold
-    text-headingDark
-    text-left
-    font-inter
-  "
->
-                  {hostelData.hostelName}
-                </h2>
-
-             <p
-  className="
-    text-cardTitle
-    text-textDark/60
-    flex
-    items-center
-    gap-1
-    text-start
-    whitespace-nowrap
-  "
->
-  {hostelData.hostelId} |
-
-  <span
-    className="
-      text-primaryBlue
-      cursor-pointer
-      hover:underline
-    "
-    onClick={() => handleOwnerClick(hostelData)}
-  >
-    {hostelData.owner?.fullName}
-  </span>
-
-  <img
-    src={Arrow}
-    className="
-      w-3
-      h-3
-      ml-1
-    "
-  />
-</p>
-              </div>
-              <div className="flex gap-5 mt-4">
-
-                {/* 1️⃣ Trial Extend */}
-                {/* <button
-                disabled={trialPlan?.trialExtendable === false}
-                 onClick={() => setShowTrialConfirm(true)}
-                  className="bg-green-600 text-white px-2 py-[2px] font-medium rounded text-[10px] whitespace-nowrap cursor-pointer"
-                >
-                  Trial Extend
-                </button> */}
-                {/* <button
-  disabled={
-    trialPlan?.canAddTrial === false ||
-    !canSubscriptionWrite
-  }
-  onClick={() => {
-    if (
-      trialPlan?.canAddTrial !== false &&
-      canSubscriptionWrite
-    ) {
-      setShowTrialConfirm(true);
-    }
-  }}
-  className={`px-2 py-[2px] font-medium rounded text-[10px] whitespace-nowrap
-    ${
-      trialPlan?.canAddTrial === false ||
-      !canSubscriptionWrite
-        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-        : "bg-green-600 text-white cursor-pointer hover:bg-green-700"
-    }
-  `}
-  title={
-    trialPlan?.canAddTrial === false
-      ? "Trial cannot be extended"
-      : !canSubscriptionWrite
-      ? "No permission"
-      : ""
-  }
->
-  Trial Extend
-</button> */}
-
-                {/* <button
-                  disabled={trialPlan?.canAddExpandableTrial === false}
-                  onClick={() => setShowTrialModal(true)}
-                  className={`px-3 py-1 rounded text-[10px] whitespace-nowrap
-    ${trialPlan?.canAddExpandableTrial === false
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-yellow-500 text-white cursor-pointer hover:bg-yellow-600"
-                    }
-  `}
-                >
-                  Trial + Days
-                </button> */}
-               <button
-  disabled={
-    hostelData?.canAddExpandableTrial === false ||
-    !canSubscriptionWrite
-  }
-  onClick={() => {
-    if (
-      hostelData?.canAddExpandableTrial !== false &&
-      canSubscriptionWrite
-    ) {
-      setShowTrialModal(true);
-    }
-  }}
-  className={`
-    px-3
-    py-1
-    rounded-[6px]
-    text-[10px]
-    font-medium
-    whitespace-nowrap
-    transition-all
-    duration-200
-    shadow-card
-    font-inter
-    ${
-      hostelData?.canAddExpandableTrial === false ||
-      !canSubscriptionWrite
-        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-        : "bg-warningYellow text-white cursor-pointer hover:opacity-90"
-    }
-  `}
->
-  Trial + Days
-</button>
-
-              <button
-  disabled={!canSubscriptionWrite}
-  onClick={() => {
-    if (canSubscriptionWrite) {
-      setShowPlanModal(true);
-    }
-  }}
-  className={`
-    px-3
-    py-1
-    rounded-[6px]
-    text-[10px]
-    font-medium
-    whitespace-nowrap
-    transition-all
-    duration-200
-    shadow-card
-    font-inter
-    ${
-      canSubscriptionWrite
-        ? "bg-primaryBlue text-white cursor-pointer hover:opacity-90"
-        : "bg-gray-200 text-gray-400 cursor-not-allowed"
-    }
-  `}
->
-  Buy Plan
-</button>
-
-              <button
-  onClick={() => setShowPaymentDrawer(true)}
-  className="
-    px-3
-    py-1
-    rounded-[6px]
-    text-[10px]
-    font-medium
-    whitespace-nowrap
-    bg-successGreen
-    text-white
-    cursor-pointer
-    hover:opacity-90
-    transition-all
-    duration-200
-    shadow-card
-    font-inter
-  "
->
-  Generate Payment
-</button>
+    </div>
 
 
-              </div>
-            </div>
+    {/* CONTENT */}
+    <div className="min-w-0 flex-1">
+
+      {/* NAME + RIGHT */}
+      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
+
+        {/* NAME */}
+        <div className="min-w-0">
+
+          <h2
+            title={hostelData.hostelName}
+            className="
+              text-sectionTitle
+              font-semibold
+              text-headingDark
+              font-inter
+              truncate
+              whitespace-nowrap
+              overflow-hidden
+              max-w-[500px] text-left
+            "
+          >
+            {hostelData.hostelName}
+          </h2>
+
+          <p
+            className="
+              text-cardTitle
+              text-textDark/60
+              flex
+              items-center
+              gap-1
+              whitespace-nowrap
+              overflow-hidden
+              mt-1
+            "
+          >
+
+            <span className="shrink-0">
+              {hostelData.hostelId} |
+            </span>
+
+            <span
+              title={hostelData.owner?.fullName}
+              className="
+                text-primaryBlue
+                cursor-pointer
+                hover:underline
+                truncate
+                overflow-hidden
+                max-w-[260px]
+              "
+              onClick={() => handleOwnerClick(hostelData)}
+            >
+              {hostelData.owner?.fullName}
+            </span>
+
+            <img
+              src={Arrow}
+              className="w-3 h-3 ml-1 shrink-0"
+            />
+
+          </p>
+
+        </div>
 
 
-            {/* Right */}
-            <div className="flex items-center gap-3 text-[13px] text-gray-500 font-inter">
-  
-  <div className="flex items-center gap-2">
-    <img
-      src={refresh}
-      className="w-8 h-8 object-contain"
-      alt="refresh"
-    />
+        {/* RIGHT SECTION */}
+        <div className="flex items-center gap-3 shrink-0 flex-wrap mb-5">
 
-    <span className="whitespace-nowrap text-textDark">
-      {hostelData.createdAtDate}
-    </span>
-  </div>
+          {/* BUTTONS */}
+          <div className="flex items-center gap-2 flex-wrap">
 
-  {/* View */}
-  <button
-    className="
-      w-8
-      h-8
-      flex
-      items-center
-      justify-center
-      rounded-full
-      hover:bg-cardBg
-      transition-all
-      duration-200
-      cursor-pointer
-    "
-  >
-    <img
-      src={ViewImg}
-      width={18}
-      height={18}
-      alt="view"
-      className="object-contain"
-    />
-  </button>
+            {/* TRIAL */}
+            <button
+              disabled={
+                hostelData?.canAddExpandableTrial === false ||
+                !canSubscriptionWrite
+              }
+              onClick={() => {
 
-  {/* Menu */}
-  <button
-    className="
-      w-8
-      h-8
-      flex
-      items-center
-      justify-center
-      rounded-full
-      text-gray-400
-      hover:bg-cardBg
-      hover:text-textDark
-      transition-all
-      duration-200
-      cursor-pointer
-    "
-  >
-    ⋮
-  </button>
-</div>
+                if (
+                  hostelData?.canAddExpandableTrial !== false &&
+                  canSubscriptionWrite
+                ) {
+
+                  setShowTrialModal(true);
+
+                }
+
+              }}
+              className={`
+                px-3
+                py-1
+                rounded-[6px]
+                text-[10px]
+                font-medium
+                whitespace-nowrap
+                transition-all
+                duration-200
+                shadow-card
+                font-inter
+                ${
+                  hostelData?.canAddExpandableTrial === false ||
+                  !canSubscriptionWrite
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-warningYellow text-white cursor-pointer hover:opacity-90"
+                }
+              `}
+            >
+              Trial + Days
+            </button>
+
+
+            {/* BUY PLAN */}
+            <button
+              disabled={!canSubscriptionWrite}
+              onClick={() => {
+
+                if (canSubscriptionWrite) {
+
+                  setShowPlanModal(true);
+
+                }
+
+              }}
+              className={`
+                px-3
+                py-1
+                rounded-[6px]
+                text-[10px]
+                font-medium
+                whitespace-nowrap
+                transition-all
+                duration-200
+                shadow-card
+                font-inter
+                ${
+                  canSubscriptionWrite
+                    ? "bg-primaryBlue text-white cursor-pointer hover:opacity-90"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }
+              `}
+            >
+              Buy Plan
+            </button>
+
+
+            {/* PAYMENT */}
+            <button
+              onClick={() => setShowPaymentDrawer(true)}
+              className="
+                px-3
+                py-1
+                rounded-[6px]
+                text-[10px]
+                font-medium
+                whitespace-nowrap
+                bg-successGreen
+                text-white
+                cursor-pointer
+                hover:opacity-90
+                transition-all
+                duration-200
+                shadow-card
+                font-inter
+              "
+            >
+              Generate Payment
+            </button>
 
           </div>
+
+
+          {/* DATE */}
+          <div className="flex items-center gap-2">
+
+            <img
+              src={refresh}
+              className="w-8 h-8 object-contain"
+              alt="refresh"
+            />
+
+            <span className="whitespace-nowrap text-textDark text-[13px] font-inter">
+              {hostelData.createdAtDate}
+            </span>
+
+          </div>
+
+
+          {/* VIEW */}
+          <button
+            className="
+              w-8
+              h-8
+              flex
+              items-center
+              justify-center
+              rounded-full
+              hover:bg-cardBg
+              transition-all
+              duration-200
+              cursor-pointer
+            "
+          >
+            <img
+              src={ViewImg}
+              width={18}
+              height={18}
+              alt="view"
+              className="object-contain"
+            />
+          </button>
+
+
+          {/* MENU */}
+          <button
+            className="
+              w-8
+              h-8
+              flex
+              items-center
+              justify-center
+              rounded-full
+              text-gray-400
+              hover:bg-cardBg
+              hover:text-textDark
+              transition-all
+              duration-200
+              cursor-pointer
+            "
+          >
+            ⋮
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
 
           
@@ -1601,7 +1603,7 @@ const PropertyOverview = () => {
           text-sectionTitle
           font-semibold
           mt-1
-          text-headingDark
+          text-headingDark text-left
         "
       >
         {hostelData.noOfRooms} | {hostelData.noOfBeds}
@@ -1666,7 +1668,7 @@ const PropertyOverview = () => {
           text-sectionTitle
           font-semibold
           mt-1
-          text-headingDark
+          text-headingDark text-left
         "
       >
         0
@@ -1838,7 +1840,7 @@ const PropertyOverview = () => {
                     className="
                       px-4
                       py-3
-                      text-left
+                      text-left text-[12px]
                     "
                   >
 
@@ -1889,7 +1891,7 @@ const PropertyOverview = () => {
                     key={item.customerId || index}
                     className="
                       hover:bg-cardBg
-                      transition-all
+                      transition-all1 text-[12px]
                     "
                   >
 
@@ -2823,18 +2825,13 @@ const PropertyOverview = () => {
           </div>
         </div>
       )} */}
-     {showTrialModal && (
+  {showTrialModal && (
 
   <div
     className="
-      fixed
-      inset-0
+      fixed inset-0
       bg-black/40
-      flex
-      items-center
-      justify-center
-      z-50
-      px-4
+      z-[99999]
     "
     onClick={() => {
 
@@ -2845,75 +2842,502 @@ const PropertyOverview = () => {
     }}
   >
 
+    {/* DRAWER */}
     <div
       className="
-        bg-white
-        rounded-modal
-        shadow-modal
+        absolute
+        top-4
+        right-4
+        bottom-4
+
         w-full
-        max-w-[320px]
-        p-6
-        animate-fadeIn
+        max-w-[480px]
+
+        bg-white
+        rounded-2xl
+        shadow-2xl
+
+        flex
+        flex-col
+
+        overflow-hidden
+        animate-slideLeft
       "
       onClick={(e) => e.stopPropagation()}
     >
 
-      {/* TITLE */}
-      <h2
-        className="
-          text-cardTitle
-          font-semibold
-          text-headingDark
-          mb-4
-          text-left
-        "
-      >
-        Extend Trial
-      </h2>
-
-      {/* INPUT */}
-      <input
-        type="number"
-        placeholder="Enter days"
-        value={days}
-        onChange={(e) => {
-
-          setDays(e.target.value);
-          setDaysError("");
-
-        }}
-        className="
-          w-full
-          border
-          border-borderSoft
-          rounded-card
-          px-3
-          py-2
-          text-cardTitle
-          outline-none
-          focus:border-primaryBlue
-        "
-      />
-
-      {/* ERROR */}
-      {daysError && (
-
-        <div className="mt-2">
-          <ErrorMessage
-            message={daysError}
-            type="error"
-          />
-        </div>
-
-      )}
-
-      {/* BUTTONS */}
+      {/* HEADER */}
       <div
         className="
-          flex
-          justify-end
-          gap-3
-          mt-5
+          flex items-center justify-between
+          px-6 py-5
+          border-b border-gray-200
+          shrink-0
+        "
+      >
+
+        <h2
+          className="
+            text-[22px]
+            font-semibold
+            text-gray-800
+          "
+        >
+          Extend Trial Period
+        </h2>
+
+        <button
+          onClick={() => {
+
+            setShowTrialModal(false);
+            setDays("");
+            setDaysError("");
+
+          }}
+          className="
+            w-8 h-8
+            rounded-full
+            flex items-center justify-center
+            hover:bg-gray-100
+            text-gray-500
+            text-lg
+            cursor-pointer
+          "
+        >
+          ✕
+        </button>
+
+      </div>
+
+
+    
+      <div
+        className="
+          flex-1
+          overflow-y-auto
+          px-6 py-5
+        "
+      >
+
+        
+        <div
+  className="
+    bg-[#F9FAFB]
+    rounded-xl
+    p-5
+    mb-6
+    border border-[#F1F3F5]
+  "
+>
+
+  {/* TITLE */}
+  <p
+    className="
+      text-[13px]
+      font-semibold
+      text-[#6B7280]
+      tracking-wide
+      mb-5
+      text-left
+    "
+  >
+    PROPERTY INFO
+  </p>
+
+  {/* ROWS */}
+  <div className="space-y-4">
+
+    {/* CUSTOMER */}
+    <div className="flex items-start gap-3">
+
+      <img
+        src={CustImag}
+        className="w-4 h-4 mt-[2px] shrink-0"
+      />
+
+      <div className="flex items-center">
+
+        <p
+          className="
+            w-[150px]
+            text-[12px]
+            text-[#6B7280]
+            font-medium text-left
+          "
+        >
+          Customer Name
+        </p>
+
+        <p
+          className="
+            text-[12px]
+            font-semibold
+            text-[#111827] text-left
+          "
+        >
+          Arish Raj
+        </p>
+
+      </div>
+
+    </div>
+
+
+    {/* PROPERTY */}
+    <div className="flex items-start gap-3">
+
+      <img
+        src={CustTenImg}
+        className="w-4 h-4 mt-[2px] shrink-0"
+      />
+
+      <div className="flex items-center">
+
+        <p
+          className="
+            w-[150px]
+            text-[12px]
+            text-[#6B7280]
+            font-medium text-left
+          "
+        >
+          Property Name
+        </p>
+
+        <p
+          className="
+            text-[12px]
+            font-semibold
+            text-[#1D4ED8] text-left
+          "
+        >
+          Laksha Ladies Hostel
+        </p>
+
+      </div>
+
+    </div>
+
+
+    {/* LOCATION */}
+    <div className="flex items-start gap-3">
+
+      <img
+        src={LocationGrey}
+        className="w-4 h-4 mt-[2px] shrink-0"
+      />
+
+      <div className="flex items-center">
+
+        <p
+          className="
+            w-[150px]
+            text-[12px]
+            text-[#6B7280]
+            font-medium text-left
+          "
+        >
+          Location
+        </p>
+
+        <p
+          className="
+            text-[12px]
+            font-semibold
+            text-[#111827]
+          "
+        >
+          Solinganallur, Chennai
+        </p>
+
+      </div>
+
+    </div>
+
+
+    {/* MOBILE */}
+    <div className="flex items-start gap-3">
+
+      <img
+        src={Call}
+        className="w-4 h-4 mt-[2px] shrink-0"
+      />
+
+      <div className="flex items-center">
+
+        <p
+          className="
+            w-[150px]
+            text-[12px]
+            text-[#6B7280]
+            font-medium text-left
+          "
+        >
+          Mobile
+        </p>
+
+        <p
+          className="
+            text-[12px]
+            font-semibold
+            text-[#111827]
+          "
+        >
+          +91 98654 87475
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+      
+   <div className="flex items-start gap-3">
+
+  {/* LEFT */}
+  <div className="w-[140px] pt-1">
+
+    <label
+      className="
+        text-xs
+        font-medium
+        text-gray-700
+        leading-5
+        text-left
+        block
+      "
+    >
+      Extension
+      <br />
+      Duration
+      <span className="text-red-500 ml-1">
+        *
+      </span>
+    </label>
+
+  </div>
+
+
+  {/* RIGHT */}
+  <div className="pt-[2px]">
+
+    <div
+      className="
+        flex
+        items-center
+        gap-8
+        whitespace-nowrap
+      "
+    >
+
+      {[
+        { label: "+7 Days", value: 7 },
+        { label: "+10 Days", value: 10 },
+        { label: "+14 Days (Max)", value: 14 }
+      ].map((item) => (
+
+        <label
+          key={item.value}
+          className="
+            flex items-center gap-2
+            text-sm text-gray-700
+            cursor-pointer
+          "
+        >
+
+          <input
+            type="radio"
+            name="days"
+            value={item.value}
+            checked={Number(days) === item.value}
+            onChange={(e) => {
+
+              setDays(e.target.value);
+              setDaysError("");
+
+            }}
+            className="accent-blue-600"
+          />
+
+          {item.label}
+
+        </label>
+
+      ))}
+
+    </div>
+
+
+    <div className="text-left">
+
+  <button
+    className="
+      mt-3
+      block
+      text-xs
+      text-blue-600
+      hover:underline
+      cursor-pointer
+    "
+  >
+    Select Custom
+  </button>
+
+</div>
+
+  </div>
+
+</div>
+ {daysError && (
+
+          <div className="mt-4">
+
+            <ErrorMessage
+              message={daysError}
+              type="error"
+            />
+
+          </div>
+
+        )}
+        {/* REASON */}
+       <div className="flex items-start gap-6 mt-5">
+
+  {/* LABEL */}
+  <div className=" pt-3">
+
+    <label
+      className="
+        text-xs
+        font-medium
+        text-gray-700
+        text-left
+        block
+      "
+    >
+      Reason
+      <span className="text-red-500 ml-1">
+        *
+      </span>
+    </label>
+
+  </div>
+
+
+  {/* SELECT */}
+  <div className="flex-1">
+
+    <select
+      className="
+        w-full
+        h-[48px]
+        border
+        border-gray-300
+        rounded-xl
+        px-4
+        text-sm
+        text-gray-700
+        outline-none
+        bg-white
+        focus:border-blue-500
+      "
+    >
+
+      <option>
+        Sales Follow-up
+      </option>
+
+    </select>
+
+  </div>
+
+</div>
+
+
+        {/* REMARKS */}
+        <div className="flex items-start gap-6 mt-5">
+
+  {/* LABEL */}
+  <div className=" pt-3">
+
+    <label
+      className="
+        text-xs
+        font-medium
+        text-gray-700
+        text-left
+        block
+      "
+    >
+      Remarks
+    </label>
+
+  </div>
+
+
+  {/* TEXTAREA */}
+  <div className="flex-1">
+
+    <textarea
+      rows={4}
+      placeholder="Add internal notes..."
+      className="
+        w-full
+        min-h-[120px]
+        border
+        border-gray-300
+        rounded-xl
+        px-4
+        py-3
+        text-sm
+        text-gray-700
+        resize-none
+        outline-none
+        bg-white
+        placeholder:text-gray-400
+        focus:border-blue-500
+      "
+    />
+
+  </div>
+
+</div>
+
+
+        {/* INFO */}
+        <div
+          className="
+            bg-blue-50
+            border border-blue-100
+            rounded-xl
+            px-4 py-3
+            text-xs
+            text-blue-700
+          "
+        >
+          ℹ Maximum extension allowed: 14 days,
+          Max 1 times per customer.
+        </div>
+
+
+        {/* ERROR */}
+       
+
+      </div>
+
+
+      {/* FOOTER */}
+      <div
+        className="
+          px-6 py-5
+          border-t border-gray-200
+          flex justify-end gap-3
+          shrink-0
+          bg-white
         "
       >
 
@@ -2926,13 +3350,11 @@ const PropertyOverview = () => {
 
           }}
           className="
-            px-4
-            py-2
-            border
-            border-borderSoft
-            rounded-card
-            text-textDark/70
-            hover:bg-cardBg
+            px-5 py-2.5
+            rounded-xl
+            border border-gray-300
+            text-gray-600
+            hover:bg-gray-50
             cursor-pointer
           "
         >
@@ -2942,15 +3364,15 @@ const PropertyOverview = () => {
         <button
           onClick={handleTrialWithDays}
           className="
-            px-4
-            py-2
-            bg-warningYellow
+            px-5 py-2.5
+            rounded-xl
+            bg-blue-600
             text-white
-            rounded-card
+            hover:bg-blue-700
             cursor-pointer
           "
         >
-          Submit
+          Confirm Extension
         </button>
 
       </div>
@@ -4291,6 +4713,8 @@ const PropertyOverview = () => {
         setPaymentDiscountError("");
 
         setGeneratedPaymentUrl("");
+        setShowPaidByDropdownGenerate(false)
+        setPaidBy()
 
       }}
     />
@@ -4564,7 +4988,178 @@ const PropertyOverview = () => {
 
         </div>
 
-        
+        {/* PAID BY */}
+<div className="mb-5">
+
+  <label
+    className="
+      block
+      text-cardTitle
+      font-medium
+      text-textDark
+      mb-2
+      text-left
+    "
+  >
+    Paid By
+
+    <span className="text-dangerRed">
+      *
+    </span>
+
+  </label>
+
+  <div className="relative">
+
+    {/* SELECT BOX */}
+    <div
+      onClick={() =>
+        setShowPaidByDropdownGenerate(
+          !showPaidByDropdownGenerate
+        )
+      }
+      className="
+        w-full
+        h-[43px]
+        border
+        border-borderSoft
+        rounded-card
+        px-4
+        cursor-pointer
+        bg-white
+        flex
+        items-center
+        justify-between
+      "
+    >
+
+      <span
+        className={`
+          text-cardTitle
+          ${
+            paidBy
+              ? "text-textDark"
+              : "text-textDark/40"
+          }
+        `}
+      >
+
+        {
+          paidByUsers?.find(
+            item => item.id === paidBy
+          )?.name || "Select Paid By"
+        }
+
+      </span>
+
+      <img
+        src={ArrowSelect}
+        className={`
+          w-4
+          h-4
+          transition-transform
+          ${
+            showPaidByDropdownGenerate
+              ? "rotate-180"
+              : ""
+          }
+        `}
+      />
+
+    </div>
+
+    {/* DROPDOWN */}
+    {showPaidByDropdownGenerate && (
+
+      <div
+        className="
+          absolute
+          top-full
+          left-0
+          mt-2
+          w-full
+          bg-white
+          border
+          border-borderSoft
+          rounded-card
+          shadow-dropdown
+          max-h-48
+          overflow-y-auto
+          z-50
+        "
+      >
+
+        {paidByUsers?.map((item) => (
+
+          <div
+            key={item.id}
+            onClick={() => {
+
+              setPaidBy(item.id);
+
+              setPaidByError("");
+
+              setShowPaidByDropdownGenerate(false);
+
+            }}
+            className={`
+              px-4
+              py-3
+              cursor-pointer
+              text-cardTitle
+              flex
+              items-center
+              justify-between
+
+              ${
+                paidBy === item.id
+                  ? "bg-primarySoft text-primaryBlue"
+                  : "hover:bg-cardBg"
+              }
+            `}
+          >
+
+            <div className="flex flex-col">
+
+              <span>
+                {item.name}
+              </span>
+
+              <span
+                className="
+                  text-[11px]
+                  text-textDark/50
+                "
+              >
+                {item.role}
+              </span>
+
+            </div>
+
+            {paidBy === item.id && (
+              <span>✔</span>
+            )}
+
+          </div>
+
+        ))}
+
+      </div>
+
+    )}
+
+  </div>
+
+  {paidByError && (
+
+    <ErrorMessage
+      message={paidByError}
+      type="error"
+    />
+
+  )}
+
+</div>
         <div className="mb-5">
 
           <label

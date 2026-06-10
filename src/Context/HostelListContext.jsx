@@ -38,44 +38,123 @@ export const HostelProvider = ({ children }) => {
   //     setLoading(false);
   //   }
   // };
-  const getHostels = async (page = 1, size = 10, hostelName = "",  startDate = "",
-  endDate = "",subActive = ""
+  const getHostels = async (
+  page = 1,
+  size = 10,
+  name = "",
+  startDate = "",
+  endDate = "",
+  subActive = "",
+  agentId = "",
+  filterOption = "TOTAL_PROPERTIES"
 ) => {
+
   try {
+
     setLoading(true);
     setErrorMsg("");
 
-    const res = await axiosInstance.get("/v2/hostels", {
-      params: {
-        page,
-        size,
-        hostelName,
-        startDate,
-        endDate,
-         ...(subActive !== "" && {
-            subActive
-          })
-        
-        
+    const res = await axiosInstance.get(
+      "/v2/hostels/new",
+      {
+        params: {
+
+          page,
+          size,
+
+          name,
+
+          startDate,
+          endDate,
+
+          agentId,
+
+          filterOption,
+
+          ...(subActive !== "" && {
+            subActive,
+          }),
+
+        },
       }
-    });
-console.log("res",res)
+    );
+
+    console.log("res", res);
+
     if (res.status === 200) {
+
       setHostels(res.data);
-      return { success: true, data: res.data };
+
+      return {
+        success: true,
+        data: res.data,
+      };
+
     }
 
     return { success: false };
-  } 
-  catch (error) {
-    const msg = getErrorMessage(error);
-    setErrorMsg(msg);
-    setAccessError(msg)
-    return { success: false, message: msg };
-  } finally {
-    setLoading(false);
+
   }
+
+  catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+    setAccessError(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+
+  }
+
+  finally {
+
+    setLoading(false);
+
+  }
+
 };
+//   const getHostels = async (page = 1, size = 10, hostelName = "",  startDate = "",
+//   endDate = "",subActive = ""
+// ) => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.get("/v2/hostels/new", {
+//       params: {
+//         page,
+//         size,
+//         hostelName,
+//         startDate,
+//         endDate,
+//          ...(subActive !== "" && {
+//             subActive
+//           })
+        
+        
+//       }
+//     });
+// console.log("res",res)
+//     if (res.status === 200) {
+//       setHostels(res.data);
+//       return { success: true, data: res.data };
+//     }
+
+//     return { success: false };
+//   } 
+//   catch (error) {
+//     const msg = getErrorMessage(error);
+//     setErrorMsg(msg);
+//     setAccessError(msg)
+//     return { success: false, message: msg };
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 // GET /v2/hostels/{hostelId}
 const getHostelById = async (hostelId) => {
   try {

@@ -17,17 +17,41 @@ import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
 import { usePlan } from "../../Context/PlanContexts";
 import AssignStaffModal from "./AssignStaffDesign";
+import PropertyIcon from "../../assets/ReceiptItem.png";
+import ActiveIcon from "../../assets/ActiveTrend.png";
+import InactiveIcon from "../../assets/trend-up.png";
+import CalendarIcon from "../../assets/calendarIcon.png";
+import UserIcon from "../../assets/user-block.png";
+import TrialIcon from "../../assets/timer.png";
+import Arrow from "../../assets/direction-down 01.png";
+import { createPortal } from "react-dom";
 
 
 const Properties = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, deleteHostelExpense, exportHostels, deleteHostel } = useHostel();
-  const { createSubscription } = useSubscription();
+  const { createSubscription,getAgentsDropdown } = useSubscription();
   const { getPlansDropdown } = usePlan();
   const [dropdownPlans, setDropdownPlans] = useState([]);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const [isDeleting, setIsDeleting] = useState(false);
   const location = useLocation();
   const { roleId } = useParams();
+const [agentList, setAgentList] = useState([])
+const agentDropdownRef = useRef(null);
+const [agentFilter, setAgentFilter] = useState("");
+const [openAgentDropdown, setOpenAgentDropdown] = useState(false);
+const [filterOption, setFilterOption] = useState("TOTAL_PROPERTIES");
+useEffect(() => {
+    const fetchAgents = async () => {
+      const res = await getAgentsDropdown();
+      if (res.success) {
 
+        setAgentList(res.data)
+      }
+    };
+
+    fetchAgents();
+  }, []);
   useEffect(() => {
     getPlansDropdown().then((res) => {
       if (res?.success) {
@@ -36,9 +60,9 @@ const Properties = () => {
     });
   }, []);
   console.log("dropdownPlans", dropdownPlans)
-  const skipApi = location.state?.skipApi;
+  // const skipApi = location.state?.skipApi;
   const { RangePicker } = DatePicker;
-  const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
+  // const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
   // const [dateRange, setDateRange] = useState([]);
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Hostels");
@@ -51,17 +75,96 @@ const Properties = () => {
   location.state?.currentPage || 1
 );
 
-const [searchText, setSearchText] = useState(
-  location.state?.currentSearch || ""
-);
+// const [searchText, setSearchText] = useState(
+//   location.state?.currentSearch || ""
+// );
+const locationSearch =
+  location.state?.currentSearch;
 
-const [dateRange, setDateRange] = useState(
-  location.state?.currentDateRange || []
+// const [searchText, setSearchText] = useState(
+//   locationSearch ?? ""
+// );
+const [searchText, setSearchText] = useState(
+  sessionStorage.getItem("propertiesSearch") || ""
 );
 
 const [statusFilter, setStatusFilter] = useState(
-  location.state?.currentStatusFilter || ""
+  sessionStorage.getItem("propertiesStatus") || ""
 );
+
+const [dateRange, setDateRange] = useState(() => {
+
+  const stored =
+    sessionStorage.getItem("propertiesDate");
+
+  if (!stored) return [];
+
+  const parsed = JSON.parse(stored);
+
+  return [
+    dayjs(parsed[0]),
+    dayjs(parsed[1]),
+  ];
+
+});
+useEffect(() => {
+
+  sessionStorage.setItem(
+    "propertiesSearch",
+    searchText
+  );
+
+}, [searchText]);
+
+useEffect(() => {
+
+  sessionStorage.setItem(
+    "propertiesStatus",
+    statusFilter
+  );
+
+}, [statusFilter]);
+
+useEffect(() => {
+
+  if (dateRange?.length === 2) {
+
+    sessionStorage.setItem(
+      "propertiesDate",
+      JSON.stringify([
+        dateRange[0],
+        dateRange[1],
+      ])
+    );
+
+  }
+  else {
+
+    sessionStorage.removeItem(
+      "propertiesDate"
+    );
+
+  }
+
+}, [dateRange]);
+useEffect(() => {
+
+  if (!location.state?.currentPage) {
+
+    setSearchText("");
+    setDateRange([]);
+    setStatusFilter("");
+    setPage(1);
+
+  }
+
+}, []);
+
+// const [dateRange, setDateRange] = useState(
+//   location.state?.currentDateRange || []
+// );
+
+
   const isStatusFiltering = statusFilter !== "";
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
@@ -92,6 +195,7 @@ const [statusFilter, setStatusFilter] = useState(
   // const [selectedHostel, setSelectedHostel] = useState(null);
   console.log("startDate", startDate)
   const navigate = useNavigate();
+  
   const [tooltip, setTooltip] = useState({
     visible: false,
     text: "",
@@ -118,13 +222,15 @@ const [statusFilter, setStatusFilter] = useState(
 
   const [debouncedSearch, setDebouncedSearch] = useState(searchText);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchText);
-    }, 2000);
+useEffect(() => {
 
-    return () => clearTimeout(timer);
-  }, [searchText]);
+  const timer = setTimeout(() => {
+    setDebouncedSearch(searchText);
+  }, 500);
+
+  return () => clearTimeout(timer);
+
+}, [searchText]);
 
   // useEffect(() => {
   //   if (skipFirstApi) {
@@ -165,14 +271,46 @@ const [statusFilter, setStatusFilter] = useState(
   //   getHostels(page, pageSize, debouncedSearch, start, end);
 
   // }, [page, pageSize, debouncedSearch, dateRange]);
-  useEffect(() => {
+//   useEffect(() => {
+
+//   let start = "";
+//   let end = "";
+
+//   if (dateRange && dateRange.length === 2) {
+//     start = dateRange[0].format("DD-MM-YYYY");
+//     end = dateRange[1].format("DD-MM-YYYY");
+//   }
+
+//   let subActive = "";
+
+//   if (statusFilter === "active") {
+//     subActive = true;
+//   }
+//   else if (statusFilter === "inactive") {
+//     subActive = false;
+//   }
+
+//   getHostels(
+//     page,
+//     pageSize,
+//     debouncedSearch,
+//     start,
+//     end,
+//     subActive
+//   );
+
+// }, [page, pageSize, debouncedSearch, dateRange]);
+
+useEffect(() => {
 
   let start = "";
   let end = "";
 
   if (dateRange && dateRange.length === 2) {
+
     start = dateRange[0].format("DD-MM-YYYY");
     end = dateRange[1].format("DD-MM-YYYY");
+
   }
 
   let subActive = "";
@@ -184,56 +322,29 @@ const [statusFilter, setStatusFilter] = useState(
     subActive = false;
   }
 
-  getHostels(
-    page,
-    pageSize,
-    debouncedSearch,
-    start,
-    end,
-    subActive
-  );
+ getHostels(
+  page,
+  pageSize,
 
-}, [page, pageSize, debouncedSearch, dateRange]);
+  debouncedSearch,
 
- useEffect(() => {
+  start,
+  end,
 
-  if (skipFirstApi) {
-    setSkipFirstApi(false);
-    return;
-  }
+  subActive,
 
-  let start = "";
-  let end = "";
+  agentFilter,
 
-  if (dateRange && dateRange.length === 2) {
-    start = dateRange[0].format("DD-MM-YYYY");
-    end = dateRange[1].format("DD-MM-YYYY");
-  }
-
-  let subActive = "";
-
-  if (statusFilter === "active") {
-    subActive = true;
-  } 
-  else if (statusFilter === "inactive") {
-    subActive = false;
-  }
-
-  getHostels(
-    page,
-    pageSize,
-    debouncedSearch,
-    start,
-    end,
-    subActive
-  );
+ filterOption
+);
 
 }, [
   page,
   pageSize,
   debouncedSearch,
   dateRange,
-  statusFilter
+  statusFilter,
+  agentFilter,filterOption
 ]);
 
 
@@ -330,6 +441,36 @@ const [statusFilter, setStatusFilter] = useState(
   );
 
 };
+useEffect(() => {
+
+  const handleClickOutside = (event) => {
+
+    if (
+      agentDropdownRef.current &&
+      !agentDropdownRef.current.contains(event.target)
+    ) {
+
+      setOpenAgentDropdown(false);
+
+    }
+
+  };
+
+  document.addEventListener(
+    "mousedown",
+    handleClickOutside
+  );
+
+  return () => {
+
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+  };
+
+}, []);
 
   const handleCreateSubscription = async (item) => {
     const firstPlan = dropdownPlans?.trialPlans?.[0];
@@ -407,23 +548,34 @@ const [statusFilter, setStatusFilter] = useState(
 
   };
   const handleDeleteHostel = async () => {
-    const res = await deleteHostel(deleteHostelId);
 
-    if (res?.success) {
-      setModalType("success");
-      setMessage(res.message);
-      setShowSuccess(true);
+  if (isDeleting) return;
 
-      getHostels(page, pageSize, searchText);
+  setIsDeleting(true);
 
-      setTimeout(() => {
-        setShowSuccess(false);
-        setShowDeleteModal(false);
-      }, 1500);
-    } else {
-      setMenuError(res.message);
-    }
-  };
+  const res = await deleteHostel(deleteHostelId);
+
+  if (res?.success) {
+
+    setModalType("success");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    getHostels(page, pageSize, searchText);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+      setShowDeleteModal(false);
+      setIsDeleting(false);
+    }, 1500);
+
+  } else {
+
+    setMenuError(res.message);
+    setIsDeleting(false);
+
+  }
+};
 
   return (
     <>
@@ -432,7 +584,7 @@ const [statusFilter, setStatusFilter] = useState(
 
         {(canRead === false || accessError === "Access Restricted") ? (
 
-          <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+          <div className="flex-center-col h-[400px] gap-4">
 
             <img
               src={LoginImg}
@@ -440,7 +592,7 @@ const [statusFilter, setStatusFilter] = useState(
               className="w-64 object-contain"
             />
 
-            <p className="text-red-600 text-lg font-medium">
+           <p className="error-title">
               {accessError}
             </p>
 
@@ -464,172 +616,767 @@ const [statusFilter, setStatusFilter] = useState(
             {/* {!isFirstLoad && ( */}
 
 
-            <div className="flex flex-col h-full min-h-0">
+           <div className="flex-col-layout">
 
 
 
 
 
               {/* Header */}
-              <div className="flex justify-between items-center mb-6">
-                <h1 className="text-xl font-semibold font-sans">Properties</h1>
+              <div className="flex-between mb-6">
 
-                <button className="flex items-center gap-2 text-blue-600 px-4 py-2 rounded-lg text-sm hover:bg-blue-700 font-Inter">
-                  <img src={AddBtn} alt="add" className="w-4 h-4 object-contain" />
-                  Add Property
-                </button>
-              </div>
+  <h1 className="text-xl font-semibold font-inter">
+    Properties
+  </h1>
+
+  <button
+    className="
+      flex items-center gap-2
+      text-primaryBlue
+      px-4 py-2
+      rounded-lg
+      text-sm
+      font-inter
+      transition-all duration-200
+      hover:bg-primaryBlue
+      hover:text-white
+      cursor-pointer
+    "
+  >
+    <img
+      src={AddBtn}
+      alt="add"
+      className="w-4 h-4 object-contain"
+    />
+
+    Add Property
+  </button>
+
+</div>
 
               {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mb-6">
-                <div className="bg-white p-5 rounded-xl shadow-sm border-gray-300">
-                  <p className="text-gray-500 text-xs font-Gilroy">Total Properties</p>
-                  <h2 className="text-2xl font-bold text-base mt-1 font-Gilroy">{hostels?.totalHostels}</h2>
-                </div>
-
-                <div className="bg-white p-5 rounded-xl shadow-sm border-gray-300">
-                  <p className="text-gray-500 text-sm">Active Properties</p>
-                  <h2 className="text-2xl text-base font-bold mt-1">{hostels?.activeHostels}</h2>
-                </div>
-
-                <div className="bg-white p-5 rounded-xl shadow-sm border-gray-300">
-                  <p className="text-gray-500 text-sm">InActive Properties</p>
-                  <h2 className="text-2xl text-base font-bold mt-1">{hostels?.inactiveHostels}</h2>
-                </div>
-              </div>
+   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
 
 
-              <div className="sticky top-0 z-20 bg-white pb-4">
-                <div className="flex flex-wrap justify-between items-center gap-2 font-inter">
 
-
-                  <div className="flex gap-3">
-
-                   <select
-  value={statusFilter}
-  onChange={(e) => {
-    setStatusFilter(e.target.value);
+  <div
+  onClick={() => {
+    setFilterOption("TOTAL_PROPERTIES");
     setPage(1);
   }}
+  className={`
+    card-common
+    flex items-start justify-between
+    p-4 xl:p-5
+    min-h-[90px]
+
+    cursor-pointer
+    transition-all
+    duration-200
+
+    ${
+      filterOption === "TOTAL_PROPERTIES"
+        ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+        : "hover:border-blue-300 hover:shadow-md"
+    }
+  `}
+>
+
+    <div  >
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Total Properties
+      </p>
+
+      <h2 className="text-2xl text-[20px] text-left font-bold text-gray-800 mt-2 leading-none">
+        {hostels?.totalHostels}
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-success">
+
+      <img
+        src={PropertyIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 2 */}
+
+  <div
+    className={`
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px] cursor-pointer
+      ${
+  filterOption === "ACTIVE_PROPERTIES"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+  onClick={() => {
+    setFilterOption("ACTIVE_PROPERTIES");
+    setPage(1);
+  }} >
+
+    <div >
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Active Properties
+      </p>
+
+      <div className="flex items-center text-left gap-2 mt-2">
+
+        <h2 className="text-2xl text-[20px] font-bold text-gray-800 leading-none">
+          {hostels?.activeHostels}
+        </h2>
+
+        <span className="badge-primary">
+          ↑ 12%
+        </span>
+
+      </div>
+
+    </div>
+
+    <div className="stats-icon stats-icon-success">
+
+      <img
+        src={ActiveIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 3 */}
+
+  <div
+    className={`
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px] cursor-pointer
+      ${
+  filterOption === "INACTIVE_PROPERTIES"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+  onClick={() => {
+    setFilterOption("INACTIVE_PROPERTIES");
+    setPage(1);
+  }} >
+
+    <div >
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Inactive Properties
+      </p>
+
+      <h2 className="text-2xl text-[20px] text-left font-bold text-gray-800 mt-2 leading-none">
+        {hostels?.inactiveHostels}
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-warning">
+
+      <img
+        src={InactiveIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 4 */}
+
+  <div
+    className={`
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px] cursor-pointer
+      ${ 
+  filterOption === "USED_TODAY"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+   onClick={() => {
+    setFilterOption("USED_TODAY");
+    setPage(1);
+  }}>
+
+    <div >
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Used Today
+      </p>
+
+      <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
+        {hostels?.usedTodayCount}
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-success">
+
+      <img
+        src={CalendarIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 5 */}
+
+  <div
+    className={`
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px] cursor-pointer
+       ${
+  filterOption === "USED_2TO7_DAYS"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+`}
+ onClick={() => {
+    setFilterOption("USED_2TO7_DAYS");
+    setPage(1);
+  }} >
+
+    <div  >
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Used 1-7 Days
+      </p>
+
+      <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
+        {hostels?.used2To7DaysCount}
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-success">
+
+      <img
+        src={CalendarIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 6 */}
+
+  <div
+    className={`
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px] cursor-pointer
+       ${
+  filterOption === "USED_8TO14_DAYS"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+ onClick={() => {
+    setFilterOption("USED_8TO14_DAYS");
+    setPage(1);
+  }} >
+
+    <div >
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Used Last 8-14 Days
+      </p>
+
+      <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
+        {hostels?.used8To14DaysCount}
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-success">
+
+      <img
+        src={PropertyIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 7 */}
+
+  <div
+    className={`
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px] cursor-pointer
+       ${
+  filterOption === "USED_15TO30_DAYS"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+ onClick={() => {
+    setFilterOption("USED_15TO30_DAYS");
+    setPage(1);
+  }} >
+
+    <div  >
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Used 15-30 Days
+      </p>
+
+      <div className="flex items-center gap-2 mt-2">
+
+        <h2 className="text-2xl text-[20px] font-bold text-gray-800 leading-none">
+          {hostels?.used15To30DaysCount}
+        </h2>
+
+        <span className="badge-primary">
+          ↑ 12%
+        </span>
+
+      </div>
+
+    </div>
+
+    <div className="stats-icon stats-icon-warning">
+
+      <img
+        src={UserIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 8 */}
+
+  <div
+    className={`
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px] cursor-pointer
+       ${
+  filterOption === "USED_30_DAYS_AGO"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+  onClick={() => {
+    setFilterOption("USED_30_DAYS_AGO");
+    setPage(1);
+  }} >
+
+    <div >
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Used 30+ Days
+      </p>
+
+      <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
+        {hostels?.used30DaysAgoCount}
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-warning">
+
+      <img
+        src={UserIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 9 */}
+
+  <div
+    className={`
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px] cursor-pointer
+        ${
+  filterOption === "NEVER_USED"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+    onClick={() => {
+    setFilterOption("NEVER_USED");
+    setPage(1);
+  }}>
+
+    <div  >
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Never Used
+      </p>
+
+      <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
+        {hostels?.neverUsedCount}
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-warning">
+
+      <img
+        src={InactiveIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+
+  {/* CARD 10 */}
+
+  <div
+    className={`
+      card-common
+      flex items-start justify-between
+      p-4 xl:p-5
+      min-h-[90px]
+      cursor-pointer
+        ${
+  filterOption === "TRIAL_EXPIRING_SOON"
+    ? "!border-2 !border-blue-500 !bg-blue-50 shadow-lg scale-[1.01]"
+    : "hover:border-blue-300 hover:shadow-md"
+}
+    `}
+     onClick={() => {
+    setFilterOption("TRIAL_EXPIRING_SOON");
+    setPage(1);
+  }}>
+
+    <div>
+
+      <p className="text-[11px] text-gray-500 font-medium">
+        Trial Expiring Soon
+      </p>
+
+      <h2 className="text-2xl text-[20px] font-bold text-gray-800 mt-2 leading-none">
+        {hostels?.trialExpiringCount}
+      </h2>
+
+    </div>
+
+    <div className="stats-icon stats-icon-danger">
+
+      <img
+        src={TrialIcon}
+        alt="icon"
+        className="w-4 h-4 object-contain"
+      />
+
+    </div>
+
+  </div>
+
+</div>
+
+
+           <div className="sticky top-0 z-20 bg-white pb-4">
+
+  <div
   className="
-    border rounded-lg px-3 py-2
-    text-xs font-medium text-gray-700
-    border-gray-300
+    flex
+    items-end
+    gap-4
+    flex-wrap
+    font-inter 
   "
 >
 
-  <option value="">
-    All
-  </option>
+    {/* <div className="flex gap-3">
 
-  <option value="active">
-    Active
-  </option>
+      <select
+        value={statusFilter}
+        onChange={(e) => {
+          setStatusFilter(e.target.value);
+          setPage(1);
+        }}
+        className="
+          border border-gray-300
+          rounded-lg
+          px-3 py-2
+          text-xs
+          font-medium
+          text-gray-700
+          outline-none h-[42px]
+        "
+      >
 
-  <option value="inactive">
-    Inactive
-  </option>
+        <option value="">
+          All
+        </option>
 
-</select>
+        <option value="active">
+          Active
+        </option>
 
-                    {/* 
-                  <select className="border rounded-lg px-3 py-2 text-xs font-medium leading-[150%] text-gray-700">
-                    <option className="text-[#1E45E1] font-medium font-inter ">This Month</option>
-                    <option>Last Month</option>
-                  </select> */}
+        <option value="inactive">
+          Inactive
+        </option>
 
-                    
+      </select>
 
-                  </div>
-                  {/* <div className="flex items-end gap-3">
+    </div> */}
+<div
+  className="
+    relative
+    w-[240px]
+    shrink-0
+  "
+  ref={agentDropdownRef}
+>
 
-                    
-                    <div className="flex flex-col">
-                      <label className="text-xs text-gray-500 mb-1">Start Date</label>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                      />
-                    </div>
+  {/* SELECT BOX */}
+  <button
+    type="button"
+    onClick={() =>
+      setOpenAgentDropdown(
+        !openAgentDropdown
+      )
+    }
+    className="
+      w-full
+      h-[42px]
+      px-4
+      rounded-xl
+      border border-gray-300
+      bg-white
+      flex items-center justify-between
+      gap-3
+      text-sm
+      font-medium
+      text-gray-700
+      shadow-sm
+      hover:border-blue-400
+      transition-all
+      duration-200
+      cursor-pointer
+    "
+  >
 
-                 
-                    <div className="flex flex-col">
-                      <label className="text-xs text-gray-500 mb-1">End Date</label>
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                      />
-                    </div>
+    <span
+      className="
+        truncate
+        text-left
+        flex-1
+      "
+    >
+      {
+        agentList.find(
+          (a) =>
+            a.agentId === agentFilter
+        )?.agentName || "All Agents"
+      }
+    </span>
 
-
-                    <button
-                      onClick={() =>
-                        exportHostels(
-                          searchText,
-                          formatDateToDDMMYYYY(startDate),
-                          formatDateToDDMMYYYY(endDate)
-                        )
-                      } className="px-4 py-2 rounded-lg text-sm text-white flex items-center gap-2 bg-green-600 hover:bg-green-700"
-
-                    >
-                      ⬇ Export
-                    </button>
-
-                  </div> */}
-                  <div className="flex items-end gap-3">
-                    <div className="flex flex-col">
-                      <label className="text-xs text-gray-500 mb-1 text-left">Select Date Range</label>
-
-                      <RangePicker
-                        value={dateRange}
-                        onChange={(dates) => setDateRange(dates)}
-                        format="DD-MM-YYYY"
-                        className="h-[38px] rounded-lg"
-                      />
-                    </div>
-                    {/* Start Date */}
-                    {/* <div className="flex flex-col">
-    <label className="text-xs text-gray-500 mb-1">Start Date</label>
-    <input
-      type="date"
-      value={startDate}
-      onChange={(e) => setStartDate(e.target.value)}
-      className="border border-gray-300 rounded-lg px-3 py-2 text-sm h-[38px] w-[180px]"
+    <img
+      src={Arrow}
+      className={`
+        w-4 h-4 shrink-0
+        transition-transform duration-200
+        ${
+          openAgentDropdown
+            ? "rotate-180"
+            : ""
+        }
+      `}
     />
-  </div> */}
 
-                    {/* End Date */}
-                    {/* <div className="flex flex-col">
-    <label className="text-xs text-gray-500 mb-1">End Date</label>
-    <input
-      type="date"
-      value={endDate}
-      onChange={(e) => setEndDate(e.target.value)}
-      className="border border-gray-300 rounded-lg px-3 py-2 text-sm h-[38px] w-[180px]"
-    />
-  </div> */}
+  </button>
 
-                    {/* Export Button */}
-                    <button
-                      // onClick={() =>
-                      //   exportHostels(
-                      //     searchText,
-                      //     formatDateToDDMMYYYY(startDate),
-                      //     formatDateToDDMMYYYY(endDate)
-                      //   )
-                      // }
-                      onClick={handleExport}
-                      className="h-[38px] px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm flex items-center gap-2 shadow-sm cursor-pointer"
-                    >
-                      ⬇ Export
-                    </button>
 
-                  </div>
-                  <div className="relative">
+  {/* DROPDOWN */}
+  {openAgentDropdown && (
+
+    <div
+      className="
+        absolute
+        top-[48px]
+        left-0
+        w-full
+        bg-white
+        border border-gray-200
+        rounded-xl
+        shadow-[0_10px_30px_rgba(0,0,0,0.12)]
+        overflow-hidden
+        z-[9999]
+        animate-fadeIn
+      "
+    >
+
+      <div
+        className="
+          max-h-[240px]
+          overflow-y-auto
+        "
+      >
+
+        {/* ALL */}
+        <button
+          type="button"
+          onClick={() => {
+
+            setAgentFilter("");
+            setOpenAgentDropdown(false);
+
+          }}
+          className={`
+            w-full
+            px-4 py-3
+            text-sm
+            text-left
+            transition-all
+            duration-150
+            hover:bg-blue-50
+            cursor-pointer
+
+            ${
+              agentFilter === ""
+                ? "bg-blue-50 text-blue-600 font-semibold"
+                : "text-gray-700"
+            }
+          `}
+        >
+          All Agents
+        </button>
+
+
+        {/* AGENTS */}
+        {agentList.map((agent) => (
+
+          <button
+            key={agent.agentId}
+            type="button"
+            onClick={() => {
+
+              setAgentFilter(
+                agent.agentId
+              );
+
+              setOpenAgentDropdown(
+                false
+              );
+
+            }}
+            className={`
+              w-full
+              px-4 py-3
+              text-sm
+              text-left
+              transition-all
+              duration-150
+              hover:bg-blue-50
+              cursor-pointer
+              break-words
+
+              ${
+                agentFilter ===
+                agent.agentId
+                  ? "bg-blue-50 text-blue-600 font-semibold"
+                  : "text-gray-700"
+              }
+            `}
+          >
+            {agent.agentName}
+          </button>
+
+        ))}
+
+      </div>
+
+    </div>
+
+  )}
+
+</div>
+    <div className="flex items-end gap-3">
+
+      <div className="flex flex-col">
+
+        <label className="text-xs text-gray-500 mb-1 text-left">
+          Select Date Range
+        </label>
+
+        <RangePicker
+          value={dateRange}
+          onChange={(dates) => setDateRange(dates)}
+          format="DD-MM-YYYY"
+          className="h-[38px] rounded-lg"
+        />
+
+      </div>
+
+      <button
+        onClick={handleExport}
+        className="
+          btn-primary
+          h-[38px]
+          px-5
+          rounded-lg
+          text-sm
+          flex
+          items-center
+          gap-2
+          shadow-sm
+        "
+      >
+        ⬇ Export
+      </button>
+
+    </div>
+
+   <div className="relative">
                     <img
                       src={Search}
                       alt="Search"
@@ -639,41 +1386,63 @@ const [statusFilter, setStatusFilter] = useState(
                       type="text"
                       placeholder="Search..."
                       value={searchText}
-                      onChange={(e) => {
-                        setSearchText(e.target.value);
-                        setPage(1);
-                      }}
+                      // onChange={(e) => {
+                      //   setSearchText(e.target.value);
+                      //   setPage(1);
+                      // }}
+  onChange={(e) => {
+  const value = e.target.value;
+
+  setSearchText(value);
+
+  setPage(1);
+}}
                       className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm font-medium leading-[150%] w-56"
                     />
                   </div>
-                </div>
-              </div>
+
+  </div>
+
+</div>
 
 
 
 
-              {/* <div className="bg-white rounded-xl shadow-sm border flex flex-col h-[calc(100vh-230px)]"> */}
+             
 
-              {/* <div className="bg-white rounded-xl shadow-sm border-gray-600 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]"> */}
+ <div
+  className="card-common flex-col-layout relative z-[1]"
+  style={{ 
+    overflow: 'visible',
+    maxHeight: 'calc(100vh - 230px)',  
+    display: 'flex',
+    flexDirection: 'column'
+  }}
+>
 
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]">
+ <div
+  className="scroll-container relative"
+  style={{ 
+    overflowX: 'auto',
+    overflowY: 'auto', 
+    flex: 1,
+    minHeight: 0,
+  }}
+>
 
-                <div className="flex-1 overflow-x-auto overflow-y-auto">
+                 <table className="w-max min-w-full table-fixed text-sm text-left">
 
-                  <table className="w-max min-w-full table-fixed text-sm text-left">
-
-
-                    <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-40">
+  <thead className="table-header sticky top-0 z-[50]">
 
                       <tr>
 
                         {/* Sticky ID */}
-                        <th className="px-4 py-3 sticky left-0 bg-[#F8F9FF] z-50 w-[80px]">
+                       <th className="table-sticky-head px-4 py-3 w-[80px]">
                           ID
                         </th>
 
                         {/* Sticky Name */}
-                        <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">
+                        <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-80 w-[100px]">
                           Name
                         </th>
                         <th className="px-4 py-3 w-[120px] text-left">
@@ -712,9 +1481,27 @@ const [statusFilter, setStatusFilter] = useState(
                         </th>
                         
 
-                        <th className="px-4 py-3 w-[120px] text-center">
+                        {/* <th className="px-4 py-3 w-[120px] text-center">
                           Actions
-                        </th>
+                        </th> */}
+                        <th
+  className="
+    px-4 py-3
+    w-[120px]
+    text-center
+
+    sticky
+    right-0
+
+    bg-[#F8F9FF]
+
+    z-[90]
+
+  
+  "
+>
+  Actions
+</th>
 
                       </tr>
                     </thead>
@@ -891,7 +1678,7 @@ const [statusFilter, setStatusFilter] = useState(
                               {item.lastUpdateDate || item.lastUpdateTime ? (
                                 <div className="flex flex-col">
                                   <span>{item.lastUpdateDate || "----"}</span>
-                                  <span>{item.lastUpdateTime || "----"}</span>
+                                <span>{item.lastUpdateTime || "----"}</span>
                                 </div>
                               ) : (
                                 "----"
@@ -938,7 +1725,21 @@ const [statusFilter, setStatusFilter] = useState(
 </td>
                            
 
-                          <td className="px-4 py-2 text-center">
+   <td
+  className="
+    px-4 py-2
+    text-center
+
+    sticky
+    right-0
+
+    bg-white
+
+    z-[10]
+
+    group-hover:bg-gray-50
+  "
+>
 
   <div className="flex items-center justify-center gap-2">
 
@@ -948,53 +1749,53 @@ const [statusFilter, setStatusFilter] = useState(
       className="w-5 h-5 cursor-pointer"
     />
 
-    <div className="relative">
+    <div className="static">
 
       <button
-        onClick={(e) => {
+      onClick={(e) => {
 
-          e.stopPropagation();
+  e.stopPropagation();
 
-          const rect =
-            e.currentTarget.getBoundingClientRect();
+  const rect =
+    e.currentTarget.getBoundingClientRect();
 
-          const viewportHeight =
-            window.innerHeight;
+  const viewportHeight =
+    window.innerHeight;
 
-          const menuHeight = 120;
+  const viewportWidth =
+    window.innerWidth;
 
-          const spaceBelow =
-            viewportHeight - rect.bottom;
+  const menuWidth = 180;
 
-          setMenuPosition({
+  const menuHeight = 100;
 
-            top:
-              spaceBelow < menuHeight
-                ? rect.top - menuHeight
-                : rect.bottom + 5,
+  const spaceBelow =
+    viewportHeight - rect.bottom;
 
-            left: rect.right - 150,
+  const spaceRight =
+    viewportWidth - rect.right;
 
-          });
+  setMenuPosition({
 
-          setOpenMenu(
-            openMenu === item.hostelId
-              ? null
-              : item.hostelId
-          );
+  top:
+    spaceBelow < menuHeight
+      ? rect.top - menuHeight + window.scrollY
+      : rect.bottom + 8 + window.scrollY,
 
-        }}
-        className={`
-          p-1.5 rounded-full
-          transition-all duration-150
-          active:scale-90
+  left:
+    spaceRight < menuWidth
+      ? rect.left - menuWidth + window.scrollX
+      : rect.right - menuWidth + window.scrollX,
 
-          ${
-            openMenu === item.hostelId
-              ? "bg-[#EEF2FF]"
-              : "hover:bg-gray-100"
-          }
-        `}
+});
+
+  setOpenMenu(
+    openMenu === item.hostelId
+      ? null
+      : item.hostelId
+  );
+
+}}
       >
 
         <img
@@ -1012,53 +1813,46 @@ const [statusFilter, setStatusFilter] = useState(
 
       </button>
 
-      {openMenu === item.hostelId && (
+     {openMenu === item.hostelId && createPortal(
+  <div
+    ref={menuRef}
+    style={{
+      position: "fixed",
+      top: menuPosition.top,
+      left: menuPosition.left,
+      width: "160px",
+      background: "white",
+      border: "1px solid #e5e7eb",
+      borderRadius: "16px",
+      boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+      overflow: "hidden",
+      zIndex: 999999,
+    }}
+  >
+    <button
+      onClick={() => {
+        setSelectedHostelId(item.hostelId);
+        setShowResetModal(true);
+        setOpenMenu(null);
+      }}
+      className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+    >
+      Reset Expense
+    </button>
 
-        <div
-          ref={menuRef}
-          className="fixed w-36 bg-white border border-gray-200 rounded-xl shadow-xl z-[9999] overflow-hidden"
-          style={{
-            top: menuPosition.top,
-            left: menuPosition.left,
-          }}
-        >
-
-          <button
-            onClick={() => {
-              setSelectedHostelId(item.hostelId);
-              setShowResetModal(true);
-              setOpenMenu(false);
-            }}
-            className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            Reset Expense
-          </button>
-
-          <button
-            onClick={() => {
-              setDeleteHostelId(item.hostelId);
-              setShowDeleteModal(true);
-              setOpenMenu(false);
-            }}
-            className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-600 transition-colors cursor-pointer"
-          >
-            Delete
-          </button>
-
-          {/* <button
-            onClick={() => {
-              setSelectedHostel(item);
-              setShowAssignModal(true);
-              setOpenMenu(false);
-            }}
-            className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            Assign Staff
-          </button> */}
-
-        </div>
-
-      )}
+    <button
+      onClick={() => {
+        setDeleteHostelId(item.hostelId);
+        setShowDeleteModal(true);
+        setOpenMenu(null);
+      }}
+      className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-600 transition-colors cursor-pointer"
+    >
+      Delete
+    </button>
+  </div>,
+  document.body
+)}
 
     </div>
 
@@ -1098,6 +1892,26 @@ const [statusFilter, setStatusFilter] = useState(
                         ))
 
                       )}
+                      {!loading && displayData?.length === 0 && (
+
+  <tr>
+
+    <td
+      colSpan={8}
+      className="
+        text-center
+        py-10
+        text-gray-400
+        text-sm
+        font-medium
+      "
+    >
+      No Data Found
+    </td>
+
+  </tr>
+
+)}
 
 
                     </tbody>
@@ -1106,15 +1920,13 @@ const [statusFilter, setStatusFilter] = useState(
 
 
                   {tooltip.visible && (
-                    <div
-                      className="fixed bg-white shadow-lg border border-gray-200 
-        rounded-lg px-3 py-2 text-xs text-gray-700 
-        z-[9999] max-w-[400px] break-words"
-                      style={{
-                        left: tooltip.x,
-                        top: tooltip.y,
-                      }}
-                    >
+                     <div
+    className="tooltip-common"
+    style={{
+      left: tooltip.x,
+      top: tooltip.y,
+    }}
+  >
                       {tooltip.text}
                     </div>
                   )}
@@ -1122,12 +1934,13 @@ const [statusFilter, setStatusFilter] = useState(
                 </div>
 
               </div>
-              <div className="flex justify-between items-center px-4 py-1 text-sm  bg-white">
+              {hostels?.totalPages > 1&& (
+              <div className="flex-between px-4 py-1 text-sm bg-white">
 
                 {/* Total Count */}
-                <span className="text-gray-600">
+                <span className="text-muted">
                   Total Record Count :{" "}
-                  <span className="text-blue-600 font-medium">
+                  <span className="text-primary">
                     {/* {pageSize} */}
                     {/* {hostels?.totalHostels} */}
                     {displayData?.length || 0}
@@ -1217,6 +2030,7 @@ const [statusFilter, setStatusFilter] = useState(
 
                 </div>
               </div>
+              )}
 
             </div>
             {/* // )
@@ -1285,59 +2099,105 @@ const [statusFilter, setStatusFilter] = useState(
             </div>
           </div>
         )} */}
-        {showResetModal && (
-          <div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-            onClick={() => {
-              setShowResetModal(false);
-              setOpenMenu(false);
-              setMenuError("")
-            }}
-          >
-            <div
-              className="bg-white rounded-2xl shadow-xl w-[420px] p-8 text-center"
-              onClick={(e) => e.stopPropagation()}
-            >
+ {showResetModal && (
 
-              <h2 className="text-xl font-semibold mb-3">
-                Reset Expense?
-              </h2>
+  <div
+    className="
+      fixed inset-0
+      bg-black/40
 
-              <p className="text-gray-500 mb-8">
-                Are you sure you want to reset this expense?
-              </p>
-              {menuError && (
-                <ErrorMessage message={menuError} type="error" />
-              )}
-              <div className="flex justify-center gap-4 mt-1">
+      flex
+      items-center
+      justify-center
 
-                <button
-                  // onClick={() => setShowResetModal(false)}
-                  onClick={() => {
-                    setShowResetModal(false);
-                    setOpenMenu(false);
-                    setMenuError("")
-                  }}
-                  className="px-6 py-3 border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 cursor-pointer"
-                >
-                  Cancel
-                </button>
+      z-[99999]
+    "
+    onClick={() => {
+      setShowResetModal(false);
+      setOpenMenu(false);
+      setMenuError("");
+    }}
+  >
 
-                <button
-                  onClick={handleResetExpense}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
-                >
-                  Delete
-                </button>
+    <div
+      className="
+        bg-white
+        rounded-2xl
+        shadow-2xl
 
-              </div>
+        w-[420px]
+        max-w-[90%]
 
-            </div>
-          </div>
-        )}
+        p-8
+        text-center
+
+        animate-fadeIn
+      "
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      <h2 className="text-xl font-semibold mb-3">
+        Reset Expense?
+      </h2>
+
+      <p className="text-gray-500 mb-8">
+        Are you sure you want to reset this expense?
+      </p>
+
+      {menuError && (
+        <ErrorMessage
+          message={menuError}
+          type="error"
+        />
+      )}
+
+      <div className="flex justify-center gap-4 mt-1">
+
+        <button
+          onClick={() => {
+            setShowResetModal(false);
+            setOpenMenu(false);
+            setMenuError("");
+          }}
+          className="
+            px-6
+            py-3
+            rounded-lg
+            border
+            border-blue-500
+            text-blue-600
+            hover:bg-blue-50
+            transition-all
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleResetExpense}
+          className="
+            px-6
+            py-3
+            rounded-lg
+            bg-blue-600
+            text-white
+            hover:bg-blue-700
+            transition-all
+          "
+        >
+          Delete
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+)}
         {showTrialPopup && (
           <div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/40 flex items-center justify-center z-80"
             onClick={() => setShowTrialPopup(false)}
           >
             <div
@@ -1372,51 +2232,123 @@ const [statusFilter, setStatusFilter] = useState(
             </div>
           </div>
         )}
-        {showDeleteModal && (
-          <div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-            onClick={() => {
-              setShowDeleteModal(false);
-              setMenuError("");
-            }}
-          >
-            <div
-              className="bg-white rounded-xl p-5 w-[350px]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 className="text-sm font-semibold mb-2">
-                Delete Hostel?
-              </h2>
+  {showDeleteModal && (
 
-              <p className="text-sm text-gray-500 mb-4">
-                Are you sure you want to delete this hostel?
-              </p>
-              {menuError && (
-                <ErrorMessage message={menuError} type="error" />
-              )}
-              <div className="flex justify-end gap-2">
+  <div
+    className="
+      fixed inset-0
+      bg-black/40
 
-                <button
-                  onClick={() => {
-                    setShowDeleteModal(false);
-                    setMenuError("");
-                  }}
-                  className="px-3 py-1 border rounded text-sm cursor-pointer"
-                >
-                  Cancel
-                </button>
+      flex
+      items-center
+      justify-center
 
-                <button
-                  onClick={handleDeleteHostel}
-                  className="px-3 py-1 bg-red-600 text-white rounded text-sm cursor-pointer"
-                >
-                  Delete
-                </button>
+      z-[99999]
+    "
+    onClick={() => {
+      setShowDeleteModal(false);
+      setMenuError("");
+    }}
+  >
 
-              </div>
-            </div>
-          </div>
-        )}
+    <div
+      className="
+        bg-white
+        rounded-2xl
+        shadow-2xl
+
+        w-[380px]
+        max-w-[90%]
+
+        p-7
+        text-center
+
+        animate-fadeIn
+      "
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      <h2 className="text-[22px] font-semibold text-gray-800 mb-3">
+        Delete Hostel?
+      </h2>
+
+      <p className="text-gray-500 text-[15px] leading-6 mb-7">
+        Are you sure you want to delete this hostel?
+      </p>
+
+      {menuError && (
+        <ErrorMessage
+          message={menuError}
+          type="error"
+        />
+      )}
+
+      <div className="flex justify-center gap-4">
+
+        <button
+          onClick={() => {
+            setShowDeleteModal(false);
+            setMenuError("");
+          }}
+          className="
+            min-w-[110px]
+            px-5
+            py-3
+
+            rounded-xl
+
+            border
+            border-gray-300
+
+            text-gray-700
+            font-medium
+
+            hover:bg-gray-50
+
+            transition-all
+            duration-200
+
+            cursor-pointer
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleDeleteHostel}
+          disabled={isDeleting}
+          className={`
+            min-w-[110px]
+            px-5
+            py-3
+
+            rounded-xl
+
+            text-white
+            font-medium
+
+            transition-all
+            duration-200
+
+            ${
+              isDeleting
+                ? "bg-red-300 cursor-not-allowed"
+                : "bg-red-600 hover:bg-red-700 cursor-pointer"
+            }
+          `}
+        >
+          {isDeleting
+            ? "Deleting..."
+            : "Delete"}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+)}
         <AssignStaffModal
           show={showAssignModal}
           onClose={() => setShowAssignModal(false)}
