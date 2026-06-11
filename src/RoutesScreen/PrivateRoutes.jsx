@@ -32,6 +32,7 @@ import TrailPage from "../components/SubscriptionScreen/TrialUsers";
 import TableCustomization from "../components/TableCustomizationScreen/TableCustomization";
 import TenantRecurring from "../components/RecurringMonitor/TenantRecurring";
 import InvoiceRedemption from "../components/InvoiceRedemption/InvoiceRedemption";
+import { SupportTicketsProvider } from "../Context/SupportTicketsContext";
 
 const PrivateRoute = ({ children }) => {
   const token =
@@ -76,43 +77,44 @@ const PrivateRoutesScreen = () => {
             <SubscriptionProvider>
               <OwnersProvider>
                 <DashboardProvider>
+                  <SupportTicketsProvider>
+                    <Routes>
+                      <Route path="/home/:roleId" element={<Home />} />
+                      <Route path="/proprietors/:roleId" element={<Proprietors />} />
+                      {/* <Route path="/iam-admin-user/:roleId" element={<IamAdminUser />} /> */}
+                      <Route path="/iam-admin-user/:adminRoleId/:filterRoleId?" element={<IamAdminUser />} />
+                      <Route path="/roles/:roleId" element={<Roles />} />
+                      <Route path="/properties/:roleId" element={<Properties />} />
+                      <Route path="/subscription/:roleId" element={<Subscription />} />
+                      {/* <Route path="/subscription/:roleId" element={<Manageplans />} /> */}
+                      <Route path="/billing/:roleId" element={<Billing />} />
+                      <Route path="/supportTicket/:roleId" element={<SupportTicket />} />
+                      <Route path="/crmDashboard/:roleId" element={<CRMDashboard />} />
+                      <Route path="/manage-plans/:roleId" element={<ManagePlans />} />
+                      {/* <Route path="/property-overview" element={<PropertyOverview/>} /> */}
+                      <Route path="/property-overview/:hostelId" element={<PropertyOverview />} />
+                      {/* <Route path="/ProprietorsOverview" element={<ProprietorsOverview/>} /> */}
+                      <Route path="/ProprietorsOverview/:ownerId" element={<ProprietorsOverview />} />
+                      <Route path="/tenantList/:roleId" element={<TenantsList />} />
+                      <Route path="/Recurring-Bill/:roleId" element={<RecurringInvoice />} />
+                      {/* <Route path="/subscriptions" element={<Subscription />} /> */}
+                      <Route path="/demo-requests/:roleId" element={<DemoRequests />} />
+                      <Route path="/add-plan" element={<AddEditPlan />} />
+                      <Route path="/create-offer" element={<CreateOffer />} />
 
-                  <Routes>
-                    <Route path="/home/:roleId" element={<Home />} />
-                    <Route path="/proprietors/:roleId" element={<Proprietors />} />
-                    {/* <Route path="/iam-admin-user/:roleId" element={<IamAdminUser />} /> */}
-                    <Route path="/iam-admin-user/:adminRoleId/:filterRoleId?" element={<IamAdminUser />} />
-                    <Route path="/roles/:roleId" element={<Roles />} />
-                    <Route path="/properties/:roleId" element={<Properties />} />
-                    <Route path="/subscription/:roleId" element={<Subscription />} />
-                    {/* <Route path="/subscription/:roleId" element={<Manageplans />} /> */}
-                    <Route path="/billing/:roleId" element={<Billing />} />
-                    <Route path="/supportTicket/:roleId" element={<SupportTicket />} />
-                    <Route path="/crmDashboard/:roleId" element={<CRMDashboard />} />
-                    <Route path="/manage-plans/:roleId" element={<ManagePlans />} />
-                    {/* <Route path="/property-overview" element={<PropertyOverview/>} /> */}
-                    <Route path="/property-overview/:hostelId" element={<PropertyOverview />} />
-                    {/* <Route path="/ProprietorsOverview" element={<ProprietorsOverview/>} /> */}
-                    <Route path="/ProprietorsOverview/:ownerId" element={<ProprietorsOverview />} />
-                    <Route path="/tenantList/:roleId" element={<TenantsList />} />
-                    <Route path="/Recurring-Bill/:roleId" element={<RecurringInvoice />} />
-                    {/* <Route path="/subscriptions" element={<Subscription />} /> */}
-                    <Route path="/demo-requests/:roleId" element={<DemoRequests />} />
-                     <Route path="/add-plan" element={<AddEditPlan />} />
-                   <Route path="/create-offer" element={<CreateOffer />} />
+                      <Route path="/transactions/:roleId" element={<TransactionsPage />} />
+                      <Route path="/trial-users/:roleId" element={<TrailPage />} />
 
-                    <Route path="/transactions/:roleId" element={<TransactionsPage />} />
-                    <Route path="/trial-users/:roleId" element={<TrailPage/>} />
-
-                    <Route path="/tenant-Bill/:roleId" element={< TenantRecurring/>} />
-                    <Route path="/iam-user/:agentId" element={<UserInfo />} />
+                      <Route path="/tenant-Bill/:roleId" element={< TenantRecurring />} />
+                      <Route path="/iam-user/:agentId" element={<UserInfo />} />
                       <Route path="/tableCustomize/:agentId" element={<TableCustomization />} />
-                        <Route path="/invoice-redemption/:agentId" element={<InvoiceRedemption />} />
-                 
-                 
+                      <Route path="/invoice-redemption/:agentId" element={<InvoiceRedemption />} />
 
 
-                  </Routes>
+
+
+                    </Routes>
+                  </SupportTicketsProvider>
                 </DashboardProvider>
               </OwnersProvider>
             </SubscriptionProvider>

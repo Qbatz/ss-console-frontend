@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState,useEffect,useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import {
   Search,
@@ -10,13 +10,176 @@ import {
 } from "lucide-react";
 import { createPortal } from "react-dom";
 import CreateTicketModal from "./CreateTicketModal";
+import UpdateSupportStatusModal from "./SupportUpdateStatusModal";
+import { useSupportTickets } from "../../Context/SupportTicketsContext";
+import Arrow from "../../assets/arrow-right.png";
+import { DatePicker } from "antd";
+import dayjs from "dayjs";
+import FilterArrow from "../../assets/direction-down 01.png";
 
 const SupportTicket = () => {
   const [openMenu, setOpenMenu] = useState(null);
   const [showCommentModal, setShowCommentModal] = useState(false);
+  const {getAllSupportTickets} = useSupportTickets();
 
 const [commentText, setCommentText] = useState("");
 const [showCreateModal, setShowCreateModal] = useState(false);
+const [showUpdateStatus, setShowUpdateStatus] =useState(false);
+const [tickets, setTickets] = useState([]);
+const [page, setPage] = useState(1);
+const [size, setSize] = useState(10);
+const [search, setSearch] = useState("");
+const [status, setStatus] = useState("");
+// const [startDate, setStartDate] = useState("");
+// const [endDate, setEndDate] = useState("");
+const [agentId, setAgentId] = useState("");
+const [totalCount, setTotalCount] = useState(0);
+const [totalPages, setTotalPages] = useState(0);
+const [searchInput, setSearchInput] = useState("");
+const [resData,setResData] = useState([])
+const { RangePicker } = DatePicker;
+
+const [dateRange, setDateRange] =
+  useState([]);
+
+const [openStatusDropdown, setOpenStatusDropdown] =
+  useState(false);
+
+const [openAgentDropdown, setOpenAgentDropdown] = useState(false);
+
+const statusDropdownRef =
+  useRef(null);
+
+const agentDropdownRef =
+  useRef(null);
+
+
+const statusList = [
+  "OPEN",
+  "IN_PROGRESS",
+  "RESOLVED",
+  "CLOSED",
+];
+const startDate =
+  dateRange?.[0]
+    ? dayjs(dateRange[0]).format(
+        "DD-MM-YYYY"
+      )
+    : "";
+
+const endDate =
+  dateRange?.[1]
+    ? dayjs(dateRange[1]).format(
+        "DD-MM-YYYY"
+      )
+    : "";
+    useEffect(() => {
+
+  const handleClickOutside = (
+    event
+  ) => {
+
+    if (
+      statusDropdownRef.current &&
+      !statusDropdownRef.current.contains(
+        event.target
+      )
+    ) {
+
+      setOpenStatusDropdown(false);
+
+    }
+
+    if (
+      agentDropdownRef.current &&
+      !agentDropdownRef.current.contains(
+        event.target
+      )
+    ) {
+
+      setOpenAgentDropdown(false);
+
+    }
+
+  };
+
+  document.addEventListener(
+    "mousedown",
+    handleClickOutside
+  );
+
+  return () => {
+
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+  };
+
+}, []);
+
+useEffect(() => {
+
+  const timer = setTimeout(() => {
+
+    setSearch(searchInput);
+
+    setPage(1);
+
+  }, 500);
+
+  return () => clearTimeout(timer);
+
+}, [searchInput]);
+useEffect(() => {
+
+  fetchTickets();
+
+}, [
+  page,
+  size,
+  search,
+  status,
+  startDate,
+  endDate,
+  agentId,
+]);
+
+const fetchTickets =
+  async () => {
+
+    const res =
+      await getAllSupportTickets({
+        page,
+        size,
+        name: search,
+        startDate,
+        endDate,
+        status,
+        agentId,
+      });
+
+    if (res.success) {
+
+      const responseData =
+  res?.data || {};
+
+setTickets(
+  responseData?.supportTicketList || []
+);
+
+setTotalCount(
+  responseData?.totalItems || 0
+);
+setTotalPages(
+  responseData?.totalPages || 0
+);
+setResData(responseData)
+
+    }
+
+  };
 
 const [allComments, setAllComments] =
   useState([
@@ -86,116 +249,7 @@ useEffect(() => {
   document.addEventListener("click", handleClickOutside);
   return () => document.removeEventListener("click", handleClickOutside);
 }, []);
-  const tickets = [
-    {
-      id: "#ST-2025-001",
-      subject: "Unable to add tenant",
-      type: "General Query",
-      raisedBy: "Anish Raj",
-      property: "Laksha Ladies Hostel",
-      priority: "Low",
-      color: "bg-green-500",
-    },
-    {
-      id: "#ST-2025-002",
-      subject: "Need WhatsApp invoice option",
-      type: "Feature Request",
-      raisedBy: "Rahul Dev",
-      property: "Sunrise PG",
-      priority: "Medium",
-      color: "bg-blue-500",
-    },
-    {
-      id: "#ST-2025-003",
-      subject: "Electricity amount mismatch while tenant checkout",
-      type: "Complaint",
-      raisedBy: "Priya Mohan",
-      property: "Moksha Ladies Hostel",
-      priority: "High",
-      color: "bg-red-500",
-    },
-    {
-      id: "#ST-2025-004",
-      subject: "App crashes during billing",
-      type: "Bug/Issue",
-      raisedBy: "Rajesh Kannan",
-      property: "SRK Coliving",
-      priority: "Medium",
-      color: "bg-blue-500",
-    },
-    {
-      id: "#ST-2025-005",
-      subject: "Need custom invoice design",
-      type: "Requirement",
-      raisedBy: "Ravi Kumar",
-      property: "roomsearch.in",
-      priority: "High",
-      color: "bg-red-500",
-    },
-    {
-      id: "#ST-2025-006",
-      subject: "Payment entry not saving",
-      type: "Bug/Issue",
-      raisedBy: "David",
-      property: "LakeView Hostel",
-      priority: "High",
-      color: "bg-red-500",
-    },
-    {
-      id: "#ST-2025-007",
-      subject: "Payment entry not saving",
-      type: "Bug/Issue",
-      raisedBy: "David",
-      property: "LakeView Hostel",
-      priority: "High",
-      color: "bg-red-500",
-    },
-    {
-      id: "#ST-2025-008",
-      subject: "Payment entry not saving",
-      type: "Bug/Issue",
-      raisedBy: "David",
-      property: "LakeView Hostel",
-      priority: "High",
-      color: "bg-red-500",
-    },
-    {
-      id: "#ST-2025-009",
-      subject: "Payment entry not saving",
-      type: "Bug/Issue",
-      raisedBy: "David",
-      property: "LakeView Hostel",
-      priority: "High",
-      color: "bg-red-500",
-    },
-    {
-      id: "#ST-2025-010",
-      subject: "Payment entry not saving",
-      type: "Bug/Issue",
-      raisedBy: "David",
-      property: "LakeView Hostel",
-      priority: "High",
-      color: "bg-red-500",
-    },
-    {
-      id: "#ST-2025-011",
-      subject: "Payment entry not saving",
-      type: "Bug/Issue",
-      raisedBy: "David",
-      property: "LakeView Hostel",
-      priority: "High",
-      color: "bg-red-500",
-    },
-    {
-      id: "#ST-2025-012",
-      subject: "Payment entry not saving",
-      type: "Bug/Issue",
-      raisedBy: "David",
-      property: "LakeView Hostel",
-      priority: "High",
-      color: "bg-red-500",
-    },
-  ];
+  
 
   return (
     <DashboardLayout>
@@ -230,7 +284,7 @@ useEffect(() => {
                 text-white text-sm font-medium
                 flex items-center gap-2
                 hover:bg-[#2948e6]
-                transition
+                transition cursor-pointer
               "
             >
               <Plus size={16} />
@@ -240,42 +294,48 @@ useEffect(() => {
         </div>
 
         {/* STATS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-          {[
-            {
-              title: "Total Leads",
-              value: "246",
-            },
-            {
-              title: "New Today",
-              value: "0",
-            },
-            {
-              title: "Contacted",
-              value: "132",
-            },
-            {
-              title: "Demo Scheduled",
-              value: "09",
-            },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="
-                bg-white rounded-2xl border border-[#edf0f7]
-                p-5 shadow-sm
-              "
-            >
-              <p className="text-[13px] text-[#6b7280] mb-2">
-                {item.title}
-              </p>
+       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
 
-              <h2 className="text-[30px] font-bold text-[#111827] leading-none">
-                {item.value}
-              </h2>
-            </div>
-          ))}
-        </div>
+  {[
+    {
+      title: "Total Leads",
+      value: resData?.totalLeads || 0,
+    },
+    {
+      title: "New Today",
+      value: resData?.newToday || 0,
+    },
+    {
+      title: "Contacted",
+      value: resData?.contacted || 0,
+    },
+    {
+      title: "Demo Scheduled",
+      value: resData?.demoScheduled || 0,
+    },
+  ].map((item, index) => (
+
+    <div
+      key={index}
+      className="
+        bg-white rounded-2xl border border-[#edf0f7]
+        p-5 shadow-sm
+      "
+    >
+
+      <p className="text-[13px] text-[#6b7280] mb-2">
+        {item.title}
+      </p>
+
+      <h2 className="text-[30px] font-bold text-[#111827] leading-none">
+        {item.value}
+      </h2>
+
+    </div>
+
+  ))}
+
+</div>
 
         {/* LAST 30 DAYS */}
         <div className="flex items-center gap-2 text-[12px] text-[#6b7280] mb-6">
@@ -283,49 +343,282 @@ useEffect(() => {
           Based upon last 30 Days
         </div>
 
-        {/* TABLE SECTION */}
-         <div className="p-4 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-            <div className="flex flex-wrap gap-3">
-              <button
-                className="
-                  h-10 px-4 rounded-xl
-                  bg-[#eef2ff]
-                  text-[#3b5bfd]
-                  border border-[#dbe2ff]
-                  text-sm font-medium
-                  flex items-center gap-2
-                "
-              >
-                Active
-                <ChevronDown size={15} />
-              </button>
-
-              <button
-                className="
-                  h-10 px-4 rounded-xl border border-[#e5e7eb]
-                  text-sm text-[#374151]
-                  flex items-center gap-2
-                "
-              >
-                This Month
-                <ChevronDown size={15} />
-              </button>
-
-              <button
-                className="
-                  h-10 px-4 rounded-xl border border-[#e5e7eb]
-                  text-sm text-[#374151]
-                  flex items-center gap-2
-                "
-              >
-                Filter
-                <Filter size={15} />
-              </button>
-            </div>
+         <div className=" flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+            
 
             <div className="flex flex-col sm:flex-row gap-3">
-              {/* SEARCH */}
-              <div
+             
+             
+<div className="flex flex-wrap gap-3 mb-5">
+
+  
+  <RangePicker
+    value={dateRange}
+    inputReadOnly={true}
+    format="DD-MM-YYYY"
+    onChange={(dates) => {
+
+      setDateRange(
+        dates || []
+      );
+
+      setPage(1);
+
+    }}
+    className="
+      h-[40px]
+      rounded-xl
+    "
+  />
+
+  {/* STATUS FILTER */}
+  <div
+    className="
+      relative
+      min-w-[180px]
+    "
+    ref={statusDropdownRef}
+  >
+
+    <div
+      onClick={() => {
+
+        setOpenStatusDropdown(
+          !openStatusDropdown
+        );
+
+        setOpenAgentDropdown(
+          false
+        );
+
+      }}
+      className="
+        h-[40px]
+        px-4
+        border border-[#e5e7eb]
+        rounded-xl
+        bg-white
+        flex items-center
+        justify-between
+        cursor-pointer
+      "
+    >
+
+      <span className="text-sm">
+        {status || "All Status"}
+      </span>
+
+      <img
+        src={FilterArrow}
+        className="w-4 h-4"
+      />
+
+    </div>
+
+    {openStatusDropdown && (
+
+      <div
+        className="
+          absolute
+          top-full
+          left-0
+          mt-2
+          w-full
+          bg-white
+          border border-[#e5e7eb]
+          rounded-xl
+          shadow-xl
+          z-[9999]
+          overflow-hidden
+        "
+      >
+
+        <div
+          onClick={() => {
+
+            setStatus("");
+
+            setPage(1);
+
+            setOpenStatusDropdown(
+              false
+            );
+
+          }}
+          className="
+            px-4 py-3
+            text-sm
+            hover:bg-[#f8f9fc]
+            cursor-pointer
+          "
+        >
+          All Status
+        </div>
+
+        {statusList.map((item) => (
+
+          <div
+            key={item}
+            onClick={() => {
+
+              setStatus(item);
+
+              setPage(1);
+
+              setOpenStatusDropdown(
+                false
+              );
+
+            }}
+            className="
+              px-4 py-3
+              text-sm
+              hover:bg-[#f8f9fc]
+              cursor-pointer
+            "
+          >
+            {item}
+          </div>
+
+        ))}
+
+      </div>
+
+    )}
+
+  </div>
+
+  {/* AGENT FILTER */}
+  <div
+    className="
+      relative
+      min-w-[180px]
+    "
+    ref={agentDropdownRef}
+  >
+
+    <div
+      onClick={() => {
+
+        setOpenAgentDropdown(
+          !openAgentDropdown
+        );
+
+        setOpenStatusDropdown(
+          false
+        );
+
+      }}
+      className="
+        h-[40px]
+        px-4
+        border border-[#e5e7eb]
+        rounded-xl
+        bg-white
+        flex items-center
+        justify-between
+        cursor-pointer
+      "
+    >
+
+      <span className="text-sm truncate">
+
+        {
+          agentList.find(
+            (a) =>
+              a.agentId === agentId
+          )?.agentName ||
+          "All Agents"
+        }
+
+      </span>
+
+      <img
+        src={FilterArrow}
+        className="w-4 h-4"
+      />
+
+    </div>
+
+    {openAgentDropdown && (
+
+      <div
+        className="
+          absolute
+          top-full
+          left-0
+          mt-2
+          w-full
+          bg-white
+          border border-[#e5e7eb]
+          rounded-xl
+          shadow-xl
+          z-[9999]
+          overflow-hidden
+          max-h-[220px]
+          overflow-y-auto
+        "
+      >
+
+        <div
+          onClick={() => {
+
+            setAgentId("");
+
+            setPage(1);
+
+            setOpenAgentDropdown(
+              false
+            );
+
+          }}
+          className="
+            px-4 py-3
+            text-sm
+            hover:bg-[#f8f9fc]
+            cursor-pointer
+          "
+        >
+          All Agents
+        </div>
+
+        {agentList.map((agent) => (
+
+          <div
+            key={agent.agentId}
+            onClick={() => {
+
+              setAgentId(
+                agent.agentId
+              );
+
+              setPage(1);
+
+              setOpenAgentDropdown(
+                false
+              );
+
+            }}
+            className="
+              px-4 py-3
+              text-sm
+              hover:bg-[#f8f9fc]
+              cursor-pointer
+            "
+          >
+            {agent.agentName}
+          </div>
+
+        ))}
+
+      </div>
+
+    )}
+
+  </div>
+
+</div>
+ <div
                 className="
                   h-10 w-full sm:w-[240px]
                   border border-[#e5e7eb]
@@ -336,18 +629,21 @@ useEffect(() => {
               >
                 <Search size={17} className="text-gray-400" />
 
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="
-                    w-full bg-transparent outline-none
-                    text-sm text-gray-700
-                    placeholder:text-gray-400
-                  "
-                />
+ <input
+  type="text"
+  placeholder="Search..."
+  value={searchInput}
+  onChange={(e) =>
+    setSearchInput(e.target.value)
+  }
+  className="
+    w-full bg-transparent outline-none
+    text-sm text-gray-700
+    placeholder:text-gray-400
+  "
+/>
               </div>
-
-              <button
+              {/* <button
                 className="
                   h-10 px-4 rounded-xl border border-[#e5e7eb]
                   text-sm text-[#374151]
@@ -356,7 +652,7 @@ useEffect(() => {
               >
                 Last 30 Days
                 <ChevronDown size={15} />
-              </button>
+              </button> */}
             </div>
           </div>
         <div className="bg-white border border-[#edf0f7] rounded-2xl shadow-sm relative">
@@ -390,7 +686,7 @@ useEffect(() => {
 
     {[
       "SUBJECT",
-      "TYPE",
+      "QUERY TYPE",
       "RAISED BY",
       "PROPERTY NAME",
       "PRIORITY",
@@ -428,53 +724,78 @@ useEffect(() => {
   </tr>
 </thead>
 
-              <tbody>
-                {tickets.map((item, index) => (
-                  <tr
-                   key={index}
-  className="border-b border-[#edf0f7] hover:bg-[#fafbff] group"
-                  >
-   <td className="px-5 py-2 text-sm font-medium text-[#374151] whitespace-nowrap sticky left-0 z-10 bg-white group-hover:bg-[#fafbff]">
-  {item.id}
-</td>
+            <tbody>
 
-                    <td className="px-5 py-2 text-sm text-[#111827] min-w-[230px] relative text-left">
-                      <div className="truncate max-w-[250px]">
-                        {item.subject}
-                      </div>
+  {tickets?.length > 0 ? (
 
-                    </td>
+    tickets.map(
+      (item, index) => (
 
-                    <td className="px-5 py-2 text-sm text-[#4b5563] whitespace-nowrap text-left">
-                      {item.type}
-                    </td>
+        <tr
+          key={index}
+          className="
+            border-b border-[#edf0f7]
+            hover:bg-[#fafbff]
+            group
+          "
+        >
 
-                    <td className="px-5 py-2 text-sm font-medium text-[#374151] whitespace-nowrap text-left">
-                      {item.raisedBy}
-                    </td>
+          <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap sticky left-0 z-10 bg-white group-hover:bg-[#fafbff]">
+            {item.ticketId}
+          </td>
 
-                    <td className="px-5 py-2 text-sm font-medium text-[#374151] whitespace-nowrap text-left">
-                      {item.property}
-                    </td>
+          <td className="px-5 py-2 text-xs text-[#111827] min-w-[230px] text-left">
+            <div className="truncate max-w-[250px]">
+              {item.subject}
+            </div>
+          </td>
 
-                    <td className="px-5 py-2 whitespace-nowrap text-left">
-                      <div
-                        className="
-                          inline-flex items-center gap-2
-                          px-3 py-1 rounded-full
-                          text-xs font-medium
-                          bg-[#f9fafb] 
-                        "
-                      >
-                        <div
-                          className={`w-2 h-2 rounded-full ${item.color}`}
-                        />
+          <td className="px-5 py-2 text-xs text-[#4b5563] whitespace-nowrap text-left">
+            {item.queryType}
+          </td>
 
-                        {item.priority}
-                      </div>
-                    </td>
+          <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
+            {item.raisedBy}
+          </td>
 
-                  <td className="sticky right-0 z-20 bg-white group-hover:bg-[#fafbff] px-5 py-2 relative overflow-visible">
+          <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
+            {item.hostelName}
+          </td>
+
+          <td className="px-5 py-2 whitespace-nowrap text-left">
+
+            <div
+              className="
+                inline-flex items-center gap-2
+                px-3 py-1 rounded-full
+                text-xs font-medium
+                bg-[#f9fafb]
+              "
+            >
+
+              <div
+                className={`
+                  w-2 h-2 rounded-full
+
+                  ${
+                    item.priority ===
+                    "HIGH"
+                      ? "bg-red-500"
+                      : item.priority ===
+                        "MEDIUM"
+                      ? "bg-blue-500"
+                      : "bg-green-500"
+                  }
+                `}
+              />
+
+              {item.priority || "N/A"}
+
+            </div>
+
+          </td>
+
+             <td className="sticky right-0 z-20 bg-white group-hover:bg-[#fafbff] px-5 py-2 relative overflow-visible">
                       <button
  onClick={(e) => { e.stopPropagation(); handleMenuToggle(e, index); }}
   className="
@@ -520,6 +841,9 @@ useEffect(() => {
   if (menu === "Assign Staff") {
     setShowAssignDrawer(true);
   }
+  if (menu === "Update Status") {
+  setShowUpdateStatus(true);
+}
 
   setMenuPosition({
     index: null,
@@ -541,60 +865,201 @@ useEffect(() => {
     document.body
   )}
                     </td>
-                  </tr>
-                ))}
-              </tbody>
+
+        </tr>
+
+      )
+    )
+
+  ) : (
+
+    <tr>
+
+      <td
+        colSpan={7}
+        className="
+          py-10
+          text-center
+          text-sm
+          text-gray-500
+        "
+      >
+        No Support Tickets Found
+      </td>
+
+    </tr>
+
+  )}
+
+</tbody>
             </table>
           </div>
 
           {/* FOOTER */}
         
         </div>
-          <div
-            className="
-              p-4
-              flex flex-col sm:flex-row
-              items-start sm:items-center
-              justify-between
-              gap-4
-            "
-          >
-            <p className="text-sm text-[#4b5563]">
-              Total Record Count :
-              <span className="text-[#3b5bfd] font-semibold ml-1">
-                40
-              </span>
-            </p>
+   <div
+  className="
+    p-4
+    flex flex-col sm:flex-row
+    items-start sm:items-center
+    justify-between
+    gap-4
+  "
+>
 
-            <div className="flex items-center gap-3">
-              <select
-                className="
-                  h-9 px-3 rounded-lg border border-[#e5e7eb]
-                  text-sm outline-none
-                "
-              >
-                <option>20</option>
-              </select>
+  {/* TOTAL COUNT */}
+  <p className="text-sm text-[#4b5563]">
+    Total Record Count :
+    <span className="text-[#3b5bfd] font-semibold ml-1">
+      {tickets?.length}
+    </span>
+  </p>
 
-              <div className="flex items-center gap-3 text-sm">
-                <button className="text-[#3b5bfd]">{`<`}</button>
+  {/* PAGINATION */}
+  <div className="flex items-center gap-3">
 
-                <button
-                  className="
-                    h-8 w-8 rounded-lg
-                    border border-[#dbe2ff]
-                    text-[#3b5bfd]
-                  "
-                >
-                  1
-                </button>
+    {/* PAGE SIZE */}
+    <select
+      value={size}
+      onChange={(e) => {
 
-                <span className="text-[#6b7280]">- 10</span>
+        setSize(
+          Number(e.target.value)
+        );
 
-                <button className="text-[#3b5bfd]">{`>`}</button>
-              </div>
-            </div>
-          </div>
+        setPage(1);
+
+      }}
+      className="
+        h-9 px-3 rounded-lg
+        border border-[#e5e7eb]
+        text-sm outline-none
+      "
+    >
+
+      <option value={10}>
+        10
+      </option>
+
+      <option value={20}>
+        20
+      </option>
+
+      <option value={50}>
+        50
+      </option>
+
+    </select>
+
+    
+    <div className="flex items-center gap-3 text-sm">
+
+    
+      <button
+        disabled={page === 1}
+        onClick={() =>
+          setPage((prev) => prev - 1)
+        }
+        className={`
+          ${
+            page === 1
+              ? "opacity-40 cursor-not-allowed"
+              : "cursor-pointer"
+          }
+        `}
+      >
+
+        <img
+          src={Arrow}
+          className="
+            w-[15px]
+            h-[15px]
+          "
+        />
+
+      </button>
+
+    
+      <button
+        className="
+          h-8
+          min-w-8
+          px-3
+          rounded-lg
+          border border-[#dbe2ff]
+          text-[#3b5bfd]
+          font-medium
+        "
+      >
+        {page}
+      </button>
+
+      {/* RANGE */}
+     <div className="flex items-center gap-2">
+
+  {/* CURRENT PAGE */}
+  {/* <button
+    className="
+      h-8
+      min-w-8
+      px-3
+      rounded-lg
+      border border-[#dbe2ff]
+      text-[#3b5bfd]
+      font-medium
+    "
+  >
+    {page}
+  </button> */}
+   <span className="text-[#6b7280] font-medium">
+    {page}
+  </span>
+
+  <span className="text-[#9ca3af]">
+    -
+  </span>
+
+  {/* TOTAL PAGES */}
+  <span className="text-[#6b7280] font-medium">
+    {totalPages}
+  </span>
+
+</div>
+
+      {/* NEXT */}
+      <button
+        disabled={
+          page >= totalPages
+        }
+        onClick={() =>
+          setPage((prev) => prev + 1)
+        }
+        className={`
+          ${
+            page >= totalPages
+              ? "opacity-40 cursor-not-allowed"
+              : "cursor-pointer"
+          }
+        `}
+      >
+
+        <img
+          src={Arrow}
+          className="
+            w-[15px]
+            h-[15px]
+            scale-x-[-1]
+          "
+        />
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
       </div>
       {showCommentModal && (
   <div className="fixed inset-0 z-[99999]">
@@ -1009,6 +1474,12 @@ useEffect(() => {
   open={showCreateModal}
   onClose={() =>
     setShowCreateModal(false)
+  }
+/>
+<UpdateSupportStatusModal
+  open={showUpdateStatus}
+  onClose={() =>
+    setShowUpdateStatus(false)
   }
 />
     </DashboardLayout>
