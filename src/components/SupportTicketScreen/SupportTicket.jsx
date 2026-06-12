@@ -12,6 +12,7 @@ import { createPortal } from "react-dom";
 import CreateTicketModal from "./CreateTicketModal";
 import UpdateSupportStatusModal from "./SupportUpdateStatusModal";
 import { useSupportTickets } from "../../Context/SupportTicketsContext";
+import { useSubscription } from "../../Context/SubscriptionContext";
 import Arrow from "../../assets/arrow-right.png";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
@@ -20,7 +21,9 @@ import FilterArrow from "../../assets/direction-down 01.png";
 const SupportTicket = () => {
   const [openMenu, setOpenMenu] = useState(null);
   const [showCommentModal, setShowCommentModal] = useState(false);
-  const {getAllSupportTickets} = useSupportTickets();
+  const {getAllSupportTickets,getSupportTicketStatus,loading} = useSupportTickets();
+  const { getAgentsDropdown } = useSubscription();
+
 
 const [commentText, setCommentText] = useState("");
 const [showCreateModal, setShowCreateModal] = useState(false);
@@ -37,6 +40,7 @@ const [totalCount, setTotalCount] = useState(0);
 const [totalPages, setTotalPages] = useState(0);
 const [searchInput, setSearchInput] = useState("");
 const [resData,setResData] = useState([])
+const [agentList, setAgentList] = useState([]);
 const { RangePicker } = DatePicker;
 
 const [dateRange, setDateRange] =
@@ -52,14 +56,32 @@ const statusDropdownRef =
 
 const agentDropdownRef =
   useRef(null);
+const [statusList, setStatusList] =
+  useState([]);
+
+useEffect(() => {
+
+  const fetchStatus =
+    async () => {
+
+      const res =
+        await getSupportTicketStatus();
+
+      if (res.success) {
+
+        setStatusList(
+          res.data || []
+        );
+
+      }
+
+    };
+
+  fetchStatus();
+
+}, []);
 
 
-const statusList = [
-  "OPEN",
-  "IN_PROGRESS",
-  "RESOLVED",
-  "CLOSED",
-];
 const startDate =
   dateRange?.[0]
     ? dayjs(dateRange[0]).format(
@@ -116,6 +138,27 @@ const endDate =
     );
 
   };
+
+}, []);
+useEffect(() => {
+
+  const fetchAgents =
+    async () => {
+
+      const res =
+        await getAgentsDropdown();
+
+      if (res.success) {
+
+        setAgentList(
+          res.data || []
+        );
+
+      }
+
+    };
+
+  fetchAgents();
 
 }, []);
 
@@ -209,20 +252,7 @@ const [openDropdown, setOpenDropdown] =
 const [assignError, setAssignError] =
   useState("");
 
-const agentList = [
-  {
-    agentId: 1,
-    agentName: "Rahul",
-  },
-  {
-    agentId: 2,
-    agentName: "David",
-  },
-  {
-    agentId: 3,
-    agentName: "Anish",
-  },
-];
+
 
 const handleMenuToggle = (e, index) => {
   if (menuPosition.index === index) {
@@ -294,42 +324,83 @@ useEffect(() => {
         </div>
 
         {/* STATS */}
-       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
 
   {[
     {
-      title: "Total Leads",
-      value: resData?.totalLeads || 0,
+      title1: "Total Leads",
+      value1:
+        resData?.totalLeads || 0,
+
+      title2: "New Today",
+      value2:
+        resData?.newToday || 0,
     },
     {
-      title: "New Today",
-      value: resData?.newToday || 0,
+       title1: "Waiting",
+      value1:
+        resData?.waitingCount || 0,
+      title2: "Assigned",
+      value2:
+        resData?.assignedCount || 0,
+
+     
     },
+
     {
-      title: "Contacted",
-      value: resData?.contacted || 0,
+      title1: "In Progress",
+      value1:
+        resData?.inProgressCount || 0,
+
+      title2: "Resolved",
+      value2:
+        resData?.resolvedCount || 0,
     },
-    {
-      title: "Demo Scheduled",
-      value: resData?.demoScheduled || 0,
-    },
+
+    
+
   ].map((item, index) => (
 
     <div
       key={index}
       className="
-        bg-white rounded-2xl border border-[#edf0f7]
-        p-5 shadow-sm
+        bg-white
+        rounded-2xl
+        border border-[#edf0f7]
+        p-6
+        shadow-sm
       "
     >
 
-      <p className="text-[13px] text-[#6b7280] mb-2">
-        {item.title}
-      </p>
+      <div className="flex items-center justify-between">
 
-      <h2 className="text-[30px] font-bold text-[#111827] leading-none">
-        {item.value}
-      </h2>
+        <div className="flex-1 text-center">
+
+          <p className="text-[14px] text-[#6b7280] mb-3">
+            {item.title1}
+          </p>
+
+          <h2 className="text-[38px] font-bold text-[#111827] leading-none">
+            {item.value1}
+          </h2>
+
+        </div>
+
+        <div className="w-[1px] h-[70px] bg-[#edf0f7]" />
+
+        <div className="flex-1 text-center">
+
+          <p className="text-[14px] text-[#6b7280] mb-3">
+            {item.title2}
+          </p>
+
+          <h2 className="text-[38px] font-bold text-[#111827] leading-none">
+            {item.value2}
+          </h2>
+
+        </div>
+
+      </div>
 
     </div>
 
@@ -340,7 +411,7 @@ useEffect(() => {
         {/* LAST 30 DAYS */}
         <div className="flex items-center gap-2 text-[12px] text-[#6b7280] mb-6">
           <div className="w-2 h-2 rounded-full bg-[#3b5bfd]" />
-          Based upon last 30 Days
+           Based on Current Month
         </div>
 
          <div className=" flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
@@ -418,19 +489,26 @@ useEffect(() => {
     {openStatusDropdown && (
 
       <div
-        className="
-          absolute
-          top-full
-          left-0
-          mt-2
-          w-full
-          bg-white
-          border border-[#e5e7eb]
-          rounded-xl
-          shadow-xl
-          z-[9999]
-          overflow-hidden
-        "
+       className="
+  absolute
+  top-full
+  left-0
+  mt-2
+  w-full
+  bg-white
+  border border-[#e5e7eb]
+  rounded-xl
+  shadow-xl
+  z-[9999]
+
+  max-h-[220px]
+  overflow-y-auto
+
+  [&::-webkit-scrollbar]:w-[5px]
+  [&::-webkit-scrollbar-track]:bg-transparent
+  [&::-webkit-scrollbar-thumb]:bg-[#d1d5db]
+  [&::-webkit-scrollbar-thumb]:rounded-full
+"
       >
 
         <div
@@ -455,32 +533,32 @@ useEffect(() => {
           All Status
         </div>
 
-        {statusList.map((item) => (
+       {statusList.map((item) => (
 
-          <div
-            key={item}
-            onClick={() => {
+  <div
+    key={item.key}
+    onClick={() => {
 
-              setStatus(item);
+      setStatus(item.key);
 
-              setPage(1);
+      setPage(1);
 
-              setOpenStatusDropdown(
-                false
-              );
+      setOpenStatusDropdown(
+        false
+      );
 
-            }}
-            className="
-              px-4 py-3
-              text-sm
-              hover:bg-[#f8f9fc]
-              cursor-pointer
-            "
-          >
-            {item}
-          </div>
+    }}
+    className="
+      px-4 py-3
+      text-sm
+      hover:bg-[#f8f9fc]
+      cursor-pointer
+    "
+  >
+    {item.label}
+  </div>
 
-        ))}
+))}
 
       </div>
 
@@ -523,13 +601,13 @@ useEffect(() => {
 
       <span className="text-sm truncate">
 
-        {
-          agentList.find(
-            (a) =>
-              a.agentId === agentId
-          )?.agentName ||
-          "All Agents"
-        }
+   {
+  agentList.find(
+    (a) =>
+      a.agentId === agentId
+  )?.agentName ||
+  "All Agents"
+}
 
       </span>
 
@@ -655,8 +733,41 @@ useEffect(() => {
               </button> */}
             </div>
           </div>
-        <div className="bg-white border border-[#edf0f7] rounded-2xl shadow-sm relative">
-          
+       <div className="bg-white border border-[#edf0f7] rounded-2xl shadow-sm relative overflow-hidden">
+         {loading && (
+
+  <div
+    className="
+      absolute inset-0
+      bg-white/70
+      backdrop-blur-[2px]
+      z-[999]
+      flex items-center justify-center
+    "
+  >
+
+    <div className="flex flex-col items-center gap-3">
+
+      <div
+        className="
+          w-12 h-12
+          border-[4px]
+          border-[#dbe2ff]
+          border-t-[#3b5bfd]
+          rounded-full
+          animate-spin
+        "
+      />
+
+      <p className="text-sm text-[#3b5bfd] font-medium">
+        Loading Tickets...
+      </p>
+
+    </div>
+
+  </div>
+
+)} 
         <div
   className="
     table-scroll
@@ -669,25 +780,35 @@ useEffect(() => {
             <table className="min-w-[1100px] w-full border-separate border-spacing-0">
        <thead className="sticky top-0 z-40">
   <tr>
+ <th
+  className="
+    sticky left-0 z-50
+    bg-[#f8f9fc]
+    min-w-[70px]
+    w-[70px]
+    px-5 py-4 text-[12px] text-[#6b7280]
+  "
+>
+  ID
+</th>
 
-    <th
-      className="
-        sticky top-0 left-0 z-50
-        bg-[#f8f9fc]
-        px-5 py-4
-        text-left text-[12px]
-        font-semibold text-[#6b7280]
-        whitespace-nowrap
-        border-b border-[#edf0f7]
-      "
-    >
-      TICKET ID
-    </th>
+<th
+  className="
+    sticky left-[70px] z-40
+    bg-[#f8f9fc]
+    min-w-[190px]
+    w-[190px]
+    px-5 py-4 text-[12px] text-[#6b7280]
+  "
+>
+  TICKET NUMBER
+</th>
 
     {[
       "SUBJECT",
       "QUERY TYPE",
       "RAISED BY",
+      "TICKET STATUS",
       "PROPERTY NAME",
       "PRIORITY",
     ].map((head, i) => (
@@ -739,10 +860,41 @@ useEffect(() => {
             group
           "
         >
+<td
+  className="
+    sticky left-0 z-30
+    bg-white
+    group-hover:bg-[#fafbff]
 
-          <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap sticky left-0 z-10 bg-white group-hover:bg-[#fafbff]">
-            {item.ticketId}
-          </td>
+    min-w-[70px]
+    w-[70px]
+
+    px-5 py-2
+    text-xs font-medium
+    text-[#374151]
+    whitespace-nowrap
+  "
+>
+  {(page - 1) * size + index + 1}
+</td>
+
+<td
+  className="
+    sticky left-[70px] z-20
+    bg-white
+    group-hover:bg-[#fafbff]
+
+    min-w-[190px]
+    w-[190px]
+
+    px-5 py-2
+    text-xs font-medium
+    text-[#374151]
+    whitespace-nowrap
+  "
+>
+  {item.ticketNumber}
+</td>
 
           <td className="px-5 py-2 text-xs text-[#111827] min-w-[230px] text-left">
             <div className="truncate max-w-[250px]">
@@ -757,7 +909,9 @@ useEffect(() => {
           <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
             {item.raisedBy}
           </td>
-
+ <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
+            {item.ticketStatus}
+          </td>
           <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
             {item.hostelName}
           </td>
@@ -1475,6 +1629,7 @@ useEffect(() => {
   onClose={() =>
     setShowCreateModal(false)
   }
+  reFreshData={fetchTickets}
 />
 <UpdateSupportStatusModal
   open={showUpdateStatus}

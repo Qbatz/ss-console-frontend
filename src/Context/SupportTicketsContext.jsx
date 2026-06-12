@@ -302,6 +302,52 @@ const getAllSupportTickets =
     }
 
   };
+  const getSupportTicketStatus =
+  async () => {
+
+    try {
+
+      setLoading(true);
+
+      setErrorMsg("");
+
+      const res =
+        await axiosInstance.get(
+          "/v2/support-ticket/status"
+        );
+
+      if (res.status === 200) {
+
+        return {
+          success: true,
+          data: res.data,
+        };
+
+      }
+
+      return {
+        success: false,
+      };
+
+    } catch (error) {
+
+      const msg =
+        getErrorMessage(error);
+
+      setErrorMsg(msg);
+
+      return {
+        success: false,
+        message: msg,
+      };
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
 
   return (
     <SupportTicketsContext.Provider
@@ -309,7 +355,7 @@ const getAllSupportTickets =
         loading,
         errorMsg,
 
-        searchOwners,getQueryTypes,createSupportTicket,getAllSupportTickets
+        searchOwners,getQueryTypes,createSupportTicket,getAllSupportTickets,getSupportTicketStatus
       }}
     >
       {children}

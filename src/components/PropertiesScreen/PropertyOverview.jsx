@@ -192,7 +192,7 @@ const PropertyOverview = () => {
     if (res?.success) {
       setModalType("success");
       setMessage(res?.message);
-
+fetchData()
 
       setShowNoteModal(false);
       setShowSuccess(true);

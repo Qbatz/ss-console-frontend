@@ -7,7 +7,7 @@ import ErrorMessage from "../../components/ErrorMessage/ErrorMessage";
 import Toast from "../../components/SuccessModal/ToastDesign";
 
 
-const CreateTicketModal = ({ open, onClose }) => {
+const CreateTicketModal = ({ open, onClose,reFreshData }) => {
   const { searchOwners, loading, getQueryTypes, createSupportTicket } = useSupportTickets();
   const [customerSearch, setCustomerSearch] = useState("");
   const [selectedOwner, setSelectedOwner] = useState(null);
@@ -265,6 +265,7 @@ const CreateTicketModal = ({ open, onClose }) => {
             res?.message ||
             "Ticket Created Successfully"
           );
+          reFreshData()
           setShowSuccess(true);
 
           setTimeout(() => {

@@ -88,8 +88,8 @@ const toggleOwner = (id) => {
 </div>
 
                   <div>
-                    <h3 className="text-[16px] font-semibold text-gray-900">
-                      {agentDetails?.fullName || "Susi"}
+                    <h3 className="text-[16px] font-semibold text-gray-900 text-left">
+                      {agentDetails?.fullName || "N/A"}
                     </h3>
                     <p className="text-[12px] text-gray-500 mt-1">
                       {agentDetails?.roleName || "Support Agent"}
