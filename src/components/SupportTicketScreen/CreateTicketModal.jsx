@@ -22,6 +22,7 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   useEffect(() => {
 
     const fetchQueryTypes =
@@ -160,134 +161,106 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
     }
 
   }, [customerSearch]);
-  const handleSubmit =
-    async () => {
+ const handleSubmit =
+  async () => {
 
-      const newErrors = {};
+    // 🔥 already submitting na stop
+    if (isSubmitting) return;
 
-      if (!selectedOwner) {
+    const newErrors = {};
 
-        newErrors.customer =
-          "Customer is required";
+    if (!selectedOwner) {
+      newErrors.customer =
+        "Customer is required";
+    }
 
-      }
+    if (!selectedHostel) {
+      newErrors.property =
+        "Property is required";
+    }
 
-      if (!selectedHostel) {
+    if (!selectedStaff) {
+      newErrors.raisedBy =
+        "Raised by is required";
+    }
 
-        newErrors.property =
-          "Property is required";
+    if (!selectedQueryType) {
+      newErrors.queryType =
+        "Query Type is required";
+    }
 
-      }
+    if (!formData.subject.trim()) {
+      newErrors.subject =
+        "Subject is required";
+    }
 
-      if (!selectedStaff) {
+    if (!formData.date) {
+      newErrors.date =
+        "Date is required";
+    }
 
-        newErrors.raisedBy =
-          "Raised by is required";
+    if (
+      Object.keys(newErrors)
+        .length > 0
+    ) {
 
-      }
+      setErrors(newErrors);
 
-      if (!selectedQueryType) {
+      return;
 
-        newErrors.queryType =
-          "Query Type is required";
+    }
 
-      }
+    setErrors({});
 
-      if (
-        !formData.subject.trim()
-      ) {
+    try {
 
-        newErrors.subject =
-          "Subject is required";
+      // 🔥 disable button
+      setIsSubmitting(true);
 
-      }
+      const payload = {
 
-      if (!formData.date) {
+        parentId:
+          selectedOwner?.parentId,
 
-        newErrors.date =
-          "Date is required";
+        hostelId:
+          selectedHostel?.hostelId,
 
-      }
+        raisedBy:
+          selectedStaff?.userId,
 
-      // STOP API
-      if (
-        Object.keys(newErrors)
-          .length > 0
-      ) {
+        queryType:
+          selectedQueryType?.key,
 
-        setErrors(newErrors);
+        subject:
+          formData.subject,
 
-        return;
+        issueDate:
+          dayjs(formData.date)
+            .format(
+              "DD-MM-YYYY"
+            ),
 
-      }
+        remarks:
+          formData.remarks,
 
-      setErrors({});
+      };
 
-      try {
+      const res =
+        await createSupportTicket(
+          payload,
+          formData.file
+        );
 
-        const payload = {
+      if (res.success) {
 
-          parentId:
-            selectedOwner?.parentId,
-
-          hostelId:
-            selectedHostel?.hostelId,
-
-          raisedBy:
-            selectedStaff?.userId,
-
-          queryType:
-            selectedQueryType?.key,
-
-          subject:
-            formData.subject,
-
-          issueDate:
-            dayjs(formData.date)
-              .format(
-                "DD-MM-YYYY"
-              ),
-
-          remarks:
-            formData.remarks,
-
-        };
-
-        const res =
-          await createSupportTicket(
-            payload,
-            formData.file
-          );
-
-        if (res.success) {
-          setModalType("success");
-          setMessage(
-            res?.message ||
-            "Ticket Created Successfully"
-          );
-          reFreshData()
-          setShowSuccess(true);
-
-          setTimeout(() => {
-            setShowSuccess(false);
-            onClose();
-
-          }, 1300);
-
-
-        }
-
-      }
-      catch (error) {
-
-        console.log(error);
-
-        setModalType("error");
+        setModalType("success");
 
         setMessage(
-          error?.message ||
-          "Something went wrong"
+          res?.message ||
+          "Ticket Created Successfully"
         );
+
+        reFreshData();
 
         setShowSuccess(true);
 
@@ -295,11 +268,37 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
 
           setShowSuccess(false);
 
+          onClose();
+
         }, 1300);
 
       }
 
-    };
+    } catch (error) {
+
+      setModalType("error");
+
+      setMessage(
+        error?.message ||
+        "Something went wrong"
+      );
+
+      setShowSuccess(true);
+
+      setTimeout(() => {
+
+        setShowSuccess(false);
+
+      }, 1300);
+
+    } finally {
+
+      // 🔥 enable again
+      setIsSubmitting(false);
+
+    }
+
+  };
 
   if (!open) return null;
 
@@ -1412,7 +1411,11 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
               font-medium cursor-pointer
             "
             >
-              Send & Schedule
+            {
+    isSubmitting
+      ? "Submitting..."
+      : "Send & Schedule"
+  }
             </button>
 
           </div>

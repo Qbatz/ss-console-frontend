@@ -12,7 +12,7 @@ import DemoRequestDrawer from "./AddRequest";
 import UpdateStatusModal from "./UpdateStatusModal";
 import CommentBox from "../../assets/message-2.png";
 import Notes from "../../assets/notes.png";
-import  SupportTicketOverview from "../DemoRequestsScreen/SupportTicketOverview";
+import  DemoRequestOverview from "../DemoRequestsScreen/DemoRequestOverview";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import MarkAsLostDrawer from "./MarkAsLostDrawer";
@@ -2016,7 +2016,7 @@ setCommentText("")
     </div>
   </div>
 )}
-<SupportTicketOverview
+<DemoRequestOverview
   open={openOverview}
   onClose={() => setOpenOverview(false)}
   selectedItem={selectedItem}

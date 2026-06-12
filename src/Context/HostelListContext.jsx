@@ -547,41 +547,140 @@ const bulkGenerateRecurring = async (hostelIds = []) => {
 const exportHostels = async (
   hostelName = "",
   startDate = "",
-  endDate = ""
+  endDate = "",
+  agentId = "",
+  filterOption = "TOTAL_PROPERTIES"
 ) => {
+
   try {
+
     setLoading(true);
 
-    const res = await axiosInstance.get("/v2/hostels/export", {
-      params: {
-        hostelName,
-        startDate,
-        endDate
-      },
-      responseType: "blob" // 🔥 important for file download
-    });
+    const params = {
+      filterOption,
+    };
 
-    // Create file download
-    const url = window.URL.createObjectURL(new Blob([res.data]));
-    const link = document.createElement("a");
+    if (hostelName) {
+      params.name = hostelName;
+    }
+
+    if (startDate) {
+      params.startDate = startDate;
+    }
+
+    if (endDate) {
+      params.endDate = endDate;
+    }
+
+    if (agentId) {
+      params.agentId = agentId;
+    }
+
+    const res = await axiosInstance.get(
+      "/v2/hostels/export/new",
+      {
+        params,
+        responseType: "blob",
+      }
+    );
+
+    // 🔥 check blob size
+    console.log(
+      "FILE SIZE",
+      res.data.size
+    );
+
+    if (res.data.size === 0) {
+
+      return {
+        success: false,
+        message: "No data found",
+      };
+
+    }
+
+    const url =
+      window.URL.createObjectURL(
+        res.data
+      );
+
+    const link =
+      document.createElement("a");
 
     link.href = url;
-    link.setAttribute("download", "hostels.xlsx"); // file name
+
+    link.download =
+      "hostels.xlsx";
+
     document.body.appendChild(link);
+
     link.click();
 
-    return { success: true };
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+
+    return {
+      success: true,
+    };
 
   } catch (error) {
-    const msg = getErrorMessage(error);
-    setErrorMsg(msg);
 
-    return { success: false, message: msg };
+    console.log(
+      "EXPORT ERROR",
+      error
+    );
+
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
 
   } finally {
+
     setLoading(false);
+
   }
+
 };
+// const exportHostels = async (
+//   hostelName = "",
+//   startDate = "",
+//   endDate = ""
+// ) => {
+//   try {
+//     setLoading(true);
+
+//     const res = await axiosInstance.get("/v2/hostels/export/new", {
+//       params: {
+//         hostelName,
+//         startDate,
+//         endDate
+//       },
+//       responseType: "blob" // 🔥 important for file download
+//     });
+
+//     // Create file download
+//     const url = window.URL.createObjectURL(new Blob([res.data]));
+//     const link = document.createElement("a");
+
+//     link.href = url;
+//     link.setAttribute("download", "hostels.xlsx"); // file name
+//     document.body.appendChild(link);
+//     link.click();
+
+//     return { success: true };
+
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+//     setErrorMsg(msg);
+
+//     return { success: false, message: msg };
+
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 const getTenantRecurring = async (
   page = 0,
   size = 10,

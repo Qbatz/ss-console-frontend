@@ -17,11 +17,13 @@ import Arrow from "../../assets/arrow-right.png";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import FilterArrow from "../../assets/direction-down 01.png";
-
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import Toast from "../SuccessModal/ToastDesign";
+import SupportTicketOverview from "./SupportTicketOverview";
 const SupportTicket = () => {
   const [openMenu, setOpenMenu] = useState(null);
   const [showCommentModal, setShowCommentModal] = useState(false);
-  const {getAllSupportTickets,getSupportTicketStatus,loading} = useSupportTickets();
+  const {getAllSupportTickets,getSupportTicketStatus,loading,getSupportTicketPriority,assignSupportTicket,getSupportTicketById} = useSupportTickets();
   const { getAgentsDropdown } = useSubscription();
 
 
@@ -41,24 +43,53 @@ const [totalPages, setTotalPages] = useState(0);
 const [searchInput, setSearchInput] = useState("");
 const [resData,setResData] = useState([])
 const [agentList, setAgentList] = useState([]);
+const [priorityValue, setPriorityValue] = useState("");
 const { RangePicker } = DatePicker;
+const [priorityList, setPriorityList] = useState([]);
 
-const [dateRange, setDateRange] =
-  useState([]);
-
-const [openStatusDropdown, setOpenStatusDropdown] =
-  useState(false);
+const [dateRange, setDateRange] = useState([]);
+const [openPriorityDropdown,setOpenPriorityDropdown] =useState(false);
+const [openStatusDropdown, setOpenStatusDropdown] = useState(false);
 
 const [openAgentDropdown, setOpenAgentDropdown] = useState(false);
+const [priorityError,setPriorityError] = useState("")
+const [selectedTicketId,setSelectedTicketId] = useState(null);
+const [modalType, setModalType] = useState("success");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [message, setMessage] = useState("");
+  const [
+  showOverview,
+  setShowOverview
+] = useState(false);
 
-const statusDropdownRef =
-  useRef(null);
+const [selectedTicket,setSelectedTicket] = useState(null);
+
+const statusDropdownRef = useRef(null);
 
 const agentDropdownRef =
   useRef(null);
-const [statusList, setStatusList] =
-  useState([]);
+const [statusList, setStatusList] = useState([]);
+useEffect(() => {
 
+  const fetchPriority =
+    async () => {
+
+      const res =
+        await getSupportTicketPriority();
+
+      if (res.success) {
+
+        setPriorityList(
+          res.data || []
+        );
+
+      }
+
+    };
+
+  fetchPriority();
+
+}, []);
 useEffect(() => {
 
   const fetchStatus =
@@ -234,6 +265,25 @@ const [allComments, setAllComments] =
       createdBy: "Admin",
     },
   ]);
+  const handleOpenOverview =
+  async (ticketId) => {
+
+    const res =
+      await getSupportTicketById(
+        ticketId
+      );
+
+    if (res.success) {
+
+      setSelectedTicket(
+        res.data
+      );
+
+      setShowOverview(true);
+
+    }
+
+  };
 const [menuPosition, setMenuPosition] = useState({
   index: null,
   top: 0,
@@ -267,9 +317,9 @@ const handleMenuToggle = (e, index) => {
 
   setMenuPosition({
     index,
-    left: rect.right - 160,           // ✅ no scrollX — fixed positioning
+    left: rect.right - 160,          
     top: direction === "up"
-      ? rect.top - menuHeight - 4     // ✅ no scrollY
+      ? rect.top - menuHeight - 4    
       : rect.bottom + 4,
     direction,
   });
@@ -280,10 +330,111 @@ useEffect(() => {
   return () => document.removeEventListener("click", handleClickOutside);
 }, []);
   
+const handleAssignSave =
+  async () => {
 
+    let hasError = false;
+
+    if (!dropdownValue) {
+
+      setAssignError(
+        "Please select staff"
+      );
+
+      hasError = true;
+
+    } else {
+
+      setAssignError("");
+
+    }
+
+    if (!priorityValue) {
+
+      setPriorityError(
+        "Please select priority"
+      );
+
+      hasError = true;
+
+    } else {
+
+      setPriorityError("");
+
+    }
+
+    if (hasError) return;
+
+    const payload = {
+
+      agentId:
+        dropdownValue,
+
+      comments:
+        commentText,
+
+      priority:
+        priorityValue,
+
+    };
+
+    const res =
+      await assignSupportTicket(
+        selectedTicketId,
+        payload
+      );
+
+    if (res.success) {
+ setModalType("success");
+          setMessage(
+            res?.message 
+          );
+          fetchTickets();
+          setShowSuccess(true);
+
+          setTimeout(() => {
+            setShowSuccess(false);
+            
+
+          }, 1300);
+      
+
+      setShowAssignDrawer(
+        false
+      );
+
+      setDropdownValue("");
+
+      setPriorityValue("");
+
+      setCommentText("");
+
+    }
+    else{
+      setModalType("error");
+          setMessage(
+            res?.message 
+          );
+         
+          setShowSuccess(true);
+
+          setTimeout(() => {
+            setShowSuccess(false);
+          
+
+          }, 1300);
+    }
+
+  };
   return (
     <DashboardLayout>
-      <div className="w-full bg-[#f8f9fc] min-h-screen p-3 sm:p-5">
+      <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
+
+      />
+      <div className="w-full min-h-screen p-3 sm:p-5">
         {/* HEADER */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-5">
           <h1 className="text-[22px] font-semibold text-[#1f2937]">
@@ -291,7 +442,7 @@ useEffect(() => {
           </h1>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button
+            {/* <button
               className="
                 h-10 px-4 rounded-xl border border-[#dbe2ff]
                 bg-[#eef2ff] text-[#3b5bfd]
@@ -303,17 +454,17 @@ useEffect(() => {
             >
               <ListFilter size={16} />
               IAM Users
-            </button>
+            </button> */}
 
             <button onClick={() =>
     setShowCreateModal(true)
   }
               className="
                 h-10 px-4 rounded-xl
-                bg-[#3b5bfd]
+                bg-primary-hover
                 text-white text-sm font-medium
                 flex items-center gap-2
-                hover:bg-[#2948e6]
+                
                 transition cursor-pointer
               "
             >
@@ -366,7 +517,7 @@ useEffect(() => {
       className="
         bg-white
         rounded-2xl
-        border border-[#edf0f7]
+        border-soft-light
         p-6
         shadow-sm
       "
@@ -733,7 +884,7 @@ useEffect(() => {
               </button> */}
             </div>
           </div>
-       <div className="bg-white border border-[#edf0f7] rounded-2xl shadow-sm relative overflow-hidden">
+       <div className="bg-white border-soft-light rounded-2xl shadow-sm relative overflow-hidden">
          {loading && (
 
   <div
@@ -821,7 +972,7 @@ useEffect(() => {
           text-left text-[12px]
           font-semibold text-[#6b7280]
           whitespace-nowrap
-          border-b border-[#edf0f7]
+          
         "
       >
         {head}
@@ -836,7 +987,7 @@ useEffect(() => {
         text-left text-[12px]
         font-semibold text-[#6b7280]
         whitespace-nowrap
-        border-b border-[#edf0f7]
+       
       "
     >
       ACTIONS
@@ -855,7 +1006,7 @@ useEffect(() => {
         <tr
           key={index}
           className="
-            border-b border-[#edf0f7]
+            border-soft-light
             hover:bg-[#fafbff]
             group
           "
@@ -878,7 +1029,11 @@ useEffect(() => {
   {(page - 1) * size + index + 1}
 </td>
 
-<td
+<td onClick={() =>
+  handleOpenOverview(
+    item.ticketId
+  )
+}
   className="
     sticky left-[70px] z-20
     bg-white
@@ -943,7 +1098,7 @@ useEffect(() => {
                 `}
               />
 
-              {item.priority || "N/A"}
+             {item.priority || "Priority Not Set"}
 
             </div>
 
@@ -958,7 +1113,7 @@ useEffect(() => {
     flex items-center justify-center
   "
 >
-  <MoreVertical size={18} />
+  <MoreVertical size={18}  className="cursor-pointer"/>
 </button>
 
   {menuPosition.index === index &&
@@ -993,6 +1148,9 @@ useEffect(() => {
   }
 
   if (menu === "Assign Staff") {
+     setSelectedTicketId(
+    item.ticketId
+  );
     setShowAssignDrawer(true);
   }
   if (menu === "Update Status") {
@@ -1306,12 +1464,11 @@ useEffect(() => {
               setCommentText("");
             }}
             className="
-              bg-blue-600
-              hover:bg-blue-700
+              bg-primary-hover
               text-white
               px-5 py-2
               rounded-lg
-              text-sm
+              text-sm cursor-pointer
             "
           >
             Add
@@ -1370,6 +1527,9 @@ useEffect(() => {
         setDropdownValue("");
         setAssignError("");
         setCommentText("");
+        setPriorityError("")
+        setPriorityValue("");
+        setOpenPriorityDropdown(false)
       }}
     />
 
@@ -1411,6 +1571,10 @@ useEffect(() => {
             setDropdownValue("");
             setAssignError("");
             setCommentText("");
+             setPriorityValue("");
+            setPriorityError("")
+            setOpenPriorityDropdown(false)
+            
           }}
           className="text-red-500 text-lg cursor-pointer"
         >
@@ -1432,9 +1596,10 @@ useEffect(() => {
         <div className="relative">
 
           <div
-            onClick={() =>
-              setOpenDropdown(!openDropdown)
-            }
+            onClick={() => {
+  setOpenDropdown(!openDropdown);
+  setOpenPriorityDropdown(false);
+}}
             className="
               w-full
               border
@@ -1505,7 +1670,7 @@ useEffect(() => {
                     ${
                       dropdownValue ===
                       agent.agentId
-                        ? "bg-blue-600 text-white"
+                        ? "bg-primary text-white"
                         : "hover:bg-gray-100"
                     }
                   `}
@@ -1524,14 +1689,138 @@ useEffect(() => {
         </div>
 
         {/* ERROR */}
-        {assignError && (
+        {/* {assignError && (
 
           <p className="text-red-500 text-xs mt-2 text-left">
             {assignError}
           </p>
 
-        )}
+        )} */}
+         {assignError && (
+                        <ErrorMessage
+                          message={assignError}
+                          type="error"
+                        />
+                      )}
+{/* PRIORITY */}
+<div className="mt-5">
 
+  <label className="text-[13px] font-medium text-left block mb-2">
+    Priority
+    <span className="text-red-500">*</span>
+  </label>
+
+  <div className="relative">
+
+    {/* SELECT BOX */}
+    <div
+    onClick={() => {
+  setOpenPriorityDropdown(
+    !openPriorityDropdown
+  );
+
+  setOpenDropdown(false);
+}}
+      className="
+        w-full
+        border border-gray-300
+        rounded-xl
+        px-4 py-3
+        flex justify-between items-center
+        cursor-pointer
+        bg-white
+      "
+    >
+
+      <span className="text-sm">
+
+        {
+          priorityList.find(
+            (p) =>
+              p.key === priorityValue
+          )?.label ||
+          "Select Priority"
+        }
+
+      </span>
+
+      <ChevronDown size={18} />
+
+    </div>
+
+    {/* DROPDOWN */}
+    {openPriorityDropdown && (
+
+      <div
+        className="
+          absolute
+          mt-2
+          w-full
+          bg-white
+          rounded-xl
+          shadow-xl
+          border
+          max-h-[180px]
+          overflow-y-auto
+          z-[9999]
+
+          [&::-webkit-scrollbar]:w-[5px]
+          [&::-webkit-scrollbar-track]:bg-transparent
+          [&::-webkit-scrollbar-thumb]:bg-[#d1d5db]
+          [&::-webkit-scrollbar-thumb]:rounded-full
+        "
+      >
+
+        {priorityList.map((item) => (
+
+          <div
+            key={item.key}
+            onClick={() => {
+
+              setPriorityValue(
+                item.key
+              );
+
+              setOpenPriorityDropdown(
+                false
+              );
+              setPriorityError("")
+
+            }}
+            className="
+              px-4 py-3
+              text-sm
+              hover:bg-[#f8f9fc]
+              cursor-pointer text-left
+            "
+          >
+
+            {item.label}
+
+          </div>
+
+        ))}
+
+      </div>
+
+    )}
+
+  </div>
+
+</div>
+{/* {priorityError && (
+
+          <p className="text-red-500 text-xs mt-2 text-left">
+            {priorityError}
+          </p>
+
+        )} */}
+         {priorityError && (
+                        <ErrorMessage
+                          message={priorityError}
+                          type="error"
+                        />
+                      )}
         {/* COMMENTS */}
         <div className="mt-5">
 
@@ -1579,6 +1868,9 @@ useEffect(() => {
             setDropdownValue("");
             setAssignError("");
             setCommentText("");
+          setPriorityValue("");
+            setPriorityError("")
+            setOpenPriorityDropdown(false)
           }}
           className="
             px-4 py-2
@@ -1592,27 +1884,13 @@ useEffect(() => {
         </button>
 
         <button
-          onClick={() => {
-
-            if (!dropdownValue) {
-              setAssignError(
-                "Please select staff"
-              );
-              return;
-            }
-
-            setShowAssignDrawer(false);
-
-            setDropdownValue("");
-            setCommentText("");
-          }}
+          onClick={handleAssignSave}
           className="
             px-5 py-2
-            bg-blue-600
-            hover:bg-blue-700
+            bg-primary-hover
             text-white
             rounded-lg
-            text-sm
+            text-sm cursor-pointer
           "
         >
           Save
@@ -1636,6 +1914,32 @@ useEffect(() => {
   onClose={() =>
     setShowUpdateStatus(false)
   }
+/>
+<SupportTicketOverview
+  open={showOverview}
+  onClose={() => {
+
+    setShowOverview(false);
+
+    setSelectedTicket(null);
+
+  }}
+
+  selectedTicket={selectedTicket}
+
+  onAssignClick={(ticket) => {
+
+    setSelectedTicketId(
+      ticket.ticketId
+    );
+
+    setShowOverview(false);
+
+    setShowAssignDrawer(
+      true
+    );
+
+  }}
 />
     </DashboardLayout>
   );

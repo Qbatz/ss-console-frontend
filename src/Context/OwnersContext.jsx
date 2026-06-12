@@ -324,6 +324,79 @@ export const OwnersProvider = ({ children }) => {
       setLoading(false);
     }
   };
+  const exportOwners = async ({
+  name = "",
+  isPropertiesExpired,
+  isAboutToExpire,
+  isActive,
+  hasNoProperties,
+  sortBy = "JOINING_DATE",
+  direction = "desc",
+} = {}) => {
+
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.get(
+      "/v2/owners/export",
+      {
+        params: {
+          name,
+          isPropertiesExpired,
+          isAboutToExpire,
+          isActive,
+          hasNoProperties,
+          sortBy,
+          direction,
+        },
+
+        responseType: "blob",
+      }
+    );
+
+    const url =
+      window.URL.createObjectURL(
+        new Blob([res.data])
+      );
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+
+    link.setAttribute(
+      "download",
+      "owners.xlsx"
+    );
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    return {
+      success: true,
+    };
+
+  } catch (error) {
+
+    const msg =
+      getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg,
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
 
   return (
     <OwnersContext.Provider
@@ -333,7 +406,8 @@ export const OwnersProvider = ({ children }) => {
         totalPages,
         ownerCount,
         loading, accessError,
-        getOwners, changeOwnerPassword, getOwnerById, getTenantSummary, updateOwnerEmail, deleteTenant, updateOwnerMobile, deleteOwner,activeCount
+        getOwners, changeOwnerPassword, getOwnerById, getTenantSummary, updateOwnerEmail, deleteTenant, updateOwnerMobile, deleteOwner,
+        activeCount,exportOwners
       }}
 
     >

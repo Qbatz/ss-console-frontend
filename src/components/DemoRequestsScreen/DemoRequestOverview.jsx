@@ -9,7 +9,7 @@ import Phone from "../../assets/call.png";
 import { useNavigate } from "react-router-dom";
 
 
-const SupportTicketOverview = ({
+const DemoRequestOverview = ({
   open,
   onClose,
   selectedItem,
@@ -823,4 +823,4 @@ const [showAllComments, setShowAllComments] =
 );
 };
 
-export default SupportTicketOverview;
+export default DemoRequestOverview;

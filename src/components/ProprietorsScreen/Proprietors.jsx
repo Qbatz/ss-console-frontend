@@ -14,7 +14,7 @@ import AssignStaffModal from "../PropertiesScreen/AssignStaffDesign";
 
 const Proprietors = () => {
 
-  const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById, updateOwnerMobile, deleteOwner,ownerCount,activeCount ,changeOwnerPassword } = useOwners();
+  const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById, updateOwnerMobile, deleteOwner,ownerCount,activeCount ,changeOwnerPassword,exportOwners } = useOwners();
   const navigate = useNavigate();
  
   const { canRead, canWrite, canUpdate, canDelete } =
@@ -378,6 +378,19 @@ const handleDelete = async () => {
   }
 
 };
+const handleExport = () => {
+
+  const filters =
+    getFilterParams();
+
+  exportOwners({
+    name: search,
+    sortBy,
+    direction,
+    ...filters,
+  });
+
+};
   // const handleDelete = async () => {
 
   //   const res = await deleteOwner(selectedOwner.ownerId);
@@ -481,7 +494,7 @@ const handleDelete = async () => {
 
            <div className="relative">
 
-  {/* SELECT BUTTON */}
+ 
   <button
     onClick={() =>
       setShowFilterDropdown(!showFilterDropdown)
@@ -502,7 +515,20 @@ const handleDelete = async () => {
 
     <img src={Arrow} className="w-5 h-5"/>
   </button>
-
+<button
+  onClick={handleExport}
+  className="
+    bg-blue-600
+    text-white
+    px-4
+    py-2
+    rounded-lg
+    text-sm
+    cursor-pointer
+  "
+>
+  Export
+</button>
   <div className="relative" ref={dropdownRef}>
   {showFilterDropdown && (
 

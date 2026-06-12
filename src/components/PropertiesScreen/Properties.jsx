@@ -433,12 +433,13 @@ useEffect(() => {
 
   }
 
-  exportHostels(
-    searchText,
-    start,
-    end,
-    subActive
-  );
+exportHostels(
+  searchText,
+  start,
+  end,
+  agentFilter,
+  filterOption
+);
 
 };
 useEffect(() => {

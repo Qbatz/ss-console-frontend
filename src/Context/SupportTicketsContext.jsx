@@ -348,14 +348,160 @@ const getAllSupportTickets =
     }
 
   };
+  const getSupportTicketPriority =
+  async () => {
 
+    try {
+
+      setLoading(true);
+
+      setErrorMsg("");
+
+      const res =
+        await axiosInstance.get(
+          "/v2/support-ticket/priority"
+        );
+
+      if (res.status === 200) {
+
+        return {
+          success: true,
+          data: res.data,
+        };
+
+      }
+
+      return {
+        success: false,
+      };
+
+    } catch (error) {
+
+      const msg =
+        getErrorMessage(error);
+
+      setErrorMsg(msg);
+
+      return {
+        success: false,
+        message: msg,
+      };
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+const assignSupportTicket =
+  async (
+    supportTicketId,
+    payload
+  ) => {
+
+    try {
+
+      setLoading(true);
+
+      setErrorMsg("");
+
+      const res =
+        await axiosInstance.put(
+          `/v2/support-ticket/assign/${supportTicketId}`,
+          payload
+        );
+
+      if (res.status === 200) {
+
+        return {
+          success: true,
+          data: res.data,
+          message:
+            res.data?.message ||
+            "Ticket Assigned Successfully",
+        };
+
+      }
+
+      return {
+        success: false,
+      };
+
+    } catch (error) {
+
+      const msg =
+        getErrorMessage(error);
+
+      setErrorMsg(msg);
+
+      return {
+        success: false,
+        message: msg,
+      };
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+
+  const getSupportTicketById =
+  async (supportTicketId) => {
+
+    try {
+
+      setLoading(true);
+
+      setErrorMsg("");
+
+      const res =
+        await axiosInstance.get(
+          `/v2/support-ticket/${supportTicketId}`
+        );
+
+      if (res.status === 200) {
+
+        return {
+          success: true,
+          data: res.data,
+        };
+
+      }
+
+      return {
+        success: false,
+      };
+
+    } catch (error) {
+
+      const msg =
+        getErrorMessage(error);
+
+      setErrorMsg(msg);
+
+      return {
+        success: false,
+        message: msg,
+      };
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
   return (
     <SupportTicketsContext.Provider
       value={{
         loading,
         errorMsg,
 
-        searchOwners,getQueryTypes,createSupportTicket,getAllSupportTickets,getSupportTicketStatus
+        searchOwners,getQueryTypes,createSupportTicket,getAllSupportTickets,getSupportTicketStatus,
+        getSupportTicketPriority,assignSupportTicket,getSupportTicketById
       }}
     >
       {children}

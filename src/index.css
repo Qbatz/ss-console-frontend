@@ -125,7 +125,12 @@ body {
 .bg-primary-soft {
   @apply bg-blue-50;
 }
-
+.bg-primary {
+  @apply bg-blue-600;
+}
+.bg-primary-hover {
+  @apply bg-blue-600 hover:bg-blue-700;
+}
 .bg-primary-light {
   @apply bg-[#EEF3FF];
 }
@@ -314,7 +319,9 @@ input[type=number] {
 .btn-disabled {
   @apply bg-gray-300 text-gray-500 cursor-not-allowed;
 }
-
+.border-soft-light {
+  @apply border border-[#edf0f7];
+}
 .btn-soft-primary {
   @apply w-full bg-[#EEF2FF] hover:bg-[#E4E9FF]
   text-[#2563EB] text-sm font-medium
