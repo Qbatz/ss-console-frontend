@@ -1422,13 +1422,13 @@ useEffect(() => {
 >
 
  <div
-  className="scroll-container relative"
-  style={{ 
-    overflowX: 'auto',
-    overflowY: 'auto', 
-    flex: 1,
-    minHeight: 0,
-  }}
+   className="
+    table-scroll
+    relative
+    overflow-auto
+    max-h-[420px]
+    rounded-2xl
+  "
 >
 
                  <table className="w-max min-w-full table-fixed text-sm text-left">

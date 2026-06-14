@@ -13,6 +13,7 @@ import { usePermission } from "../../Utils/permissionHelper";
 import { useHostel } from "../../Context/HostelListContext";
 import { useRole } from "../../Context/RoleContext";
 import { useParams } from "react-router-dom";
+
 const ProprietorsOverview = () => {
   const navigate = useNavigate();
   const location = useLocation();

@@ -9,12 +9,14 @@ import {
   ChevronRight,
 } from "lucide-react";
 import CommentBox from "../../assets/message-2.png";
+import { useNavigate } from "react-router-dom";
 
 const SupportTicketOverview = ({
   open,
   onClose,
   selectedTicket,onAssignClick
 }) => {
+  const navigate = useNavigate();
 
   if (!open) return null;
 
@@ -104,7 +106,7 @@ const SupportTicketOverview = ({
               onClick={onClose}
               className="
                 text-red-500
-                hover:opacity-80
+                hover:opacity-80 cursor-pointer
               "
             >
 
@@ -157,7 +159,7 @@ const SupportTicketOverview = ({
               <div className="space-y-4">
 
                 {/* CUSTOMER */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 text-left">
 
                   <User
                     size={15}
@@ -167,15 +169,43 @@ const SupportTicketOverview = ({
                   <p className="w-[120px] text-[13px] text-[#9CA3AF]">
                     Customer Name
                   </p>
-
-                  <p className="text-[14px] font-medium">
+<span className="mr-5 text-[#9CA3AF]">
+                    :
+                  </span>
+                  {/* <p className="text-[14px] font-medium">
                     {selectedTicket?.owner?.fullName || "----"}
-                  </p>
+                  </p> */}
+                  <p
+  onClick={() => {
+
+    if (
+      selectedTicket?.owner?.ownerId
+    ) {
+
+      navigate(
+        `/ProprietorsOverview/${selectedTicket.owner.ownerId}`
+      );
+
+    }
+
+  }}
+  className="
+    text-[14px]
+    font-medium
+    text-[#315CEC]
+    cursor-pointer
+    hover:underline
+  "
+>
+
+  {selectedTicket?.owner?.fullName || "----"}
+
+</p>
 
                 </div>
 
                 {/* PROPERTY */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 text-left">
 
                   <Building2
                     size={15}
@@ -185,26 +215,59 @@ const SupportTicketOverview = ({
                   <p className="w-[120px] text-[13px] text-[#9CA3AF]">
                     Property Name
                   </p>
-
+<span className="mr-5 text-[#9CA3AF]">
+                    :
+                  </span>
                   <div
-                    className="
-                      flex items-center gap-1
-                      text-[#315CEC]
-                      font-semibold
-                      text-[14px]
-                    "
-                  >
+  onClick={() => {
 
-                    {selectedTicket?.hostelName}
+    if (
+      selectedTicket?.hostelId
+    ) {
 
-                    <ChevronRight size={14} />
+     navigate(
+  `/property-overview/${selectedTicket.hostelId}`,
+  {
+    state: {
+      from: "supportTickets",
 
-                  </div>
+      currentPage:
+        location.state?.currentPage,
+
+      currentSearch:
+        location.state?.currentSearch,
+
+      currentStatusFilter:
+        location.state?.currentStatusFilter,
+    },
+  }
+);
+
+    }
+
+  }}
+  className="
+    flex
+    items-center
+    gap-1
+    text-[#315CEC]
+    font-semibold
+    text-[14px]
+    cursor-pointer
+    hover:underline
+  "
+>
+
+  {selectedTicket?.hostelName}
+
+  <ChevronRight size={14} />
+
+</div>
 
                 </div>
 
                 {/* LOCATION */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 text-left">
 
                   <MapPin
                     size={15}
@@ -214,15 +277,37 @@ const SupportTicketOverview = ({
                   <p className="w-[120px] text-[13px] text-[#9CA3AF]">
                     Location
                   </p>
+<span className="mr-5 text-[#9CA3AF]">
+                    :
+                  </span>
+                  <p
+  title={
+    selectedTicket?.fullAddress || "N/A"
+  }
+  className="
+    text-[14px]
+    font-medium
+    cursor-pointer
+  "
+>
+  {selectedTicket?.hostelCity}
 
-                  <p className="text-[14px] font-medium">
-                    {selectedTicket?.location}
-                  </p>
+  {selectedTicket?.hostelCity &&
+    selectedTicket?.hostelState
+      ? ", "
+      : ""}
+
+  {selectedTicket?.hostelState || ""}
+
+  {!selectedTicket?.hostelCity &&
+    !selectedTicket?.hostelState &&
+    "N/A"}
+</p>
 
                 </div>
 
                 {/* MOBILE */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 text-left">
 
                   <Phone
                     size={15}
@@ -232,9 +317,11 @@ const SupportTicketOverview = ({
                   <p className="w-[120px] text-[13px] text-[#9CA3AF]">
                     Mobile
                   </p>
-
+<span className="mr-5 text-[#9CA3AF]">
+                    :
+                  </span>
                   <p className="text-[14px] font-medium">
-                    {selectedTicket?.mobile}
+                    {selectedTicket?.hostelMobile || "N/A"}
                   </p>
 
                 </div>
@@ -260,7 +347,9 @@ const SupportTicketOverview = ({
                   <p className="w-[120px] text-[13px] text-[#9CA3AF]">
                     Subject
                   </p>
-
+<span className="mr-5 text-[#9CA3AF]">
+                    :
+                  </span>
                   <p className="text-[14px] text-[#111827] leading-6">
                     {selectedTicket?.subject}
                   </p>
@@ -278,7 +367,7 @@ const SupportTicketOverview = ({
                     :
                   </span>
 
-                  <p className="font-semibold">
+                  <p className="font-semibold text-[14px]">
                     {selectedTicket?.ticketNumber}
                   </p>
 
@@ -295,7 +384,7 @@ const SupportTicketOverview = ({
                     :
                   </span>
 
-                  <p className="text-[#F59E0B] font-medium">
+                  <p className="text-[#F59E0B] font-medium text-[14px]">
                     {selectedTicket?.ticketStatus}
                   </p>
 
@@ -323,9 +412,9 @@ const SupportTicketOverview = ({
                     "
                   >
 
-                    <div className="w-2 h-2 rounded-full bg-[#2563EB]" />
+                    <div className="w-2 h-2 rounded-full bg-[#2563EB] text-[14px]" />
 
-                    {selectedTicket?.priority}
+                    {selectedTicket?.priority || "Priority Not Set"}
 
                   </div>
 
@@ -504,7 +593,15 @@ const SupportTicketOverview = ({
     Activity Timeline:
   </h2>
 
-  <div className="space-y-6">
+ <div
+  className="
+    space-y-6
+    max-h-[250px]
+    overflow-y-auto
+    pr-2
+    timeline-scroll
+  "
+>
 
    {selectedTicket?.activities?.map(
   (item, index) => (

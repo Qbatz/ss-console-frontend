@@ -863,33 +863,74 @@ fetchData()
   "
 
          
-            onClick={() => {
+          onClick={() => {
 
-              if (location.state?.from === "transactions") {
+  if (
+    location.state?.from === "supportTickets"
+  ) {
 
-                navigate(`/transactions/${adminDetails?.roleId}`, {
-                  state: {
-                    currentPage: location.state?.currentPage,
-                    currentSearch: location.state?.currentSearch,
-                    currentDateRange: location.state?.currentDateRange,
-                  },
-                })
+    navigate(
+      `/supportTicket/${adminDetails?.roleId}`,
+      {
+        state: {
+          currentPage:
+            location.state?.currentPage,
 
-              } else {
+          currentSearch:
+            location.state?.currentSearch,
 
-                navigate(`/properties/${adminDetails?.roleId}`, {
-  state: {
-    currentPage: location.state?.currentPage,
-    currentSearch: location.state?.currentSearch,
-    currentDateRange: location.state?.currentDateRange,
-    currentStatusFilter:
-      location.state?.currentStatusFilter,
-  },
-});
+          currentStatusFilter:
+            location.state?.currentStatusFilter,
+        },
+      }
+    );
 
-              }
+  }
 
-            }}
+  else if (
+    location.state?.from === "transactions"
+  ) {
+
+    navigate(
+      `/transactions/${adminDetails?.roleId}`,
+      {
+        state: {
+          currentPage:
+            location.state?.currentPage,
+
+          currentSearch:
+            location.state?.currentSearch,
+
+          currentDateRange:
+            location.state?.currentDateRange,
+        },
+      }
+    );
+
+  } else {
+
+    navigate(
+      `/properties/${adminDetails?.roleId}`,
+      {
+        state: {
+          currentPage:
+            location.state?.currentPage,
+
+          currentSearch:
+            location.state?.currentSearch,
+
+          currentDateRange:
+            location.state?.currentDateRange,
+
+          currentStatusFilter:
+            location.state?.currentStatusFilter,
+        },
+      }
+    );
+
+  }
+
+}}
           />
         <p className="text-pageTitle leading-pageTitle text-headingDark font-medium">
   Property Overview
@@ -1651,7 +1692,7 @@ fetchData()
           Total Invoices
         </p>
 
-        <img
+        {/* <img
           src={ViewImg}
           className="
             w-3.5
@@ -1660,7 +1701,7 @@ fetchData()
             cursor-pointer
           "
           onClick={() => setShowBillingRule(true)}
-        />
+        /> */}
 
       </div>
 

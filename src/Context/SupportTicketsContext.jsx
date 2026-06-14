@@ -494,6 +494,59 @@ const assignSupportTicket =
     }
 
   };
+  const updateSupportTicketStatus =
+  async (
+    supportTicketId,
+    payload
+  ) => {
+
+    try {
+
+      setLoading(true);
+
+      setErrorMsg("");
+
+      const res =
+        await axiosInstance.put(
+          `/v2/support-ticket/update-status/${supportTicketId}`,
+          payload
+        );
+
+      if (res.status === 200) {
+
+        return {
+          success: true,
+          data: res.data,
+          message:
+            res.data?.message ||
+            "Status updated successfully",
+        };
+
+      }
+
+      return {
+        success: false,
+      };
+
+    } catch (error) {
+
+      const msg =
+        getErrorMessage(error);
+
+      setErrorMsg(msg);
+
+      return {
+        success: false,
+        message: msg,
+      };
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
   return (
     <SupportTicketsContext.Provider
       value={{
@@ -501,7 +554,7 @@ const assignSupportTicket =
         errorMsg,
 
         searchOwners,getQueryTypes,createSupportTicket,getAllSupportTickets,getSupportTicketStatus,
-        getSupportTicketPriority,assignSupportTicket,getSupportTicketById
+        getSupportTicketPriority,assignSupportTicket,getSupportTicketById,updateSupportTicketStatus
       }}
     >
       {children}

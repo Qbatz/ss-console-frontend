@@ -10,20 +10,196 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { useSupportTickets } from "../../Context/SupportTicketsContext";
+import { useSubscription } from "../../Context/SubscriptionContext";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import Toast from "../SuccessModal/ToastDesign";
 
 const UpdateSupportStatusModal = ({
   open,
   onClose,
+  ticketId
 }) => {
+  console.log("ticketId",ticketId)
 const {
-  searchOwners,
   loading,
+  updateSupportTicketStatus,
+  getSupportTicketStatus,
+  getSupportTicketPriority,
+  searchOwners
 } = useSupportTickets();
+const {
+  getAgentsDropdown
+} = useSubscription();
   const [status, setStatus] =
     useState("In Progress");
 
-  const [comments, setComments] =
-    useState("");
+  const [comments, setComments] = useState("");
+  const [statusList,setStatusList] = useState([]);
+
+const [openStatusDropdown,setOpenStatusDropdown] = useState(false);
+const [
+  priority,
+  setPriority
+] = useState("");
+
+const [
+  priorityList,
+  setPriorityList
+] = useState([]);
+
+const [
+  openPriorityDropdown,
+  setOpenPriorityDropdown
+] = useState(false);
+
+const [
+  selectedAgent,
+  setSelectedAgent
+] = useState("");
+
+const [
+  agentList,
+  setAgentList
+] = useState([]);
+
+const [
+  openAgentDropdown,
+  setOpenAgentDropdown
+] = useState(false);
+
+const statusDropdownRef = useRef(null);
+useEffect(() => {
+
+  const fetchPriority =
+    async () => {
+
+      const res =
+        await getSupportTicketPriority();
+
+      if (res.success) {
+
+        setPriorityList(
+          res.data || []
+        );
+
+      }
+
+    };
+
+  fetchPriority();
+
+}, []);
+
+useEffect(() => {
+
+  const fetchAgents =
+    async () => {
+
+      const res =
+        await getAgentsDropdown();
+
+      if (res.success) {
+
+        setAgentList(
+          res.data || []
+        );
+
+      }
+
+    };
+
+  fetchAgents();
+
+}, []);
+  useEffect(() => {
+
+  const fetchStatus =
+    async () => {
+
+      const res =
+        await getSupportTicketStatus();
+
+      if (res.success) {
+
+        setStatusList(
+          res.data || []
+        );
+
+      }
+
+    };
+
+  fetchStatus();
+
+}, []);
+useEffect(() => {
+
+  const handleClickOutside = (
+    event
+  ) => {
+
+    if (
+      statusDropdownRef.current &&
+      !statusDropdownRef.current.contains(
+        event.target
+      )
+    ) {
+
+      setOpenStatusDropdown(false);
+
+    }
+
+  };
+
+  document.addEventListener(
+    "mousedown",
+    handleClickOutside
+  );
+
+  return () => {
+
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+  };
+
+}, []);
+const handleSubmit =
+  async () => {
+
+    const payload = {
+
+      ticketStatus: status,
+
+      comments,
+
+      agentId:
+        status === "ASSIGNED"
+          ? selectedAgent
+          : null,
+
+      priority:
+        status === "ASSIGNED"
+          ? priority
+          : null,
+
+    };
+
+    const res =
+      await updateSupportTicketStatus(
+        ticketId,
+        payload
+      );
+
+    if (res.success) {
+
+      onClose();
+
+    }
+
+  };
 
   if (!open) return null;
 
@@ -189,47 +365,349 @@ const {
           <div className="mt-6 space-y-5">
 
             {/* STATUS */}
-            <div className="flex flex-col md:flex-row md:gap-4">
+     <div className="flex flex-col md:flex-row md:gap-4">
 
-              <label
-                className="
-                  w-full md:w-[110px]
-                  shrink-0
-                  text-sm
-                  text-[#374151]
-                  pt-3
-                  text-left
-                "
-              >
-                Update Lead Status
-                <span className="text-red-500 ml-1">*</span>
-              </label>
+  {/* LABEL */}
+  <label
+    className="
+      w-full md:w-[110px]
+      shrink-0
+      text-sm
+      text-[#374151]
+      pt-3
+      text-left
+    "
+  >
+    Update Lead Status
 
-              <div className="flex-1">
+    <span className="text-red-500 ml-1">
+      *
+    </span>
 
-                <button
-                  className="
-                    w-full
-                    h-[48px]
-                    border border-[#e5e7eb]
-                    rounded-xl
-                    px-4
-                    flex items-center justify-between
-                    text-sm
-                    bg-white
-                  "
-                >
+  </label>
 
-                  {status}
+  {/* DROPDOWN */}
+  <div className="flex-1 relative">
 
-                  <ChevronDown size={18} />
+    {/* SELECT BOX */}
+    <div
+      onClick={() =>
+        setOpenStatusDropdown(
+          !openStatusDropdown
+        )
+      }
+      className="
+        w-full
+        h-[48px]
+        border border-[#e5e7eb]
+        rounded-xl
+        px-4
+        flex items-center
+        justify-between
+        text-sm
+        bg-white
+        cursor-pointer
+      "
+    >
 
-                </button>
+      <span>
 
-              </div>
+        {
+          statusList.find(
+            (s) =>
+              s.key === status
+          )?.label ||
+          "Select Status"
+        }
 
-            </div>
+      </span>
 
+      <ChevronDown size={18} />
+
+    </div>
+
+    {/* DROPDOWN */}
+    {openStatusDropdown && (
+
+      <div
+        className="
+          absolute
+          top-full
+          left-0
+          mt-2
+          w-full
+          bg-white
+          border border-[#e5e7eb]
+          rounded-xl
+          shadow-xl
+          z-[9999]
+          max-h-[150px]
+          overflow-y-auto
+        "
+      >
+
+        {statusList.map((item) => (
+
+          <div
+            key={item.key}
+            onClick={() => {
+
+              setStatus(
+                item.key
+              );
+
+              setOpenStatusDropdown(
+                false
+              );
+
+            }}
+            className="
+              px-4 py-3
+              text-sm
+              hover:bg-[#f8f9fc]
+              cursor-pointer
+              text-left
+            "
+          >
+
+            {item.label}
+
+          </div>
+
+        ))}
+
+      </div>
+
+    )}
+
+  </div>
+
+</div>
+{status === "ASSIGNED" && (
+
+  <>
+
+    {/* AGENT */}
+    <div className="flex flex-col md:flex-row md:gap-4">
+
+      <label
+        className="
+          w-full md:w-[110px]
+          shrink-0
+          text-sm
+          text-[#374151]
+          pt-3
+          text-left
+        "
+      >
+        Assign Agent
+
+        <span className="text-red-500 ml-1">
+          *
+        </span>
+
+      </label>
+
+      <div className="relative flex-1">
+
+  <div
+    onClick={() =>
+      setOpenAgentDropdown(
+        !openAgentDropdown
+      )
+    }
+    className="
+      w-full h-[48px]
+      border border-[#e5e7eb]
+      rounded-xl
+      px-4
+      flex items-center justify-between
+      cursor-pointer
+      bg-white
+    "
+  >
+
+    <span>
+
+      {
+        agentList.find(
+          (a) =>
+            a.agentId === selectedAgent
+        )?.agentName ||
+        "Select Agent"
+      }
+
+    </span>
+
+    <ChevronDown size={18} />
+
+  </div>
+
+  {openAgentDropdown && (
+
+    <div
+      className="
+        absolute top-full left-0
+        mt-2 w-full
+        bg-white
+        border border-[#e5e7eb]
+        rounded-xl
+        shadow-xl
+        z-[9999]
+        max-h-[220px]
+        overflow-y-auto
+      "
+    >
+
+      {agentList.map((item) => (
+
+        <div
+          key={item.agentId}
+          onClick={() => {
+
+            setSelectedAgent(
+              item.agentId
+            );
+
+            setOpenAgentDropdown(
+              false
+            );
+
+          }}
+          className="
+            px-4 py-3
+            hover:bg-[#f8f9fc]
+            cursor-pointer
+            text-sm
+          "
+        >
+
+          {item.agentName}
+
+        </div>
+
+      ))}
+
+    </div>
+
+  )}
+
+</div>
+
+    </div>
+
+    {/* PRIORITY */}
+    <div className="flex flex-col md:flex-row md:gap-4">
+
+      <label
+        className="
+          w-full md:w-[110px]
+          shrink-0
+          text-sm
+          text-[#374151]
+          pt-3
+          text-left
+        "
+      >
+        Priority
+
+        <span className="text-red-500 ml-1">
+          *
+        </span>
+
+      </label>
+
+      <div className="relative flex-1">
+
+  <div
+    onClick={() =>
+      setOpenPriorityDropdown(
+        !openPriorityDropdown
+      )
+    }
+    className="
+      w-full h-[48px]
+      border border-[#e5e7eb]
+      rounded-xl
+      px-4
+      flex items-center justify-between
+      cursor-pointer
+      bg-white
+    "
+  >
+
+    <span>
+
+      {
+        priorityList.find(
+          (p) =>
+            p.key === priority
+        )?.label ||
+        "Select Priority"
+      }
+
+    </span>
+
+    <ChevronDown size={18} />
+
+  </div>
+
+  {openPriorityDropdown && (
+
+    <div
+      className="
+        absolute top-full left-0
+        mt-2 w-full
+        bg-white
+        border border-[#e5e7eb]
+        rounded-xl
+        shadow-xl
+        z-[9999]
+        max-h-[200px]
+        overflow-y-auto
+      "
+    >
+
+      {priorityList.map((item) => (
+
+        <div
+          key={item.key}
+          onClick={() => {
+
+            setPriority(
+              item.key
+            );
+
+            setOpenPriorityDropdown(
+              false
+            );
+
+          }}
+          className="
+            px-4 py-3
+            hover:bg-[#f8f9fc]
+            cursor-pointer
+            text-sm
+          "
+        >
+
+          {item.label}
+
+        </div>
+
+      ))}
+
+    </div>
+
+  )}
+
+</div>
+
+    </div>
+
+  </>
+
+)}
             {/* COMMENTS */}
             <div className="flex flex-col md:flex-row md:gap-4">
 
@@ -276,46 +754,53 @@ const {
         </div>
 
         {/* FOOTER */}
-        <div
-          className="
-            shrink-0
-            px-6
-            py-5
-            border-t border-[#edf0f7]
-            flex justify-end gap-3
-            bg-white
-          "
-        >
+      <div
+  className="
+    shrink-0
+    px-6
+    py-5
+    border-t border-[#edf0f7]
+    flex justify-end gap-3
+    bg-white
+  "
+>
 
-          <button
-            onClick={onClose}
-            className="
-              h-[44px]
-              px-6
-              rounded-xl
-              border border-[#e5e7eb]
-              text-sm
-              font-medium
-            "
-          >
-            Cancel
-          </button>
+  <button
+    onClick={onClose}
+    className="
+      h-[44px]
+      px-6
+      rounded-xl
+      border border-[#e5e7eb]
+      text-sm
+      font-medium
+    "
+  >
+    Cancel
+  </button>
 
-          <button
-            className="
-              h-[44px]
-              px-8
-              rounded-xl
-              bg-[#315CEC]
-              text-white
-              text-sm
-              font-medium
-            "
-          >
-            Submit
-          </button>
+  <button
+    onClick={handleSubmit}
+    disabled={loading}
+    className="
+      h-[44px]
+      px-8
+      rounded-xl
+      bg-[#315CEC]
+      text-white
+      text-sm
+      font-medium
+      disabled:opacity-50
+    "
+  >
+    {
+      loading
+        ? "Submitting..."
+        : "Submit"
+    }
+  </button>
 
-        </div>
+</div>
 
       </div>
 

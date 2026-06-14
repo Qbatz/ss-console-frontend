@@ -531,7 +531,7 @@ const handleAssignSave =
             {item.title1}
           </p>
 
-          <h2 className="text-[38px] font-bold text-[#111827] leading-none">
+          <h2 className="text-[25px] font-bold text-[#111827] leading-none">
             {item.value1}
           </h2>
 
@@ -545,7 +545,7 @@ const handleAssignSave =
             {item.title2}
           </p>
 
-          <h2 className="text-[38px] font-bold text-[#111827] leading-none">
+          <h2 className="text-[25px] font-bold text-[#111827] leading-none">
             {item.value2}
           </h2>
 
@@ -960,6 +960,7 @@ const handleAssignSave =
       "QUERY TYPE",
       "RAISED BY",
       "TICKET STATUS",
+      "ASSIGNED TO",
       "PROPERTY NAME",
       "PRIORITY",
     ].map((head, i) => (
@@ -1029,11 +1030,12 @@ const handleAssignSave =
   {(page - 1) * size + index + 1}
 </td>
 
-<td onClick={() =>
-  handleOpenOverview(
-    item.ticketId
-  )
-}
+<td
+  onClick={() =>
+    handleOpenOverview(
+      item.ticketId
+    )
+  }
   className="
     sticky left-[70px] z-20
     bg-white
@@ -1044,11 +1046,22 @@ const handleAssignSave =
 
     px-5 py-2
     text-xs font-medium
-    text-[#374151]
     whitespace-nowrap
+    cursor-pointer
   "
 >
-  {item.ticketNumber}
+
+  <span
+    className="
+      text-[#315CEC]
+      hover:underline
+      hover:text-[#2648C9]
+      transition-all
+    "
+  >
+    {item.ticketNumber}
+  </span>
+
 </td>
 
           <td className="px-5 py-2 text-xs text-[#111827] min-w-[230px] text-left">
@@ -1066,6 +1079,9 @@ const handleAssignSave =
           </td>
  <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
             {item.ticketStatus}
+          </td>
+          <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
+             {item.assignedTo || "Not Assigned"}
           </td>
           <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
             {item.hostelName}
@@ -1120,7 +1136,7 @@ const handleAssignSave =
   createPortal(
     <div
       style={{
-  position: "fixed",   // ✅ change "absolute" → "fixed"
+  position: "fixed",  
   top: menuPosition.top,
   left: menuPosition.left,
 }}
@@ -1130,7 +1146,7 @@ const handleAssignSave =
         border border-[#e5e7eb]
         rounded-xl
         shadow-xl
-        w-[150px]
+        w-[150px] 
         overflow-hidden
       "
     >
@@ -1155,6 +1171,9 @@ const handleAssignSave =
   }
   if (menu === "Update Status") {
   setShowUpdateStatus(true);
+   setSelectedTicketId(
+    item.ticketId
+  );
 }
 
   setMenuPosition({
@@ -1167,7 +1186,7 @@ const handleAssignSave =
   className="
     w-full text-left px-3 py-2.5
     text-sm text-[#374151]
-    hover:bg-[#f8f9fc]
+    hover:bg-[#f8f9fc] cursor-pointer
   "
 >
   {menu}
@@ -1914,6 +1933,7 @@ const handleAssignSave =
   onClose={() =>
     setShowUpdateStatus(false)
   }
+   ticketId={selectedTicketId}
 />
 <SupportTicketOverview
   open={showOverview}
