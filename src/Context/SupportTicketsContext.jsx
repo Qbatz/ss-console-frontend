@@ -547,6 +547,46 @@ const assignSupportTicket =
     }
 
   };
+  const getSupportTicketNotes =
+  async (supportTicketId) => {
+
+    try {
+
+      setLoading(true);
+
+      const res =
+        await axiosInstance.get(
+          `/v2/support-ticket/notes/${supportTicketId}`
+        );
+
+      if (res.status === 200) {
+
+        return {
+          success: true,
+          data: res.data
+        };
+
+      }
+
+      return {
+        success: false
+      };
+
+    } catch (error) {
+
+      return {
+        success: false,
+        message:
+          getErrorMessage(error)
+      };
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+};
   return (
     <SupportTicketsContext.Provider
       value={{
@@ -554,7 +594,7 @@ const assignSupportTicket =
         errorMsg,
 
         searchOwners,getQueryTypes,createSupportTicket,getAllSupportTickets,getSupportTicketStatus,
-        getSupportTicketPriority,assignSupportTicket,getSupportTicketById,updateSupportTicketStatus
+        getSupportTicketPriority,assignSupportTicket,getSupportTicketById,updateSupportTicketStatus,getSupportTicketNotes
       }}
     >
       {children}

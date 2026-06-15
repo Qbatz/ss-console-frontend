@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import Notes from "../../assets/notes.png";
 import CommentBox from "../../assets/message-2.png";
 import Messagequestion from "../../assets/messagequestion.png";
@@ -15,55 +15,55 @@ const DemoRequestOverview = ({
   selectedItem,
   commentText,
   setCommentText,
-  handleAddComment,onAssignStaff,allComments,
+  handleAddComment, onAssignStaff, allComments,
   fetchAllComments
 }) => {
   if (!open) return null;
-console.log("selectedItem",selectedItem)
-const [showAllComments, setShowAllComments] =
-  useState(false);
+  console.log("selectedItem", selectedItem)
+  const [showAllComments, setShowAllComments] =
+    useState(false);
   const navigate = useNavigate();
   const handleSeeAllComments = async () => {
 
-  console.log(
-    "CLICKED",
-    selectedItem
-  );
+    console.log(
+      "CLICKED",
+      selectedItem
+    );
 
-  await fetchAllComments(
-    selectedItem?.requestId
-  );
+    await fetchAllComments(
+      selectedItem?.requestId
+    );
 
-  setShowAllComments(true);
+    setShowAllComments(true);
 
-};
+  };
   return (
     <>
-<div
-  className="fixed inset-0 z-[999999]"
-  onClick={() => {
-    setShowAllComments(false);
-    setCommentText("")
-  }}
->
+      <div
+        className="fixed inset-0 z-[999999]"
+        onClick={() => {
+          setShowAllComments(false);
+          setCommentText("")
+        }}
+      >
 
-    {/* OVERLAY */}
-    <div
-      className="absolute inset-0 bg-black/30"
-    onClick={() => {
-  onClose();
-  setCommentText("");
-}}
-    />
+        {/* OVERLAY */}
+        <div
+          className="absolute inset-0 bg-black/30"
+          onClick={() => {
+            onClose();
+            setCommentText("");
+          }}
+        />
 
-    {/* DRAWER */}
- <div
-  className="absolute inset-0 flex justify-end p-2"
-  onClick={onClose}
->
+        {/* DRAWER */}
+        <div
+          className="absolute inset-0 flex justify-end p-2"
+          onClick={onClose}
+        >
 
-  <div
-  className="
+          <div
+            className="
     h-full
     w-full
     max-w-[520px]
@@ -75,42 +75,42 @@ const [showAllComments, setShowAllComments] =
     flex
     flex-col
   "
-  onClick={(e) => e.stopPropagation()}
->
-<div
-  className="flex-1 overflow-y-auto"
-  style={{
-    scrollbarWidth: "none",
-    msOverflowStyle: "none",
-  }}
->
-        {/* HEADER */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 sticky top-0 bg-white z-50">
-
-          <div className="flex items-center text-center gap-2">
-            <img src={Messagequestion} className="w-5 h-5" />
-
-          <h2 className="text-[20px] leading-[20px] font-semibold text-[#1D1D1D] font-sans">
-  Demo Overview
-</h2>
-          </div>
-
-          <button
-               onClick={() => {
-  onClose();
-  setCommentText("");
-}}
-            className="text-red-500 text-m cursor-pointer"
+            onClick={(e) => e.stopPropagation()}
           >
-            ✕
-          </button>
+            <div
+              className="flex-1 overflow-y-auto"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              {/* HEADER */}
+              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 sticky top-0 bg-white z-50">
 
-        </div>
+                <div className="flex items-center text-center gap-2">
+                  <img src={Messagequestion} className="w-5 h-5" />
 
-        {/* BODY */}
-        <div className="p-6 space-y-6">
+                  <h2 className="text-[20px] leading-[20px] font-semibold text-[#1D1D1D] font-sans">
+                    Demo Overview
+                  </h2>
+                </div>
 
-       {/* <div className="border border-[#E5E7EB] rounded-2xl p-5 text-left bg-[#FCFCFD]">
+                <button
+                  onClick={() => {
+                    onClose();
+                    setCommentText("");
+                  }}
+                  className="text-red-500 text-m cursor-pointer"
+                >
+                  ✕
+                </button>
+
+              </div>
+
+              {/* BODY */}
+              <div className="p-6 space-y-6">
+
+                {/* <div className="border border-[#E5E7EB] rounded-2xl p-5 text-left bg-[#FCFCFD]">
 
   
   <div className="flex items-center justify-between mb-5">
@@ -205,39 +205,39 @@ const [showAllComments, setShowAllComments] =
   </div>
 </div> */}
 
-         
-         <div className="border border-[#E5E7EB] rounded-2xl p-5">
 
-  <div className="space-y-6 text-left">
+                <div className="border border-[#E5E7EB] rounded-2xl p-5">
 
-   
-    <div className="flex items-start">
-
-    
+                  <div className="space-y-6 text-left">
 
 
-    </div>
+                    <div className="flex items-start">
 
-    {/* REQUEST ID */}
-  
 
-    {/* STATUS */}
-    <div className="flex items-center">
 
-      <p className="w-[100px] text-[12px] text-[#9CA3AF]">
-        Status
-      </p>
 
-      <span className="mr-5 text-[#9CA3AF]">:</span>
+                    </div>
 
-      <p className="text-[14px] font-medium text-[#F59E0B]">
-       {selectedItem?.demoRequestStatus}
-      </p>
+                    {/* REQUEST ID */}
 
-    </div>
 
-    {/* PRIORITY */}
-    {/* <div className="flex items-center">
+                    {/* STATUS */}
+                    <div className="flex items-center">
+
+                      <p className="w-[100px] text-[12px] text-[#9CA3AF]">
+                        Status
+                      </p>
+
+                      <span className="mr-5 text-[#9CA3AF]">:</span>
+
+                      <p className="text-[14px] font-medium text-[#F59E0B]">
+                        {selectedItem?.demoRequestStatus}
+                      </p>
+
+                    </div>
+
+                    {/* PRIORITY */}
+                    {/* <div className="flex items-center">
 
       <p className="w-[100px] text-[12px] text-[#9CA3AF]">
         Assigned Staff
@@ -254,27 +254,27 @@ const [showAllComments, setShowAllComments] =
       </div>
 
     </div> */}
-    <div className="flex items-center">
+                    <div className="flex items-center">
 
-  <p className="w-[100px] text-[12px] text-[#9CA3AF]">
-    Assigned Staff
-  </p>
+                      <p className="w-[100px] text-[12px] text-[#9CA3AF]">
+                        Assigned Staff
+                      </p>
 
-  <span className="mr-5 text-[#9CA3AF]">:</span>
+                      <span className="mr-5 text-[#9CA3AF]">:</span>
 
-  <div
-    onClick={() => {
+                      <div
+                        onClick={() => {
 
-      if (selectedItem?.assignedToId) {
+                          if (selectedItem?.assignedToId) {
 
-        navigate(
-          `/iam-user/${selectedItem?.assignedToId}`
-        );
+                            navigate(
+                              `/iam-user/${selectedItem?.assignedToId}`
+                            );
 
-      }
+                          }
 
-    }}
-    className="
+                        }}
+                        className="
       bg-[#EEF4FF]
       text-[#2563EB]
       text-[13px]
@@ -290,30 +290,30 @@ const [showAllComments, setShowAllComments] =
       hover:bg-[#DCE7FF]
       transition-all
     "
-  >
+                      >
 
-    <div className="w-2 h-2 rounded-full bg-[#2563EB]"></div>
+                        <div className="w-2 h-2 rounded-full bg-[#2563EB]"></div>
 
-    {selectedItem?.assignedTo || "N/A"}
+                        {selectedItem?.assignedTo || "N/A"}
 
-  </div>
+                      </div>
 
-</div>
+                    </div>
 
-    {/* TYPE */}
-   
+                    {/* TYPE */}
 
-    {/* ASSIGNED STAFF */}
-    {selectedItem?.canAssignStaff === true && (
-    <div className="flex items-center">
 
-      <p className="w-[100px] text-[12px] text-[#9CA3AF]">
-       Add Assigned 
-      </p>
+                    {/* ASSIGNED STAFF */}
+                    {selectedItem?.canAssignStaff === true && (
+                      <div className="flex items-center">
 
-      <span className="mr-5 text-[#9CA3AF]">:</span>
+                        <p className="w-[100px] text-[12px] text-[#9CA3AF]">
+                          Add Assigned
+                        </p>
 
-     {/* <button
+                        <span className="mr-5 text-[#9CA3AF]">:</span>
+
+                        {/* <button
   onClick={onAssignStaff}
   className="
     text-[14px]
@@ -325,59 +325,59 @@ const [showAllComments, setShowAllComments] =
 >
   Assign +
 </button> */}
-{selectedItem?.canAssignStaff === true && (
+                        {selectedItem?.canAssignStaff === true && (
 
-  <button
-    onClick={onAssignStaff}
-    className="
+                          <button
+                            onClick={onAssignStaff}
+                            className="
       text-[14px]
       font-semibold
       text-[#2563EB]
       cursor-pointer
       hover:underline
     "
-  >
-    Assign +
-  </button>
+                          >
+                            Assign +
+                          </button>
 
-)}
+                        )}
 
-    </div>
-    )}
-     <div className="flex items-center">
+                      </div>
+                    )}
+                    <div className="flex items-center">
 
-      <p className="w-[100px] text-[12px] text-[#9CA3AF] whitespace-nowrap">
-        Owner Name
-      </p>
+                      <p className="w-[100px] text-[12px] text-[#9CA3AF] whitespace-nowrap">
+                        Owner Name
+                      </p>
 
-      <span className="mr-5 text-[#9CA3AF]">:</span>
+                      <span className="mr-5 text-[#9CA3AF]">:</span>
 
-      <p className="text-[14px] font-medium text-[#1D1D1D]"  onClick={() =>
-        navigate(
-          `/ProprietorsOverview/${selectedItem?.owner?.ownerId}`
-        )
-      }>
-       {selectedItem?.owner?.fullName || "N/A"}
-      </p> 
+                      <p className="text-[14px] font-medium text-[#1D1D1D]" onClick={() =>
+                        navigate(
+                          `/ProprietorsOverview/${selectedItem?.owner?.ownerId}`
+                        )
+                      }>
+                        {selectedItem?.owner?.fullName || "N/A"}
+                      </p>
 
-    </div>
+                    </div>
 
-    {/* NOTES */}
-    <div className="pt-2">
+                    {/* NOTES */}
+                    <div className="pt-2">
 
-      <label className="text-[14px] font-medium text-[#1D1D1D]">
-        Add Notes 
-      </label>
+                      <label className="text-[14px] font-medium text-[#1D1D1D]">
+                        Add Notes
+                      </label>
 
-      <div className="mt-3 border border-[#E5E7EB] rounded-xl overflow-hidden">
+                      <div className="mt-3 border border-[#E5E7EB] rounded-xl overflow-hidden">
 
- <textarea
-  placeholder="Comment here"
-  value={commentText}
-  onChange={(e) =>
-    setCommentText(e.target.value)
-  }
-  className="
+                        <textarea
+                          placeholder="Comment here"
+                          value={commentText}
+                          onChange={(e) =>
+                            setCommentText(e.target.value)
+                          }
+                          className="
     w-full
     h-[110px]
     resize-none
@@ -386,147 +386,146 @@ const [showAllComments, setShowAllComments] =
     text-[13px]
     placeholder:text-[#9CA3AF]
   "
-/>
+                        />
 
-        {/* BOTTOM TOOLBAR */}
-        <div className="flex justify-end px-3 pb-3">
+                        {/* BOTTOM TOOLBAR */}
+                        <div className="flex justify-end px-3 pb-3">
 
-          <div className="bg-[#F5F7FF] rounded-lg px-3 py-1 flex items-center gap-3 text-[12px] text-[#6B7280]">
+                          <div className="bg-[#F5F7FF] rounded-lg px-3 py-1 flex items-center gap-3 text-[12px] text-[#6B7280]">
 
-            <span className="font-semibold">B</span>
+                            <span className="font-semibold">B</span>
 
-            <span className="italic">I</span>
+                            <span className="italic">I</span>
 
-            <span className="underline">U</span>
+                            <span className="underline">U</span>
 
-          </div>
+                          </div>
 
-        </div>
+                        </div>
 
-      </div>
-      
- <div className="flex items-center justify-between mt-3">
+                      </div>
 
-      {/* LEFT */}
-    <button
- onClick={handleSeeAllComments }
-  className="
+                      <div className="flex items-center justify-between mt-3">
+
+                        {/* LEFT */}
+                        <button
+                          onClick={handleSeeAllComments}
+                          className="
     text-[11px]
     font-medium
     text-[#315CEC]
     uppercase
     hover:underline
   "
->
-  SEE ALL COMMENTS
-</button>
+                        >
+                          SEE ALL COMMENTS
+                        </button>
 
-      {/* RIGHT */}
-      <div className="flex items-center gap-3">
+                        {/* RIGHT */}
+                        <div className="flex items-center gap-3">
 
-        {/* TOOLBAR */}
-        
+                          {/* TOOLBAR */}
 
-        {/* BUTTON */}
-        <button
-          onClick={handleAddComment}
-          disabled={!commentText.trim()}
-          className={`
+
+                          {/* BUTTON */}
+                          <button
+                            onClick={handleAddComment}
+                            disabled={!commentText.trim()}
+                            className={`
             px-6 py-2 rounded-lg text-sm flex items-center gap-2 transition-all
 
-            ${
-              commentText.trim()
-                ? "bg-[#315CEC] hover:bg-[#2648C9] text-white cursor-pointer"
-                : "bg-[#DDE3FF] text-white cursor-not-allowed"
-            }
+            ${commentText.trim()
+                                ? "bg-[#315CEC] hover:bg-[#2648C9] text-white cursor-pointer"
+                                : "bg-[#DDE3FF] text-white cursor-not-allowed"
+                              }
           `}
-        >
+                          >
 
-          ➤ Add
+                            ➤ Add
 
-        </button>
+                          </button>
 
-      </div>
+                        </div>
 
-    </div>
-    </div>
+                      </div>
+                    </div>
 
-  </div>
-</div>
+                  </div>
+                </div>
 
-          {/* TIMELINE */}
-          <div>
+                {/* TIMELINE */}
+                <div>
 
-            {/* <h3 className="text-[26px] font-semibold mb-8">
+                  {/* <h3 className="text-[26px] font-semibold mb-8">
               Activity Timeline:
             </h3> */}
                   {/* TIMELINE */}
-<div className="border border-[#E5E7EB] rounded-2xl p-5 bg-white">
+                  <div className="border border-[#E5E7EB] rounded-2xl p-5 bg-white">
 
-  {/* TITLE */}
-  <div className="flex items-center justify-between mb-5">
+                    {/* TITLE */}
+                    <div className="flex items-center justify-between mb-5">
 
-    <h2 className="text-[18px] font-semibold text-[#1D1D1D]">
-      Activity Timeline
-    </h2>
+                      <h2 className="text-[18px] font-semibold text-[#1D1D1D]">
+                        Activity Timeline
+                      </h2>
 
-    <span className="text-[12px] text-gray-400">
-      {selectedItem?.demoRequestActivities?.length || 0} Activities
-    </span>
+                      <span className="text-[12px] text-gray-400">
+                        {selectedItem?.demoRequestActivities?.length || 0} Activities
+                      </span>
 
-  </div>
+                    </div>
 
-  {/* SCROLL AREA */}
-  <div
-    className="
+                    {/* SCROLL AREA */}
+                    <div
+                      className="
       max-h-[350px]
       overflow-y-auto
       pr-2
       space-y-6
     "
-    style={{
-      scrollbarWidth: "thin",
-    }}
-  >
+                      style={{
+                        scrollbarWidth: "thin",
+                      }}
+                    >
 
-    {selectedItem?.demoRequestActivities?.length > 0 ? (
+                      {selectedItem?.demoRequestActivities?.length > 0 ? (
 
-      selectedItem?.demoRequestActivities?.map(
-        (item, index) => (
+                        selectedItem?.demoRequestActivities?.map(
+                          (item, index) => (
 
-          <div
-            key={index}
-            className="flex gap-4"
-          >
+                            <div
+                              key={index}
+                              className="flex gap-4"
+                            >
 
-            {/* LEFT */}
-            <div className="flex flex-col items-center">
+                              {/* LEFT */}
+                              <div className="flex flex-col items-center">
 
-              <div
-                className="
+                                <div
+                                  className="
                   w-11 h-11 rounded-full
                   bg-[#EEF4FF]
                   border border-[#DCE7FF]
                   flex items-center justify-center
                   shrink-0
                 "
-              >
-                <img
-                  src={CommentBox}
-                  className="w-5 h-5"
-                />
-              </div>
+                                >
+                                  <img
+                                    src={CommentBox}
+                                    className="w-5 h-5"
+                                  />
+                                </div>
 
-              {index !==
-                selectedItem?.demoRequestActivities?.length - 1 && (
-                <div className="w-[1px] flex-1 bg-[#E5E7EB] mt-2"></div>
-              )}
+                                {index !==
+                                  selectedItem?.demoRequestActivities?.length - 1 && (
+                                    <div className="w-[1px] flex-1 bg-[#E5E7EB] mt-2"></div>
+                                  )}
 
-            </div>
+                              </div>
 
-           
-          <div
-  className="
+
+                              <div
+                                className="
     flex-1
     bg-white
     border border-[#E5E7EB]
@@ -536,13 +535,13 @@ const [showAllComments, setShowAllComments] =
     hover:shadow-md
     transition-all
   "
->
+                              >
 
-  {/* STATUS */}
-  <div className="flex items-center justify-between gap-3 mb-3">
+                                {/* STATUS */}
+                                <div className="flex items-center justify-between gap-3 mb-3">
 
-    <div
-      className="
+                                  <div
+                                    className="
         px-3
         py-1
         rounded-full
@@ -553,127 +552,127 @@ const [showAllComments, setShowAllComments] =
         uppercase
         w-fit
       "
-    >
-      {item.status || "STATUS"}
-    </div>
+                                  >
+                                    {item.status || "STATUS"}
+                                  </div>
 
-    <p className="text-[11px] text-gray-400 whitespace-nowrap">
-      {item.createdAtDate} • {item.createdAtTime}
-    </p>
+                                  <p className="text-[11px] text-gray-400 whitespace-nowrap">
+                                    {item.createdAtDate} • {item.createdAtTime}
+                                  </p>
 
-  </div>
+                                </div>
 
-  {/* DESCRIPTION */}
-  {item.description && (
-    <div className="mb-3">
+                                {/* DESCRIPTION */}
+                                {item.description && (
+                                  <div className="mb-3">
 
-     
 
-      <p className="text-[14px] text-[#374151] leading-6 text-left break-words">
-        {item.description}
-      </p>
 
-    </div>
-  )}
+                                    <p className="text-[14px] text-[#374151] leading-6 text-left break-words">
+                                      {item.description}
+                                    </p>
 
-  {/* COMMENT */}
-  {item.comment && (
-    <div
-      className="
+                                  </div>
+                                )}
+
+                                {/* COMMENT */}
+                                {item.comment && (
+                                  <div
+                                    className="
         bg-[#F9FAFB]
         border border-[#F1F5F9]
         rounded-xl
         p-3
       "
-    >
+                                  >
 
-      <p className="text-[12px] text-gray-400 font-medium text-left mb-1 uppercase tracking-wide">
-        Comment
-      </p>
+                                    <p className="text-[12px] text-gray-400 font-medium text-left mb-1 uppercase tracking-wide">
+                                      Comment
+                                    </p>
 
-      <p className="text-[14px] text-[#111827] leading-6 text-left break-words whitespace-pre-wrap">
-        {item.comment}
-      </p>
+                                    <p className="text-[14px] text-[#111827] leading-6 text-left break-words whitespace-pre-wrap">
+                                      {item.comment}
+                                    </p>
 
-    </div>
-  )}
+                                  </div>
+                                )}
 
-  {/* UPDATED BY */}
-  <div className="mt-4 pt-3 border-t border-[#F3F4F6]">
+                                {/* UPDATED BY */}
+                                <div className="mt-4 pt-3 border-t border-[#F3F4F6]">
 
-    <p className="text-[12px] text-left">
+                                  <p className="text-[12px] text-left">
 
-      <span className="text-gray-400">
-        Updated by
-      </span>
+                                    <span className="text-gray-400">
+                                      Updated by
+                                    </span>
 
-      <span className="text-[#2563EB] font-semibold ml-1">
-        {item.createdBy}
-      </span>
+                                    <span className="text-[#2563EB] font-semibold ml-1">
+                                      {item.createdBy}
+                                    </span>
 
-    </p>
+                                  </p>
 
-  </div>
+                                </div>
 
-</div>
+                              </div>
 
+                            </div>
+                          )
+                        )
+
+                      ) : (
+
+                        <div className="h-[220px] flex flex-col items-center justify-center text-center">
+
+                          <div className="w-14 h-14 rounded-full bg-[#F3F4F6] flex items-center justify-center mb-3">
+
+                            <img
+                              src={CommentBox}
+                              className="w-6 h-6 opacity-50"
+                            />
+
+                          </div>
+
+                          <p className="text-sm font-medium text-gray-500">
+                            No Activities Found
+                          </p>
+
+                          <p className="text-xs text-gray-400 mt-1">
+                            Timeline activities will appear here
+                          </p>
+
+                        </div>
+
+                      )}
+
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
           </div>
-        )
-      )
+        </div>
+      </div>
+      {/* ALL COMMENTS POPUP */}
+      {showAllComments && (
 
-    ) : (
+        <div className="fixed inset-0 z-[999999]">
 
-      <div className="h-[220px] flex flex-col items-center justify-center text-center">
-
-        <div className="w-14 h-14 rounded-full bg-[#F3F4F6] flex items-center justify-center mb-3">
-
-          <img
-            src={CommentBox}
-            className="w-6 h-6 opacity-50"
+          {/* OVERLAY */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() =>
+              setShowAllComments(false)
+            }
           />
 
-        </div>
+          {/* MODAL */}
+          <div className="absolute inset-0 flex items-center justify-center p-4">
 
-        <p className="text-sm font-medium text-gray-500">
-          No Activities Found
-        </p>
-
-        <p className="text-xs text-gray-400 mt-1">
-          Timeline activities will appear here
-        </p>
-
-      </div>
-
-    )}
-
-  </div>
-
-</div>
-          </div>
-
-        </div>
-</div>
-      </div>
-    </div>
-  </div>
-  {/* ALL COMMENTS POPUP */}
-{showAllComments && (
-
-  <div className="fixed inset-0 z-[999999]">
-
-    {/* OVERLAY */}
-    <div
-      className="absolute inset-0 bg-black/40"
-      onClick={() =>
-        setShowAllComments(false)
-      }
-    />
-
-    {/* MODAL */}
-    <div className="absolute inset-0 flex items-center justify-center p-4">
-
-      <div
-        className="
+            <div
+              className="
           bg-white
           w-full
           max-w-[650px]
@@ -684,61 +683,61 @@ const [showAllComments, setShowAllComments] =
           flex-col
           max-h-[85vh]
         "
-        onClick={(e) =>
-          e.stopPropagation()
-        }
-      >
+              onClick={(e) =>
+                e.stopPropagation()
+              }
+            >
 
-        {/* HEADER */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              {/* HEADER */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
 
-          <div>
+                <div>
 
-            <h2 className="text-[18px] font-semibold text-left">
-              All Comments
-            </h2>
+                  <h2 className="text-[18px] font-semibold text-left">
+                    All Comments
+                  </h2>
 
-            <p className="text-[12px] text-gray-500 mt-1">
-              View all activity comments
-            </p>
+                  <p className="text-[12px] text-gray-500 mt-1">
+                    View all activity comments
+                  </p>
 
-          </div>
+                </div>
 
-          <button
-            onClick={() =>
-              setShowAllComments(false)
-            }
-            className="text-red-500 text-lg"
-          >
-            ✕
-          </button>
+                <button
+                  onClick={() =>
+                    setShowAllComments(false)
+                  }
+                  className="text-red-500 text-lg"
+                >
+                  ✕
+                </button>
 
-        </div>
+              </div>
 
-        {/* BODY */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+              {/* BODY */}
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-          {allComments
-            ?.length > 0 ? (
+                {allComments
+                  ?.length > 0 ? (
 
-            allComments.map(
-              (item, index) => (
+                  allComments.map(
+                    (item, index) => (
 
-                <div
-                  key={index}
-                  className="
+                      <div
+                        key={index}
+                        className="
                     border border-[#E5E7EB]
                     rounded-2xl
                     p-4
                     bg-[#FAFAFA]
                   "
-                >
+                      >
 
-                  <div className="flex gap-3">
+                        <div className="flex gap-3">
 
-                    {/* ICON */}
-                    <div
-                      className="
+                          {/* ICON */}
+                          <div
+                            className="
                         w-10 h-10
                         rounded-full
                         bg-[#EEF4FF]
@@ -746,81 +745,81 @@ const [showAllComments, setShowAllComments] =
                         flex items-center justify-center
                         shrink-0
                       "
-                    >
+                          >
+
+                            <img
+                              src={CommentBox}
+                              className="w-4 h-4"
+                            />
+
+                          </div>
+
+                          {/* CONTENT */}
+                          <div className="flex-1">
+
+                            <p className="text-[14px] font-semibold text-left text-[#111827] break-words">
+                              {item.comment ||
+                                "No Comment"}
+                            </p>
+
+                            <div className="flex items-center gap-2 mt-2 text-[12px] text-gray-500">
+
+                              <span>
+                                {item.createdAtDate}
+                              </span>
+
+                              <span>•</span>
+
+                              <span>
+                                {item.createdAtTime}
+                              </span>
+
+                            </div>
+
+                            <p className="text-[12px] text-[#315CEC] mt-2 font-medium text-left">
+                              Added by {item.createdBy}
+                            </p>
+
+                          </div>
+
+                        </div>
+
+                      </div>
+                    )
+                  )
+
+                ) : (
+
+                  <div className="h-[300px] flex flex-col items-center justify-center text-center">
+
+                    <div className="w-14 h-14 rounded-full bg-[#F3F4F6] flex items-center justify-center mb-3">
 
                       <img
                         src={CommentBox}
-                        className="w-4 h-4"
+                        className="w-6 h-6 opacity-50"
                       />
 
                     </div>
 
-                    {/* CONTENT */}
-                    <div className="flex-1">
-
-                      <p className="text-[14px] font-semibold text-left text-[#111827] break-words">
-                        {item.comment ||
-                          "No Comment"}
-                      </p>
-
-                      <div className="flex items-center gap-2 mt-2 text-[12px] text-gray-500">
-
-                        <span>
-                          {item.createdAtDate}
-                        </span>
-
-                        <span>•</span>
-
-                        <span>
-                          {item.createdAtTime}
-                        </span>
-
-                      </div>
-
-                      <p className="text-[12px] text-[#315CEC] mt-2 font-medium text-left">
-                        Added by {item.createdBy}
-                      </p>
-
-                    </div>
+                    <p className="text-sm font-medium text-gray-500">
+                      No Comments Found
+                    </p>
 
                   </div>
 
-                </div>
-              )
-            )
-
-          ) : (
-
-            <div className="h-[300px] flex flex-col items-center justify-center text-center">
-
-              <div className="w-14 h-14 rounded-full bg-[#F3F4F6] flex items-center justify-center mb-3">
-
-                <img
-                  src={CommentBox}
-                  className="w-6 h-6 opacity-50"
-                />
+                )}
 
               </div>
 
-              <p className="text-sm font-medium text-gray-500">
-                No Comments Found
-              </p>
-
             </div>
 
-          )}
+          </div>
 
         </div>
 
-      </div>
-
-    </div>
-
-  </div>
-
-)}
-  </>
-);
+      )}
+    </>
+  );
 };
 
 export default DemoRequestOverview;

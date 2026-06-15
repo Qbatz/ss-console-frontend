@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState,useEffect} from "react";
 import {
   X,
   MessageSquare,
@@ -10,6 +10,10 @@ import {
 } from "lucide-react";
 import CommentBox from "../../assets/message-2.png";
 import { useNavigate } from "react-router-dom";
+import { useSubscription } from "../../Context/SubscriptionContext";
+import { useSupportTickets } from "../../Context/SupportTicketsContext";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import Toast from "../SuccessModal/ToastDesign";
 
 const SupportTicketOverview = ({
   open,
@@ -17,17 +21,120 @@ const SupportTicketOverview = ({
   selectedTicket,onAssignClick
 }) => {
   const navigate = useNavigate();
+ const {getSupportTicketNotes} = useSupportTickets();
+  const {addSupportTicketNotes } = useSubscription();
+  const [commentText,setCommentText] = useState("");
 
+const [allComments,setAllComments] = useState([]);
+
+const [notesError,setNotesError] = useState("");
+
+const [addNotesLoading,setAddNotesLoading] = useState(false);
+const [showAllComments,setShowAllComments] = useState(false);
+const handleGetNotes =
+  async () => {
+
+    if (
+      !selectedTicket?.ticketId
+    ) return;
+
+    const res =
+      await getSupportTicketNotes(
+        selectedTicket.ticketId
+      );
+
+    if (res?.success) {
+
+      setAllComments(
+        res.data || []
+      );
+
+    } else {
+
+      setAllComments([]);
+
+    }
+
+};
+useEffect(() => {
+
+  if (open) {
+
+    handleGetNotes();
+
+  }
+
+}, [open]);
+const handleAddComment =
+  async () => {
+
+    if (addNotesLoading)
+      return;
+
+    if (
+      !commentText.trim()
+    ) {
+
+      setNotesError(
+        "Please enter notes"
+      );
+
+      return;
+
+    }
+
+    try {
+
+      setAddNotesLoading(true);
+
+      setNotesError("");
+
+      const res =
+        await addSupportTicketNotes(
+          selectedTicket?.ticketId,
+          commentText
+        );
+
+      if (res?.success) {
+
+        setCommentText("");
+
+        handleGetNotes();
+
+      }
+
+    } finally {
+
+      setAddNotesLoading(false);
+
+    }
+
+};
+const handleCloseDrawer =
+  () => {
+
+    setCommentText("");
+
+    setNotesError("");
+
+    setAllComments([]);
+
+    setShowAllComments(false);
+
+    onClose();
+
+};
   if (!open) return null;
 
   return (
-
+<>
     <div className="fixed inset-0 z-[999999]">
 
       {/* OVERLAY */}
       <div
         className="absolute inset-0 bg-black/40"
-        onClick={onClose}
+        onClick={handleCloseDrawer}
+      
       />
 
       {/* DRAWER */}
@@ -103,7 +210,7 @@ const SupportTicketOverview = ({
             </div>
 
             <button
-              onClick={onClose}
+              onClick={handleCloseDrawer}
               className="
                 text-red-500
                 hover:opacity-80 cursor-pointer
@@ -437,7 +544,7 @@ const SupportTicketOverview = ({
 
                 </div>
 
-<div className="flex items-center">
+{/* <div className="flex items-center">
 
   <p className="w-[120px] text-[13px] text-[#9CA3AF]">
     Assigned Staff
@@ -492,8 +599,95 @@ const SupportTicketOverview = ({
 
   </button>
 
+</div> */}
+{/* ASSIGNED STAFF */}
+<div className="flex items-center">
+
+  <p className="w-[120px] text-[13px] text-[#9CA3AF]">
+    Assigned Staff
+  </p>
+
+  <span className="mr-5 text-[#9CA3AF]">
+    :
+  </span>
+
+  <div
+    onClick={() => {
+
+      if (
+        selectedTicket?.assignedToId
+      ) {
+
+        navigate(
+          `/iam-user/${selectedTicket?.assignedToId}`
+        );
+
+      }
+
+    }}
+    className="
+      bg-[#EEF4FF]
+      text-[#2563EB]
+      text-[13px]
+      px-3
+      py-1
+      rounded-full
+      flex
+      items-center
+      gap-1
+      w-fit
+      cursor-pointer
+      hover:bg-[#DCE7FF]
+      transition-all
+    "
+  >
+
+    <div className="w-2 h-2 rounded-full bg-[#2563EB]"></div>
+
+    {
+      selectedTicket?.assignedTo ||
+      "N/A"
+    }
+
+  </div>
+
 </div>
 
+{/* ADD ASSIGNED */}
+{
+  selectedTicket?.canAssignStaff === true && (
+
+    <div className="flex items-center">
+
+      <p className="w-[120px] text-[13px] text-[#9CA3AF]">
+        Add Assigned
+      </p>
+
+      <span className="mr-5 text-[#9CA3AF]">
+        :
+      </span>
+
+      <button
+        onClick={() =>
+          onAssignClick?.(
+            selectedTicket
+          )
+        }
+        className="
+          text-[14px]
+          font-semibold
+          text-[#2563EB]
+          cursor-pointer
+          hover:underline
+        "
+      >
+        Assign +
+      </button>
+
+    </div>
+
+  )
+}
 
  <div className="pt-2 text-left">
 
@@ -503,12 +697,18 @@ const SupportTicketOverview = ({
 
       <div className="mt-3 border border-[#E5E7EB] rounded-xl overflow-hidden">
 
- <textarea
+<textarea
   placeholder="Comment here"
-  // value={commentText}
-  // onChange={(e) =>
-  //   setCommentText(e.target.value)
-  // }
+  value={commentText}
+  onChange={(e) => {
+
+    setCommentText(
+      e.target.value
+    );
+
+    setNotesError("");
+
+  }}
   className="
     w-full
     h-[110px]
@@ -536,12 +736,21 @@ const SupportTicketOverview = ({
         </div>
 
       </div>
-      
+{notesError && (
+
+  <ErrorMessage
+    message={notesError}
+    type="error"
+  />
+
+)}
  <div className="flex items-center justify-between mt-3">
 
       {/* LEFT */}
     <button
-//  onClick={handleSeeAllComments }
+  onClick={() =>
+    setShowAllComments(true)
+  }
   className="
     text-[11px]
     font-medium
@@ -561,19 +770,45 @@ const SupportTicketOverview = ({
 
         {/* BUTTON */}
         <button
-          // onClick={handleAddComment}
-          // disabled={!commentText.trim()}
-          className="
-            px-6 py-2 rounded-lg text-sm flex items-center gap-2 transition-all bg-[#315CEC] hover:bg-[#2648C9] text-white cursor-pointer"
-        >
+  onClick={handleAddComment}
+  disabled={addNotesLoading}
+  className={`
+    px-6 py-2
+    rounded-lg
+    text-sm
+    flex items-center
+    gap-2
+    transition-all
+    text-white
 
-          ➤ Add
+    ${
+      addNotesLoading
+        ? `
+          bg-[#9db2ff]
+          cursor-not-allowed
+        `
+        : `
+          bg-[#315CEC]
+          hover:bg-[#2648C9]
+          cursor-pointer
+        `
+    }
+  `}
+>
 
-        </button>
+  {
+    addNotesLoading
+      ? "Adding..."
+      : "➤ Add"
+  }
+
+</button>
 
       </div>
 
     </div>
+  
+
     </div>
               </div>
 
@@ -839,6 +1074,194 @@ const SupportTicketOverview = ({
       </div>
 
     </div>
+    {/* ALL COMMENTS POPUP */}
+{
+  showAllComments && (
+
+    <div className="fixed inset-0 z-[9999999]">
+
+      {/* OVERLAY */}
+      <div
+        className="
+          absolute inset-0
+          bg-black/40
+        "
+        onClick={() => {
+
+  setShowAllComments(false);
+
+  setNotesError("");
+
+}}
+      />
+
+      {/* MODAL */}
+      <div
+        className="
+          absolute
+          top-1/2
+          left-1/2
+          -translate-x-1/2
+          -translate-y-1/2
+          bg-white
+          w-full
+          max-w-[650px]
+          rounded-3xl
+          shadow-2xl
+          overflow-hidden
+        "
+      >
+
+        {/* HEADER */}
+        <div
+          className="
+            flex items-center
+            justify-between
+            px-6 py-5
+            border-b border-[#E5E7EB]
+          "
+        >
+
+          <h2
+            className="
+              text-[18px]
+              font-semibold
+              text-[#111827]
+            "
+          >
+            All Comments
+          </h2>
+
+          <button
+            onClick={() => {
+
+  setShowAllComments(false);
+
+  setNotesError("");
+  
+
+}}
+            className="
+              text-red-500
+              cursor-pointer
+            "
+          >
+
+            <X size={22} />
+
+          </button>
+
+        </div>
+
+        {/* COMMENTS */}
+        <div
+          className="
+            max-h-[500px]
+            overflow-y-auto
+            p-6
+            space-y-4
+          "
+        >
+
+          {
+            allComments.length > 0
+              ? (
+                allComments.map(
+                  (item, index) => (
+
+                    <div
+                      key={index}
+                      className="
+                        border
+                        border-[#E5E7EB]
+                        rounded-2xl
+                        p-4
+                        text-left
+                      "
+                    >
+
+                      <p
+                        className="
+                          text-[14px]
+                          text-[#111827]
+                          break-words
+                          leading-6
+                        "
+                      >
+                        {item.notes}
+                      </p>
+
+                      <div
+                        className="
+                          mt-3
+                          flex items-center
+                          justify-between
+                          flex-wrap
+                          gap-2
+                        "
+                      >
+
+                        <p
+                          className="
+                            text-[12px]
+                            text-[#6B7280]
+                          "
+                        >
+                          Added by
+                          {" "}
+                          <span className="font-medium">
+                            {item.createdBy}
+                          </span>
+                        </p>
+
+                        <p
+                          className="
+                            text-[12px]
+                            text-[#9CA3AF]
+                          "
+                        >
+                          {
+                            item.createdAtDate
+                          }
+                          {" "}
+                          •
+                          {" "}
+                          {
+                            item.createdAtTime
+                          }
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                  )
+                )
+              ) : (
+
+                <div
+                  className="
+                    text-center
+                    text-sm
+                    text-[#9CA3AF]
+                    py-10
+                  "
+                >
+                  No comments found
+                </div>
+
+              )
+          }
+
+        </div>
+
+      </div>
+
+    </div>
+
+  )
+}
+    </>
 
   );
 

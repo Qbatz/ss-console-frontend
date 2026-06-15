@@ -20,11 +20,13 @@ import FilterArrow from "../../assets/direction-down 01.png";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import SupportTicketOverview from "./SupportTicketOverview";
+import { useNavigate } from "react-router-dom";
 const SupportTicket = () => {
+  const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(null);
   const [showCommentModal, setShowCommentModal] = useState(false);
-  const {getAllSupportTickets,getSupportTicketStatus,loading,getSupportTicketPriority,assignSupportTicket,getSupportTicketById} = useSupportTickets();
-  const { getAgentsDropdown } = useSubscription();
+  const {getAllSupportTickets,getSupportTicketStatus,loading,getSupportTicketPriority,assignSupportTicket,getSupportTicketById,getSupportTicketNotes} = useSupportTickets();
+  const { getAgentsDropdown,addSupportTicketNotes } = useSubscription();
 
 
 const [commentText, setCommentText] = useState("");
@@ -57,14 +59,15 @@ const [selectedTicketId,setSelectedTicketId] = useState(null);
 const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
-  const [
-  showOverview,
-  setShowOverview
-] = useState(false);
+  const [showOverview,setShowOverview] = useState(false);
 
 const [selectedTicket,setSelectedTicket] = useState(null);
 
 const statusDropdownRef = useRef(null);
+
+
+const [selectedNoteTicketId,setSelectedNoteTicketId] = useState(null);
+ const [notesError,setNotesError] = useState("");
 
 const agentDropdownRef =
   useRef(null);
@@ -255,16 +258,7 @@ setResData(responseData)
 
   };
 
-const [allComments, setAllComments] =
-  useState([
-    {
-      comment:
-        "Customer reported payment issue during checkout.",
-      createdAtDate: "10-06-2026",
-      createdAtTime: "02:30 PM",
-      createdBy: "Admin",
-    },
-  ]);
+const [allComments, setAllComments] =useState([]);
   const handleOpenOverview =
   async (ticketId) => {
 
@@ -424,6 +418,119 @@ const handleAssignSave =
 
           }, 1300);
     }
+
+  };
+  const [
+  addNotesLoading,
+  setAddNotesLoading
+] = useState(false);
+ 
+const handleAddInternalNotes =
+  async () => {
+
+    if (addNotesLoading)
+      return;
+
+    if (
+      !commentText.trim()
+    ) {
+
+      setNotesError(
+        "Please enter notes"
+      );
+
+      return;
+
+    }
+
+    try {
+
+      setAddNotesLoading(true);
+
+      setNotesError("");
+
+      const res =
+        await addSupportTicketNotes(
+          selectedNoteTicketId,
+          commentText
+        );
+
+      if (res.success) {
+
+        setModalType("success");
+
+        setMessage(
+          res?.message
+        );
+
+        setShowSuccess(true);
+
+        setTimeout(() => {
+
+          setShowSuccess(false);
+
+        }, 1300);
+
+        setCommentText("");
+
+        setShowCommentModal(
+          false
+        );
+
+        fetchTickets();
+
+      } else {
+
+        setModalType("error");
+
+        setMessage(
+          res?.message
+        );
+
+        setShowSuccess(true);
+
+        setTimeout(() => {
+
+          setShowSuccess(false);
+
+        }, 1300);
+
+      }
+
+    } finally {
+
+      setAddNotesLoading(false);
+
+    }
+
+};
+
+
+const handleOpenComments =
+  async (ticketId) => {
+
+    setSelectedNoteTicketId(
+      ticketId
+    );
+
+    const res =
+      await getSupportTicketNotes(
+        ticketId
+      );
+
+    if (res?.success) {
+
+      setAllComments(
+        res.data || []
+      );
+
+    } else {
+
+      setAllComments([]);
+
+    }
+
+    setShowCommentModal(true);
 
   };
   return (
@@ -1080,9 +1187,34 @@ const handleAssignSave =
  <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
             {item.ticketStatus}
           </td>
-          <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
-             {item.assignedTo || "Not Assigned"}
-          </td>
+        <td
+  className="
+    px-5 py-2
+    text-xs
+    font-medium
+    text-[#374151]
+    whitespace-nowrap
+    text-left
+    cursor-pointer
+    hover:text-[#315CEC]
+    hover:underline
+  "
+  onClick={() => {
+
+    if (item?.assignedToId) {
+
+      navigate(
+        `/iam-user/${item.assignedToId}`
+      );
+
+    }
+
+  }}
+>
+
+  {item?.assignedTo || "N/A"}
+
+</td>
           <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
             {item.hostelName}
           </td>
@@ -1150,17 +1282,31 @@ const handleAssignSave =
         overflow-hidden
       "
     >
-      {[
-        "Add Notes",
-        "Update Status",
-        "Assign Staff",
-      ].map((menu, idx) => (
+     {[
+  "Add Notes",
+
+  ...(item.ticketStatus !== "RESOLVED" &&
+     item.ticketStatus !== "CLOSED"
+    ? ["Update Status"]
+    : []),
+
+  "Assign Staff",
+
+].map((menu, idx) => (
        <button
   key={idx}
   onClick={() => {
 
   if (menu === "Add Notes") {
-    setShowCommentModal(true);
+  //   console.log("item",item)
+  //    setSelectedNoteTicketId(
+  //   item.ticketId
+  // );
+
+  // setShowCommentModal(true);
+   handleOpenComments(
+    item.ticketId
+  );
   }
 
   if (menu === "Assign Staff") {
@@ -1174,6 +1320,7 @@ const handleAssignSave =
    setSelectedTicketId(
     item.ticketId
   );
+  setSelectedTicket(item);
 }
 
   setMenuPosition({
@@ -1401,6 +1548,7 @@ const handleAssignSave =
       onClick={() => {
         setShowCommentModal(false);
         setCommentText("");
+        setNotesError("")
       }}
     />
 
@@ -1428,6 +1576,7 @@ const handleAssignSave =
           onClick={() => {
             setShowCommentModal(false);
             setCommentText("");
+            setNotesError("")
           }}
           className="text-red-500 text-lg"
         >
@@ -1441,7 +1590,7 @@ const handleAssignSave =
 
         {/* INPUT */}
         <label className="text-xs text-gray-500 mb-2 text-left">
-          Additional Comments
+          Additional Comments <span className="text-red-600">*</span>
         </label>
 
         <div className="border border-gray-300 rounded-xl p-3">
@@ -1449,9 +1598,15 @@ const handleAssignSave =
           <textarea
             placeholder="Comment here"
             value={commentText}
-            onChange={(e) =>
-              setCommentText(e.target.value)
-            }
+            onChange={(e) => {
+
+  setCommentText(
+    e.target.value
+  );
+
+  setNotesError("");
+
+}}
             className="
               w-full
               h-24
@@ -1462,36 +1617,47 @@ const handleAssignSave =
           />
 
         </div>
+{notesError && (
 
+  <ErrorMessage
+    message={notesError}
+    type="error"
+  />
+
+)}
         {/* ADD BUTTON */}
         <div className="flex justify-end mt-3">
 
-          <button
-            onClick={() => {
-              if (!commentText.trim()) return;
+         <button
+  onClick={handleAddInternalNotes}
+  disabled={addNotesLoading}
+  className={`
+    px-5 py-2
+    rounded-lg
+    text-sm
+    text-white
 
-              setAllComments((prev) => [
-                ...prev,
-                {
-                  comment: commentText,
-                  createdAtDate: "10-06-2026",
-                  createdAtTime: "03:45 PM",
-                  createdBy: "Admin",
-                },
-              ]);
+    ${
+      addNotesLoading
+        ? `
+          bg-[#9db2ff]
+          cursor-not-allowed
+        `
+        : `
+          bg-primary-hover
+          cursor-pointer
+        `
+    }
+  `}
+>
 
-              setCommentText("");
-            }}
-            className="
-              bg-primary-hover
-              text-white
-              px-5 py-2
-              rounded-lg
-              text-sm cursor-pointer
-            "
-          >
-            Add
-          </button>
+  {
+    addNotesLoading
+      ? "Adding..."
+      : "Add"
+  }
+
+</button>
 
         </div>
 
@@ -1502,30 +1668,30 @@ const handleAssignSave =
 
         <div className="flex-1 overflow-y-auto pr-1 space-y-5">
 
-          {allComments.map((item, index) => (
+       {allComments.map((item, index) => (
 
-            <div
-              key={index}
-              className="border-b border-gray-100 pb-4"
-            >
+  <div
+    key={index}
+    className="border-b border-gray-100 pb-4"
+  >
 
-              <p className="text-sm font-semibold text-left">
-                {item.comment}
-              </p>
+    <p className="text-sm font-semibold text-left break-words">
+      {item.notes}
+    </p>
 
-              <p className="text-xs text-gray-500 mt-1 text-left">
-                {item.createdAtDate} ,
-                {" "}
-                {item.createdAtTime}
-              </p>
+    <p className="text-xs text-gray-500 mt-1 text-left">
+      {item.createdAtDate},
+      {" "}
+      {item.createdAtTime}
+    </p>
 
-              <p className="text-xs text-gray-400 mt-2 text-left">
-                Added by {item.createdBy}
-              </p>
+    <p className="text-xs text-gray-400 mt-2 text-left">
+      Added by {item.createdBy}
+    </p>
 
-            </div>
+  </div>
 
-          ))}
+))}
 
         </div>
 
@@ -1844,7 +2010,7 @@ const handleAssignSave =
         <div className="mt-5">
 
           <label className="text-[13px] font-medium text-left block mb-2">
-            Additional Comments
+            Additional Comments 
           </label>
 
           <div
@@ -1934,6 +2100,13 @@ const handleAssignSave =
     setShowUpdateStatus(false)
   }
    ticketId={selectedTicketId}
+   reFreshData={fetchTickets}
+    currentStatus={
+    selectedTicket?.ticketStatus
+  }
+  currentData={
+    selectedTicket
+  }
 />
 <SupportTicketOverview
   open={showOverview}

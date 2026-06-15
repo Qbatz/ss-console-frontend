@@ -1928,21 +1928,26 @@ const TenantRecurring = () => {
 
                       setTimeout(() => setShowSuccess(false), 1500);
                       setData(prev =>
-                        prev.map(item =>
-                          ids.includes(selectedIds)
-                            ? { ...item, recurringStatus: true }
-                            : item
-                        )
-                      );
+  prev.map(item =>
+    selectedIds.includes(item.customerId)
+      ? {
+          ...item,
+          recurringStatus: true
+        }
+      : item
+  )
+);
 
-
-                      setSelectedCustomers(prev =>
-                        prev.map(item =>
-                          ids.includes(item.customerId)
-                            ? { ...item, recurringStatus: true }
-                            : item
-                        )
-                      );
+setSelectedCustomers(prev =>
+  prev.map(item =>
+    selectedIds.includes(item.customerId)
+      ? {
+          ...item,
+          recurringStatus: true
+        }
+      : item
+  )
+);
                       fetchRecurring();
                     } else {
                       setModalType("error");

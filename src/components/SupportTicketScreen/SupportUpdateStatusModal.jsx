@@ -1,4 +1,4 @@
-import React, { useState,useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   X,
   ChevronDown,
@@ -13,161 +13,229 @@ import { useSupportTickets } from "../../Context/SupportTicketsContext";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
+import { useNavigate } from "react-router-dom";
 
 const UpdateSupportStatusModal = ({
   open,
   onClose,
-  ticketId
+  ticketId, reFreshData,currentStatus,currentData
 }) => {
-  console.log("ticketId",ticketId)
-const {
-  loading,
-  updateSupportTicketStatus,
-  getSupportTicketStatus,
-  getSupportTicketPriority,
-  searchOwners
-} = useSupportTickets();
-const {
-  getAgentsDropdown
-} = useSubscription();
-  const [status, setStatus] =
-    useState("In Progress");
-
+  console.log("currentData", currentData)
+  const {
+    loading,
+    updateSupportTicketStatus,
+    getSupportTicketStatus,
+    getSupportTicketPriority,
+    searchOwners
+  } = useSupportTickets();
+  const {getAgentsDropdown} = useSubscription();
+  const [status, setStatus] = useState("");
   const [comments, setComments] = useState("");
-  const [statusList,setStatusList] = useState([]);
+  const [statusList, setStatusList] = useState([]);
+  const navigate = useNavigate();
+  const filteredStatuses =
 
-const [openStatusDropdown,setOpenStatusDropdown] = useState(false);
-const [
-  priority,
-  setPriority
-] = useState("");
+  statusList.find(
+    (item) =>
+      item.key === currentStatus
+  )?.allowedStatuses || [];
+  const [openStatusDropdown, setOpenStatusDropdown] = useState(false);
+  const [priority, setPriority] = useState("");
+  const [priorityList, setPriorityList] = useState([]);
 
-const [
-  priorityList,
-  setPriorityList
-] = useState([]);
+  const [openPriorityDropdown, setOpenPriorityDropdown] = useState(false);
 
-const [
-  openPriorityDropdown,
-  setOpenPriorityDropdown
-] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState("");
 
-const [
-  selectedAgent,
-  setSelectedAgent
-] = useState("");
+  const [agentList, setAgentList] = useState([]);
 
-const [
-  agentList,
-  setAgentList
-] = useState([]);
+  const [openAgentDropdown, setOpenAgentDropdown] = useState(false);
 
-const [
-  openAgentDropdown,
-  setOpenAgentDropdown
-] = useState(false);
+  const statusDropdownRef = useRef(null);
+  const [statusError, setStatusError] = useState("");
+  const [agentError, setAgentError] = useState("");
+  const [priorityError, setPriorityError] = useState("");
+  const [modalType, setModalType] = useState("success");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [message, setMessage] = useState("");
+  const handleClose = () => {
 
-const statusDropdownRef = useRef(null);
-useEffect(() => {
+    onClose();
 
-  const fetchPriority =
-    async () => {
+    // values
+    setStatus("");
+    setComments("");
+    setPriority("");
+    setSelectedAgent("");
 
-      const res =
-        await getSupportTicketPriority();
+    // dropdowns
+    setOpenStatusDropdown(false);
+    setOpenPriorityDropdown(false);
+    setOpenAgentDropdown(false);
 
-      if (res.success) {
-
-        setPriorityList(
-          res.data || []
-        );
-
-      }
-
-    };
-
-  fetchPriority();
-
-}, []);
-
-useEffect(() => {
-
-  const fetchAgents =
-    async () => {
-
-      const res =
-        await getAgentsDropdown();
-
-      if (res.success) {
-
-        setAgentList(
-          res.data || []
-        );
-
-      }
-
-    };
-
-  fetchAgents();
-
-}, []);
-  useEffect(() => {
-
-  const fetchStatus =
-    async () => {
-
-      const res =
-        await getSupportTicketStatus();
-
-      if (res.success) {
-
-        setStatusList(
-          res.data || []
-        );
-
-      }
-
-    };
-
-  fetchStatus();
-
-}, []);
-useEffect(() => {
-
-  const handleClickOutside = (
-    event
-  ) => {
-
-    if (
-      statusDropdownRef.current &&
-      !statusDropdownRef.current.contains(
-        event.target
-      )
-    ) {
-
-      setOpenStatusDropdown(false);
-
-    }
+    // errors
+    setStatusError("");
+    setAgentError("");
+    setPriorityError("");
 
   };
+  useEffect(() => {
 
-  document.addEventListener(
-    "mousedown",
-    handleClickOutside
-  );
+    const fetchPriority =
+      async () => {
 
-  return () => {
+        const res =
+          await getSupportTicketPriority();
 
-    document.removeEventListener(
+        if (res.success) {
+
+          setPriorityList(
+            res.data || []
+          );
+
+        }
+
+      };
+
+    fetchPriority();
+
+  }, []);
+
+  useEffect(() => {
+
+    const fetchAgents =
+      async () => {
+
+        const res =
+          await getAgentsDropdown();
+
+        if (res.success) {
+
+          setAgentList(
+            res.data || []
+          );
+
+        }
+
+      };
+
+    fetchAgents();
+
+  }, []);
+  useEffect(() => {
+
+    const fetchStatus =
+      async () => {
+
+        const res =
+          await getSupportTicketStatus();
+
+        if (res.success) {
+
+          setStatusList(
+            res.data || []
+          );
+
+        }
+
+      };
+
+    fetchStatus();
+
+  }, []);
+  useEffect(() => {
+
+    const handleClickOutside = (
+      event
+    ) => {
+
+      if (
+        statusDropdownRef.current &&
+        !statusDropdownRef.current.contains(
+          event.target
+        )
+      ) {
+
+        setOpenStatusDropdown(false);
+
+      }
+
+    };
+
+    document.addEventListener(
       "mousedown",
       handleClickOutside
     );
 
-  };
+    return () => {
 
-}, []);
-const handleSubmit =
-  async () => {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+
+    };
+
+  }, []);
+  const handleSubmit = async () => {
+
+    let hasError = false;
+
+    // STATUS VALIDATION
+    if (!status) {
+
+      setStatusError(
+        "Please select status"
+      );
+
+      hasError = true;
+
+    } else {
+
+      setStatusError("");
+
+    }
+
+    // ASSIGNED VALIDATION
+    if (status === "ASSIGNED") {
+
+      if (!selectedAgent) {
+
+        setAgentError(
+          "Please select agent"
+        );
+
+        hasError = true;
+
+      } else {
+
+        setAgentError("");
+
+      }
+
+      if (!priority) {
+
+        setPriorityError(
+          "Please select priority"
+        );
+
+        hasError = true;
+
+      } else {
+
+        setPriorityError("");
+
+      }
+
+    } else {
+
+      setAgentError("");
+
+      setPriorityError("");
+
+    }
+
+    if (hasError) return;
 
     const payload = {
 
@@ -194,9 +262,39 @@ const handleSubmit =
       );
 
     if (res.success) {
+      setModalType("success");
 
-      onClose();
+      setMessage(res?.data || "Status Updated Successfully");
 
+      reFreshData();
+
+      setShowSuccess(true);
+
+      setTimeout(() => {
+
+        setShowSuccess(false);
+
+        handleClose();
+
+      }, 1300);
+
+
+    }
+    else {
+      setModalType("error");
+
+      setMessage(res?.message);
+
+
+      setShowSuccess(true);
+
+      setTimeout(() => {
+
+        setShowSuccess(false);
+
+
+
+      }, 1300);
     }
 
   };
@@ -204,108 +302,232 @@ const handleSubmit =
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[99999]">
+    <>
+      <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
 
-      {/* OVERLAY */}
-      <div
-        className="absolute inset-0 bg-black/40"
-        onClick={onClose}
       />
+      <div className="fixed inset-0 z-[99999]">
 
-      {/* DRAWER */}
-       <div className="fixed top-3 right-3 bottom-3 w-[420px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
 
-        {/* HEADER */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-[#edf0f7]">
+        <div
+          className="absolute inset-0 bg-black/40"
+          onClick={handleClose}
+        />
 
-          <h2 className="text-[24px] font-semibold text-[#111827]">
-            Update status
-          </h2>
 
-          <button
-            onClick={onClose}
-            className="text-red-500"
-          >
-            <X size={22} />
-          </button>
+        <div className="fixed top-3 right-3 bottom-3 w-[420px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
 
-        </div>
+          <div className="flex items-center justify-between px-6 py-5 border-b border-[#edf0f7]">
 
-        {/* BODY */}
-        <div className="flex-1 overflow-y-auto px-6 py-5">
+            <h2 className="text-[24px] font-semibold text-[#111827]">
+              Update status
+            </h2>
 
-          {/* PROPERTY INFO */}
-          <div
-            className="
+            <button
+              onClick={handleClose}
+              className="text-red-500"
+            >
+              <X size={22} />
+            </button>
+
+          </div>
+
+
+          <div className="flex-1 overflow-y-auto px-6 py-5">
+
+
+            <div
+              className="
               border border-[#edf0f7]
               rounded-2xl
               p-5
               bg-[#fcfcfd]
             "
-          >
+            >
 
-            {/* TOP */}
-            <div className="flex items-center justify-between mb-5">
+              {/* TOP */}
+              <div className="flex items-center justify-between mb-5">
 
-              <h3 className="text-[13px] font-semibold text-[#6b7280] tracking-wide uppercase">
-                Property Info
-              </h3>
+                <h3 className="text-[13px] font-semibold text-[#6b7280] tracking-wide uppercase">
+                  Property Info
+                </h3>
 
-              <button className="text-gray-500">
-                <MoreVertical size={18} />
-              </button>
-
-            </div>
-
-            {/* INFO LIST */}
-            <div className="space-y-4">
-
-              {/* CUSTOMER */}
-              <div className="flex items-start gap-3">
-
-                <User
-                  size={15}
-                  className="text-gray-400 mt-[2px]"
-                />
-
-                <div className="flex gap-2 text-sm">
-
-                  <span className="text-[#6b7280] min-w-[110px] text-left">
-                    Customer Name
-                  </span>
-
-                  <span className="font-medium text-[#111827]">
-                    Priya Sharma D
-                  </span>
-
-                </div>
+                {/* <button className="text-gray-500">
+                  <MoreVertical size={18} />
+                </button> */}
 
               </div>
 
-              {/* PROPERTY */}
-              <div className="flex items-start gap-3">
+              {/* INFO LIST */}
+              <div className="space-y-4">
 
-                <Building2
-                  size={15}
-                  className="text-gray-400 mt-[2px]"
-                />
+                {/* CUSTOMER */}
+                <div className="flex items-start gap-3">
+
+                  <User
+                    size={15}
+                    className="text-gray-400 mt-[2px]"
+                  />
+
+                  <div className="flex gap-2 text-sm">
+
+                    <span className="text-[#6b7280] min-w-[110px] text-left">
+                      Customer Name
+                    </span>
+
+                    {/* <span className="font-medium text-[#111827]">
+                      {currentData?.owner.fullName || "N/A"}
+                    </span> */}
+<p
+  onClick={() => {
+
+    if (
+      currentData?.owner?.ownerId
+    ) {
+
+      navigate(
+        `/ProprietorsOverview/${currentData.owner.ownerId}`
+      );
+
+    }
+
+  }}
+  className="
+    text-[14px]
+    font-medium
+    text-[#315CEC]
+    cursor-pointer
+    hover:underline
+  "
+>
+
+  {currentData?.owner?.fullName || "----"}
+
+</p>
+                  </div>
+
+                </div>
+
+                {/* PROPERTY */}
+                <div className="flex items-start gap-3">
+
+                  <Building2
+                    size={15}
+                    className="text-gray-400 mt-[2px]"
+                  />
+
+                  <div className="flex gap-2 text-sm">
+
+                    <span className="text-[#6b7280] min-w-[110px] text-left">
+                      Property Name
+                    </span>
+
+                    <div className="flex items-center gap-1">
+
+                      {/* <span className="font-medium text-[#315CEC]">
+                       {currentData?.hostelName}
+                      </span> */}
+                      <span
+  onClick={() => {
+
+    if (
+      currentData?.hostelId
+    ) {
+
+      navigate(
+        `/property-overview/${currentData.hostelId}`,
+        {
+          state: {
+            from: "supportTickets"
+          }
+        }
+      );
+
+    }
+
+  }}
+  className="
+    font-medium
+    text-[#315CEC]
+    cursor-pointer
+    hover:underline
+  "
+>
+
+  {currentData?.hostelName}
+
+</span>
+
+                      <ExternalLink
+                        size={13}
+                        className="text-[#315CEC]"
+                      />
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+                {/* LOCATION */}
+                <div className="flex items-start gap-3">
+
+                  <MapPin
+                    size={15}
+                    className="text-gray-400 mt-[2px]"
+                  />
 
                 <div className="flex gap-2 text-sm">
 
-                  <span className="text-[#6b7280] min-w-[110px] text-left">
-                    Property Name
-                  </span>
+  <span className="text-[#6b7280] min-w-[110px] text-left">
+    Location
+  </span>
 
-                  <div className="flex items-center gap-1">
+  <span
+    title={currentData?.fullAddress || ""}
+    className="
+      font-medium
+      text-[#111827]
+      truncate
+      max-w-[180px]
+      cursor-pointer
+    "
+  >
+    {currentData?.hostelCity}
 
-                    <span className="font-medium text-[#315CEC]">
-                      Laksha Ladies Hostel
+    {currentData?.hostelCity &&
+      currentData?.hostelState
+      ? ", "
+      : ""}
+
+    {currentData?.hostelState}
+
+  </span>
+
+</div>
+
+                </div>
+
+                {/* MOBILE */}
+                <div className="flex items-start gap-3">
+
+                  <Phone
+                    size={15}
+                    className="text-gray-400 mt-[2px]"
+                  />
+
+                  <div className="flex gap-2 text-sm">
+
+                    <span className="text-[#6b7280] min-w-[110px] text-left">
+                      Mobile
                     </span>
 
-                    <ExternalLink
-                      size={13}
-                      className="text-[#315CEC]"
-                    />
+                    <span className="font-medium text-[#111827]">
+                      +91 {currentData?.hostelMobile}
+                    </span>
 
                   </div>
 
@@ -313,63 +535,17 @@ const handleSubmit =
 
               </div>
 
-              {/* LOCATION */}
-              <div className="flex items-start gap-3">
-
-                <MapPin
-                  size={15}
-                  className="text-gray-400 mt-[2px]"
-                />
-
-                <div className="flex gap-2 text-sm">
-
-                  <span className="text-[#6b7280] min-w-[110px] text-left">
-                    Location
-                  </span>
-
-                  <span className="font-medium text-[#111827]">
-                    Solinganallur, Chennai
-                  </span>
-
-                </div>
-
-              </div>
-
-              {/* MOBILE */}
-              <div className="flex items-start gap-3">
-
-                <Phone
-                  size={15}
-                  className="text-gray-400 mt-[2px]"
-                />
-
-                <div className="flex gap-2 text-sm">
-
-                  <span className="text-[#6b7280] min-w-[110px] text-left">
-                    Mobile
-                  </span>
-
-                  <span className="font-medium text-[#111827]">
-                    +91 98654 87475
-                  </span>
-
-                </div>
-
-              </div>
-
             </div>
 
-          </div>
+            {/* FORM */}
+            <div className="mt-6 space-y-5">
 
-          {/* FORM */}
-          <div className="mt-6 space-y-5">
+              {/* STATUS */}
+              <div className="flex flex-col md:flex-row md:gap-4">
 
-            {/* STATUS */}
-     <div className="flex flex-col md:flex-row md:gap-4">
 
-  {/* LABEL */}
-  <label
-    className="
+                <label
+                  className="
       w-full md:w-[110px]
       shrink-0
       text-sm
@@ -377,26 +553,30 @@ const handleSubmit =
       pt-3
       text-left
     "
-  >
-    Update Lead Status
+                >
+                  Update Lead Status
 
-    <span className="text-red-500 ml-1">
-      *
-    </span>
+                  <span className="text-red-500 ml-1">
+                    *
+                  </span>
 
-  </label>
+                </label>
 
-  {/* DROPDOWN */}
-  <div className="flex-1 relative">
 
-    {/* SELECT BOX */}
-    <div
-      onClick={() =>
-        setOpenStatusDropdown(
-          !openStatusDropdown
-        )
-      }
-      className="
+                <div className="flex-1 relative">
+
+
+                  <div
+                    onClick={() => {
+
+                      setOpenStatusDropdown(
+                        !openStatusDropdown
+                      );
+
+                      setStatusError("");
+
+                    }}
+                    className="
         w-full
         h-[48px]
         border border-[#e5e7eb]
@@ -408,29 +588,29 @@ const handleSubmit =
         bg-white
         cursor-pointer
       "
-    >
+                  >
 
-      <span>
+                    <span>
 
-        {
-          statusList.find(
-            (s) =>
-              s.key === status
-          )?.label ||
-          "Select Status"
-        }
+                     {
+  filteredStatuses.find(
+    (s) =>
+      s.key === status
+  )?.label ||
+  "Select Status"
+}
 
-      </span>
+                    </span>
 
-      <ChevronDown size={18} />
+                    <ChevronDown size={18} />
 
-    </div>
+                  </div>
 
-    {/* DROPDOWN */}
-    {openStatusDropdown && (
+                  {/* DROPDOWN */}
+                  {openStatusDropdown && (
 
-      <div
-        className="
+                    <div
+                      className="
           absolute
           top-full
           left-0
@@ -444,54 +624,61 @@ const handleSubmit =
           max-h-[150px]
           overflow-y-auto
         "
-      >
+                    >
 
-        {statusList.map((item) => (
+                      {filteredStatuses.map((item) => (
 
-          <div
-            key={item.key}
-            onClick={() => {
+                        <div
+                          key={item.key}
+                          onClick={() => {
 
-              setStatus(
-                item.key
-              );
+                            setStatus(
+                              item.key
+                            );
 
-              setOpenStatusDropdown(
-                false
-              );
+                            setOpenStatusDropdown(
+                              false
+                            );
 
-            }}
-            className="
+                          }}
+                          className="
               px-4 py-3
               text-sm
               hover:bg-[#f8f9fc]
               cursor-pointer
               text-left
             "
-          >
+                        >
 
-            {item.label}
+                          {item.label}
 
-          </div>
+                        </div>
 
-        ))}
+                      ))}
 
-      </div>
+                    </div>
 
-    )}
+                  )}
 
-  </div>
+                </div>
 
-</div>
-{status === "ASSIGNED" && (
+              </div>
+              <div className="md:pl-[124px] pl-0">
+                {statusError && (
+                  <ErrorMessage
+                    message={statusError}
+                    type="error"
+                  />
+                )}
+              </div>
+              {status === "ASSIGNED" && (
 
-  <>
+                <>
 
-    {/* AGENT */}
-    <div className="flex flex-col md:flex-row md:gap-4">
+                  <div className="flex flex-col md:flex-row md:gap-4">
 
-      <label
-        className="
+                    <label
+                      className="
           w-full md:w-[110px]
           shrink-0
           text-sm
@@ -499,24 +686,28 @@ const handleSubmit =
           pt-3
           text-left
         "
-      >
-        Assign Agent
+                    >
+                      Assign Agent
 
-        <span className="text-red-500 ml-1">
-          *
-        </span>
+                      <span className="text-red-500 ml-1">
+                        *
+                      </span>
 
-      </label>
+                    </label>
 
-      <div className="relative flex-1">
+                    <div className="relative flex-1">
 
-  <div
-    onClick={() =>
-      setOpenAgentDropdown(
-        !openAgentDropdown
-      )
-    }
-    className="
+                      <div
+                        onClick={() => {
+
+                          setOpenAgentDropdown(
+                            !openAgentDropdown
+                          );
+
+                          setAgentError("");
+
+                        }}
+                        className="
       w-full h-[48px]
       border border-[#e5e7eb]
       rounded-xl
@@ -525,28 +716,28 @@ const handleSubmit =
       cursor-pointer
       bg-white
     "
-  >
+                      >
 
-    <span>
+                        <span>
 
-      {
-        agentList.find(
-          (a) =>
-            a.agentId === selectedAgent
-        )?.agentName ||
-        "Select Agent"
-      }
+                          {
+                            agentList.find(
+                              (a) =>
+                                a.agentId === selectedAgent
+                            )?.agentName ||
+                            "Select Agent"
+                          }
 
-    </span>
+                        </span>
 
-    <ChevronDown size={18} />
+                        <ChevronDown size={18} />
 
-  </div>
+                      </div>
 
-  {openAgentDropdown && (
+                      {openAgentDropdown && (
 
-    <div
-      className="
+                        <div
+                          className="
         absolute top-full left-0
         mt-2 w-full
         bg-white
@@ -557,50 +748,61 @@ const handleSubmit =
         max-h-[220px]
         overflow-y-auto
       "
-    >
+                        >
 
-      {agentList.map((item) => (
+                          {agentList.map((item) => (
 
-        <div
-          key={item.agentId}
-          onClick={() => {
+                            <div
+                              key={item.agentId}
+                              onClick={() => {
 
-            setSelectedAgent(
-              item.agentId
-            );
+                                setSelectedAgent(
+                                  item.agentId
+                                );
 
-            setOpenAgentDropdown(
-              false
-            );
+                                setOpenAgentDropdown(
+                                  false
+                                );
 
-          }}
-          className="
+                              }}
+                              className="
             px-4 py-3
             hover:bg-[#f8f9fc]
             cursor-pointer
             text-sm
           "
-        >
+                            >
 
-          {item.agentName}
+                              {item.agentName}
 
-        </div>
+                            </div>
 
-      ))}
+                          ))}
 
-    </div>
+                        </div>
 
-  )}
+                      )}
 
-</div>
+                    </div>
 
-    </div>
+                  </div>
+                  {agentError && (
 
-    {/* PRIORITY */}
-    <div className="flex flex-col md:flex-row md:gap-4">
+                    <div className="md:pl-[124px] pl-0">
 
-      <label
-        className="
+                      <ErrorMessage
+                        message={agentError}
+                        type="error"
+                      />
+
+                    </div>
+
+                  )}
+
+                  <div className="flex flex-col md:flex-row md:gap-4">
+
+                    <label
+                      className="
           w-full md:w-[110px]
           shrink-0
           text-sm
@@ -608,24 +810,28 @@ const handleSubmit =
           pt-3
           text-left
         "
-      >
-        Priority
+                    >
+                      Priority
 
-        <span className="text-red-500 ml-1">
-          *
-        </span>
+                      <span className="text-red-500 ml-1">
+                        *
+                      </span>
 
-      </label>
+                    </label>
 
-      <div className="relative flex-1">
+                    <div className="relative flex-1">
 
-  <div
-    onClick={() =>
-      setOpenPriorityDropdown(
-        !openPriorityDropdown
-      )
-    }
-    className="
+                      <div
+                        onClick={() => {
+
+                          setOpenPriorityDropdown(
+                            !openPriorityDropdown
+                          );
+
+                          setPriorityError("");
+
+                        }}
+                        className="
       w-full h-[48px]
       border border-[#e5e7eb]
       rounded-xl
@@ -634,28 +840,28 @@ const handleSubmit =
       cursor-pointer
       bg-white
     "
-  >
+                      >
 
-    <span>
+                        <span>
 
-      {
-        priorityList.find(
-          (p) =>
-            p.key === priority
-        )?.label ||
-        "Select Priority"
-      }
+                          {
+                            priorityList.find(
+                              (p) =>
+                                p.key === priority
+                            )?.label ||
+                            "Select Priority"
+                          }
 
-    </span>
+                        </span>
 
-    <ChevronDown size={18} />
+                        <ChevronDown size={18} />
 
-  </div>
+                      </div>
 
-  {openPriorityDropdown && (
+                      {openPriorityDropdown && (
 
-    <div
-      className="
+                        <div
+                          className="
         absolute top-full left-0
         mt-2 w-full
         bg-white
@@ -666,53 +872,65 @@ const handleSubmit =
         max-h-[200px]
         overflow-y-auto
       "
-    >
+                        >
 
-      {priorityList.map((item) => (
+                          {priorityList.map((item) => (
 
-        <div
-          key={item.key}
-          onClick={() => {
+                            <div
+                              key={item.key}
+                              onClick={() => {
 
-            setPriority(
-              item.key
-            );
+                                setPriority(
+                                  item.key
+                                );
 
-            setOpenPriorityDropdown(
-              false
-            );
+                                setOpenPriorityDropdown(
+                                  false
+                                );
 
-          }}
-          className="
+                              }}
+                              className="
             px-4 py-3
             hover:bg-[#f8f9fc]
             cursor-pointer
             text-sm
           "
-        >
+                            >
 
-          {item.label}
+                              {item.label}
 
-        </div>
+                            </div>
 
-      ))}
+                          ))}
 
-    </div>
+                        </div>
 
-  )}
+                      )}
 
-</div>
+                    </div>
 
-    </div>
+                  </div>
+                  {priorityError && (
 
-  </>
+                    <div className="md:pl-[124px] pl-0">
 
-)}
-            {/* COMMENTS */}
-            <div className="flex flex-col md:flex-row md:gap-4">
+                      <ErrorMessage
+                        message={priorityError}
+                        type="error"
+                      />
 
-              <label
-                className="
+                    </div>
+
+                  )}
+
+                </>
+
+              )}
+
+              <div className="flex flex-col md:flex-row md:gap-4">
+
+                <label
+                  className="
                   w-full md:w-[110px]
                   shrink-0
                   text-sm
@@ -720,20 +938,20 @@ const handleSubmit =
                   pt-3
                   text-left
                 "
-              >
-                Additional Comments
-                <span className="text-red-500 ml-1">*</span>
-              </label>
+                >
+                  Additional Comments
 
-              <div className="flex-1">
+                </label>
 
-                <textarea
-                  placeholder="..."
-                  value={comments}
-                  onChange={(e) =>
-                    setComments(e.target.value)
-                  }
-                  className="
+                <div className="flex-1">
+
+                  <textarea
+                    placeholder="..."
+                    value={comments}
+                    onChange={(e) =>
+                      setComments(e.target.value)
+                    }
+                    className="
                     w-full
                     h-[110px]
                     border border-[#e5e7eb]
@@ -743,7 +961,9 @@ const handleSubmit =
                     outline-none
                     text-sm
                   "
-                />
+                  />
+
+                </div>
 
               </div>
 
@@ -751,11 +971,9 @@ const handleSubmit =
 
           </div>
 
-        </div>
-
-        {/* FOOTER */}
-      <div
-  className="
+          {/* FOOTER */}
+          <div
+            className="
     shrink-0
     px-6
     py-5
@@ -763,26 +981,26 @@ const handleSubmit =
     flex justify-end gap-3
     bg-white
   "
->
+          >
 
-  <button
-    onClick={onClose}
-    className="
+            <button
+              onClick={handleClose}
+              className="
       h-[44px]
       px-6
       rounded-xl
       border border-[#e5e7eb]
       text-sm
-      font-medium
+      font-medium cursor-pointer
     "
-  >
-    Cancel
-  </button>
+            >
+              Cancel
+            </button>
 
-  <button
-    onClick={handleSubmit}
-    disabled={loading}
-    className="
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="
       h-[44px]
       px-8
       rounded-xl
@@ -790,21 +1008,22 @@ const handleSubmit =
       text-white
       text-sm
       font-medium
-      disabled:opacity-50
+      disabled:opacity-50 cursor-pointer
     "
-  >
-    {
-      loading
-        ? "Submitting..."
-        : "Submit"
-    }
-  </button>
+            >
+              {
+                loading
+                  ? "Submitting..."
+                  : "Submit"
+              }
+            </button>
 
-</div>
+          </div>
+
+        </div>
 
       </div>
-
-    </div>
+    </>
   );
 };
 
