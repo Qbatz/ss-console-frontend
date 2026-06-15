@@ -1224,7 +1224,9 @@ const handleExport = () => {
   &#8250;
 </button>
 
-
+ <span className="text-gray-400">
+                      {page} - {totalPages}
+                    </span>
               </div>
 
             </div>

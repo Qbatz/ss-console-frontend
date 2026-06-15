@@ -671,3 +671,8 @@ input[type=number] {
   background: #d1d5db;
   border-radius: 20px;
 }
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
