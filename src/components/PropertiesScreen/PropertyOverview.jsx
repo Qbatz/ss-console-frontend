@@ -38,7 +38,7 @@ const PropertyOverview = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory,sharePaymentLink} = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
-  const { createSubscription } = useSubscription();
+  const { createSubscription,getTrialDaysExtReason } = useSubscription();
   const [hostelData, setHostelData] = useState(null);
   const [dropdownPlans, setDropdownPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState("");
@@ -53,6 +53,34 @@ const PropertyOverview = () => {
   const [phone, setPhone] = useState("");
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [generatedPaymentUrl, setGeneratedPaymentUrl] = useState("");
+  const [trialReasons, setTrialReasons] =
+  useState([]);
+  const [reasonError,setReasonError] = useState("")
+const [remarks, setRemarks] =
+  useState("");
+const [selectedReason, setSelectedReason] =
+  useState("");
+  const [showReasonDropdown,setShowReasonDropdown] =useState(false);
+  useEffect(() => {
+
+  const fetchReasons = async () => {
+
+    const res =
+      await getTrialDaysExtReason();
+
+    if (res?.success) {
+
+      setTrialReasons(
+        res.data || []
+      );
+
+    }
+
+  };
+
+  fetchReasons();
+
+}, []);
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenants");
   const {
@@ -279,6 +307,12 @@ fetchData()
       setDaysError("Please Choose Days");
       hasError = true;
     }
+    if (!selectedReason) {
+  setReasonError(
+    "Please Select Reason"
+  );
+  hasError = true;
+}
 
     if (hasError) return;
 
@@ -290,13 +324,18 @@ fetchData()
       return;
     }
 
-    const payload = {
-      trialDays: Number(days),
-      paidAmount: 0,
-      discountAmount: 0,
-      planCode: firstPlan.planCode
-    };
+   const payload = {
+  trialDays: Number(days),
+  paidAmount: 0,
+  discountAmount: 0,
+  planCode: firstPlan.planCode,
 
+  trialDaysReason:
+    selectedReason,
+
+  trialDaysRemarks:
+    remarks
+};
     const res = await createSubscription(
       // trialPlan?.hostelId,
       hostelId,
@@ -317,7 +356,8 @@ fetchData()
       setTimeout(() => {
         setShowSuccess(false);
         setShowTrialModal(false);
-        setDays(""); // reset
+        setDays("");
+        setSelectedReason("")
       }, 1000);
 
     } else {
@@ -2880,6 +2920,8 @@ fetchData()
       setShowTrialModal(false);
       setDays("");
       setDaysError("");
+      setReasonError("")
+      setSelectedReason("")
 
     }}
   >
@@ -2934,6 +2976,8 @@ fetchData()
             setShowTrialModal(false);
             setDays("");
             setDaysError("");
+            setSelectedReason("")
+            setReasonError("")
 
           }}
           className="
@@ -3234,6 +3278,7 @@ fetchData()
   </div>
 
 </div>
+ <div className="md:pl-[80px] pl-0">
  {daysError && (
 
           <div className="mt-4">
@@ -3246,6 +3291,7 @@ fetchData()
           </div>
 
         )}
+        </div>
        
        <div className="flex items-start gap-6 mt-5">
 
@@ -3271,34 +3317,106 @@ fetchData()
 
 
 
-  <div className="flex-1">
+<div className="relative flex-1">
 
-    <select
-      className="
-        w-full
-        h-[48px]
-        border
-        border-gray-300
-        rounded-xl
-        px-4
-        text-sm
-        text-gray-700
-        outline-none
-        bg-white
-        focus:border-blue-500
-      "
-    >
+  <div
+    onClick={() =>
+      setShowReasonDropdown(
+        !showReasonDropdown
+      )
+    }
+    className="
+      w-full
+      h-[48px]
+      border
+      border-gray-300
+      rounded-xl
+      px-4
+      flex
+      items-center
+      justify-between
+      cursor-pointer
+      bg-white
+    "
+  >
 
-      <option>
-        Sales Follow-up
-      </option>
+    <span className="text-sm text-gray-700">
 
-    </select>
+      {selectedReason
+        ? trialReasons.find(
+            (x) =>
+              x.key === selectedReason
+          )?.label
+        : "Select Reason"}
+
+    </span>
 
   </div>
 
+  {showReasonDropdown && (
+
+    <div
+      className="
+        absolute
+        top-full
+        mt-2
+        w-full
+        bg-white
+        border
+        border-gray-200
+        rounded-xl
+        shadow-lg
+        max-h-[100px]
+        overflow-y-auto
+        z-50
+      "
+    >
+
+      {trialReasons?.map((item) => (
+
+        <div
+          key={item.key}
+          onClick={() => {
+
+            setSelectedReason(item.key);
+            setShowReasonDropdown(false);
+            setReasonError("")
+
+          }}
+          className="
+            px-4
+            py-3
+            text-sm
+            hover:bg-gray-100
+            cursor-pointer
+          "
+        >
+          {item.label}
+        </div>
+
+      ))}
+
+    </div>
+
+  )}
+
 </div>
 
+</div>
+ <div className="md:pl-[80px] pl-0">
+{reasonError && (
+
+          <div className="mt-4">
+
+            <ErrorMessage
+              message={reasonError}
+              type="error"
+            />
+
+          </div>
+
+        )}
+        </div>
 
         {/* REMARKS */}
         <div className="flex items-start gap-6 mt-5">
@@ -3324,26 +3442,30 @@ fetchData()
   {/* TEXTAREA */}
   <div className="flex-1">
 
-    <textarea
-      rows={4}
-      placeholder="Add internal notes..."
-      className="
-        w-full
-        min-h-[120px]
-        border
-        border-gray-300
-        rounded-xl
-        px-4
-        py-3
-        text-sm
-        text-gray-700
-        resize-none
-        outline-none
-        bg-white
-        placeholder:text-gray-400
-        focus:border-blue-500
-      "
-    />
+   <textarea
+  rows={4}
+  value={remarks}
+  onChange={(e) =>
+    setRemarks(e.target.value)
+  }
+  placeholder="Add internal notes..."
+  className="
+    w-full
+    min-h-[120px]
+    border
+    border-gray-300
+    rounded-xl
+    px-4
+    py-3
+    text-sm
+    text-gray-700
+    resize-none
+    outline-none
+    bg-white
+    placeholder:text-gray-400
+    focus:border-blue-500
+  "
+/>
 
   </div>
 
@@ -3389,6 +3511,9 @@ fetchData()
             setShowTrialModal(false);
             setDays("");
             setDaysError("");
+            setReasonError("")
+            setSelectedReason("")
+            
 
           }}
           className="

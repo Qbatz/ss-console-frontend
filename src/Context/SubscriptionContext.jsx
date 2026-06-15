@@ -760,6 +760,45 @@ const addSupportTicketNotes = async (
   }
 
 };
+const getTrialDaysExtReason = async () => {
+  try {
+
+    setLoading(true);
+
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      "/v2/subscription/trialDaysExtReason"
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
   return (
     <SubscriptionContext.Provider
       value={{
@@ -767,7 +806,7 @@ const addSupportTicketNotes = async (
         errorMsg,
         createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, 
         getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment,deleteDemoRequest,getDemoType,getDropReasons,getDemoRequestComments,
-        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes
+        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes,getTrialDaysExtReason
       }}
     >
       {children}
