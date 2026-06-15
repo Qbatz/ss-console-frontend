@@ -433,12 +433,13 @@ useEffect(() => {
 
   }
 
-  exportHostels(
-    searchText,
-    start,
-    end,
-    subActive
-  );
+exportHostels(
+  searchText,
+  start,
+  end,
+  agentFilter,
+  filterOption
+);
 
 };
 useEffect(() => {
@@ -738,9 +739,9 @@ useEffect(() => {
           {hostels?.activeHostels}
         </h2>
 
-        <span className="badge-primary">
+        {/* <span className="badge-primary">
           ↑ 12%
-        </span>
+        </span> */}
 
       </div>
 
@@ -966,9 +967,9 @@ useEffect(() => {
           {hostels?.used15To30DaysCount}
         </h2>
 
-        <span className="badge-primary">
+        {/* <span className="badge-primary">
           ↑ 12%
-        </span>
+        </span> */}
 
       </div>
 
@@ -1421,13 +1422,13 @@ useEffect(() => {
 >
 
  <div
-  className="scroll-container relative"
-  style={{ 
-    overflowX: 'auto',
-    overflowY: 'auto', 
-    flex: 1,
-    minHeight: 0,
-  }}
+   className="
+    table-scroll
+    relative
+    overflow-auto
+    max-h-[420px]
+    rounded-2xl
+  "
 >
 
                  <table className="w-max min-w-full table-fixed text-sm text-left">

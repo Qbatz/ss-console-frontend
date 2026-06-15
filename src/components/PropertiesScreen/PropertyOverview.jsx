@@ -72,6 +72,7 @@ const PropertyOverview = () => {
       }
     });
   }, []);
+  console.log("hostelData",hostelData)
   const paidByUsers = [
     {
       id: hostelData?.owner?.userId,
@@ -191,7 +192,7 @@ const PropertyOverview = () => {
     if (res?.success) {
       setModalType("success");
       setMessage(res?.message);
-
+fetchData()
 
       setShowNoteModal(false);
       setShowSuccess(true);
@@ -862,33 +863,74 @@ const PropertyOverview = () => {
   "
 
          
-            onClick={() => {
+          onClick={() => {
 
-              if (location.state?.from === "transactions") {
+  if (
+    location.state?.from === "supportTickets"
+  ) {
 
-                navigate(`/transactions/${adminDetails?.roleId}`, {
-                  state: {
-                    currentPage: location.state?.currentPage,
-                    currentSearch: location.state?.currentSearch,
-                    currentDateRange: location.state?.currentDateRange,
-                  },
-                })
+    navigate(
+      `/supportTicket/${adminDetails?.roleId}`,
+      {
+        state: {
+          currentPage:
+            location.state?.currentPage,
 
-              } else {
+          currentSearch:
+            location.state?.currentSearch,
 
-                navigate(`/properties/${adminDetails?.roleId}`, {
-  state: {
-    currentPage: location.state?.currentPage,
-    currentSearch: location.state?.currentSearch,
-    currentDateRange: location.state?.currentDateRange,
-    currentStatusFilter:
-      location.state?.currentStatusFilter,
-  },
-});
+          currentStatusFilter:
+            location.state?.currentStatusFilter,
+        },
+      }
+    );
 
-              }
+  }
 
-            }}
+  else if (
+    location.state?.from === "transactions"
+  ) {
+
+    navigate(
+      `/transactions/${adminDetails?.roleId}`,
+      {
+        state: {
+          currentPage:
+            location.state?.currentPage,
+
+          currentSearch:
+            location.state?.currentSearch,
+
+          currentDateRange:
+            location.state?.currentDateRange,
+        },
+      }
+    );
+
+  } else {
+
+    navigate(
+      `/properties/${adminDetails?.roleId}`,
+      {
+        state: {
+          currentPage:
+            location.state?.currentPage,
+
+          currentSearch:
+            location.state?.currentSearch,
+
+          currentDateRange:
+            location.state?.currentDateRange,
+
+          currentStatusFilter:
+            location.state?.currentStatusFilter,
+        },
+      }
+    );
+
+  }
+
+}}
           />
         <p className="text-pageTitle leading-pageTitle text-headingDark font-medium">
   Property Overview
@@ -1650,7 +1692,7 @@ const PropertyOverview = () => {
           Total Invoices
         </p>
 
-        <img
+        {/* <img
           src={ViewImg}
           className="
             w-3.5
@@ -1659,7 +1701,7 @@ const PropertyOverview = () => {
             cursor-pointer
           "
           onClick={() => setShowBillingRule(true)}
-        />
+        /> */}
 
       </div>
 
@@ -2975,7 +3017,7 @@ const PropertyOverview = () => {
             text-[#111827] text-left
           "
         >
-          Arish Raj
+         {hostelData.owner?.fullName}
         </p>
 
       </div>
@@ -3011,7 +3053,7 @@ const PropertyOverview = () => {
             text-[#1D4ED8] text-left
           "
         >
-          Laksha Ladies Hostel
+          {hostelData?.hostelName}
         </p>
 
       </div>
@@ -3047,7 +3089,7 @@ const PropertyOverview = () => {
             text-[#111827]
           "
         >
-          Solinganallur, Chennai
+           {hostelData.city}, {hostelData.state}
         </p>
 
       </div>
@@ -3083,7 +3125,7 @@ const PropertyOverview = () => {
             text-[#111827]
           "
         >
-          +91 98654 87475
+         +91 {hostelData.mobile}
         </p>
 
       </div>
@@ -3204,10 +3246,10 @@ const PropertyOverview = () => {
           </div>
 
         )}
-        {/* REASON */}
+       
        <div className="flex items-start gap-6 mt-5">
 
-  {/* LABEL */}
+ 
   <div className=" pt-3">
 
     <label
@@ -3228,7 +3270,7 @@ const PropertyOverview = () => {
   </div>
 
 
-  {/* SELECT */}
+
   <div className="flex-1">
 
     <select

@@ -29,7 +29,8 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
   const [emailError, setEmailError] = useState("");
   const[requestDateError,setRequestDateError] = useState("")
   const [requestTimeError,setRequestTimeError] = useState("")
-
+const [isSubmitting, setIsSubmitting] =
+  useState(false);
   const filteredStates = states.filter((s) =>
     s.toLowerCase().includes(search.toLowerCase())
   );
@@ -169,62 +170,147 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
     onClose();
   };
 
-  const handleSubmit = async () => {
-    const isValid = validateForm();
+ const handleSubmit = async () => {
+
+  // 🔥 prevent multiple clicks
+  if (
+  isSubmitting ||
+  loading
+) return;
+
+// 🔥 immediately lock button
+setIsSubmitting(true);
+  const isValid = validateForm();
+
   if (!formData.contactNo) {
 
-  setMobileError("Mobile number is required");
-  valid = false;
+    setMobileError(
+      "Mobile number is required"
+    );
 
-} else if (
-  !/^[6-9]\d{9}$/.test(formData.contactNo) ||
-  /^(\d)\1{9}$/.test(formData.contactNo)
-) {
+    return;
 
-  setMobileError("Enter valid mobile number");
-  valid = false;
+  } else if (
+    !/^[6-9]\d{9}$/.test(
+      formData.contactNo
+    ) ||
+    /^(\d)\1{9}$/.test(
+      formData.contactNo
+    )
+  ) {
+
+    setMobileError(
+      "Enter valid mobile number"
+    );
+
+    return;
+
+  }
+
+ if (!isValid) {
+
+  setIsSubmitting(false);
+
+  return;
 
 }
 
-    if (!isValid) return;
+  try {
+
+   
 
     const payload = {
       ...formData,
-      noOfHostels: Number(formData.noOfHostels) || 0,
-      noOfTenants: Number(formData.noOfTenants) || 0,
-      requestedDate: formatDate(formData.requestedDate),
-      requestedTime: formatTime(formData.requestedTime),
+
+      noOfHostels:
+        Number(
+          formData.noOfHostels
+        ) || 0,
+
+      noOfTenants:
+        Number(
+          formData.noOfTenants
+        ) || 0,
+
+      requestedDate:
+        formatDate(
+          formData.requestedDate
+        ),
+
+      requestedTime:
+        formatTime(
+          formData.requestedTime
+        ),
     };
 
-    const res = await createDemoRequest(payload);
+    const res =
+      await createDemoRequest(
+        payload
+      );
 
     if (res.success) {
-      console.log("setModalType",message)
+
       setModalType("success");
-      setMessage(res?.message);
+
+      setMessage(
+        res?.message
+      );
+
       setShowSuccess(true);
-      fetchData()
+
+      fetchData();
 
       setTimeout(() => {
+
         setShowSuccess(false);
+
         handleCloseDrawer();
 
       }, 1500);
 
-    }
-    else {
+    } else {
+
       setModalType("error");
-      setMessage(res?.message);
+
+      setMessage(
+        res?.message
+      );
+
       setShowSuccess(true);
 
-
       setTimeout(() => {
+
         setShowSuccess(false);
 
-
       }, 1500);
+
     }
-  };
+
+  } catch (error) {
+
+    setModalType("error");
+
+    setMessage(
+      error?.message ||
+      "Something went wrong"
+    );
+
+    setShowSuccess(true);
+
+    setTimeout(() => {
+
+      setShowSuccess(false);
+
+    }, 1500);
+
+  } finally {
+
+    // 🔥 enable again
+    setIsSubmitting(false);
+
+  }
+
+};
 
   if (!open) return null;
 
@@ -576,7 +662,11 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
                   onClick={handleSubmit}
                   className="bg-blue-500 text-white px-4 py-2 rounded"
                 >
-                  {loading ? "Saving..." : "Submit"}
+                 {
+    isSubmitting || loading
+      ? "Submitting..."
+      : "Submit"
+  }
                 </button>
               </div>
             </div>

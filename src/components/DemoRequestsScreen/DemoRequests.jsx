@@ -12,7 +12,7 @@ import DemoRequestDrawer from "./AddRequest";
 import UpdateStatusModal from "./UpdateStatusModal";
 import CommentBox from "../../assets/message-2.png";
 import Notes from "../../assets/notes.png";
-import  SupportTicketOverview from "../DemoRequestsScreen/SupportTicketOverview";
+import  DemoRequestOverview from "../DemoRequestsScreen/DemoRequestOverview";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import MarkAsLostDrawer from "./MarkAsLostDrawer";
@@ -1847,7 +1847,7 @@ setCommentText("")
       onClick={(e) => e.stopPropagation()}
     >
 
-      {/* HEADER */}
+    
       <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200">
 
         <h2 className="flex items-center gap-2 text-[16px] font-semibold">
@@ -2016,7 +2016,7 @@ setCommentText("")
     </div>
   </div>
 )}
-<SupportTicketOverview
+<DemoRequestOverview
   open={openOverview}
   onClose={() => setOpenOverview(false)}
   selectedItem={selectedItem}

@@ -14,7 +14,7 @@ import AssignStaffModal from "../PropertiesScreen/AssignStaffDesign";
 
 const Proprietors = () => {
 
-  const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById, updateOwnerMobile, deleteOwner,ownerCount,activeCount ,changeOwnerPassword } = useOwners();
+  const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById, updateOwnerMobile, deleteOwner,ownerCount,activeCount ,changeOwnerPassword,exportOwners } = useOwners();
   const navigate = useNavigate();
  
   const { canRead, canWrite, canUpdate, canDelete } =
@@ -378,6 +378,19 @@ const handleDelete = async () => {
   }
 
 };
+const handleExport = () => {
+
+  const filters =
+    getFilterParams();
+
+  exportOwners({
+    name: search,
+    sortBy,
+    direction,
+    ...filters,
+  });
+
+};
   // const handleDelete = async () => {
 
   //   const res = await deleteOwner(selectedOwner.ownerId);
@@ -477,11 +490,11 @@ const handleDelete = async () => {
 
 
           {/* Filter Row */}
-          <div className="flex justify-between items-center">
+          {/* <div className="flex justify-between items-center">
 
            <div className="relative">
 
-  {/* SELECT BUTTON */}
+ 
   <button
     onClick={() =>
       setShowFilterDropdown(!showFilterDropdown)
@@ -502,7 +515,20 @@ const handleDelete = async () => {
 
     <img src={Arrow} className="w-5 h-5"/>
   </button>
-
+<button
+  onClick={handleExport}
+  className="
+    bg-blue-600
+    text-white
+    px-4
+    py-2
+    rounded-lg
+    text-sm
+    cursor-pointer
+  "
+>
+  Export
+</button>
   <div className="relative" ref={dropdownRef}>
   {showFilterDropdown && (
 
@@ -592,7 +618,174 @@ const handleDelete = async () => {
 
             </div>
 
-          </div>
+          </div> */}
+          <div className="flex justify-between items-center">
+
+  {/* LEFT SIDE */}
+  <div className="flex items-center gap-2">
+
+    {/* FILTER DROPDOWN */}
+    <div
+      className="relative"
+      ref={dropdownRef}
+    >
+
+      <button
+        onClick={() =>
+          setShowFilterDropdown(
+            !showFilterDropdown
+          )
+        }
+        className="
+          border border-gray-300
+          px-3 py-2
+          rounded-lg
+          text-xs
+          font-sans
+          bg-white
+          min-w-[180px]
+          text-left
+          flex justify-between items-center
+        "
+      >
+
+        <span>{filterType}</span>
+
+        <img
+          src={Arrow}
+          className="w-5 h-5"
+        />
+
+      </button>
+
+      {showFilterDropdown && (
+
+        <div
+          className="
+            absolute z-50 mt-1
+            w-full
+            bg-white
+            border border-gray-200
+            rounded-xl
+            shadow-lg
+            max-h-[180px]
+            overflow-y-auto
+          "
+        >
+
+          {[
+            "ALL",
+            "EXPIRED",
+            "ABOUT_TO_EXPIRE",
+            "ACTIVE",
+            "NO_PROPERTIES"
+          ].map((item) => (
+
+            <div
+              key={item}
+              onClick={() => {
+
+                setFilterType(item);
+
+                setPage(1);
+
+                setShowFilterDropdown(
+                  false
+                );
+
+              }}
+              className="
+                px-3 py-2
+                text-xs
+                cursor-pointer
+                hover:bg-blue-50
+              "
+            >
+
+              {item}
+
+            </div>
+
+          ))}
+
+        </div>
+
+      )}
+
+    </div>
+
+    {/* EXPORT BUTTON */}
+    <button
+      onClick={handleExport}
+      className="
+        bg-blue-600
+        text-white
+        px-4 py-2
+        rounded-lg
+        text-sm
+        cursor-pointer
+      "
+    >
+      Export
+    </button>
+
+  </div>
+
+  {/* RIGHT SIDE */}
+  <div className="flex items-center gap-2">
+
+    <button
+      onClick={() => {
+
+        setPage(1);
+
+        const filters =
+          getFilterParams();
+
+        getOwners({
+          page: 1,
+          size,
+          name: search,
+          sortBy,
+          direction,
+          ...filters
+        });
+
+      }}
+      className="
+        bg-blue-600
+        text-white
+        p-2
+        rounded-md
+      "
+    >
+      ⟳
+    </button>
+
+    <input
+      type="text"
+      placeholder="Search..."
+      value={search}
+      onChange={(e) => {
+
+        setPage(1);
+
+        setSearch(
+          e.target.value
+        );
+
+      }}
+      className="
+        border border-gray-300
+        rounded-md
+        px-3 py-2
+        text-sm
+      "
+    />
+
+  </div>
+
+</div>
 
 
           {/* Table Card */}
@@ -1031,7 +1224,9 @@ const handleDelete = async () => {
   &#8250;
 </button>
 
-
+ <span className="text-gray-400">
+                      {page} - {totalPages}
+                    </span>
               </div>
 
             </div>
@@ -1138,16 +1333,19 @@ const handleDelete = async () => {
         >
           Delete
         </button> */}
-        <button
+     <button
   onClick={handleDelete}
   disabled={isDeleting}
   className={`
-    px-3 py-1 rounded text-sm text-white
+    px-3 py-1
+    rounded
+    text-sm
+    text-white
 
     ${
       isDeleting
-        ? "delete-btn-disabled"
-        : "delete-btn-active"
+        ? "bg-red-300 cursor-not-allowed"
+        : "bg-red-600 hover:bg-red-700 cursor-pointer"
     }
   `}
 >

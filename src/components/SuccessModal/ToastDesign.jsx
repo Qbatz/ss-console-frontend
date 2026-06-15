@@ -52,17 +52,21 @@ const Toast = ({
   const styles = getStyles();
 
   return (
-   <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[99999] animate-fadeIn">
-  <div
-    className={`flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg ${styles.bg}`}
-  >
-    {styles.icon}
-    <span className={`font-medium text-sm ${styles.text}`}>
-      {message}
-    </span>
+  <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[999999] animate-fadeIn">
+    <div
+      className={`flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg ${styles.bg}`}
+    >
+      {styles.icon}
+
+      <span
+        className={`font-medium text-sm ${styles.text}`}
+      >
+        {message}
+      </span>
+
+    </div>
   </div>
-</div>
-  );
+);
 };
 
 export default Toast;

@@ -702,13 +702,72 @@ const getOwnerByMobile = async (mobileNumber) => {
   }
 
 };
+
+
+
+const addSupportTicketNotes = async (
+  supportTicketId,
+  notes
+) => {
+
+  try {
+
+    setLoading(true);
+
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      `/v2/support-ticket/notes/${supportTicketId}`,
+      {
+        notes
+      }
+    );
+
+    if (
+      res.status === 200 ||
+      res.status === 201
+    ) {
+
+      return {
+        success: true,
+        data: res.data,
+        message:
+          "Notes added successfully"
+      };
+
+    }
+
+    return {
+      success: false
+    };
+
+  } catch (error) {
+
+    const msg =
+      getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
   return (
     <SubscriptionContext.Provider
       value={{
         loading,
         errorMsg,
         createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, 
-        getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment,deleteDemoRequest,getDemoType,getDropReasons,getDemoRequestComments,dropDemoRequest,getOwnerByMobile
+        getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment,deleteDemoRequest,getDemoType,getDropReasons,getDemoRequestComments,
+        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes
       }}
     >
       {children}

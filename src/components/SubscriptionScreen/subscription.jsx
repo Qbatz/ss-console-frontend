@@ -592,7 +592,7 @@ const Subscription = () => {
 </button>
 
                     <span className="text-gray-400">
-                      {start} - {end}
+                      {page} - {totalPages}
                     </span>
 
                   </div>

@@ -1,396 +1,2139 @@
-import React, { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
+import React, { useState,useEffect,useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
-
-/* ── dummy data ── */
-const DUMMY_TICKETS = [
-  { id: "#ST-2025-001", subject: "Unable to add tenant",                    type: "General Query",   raisedBy: "Anish Raj",     property: "Laksha Ladies Hostel", priority: "Low",    status: "Active" },
-  { id: "#ST-2025-002", subject: "Need WhatsApp invoice option",            type: "Feature Request", raisedBy: "Rahul Dev",     property: "Sunrise PG",           priority: "Low",    status: "Active" },
-  { id: "#ST-2025-003", subject: "Electricity amount mismatch while tenan…",type: "Complaint",       raisedBy: "Priya Mohan",   property: "Moksha Ladies Hostel", priority: "Low",    status: "Active" },
-  { id: "#ST-2025-004", subject: "App crashes on payment screen",           type: "Bug/Issue",       raisedBy: "Rajesh Kannan", property: "SRK Coliving",         priority: "Medium", status: "Active" },
-  { id: "#ST-2025-005", subject: "Need bulk upload for tenants",            type: "Requirement",     raisedBy: "Ravi Kumar",    property: "roomsearch.in",        priority: "High",   status: "Active" },
-  { id: "#ST-2025-006", subject: "Payment entry not saving",                type: "Bug/Issue",       raisedBy: "David",         property: "LakeView Hostel",      priority: "High",   status: "Active" },
-  { id: "#ST-2025-012", subject: "Need GST invoice copy",                   type: "Clarification",   raisedBy: "Raj Prasanna",  property: "SRK Coliving",         priority: "High",   status: "Active" },
-  { id: "#ST-2025-011", subject: "Complaint about mobile sync delay",       type: "Complaint",       raisedBy: "Hari Krishnan", property: "BlueMoon Inn",         priority: "Medium", status: "Active" },
-  { id: "#ST-2025-010", subject: "Requesting dark mode",                    type: "Feature Request", raisedBy: "Sahul",         property: "SRK Gent's Hostel",   priority: "Medium", status: "Active" },
-  { id: "#ST-2025-009", subject: "Tenant receipt PDF issue",                type: "Bug/Issue",       raisedBy: "Vinoth Kumar",  property: "Ganesh Men's Hostel", priority: "High",   status: "Active" },
-];
-
-const PRIORITY_STYLES = {
-  Low:    { dot: "bg-green-500",  text: "text-green-600",  bg: "" },
-  Medium: { dot: "bg-blue-500",   text: "text-blue-600",   bg: "" },
-  High:   { dot: "bg-red-500",    text: "text-red-600",    bg: "" },
-};
-
-const STATUS_OPTIONS  = ["Active", "Inactive", "Resolved", "Pending"];
-const MONTH_OPTIONS   = ["This Month", "Last Month", "Last 3 Months", "Last 6 Months"];
-const DATE_OPTIONS    = ["Last 30 Days", "Last 7 Days", "Last 90 Days", "Custom"];
-
-/* ── tiny reusable dropdown ── */
-const FilterDropdown = ({ value, options, onChange, accent = false }) => {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen(!open)}
-        className={`
-          flex items-center gap-2 px-3 py-[7px] rounded-lg border text-sm font-medium cursor-pointer
-          transition-all duration-150
-          ${accent
-            ? "bg-blue-600 text-white border-blue-600 hover:bg-blue-700"
-            : "bg-white text-gray-700 border-gray-300 hover:border-blue-400"}
-        `}
-      >
-        {value}
-        <svg className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {open && (
-        <div className="absolute top-[38px] left-0 min-w-[160px] bg-white border border-gray-200 rounded-xl shadow-lg z-[9999] overflow-hidden animate-fadeIn">
-          {options.map((opt) => (
-            <button
-              key={opt}
-              onClick={() => { onChange(opt); setOpen(false); }}
-              className={`w-full text-left px-4 py-2.5 text-sm hover:bg-blue-50 transition-colors cursor-pointer
-                ${value === opt ? "text-blue-600 font-semibold bg-blue-50" : "text-gray-700"}`}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-/* ── main component ── */
+import {
+  Search,
+  ChevronDown,
+  MoreVertical,
+  Filter,
+  Plus,
+  ListFilter,
+} from "lucide-react";
+import { createPortal } from "react-dom";
+import CreateTicketModal from "./CreateTicketModal";
+import UpdateSupportStatusModal from "./SupportUpdateStatusModal";
+import { useSupportTickets } from "../../Context/SupportTicketsContext";
+import { useSubscription } from "../../Context/SubscriptionContext";
+import Arrow from "../../assets/arrow-right.png";
+import { DatePicker } from "antd";
+import dayjs from "dayjs";
+import FilterArrow from "../../assets/direction-down 01.png";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import Toast from "../SuccessModal/ToastDesign";
+import SupportTicketOverview from "./SupportTicketOverview";
+import { useNavigate } from "react-router-dom";
 const SupportTicket = () => {
-  const [statusFilter, setStatusFilter]= useState("Active");
-  const [monthFilter, setMonthFilter] = useState("This Month");
-  const [dateFilter, setDateFilter] = useState("Last 30 Days");
-  const [searchText, setSearchText] = useState("");
-  const [showFilter, setShowFilter] = useState(false);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
-  const [sortCol, setSortCol] = useState(null);
-  const [sortDir, setSortDir] = useState("asc");
-  const [tooltip, setTooltip] = useState({ visible: false, text: "", x: 0, y: 0 });
+  const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(null);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
-  const menuRef = useRef(null);
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const {getAllSupportTickets,getSupportTicketStatus,loading,getSupportTicketPriority,assignSupportTicket,getSupportTicketById,getSupportTicketNotes} = useSupportTickets();
+  const { getAgentsDropdown,addSupportTicketNotes } = useSubscription();
 
-  /* close menu on outside click */
-  useEffect(() => {
-    const handler = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setOpenMenu(null); };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
 
-  /* sort + filter */
-  let data = DUMMY_TICKETS.filter((t) =>
-    t.subject.toLowerCase().includes(searchText.toLowerCase()) ||
-    t.raisedBy.toLowerCase().includes(searchText.toLowerCase()) ||
-    t.property.toLowerCase().includes(searchText.toLowerCase())
-  );
+const [commentText, setCommentText] = useState("");
+const [showCreateModal, setShowCreateModal] = useState(false);
+const [showUpdateStatus, setShowUpdateStatus] =useState(false);
+const [tickets, setTickets] = useState([]);
+const [page, setPage] = useState(1);
+const [size, setSize] = useState(10);
+const [search, setSearch] = useState("");
+const [status, setStatus] = useState("");
+// const [startDate, setStartDate] = useState("");
+// const [endDate, setEndDate] = useState("");
+const [agentId, setAgentId] = useState("");
+const [totalCount, setTotalCount] = useState(0);
+const [totalPages, setTotalPages] = useState(0);
+const [searchInput, setSearchInput] = useState("");
+const [resData,setResData] = useState([])
+const [agentList, setAgentList] = useState([]);
+const [priorityValue, setPriorityValue] = useState("");
+const { RangePicker } = DatePicker;
+const [priorityList, setPriorityList] = useState([]);
 
-  if (sortCol) {
-    data = [...data].sort((a, b) => {
-      const av = a[sortCol] ?? ""; const bv = b[sortCol] ?? "";
-      return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
-    });
-  }
+const [dateRange, setDateRange] = useState([]);
+const [openPriorityDropdown,setOpenPriorityDropdown] =useState(false);
+const [openStatusDropdown, setOpenStatusDropdown] = useState(false);
 
-  const totalPages = Math.ceil(data.length / pageSize);
-  const paged = data.slice((page - 1) * pageSize, page * pageSize);
+const [openAgentDropdown, setOpenAgentDropdown] = useState(false);
+const [priorityError,setPriorityError] = useState("")
+const [selectedTicketId,setSelectedTicketId] = useState(null);
+const [modalType, setModalType] = useState("success");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [message, setMessage] = useState("");
+  const [showOverview,setShowOverview] = useState(false);
 
-  const handleSort = (col) => {
-    if (sortCol === col) setSortDir(sortDir === "asc" ? "desc" : "asc");
-    else { setSortCol(col); setSortDir("asc"); }
+const [selectedTicket,setSelectedTicket] = useState(null);
+
+const statusDropdownRef = useRef(null);
+
+
+const [selectedNoteTicketId,setSelectedNoteTicketId] = useState(null);
+ const [notesError,setNotesError] = useState("");
+
+const agentDropdownRef =
+  useRef(null);
+const [statusList, setStatusList] = useState([]);
+useEffect(() => {
+
+  const fetchPriority =
+    async () => {
+
+      const res =
+        await getSupportTicketPriority();
+
+      if (res.success) {
+
+        setPriorityList(
+          res.data || []
+        );
+
+      }
+
+    };
+
+  fetchPriority();
+
+}, []);
+useEffect(() => {
+
+  const fetchStatus =
+    async () => {
+
+      const res =
+        await getSupportTicketStatus();
+
+      if (res.success) {
+
+        setStatusList(
+          res.data || []
+        );
+
+      }
+
+    };
+
+  fetchStatus();
+
+}, []);
+
+
+const startDate =
+  dateRange?.[0]
+    ? dayjs(dateRange[0]).format(
+        "DD-MM-YYYY"
+      )
+    : "";
+
+const endDate =
+  dateRange?.[1]
+    ? dayjs(dateRange[1]).format(
+        "DD-MM-YYYY"
+      )
+    : "";
+    useEffect(() => {
+
+  const handleClickOutside = (
+    event
+  ) => {
+
+    if (
+      statusDropdownRef.current &&
+      !statusDropdownRef.current.contains(
+        event.target
+      )
+    ) {
+
+      setOpenStatusDropdown(false);
+
+    }
+
+    if (
+      agentDropdownRef.current &&
+      !agentDropdownRef.current.contains(
+        event.target
+      )
+    ) {
+
+      setOpenAgentDropdown(false);
+
+    }
+
   };
 
-  const SortIcon = ({ col }) => (
-    <span className="ml-1 opacity-50 text-[10px]">
-      {sortCol === col ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
-    </span>
+  document.addEventListener(
+    "mousedown",
+    handleClickOutside
   );
 
-  
-  const stats = [
-    { label: "Total Leads",      value: 246 },
-    { label: "New Today",        value: 0   },
-    { label: "Contacted",        value: 132 },
-    { label: "Demo Scheduled",   value: "09"},
-  ];
+  return () => {
 
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+  };
+
+}, []);
+useEffect(() => {
+
+  const fetchAgents =
+    async () => {
+
+      const res =
+        await getAgentsDropdown();
+
+      if (res.success) {
+
+        setAgentList(
+          res.data || []
+        );
+
+      }
+
+    };
+
+  fetchAgents();
+
+}, []);
+
+useEffect(() => {
+
+  const timer = setTimeout(() => {
+
+    setSearch(searchInput);
+
+    setPage(1);
+
+  }, 500);
+
+  return () => clearTimeout(timer);
+
+}, [searchInput]);
+useEffect(() => {
+
+  fetchTickets();
+
+}, [
+  page,
+  size,
+  search,
+  status,
+  startDate,
+  endDate,
+  agentId,
+]);
+
+const fetchTickets =
+  async () => {
+
+    const res =
+      await getAllSupportTickets({
+        page,
+        size,
+        name: search,
+        startDate,
+        endDate,
+        status,
+        agentId,
+      });
+
+    if (res.success) {
+
+      const responseData =
+  res?.data || {};
+
+setTickets(
+  responseData?.supportTicketList || []
+);
+
+setTotalCount(
+  responseData?.totalItems || 0
+);
+setTotalPages(
+  responseData?.totalPages || 0
+);
+setResData(responseData)
+
+    }
+
+  };
+
+const [allComments, setAllComments] =useState([]);
+  const handleOpenOverview =
+  async (ticketId) => {
+
+    const res =
+      await getSupportTicketById(
+        ticketId
+      );
+
+    if (res.success) {
+
+      setSelectedTicket(
+        res.data
+      );
+
+      setShowOverview(true);
+
+    }
+
+  };
+const [menuPosition, setMenuPosition] = useState({
+  index: null,
+  top: 0,
+  left: 0,
+  direction: "down",
+});
+const [showAssignDrawer, setShowAssignDrawer] =
+  useState(false);
+
+const [dropdownValue, setDropdownValue] =
+  useState("");
+
+const [openDropdown, setOpenDropdown] =
+  useState(false);
+
+const [assignError, setAssignError] =
+  useState("");
+
+
+
+const handleMenuToggle = (e, index) => {
+  if (menuPosition.index === index) {
+    setMenuPosition({ index: null, top: 0, left: 0 });
+    return;
+  }
+
+  const rect = e.currentTarget.getBoundingClientRect();
+  const menuHeight = 130;
+  const spaceBottom = window.innerHeight - rect.bottom;
+  const direction = spaceBottom < menuHeight ? "up" : "down";
+
+  setMenuPosition({
+    index,
+    left: rect.right - 160,          
+    top: direction === "up"
+      ? rect.top - menuHeight - 4    
+      : rect.bottom + 4,
+    direction,
+  });
+};
+useEffect(() => {
+  const handleClickOutside = () => setMenuPosition({ index: null, top: 0, left: 0 });
+  document.addEventListener("click", handleClickOutside);
+  return () => document.removeEventListener("click", handleClickOutside);
+}, []);
+  
+const handleAssignSave =
+  async () => {
+
+    let hasError = false;
+
+    if (!dropdownValue) {
+
+      setAssignError(
+        "Please select staff"
+      );
+
+      hasError = true;
+
+    } else {
+
+      setAssignError("");
+
+    }
+
+    if (!priorityValue) {
+
+      setPriorityError(
+        "Please select priority"
+      );
+
+      hasError = true;
+
+    } else {
+
+      setPriorityError("");
+
+    }
+
+    if (hasError) return;
+
+    const payload = {
+
+      agentId:
+        dropdownValue,
+
+      comments:
+        commentText,
+
+      priority:
+        priorityValue,
+
+    };
+
+    const res =
+      await assignSupportTicket(
+        selectedTicketId,
+        payload
+      );
+
+    if (res.success) {
+ setModalType("success");
+          setMessage(
+            res?.message 
+          );
+          fetchTickets();
+          setShowSuccess(true);
+
+          setTimeout(() => {
+            setShowSuccess(false);
+            
+
+          }, 1300);
+      
+
+      setShowAssignDrawer(
+        false
+      );
+
+      setDropdownValue("");
+
+      setPriorityValue("");
+
+      setCommentText("");
+
+    }
+    else{
+      setModalType("error");
+          setMessage(
+            res?.message 
+          );
+         
+          setShowSuccess(true);
+
+          setTimeout(() => {
+            setShowSuccess(false);
+          
+
+          }, 1300);
+    }
+
+  };
+  const [
+  addNotesLoading,
+  setAddNotesLoading
+] = useState(false);
+ 
+const handleAddInternalNotes =
+  async () => {
+
+    if (addNotesLoading)
+      return;
+
+    if (
+      !commentText.trim()
+    ) {
+
+      setNotesError(
+        "Please enter notes"
+      );
+
+      return;
+
+    }
+
+    try {
+
+      setAddNotesLoading(true);
+
+      setNotesError("");
+
+      const res =
+        await addSupportTicketNotes(
+          selectedNoteTicketId,
+          commentText
+        );
+
+      if (res.success) {
+
+        setModalType("success");
+
+        setMessage(
+          res?.message
+        );
+
+        setShowSuccess(true);
+
+        setTimeout(() => {
+
+          setShowSuccess(false);
+
+        }, 1300);
+
+        setCommentText("");
+
+        setShowCommentModal(
+          false
+        );
+
+        fetchTickets();
+
+      } else {
+
+        setModalType("error");
+
+        setMessage(
+          res?.message
+        );
+
+        setShowSuccess(true);
+
+        setTimeout(() => {
+
+          setShowSuccess(false);
+
+        }, 1300);
+
+      }
+
+    } finally {
+
+      setAddNotesLoading(false);
+
+    }
+
+};
+
+
+const handleOpenComments =
+  async (ticketId) => {
+
+    setSelectedNoteTicketId(
+      ticketId
+    );
+
+    const res =
+      await getSupportTicketNotes(
+        ticketId
+      );
+
+    if (res?.success) {
+
+      setAllComments(
+        res.data || []
+      );
+
+    } else {
+
+      setAllComments([]);
+
+    }
+
+    setShowCommentModal(true);
+
+  };
   return (
     <DashboardLayout>
-      <div className="flex-col-layout gap-4">
+      <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
 
-       
-        <div className="flex-between">
-          <h1 className="text-xl font-semibold font-inter">Support Tickets</h1>
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition cursor-pointer">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-5-4M9 20H4v-2a4 4 0 015-4m6-4a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
+      />
+      <div className="w-full min-h-screen p-3 sm:p-5">
+        {/* HEADER */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-5">
+          <h1 className="text-[22px] font-semibold text-[#1f2937]">
+            Support Tickets
+          </h1>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {/* <button
+              className="
+                h-10 px-4 rounded-xl border border-[#dbe2ff]
+                bg-[#eef2ff] text-[#3b5bfd]
+                text-sm font-medium
+                flex items-center gap-2
+                hover:bg-[#e2e8ff]
+                transition
+              "
+            >
+              <ListFilter size={16} />
               IAM Users
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition cursor-pointer">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
+            </button> */}
+
+            <button onClick={() =>
+    setShowCreateModal(true)
+  }
+              className="
+                h-10 px-4 rounded-xl
+                bg-primary-hover
+                text-white text-sm font-medium
+                flex items-center gap-2
+                
+                transition cursor-pointer
+              "
+            >
+              <Plus size={16} />
               Create Ticket
             </button>
           </div>
         </div>
 
-        {/* ── stat cards ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((s) => (
-            <div key={s.label} className="card-common p-5">
-              <p className="text-xs text-gray-500 font-medium mb-1">{s.label}</p>
-              <h2 className="text-[28px] font-bold text-gray-800 leading-none">{s.value}</h2>
-            </div>
-          ))}
+        {/* STATS */}
+   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+
+  {[
+    {
+      title1: "Total Leads",
+      value1:
+        resData?.totalLeads || 0,
+
+      title2: "New Today",
+      value2:
+        resData?.newToday || 0,
+    },
+    {
+       title1: "Waiting",
+      value1:
+        resData?.waitingCount || 0,
+      title2: "Assigned",
+      value2:
+        resData?.assignedCount || 0,
+
+     
+    },
+
+    {
+      title1: "In Progress",
+      value1:
+        resData?.inProgressCount || 0,
+
+      title2: "Resolved",
+      value2:
+        resData?.resolvedCount || 0,
+    },
+
+    
+
+  ].map((item, index) => (
+
+    <div
+      key={index}
+      className="
+        bg-white
+        rounded-2xl
+        border-soft-light
+        p-6
+        shadow-sm
+      "
+    >
+
+      <div className="flex items-center justify-between">
+
+        <div className="flex-1 text-center">
+
+          <p className="text-[14px] text-[#6b7280] mb-3">
+            {item.title1}
+          </p>
+
+          <h2 className="text-[25px] font-bold text-[#111827] leading-none">
+            {item.value1}
+          </h2>
+
         </div>
 
-        {/* ── based on label ── */}
-        <p className="text-xs text-gray-400 flex items-center gap-1 -mt-2">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
-          </svg>
-          Based upon last 30 Days
-        </p>
+        <div className="w-[1px] h-[70px] bg-[#edf0f7]" />
 
-        
-        <div className="flex items-center gap-3 flex-wrap">
-          <FilterDropdown value={statusFilter} options={STATUS_OPTIONS} onChange={setStatusFilter} accent />
-          <FilterDropdown value={monthFilter}  options={MONTH_OPTIONS}  onChange={setMonthFilter} />
+        <div className="flex-1 text-center">
 
-          
-          <button
-            onClick={() => setShowFilter(!showFilter)}
-            className="flex items-center gap-2 px-3 py-[7px] rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:border-blue-400 transition cursor-pointer"
+          <p className="text-[14px] text-[#6b7280] mb-3">
+            {item.title2}
+          </p>
+
+          <h2 className="text-[25px] font-bold text-[#111827] leading-none">
+            {item.value2}
+          </h2>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  ))}
+
+</div>
+
+        {/* LAST 30 DAYS */}
+        <div className="flex items-center gap-2 text-[12px] text-[#6b7280] mb-6">
+          <div className="w-2 h-2 rounded-full bg-[#3b5bfd]" />
+           Based on Current Month
+        </div>
+
+         <div className=" flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+            
+
+            <div className="flex flex-col sm:flex-row gap-3">
+             
+             
+<div className="flex flex-wrap gap-3 mb-5">
+
+  
+  <RangePicker
+    value={dateRange}
+    inputReadOnly={true}
+    format="DD-MM-YYYY"
+    onChange={(dates) => {
+
+      setDateRange(
+        dates || []
+      );
+
+      setPage(1);
+
+    }}
+    className="
+      h-[40px]
+      rounded-xl
+    "
+  />
+
+  {/* STATUS FILTER */}
+  <div
+    className="
+      relative
+      min-w-[180px]
+    "
+    ref={statusDropdownRef}
+  >
+
+    <div
+      onClick={() => {
+
+        setOpenStatusDropdown(
+          !openStatusDropdown
+        );
+
+        setOpenAgentDropdown(
+          false
+        );
+
+      }}
+      className="
+        h-[40px]
+        px-4
+        border border-[#e5e7eb]
+        rounded-xl
+        bg-white
+        flex items-center
+        justify-between
+        cursor-pointer
+      "
+    >
+
+      <span className="text-sm">
+        {status || "All Status"}
+      </span>
+
+      <img
+        src={FilterArrow}
+        className="w-4 h-4"
+      />
+
+    </div>
+
+    {openStatusDropdown && (
+
+      <div
+       className="
+  absolute
+  top-full
+  left-0
+  mt-2
+  w-full
+  bg-white
+  border border-[#e5e7eb]
+  rounded-xl
+  shadow-xl
+  z-[9999]
+
+  max-h-[220px]
+  overflow-y-auto
+
+  [&::-webkit-scrollbar]:w-[5px]
+  [&::-webkit-scrollbar-track]:bg-transparent
+  [&::-webkit-scrollbar-thumb]:bg-[#d1d5db]
+  [&::-webkit-scrollbar-thumb]:rounded-full
+"
+      >
+
+        <div
+          onClick={() => {
+
+            setStatus("");
+
+            setPage(1);
+
+            setOpenStatusDropdown(
+              false
+            );
+
+          }}
+          className="
+            px-4 py-3
+            text-sm
+            hover:bg-[#f8f9fc]
+            cursor-pointer
+          "
+        >
+          All Status
+        </div>
+
+       {statusList.map((item) => (
+
+  <div
+    key={item.key}
+    onClick={() => {
+
+      setStatus(item.key);
+
+      setPage(1);
+
+      setOpenStatusDropdown(
+        false
+      );
+
+    }}
+    className="
+      px-4 py-3
+      text-sm
+      hover:bg-[#f8f9fc]
+      cursor-pointer
+    "
+  >
+    {item.label}
+  </div>
+
+))}
+
+      </div>
+
+    )}
+
+  </div>
+
+  {/* AGENT FILTER */}
+  <div
+    className="
+      relative
+      min-w-[180px]
+    "
+    ref={agentDropdownRef}
+  >
+
+    <div
+      onClick={() => {
+
+        setOpenAgentDropdown(
+          !openAgentDropdown
+        );
+
+        setOpenStatusDropdown(
+          false
+        );
+
+      }}
+      className="
+        h-[40px]
+        px-4
+        border border-[#e5e7eb]
+        rounded-xl
+        bg-white
+        flex items-center
+        justify-between
+        cursor-pointer
+      "
+    >
+
+      <span className="text-sm truncate">
+
+   {
+  agentList.find(
+    (a) =>
+      a.agentId === agentId
+  )?.agentName ||
+  "All Agents"
+}
+
+      </span>
+
+      <img
+        src={FilterArrow}
+        className="w-4 h-4"
+      />
+
+    </div>
+
+    {openAgentDropdown && (
+
+      <div
+        className="
+          absolute
+          top-full
+          left-0
+          mt-2
+          w-full
+          bg-white
+          border border-[#e5e7eb]
+          rounded-xl
+          shadow-xl
+          z-[9999]
+          overflow-hidden
+          max-h-[220px]
+          overflow-y-auto
+        "
+      >
+
+        <div
+          onClick={() => {
+
+            setAgentId("");
+
+            setPage(1);
+
+            setOpenAgentDropdown(
+              false
+            );
+
+          }}
+          className="
+            px-4 py-3
+            text-sm
+            hover:bg-[#f8f9fc]
+            cursor-pointer
+          "
+        >
+          All Agents
+        </div>
+
+        {agentList.map((agent) => (
+
+          <div
+            key={agent.agentId}
+            onClick={() => {
+
+              setAgentId(
+                agent.agentId
+              );
+
+              setPage(1);
+
+              setOpenAgentDropdown(
+                false
+              );
+
+            }}
+            className="
+              px-4 py-3
+              text-sm
+              hover:bg-[#f8f9fc]
+              cursor-pointer
+            "
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 8h10M11 12h2M9 16h6" />
-            </svg>
-            Filter
-          </button>
-
-         
-          <div className="flex-1" />
-
-          {/* search */}
-          <div className="relative">
-            <svg className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchText}
-              onChange={(e) => { setSearchText(e.target.value); setPage(1); }}
-              className="pl-9 pr-4 py-[7px] border border-gray-300 rounded-lg text-sm font-medium w-56 outline-none focus:border-blue-500"
-            />
+            {agent.agentName}
           </div>
 
-          {/* date filter */}
-          <FilterDropdown value={dateFilter} options={DATE_OPTIONS} onChange={setDateFilter} />
-        </div>
+        ))}
 
-        
+      </div>
+
+    )}
+
+  </div>
+
+</div>
+ <div
+                className="
+                  h-10 w-full sm:w-[240px]
+                  border border-[#e5e7eb]
+                  rounded-xl
+                  px-3
+                  flex items-center gap-2
+                "
+              >
+                <Search size={17} className="text-gray-400" />
+
+ <input
+  type="text"
+  placeholder="Search..."
+  value={searchInput}
+  onChange={(e) =>
+    setSearchInput(e.target.value)
+  }
+  className="
+    w-full bg-transparent outline-none
+    text-sm text-gray-700
+    placeholder:text-gray-400
+  "
+/>
+              </div>
+              {/* <button
+                className="
+                  h-10 px-4 rounded-xl border border-[#e5e7eb]
+                  text-sm text-[#374151]
+                  flex items-center gap-2
+                "
+              >
+                Last 30 Days
+                <ChevronDown size={15} />
+              </button> */}
+            </div>
+          </div>
+       <div className="bg-white border-soft-light rounded-2xl shadow-sm relative overflow-hidden">
+         {loading && (
+
+  <div
+    className="
+      absolute inset-0
+      bg-white/70
+      backdrop-blur-[2px]
+      z-[999]
+      flex items-center justify-center
+    "
+  >
+
+    <div className="flex flex-col items-center gap-3">
+
+      <div
+        className="
+          w-12 h-12
+          border-[4px]
+          border-[#dbe2ff]
+          border-t-[#3b5bfd]
+          rounded-full
+          animate-spin
+        "
+      />
+
+      <p className="text-sm text-[#3b5bfd] font-medium">
+        Loading Tickets...
+      </p>
+
+    </div>
+
+  </div>
+
+)} 
         <div
-          className="card-common flex flex-col"
-          style={{ maxHeight: "calc(100vh - 230px)", overflow: "hidden" }}
+  className="
+    table-scroll
+    relative
+    overflow-auto
+    max-h-[420px]
+    rounded-2xl
+  "
+>
+            <table className="min-w-[1100px] w-full border-separate border-spacing-0">
+       <thead className="sticky top-0 z-40">
+  <tr>
+ <th
+  className="
+    sticky left-0 z-50
+    bg-[#f8f9fc]
+    min-w-[70px]
+    w-[70px]
+    px-5 py-4 text-[12px] text-[#6b7280]
+  "
+>
+  ID
+</th>
+
+<th
+  className="
+    sticky left-[70px] z-40
+    bg-[#f8f9fc]
+    min-w-[190px]
+    w-[190px]
+    px-5 py-4 text-[12px] text-[#6b7280]
+  "
+>
+  TICKET NUMBER
+</th>
+
+    {[
+      "SUBJECT",
+      "QUERY TYPE",
+      "RAISED BY",
+      "TICKET STATUS",
+      "ASSIGNED TO",
+      "PROPERTY NAME",
+      "PRIORITY",
+    ].map((head, i) => (
+      <th
+        key={i}
+        className="
+          sticky top-0 z-30
+          bg-[#f8f9fc]
+          px-5 py-4
+          text-left text-[12px]
+          font-semibold text-[#6b7280]
+          whitespace-nowrap
+          
+        "
+      >
+        {head}
+      </th>
+    ))}
+
+    <th
+      className="
+        sticky top-0 right-0 z-50
+        bg-[#f8f9fc]
+        px-5 py-4
+        text-left text-[12px]
+        font-semibold text-[#6b7280]
+        whitespace-nowrap
+       
+      "
+    >
+      ACTIONS
+    </th>
+
+  </tr>
+</thead>
+
+            <tbody>
+
+  {tickets?.length > 0 ? (
+
+    tickets.map(
+      (item, index) => (
+
+        <tr
+          key={index}
+          className="
+            border-soft-light
+            hover:bg-[#fafbff]
+            group
+          "
         >
-          <div style={{ overflowX: "auto", overflowY: "auto", flex: 1, minHeight: 0 }}>
-            <table className="w-full min-w-[900px] text-sm text-left">
+<td
+  className="
+    sticky left-0 z-30
+    bg-white
+    group-hover:bg-[#fafbff]
 
-             
-              <thead className="table-header sticky top-0 z-[50]">
-                <tr>
-                  <th className="px-4 py-3 w-[130px] whitespace-nowrap cursor-pointer" onClick={() => handleSort("id")}>
-                    TICKET ID <SortIcon col="id" />
-                  </th>
-                  <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort("subject")}>
-                    SUBJECT <SortIcon col="subject" />
-                  </th>
-                  <th className="px-4 py-3 w-[140px] whitespace-nowrap">TYPE</th>
-                  <th className="px-4 py-3 w-[140px] whitespace-nowrap cursor-pointer" onClick={() => handleSort("raisedBy")}>
-                    RAISED BY <SortIcon col="raisedBy" />
-                  </th>
-                  <th className="px-4 py-3 w-[180px] whitespace-nowrap cursor-pointer" onClick={() => handleSort("property")}>
-                    PROPERTY NAME <SortIcon col="property" />
-                  </th>
-                  <th className="px-4 py-3 w-[100px] whitespace-nowrap">PRIORITY</th>
-                  <th className="px-4 py-3 w-[80px] text-center sticky right-0 bg-[#F8F9FF]">ACTIONS</th>
-                </tr>
-              </thead>
+    min-w-[70px]
+    w-[70px]
 
-              {/* tbody */}
-              <tbody className="divide-y divide-gray-100">
-                {paged.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="text-center py-10 text-gray-400 text-sm">No tickets found</td>
-                  </tr>
-                ) : (
-                  paged.map((ticket) => {
-                    const p = PRIORITY_STYLES[ticket.priority] || PRIORITY_STYLES.Low;
-                    return (
-                      <tr key={ticket.id} className="group hover:bg-gray-50 text-[13px]">
+    px-5 py-2
+    text-xs font-medium
+    text-[#374151]
+    whitespace-nowrap
+  "
+>
+  {(page - 1) * size + index + 1}
+</td>
 
-                        {/* ticket id */}
-                        <td className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">{ticket.id}</td>
+<td
+  onClick={() =>
+    handleOpenOverview(
+      item.ticketId
+    )
+  }
+  className="
+    sticky left-[70px] z-20
+    bg-white
+    group-hover:bg-[#fafbff]
 
-                        {/* subject with tooltip */}
-                        <td className="px-4 py-3 max-w-[260px]">
-                          <span
-                            className="block truncate cursor-default"
-                            onMouseEnter={(e) => {
-                              const r = e.currentTarget.getBoundingClientRect();
-                              setTooltip({ visible: true, text: ticket.subject, x: r.left, y: r.bottom + 6 });
-                            }}
-                            onMouseLeave={() => setTooltip((p) => ({ ...p, visible: false }))}
-                          >
-                            {ticket.subject}
-                          </span>
-                        </td>
+    min-w-[190px]
+    w-[190px]
 
-                        {/* type */}
-                        <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{ticket.type}</td>
+    px-5 py-2
+    text-xs font-medium
+    whitespace-nowrap
+    cursor-pointer
+  "
+>
 
-                        {/* raised by */}
-                        <td className="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">{ticket.raisedBy}</td>
+  <span
+    className="
+      text-[#315CEC]
+      hover:underline
+      hover:text-[#2648C9]
+      transition-all
+    "
+  >
+    {item.ticketNumber}
+  </span>
 
-                        {/* property */}
-                        <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{ticket.property}</td>
+</td>
 
-                        {/* priority */}
-                        <td className="px-4 py-3">
-                          <span className={`flex items-center gap-1.5 text-xs font-medium ${p.text}`}>
-                            <span className={`w-2 h-2 rounded-full ${p.dot}`} />
-                            {ticket.priority}
-                          </span>
-                        </td>
+          <td className="px-5 py-2 text-xs text-[#111827] min-w-[230px] text-left">
+            <div className="truncate max-w-[250px]">
+              {item.subject}
+            </div>
+          </td>
 
-                        {/* actions */}
-                        <td className="px-4 py-3 text-center sticky right-0 bg-white group-hover:bg-gray-50">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              const spaceBelow = window.innerHeight - rect.bottom;
-                              setMenuPos({
-                                top: spaceBelow < 100 ? rect.top - 90 : rect.bottom + 6,
-                                left: rect.right - 140,
-                              });
-                              setOpenMenu(openMenu === ticket.id ? null : ticket.id);
-                            }}
-                            className="p-1 rounded-lg hover:bg-gray-100 transition cursor-pointer"
-                          >
-                            <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
-                              <circle cx="12" cy="5"  r="1.5" />
-                              <circle cx="12" cy="12" r="1.5" />
-                              <circle cx="12" cy="19" r="1.5" />
-                            </svg>
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
+          <td className="px-5 py-2 text-xs text-[#4b5563] whitespace-nowrap text-left">
+            {item.queryType}
+          </td>
+
+          <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
+            {item.raisedBy}
+          </td>
+ <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
+            {item.ticketStatus}
+          </td>
+        <td
+  className="
+    px-5 py-2
+    text-xs
+    font-medium
+    text-[#374151]
+    whitespace-nowrap
+    text-left
+    cursor-pointer
+    hover:text-[#315CEC]
+    hover:underline
+  "
+  onClick={() => {
+
+    if (item?.assignedToId) {
+
+      navigate(
+        `/iam-user/${item.assignedToId}`
+      );
+
+    }
+
+  }}
+>
+
+  {item?.assignedTo || "N/A"}
+
+</td>
+          <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
+            {item.hostelName}
+          </td>
+
+          <td className="px-5 py-2 whitespace-nowrap text-left">
+
+            <div
+              className="
+                inline-flex items-center gap-2
+                px-3 py-1 rounded-full
+                text-xs font-medium
+                bg-[#f9fafb]
+              "
+            >
+
+              <div
+                className={`
+                  w-2 h-2 rounded-full
+
+                  ${
+                    item.priority ===
+                    "HIGH"
+                      ? "bg-red-500"
+                      : item.priority ===
+                        "MEDIUM"
+                      ? "bg-blue-500"
+                      : "bg-green-500"
+                  }
+                `}
+              />
+
+             {item.priority || "Priority Not Set"}
+
+            </div>
+
+          </td>
+
+             <td className="sticky right-0 z-20 bg-white group-hover:bg-[#fafbff] px-5 py-2 relative overflow-visible">
+                      <button
+ onClick={(e) => { e.stopPropagation(); handleMenuToggle(e, index); }}
+  className="
+    h-8 w-8 rounded-lg
+    hover:bg-[#f3f4f6]
+    flex items-center justify-center
+  "
+>
+  <MoreVertical size={18}  className="cursor-pointer"/>
+</button>
+
+  {menuPosition.index === index &&
+  createPortal(
+    <div
+      style={{
+  position: "fixed",  
+  top: menuPosition.top,
+  left: menuPosition.left,
+}}
+      className="
+        z-[9999]
+        bg-white
+        border border-[#e5e7eb]
+        rounded-xl
+        shadow-xl
+        w-[150px] 
+        overflow-hidden
+      "
+    >
+     {[
+  "Add Notes",
+
+  ...(item.ticketStatus !== "RESOLVED" &&
+     item.ticketStatus !== "CLOSED"
+    ? ["Update Status"]
+    : []),
+
+  "Assign Staff",
+
+].map((menu, idx) => (
+       <button
+  key={idx}
+  onClick={() => {
+
+  if (menu === "Add Notes") {
+  //   console.log("item",item)
+  //    setSelectedNoteTicketId(
+  //   item.ticketId
+  // );
+
+  // setShowCommentModal(true);
+   handleOpenComments(
+    item.ticketId
+  );
+  }
+
+  if (menu === "Assign Staff") {
+     setSelectedTicketId(
+    item.ticketId
+  );
+    setShowAssignDrawer(true);
+  }
+  if (menu === "Update Status") {
+  setShowUpdateStatus(true);
+   setSelectedTicketId(
+    item.ticketId
+  );
+  setSelectedTicket(item);
+}
+
+  setMenuPosition({
+    index: null,
+    top: 0,
+    left: 0,
+    direction: "down",
+  });
+}}
+  className="
+    w-full text-left px-3 py-2.5
+    text-sm text-[#374151]
+    hover:bg-[#f8f9fc] cursor-pointer
+  "
+>
+  {menu}
+</button>
+      ))}
+    </div>,
+    document.body
+  )}
+                    </td>
+
+        </tr>
+
+      )
+    )
+
+  ) : (
+
+    <tr>
+
+      <td
+        colSpan={7}
+        className="
+          py-10
+          text-center
+          text-sm
+          text-gray-500
+        "
+      >
+        No Support Tickets Found
+      </td>
+
+    </tr>
+
+  )}
+
+</tbody>
             </table>
           </div>
 
-          {/* ── pagination ── */}
-          <div className="flex-between px-4 py-2 border-t border-gray-100 text-sm bg-white shrink-0">
-            <span className="text-gray-500">
-              Total Record Count : <span className="text-blue-600 font-semibold">{data.length}</span>
-            </span>
-            <div className="flex items-center gap-3">
-              <select
-                value={pageSize}
-                onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                className="border border-gray-300 rounded-md px-2 py-1 text-sm cursor-pointer outline-none"
-              >
-                {[10, 20, 50, 100].map((n) => <option key={n} value={n}>{n}</option>)}
-              </select>
-
-              <button
-                disabled={page <= 1}
-                onClick={() => setPage((p) => p - 1)}
-                className={`px-2 py-1 rounded ${page <= 1 ? "text-gray-300 cursor-not-allowed" : "hover:bg-gray-100 cursor-pointer"}`}
-              >&#8249;</button>
-
-              <span className="border border-gray-200 px-3 py-1 rounded-lg bg-gray-50 font-medium">{page}</span>
-
-              <span className="text-gray-400">{page} - {totalPages || 1}</span>
-
-              <button
-                disabled={page >= totalPages}
-                onClick={() => setPage((p) => p + 1)}
-                className={`px-2 py-1 rounded ${page >= totalPages ? "text-gray-300 cursor-not-allowed" : "hover:bg-gray-100 cursor-pointer"}`}
-              >&#8250;</button>
-            </div>
-          </div>
+          {/* FOOTER */}
+        
         </div>
+   <div
+  className="
+    p-4
+    flex flex-col sm:flex-row
+    items-start sm:items-center
+    justify-between
+    gap-4
+  "
+>
+
+  {/* TOTAL COUNT */}
+  <p className="text-sm text-[#4b5563]">
+    Total Record Count :
+    <span className="text-[#3b5bfd] font-semibold ml-1">
+      {tickets?.length}
+    </span>
+  </p>
+
+  {/* PAGINATION */}
+  <div className="flex items-center gap-3">
+
+    {/* PAGE SIZE */}
+    <select
+      value={size}
+      onChange={(e) => {
+
+        setSize(
+          Number(e.target.value)
+        );
+
+        setPage(1);
+
+      }}
+      className="
+        h-9 px-3 rounded-lg
+        border border-[#e5e7eb]
+        text-sm outline-none
+      "
+    >
+
+      <option value={10}>
+        10
+      </option>
+
+      <option value={20}>
+        20
+      </option>
+
+      <option value={50}>
+        50
+      </option>
+
+    </select>
+
+    
+    <div className="flex items-center gap-3 text-sm">
+
+    
+      <button
+        disabled={page === 1}
+        onClick={() =>
+          setPage((prev) => prev - 1)
+        }
+        className={`
+          ${
+            page === 1
+              ? "opacity-40 cursor-not-allowed"
+              : "cursor-pointer"
+          }
+        `}
+      >
+
+        <img
+          src={Arrow}
+          className="
+            w-[15px]
+            h-[15px]
+          "
+        />
+
+      </button>
+
+    
+      <button
+        className="
+          h-8
+          min-w-8
+          px-3
+          rounded-lg
+          border border-[#dbe2ff]
+          text-[#3b5bfd]
+          font-medium
+        "
+      >
+        {page}
+      </button>
+
+      {/* RANGE */}
+     <div className="flex items-center gap-2">
+
+  {/* CURRENT PAGE */}
+  {/* <button
+    className="
+      h-8
+      min-w-8
+      px-3
+      rounded-lg
+      border border-[#dbe2ff]
+      text-[#3b5bfd]
+      font-medium
+    "
+  >
+    {page}
+  </button> */}
+   <span className="text-[#6b7280] font-medium">
+    {page}
+  </span>
+
+  <span className="text-[#9ca3af]">
+    -
+  </span>
+
+  {/* TOTAL PAGES */}
+  <span className="text-[#6b7280] font-medium">
+    {totalPages}
+  </span>
+
+</div>
+
+      {/* NEXT */}
+      <button
+        disabled={
+          page >= totalPages
+        }
+        onClick={() =>
+          setPage((prev) => prev + 1)
+        }
+        className={`
+          ${
+            page >= totalPages
+              ? "opacity-40 cursor-not-allowed"
+              : "cursor-pointer"
+          }
+        `}
+      >
+
+        <img
+          src={Arrow}
+          className="
+            w-[15px]
+            h-[15px]
+            scale-x-[-1]
+          "
+        />
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+      </div>
+      {showCommentModal && (
+  <div className="fixed inset-0 z-[99999]">
+
+    {/* OVERLAY */}
+    <div
+      className="absolute inset-0 bg-black/40"
+      onClick={() => {
+        setShowCommentModal(false);
+        setCommentText("");
+        setNotesError("")
+      }}
+    />
+
+    {/* DRAWER */}
+    <div
+      className="
+        fixed top-3 right-3 bottom-3
+        w-[420px]
+        bg-white
+        rounded-2xl
+        shadow-2xl
+        flex flex-col
+        overflow-hidden
+      "
+    >
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200">
+
+        <h2 className="text-[16px] font-semibold">
+          Internal Notes
+        </h2>
+
+        <button
+          onClick={() => {
+            setShowCommentModal(false);
+            setCommentText("");
+            setNotesError("")
+          }}
+          className="text-red-500 text-lg"
+        >
+          ✕
+        </button>
+
       </div>
 
-      {/* ── tooltip ── */}
-      {tooltip.visible && (
-        <div
-          className="tooltip-common"
-          style={{ left: tooltip.x, top: tooltip.y }}
-        >
-          {tooltip.text}
-        </div>
-      )}
+      {/* BODY */}
+      <div className="flex-1 flex flex-col px-5 py-4 overflow-hidden">
 
-      {/* ── context menu via portal ── */}
-      {openMenu && createPortal(
-        <div
-          ref={menuRef}
-          style={{
-            position: "fixed",
-            top: menuPos.top,
-            left: menuPos.left,
-            width: "150px",
-            background: "white",
-            border: "1px solid #e5e7eb",
-            borderRadius: "12px",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-            overflow: "hidden",
-            zIndex: 999999,
+        {/* INPUT */}
+        <label className="text-xs text-gray-500 mb-2 text-left">
+          Additional Comments <span className="text-red-600">*</span>
+        </label>
+
+        <div className="border border-gray-300 rounded-xl p-3">
+
+          <textarea
+            placeholder="Comment here"
+            value={commentText}
+            onChange={(e) => {
+
+  setCommentText(
+    e.target.value
+  );
+
+  setNotesError("");
+
+}}
+            className="
+              w-full
+              h-24
+              resize-none
+              outline-none
+              text-sm
+            "
+          />
+
+        </div>
+{notesError && (
+
+  <ErrorMessage
+    message={notesError}
+    type="error"
+  />
+
+)}
+        {/* ADD BUTTON */}
+        <div className="flex justify-end mt-3">
+
+         <button
+  onClick={handleAddInternalNotes}
+  disabled={addNotesLoading}
+  className={`
+    px-5 py-2
+    rounded-lg
+    text-sm
+    text-white
+
+    ${
+      addNotesLoading
+        ? `
+          bg-[#9db2ff]
+          cursor-not-allowed
+        `
+        : `
+          bg-primary-hover
+          cursor-pointer
+        `
+    }
+  `}
+>
+
+  {
+    addNotesLoading
+      ? "Adding..."
+      : "Add"
+  }
+
+</button>
+
+        </div>
+
+        {/* COMMENTS */}
+        <p className="text-[11px] text-gray-400 mt-5 mb-3 text-left">
+          ALL COMMENTS
+        </p>
+
+        <div className="flex-1 overflow-y-auto pr-1 space-y-5">
+
+       {allComments.map((item, index) => (
+
+  <div
+    key={index}
+    className="border-b border-gray-100 pb-4"
+  >
+
+    <p className="text-sm font-semibold text-left break-words">
+      {item.notes}
+    </p>
+
+    <p className="text-xs text-gray-500 mt-1 text-left">
+      {item.createdAtDate},
+      {" "}
+      {item.createdAtTime}
+    </p>
+
+    <p className="text-xs text-gray-400 mt-2 text-left">
+      Added by {item.createdBy}
+    </p>
+
+  </div>
+
+))}
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
+{showAssignDrawer && (
+  <div className="fixed inset-0 z-[99999]">
+
+    {/* OVERLAY */}
+    <div
+      className="absolute inset-0 bg-black/40"
+      onClick={() => {
+        setShowAssignDrawer(false);
+        setDropdownValue("");
+        setAssignError("");
+        setCommentText("");
+        setPriorityError("")
+        setPriorityValue("");
+        setOpenPriorityDropdown(false)
+      }}
+    />
+
+    {/* DRAWER */}
+    <div
+      className="
+        fixed
+        top-3
+        right-3
+        bottom-3
+        w-[420px]
+        bg-white
+        rounded-2xl
+        shadow-2xl
+        flex
+        flex-col
+        overflow-hidden
+      "
+    >
+
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+
+        <div>
+
+          <h2 className="text-[18px] font-semibold text-left">
+            Assign Staff
+          </h2>
+
+          <p className="text-[12px] text-gray-500 mt-1">
+            Select staff for this support ticket
+          </p>
+
+        </div>
+
+        <button
+          onClick={() => {
+            setShowAssignDrawer(false);
+            setDropdownValue("");
+            setAssignError("");
+            setCommentText("");
+             setPriorityValue("");
+            setPriorityError("")
+            setOpenPriorityDropdown(false)
+            
           }}
+          className="text-red-500 text-lg cursor-pointer"
         >
-          {["View", "Edit", "Assign", "Close Ticket"].map((action) => (
-            <button
-              key={action}
-              onClick={() => setOpenMenu(null)}
-              className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer
-                ${action === "Close Ticket"
-                  ? "hover:bg-red-50 text-red-600"
-                  : "hover:bg-gray-50 text-gray-700"}`}
+          ✕
+        </button>
+
+      </div>
+
+      {/* BODY */}
+      <div className="flex-1 px-5 py-5 overflow-y-auto">
+
+        {/* DROPDOWN LABEL */}
+        <label className="text-[13px] font-medium text-left block mb-2">
+          Assign Staff
+          <span className="text-red-500">*</span>
+        </label>
+
+        {/* DROPDOWN */}
+        <div className="relative">
+
+          <div
+            onClick={() => {
+  setOpenDropdown(!openDropdown);
+  setOpenPriorityDropdown(false);
+}}
+            className="
+              w-full
+              border
+              border-gray-300
+              rounded-xl
+              px-4
+              py-3
+              flex
+              justify-between
+              items-center
+              cursor-pointer
+              bg-white
+            "
+          >
+
+            <span className="text-sm">
+
+              {
+                agentList.find(
+                  (a) =>
+                    a.agentId === dropdownValue
+                )?.agentName || "Select Staff"
+              }
+
+            </span>
+
+            <ChevronDown size={18} />
+
+          </div>
+
+          {openDropdown && (
+
+            <div
+              className="
+                absolute
+                mt-2
+                w-full
+                bg-white
+                rounded-xl
+                shadow-xl
+                border
+                max-h-60
+                overflow-y-auto
+                z-[9999]
+              "
             >
-              {action}
-            </button>
-          ))}
-        </div>,
-        document.body
-      )}
+
+              {agentList.map((agent) => (
+
+                <div
+                  key={agent.agentId}
+                  onClick={() => {
+                    setDropdownValue(
+                      agent.agentId
+                    );
+
+                    setOpenDropdown(false);
+
+                    setAssignError("");
+                  }}
+                  className={`
+                    px-4 py-3
+                    text-sm
+                    cursor-pointer
+                    transition-all
+                    text-left
+
+                    ${
+                      dropdownValue ===
+                      agent.agentId
+                        ? "bg-primary text-white"
+                        : "hover:bg-gray-100"
+                    }
+                  `}
+                >
+
+                  {agent.agentName}
+
+                </div>
+
+              ))}
+
+            </div>
+
+          )}
+
+        </div>
+
+        {/* ERROR */}
+        {/* {assignError && (
+
+          <p className="text-red-500 text-xs mt-2 text-left">
+            {assignError}
+          </p>
+
+        )} */}
+         {assignError && (
+                        <ErrorMessage
+                          message={assignError}
+                          type="error"
+                        />
+                      )}
+{/* PRIORITY */}
+<div className="mt-5">
+
+  <label className="text-[13px] font-medium text-left block mb-2">
+    Priority
+    <span className="text-red-500">*</span>
+  </label>
+
+  <div className="relative">
+
+    {/* SELECT BOX */}
+    <div
+    onClick={() => {
+  setOpenPriorityDropdown(
+    !openPriorityDropdown
+  );
+
+  setOpenDropdown(false);
+}}
+      className="
+        w-full
+        border border-gray-300
+        rounded-xl
+        px-4 py-3
+        flex justify-between items-center
+        cursor-pointer
+        bg-white
+      "
+    >
+
+      <span className="text-sm">
+
+        {
+          priorityList.find(
+            (p) =>
+              p.key === priorityValue
+          )?.label ||
+          "Select Priority"
+        }
+
+      </span>
+
+      <ChevronDown size={18} />
+
+    </div>
+
+    {/* DROPDOWN */}
+    {openPriorityDropdown && (
+
+      <div
+        className="
+          absolute
+          mt-2
+          w-full
+          bg-white
+          rounded-xl
+          shadow-xl
+          border
+          max-h-[180px]
+          overflow-y-auto
+          z-[9999]
+
+          [&::-webkit-scrollbar]:w-[5px]
+          [&::-webkit-scrollbar-track]:bg-transparent
+          [&::-webkit-scrollbar-thumb]:bg-[#d1d5db]
+          [&::-webkit-scrollbar-thumb]:rounded-full
+        "
+      >
+
+        {priorityList.map((item) => (
+
+          <div
+            key={item.key}
+            onClick={() => {
+
+              setPriorityValue(
+                item.key
+              );
+
+              setOpenPriorityDropdown(
+                false
+              );
+              setPriorityError("")
+
+            }}
+            className="
+              px-4 py-3
+              text-sm
+              hover:bg-[#f8f9fc]
+              cursor-pointer text-left
+            "
+          >
+
+            {item.label}
+
+          </div>
+
+        ))}
+
+      </div>
+
+    )}
+
+  </div>
+
+</div>
+{/* {priorityError && (
+
+          <p className="text-red-500 text-xs mt-2 text-left">
+            {priorityError}
+          </p>
+
+        )} */}
+         {priorityError && (
+                        <ErrorMessage
+                          message={priorityError}
+                          type="error"
+                        />
+                      )}
+        {/* COMMENTS */}
+        <div className="mt-5">
+
+          <label className="text-[13px] font-medium text-left block mb-2">
+            Additional Comments 
+          </label>
+
+          <div
+            className="
+              border border-gray-300
+              rounded-xl
+              p-3
+              bg-white
+            "
+          >
+
+            <textarea
+              placeholder="Type your comments here..."
+              value={commentText}
+              onChange={(e) =>
+                setCommentText(e.target.value)
+              }
+              className="
+                w-full
+                h-[110px]
+                resize-none
+                outline-none
+                text-sm
+                placeholder:text-gray-400
+              "
+            />
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* FOOTER */}
+      <div className="border-t border-gray-200 px-5 py-4 flex justify-end gap-3">
+
+        <button
+          onClick={() => {
+            setShowAssignDrawer(false);
+            setDropdownValue("");
+            setAssignError("");
+            setCommentText("");
+          setPriorityValue("");
+            setPriorityError("")
+            setOpenPriorityDropdown(false)
+          }}
+          className="
+            px-4 py-2
+            border border-gray-300
+            rounded-lg
+            text-sm
+            hover:bg-gray-50
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleAssignSave}
+          className="
+            px-5 py-2
+            bg-primary-hover
+            text-white
+            rounded-lg
+            text-sm cursor-pointer
+          "
+        >
+          Save
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
+<CreateTicketModal
+  open={showCreateModal}
+  onClose={() =>
+    setShowCreateModal(false)
+  }
+  reFreshData={fetchTickets}
+/>
+<UpdateSupportStatusModal
+  open={showUpdateStatus}
+  onClose={() =>
+    setShowUpdateStatus(false)
+  }
+   ticketId={selectedTicketId}
+   reFreshData={fetchTickets}
+    currentStatus={
+    selectedTicket?.ticketStatus
+  }
+  currentData={
+    selectedTicket
+  }
+/>
+<SupportTicketOverview
+  open={showOverview}
+  onClose={() => {
+
+    setShowOverview(false);
+
+    setSelectedTicket(null);
+
+  }}
+
+  selectedTicket={selectedTicket}
+
+  onAssignClick={(ticket) => {
+
+    setSelectedTicketId(
+      ticket.ticketId
+    );
+
+    setShowOverview(false);
+
+    setShowAssignDrawer(
+      true
+    );
+
+  }}
+/>
     </DashboardLayout>
   );
 };

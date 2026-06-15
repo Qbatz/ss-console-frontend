@@ -192,30 +192,25 @@ const IamAdminUser = () => {
     setShowReactivateModal(false);
   };
   const TableSkeleton = () => {
-    return (
-      <>
-        {[...Array(6)].map((_, i) => (
-          <tr key={i} className="border-b border-gray-300 animate-pulse">
-            <td className="px-4 py-3">
-              <div className="h-3 w-24 bg-gray-200 rounded"></div>
-            </td>
-            <td className="px-2 py-3">
-              <div className="h-3 w-32 bg-gray-200 rounded"></div>
-            </td>
-            <td className="px-2 py-3">
-              <div className="h-3 w-20 bg-gray-200 rounded"></div>
-            </td>
-            <td className="px-2 py-3">
-              <div className="h-3 w-28 bg-gray-200 rounded"></div>
-            </td>
-            <td className="px-2 py-3">
-              <div className="h-3 w-6 bg-gray-200 rounded"></div>
-            </td>
-          </tr>
-        ))}
-      </>
-    );
-  };
+  return (
+    <>
+      {[...Array(6)].map((_, i) => (
+        <tr
+          key={i}
+          className="border-b border-gray-200"
+        >
+          {[1, 2, 3, 4, 5].map((item) => (
+           <td className="px-4 py-3">
+  <div className="h-4 w-24 relative overflow-hidden rounded-md bg-gray-200">
+    <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.8s_infinite] bg-gradient-to-r from-transparent via-white/70 to-transparent"></div>
+  </div>
+</td>
+          ))}
+        </tr>
+      ))}
+    </>
+  );
+};
 
 
   return (

@@ -17,12 +17,16 @@ const Roles = () => {
   const [openMenu, setOpenMenu] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const totalRecords = agentRoles?.length || 0;
   const totalPages = Math.ceil(totalRecords / pageSize);
   const [deleteRole, setDeleteRole] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("")
+  const [dropdownPosition, setDropdownPosition] = useState({
+  top: 0,
+  left: 0,
+});
   const navigate = useNavigate();
 
   console.log("accessError", accessError)
@@ -180,10 +184,36 @@ const Roles = () => {
 
                           <td className="px-4 py-3 text-center relative">
                             <button
+                              // onClick={(e) => {
+                              //   e.stopPropagation();
+                              //   setOpenMenu(openMenu === index ? null : index);
+                              // }}
                               onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenMenu(openMenu === index ? null : index);
-                              }}
+  e.stopPropagation();
+
+  const rect =
+    e.currentTarget.getBoundingClientRect();
+
+  const dropdownHeight = 100;
+
+  const spaceBelow =
+    window.innerHeight - rect.bottom;
+
+  const openUp =
+    spaceBelow < dropdownHeight;
+
+  setDropdownPosition({
+    top: openUp
+      ? rect.top + window.scrollY - dropdownHeight
+      : rect.bottom + window.scrollY,
+
+    left: rect.left + window.scrollX - 110,
+  });
+
+  setOpenMenu(
+    openMenu === index ? null : index
+  );
+}}
                               className="text-gray-500 hover:text-gray-700 cursor-pointer"
                             >
                               <img src={Circle} alt="circle" className="w-5 h-5" />
@@ -192,10 +222,11 @@ const Roles = () => {
                             {openMenu === index && role.editable !== false && (
                               <div
                                 onClick={(e) => e.stopPropagation()}
-                                className={`absolute right-12 w-32 bg-white border rounded-lg shadow-lg z-20 ${index >= agentRoles.length - 2
-                                  ? "bottom-8"
-                                  : "top-8"
-                                  }`}
+  className="fixed w-32 bg-white border rounded-lg shadow-lg z-[9999]"
+  style={{
+    top: dropdownPosition.top,
+    left: dropdownPosition.left,
+  }}
                               >
                                 <button
                                   className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-sky-100 cursor-pointer"
@@ -253,6 +284,7 @@ const Roles = () => {
                 }}
                 className="border rounded-md px-2 py-1 text-sm cursor-pointer"
               >
+                
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
@@ -261,9 +293,9 @@ const Roles = () => {
 
              <button
   disabled={
-    page === 1 ||
-    data?.length === 0
-  }
+  page === 1 ||
+  paginatedData?.length === 0
+}
   onClick={() =>
     setPage((prev) => prev - 1)
   }
@@ -272,7 +304,7 @@ const Roles = () => {
 
     ${
       page === 1 ||
-      data?.length === 0
+      paginatedData?.length === 0
         ? "opacity-40 cursor-not-allowed"
         : "cursor-pointer"
     }
@@ -286,12 +318,14 @@ const Roles = () => {
                 {page}
               </span>
 
-
+<span className="text-textDark/60 text-cardTitle">
+  {page} - {totalPages}
+</span>
              <button
   disabled={
-    page >= totalPages ||
-    data?.length === 0
-  }
+  page >= totalPages ||
+  paginatedData?.length === 0
+}
   onClick={() =>
     setPage((prev) => prev + 1)
   }
@@ -300,7 +334,7 @@ const Roles = () => {
 
     ${
       page >= totalPages ||
-      data?.length === 0
+      paginatedData?.length === 0
         ? "opacity-40 cursor-not-allowed"
         : "cursor-pointer"
     }
@@ -308,6 +342,7 @@ const Roles = () => {
 >
   &#8250;
 </button>
+
 
             </div>
           </div>
