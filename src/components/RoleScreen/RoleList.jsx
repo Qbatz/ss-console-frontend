@@ -139,6 +139,7 @@ const Roles = () => {
                       <th className="px-4 py-3 w-[25%]">Description</th>
                       <th className="px-4 py-3 w-[15%]">Users Count</th>
                       <th className="px-4 py-3 w-[20%]">Created On</th>
+                      <th className="px-4 py-3 w-[20%]">Updated On</th>
                       <th className="px-4 py-3 w-[10%]">Actions</th>
                     </tr>
                   </thead>
@@ -178,9 +179,60 @@ const Roles = () => {
                             </span>
                           </td>
 
-                          <td className="px-4 py-3 text-black-600">
-                            {role.created || "N/A"}
-                          </td>
+                          <td
+  className="
+    px-4
+    py-3
+    text-black-600
+  "
+>
+
+  <div className="flex flex-col">
+
+    <span>
+      {role.createdAtDate || "N/A"}
+    </span>
+
+    <span
+      className="
+        text-xs
+        text-gray-400
+        mt-1
+      "
+    >
+      {role.createdAtTime || ""}
+    </span>
+
+  </div>
+
+</td>
+<td
+  className="
+    px-4
+    py-3
+    text-black-600
+  "
+>
+
+  <div className="flex flex-col">
+
+    <span>
+      {role.updatedAtDate || "N/A"}
+    </span>
+
+    <span
+      className="
+        text-xs
+        text-gray-400
+        mt-1
+      "
+    >
+      {role.updatedAtTime || ""}
+    </span>
+
+  </div>
+
+</td>
 
                           <td className="px-4 py-3 text-center relative">
                             <button

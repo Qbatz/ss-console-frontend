@@ -306,29 +306,82 @@ useEffect(() => {
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
+              <option value={100}>100</option>
             </select>
 
-            <button className="cursor-pointer"
-              disabled={page === 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              <img src={Arrow} className="w-4 h-4"/>
-            </button>
+      <button
+  className={`
+    w-8
+    h-8
+    rounded-full
+    flex
+    items-center
+    justify-center
+
+    ${
+      page === 1 ||
+      tableData.length === 0
+        ? " cursor-not-allowed opacity-70"
+        : " hover:bg-gray-200 cursor-pointer"
+    }
+  `}
+  disabled={
+    page === 1 ||
+    tableData.length === 0
+  }
+  onClick={() =>
+    setPage((p) => p - 1)
+  }
+>
+  <img
+    src={Arrow}
+    className="w-4 h-4"
+  />
+</button>
 
             <span className="border px-3 py-1 rounded bg-gray-50">
               {page}
             </span>
+                 <span className="text-textDark/60 text-cardTitle">
+  {page} - {totalPages}
+</span>
+       <button
+  className={`
+    w-8
+    h-8
+    rounded-full
+    flex
+    items-center
+    justify-center
 
-            <button
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              <img src={Arrow} className="w-4 h-4 rotate-[-180deg]"/>
-            </button>
+    ${
+      page >= totalPages ||
+      tableData.length === 0
+        ? "cursor-not-allowed opacity-70"
+        : "hover:bg-gray-200 cursor-pointer"
+    }
+  `}
+  disabled={
+    page >= totalPages ||
+    tableData.length === 0
+  }
+  onClick={() =>
+    setPage((p) => p + 1)
+  }
+>
+  <img
+    src={Arrow}
+    className="
+      w-4
+      h-4
+      rotate-[-180deg]
+    "
+  />
+</button>
 
-            <span className="text-gray-400">
+            {/* <span className="text-gray-400">
               {start} - {end}
-            </span>
+            </span> */}
 
           </div>
 

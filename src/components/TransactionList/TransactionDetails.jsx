@@ -700,7 +700,9 @@ useEffect(() => {
               <span className="border px-3 py-1 rounded bg-gray-50">
                 {page}
               </span>
-
+   <span className="text-textDark/60 text-cardTitle">
+  {page} - {resData?.totalPages}
+</span>
               {/* Next */}
              <button
   disabled={
@@ -721,9 +723,9 @@ useEffect(() => {
 </button>
 
               {/* Range */}
-              <span className="text-gray-400">
+              {/* <span className="text-gray-400">
                 {start} - {end}
-              </span>
+              </span> */}
 
             </div>
           </div>

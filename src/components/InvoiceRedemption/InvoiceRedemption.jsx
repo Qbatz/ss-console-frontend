@@ -373,7 +373,7 @@ setModalType("success");
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
-               <option value={100}>100</option>
+              <option value={100}>100</option>
             </select>
 
            <button
@@ -404,7 +404,9 @@ setModalType("success");
             <div className="border px-3 py-1 rounded-md text-sm">
               {page}
             </div>
-
+<span className="text-textDark/60 text-cardTitle">
+  {page} - {totalPages}
+</span>
             <button
   onClick={() =>
     setPage(prev =>

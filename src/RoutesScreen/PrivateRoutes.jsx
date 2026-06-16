@@ -33,6 +33,7 @@ import TableCustomization from "../components/TableCustomizationScreen/TableCust
 import TenantRecurring from "../components/RecurringMonitor/TenantRecurring";
 import InvoiceRedemption from "../components/InvoiceRedemption/InvoiceRedemption";
 import { SupportTicketsProvider } from "../Context/SupportTicketsContext";
+import TenantDeductions from "../components/PropertiesScreen/TenantDeductions";
 
 const PrivateRoute = ({ children }) => {
   const token =
@@ -109,6 +110,10 @@ const PrivateRoutesScreen = () => {
                       <Route path="/iam-user/:agentId" element={<UserInfo />} />
                       <Route path="/tableCustomize/:agentId" element={<TableCustomization />} />
                       <Route path="/invoice-redemption/:agentId" element={<InvoiceRedemption />} />
+                      <Route
+  path="/tenant-deductions/:customerId"
+  element={<TenantDeductions />}
+/>
 
 
 

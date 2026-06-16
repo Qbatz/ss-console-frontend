@@ -622,7 +622,9 @@ const [deleteId, setDeleteId] = useState(null);
               <span className="border px-3 py-1 rounded bg-gray-50">
                 {page + 1}
               </span>
-
+              <span className="text-textDark/60 text-cardTitle">
+  {page + 1} - {totalPages}
+</span>
              <button
   disabled={
     page + 1 >= totalPages ||

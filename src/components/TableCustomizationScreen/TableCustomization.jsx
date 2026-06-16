@@ -810,7 +810,9 @@ const TableCustomization = () => {
               {page}
             </div>
 
-            {/* Next Button */}
+                     <span className="text-textDark/60 text-cardTitle">
+  {page} - {totalPages}
+</span>
             <button
               onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
               disabled={page === totalPages}
@@ -823,10 +825,10 @@ const TableCustomization = () => {
             </button>
 
 
-            <div className="text-sm text-gray-500">
+            {/* <div className="text-sm text-gray-500">
               {(page - 1) * rowsPerPage + 1} -{" "}
               {Math.min(page * rowsPerPage, totalRecords)}
-            </div>
+            </div> */}
 
           </div>
         </div>

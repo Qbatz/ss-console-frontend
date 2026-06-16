@@ -18,6 +18,7 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
   const [message, setMessage] = useState("");
   const [initialRoleName, setInitialRoleName] = useState("");
   const [initialPermissions, setInitialPermissions] = useState([]);
+  const [description, setDescription] = useState("");
 
 
   console.log("permissions", permissions)
@@ -28,6 +29,7 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
     setPermissions([]);
     setRoleNameError("");
     setPermissionError("");
+    setDescription("");
   };
   const handleClose = () => {
     resetForm();
@@ -59,7 +61,11 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
   useEffect(() => {
     if (selectedRole) {
       setRoleName(selectedRole.name || "");
+      setDescription(
+  selectedRole.description || ""
+);
       setInitialRoleName(selectedRole.name || "");
+
 
       if (selectedRole.rolesPermissionDetails) {
         const formattedPermissions =
@@ -79,6 +85,7 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
       setPermissions([]);
       setInitialRoleName("");
       setInitialPermissions([]);
+      setDescription("")
     }
   }, [selectedRole]);
 
@@ -276,6 +283,9 @@ const handlePermissionChange = (moduleId, field, value) => {
     }
     if (selectedRole) {
       const isNameSame = roleName === initialRoleName;
+      const isDescriptionSame =
+  description ===
+  (selectedRole.description || "");
 
       // const isPermissionSame =
       //   JSON.stringify(
@@ -299,7 +309,7 @@ const isPermissionSame =
   JSON.stringify(normalizePermissions(permissions)) ===
   JSON.stringify(normalizePermissions(initialPermissions));
 
-      if (isNameSame && isPermissionSame) {
+      if (isNameSame && isPermissionSame && isDescriptionSame) {
         setModalType("error");
         setMessage("No changes detected.");
         setShowSuccess(true);
@@ -318,6 +328,7 @@ const isPermissionSame =
     const payload = {
       roleName,
       isActive: true,
+      description:description,
       permissionList: permissions,
     };
 
@@ -481,10 +492,26 @@ const isPermissionSame =
               </label>
 
               <textarea
-                rows="4"
-                placeholder="e.g., Can manage Property, Billings, Subscriptions."
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-              />
+  rows="4"
+  placeholder="e.g., Can manage Property, Billings, Subscriptions."
+  value={description}
+  onChange={(e) =>
+    setDescription(e.target.value)
+  }
+  className="
+    w-full
+    border
+    border-gray-200
+    rounded-lg
+    px-4
+    py-2.5
+    text-sm
+    focus:ring-2
+    focus:ring-blue-500
+    outline-none
+    resize-none
+  "
+/>
             </div>
           </div>
 

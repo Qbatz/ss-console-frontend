@@ -184,36 +184,35 @@ setIsSubmitting(true);
 
   if (!formData.contactNo) {
 
-    setMobileError(
-      "Mobile number is required"
-    );
-
-    return;
-
-  } else if (
-    !/^[6-9]\d{9}$/.test(
-      formData.contactNo
-    ) ||
-    /^(\d)\1{9}$/.test(
-      formData.contactNo
-    )
-  ) {
-
-    setMobileError(
-      "Enter valid mobile number"
-    );
-
-    return;
-
-  }
-
- if (!isValid) {
+  setMobileError(
+    "Mobile number is required"
+  );
 
   setIsSubmitting(false);
 
   return;
 
 }
+else if (
+  !/^[6-9]\d{9}$/.test(
+    formData.contactNo
+  ) ||
+  /^(\d)\1{9}$/.test(
+    formData.contactNo
+  )
+) {
+
+  setMobileError(
+    "Enter valid mobile number"
+  );
+
+  setIsSubmitting(false);
+
+  return;
+
+}
+
+ 
 
   try {
 

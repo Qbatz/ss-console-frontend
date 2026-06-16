@@ -653,7 +653,7 @@ const handleCloseDrawer =
 
 </div>
 
-{/* ADD ASSIGNED */}
+
 {
   selectedTicket?.canAssignStaff === true && (
 

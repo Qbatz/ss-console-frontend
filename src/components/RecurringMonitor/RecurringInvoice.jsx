@@ -940,7 +940,9 @@ const [totalProperty,setTotalProperty] = useState("")
                   <span className="border px-2 py-1 rounded bg-gray-50">
                     {page}
                   </span>
-
+<span className="text-textDark/60 text-cardTitle">
+  {page} - {totalPages}
+</span>
                  
                   <button
   onClick={() =>
@@ -970,9 +972,9 @@ const [totalProperty,setTotalProperty] = useState("")
 </button>
 
                   {/* Range */}
-                  <span className="text-gray-400">
+                  {/* <span className="text-gray-400">
                     {start} - {end}
-                  </span>
+                  </span> */}
 
                 </div>
 

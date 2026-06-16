@@ -1337,7 +1337,9 @@ const TenantRecurring = () => {
                   {page}
                 </span>
 
-                {/* Next */}
+             <span className="text-textDark/60 text-cardTitle">
+  {page} - {totalPages}
+</span>
              <button
   onClick={() =>
     setPage(p =>
@@ -1365,10 +1367,7 @@ const TenantRecurring = () => {
   />
 </button>
 
-                {/* Range */}
-                <span className="text-gray-400">
-                  {start} - {end}
-                </span>
+               
 
               </div>
 

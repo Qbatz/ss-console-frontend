@@ -596,7 +596,9 @@ const IamAdminUser = () => {
                   <div className="w-12 h-10 border border-black rounded-xl flex items-center justify-center text-sm font-medium">
                     {page}
                   </div>
-
+         <span className="text-textDark/60 text-cardTitle">
+  {page} - {agents?.totalPages}
+</span>
 
                   <button
                     disabled={page >= agents?.totalPages}

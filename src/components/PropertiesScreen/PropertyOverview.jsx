@@ -53,8 +53,8 @@ const PropertyOverview = () => {
   const [phone, setPhone] = useState("");
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [generatedPaymentUrl, setGeneratedPaymentUrl] = useState("");
-  const [trialReasons, setTrialReasons] =
-  useState([]);
+  const [trialReasons, setTrialReasons] =useState([]);
+  const [showCustomDays,setShowCustomDays] =useState(false);
   const [reasonError,setReasonError] = useState("")
 const [remarks, setRemarks] =
   useState("");
@@ -2127,19 +2127,57 @@ fetchData()
   <div
     className="
       fixed
-      w-28
+      w-44
       bg-white
       border
       border-borderSoft
       rounded-card
       shadow-dropdown
       z-[9999]
+      py-2
+      flex
+      flex-col
     "
     style={{
       top: menuPosition.top,
       left: menuPosition.left - 100,
     }}
   >
+
+    <button
+      // onClick={() => {
+      //   setSelectedTenantId(item.customerId);
+      //   setShowDetectionsModal(true);
+      //   setOpenMenu(null);
+      // }}
+       onClick={() => {
+
+    navigate(
+      `/tenant-deductions/${item.customerId}`,
+      {
+        state: {
+          tenantData: item,
+          hostelData: hostelData
+        }
+      }
+    );
+
+    setOpenMenu(null);
+
+  }}
+      className="
+        w-full
+        text-left
+        px-4
+        py-3
+        text-cardTitle
+        hover:bg-cardBg
+        text-gray-700
+        cursor-pointer
+      "
+    >
+      Detections
+    </button>
 
     <button
       disabled={!canDelete}
@@ -2153,13 +2191,12 @@ fetchData()
 
         setShowDeleteModal(true);
         setOpenMenu(null);
-
       }}
       className={`
         w-full
         text-left
         px-4
-        py-2
+        py-3
         text-cardTitle
 
         ${
@@ -2175,7 +2212,6 @@ fetchData()
   </div>
 
 )}
-
                       </div>
 
                     </td>
@@ -3260,21 +3296,101 @@ fetchData()
 
     <div className="text-left">
 
-  <button
+ <button
+  onClick={() => {
+
+    setShowCustomDays(true);
+
+    setDays("");
+
+    setDaysError("");
+
+  }}
+  className="
+    mt-3
+    block
+    text-xs
+    text-blue-600
+    hover:underline
+    cursor-pointer
+  "
+>
+  Select Custom
+</button>
+</div>
+{showCustomDays && (
+
+  <div
     className="
-      mt-3
-      block
-      text-xs
-      text-blue-600
-      hover:underline
-      cursor-pointer
+      mt-4
+      flex
+      items-center
+      gap-4
     "
   >
-    Select Custom
-  </button>
 
-</div>
+    {/* LABEL */}
+    <label
+      className="
+        text-xs
+        font-medium
+        text-gray-700
+        text-left
+        block
+      "
+    >
+      Custom Days
+    </label>
 
+    {/* INPUT */}
+    <input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      value={showCustomDays ? days : ""}
+      onFocus={() => {
+
+        setShowCustomDays(true);
+        setDays("");
+
+      }}
+      onChange={(e) => {
+
+        const value =
+          e.target.value;
+
+        // only numbers
+        if (!/^\d*$/.test(value))
+          return;
+
+        // max 30
+        if (
+          Number(value) > 30
+        )
+          return;
+
+        setDays(value);
+
+        setDaysError("");
+
+      }}
+      placeholder="Enter custom days"
+      className="
+        w-[220px]
+        h-[44px]
+        border
+        border-gray-300
+        rounded-xl
+        px-4
+        text-sm
+        outline-none
+        focus:border-blue-500
+      "
+    />
+
+  </div>
+
+)}
   </div>
 
 </div>

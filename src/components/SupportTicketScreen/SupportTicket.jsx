@@ -1290,7 +1290,9 @@ const handleOpenComments =
     ? ["Update Status"]
     : []),
 
-  "Assign Staff",
+    ...(item.canAssignStaff !== false
+    ? ["Assign Staff"]
+    : []),
 
 ].map((menu, idx) => (
        <button
