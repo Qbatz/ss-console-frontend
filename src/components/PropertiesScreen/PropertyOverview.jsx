@@ -35,7 +35,7 @@ import CustTenImg from "../../assets/team.png"
 import LocationGrey from "../../assets/locationGrey.png";
 import Call from "../../assets/call.png";
 const PropertyOverview = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory,sharePaymentLink} = useHostel();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory,sharePaymentLink,getTenantDeductions} = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription,getTrialDaysExtReason } = useSubscription();
@@ -1034,43 +1034,39 @@ fetchData()
           </h2>
 
           <p
-            className="
-              text-cardTitle
-              text-textDark/60
-              flex
-              items-center
-              gap-1
-              whitespace-nowrap
-              overflow-hidden
-              mt-1
-            "
-          >
+  className="
+    text-cardTitle
+    text-textDark/60
+    flex
+    items-center
+    gap-1
+    mt-1
+    min-w-0
+    w-full
+  "
+>
+  <span className="shrink-0">
+    {hostelData.hostelId} |
+  </span>
 
-            <span className="shrink-0">
-              {hostelData.hostelId} |
-            </span>
+  <span
+  title={hostelData.owner?.fullName}
+  className="
+    text-primaryBlue
+    cursor-pointer
+    hover:underline
+    break-words whitespace-nowrap
+  "
+  onClick={() => handleOwnerClick(hostelData)}
+>
+  {hostelData.owner?.fullName}
+</span>
 
-            <span
-              title={hostelData.owner?.fullName}
-              className="
-                text-primaryBlue
-                cursor-pointer
-                hover:underline
-                truncate
-                overflow-hidden
-                max-w-[260px]
-              "
-              onClick={() => handleOwnerClick(hostelData)}
-            >
-              {hostelData.owner?.fullName}
-            </span>
-
-            <img
-              src={Arrow}
-              className="w-3 h-3 ml-1 shrink-0"
-            />
-
-          </p>
+  <img
+    src={Arrow}
+    className="w-3 h-3 shrink-0"
+  />
+</p>
 
         </div>
 

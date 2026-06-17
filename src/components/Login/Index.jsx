@@ -122,7 +122,7 @@ const Index = () => {
     } else {
       localStorage.removeItem("access_token");
       localStorage.removeItem("mock_token");
-      setIsChecking(false); // ⭐ allow login page
+      setIsChecking(false); 
     }
   }, []);
 

@@ -89,10 +89,10 @@ const getErrorMessage = (error) => {
     }
   };
 
- useEffect(() => {
-  fetchModules();
-    getAdminDetails();   
-}, []);
+//  useEffect(() => {
+//   fetchModules();
+//     getAdminDetails();   
+// }, []);
   const getAgentRoles = async () => {
     try {
       setLoading(true);
@@ -115,14 +115,18 @@ const getErrorMessage = (error) => {
   };
 
   // Auto load modules on mount
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      fetchModules();
-     
-        getAdminDetails();   
-    }
-  }, []);
+ useEffect(() => {
+
+  const token =
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("mock_token");
+
+  if (!token) return;
+
+  fetchModules();
+  getAdminDetails();
+
+}, []);
   const createAgentRole = async (payload) => {
     try {
       setLoading(true);

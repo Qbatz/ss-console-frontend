@@ -1290,9 +1290,9 @@ const handleOpenComments =
     ? ["Update Status"]
     : []),
 
-    ...(item.canAssignStaff !== false
-    ? ["Assign Staff"]
-    : []),
+   ...(item.canAssignStaff !== false
+  ? [item.assignedTo ? "ReAssign Staff" : "Assign Staff"]
+  : []),
 
 ].map((menu, idx) => (
        <button
@@ -1311,12 +1311,16 @@ const handleOpenComments =
   );
   }
 
-  if (menu === "Assign Staff") {
-     setSelectedTicketId(
+ if (
+  menu === "Assign Staff" ||
+  menu === "ReAssign Staff"
+) {
+  setSelectedTicketId(
     item.ticketId
   );
-    setShowAssignDrawer(true);
-  }
+  setSelectedTicket(item)
+  setShowAssignDrawer(true);
+}
   if (menu === "Update Status") {
   setShowUpdateStatus(true);
    setSelectedTicketId(
@@ -1742,9 +1746,11 @@ const handleOpenComments =
 
         <div>
 
-          <h2 className="text-[18px] font-semibold text-left">
-            Assign Staff
-          </h2>
+         <h2 className="text-[18px] font-semibold text-left">
+  {selectedTicket?.assignedTo
+    ? "ReAssign Staff"
+    : "Assign Staff"}
+</h2>
 
           <p className="text-[12px] text-gray-500 mt-1">
             Select staff for this support ticket

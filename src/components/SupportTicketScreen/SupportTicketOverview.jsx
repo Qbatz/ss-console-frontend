@@ -660,7 +660,10 @@ const handleCloseDrawer =
     <div className="flex items-center">
 
       <p className="w-[120px] text-[13px] text-[#9CA3AF]">
-        Add Assigned
+                 {selectedTicket?.assignedTo
+          ? "ReAssign Staff"
+          : "Assign Staff"}
+
       </p>
 
       <span className="mr-5 text-[#9CA3AF]">
@@ -674,14 +677,20 @@ const handleCloseDrawer =
           )
         }
         className="
-          text-[14px]
-          font-semibold
-          text-[#2563EB]
-          cursor-pointer
-          hover:underline
-        "
+    px-3 py-1.5
+    rounded-lg
+    bg-[#315CEC]
+    text-white
+    text-[13px]
+    font-medium
+    cursor-pointer
+    hover:bg-[#2648C9]
+    transition-all
+  "
       >
-        Assign +
+        {selectedTicket?.assignedTo
+    ? "↻ Reassign"
+    : "+ Assign"}
       </button>
 
     </div>

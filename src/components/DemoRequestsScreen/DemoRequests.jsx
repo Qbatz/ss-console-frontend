@@ -1343,7 +1343,8 @@ setCommentText("")
           }}
           className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
         >
-          Assign Staff
+          
+          {item?.assignedTo ? "ReAssign Staff" : "Assign Staff "}
         </button>
       )}
 {item?.demoRequestStatus !==
@@ -1586,7 +1587,9 @@ setCommentText("")
 
         <div>
           <h2 className="text-[18px] font-semibold text-left">
-            Assign Staff
+           {selectedItem?.assignedTo
+    ? "Reassign Staff"
+    : "Assign Staff"}
           </h2>
 
           <p className="text-[12px] text-gray-500 mt-1">

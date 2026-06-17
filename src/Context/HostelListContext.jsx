@@ -1342,6 +1342,85 @@ const sharePaymentLink = async (
 
   }
 };
+
+const getTenantDeductions = async (
+  hostelId,
+  customerId
+) => {
+  try {
+
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      `/v2/tenants/deductions/${hostelId}/${customerId}`
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
+const updateTenantDeductions = async (
+  hostelId,
+  customerId,
+  invoiceId,
+  payload
+) => {
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.put(
+      `/v2/tenants/deductions/${hostelId}/${customerId}/${invoiceId}`,
+      payload
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      message: getErrorMessage(error)
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
   return (
     <HostelContext.Provider
       value={{
@@ -1352,7 +1431,8 @@ const sharePaymentLink = async (
         bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,
         deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns,
         resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,
-        deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,generateOrderHistory,sharePaymentLink
+        deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,
+        generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions
       }}
     >
       {children}

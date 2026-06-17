@@ -5,50 +5,42 @@ const axiosInstance = axios.create({
   baseURL: ConfigV2.apiBaseUrl,
 });
 
+axiosInstance.interceptors.request.use(
+  (config) => {
 
+    const loginType =
+      localStorage.getItem(
+        "login_type"
+      );
 
-let isRefreshing = false;
-let failedQueue = [];
+    let token = null;
 
+    if (loginType === "mock") {
 
+      token =
+        localStorage.getItem(
+          "mock_token"
+        );
 
-const processQueue = (error, token = null) => {
-
-  failedQueue.forEach((prom) => {
-
-    if (error) {
-      prom.reject(error);
     } else {
-      prom.resolve(token);
+
+      token =
+        localStorage.getItem(
+          "access_token"
+        );
+
     }
 
-  });
+    if (token) {
 
-  failedQueue = [];
-};
+      config.headers.Authorization =
+        `Bearer ${token}`;
 
+    }
 
-
-axiosInstance.interceptors.request.use((config) => {
-
-  const loginType = localStorage.getItem("login_type");
-
-  let token = null;
-
-  if (loginType === "mock") {
-    token = localStorage.getItem("mock_token");
-  } else {
-    token = localStorage.getItem("access_token");
+    return config;
   }
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-});
-
-
+);
 
 axiosInstance.interceptors.response.use(
 
@@ -56,101 +48,16 @@ axiosInstance.interceptors.response.use(
 
   async (error) => {
 
-    const originalRequest = error.config;
-
-
     if (
-      error?.response?.status === 401 &&
-      !originalRequest._retry
+      error?.response?.status === 401
     ) {
 
+      localStorage.clear();
 
-      if (isRefreshing) {
+      window.location.replace(
+        "/internal/login"
+      );
 
-        return new Promise((resolve, reject) => {
-
-          failedQueue.push({ resolve, reject });
-
-        })
-          .then((token) => {
-
-            originalRequest.headers.Authorization =
-              "Bearer " + token;
-
-            return axiosInstance(originalRequest);
-
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      const refreshToken =
-        localStorage.getItem("refreshToken");
-
-
-      if (!refreshToken) {
-
-        localStorage.clear();
-        window.location.replace("/");
-
-        return Promise.reject(error);
-      }
-
-      try {
-
-
-        const res = await axios.post(
-          `${ConfigV2.apiBaseUrl}/refresh-token`,
-          {
-            refreshToken,
-          }
-        );
-
-
-        const newAccessToken =
-          res?.data?.accessToken;
-
-
-        if (!newAccessToken) {
-          throw new Error("No access token received");
-        }
-
-
-        localStorage.setItem(
-          "access_token",
-          newAccessToken
-        );
-
-
-        axiosInstance.defaults.headers.common.Authorization =
-          "Bearer " + newAccessToken;
-
-
-        processQueue(null, newAccessToken);
-
-
-        originalRequest.headers.Authorization =
-          "Bearer " + newAccessToken;
-
-        return axiosInstance(originalRequest);
-
-      } catch (err) {
-
-        processQueue(err, null);
-
-
-        localStorage.clear();
-
-        window.location.replace("/");
-
-        return Promise.reject(err);
-
-      } finally {
-
-        isRefreshing = false;
-      }
     }
 
     return Promise.reject(error);

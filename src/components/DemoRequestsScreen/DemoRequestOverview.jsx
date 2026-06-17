@@ -308,7 +308,8 @@ const DemoRequestOverview = ({
                       <div className="flex items-center">
 
                         <p className="w-[100px] text-[12px] text-[#9CA3AF]">
-                          Add Assigned
+                          {selectedItem?.assignedTo ? "ReAssign" : "Add Assign "}
+
                         </p>
 
                         <span className="mr-5 text-[#9CA3AF]">:</span>
@@ -328,17 +329,25 @@ const DemoRequestOverview = ({
                         {selectedItem?.canAssignStaff === true && (
 
                           <button
-                            onClick={onAssignStaff}
-                            className="
-      text-[14px]
-      font-semibold
-      text-[#2563EB]
-      cursor-pointer
-      hover:underline
-    "
-                          >
-                            Assign +
-                          </button>
+  onClick={onAssignStaff}
+  className="
+    px-2
+    py-1
+    rounded-lg
+    border
+    border-[#315CEC]
+    text-[#315CEC]
+    text-[13px]
+    font-medium
+    hover:bg-[#EEF4FF]
+    transition-all
+    cursor-pointer
+  "
+>
+  {selectedItem?.assignedTo
+    ? "↻ Reassign"
+    : "+ Assign"}
+</button>
 
                         )}
 

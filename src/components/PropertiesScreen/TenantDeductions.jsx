@@ -1,42 +1,191 @@
-import React from "react";
-import {
-  useLocation
-} from "react-router-dom";
+import React,{useState,useEffect} from "react";
+import { useLocation,useNavigate} from "react-router-dom";
 
 import DashboardLayout
 from "../SidebarScreen/SidebarLayout";
+import { useHostel } from "../../Context/HostelListContext";
+import Toast from "../SuccessModal/ToastDesign";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import arrowleft from "../../assets/arrow-up.png";
 
 const TenantDeductions = () => {
+const { getTenantDeductions,updateTenantDeductions } = useHostel();
+  const { state } = useLocation();
+const navigate = useNavigate();
+  const tenantData = state?.tenantData;
+  const hostelData = state?.hostelData;
+  console.log("tenantData",tenantData)
+const [deductions, setDeductions] = useState([]);
+const [invoiceDeductions,setInvoiceDeductions] =useState([]);
+const [selectedInvoiceId, setSelectedInvoiceId] = useState("");
+  const [invoiceList, setInvoiceList] = useState([]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedInvoice,setSelectedInvoice] = useState(null);
+  const [deductionType, setDeductionType] = useState("");
+  const [modalType, setModalType] = useState("success");
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [message, setMessage] = useState("");
+    const [saving, setSaving] = useState(false);
 
-  const { state } =
-    useLocation();
+const [amount, setAmount] =
+  useState("");
 
-  const tenantData =
-    state?.tenantData;
+const [paidAmount, setPaidAmount] =
+  useState("");
+  const fetchDeductions = async () => {
 
-  // dummy data
-  const deductions = [
-    {
-      type: "Electricity",
-      amount: 2500,
-      paidAmount: 1500
-    },
-    {
-      type: "Maintenance",
-      amount: 1200,
-      paidAmount: 1200
-    },
-    {
-      type: "Damage",
-      amount: 3000,
-      paidAmount: 0
+  const res = await getTenantDeductions(
+    hostelData?.hostelId,
+    tenantData?.customerId
+  );
+
+  if (res?.success) {
+
+    setDeductions(
+      Array.isArray(
+        res.data?.customerAdvanceDeductions
+      )
+        ? res.data.customerAdvanceDeductions
+        : []
+    );
+
+    setInvoiceList(
+      res.data?.advanceInvoice || []
+    );
+
+    const invoiceData =
+      res.data?.advanceInvoice?.flatMap(
+        (invoice) =>
+          (invoice.invoiceAdvanceDeductions || [])
+            .map((deduction) => ({
+              ...deduction,
+              invoiceId: invoice.invoiceId,
+              invoiceNumber: invoice.invoiceNumber
+            }))
+      ) || [];
+
+    setInvoiceDeductions(invoiceData);
+  }
+};
+useEffect(() => {
+
+  if (
+    hostelData?.hostelId &&
+    tenantData?.customerId
+  ) {
+    fetchDeductions();
+  }
+
+}, [hostelData?.hostelId, tenantData?.customerId]);
+
+// useEffect(() => {
+
+//   const fetchDeductions = async () => {
+
+//     const res = await getTenantDeductions(
+//       hostelData?.hostelId,
+//       tenantData?.customerId
+//     );
+
+// if (res?.success) {
+
+//   setDeductions(
+//     Array.isArray(
+//       res.data?.customerAdvanceDeductions
+//     )
+//       ? res.data.customerAdvanceDeductions
+//       : []
+//   );
+
+//   setInvoiceList(
+//     res.data?.advanceInvoice || []
+//   );
+
+//   const invoiceData =
+//     res.data?.advanceInvoice?.flatMap(
+//       (invoice) =>
+//         (invoice.invoiceAdvanceDeductions || [])
+//           .map((deduction) => ({
+//             ...deduction,
+//             invoiceId: invoice.invoiceId,
+//             invoiceNumber: invoice.invoiceNumber
+//           }))
+//     ) || [];
+
+//   setInvoiceDeductions(
+//     invoiceData
+//   );
+// }
+
+//   };
+
+//   if (
+//     hostelData?.hostelId &&
+//     tenantData?.customerId
+//   ) {
+//     fetchDeductions();
+//   }
+
+// }, []);
+const handleSaveDeduction =
+  async () => {
+
+    if (saving) return;
+
+    try {
+
+      setSaving(true);
+
+      const res =
+        await updateTenantDeductions(
+          hostelData?.hostelId,
+          tenantData?.customerId,
+          selectedInvoiceId
+        );
+
+      if (res?.success) {
+
+        setModalType("success");
+        setMessage(res?.data);
+
+        await fetchDeductions();
+
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          setShowSuccess(false);
+          setShowAddModal(false);
+        }, 1500);
+
+      } else {
+
+        setModalType("error");
+        setMessage(res?.message);
+
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
+      }
+
+    } finally {
+
+      setSaving(false);
+
     }
-  ];
+
+  };
 
   return (
 
     <DashboardLayout>
+ <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
 
+      />
       <div
         className="
           p-6
@@ -46,29 +195,45 @@ const TenantDeductions = () => {
       >
 
         {/* PAGE TITLE */}
-        <div className="mb-6">
+       <div className="flex items-center gap-3 mb-6">
 
-          <h1
-            className="
-              text-[28px]
-              font-bold
-              text-gray-800
-            "
-          >
-            Tenant Deductions
-          </h1>
+  <img
+    src={arrowleft}
+    alt="Back"
+    className="
+      w-5
+      h-5
+     
+      cursor-pointer
+    "
+    onClick={() => navigate(-1)}
+  />
 
-          <p
-            className="
-              text-sm
-              text-gray-500
-              mt-1
-            "
-          >
-            Manage tenant deduction details
-          </p>
+  <div className="text-left">
 
-        </div>
+    <h1
+      className="
+        text-[22px]
+        font-bold
+        text-gray-800
+      "
+    >
+      Tenant Deductions
+    </h1>
+
+    <p
+      className="
+        text-sm
+        text-gray-500
+        mt-1
+      "
+    >
+      Manage tenant deduction details
+    </p>
+
+  </div>
+
+</div>
 
 
         {/* TENANT DETAILS CARD */}
@@ -114,29 +279,29 @@ const TenantDeductions = () => {
                 text-green-700
               "
             >
-              CHECK_IN
+             {tenantData?.currentStatus}
             </span>
 
           </div>
 
 
           <div
-            className="
-              grid
-              grid-cols-1
-              md:grid-cols-3
-              gap-6
-            "
-          >
+  className="
+    grid
+    grid-cols-1
+    lg:grid-cols-2
+    gap-6
+  "
+>
 
             {/* NAME */}
-            <div>
+            <div className="text-left">
 
               <p
                 className="
                   text-xs
                   text-gray-500
-                  mb-1
+                  mb-1 
                 "
               >
                 Tenant Name
@@ -156,7 +321,7 @@ const TenantDeductions = () => {
 
 
             {/* MOBILE */}
-            <div>
+            <div className="text-left">
 
               <p
                 className="
@@ -181,30 +346,8 @@ const TenantDeductions = () => {
             </div>
 
 
-            {/* CUSTOMER ID */}
-            <div>
-
-              <p
-                className="
-                  text-xs
-                  text-gray-500
-                  mb-1
-                "
-              >
-                Customer ID
-              </p>
-
-              <p
-                className="
-                  text-sm
-                  font-semibold
-                  text-gray-800
-                "
-              >
-                {tenantData?.customerId}
-              </p>
-
-            </div>
+          
+            
 
           </div>
 
@@ -221,17 +364,18 @@ const TenantDeductions = () => {
           "
         >
 
-          {/* LEFT TABLE */}
+        
           <div
-            className="
-              bg-white
-              rounded-2xl
-              border
-              border-gray-200
-              shadow-sm
-              overflow-hidden
-            "
-          >
+  className="
+    bg-white
+    rounded-2xl
+    border
+    border-gray-200
+    shadow-sm
+    overflow-hidden
+    self-start
+  "
+>
 
             {/* HEADER */}
             <div
@@ -254,206 +398,339 @@ const TenantDeductions = () => {
                   text-gray-800
                 "
               >
-                Deduction List
+                Advance Deduction
               </h2>
 
-              <button
-                className="
-                  px-4
-                  py-2
-                  rounded-xl
-                  bg-blue-600
-                  text-white
-                  text-sm
-                  hover:bg-blue-700
-                  cursor-pointer
-                "
-              >
-                + Add
-              </button>
+              
 
             </div>
 
 
             {/* TABLE */}
-            <div className="overflow-x-auto">
+           <div
+  className="
+    border-t
+    border-gray-200
+  "
+>
 
-              <table className="w-full">
+  {/* HEADER */}
+  <table className="w-full">
 
-                <thead
+    <thead className="bg-gray-50">
+
+      <tr>
+
+        <th
+          className="
+            text-left
+            px-6
+            py-4
+            text-xs
+            font-semibold
+            text-gray-500
+            uppercase
+            w-[33%]
+          "
+        >
+          Type
+        </th>
+
+        <th
+          className="
+            text-left
+            px-6
+            py-4
+            text-xs
+            font-semibold
+            text-gray-500
+            uppercase
+            w-[33%]
+          "
+        >
+          Amount
+        </th>
+
+        <th
+          className="
+            text-left
+            px-6
+            py-4
+            text-xs
+            font-semibold
+            text-gray-500
+            uppercase
+            w-[34%]
+          "
+        >
+          Paid Amount
+        </th>
+
+      </tr>
+
+    </thead>
+
+  </table>
+
+
+  {/* BODY */}
+  <div className="max-h-[250px] overflow-y-auto">
+
+    <table className="w-full">
+
+      <tbody>
+
+        {Array.isArray(deductions) &&
+         deductions.length > 0 ? (
+
+          deductions.map(
+            (item, index) => (
+
+              <tr
+                key={index}
+                className="
+                  border-t
+                  border-gray-100
+                  hover:bg-gray-50
+                "
+              >
+
+                <td
                   className="
-                    bg-gray-50
+                    px-6
+                    py-4
+                    text-sm
+                    font-medium
+                    text-gray-800
+                    text-left
+                    w-[33%]
                   "
                 >
+                  {item.type}
+                </td>
 
-                  <tr>
+                <td
+                  className="
+                    px-6
+                    py-4
+                    text-sm
+                    text-gray-700
+                    text-left
+                    w-[33%]
+                  "
+                >
+                  ₹ {item.amount}
+                </td>
 
-                    <th
-                      className="
-                        text-left
-                        px-6
-                        py-4
-                        text-xs
-                        font-semibold
-                        text-gray-500
-                        uppercase
-                      "
-                    >
-                      Type
-                    </th>
+                <td
+                  className="
+                    px-6
+                    py-4
+                    text-sm
+                    font-semibold
+                    text-green-600
+                    text-left
+                    w-[34%]
+                  "
+                >
+                  ₹ {item?.paidAmount || 0}
+                </td>
 
-                    <th
-                      className="
-                        text-left
-                        px-6
-                        py-4
-                        text-xs
-                        font-semibold
-                        text-gray-500
-                        uppercase
-                      "
-                    >
-                      Amount
-                    </th>
+              </tr>
 
-                    <th
-                      className="
-                        text-left
-                        px-6
-                        py-4
-                        text-xs
-                        font-semibold
-                        text-gray-500
-                        uppercase
-                      "
-                    >
-                      Paid Amount
-                    </th>
+            )
+          )
 
-                  </tr>
+        ) : (
 
-                </thead>
+          <tr>
 
+            <td
+              colSpan={3}
+              className="
+                py-8
+                text-center
+                text-gray-500
+                text-sm
+              "
+            >
+              No Data Found
+            </td>
 
-                <tbody>
+          </tr>
 
-                  {deductions.map(
-                    (item, index) => (
+        )}
 
-                      <tr
-                        key={index}
-                        className="
-                          border-t
-                          border-gray-100
-                          hover:bg-gray-50
-                        "
-                      >
+      </tbody>
 
-                        <td
-                          className="
-                            px-6
-                            py-4
-                            text-sm
-                            font-medium
-                            text-gray-800
-                          "
-                        >
-                          {item.type}
-                        </td>
+    </table>
 
-                        <td
-                          className="
-                            px-6
-                            py-4
-                            text-sm
-                            text-gray-700
-                          "
-                        >
-                          ₹ {item.amount}
-                        </td>
+  </div>
 
-                        <td
-                          className="
-                            px-6
-                            py-4
-                            text-sm
-                            font-semibold
-                            text-green-600
-                          "
-                        >
-                          ₹ {item.paidAmount}
-                        </td>
-
-                      </tr>
-
-                    )
-                  )}
-
-                </tbody>
-
-              </table>
-
-            </div>
+</div>
 
           </div>
 
 
           {/* RIGHT TABLE */}
-          <div
-            className="
-              bg-white
-              rounded-2xl
-              border
-              border-gray-200
-              shadow-sm
-              overflow-hidden
-            "
-          >
+         {/* RIGHT TABLE */}
+<div
+  className="
+    bg-white
+    rounded-2xl
+    border
+    border-gray-200
+    shadow-sm
+    overflow-hidden
+  "
+>
 
-            {/* HEADER */}
+  {/* HEADER */}
+  <div
+    className="
+      px-6
+      py-5
+      border-b
+      border-gray-200
+      bg-gray-50
+      flex
+      items-center
+      justify-between
+    "
+  >
+
+    <h2
+      className="
+        text-lg
+        font-semibold
+        text-gray-800
+      "
+    >
+      Invoice Deductions
+    </h2>
+
+  </div>
+
+  <div className="max-h-[500px] overflow-y-auto">
+
+    {invoiceList?.length > 0 ? (
+
+      invoiceList.map((invoice) => (
+
+        <div key={invoice.invoiceId}>
+
+          {/* INVOICE ROW */}
+          <table className="w-full">
+
+            <thead className="bg-gray-50">
+
+              <tr>
+
+                <th
+                  className="
+                    text-left
+                    px-6
+                    py-4
+                    text-xs
+                    font-semibold
+                    text-gray-500
+                    uppercase
+                  "
+                >
+                  Invoice Num
+                </th>
+
+                <th
+                  className="
+                    text-center
+                    px-6
+                    py-4
+                    text-xs
+                    font-semibold
+                    text-gray-500
+                    uppercase text-left
+                  "
+                >
+                  Deductions
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr
+                className="
+                  border-t
+                  border-gray-100
+                "
+              >
+
+                <td
+                  className="
+                    px-6
+                    py-4
+                    text-sm
+                    font-medium
+                    text-gray-800
+                    text-left
+                  "
+                >
+                  {invoice.invoiceNumber}
+                </td>
+
+                <td
+                  className="
+                    px-6
+                    py-4
+                    text-center text-left
+                  "
+                >
+
+                  <button
+                    onClick={() => {
+
+                      setSelectedInvoiceId(
+                        invoice.invoiceId
+                      );
+
+                      setShowAddModal(true);
+
+                    }}
+                    className="
+                      px-4
+                      py-2
+                      rounded-lg
+                      bg-blue-600
+                      text-white
+                      text-sm
+                      cursor-pointer
+                    "
+                  >
+                    + Add
+                  </button>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+
+          {/* DEDUCTION TABLE */}
+          <div className="p-4">
+
             <div
               className="
-                px-6
-                py-5
-                border-b
+                border
                 border-gray-200
-                bg-gray-50
-                flex
-                items-center
-                justify-between
+                rounded-xl
+                overflow-hidden
               "
             >
-
-              <h2
-                className="
-                  text-lg
-                  font-semibold
-                  text-gray-800
-                "
-              >
-                Paid Deductions
-              </h2>
-
-              <button
-                className="
-                  px-4
-                  py-2
-                  rounded-xl
-                  bg-blue-600
-                  text-white
-                  text-sm
-                  hover:bg-blue-700
-                  cursor-pointer
-                "
-              >
-                + Add
-              </button>
-
-            </div>
-
-
-            {/* TABLE */}
-            <div className="overflow-x-auto">
 
               <table className="w-full">
 
@@ -511,59 +788,68 @@ const TenantDeductions = () => {
 
                 </thead>
 
-
                 <tbody>
 
-                  {deductions.map(
-                    (item, index) => (
+                  {invoice
+                    ?.invoiceAdvanceDeductions
+                    ?.length > 0 ? (
 
-                      <tr
-                        key={index}
+                    invoice.invoiceAdvanceDeductions.map(
+                      (
+                        deduction,
+                        index
+                      ) => (
+
+                        <tr
+                          key={index}
+                          className="
+                            border-t
+                            border-gray-100
+                          "
+                        >
+
+                          <td className="px-6 py-4 text-sm">
+                            {deduction.type}
+                          </td>
+
+                          <td className="px-6 py-4 text-sm">
+                            ₹ {deduction.amount}
+                          </td>
+
+                          <td
+                            className="
+                              px-6
+                              py-4
+                              text-sm
+                              text-green-600
+                              font-medium
+                            "
+                          >
+                            ₹ {deduction.paidAmount || 0}
+                          </td>
+
+                        </tr>
+
+                      )
+                    )
+
+                  ) : (
+
+                    <tr>
+
+                      <td
+                        colSpan={3}
                         className="
-                          border-t
-                          border-gray-100
-                          hover:bg-gray-50
+                          py-8
+                          text-center
+                          text-gray-500
                         "
                       >
+                        No Deductions Added
+                      </td>
 
-                        <td
-                          className="
-                            px-6
-                            py-4
-                            text-sm
-                            font-medium
-                            text-gray-800
-                          "
-                        >
-                          {item.type}
-                        </td>
+                    </tr>
 
-                        <td
-                          className="
-                            px-6
-                            py-4
-                            text-sm
-                            text-gray-700
-                          "
-                        >
-                          ₹ {item.amount}
-                        </td>
-
-                        <td
-                          className="
-                            px-6
-                            py-4
-                            text-sm
-                            font-semibold
-                            text-blue-600
-                          "
-                        >
-                          ₹ {item.paidAmount}
-                        </td>
-
-                      </tr>
-
-                    )
                   )}
 
                 </tbody>
@@ -576,7 +862,111 @@ const TenantDeductions = () => {
 
         </div>
 
+      ))
+
+    ) : (
+
+      <div
+  className="
+    py-12
+    flex
+    items-center
+    justify-center
+    text-gray-500
+  "
+>
+  No Invoice Found
+</div>
+
+    )}
+
+  </div>
+
+</div>
+
+        </div>
+
       </div>
+{showAddModal && (
+
+  <div
+    className="
+      fixed
+      inset-0
+      bg-black/40
+      flex
+      items-center
+      justify-center
+      z-50
+    "
+    onClick={() =>
+      setShowAddModal(false)
+    }
+  >
+
+    <div
+      className="
+        bg-white
+        rounded-2xl
+        p-6
+        w-[400px]
+        shadow-xl
+      "
+      onClick={(e) =>
+        e.stopPropagation()
+      }
+    >
+
+      <h2 className="text-lg font-semibold text-gray-800 text-left">
+        Confirmation
+      </h2>
+
+      <p className="text-sm text-gray-500 mt-3">
+        Are you sure you want to add this deduction?
+      </p>
+
+      <div className="flex justify-end gap-3 mt-6">
+
+        <button
+          onClick={() =>
+            setShowAddModal(false)
+          }
+          className="
+            px-4
+            py-2
+            border
+            rounded-lg
+            text-gray-600
+            cursor-pointer
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleSaveDeduction}
+          disabled={saving}
+          className="
+            px-4
+            py-2
+            bg-blue-600
+            text-white
+            rounded-lg
+            cursor-pointer
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+          "
+        >
+          {saving ? "Saving..." : "OK"}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+)}
 
     </DashboardLayout>
 

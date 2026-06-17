@@ -189,10 +189,23 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
         "Query Type is required";
     }
 
-    if (!formData.subject.trim()) {
-      newErrors.subject =
-        "Subject is required";
-    }
+    // if (!formData.subject.trim()) {
+    //   newErrors.subject =
+    //     "Subject is required";
+    // }
+    const subject = formData.subject.trim();
+
+if (!subject) {
+  newErrors.subject = "Subject is required";
+}
+else if (!/[a-zA-Z0-9]/.test(subject)) {
+  newErrors.subject =
+    "Subject must contain at least one letter or number";
+}
+else if (subject.length < 3) {
+  newErrors.subject =
+    "Subject must be at least 3 characters";
+}
 
     if (!formData.date) {
       newErrors.date =
