@@ -2087,35 +2087,37 @@ fetchData()
     h-5
     cursor-pointer
   "
-  onClick={(e) => {
+ onClick={(e) => {
 
-    e.stopPropagation();
+  e.stopPropagation();
 
-    const rect =
-      e.currentTarget.getBoundingClientRect();
+  const rect =
+    e.currentTarget.getBoundingClientRect();
 
-    const menuHeight = 50; // menu approx height
-    const spaceBelow =
-      window.innerHeight - rect.bottom;
+  const menuHeight = 100;
 
-    const showAbove =
-      spaceBelow < menuHeight;
+  let top =
+    rect.bottom + 5;
 
-    setMenuPosition({
-      top: showAbove
-        ? rect.top - menuHeight
-        : rect.bottom + 5,
+  if (
+    top + menuHeight >
+    window.innerHeight
+  ) {
+    top =
+      rect.top - menuHeight;
+  }
 
-      left: rect.left,
-    });
+  setMenuPosition({
+    top,
+    left: rect.left,
+  });
 
-    setOpenMenu(
-      openMenu === index
-        ? null
-        : index
-    );
-
-  }}
+  setOpenMenu(
+    openMenu === index
+      ? null
+      : index
+  );
+}}
 />
 
 {openMenu === index && (
@@ -2123,7 +2125,7 @@ fetchData()
   <div
     className="
       fixed
-      w-44
+      w-30
       bg-white
       border
       border-borderSoft
@@ -2162,17 +2164,17 @@ fetchData()
 
   }}
       className="
-        w-full
+      
         text-left
         px-4
-        py-3
+        py-1
         text-cardTitle
         hover:bg-cardBg
         text-gray-700
         cursor-pointer
       "
     >
-      Detections
+      Deductions
     </button>
 
     <button
@@ -2189,10 +2191,10 @@ fetchData()
         setOpenMenu(null);
       }}
       className={`
-        w-full
+       
         text-left
         px-4
-        py-3
+        py-2
         text-cardTitle
 
         ${
