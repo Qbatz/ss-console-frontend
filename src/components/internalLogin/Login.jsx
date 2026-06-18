@@ -98,6 +98,7 @@ useEffect(() => {
         const roleId = res.data.roleId;
         navigate(`/home/${roleId}`, { replace: true });
       }
+     
     });
 
   } else {
@@ -189,16 +190,12 @@ const verifyToken = async () => {
         localStorage.setItem("login_time", Date.now());
         localStorage.setItem("login_type", "mock");
 
-           const adminRes = await getAdminDetails();
+      const adminRes = await getAdminDetails();
       if (adminRes?.success) {
         const roleId = adminRes?.data?.roleId;
-
         navigate(`/home/${roleId}`, { replace: true });
-
       }
-
-
-        // navigate("/home", { replace: true });
+        
       }
 
     } catch (err) {

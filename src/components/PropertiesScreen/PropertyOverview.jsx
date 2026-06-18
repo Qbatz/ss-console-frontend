@@ -1987,7 +1987,7 @@ fetchData()
                     </td>
 
                     {/* NAME */}
-                    <td
+                    {/* <td
                       className="
                         px-4
                         py-3
@@ -1998,7 +1998,32 @@ fetchData()
                       "
                     >
                       {item.fullName || item.firstName || "N/A"}
-                    </td>
+                    </td> */}
+                    <td
+  className="
+    px-4
+    py-3
+    text-primaryBlue
+    text-left
+    font-medium
+    text-tableCell
+    cursor-pointer
+    hover:underline
+  "
+  onClick={() =>
+    navigate(
+      `/tenant-overview/${item.customerId}`,
+      {
+        state: {
+          tenantData: item,
+          hostelData: hostelData
+        }
+      }
+    )
+  }
+>
+  {item.fullName || item.firstName || "N/A"}
+</td>
 
                     {/* MAIL */}
                     <td

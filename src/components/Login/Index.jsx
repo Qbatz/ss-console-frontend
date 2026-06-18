@@ -95,7 +95,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { getAdminDetails } = useRole();
 
-  const [isChecking, setIsChecking] = useState(true); // ⭐ add
+  const [isChecking, setIsChecking] = useState(true);
 
   const isTokenValid = (token) => {
     try {
