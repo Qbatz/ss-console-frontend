@@ -25,7 +25,7 @@ const PropertyAmenities = ({ hostelData }) => {
         </div>
 
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 max-h-[300px] overflow-auto">
+        <div className="bg-white rounded-xl shadow-sm border-soft max-h-[300px] overflow-auto">
 
           <table className="w-full text-sm text-left">
 

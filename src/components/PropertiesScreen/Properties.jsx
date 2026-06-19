@@ -1652,9 +1652,10 @@ useEffect(() => {
                              <td className="px-4 py-2">
                               {item.noOfdaysSubscriptionActive || "----"}
                             </td>
-                             <td className="px-4 py-2">
-                              {item.expiredOn || "----"}
-                            </td>
+                            <td className="px-4 py-2">
+  {item.expiredOn || item.expiringAt || "----"}
+</td>
+                            
                             <td className="px-4 py-2 whitespace-nowrap">
                               {item.ownerInfo?.mobile}
                             </td>
