@@ -644,7 +644,7 @@ const UpdateSupportStatusModal = ({
                           className="
               px-4 py-3
               text-sm
-              hover:bg-[#f8f9fc]
+              hover:bg-cardBg
               cursor-pointer
               text-left
             "
@@ -767,7 +767,7 @@ const UpdateSupportStatusModal = ({
                               }}
                               className="
             px-4 py-3
-            hover:bg-[#f8f9fc]
+            hover:bg-cardBg
             cursor-pointer
             text-sm
           "
@@ -891,7 +891,7 @@ const UpdateSupportStatusModal = ({
                               }}
                               className="
             px-4 py-3
-            hover:bg-[#f8f9fc]
+            hover:bg-cardBg
             cursor-pointer
             text-sm
           "

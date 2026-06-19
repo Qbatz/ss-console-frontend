@@ -74,7 +74,7 @@ const [selectedInvoice, setSelectedInvoice] = useState(null);
 console.log("tenantData",tenantData)
   return (
     <DashboardLayout>
-      <div className="bg-[#F8F9FC] min-h-screen">
+      <div className="bg-cardBg min-h-screen">
 
         {/* Header */}
         <div className="bg-white border-b border-[#E5E7EB] px-6 py-4">

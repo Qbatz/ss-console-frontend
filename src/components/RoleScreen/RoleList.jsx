@@ -9,6 +9,7 @@ import Trash from "../../assets/trash.png";
 import LoginImg from "../../assets/LoginImg.png";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import Toast from "../SuccessModal/ToastDesign";
 
 const Roles = () => {
   const { agentRoles, getAgentRoles, getAgentRoleById, loading, deleteAgentRole, errorMsg, accessError, adminDetails } = useRole();
@@ -27,6 +28,9 @@ const Roles = () => {
   top: 0,
   left: 0,
 });
+const [modalType, setModalType] = useState("success");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   console.log("accessError", accessError)
@@ -45,24 +49,61 @@ const Roles = () => {
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
+const handleEditClick = async (role) => {
+  try {
+    const response = await getAgentRoleById(role.id);
 
-  const handleEditClick = async (role) => {
-    try {
-      const response = await getAgentRoleById(role.id);
+    if (response.success) {
+      setSelectedRole(response.data);
+      setOpen(true);
+    } else {
 
-      if (response.success) {
-        setSelectedRole(response.data);
-        setOpen(true);
-      } else {
-        alert(response.message || "Failed to fetch role details");
-      }
-    } catch (err) {
-      console.log("Edit fetch error:", err);
-      alert("Something went wrong");
-    } finally {
-      setOpenMenu(null);
+      setModalType("error");
+      setMessage(
+        response.message || "Failed to fetch role details"
+      );
+      setShowSuccess(true);
+ setTimeout(() => {
+            setShowSuccess(false);
+            
+
+          }, 1300);
     }
-  };
+
+  } catch (err) {
+
+    console.log("Edit fetch error:", err);
+
+    setModalType("error");
+    setMessage("Something went wrong");
+    setShowSuccess(true);
+    setTimeout(() => {
+            setShowSuccess(false);
+            
+
+          }, 1300);
+
+  } finally {
+    setOpenMenu(null);
+  }
+};
+  // const handleEditClick = async (role) => {
+  //   try {
+  //     const response = await getAgentRoleById(role.id);
+
+  //     if (response.success) {
+  //       setSelectedRole(response.data);
+  //       setOpen(true);
+  //     } else {
+  //       alert(response.message || "Failed to fetch role details");
+  //     }
+  //   } catch (err) {
+  //     console.log("Edit fetch error:", err);
+  //     alert("Something went wrong");
+  //   } finally {
+  //     setOpenMenu(null);
+  //   }
+  // };
   const handleConfirmDelete = async () => {
     if (!deleteRole) return;
 
@@ -90,7 +131,12 @@ const Roles = () => {
 
   return (
     <DashboardLayout>
+ <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
 
+      />
       {accessError === "Access Restricted" ? (
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">

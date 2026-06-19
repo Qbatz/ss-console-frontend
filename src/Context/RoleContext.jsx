@@ -207,12 +207,43 @@ const getAgentRoleById = async (roleId) => {
 
     return { success: false };
   } catch (error) {
+
+    if (error?.response?.status === 500) {
+      return {
+        success: false,
+        message: "Internal Server Error",
+      };
+    }
+
     const msg = getErrorMessage(error);
-    return { success: false, message: msg };
+
+    return {
+      success: false,
+      message: msg,
+    };
+
   } finally {
     setLoading(false);
   }
 };
+// const getAgentRoleById = async (roleId) => {
+//   try {
+//     setLoading(true);
+
+//     const res = await api.get(`/v2/agent-role/${roleId}`);
+
+//     if (res.status === 200) {
+//       return { success: true, data: res.data };
+//     }
+
+//     return { success: false };
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+//     return { success: false, message: msg };
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 
 const deleteAgentRole = async (roleId) => {
   try {

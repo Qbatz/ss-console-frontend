@@ -227,7 +227,9 @@ body {
 .border-soft {
   @apply border border-gray-300;
 }
-
+.bg-cardBg {
+  background-color: #F6F8FC;
+}
 .radius-md {
   @apply rounded-xl;
 }

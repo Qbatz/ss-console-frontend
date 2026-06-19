@@ -784,7 +784,7 @@ const handleOpenComments =
           className="
             px-4 py-3
             text-sm
-            hover:bg-[#f8f9fc]
+            hover:bg-cardBg
             cursor-pointer
           "
         >
@@ -809,7 +809,7 @@ const handleOpenComments =
     className="
       px-4 py-3
       text-sm
-      hover:bg-[#f8f9fc]
+      hover:bg-cardBg
       cursor-pointer
     "
   >
@@ -911,7 +911,7 @@ const handleOpenComments =
           className="
             px-4 py-3
             text-sm
-            hover:bg-[#f8f9fc]
+            hover:bg-cardBg
             cursor-pointer
           "
         >
@@ -938,7 +938,7 @@ const handleOpenComments =
             className="
               px-4 py-3
               text-sm
-              hover:bg-[#f8f9fc]
+              hover:bg-cardBg
               cursor-pointer
             "
           >
@@ -1041,7 +1041,7 @@ const handleOpenComments =
  <th
   className="
     sticky left-0 z-50
-    bg-[#f8f9fc]
+    bg-bg-cardBg
     min-w-[70px]
     w-[70px]
     px-5 py-4 text-[12px] text-[#6b7280]
@@ -1053,7 +1053,7 @@ const handleOpenComments =
 <th
   className="
     sticky left-[70px] z-40
-    bg-[#f8f9fc]
+    bg-cardBg
     min-w-[190px]
     w-[190px]
     px-5 py-4 text-[12px] text-[#6b7280]
@@ -1075,7 +1075,7 @@ const handleOpenComments =
         key={i}
         className="
           sticky top-0 z-30
-          bg-[#f8f9fc]
+          bg-cardBg
           px-5 py-4
           text-left text-[12px]
           font-semibold text-[#6b7280]
@@ -1090,7 +1090,7 @@ const handleOpenComments =
     <th
       className="
         sticky top-0 right-0 z-50
-        bg-[#f8f9fc]
+       bg-cardBg
         px-5 py-4
         text-left text-[12px]
         font-semibold text-[#6b7280]
@@ -1339,7 +1339,7 @@ const handleOpenComments =
   className="
     w-full text-left px-3 py-2.5
     text-sm text-[#374151]
-    hover:bg-[#f8f9fc] cursor-pointer
+    hover:bg-cardBg cursor-pointer
   "
 >
   {menu}
@@ -1983,7 +1983,7 @@ const handleOpenComments =
             className="
               px-4 py-3
               text-sm
-              hover:bg-[#f8f9fc]
+              hover:bg-cardBg
               cursor-pointer text-left
             "
           >
