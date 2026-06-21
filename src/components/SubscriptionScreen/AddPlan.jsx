@@ -25,7 +25,7 @@ const defaultFeatures = [
 const AddEditPlan = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { plans, getPlans, createPlan, updatePlan, deactivatePlanFeature, addPlanFeature } = usePlan();
+  const { plans, getPlans, createPlan, updatePlan, deactivatePlanFeature, addPlanFeature,getSmartstayFeatures } = usePlan();
   useEffect(() => {
     getPlans();
   }, []);
@@ -57,20 +57,32 @@ const AddEditPlan = () => {
   const [durationError,setDurationError] =useState("")
   const [gstPercentage,setGstPercentage] = useState("")
   const [finalAmount, setFinalAmount] = useState(0);
- 
+ const [smartstayFeatures, setSmartstayFeatures] = useState([]);
   const [deletedFeatures, setDeletedFeatures] = useState([]);
 
   // INIT FEATURES
   useEffect(() => {
+  fetchSmartstayFeatures();
+  getPlans();
+}, []);
+
+const fetchSmartstayFeatures = async () => {
+  const res = await getSmartstayFeatures();
+
+  if (res.success) {
+    setSmartstayFeatures(res.data || []);
+  }
+};
+  useEffect(() => {
     const initial = {};
 
-    defaultFeatures.forEach(f => {
-      const exists = editData?.planFeatures?.some(
-        pf => pf.featureName === f
-      );
-      initial[f] = editData ? exists : false;
-    });
+  smartstayFeatures.forEach((f) => {
+  const exists = editData?.planFeatures?.some(
+    (pf) => pf.featureName === f.featureName
+  );
 
+  initial[f.featureName] = editData ? exists : f.isCommon;
+});
     if (editData) {
       setPlanName(editData.planName);
       setPrice(editData.price);
@@ -94,20 +106,43 @@ const AddEditPlan = () => {
     }
 
     setFeatures(initial);
-  }, [editData]);
-  useEffect(() => {
+  }, [editData,smartstayFeatures]);
+
+ useEffect(() => {
+
+  const initial = {};
+  const addonData = [];
+
+  smartstayFeatures.forEach((f) => {
+
+    const existingFeature =
+      editData?.planFeatures?.find(
+        (pf) =>
+          pf.featureName?.trim() ===
+          f.featureName?.trim()
+      );
+
+    const enabled = !!existingFeature;
+
+    initial[f.featureName] = enabled;
+
+    if (enabled) {
+      addonData.push({
+        name: f.featureName,
+        planFeatureId:
+          existingFeature?.planFeatureId
+      });
+    }
+  });
+
+  setFeatures(initial);
+
   if (editData) {
-    const addonData = editData.planFeatures.map(f => ({
-      name: f.featureName,
-      price: f.price,
-      planFeatureId: f.planFeatureId
-    }));
-
     setAddons(addonData);
-    setInitialAddons(addonData); // 👈 IMPORTANT
+    setInitialAddons(addonData);
   }
-}, [editData]);
 
+}, [editData, smartstayFeatures]);
   
   const handleSubmit = async () => {
     let hasError = false;
@@ -411,64 +446,28 @@ const toggleFeature = (name) => {
 
   const isEnabled = features[name];
 
-  // OFF
   if (isEnabled) {
 
-    const existingAddon = addons.find(
-      (a) => a.name === name
-    );
-
-    // existing feature track
-    if (existingAddon?.planFeatureId) {
-
-      setDeletedFeatures((prev) => [
-        ...prev,
-        existingAddon
-      ]);
-    }
-
-    // remove addon
+    // OFF -> remove from addon
     setAddons((prev) =>
       prev.filter((a) => a.name !== name)
     );
-  }
 
-  // ON
-  else {
+  } else {
 
+    // ON -> add to addon
     const exists = addons.some(
       (a) => a.name === name
     );
 
     if (!exists) {
-
-      const existingInitial = initialAddons.find(
-        (a) => a.name === name
-      );
-
       setAddons((prev) => [
         ...prev,
         {
           name,
-          price: existingInitial?.price || "",
-          planFeatureId:
-            existingInitial?.planFeatureId || null,
-        },
+          price: ""
+        }
       ]);
-
-      // remove deleted state
-      if (existingInitial?.planFeatureId) {
-
-       setDeletedFeatures((prev) => {
-  const exists = prev.some(
-    (f) => f.planFeatureId === addon.planFeatureId
-  );
-
-  if (exists) return prev;
-
-  return [...prev, addon];
-});
-      }
     }
   }
 
@@ -828,29 +827,53 @@ const removeAddon = (index) => {
             <div className="bg-white p-5 rounded-xl border border-gray-300">
               <div className="flex justify-between mb-4">
                 <h2 className="font-medium">Core Features</h2>
-                <span className="text-xs bg-blue-100 px-2 py-1 rounded-full">
+                {/* <span className="text-xs bg-blue-100 px-2 py-1 rounded-full">
                   ADVANCE PACKAGE
-                </span>
+                </span> */}
               </div>
 
               <div className="space-y-3">
-                {defaultFeatures.map((f, i) => (
-                  <div key={i} className="flex justify-between items-center">
-                    <span className="text-sm">{f}</span>
+      {smartstayFeatures?.map((f) => (
+  <div
+    key={f.smartstayFeatureId}
+    className="flex justify-between items-center"
+  >
+    <div className="flex items-center gap-3 text-left">
 
-                    {/* TOGGLE */}
-                    <button
-                      onClick={() => toggleFeature(f)}
-                      className={`w-10 h-5 flex items-center rounded-full p-1 transition ${features[f] ? "bg-blue-600" : "bg-gray-300"
-                        }`}
-                    >
-                      <div
-                        className={`bg-white w-4 h-4 rounded-full shadow transform ${features[f] ? "translate-x-5" : ""
-                          }`}
-                      />
-                    </button>
-                  </div>
-                ))}
+      <span className="w-40">
+        {f.featureName}
+      </span>
+
+      {/* isCommon Checkbox */}
+      <input
+        type="checkbox"
+        checked={f.isCommon}
+        readOnly
+        className="w-4 h-4"
+      />
+
+    </div>
+
+    {/* Feature Toggle */}
+    <button
+      type="button"
+      onClick={() => toggleFeature(f.featureName)}
+      className={`w-12 h-5 flex items-center rounded-full p-1 transition ${
+        features[f.featureName]
+          ? "bg-blue-600"
+          : "bg-gray-300"
+      }`}
+    >
+      <div
+        className={`bg-white w-4 h-4 rounded-full shadow transition-transform ${
+          features[f.featureName]
+            ? "translate-x-7"
+            : ""
+        }`}
+      />
+    </button>
+  </div>
+))}
               </div>
             </div>
 
@@ -888,61 +911,38 @@ const removeAddon = (index) => {
 {addons.map((addon, i) => (
   <div
     key={i}
-    className="flex items-center justify-between border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 gap-2"
+    className="
+      flex
+      items-center
+      justify-between
+      border
+      rounded-lg
+      px-3
+      py-2
+    "
   >
+    <span>
+      {addon.name}
+    </span>
 
     <input
-      type="text"
-      value={addon.name}
-      onChange={(e) => {
-
-        const value = e.target.value;
-
-        // old feature false
-        if (addon.name) {
-          setFeatures((prev) => ({
-            ...prev,
-            [addon.name]: false,
-          }));
-        }
-
-        // update addon
-        updateAddon(i, "name", value);
-
-        // new feature true
-        if (value) {
-          setFeatures((prev) => ({
-            ...prev,
-            [value]: true,
-          }));
-        }
-      }}
-      placeholder="Enter feature name"
-      className="flex-1 bg-transparent outline-none text-sm text-gray-700"
+      type="checkbox"
+      checked={""}
+      readOnly
+      className="w-4 h-4"
     />
-
-    <button
-      onClick={() => removeAddon(i)}
-      className="p-1 hover:bg-red-100 rounded cursor-pointer"
-    >
-      <img
-        src={trash}
-        className="w-4 h-4"
-      />
-    </button>
-
   </div>
 ))}
 
 </div>
 
                   {/* ADD BUTTON */}
-                  <button
+                  {/* <button
                     onClick={addAddon}
                     className="w-full border border-dashed border-gray-300 py-2.5 rounded-lg text-sm mt-3 hover:bg-gray-50"
                   >
                     + Add Add-on Feature
-                  </button>
+                  </button> */}
                 </>
               )}
 

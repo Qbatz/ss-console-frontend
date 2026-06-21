@@ -27,10 +27,10 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
   const [emailError, setEmailError] = useState("");
-  const[requestDateError,setRequestDateError] = useState("")
-  const [requestTimeError,setRequestTimeError] = useState("")
-const [isSubmitting, setIsSubmitting] =
-  useState(false);
+  const [requestDateError, setRequestDateError] = useState("")
+  const [requestTimeError, setRequestTimeError] = useState("")
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
   const filteredStates = states.filter((s) =>
     s.toLowerCase().includes(search.toLowerCase())
   );
@@ -79,8 +79,8 @@ const [isSubmitting, setIsSubmitting] =
     // reset
     setNameError("");
     setMobileError("");
-      setRequestDateError("");
-  setRequestTimeError("");
+    setRequestDateError("");
+    setRequestTimeError("");
 
     if (!formData.name) {
       setNameError("Name is required");
@@ -95,14 +95,14 @@ const [isSubmitting, setIsSubmitting] =
       valid = false;
     }
     if (
-  formData.email &&
-  !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
-) {
+      formData.email &&
+      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
+    ) {
 
-  setEmailError("Enter valid email address");
-  valid = false;
+      setEmailError("Enter valid email address");
+      valid = false;
 
-}
+    }
 
     if (!formData.countryCode) {
       setCountryError("Country code is required");
@@ -118,16 +118,16 @@ const [isSubmitting, setIsSubmitting] =
       setTenantError("Tenants cannot be negative");
       valid = false;
     }
-     if (!formData.requestedDate) {
-    setRequestDateError("Requested date is required");
-    valid = false;
-  }
+    if (!formData.requestedDate) {
+      setRequestDateError("Requested date is required");
+      valid = false;
+    }
 
- 
-  if (!formData.requestedTime) {
-    setRequestTimeError("Requested time is required");
-    valid = false;
-  }
+
+    if (!formData.requestedTime) {
+      setRequestTimeError("Requested time is required");
+      valid = false;
+    }
 
     return valid;
   };
@@ -148,13 +148,14 @@ const [isSubmitting, setIsSubmitting] =
       comments: "",
       requestedDate: "",
       requestedTime: "",
-      
+
     });
 
-    // reset search
-    setSearch("");
 
-    // reset errors
+    setSearch("");
+    setIsSubmitting(false)
+
+
     setNameError("");
     setMobileError("");
     setCountryError("");
@@ -170,109 +171,114 @@ const [isSubmitting, setIsSubmitting] =
     onClose();
   };
 
- const handleSubmit = async () => {
+  const handleSubmit = async () => {
 
-  // 🔥 prevent multiple clicks
-  if (
-  isSubmitting ||
-  loading
-) return;
 
-// 🔥 immediately lock button
-setIsSubmitting(true);
-  const isValid = validateForm();
+    if (isSubmitting || loading) return;
 
-  if (!formData.contactNo) {
+    setIsSubmitting(true);
 
-  setMobileError(
-    "Mobile number is required"
-  );
+    const isValid = validateForm();
 
-  setIsSubmitting(false);
+    if (!isValid) {
+      setIsSubmitting(false);
+      return;
+    }
 
-  return;
+    if (!formData.contactNo) {
+      setMobileError("Mobile number is required");
+      setIsSubmitting(false);
+      return;
+    }
 
-}
-else if (
-  !/^[6-9]\d{9}$/.test(
-    formData.contactNo
-  ) ||
-  /^(\d)\1{9}$/.test(
-    formData.contactNo
-  )
-) {
+    if (
+      !/^[6-9]\d{9}$/.test(formData.contactNo) ||
+      /^(\d)\1{9}$/.test(formData.contactNo)
+    ) {
+      setMobileError("Enter valid mobile number");
+      setIsSubmitting(false);
+      return;
+    }
 
-  setMobileError(
-    "Enter valid mobile number"
-  );
 
-  setIsSubmitting(false);
+    try {
 
-  return;
 
-}
 
- 
+      const payload = {
+        ...formData,
 
-  try {
+        noOfHostels:
+          Number(
+            formData.noOfHostels
+          ) || 0,
 
-   
+        noOfTenants:
+          Number(
+            formData.noOfTenants
+          ) || 0,
 
-    const payload = {
-      ...formData,
+        requestedDate:
+          formatDate(
+            formData.requestedDate
+          ),
 
-      noOfHostels:
-        Number(
-          formData.noOfHostels
-        ) || 0,
+        requestedTime:
+          formatTime(
+            formData.requestedTime
+          ),
+      };
 
-      noOfTenants:
-        Number(
-          formData.noOfTenants
-        ) || 0,
+      const res =
+        await createDemoRequest(
+          payload
+        );
 
-      requestedDate:
-        formatDate(
-          formData.requestedDate
-        ),
+      if (res.success) {
 
-      requestedTime:
-        formatTime(
-          formData.requestedTime
-        ),
-    };
+        setModalType("success");
 
-    const res =
-      await createDemoRequest(
-        payload
-      );
+        setMessage(
+          res?.message
+        );
 
-    if (res.success) {
+        setShowSuccess(true);
 
-      setModalType("success");
+        fetchData();
 
-      setMessage(
-        res?.message
-      );
+        setTimeout(() => {
 
-      setShowSuccess(true);
+          setShowSuccess(false);
 
-      fetchData();
+          handleCloseDrawer();
 
-      setTimeout(() => {
+        }, 1500);
 
-        setShowSuccess(false);
+      } else {
 
-        handleCloseDrawer();
+        setModalType("error");
 
-      }, 1500);
+        setMessage(
+          res?.message
+        );
 
-    } else {
+        setShowSuccess(true);
+
+        setTimeout(() => {
+
+          setShowSuccess(false);
+
+        }, 1500);
+
+      }
+
+    } catch (error) {
 
       setModalType("error");
 
       setMessage(
-        res?.message
+        error?.message ||
+        "Something went wrong"
       );
 
       setShowSuccess(true);
@@ -285,31 +291,10 @@ else if (
 
     }
 
-  } catch (error) {
 
-    setModalType("error");
 
-    setMessage(
-      error?.message ||
-      "Something went wrong"
-    );
 
-    setShowSuccess(true);
-
-    setTimeout(() => {
-
-      setShowSuccess(false);
-
-    }, 1500);
-
-  } finally {
-
-    // 🔥 enable again
-    setIsSubmitting(false);
-
-  }
-
-};
+  };
 
   if (!open) return null;
 
@@ -351,57 +336,57 @@ else if (
                   Name <span className="text-red-500">*</span>
                 </label>
                 <div className="w-full">
-                 <input
-  name="name"
-  placeholder="Enter Name"
-  value={formData.name}
-  onChange={(e) => {
+                  <input
+                    name="name"
+                    placeholder="Enter Name"
+                    value={formData.name}
+                    onChange={(e) => {
 
-    const value = e.target.value;
+                      const value = e.target.value;
 
 
-    if (/^[A-Za-z\s]*$/.test(value)) {
+                      if (/^[A-Za-z\s]*$/.test(value)) {
 
-      handleChange({
-        target: {
-          name: "name",
-          value,
-        },
-      });
+                        handleChange({
+                          target: {
+                            name: "name",
+                            value,
+                          },
+                        });
 
-      setNameError("");
-    }
+                        setNameError("");
+                      }
 
-  }}
-  className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-/>
+                    }}
+                    className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                  />
                   {nameError && <ErrorMessage message={nameError} type="error" />}
                 </div>
               </div>
 
               {/* Email */}
-             <div className="flex items-start text-left gap-3">
-  <label className="w-40 text-[12px] font-medium">
-    Email ID
-  </label>
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">
+                  Email ID
+                </label>
 
-  <div className="w-full">
-    <input
-      name="email"
-      placeholder="Enter Email"
-      value={formData.email}
-      onChange={(e) => {
-        handleChange(e);
-        setEmailError("");
-      }}
-      className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-    />
+                <div className="w-full">
+                  <input
+                    name="email"
+                    placeholder="Enter Email"
+                    value={formData.email}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setEmailError("");
+                    }}
+                    className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                  />
 
-    {emailError && (
-      <ErrorMessage message={emailError} type="error" />
-    )}
-  </div>
-</div>
+                  {emailError && (
+                    <ErrorMessage message={emailError} type="error" />
+                  )}
+                </div>
+              </div>
 
               {/* Contact Number */}
               {/* <div className="flex items-start text-left gap-3">
@@ -596,52 +581,52 @@ else if (
               </div>
 
               {/* Date */}
-             <div className="flex items-start text-left gap-3">
-  <label className="w-40 text-[12px] font-medium">
-    Requested Date <span className="text-red-500">*</span>
-  </label>
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">
+                  Requested Date <span className="text-red-500">*</span>
+                </label>
 
-  <div className="w-full">
-    <input
-      type="date"
-      name="requestedDate"
-      value={formData.requestedDate}
-      onChange={(e) => {
-        handleChange(e);
-        setRequestDateError("");
-      }}
-      className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-    />
+                <div className="w-full">
+                  <input
+                    type="date"
+                    name="requestedDate"
+                    value={formData.requestedDate}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setRequestDateError("");
+                    }}
+                    className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                  />
 
-    {requestDateError && (
-      <ErrorMessage message={requestDateError} type="error" />
-    )}
-  </div>
-</div>
+                  {requestDateError && (
+                    <ErrorMessage message={requestDateError} type="error" />
+                  )}
+                </div>
+              </div>
 
               {/* Time */}
-       <div className="flex items-start text-left gap-3">
-  <label className="w-40 text-[12px] font-medium">
-    Requested Time <span className="text-red-500">*</span>
-  </label>
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">
+                  Requested Time <span className="text-red-500">*</span>
+                </label>
 
-  <div className="w-full">
-    <input
-      type="time"
-      name="requestedTime"
-      value={formData.requestedTime}
-      onChange={(e) => {
-        handleChange(e);
-        setRequestTimeError("");
-      }}
-      className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-    />
+                <div className="w-full">
+                  <input
+                    type="time"
+                    name="requestedTime"
+                    value={formData.requestedTime}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setRequestTimeError("");
+                    }}
+                    className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                  />
 
-    {requestTimeError && (
-      <ErrorMessage message={requestTimeError} type="error" />
-    )}
-  </div>
-</div>
+                  {requestTimeError && (
+                    <ErrorMessage message={requestTimeError} type="error" />
+                  )}
+                </div>
+              </div>
               {/* Comments */}
               <div className="flex items-start text-left gap-3">
                 <label className="w-40 text-[12px] font-medium">Comments</label>
@@ -659,13 +644,18 @@ else if (
 
                 <button
                   onClick={handleSubmit}
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                  disabled={isSubmitting || loading}
+                  className={`
+    px-4 py-2 rounded text-white
+    ${isSubmitting || loading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 cursor-pointer"
+                    }
+  `}
                 >
-                 {
-    isSubmitting || loading
-      ? "Submitting..."
-      : "Submit"
-  }
+                  {isSubmitting || loading
+                    ? "Submitting..."
+                    : "Submit"}
                 </button>
               </div>
             </div>

@@ -280,6 +280,7 @@ const [totalProperty,setTotalProperty] = useState("")
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
+         setShowDetailsModal(false);
       }, 1500);
       fetchRecurring();
 
@@ -298,7 +299,32 @@ const [totalProperty,setTotalProperty] = useState("")
     }
 
   };
+const handleBulkGenerate = async () => {
+  const res = await bulkGenerateRecurring(selectedIds);
 
+  if (res?.success) {
+    setShowBulkModal(false);
+    setSelectedIds([]);
+    setConfirmBulk(false);
+    setBulkReason("");
+    setBulkDesc("");
+
+    setModalType("success");
+    setMessage(res?.data || "Bulk Generated Successfully");
+    setShowSuccess(true);
+
+    setTimeout(() => setShowSuccess(false), 1500);
+
+    fetchRecurring();
+  } else {
+    setModalType("error");
+    setMessage(res?.message || "Failed");
+    setGenrateError(res?.message);
+    setShowSuccess(true);
+
+    setTimeout(() => setShowSuccess(false), 1500);
+  }
+};
 
   return (
 
@@ -822,7 +848,15 @@ const [totalProperty,setTotalProperty] = useState("")
 
                                   //   getRecurringByHostelId(item.hostelId);
                                   // }}
-                                  onClick={() => handleOpenDetails(item)}
+                                  onClick={() => {
+
+    setSelectedIds((prev) =>
+      prev.filter((id) => id !== item.hostelId)
+    );
+
+    handleOpenDetails(item);
+
+  }}
                                   className="px-3 py-1 rounded-lg text-xs text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 cursor-pointer"
 
                                 >
@@ -1615,32 +1649,33 @@ const [totalProperty,setTotalProperty] = useState("")
                 </button> */}
                 <button
                   // disabled={!confirmBulk || !bulkReason}
-                  onClick={async () => {
-                    const res = await bulkGenerateRecurring(selectedIds);
+                  // onClick={async () => {
+                  //   const res = await bulkGenerateRecurring(selectedIds);
 
-                    if (res?.success) {
-                      setShowBulkModal(false);
-                      setSelectedIds([]);
-                      setConfirmBulk(false);
-                      setBulkReason("");
-                      setBulkDesc("");
+                  //   if (res?.success) {
+                  //     setShowBulkModal(false);
+                  //     setSelectedIds([]);
+                  //     setConfirmBulk(false);
+                  //     setBulkReason("");
+                  //     setBulkDesc("");
 
-                      setModalType("success");
-                      setMessage(res?.data || "Bulk Generated Successfully");
-                      setShowSuccess(true);
+                  //     setModalType("success");
+                  //     setMessage(res?.data || "Bulk Generated Successfully");
+                  //     setShowSuccess(true);
 
-                      setTimeout(() => setShowSuccess(false), 1500);
+                  //     setTimeout(() => setShowSuccess(false), 1500);
 
-                      fetchRecurring();
-                    } else {
-                      setModalType("error");
-                      setMessage(res?.message || "Failed");
-                      setGenrateError(res?.message)
-                      setShowSuccess(true);
+                  //     fetchRecurring();
+                  //   } else {
+                  //     setModalType("error");
+                  //     setMessage(res?.message || "Failed");
+                  //     setGenrateError(res?.message)
+                  //     setShowSuccess(true);
 
-                      setTimeout(() => setShowSuccess(false), 1500);
-                    }
-                  }}
+                  //     setTimeout(() => setShowSuccess(false), 1500);
+                  //   }
+                  // }}
+                  onClick={handleBulkGenerate}
                   className="px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 bg-blue-700"
                 // ${confirmBulk && bulkReason
                 //   ? "bg-blue-600 hover:bg-blue-700"
@@ -1648,7 +1683,7 @@ const [totalProperty,setTotalProperty] = useState("")
                 // }`}
                 >
                   <img src={refreshWhite} className="w-4 h-4" />
-                  Generate
+                  Generateee
                 </button>
               </div>
 

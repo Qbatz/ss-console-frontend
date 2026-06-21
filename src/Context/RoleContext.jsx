@@ -115,13 +115,41 @@ const getErrorMessage = (error) => {
   };
 
   // Auto load modules on mount
- useEffect(() => {
+//  useEffect(() => {
+
+//   const token =
+//     localStorage.getItem("access_token") ||
+//     localStorage.getItem("mock_token");
+
+//   if (!token) return;
+
+//   fetchModules();
+//   getAdminDetails();
+
+// }, []);
+
+const isTokenValid = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const currentTime = Date.now() / 1000;
+    return payload.exp > currentTime;
+  } catch {
+    return false;
+  }
+};
+
+useEffect(() => {
 
   const token =
     localStorage.getItem("access_token") ||
     localStorage.getItem("mock_token");
 
-  if (!token) return;
+  if (!token || !isTokenValid(token)) {
+    // expired/missing token — clear silently, API call பண்ண வேண்டாம்
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("mock_token");
+    return;
+  }
 
   fetchModules();
   getAdminDetails();

@@ -1038,13 +1038,15 @@ const handleOpenComments =
             <table className="min-w-[1100px] w-full border-separate border-spacing-0">
        <thead className="sticky top-0 z-40">
   <tr>
- <th
+<th
   className="
     sticky left-0 z-50
-    bg-bg-cardBg
+    bg-cardBg
     min-w-[70px]
     w-[70px]
-    px-5 py-4 text-[12px] text-[#6b7280]
+    px-5 py-4
+    text-[12px]
+    text-[#6b7280]
   "
 >
   ID

@@ -1421,6 +1421,69 @@ const updateTenantDeductions = async (
 
   }
 };
+const getInvoiceReceipt = async (
+  hostelId,
+  invoiceId
+) => {
+  try {
+
+    const response = await axiosInstance.get(
+      `/v2/invoice/receipt/${hostelId}/${invoiceId}`
+    );
+
+    return {
+      success: true,
+      data: response.data
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      message:
+        error?.response?.data?.message ||
+        "Something went wrong"
+    };
+
+  }
+};
+const updateInvoiceBalance = async (
+  hostelId,
+  invoiceId,
+  balanceAmount
+) => {
+  try {
+
+    const res = await api.put(
+      `/v2/invoice/balance/${hostelId}/${invoiceId}`,
+      {
+        balanceAmount: Number(balanceAmount),
+      }
+    );
+    console.log("res",res)
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+
+  } 
+ catch (error) {
+  const msg =
+    typeof error?.response?.data === "string"
+      ? error.response.data
+      : error?.response?.data?.message;
+
+  return {
+    success: false,
+    message: msg || "Failed to update balance amount",
+  };
+}
+};
   return (
     <HostelContext.Provider
       value={{
@@ -1432,7 +1495,7 @@ const updateTenantDeductions = async (
         deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns,
         resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,
         deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,
-        generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions
+        generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions,getInvoiceReceipt,updateInvoiceBalance
       }}
     >
       {children}

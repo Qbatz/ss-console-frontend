@@ -35,6 +35,8 @@ import InvoiceRedemption from "../components/InvoiceRedemption/InvoiceRedemption
 import { SupportTicketsProvider } from "../Context/SupportTicketsContext";
 import TenantDeductions from "../components/PropertiesScreen/TenantDeductions";
 import TenantOverview from "../components/PropertiesScreen/TenantOverview";
+import InvoiceReceipt from "../components/PropertiesScreen/InvoiceReceiptPage";
+import PlanFeatures from "../components/SubscriptionScreen/PlanFeaturesScreen";
 
 const PrivateRoute = ({ children }) => {
   const token =
@@ -88,7 +90,7 @@ const PrivateRoutesScreen = () => {
                       <Route path="/roles/:roleId" element={<Roles />} />
                       <Route path="/properties/:roleId" element={<Properties />} />
                       <Route path="/subscription/:roleId" element={<Subscription />} />
-                      {/* <Route path="/subscription/:roleId" element={<Manageplans />} /> */}
+                      <Route path="/plan-features/:roleId" element={<PlanFeatures />} />
                       <Route path="/billing/:roleId" element={<Billing />} />
                       <Route path="/supportTicket/:roleId" element={<SupportTicket />} />
                       <Route path="/crmDashboard/:roleId" element={<CRMDashboard />} />
@@ -113,6 +115,10 @@ const PrivateRoutesScreen = () => {
                       <Route path="/invoice-redemption/:agentId" element={<InvoiceRedemption />} />
                       <Route path="/tenant-deductions/:customerId"element={<TenantDeductions />}/>
 <Route path="/tenant-overview/:customerId" element={<TenantOverview />}/>
+<Route
+  path="/invoice-receipt/:hostelId/:invoiceId"
+  element={<InvoiceReceipt />}
+/>
 
 
 

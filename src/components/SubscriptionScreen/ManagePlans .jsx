@@ -230,9 +230,9 @@ const ManagePlans = () => {
                       Plans List
                     </button>
 
-                    <button className="text-sm text-gray-400 pb-1">
+                    {/* <button className="text-sm text-gray-400 pb-1">
                       Approvals
-                    </button>
+                    </button> */}
                   </div>
 
                 </div>
@@ -301,19 +301,19 @@ const ManagePlans = () => {
 
   </div>
 </div> */}
-              <div className="relative bg-white border border-gray-200 rounded-xl px-5 py-4 mb-4 shadow-sm overflow-hidden">
+              {/* <div className="relative bg-white border border-gray-200 rounded-xl px-5 py-4 mb-4 shadow-sm overflow-hidden">
 
-                {/* IMAGE */}
+               
                 <img
                   src={rightsideimage}
                   alt="graph"
                   className="absolute right-0 top-0 h-[80px] max-w-[180px] opacity-3 pointer-events-none"
                 />
 
-                {/* CONTENT */}
+                
                 <div className="relative z-10 flex items-center gap-8">
 
-                  {/* LEFT */}
+                  
                   <div className="min-w-[200px]">
                     <p className="text-[11px] text-gray-400 mb-1 tracking-wide">
                       TOTAL RECURRING REVENUE
@@ -328,7 +328,7 @@ const ManagePlans = () => {
                     </span>
                   </div>
 
-                  {/* RIGHT */}
+                  
                   <div className="flex items-center gap-8 text-xs text-gray-500">
 
                     <div>
@@ -348,7 +348,7 @@ const ManagePlans = () => {
                   </div>
 
                 </div>
-              </div>
+              </div> */}
 
 
               {/* <h2 className="text-lg font-semibold text-gray-800 mb-4 text-left">

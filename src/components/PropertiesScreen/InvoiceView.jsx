@@ -12,10 +12,12 @@ import { useHostel } from "../../Context/HostelListContext";
 import Circle from "../../assets/menucircle.png";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
-import Arrow from "../../assets/arrow-right.png"
+import Arrow from "../../assets/arrow-right.png";
+import { useNavigate } from "react-router-dom";
+
 
 const InvoiceView = ({ hostelData, refreshHostel }) => {
-
+const navigate = useNavigate();
     const { getInvoicesByHostelId, deleteInvoice } = useHostel();
     const defaultInvoices = hostelData?.invoices || [];
     const [expandedInvoice, setExpandedInvoice] = useState(null);
@@ -572,6 +574,28 @@ useEffect(() => {
                                                             }}
                                                         >
                                                             Delete
+                                                        </button>
+
+                                                         <button  onClick={() =>
+    navigate(
+      `/invoice-receipt/${hostelData?.hostelId}/${item.invoiceId}`,
+      {
+        state: {
+          hostelData,
+          invoiceData: item,
+        },
+      }
+    )
+  }
+                                                            className="
+          w-full text-left
+          px-3 py-2 text-sm
+          
+           cursor-pointer
+        "
+
+                                                        >
+                                                            Invoice Receipt
                                                         </button>
 
                                                     </div>

@@ -125,7 +125,9 @@ const [selectedReason, setSelectedReason] =
   useEffect(() => {
     getPlans()
   }, [])
-  const [activeTab, setActiveTab] = useState("tenants");
+  // const [activeTab, setActiveTab] = useState("tenants");
+ 
+  
   const [showSharing, setShowSharing] = useState(false);
   const [showBillingRule, setShowBillingRule] = useState(false);
   const [modalType, setModalType] = useState("success");
@@ -171,7 +173,18 @@ const [selectedReason, setSelectedReason] =
   const loginType = localStorage.getItem("login_type");
   const showInvoices = loginType === "normal";
   const { hostelId } = useParams();
-
+   const [activeTab, setActiveTab] =
+  useState(
+    location.state?.activeTab ||
+    "tenants"
+  );
+useEffect(() => {
+  if (location.state?.activeTab) {
+    setActiveTab(
+      location.state.activeTab
+    );
+  }
+}, [location.state]);
 
   const fetchData = async () => {
     if (!hostelId) return;

@@ -47,6 +47,7 @@ useEffect(() => {
     if (
       location.pathname.includes("/demo-requests") ||
       location.pathname.includes("/subscription") ||
+       location.pathname.includes("/plan-features") ||
       location.pathname.includes("/trial-users") ||
       location.pathname.includes("/transactions")
     ) {
@@ -268,6 +269,12 @@ useEffect(() => {
                   <SidebarItem
                     title="Subscriptions"
                     to={`/subscription/${adminDetails?.roleId}`}
+                    // activeIcon={Subscription}
+                    // inactiveIcon={Subscription}
+                  />
+                  <SidebarItem
+                    title="Plan Features"
+                    to={`/plan-features/${adminDetails?.roleId}`}
                     // activeIcon={Subscription}
                     // inactiveIcon={Subscription}
                   />
