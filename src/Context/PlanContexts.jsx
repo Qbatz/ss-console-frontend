@@ -240,6 +240,105 @@ const getSmartstayFeatures = async () => {
     setLoading(false);
   }
 };
+const createSmartstayFeature = async (featureData) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      "/v2/plans/smartstay-feature",
+      featureData
+    );
+
+    if (res.status === 200 || res.status === 201) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const updateSmartstayFeature = async (
+  smartstayFeatureId,
+  featureData
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.put(
+      `/v2/plans/smartstay-feature/${smartstayFeatureId}`,
+      featureData
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const deleteSmartstayFeature = async (
+  smartstayFeatureId
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.delete(
+      `/v2/plans/smartstay-feature/${smartstayFeatureId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <PlanContext.Provider
       value={{
@@ -247,7 +346,7 @@ const getSmartstayFeatures = async () => {
         loading,
         errorMsg,
         getPlans,createPlan,updatePlan,deactivatePlan,deactivatePlanFeature,addPlanFeature,accessError,
-        getPlansDropdown,reactivatePlan,getSmartstayFeatures
+        getPlansDropdown,reactivatePlan,getSmartstayFeatures,createSmartstayFeature,updateSmartstayFeature,deleteSmartstayFeature
       }}
     >
       {children}

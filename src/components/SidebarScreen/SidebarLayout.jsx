@@ -297,8 +297,8 @@ useEffect(() => {
               )}
 
             </div>
-            <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} activeIcon={Billings}
-              inactiveIcon={Billings} />
+            {/* <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} activeIcon={Billings}
+              inactiveIcon={Billings} /> */}
               <SidebarItem title="Invoice-Redemption" to={`/invoice-redemption/${adminDetails?.roleId}`} activeIcon={Billings}
               inactiveIcon={Billings} />
 
@@ -357,8 +357,8 @@ useEffect(() => {
             <SidebarItem title="Support Tickets" count="0" to={`/supportTicket/${adminDetails?.roleId}`} activeIcon={Support}
               inactiveIcon={Support} />
 
-            <SidebarItem title="CRM Dashboard" count="0" to={`/crmDashboard/${adminDetails?.roleId}`} activeIcon={Dashbord}
-              inactiveIcon={Dashbord} />
+            {/* <SidebarItem title="CRM Dashboard" count="0" to={`/crmDashboard/${adminDetails?.roleId}`} activeIcon={Dashbord}
+              inactiveIcon={Dashbord} /> */}
 
 
             <SidebarItem title="IAM-Admin User" count={dashboardData?.agentCount || 0} to={`/iam-admin-user/${adminDetails?.roleId}`} activeIcon={Admin}

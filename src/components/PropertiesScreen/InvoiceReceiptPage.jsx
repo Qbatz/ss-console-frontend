@@ -122,7 +122,7 @@ setBalanceAmountError(res.message)
 
   </div>
 
-  <button   onClick={() => setShowUpdateModal(true)}
+  {/* <button   onClick={() => setShowUpdateModal(true)}
     className="
       px-4
       py-2
@@ -135,7 +135,21 @@ setBalanceAmountError(res.message)
     "
   >
     Update
-  </button>
+  </button> */}
+  <button
+  onClick={() => setShowUpdateModal(true)}
+  disabled={invoiceData?.invoiceType !== "ADVANCE"}
+  className={`
+    px-4 py-2 text-sm rounded-lg
+    ${
+      invoiceData?.invoiceType === "ADVANCE"
+        ? "bg-[#2563EB] text-white hover:bg-[#1D4ED8] cursor-pointer"
+        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+    }
+  `}
+>
+  Update
+</button>
 
 </div>
 <div className="bg-white rounded-xl border border-gray-200 p-5 mb-4">
@@ -298,9 +312,14 @@ setBalanceAmountError(res.message)
           "
         />
       </div>
- {balanceAmountError && (
+ {/* {balanceAmountError && (
               <ErrorMessage message={balanceAmountError} type="error" />
-            )}
+            )} */}
+            {balanceAmountError && (
+  <div className="mt-2 rounded bg-red-100 p-3 text-red-700 whitespace-pre-line">
+    {balanceAmountError}
+  </div>
+)}
       <div className="flex justify-end gap-3 mt-6">
 
         <button

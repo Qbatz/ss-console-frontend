@@ -548,7 +548,7 @@ useEffect(() => {
     fixed
     bg-white border border-gray-200
     rounded-lg shadow-lg z-[99999]
-    min-w-[120px]
+    max-w-[120px]
   "
   style={{
     top: menuPosition.top,
@@ -556,7 +556,30 @@ useEffect(() => {
   }}
 >
 
-                                                        <button
+                                                        
+
+                                                         <button  onClick={() =>
+    navigate(
+      `/invoice-receipt/${hostelData?.hostelId}/${item.invoiceId}`,
+      {
+        state: {
+          hostelData,
+          invoiceData: item,
+        },
+      }
+    )
+  }
+                                                            className="
+          w-full text-left
+          px-3 py-2 text-sm
+          
+           cursor-pointer whitespace-nowrap
+        "
+
+                                                        >
+                                                            Invoice Receipt
+                                                        </button>
+<button
                                                             className="
           w-full text-left
           px-3 py-2 text-sm
@@ -575,29 +598,6 @@ useEffect(() => {
                                                         >
                                                             Delete
                                                         </button>
-
-                                                         <button  onClick={() =>
-    navigate(
-      `/invoice-receipt/${hostelData?.hostelId}/${item.invoiceId}`,
-      {
-        state: {
-          hostelData,
-          invoiceData: item,
-        },
-      }
-    )
-  }
-                                                            className="
-          w-full text-left
-          px-3 py-2 text-sm
-          
-           cursor-pointer
-        "
-
-                                                        >
-                                                            Invoice Receipt
-                                                        </button>
-
                                                     </div>
 
                                                 )}
