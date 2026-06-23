@@ -566,15 +566,60 @@ const ManagePlans = () => {
                         </div>
 
                         {/* FEATURES */}
-                        <ul className="space-y-3 text-sm text-gray-600 min-h-[180px]">
+                        {/* <ul className="space-y-3 text-sm text-gray-600 min-h-[180px]">
                           {uniqueFeatures.map((f, i) => (
                             <li key={i} className="flex items-start gap-3 text-left whitespace-nowrap">
-                              {/* <span className="text-blue-600 mt-1 text-xs">■</span> */}
+                            
                               <img src={Tick} className="w-4 h-4 mt-0" />
                               {f.featureName}
                             </li>
                           ))}
-                        </ul>
+                        </ul> */}
+                        <ul className="space-y-3 text-sm text-gray-600 min-h-[180px]">
+  {uniqueFeatures.map((f, i) => {
+    
+    let dateText = "";
+
+    if (f.startsFrom && f.endsAt) {
+      dateText = `${f.startsFrom} to ${f.endsAt}`;
+    } else if (f.startsFrom && !f.endsAt) {
+      dateText = `${f.startsFrom} to Infinity`;
+    } else if (!f.startsFrom && f.endsAt) {
+      dateText = `Present to ${f.endsAt}`;
+    }
+
+    return (
+      <li
+        key={i}
+        className="flex items-center justify-between gap-3"
+      >
+        {/* Left Side */}
+        <div className="flex items-center gap-3">
+          <img
+            src={Tick}
+            className="w-4 h-4"
+            alt=""
+          />
+
+          <span>{f.featureName}</span>
+
+          {dateText && (
+            <span className="text-[10px] text-gray-500 bg-gray-100 px-2 py-1 rounded whitespace-nowrap">
+              {dateText}
+            </span>
+          )}
+        </div>
+
+        {/* Right Side Label */}
+        {f.labelText && (
+          <span className="text-[10px] font-medium text-blue-600 ">
+            {f.labelText}
+          </span>
+        )}
+      </li>
+    );
+  })}
+</ul>
 
                       </div>
 

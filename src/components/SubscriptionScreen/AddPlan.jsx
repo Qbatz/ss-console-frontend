@@ -115,13 +115,23 @@ const AddEditPlan = () => {
 
     smartstayFeatures.forEach((f) => {
 
-      const existingFeature =
-        editData?.planFeatures?.find(
-          (pf) =>
-            pf.featureName?.trim() ===
-            f.featureName?.trim()
-        );
+      // const existingFeature =
+      //   editData?.planFeatures?.find(
+      //     (pf) =>
+      //       pf.featureName?.trim() ===
+      //       f.featureName?.trim()
+      //   );
+const existingFeature =
+  editData?.planFeatures?.find(
+    (pf) =>
+      pf.smartstayFeatureId ===
+      f.smartstayFeatureId
+  );
 
+const enabled =
+  f.isCommon || !!existingFeature;
+
+initial[f.featureName] = enabled;
 
       if (editData) {
 
@@ -815,8 +825,8 @@ buttonRef.current = true
       setFeatureForm({
         labelText: existingAddon?.labelText || "",
         labelDescription: existingAddon?.labelDescription || "",
-        startsFrom: toInputDate(existingAddon?.startsFrom || ""),  // ✅ convert
-        endsAt: toInputDate(existingAddon?.endsAt || "")           // ✅ convert
+        startsFrom: toInputDate(existingAddon?.startsFrom || ""),  
+        endsAt: toInputDate(existingAddon?.endsAt || "")           
       });
 
       setShowFeatureModal(true);
@@ -1178,56 +1188,59 @@ buttonRef.current = true
 
 
 
-              <div className="space-y-3">
-                {smartstayFeatures?.map((f) => (
-                  <div
-                    key={f.smartstayFeatureId}
-                    className="flex justify-between items-center"
-                  >
-                    <div className="flex items-center gap-3 text-left">
+            {smartstayFeatures?.map((f) => {
+const isEnabled = features[f.featureName] ?? false;
 
-                      <span className="w-40">
-                        {f.featureName}
-                      </span>
+const shouldDisable =
+  f.isCommon && isEnabled;
 
-                      {/* isCommon Checkbox */}
-                      <input
-                        type="checkbox"
-                        checked={f.isCommon}
-                        readOnly
-                        className="w-4 h-4"
-                      />
+  return (
+    <div
+      key={f.smartstayFeatureId}
+      className="flex justify-between items-center"
+    >
+      <div className="flex items-center gap-3 text-left">
+        <span className="w-40">
+          {f.featureName}
+        </span>
 
-                    </div>
+        <input
+          type="checkbox"
+          checked={f.isCommon}
+          readOnly
+          className="w-4 h-4"
+        />
+   
+      </div>
 
-                    {/* Feature Toggle */}
-                    <button
-                      type="button"
-                      onClick={() => toggleFeature(f.featureName)}
-                      disabled={f.isCommon}
-                      className={`w-12 h-5 flex items-center rounded-full p-1 transition ${features[f.featureName]
-                          ? "bg-blue-600"
-                          : "bg-gray-300"
-                        } ${f.isCommon
-                          ? "cursor-not-allowed opacity-70"
-                          : "cursor-pointer"
-                        }`}
-                    >
-                      <div
-                        className={`bg-white w-4 h-4 rounded-full shadow transition-transform ${features[f.featureName]
-                            ? "translate-x-7"
-                            : ""
-                          }`}
-                      />
-                    </button>
-                  </div>
-                ))}
-              </div>
+  <button
+  type="button"
+  onClick={() => toggleFeature(f.featureName)}
+  disabled={shouldDisable}
+  className={`w-12 h-5 flex items-center rounded-full p-1 transition ${
+    isEnabled
+      ? "bg-blue-600"
+      : "bg-gray-300"
+  } ${
+    shouldDisable
+      ? "cursor-not-allowed opacity-70"
+      : "cursor-pointer"
+  }`}
+>
+  <div
+    className={`bg-white w-4 h-4 rounded-full shadow transition-transform ${
+      isEnabled ? "translate-x-7" : ""
+    }`}
+  />
+</button>
+    </div>
+  );
+})}
             </div>
 
           </div>
 
-          {/* RIGHT SIDE */}
+          
           <div className="space-y-6">
 
 

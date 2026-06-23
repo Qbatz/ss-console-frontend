@@ -28,7 +28,9 @@ const DashboardLayout = ({ children }) => {
   const [recurringOpen, setRecurringOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const location = useLocation();
+  const [openPlans, setOpenPlans] = useState(false);
   const menuRef = useRef(null);
+  const [plansOpen, setPlansOpen] = useState(false);
 useEffect(() => {
   const handleClickOutside = (event) => {
     if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -272,12 +274,7 @@ useEffect(() => {
                     // activeIcon={Subscription}
                     // inactiveIcon={Subscription}
                   />
-                  <SidebarItem
-                    title="Plan Features"
-                    to={`/plan-features/${adminDetails?.roleId}`}
-                    // activeIcon={Subscription}
-                    // inactiveIcon={Subscription}
-                  />
+                  
 
                   <SidebarItem
                     title="Trial Users"
@@ -297,6 +294,43 @@ useEffect(() => {
               )}
 
             </div>
+            <div>
+  {/* Parent */}
+  <div
+    onClick={() => setPlansOpen(!plansOpen)}
+    className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg"
+  >
+    <div className="flex items-center gap-3">
+      <img src={Subscription} className="w-5 h-5" />
+      <span className="text-[12px]">Plans</span>
+    </div>
+
+    <span
+      className={`transform transition ${
+        plansOpen ? "rotate-180" : ""
+      }`}
+    >
+      <img src={Drop} className="w-5 h-5" />
+    </span>
+  </div>
+
+  {/* Children */}
+  {plansOpen && (
+    <div className="ml-8 mt-1 space-y-1">
+
+      <SidebarItem
+        title="Manage Plans"
+        to={`/manage-plans/${adminDetails?.roleId}`}
+      />
+
+      <SidebarItem
+        title="Plan Features"
+        to={`/plan-features/${adminDetails?.roleId}`}
+      />
+
+    </div>
+  )}
+</div>
             {/* <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} activeIcon={Billings}
               inactiveIcon={Billings} /> */}
               <SidebarItem title="Invoice-Redemption" to={`/invoice-redemption/${adminDetails?.roleId}`} activeIcon={Billings}

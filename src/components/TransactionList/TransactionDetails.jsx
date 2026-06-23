@@ -13,13 +13,13 @@ import Single from "../../assets/single.png";
 import Location from "../../assets/locationGrey.png"
 import Call from "../../assets/call.png";
 import Team from "../../assets/Team.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useParams  } from "react-router-dom";
 import { useHostel } from "../../Context/HostelListContext";
 import Toast from "../SuccessModal/ToastDesign";
 
 
 const TransactionsPage = () => {
-
+const { roleId } = useParams();
   const [totalItems, setTotalItems] = useState(0);
   const { getOrderHistory, loading, accessError,verifyPayment } = useSubscription();
    const { sharePaymentLink} = useHostel();
@@ -223,9 +223,15 @@ useEffect(() => {
               </div>
 
 
-              <button className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit cursor-pointer">
+              {/* <button className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit cursor-pointer">
                 Manage Plans
-              </button>
+              </button> */}
+              <button
+  onClick={() => navigate(`/manage-plans/${roleId}`)}
+  className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit cursor-pointer"
+>
+  Manage Plans
+</button>
 
             </div>
 

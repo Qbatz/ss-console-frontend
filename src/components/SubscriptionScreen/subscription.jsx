@@ -157,13 +157,13 @@ const Subscription = () => {
             >
               Manage Plans
             </button> */}
-            <button
+            {/* <button
               onClick={() => navigate(`/manage-plans/${adminDetails?.roleId}`)}
 
               className="px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit bg-blue-600 text-white cursor-pointer"
             >
               Manage Plans
-            </button>
+            </button> */}
 
           </div>
 

@@ -37,7 +37,7 @@ console.log("agentDetails",agentDetails)
 
     fetchDetails();
   }, [agentId]);
-
+console.log("agentDetails",agentDetails)
   useEffect(() => {
     const handleClick = () => setOpenMenu(null);
     document.addEventListener("click", handleClick);
@@ -531,64 +531,72 @@ const toggleOwner = (id) => {
   )}
 </div>
             ) : (
-            <div className="border border-gray-200 rounded-lg p-4 overflow-x-auto">
-  <table className="w-full min-w-[650px] text-sm">
-    
-    {/* HEADER */}
+   <div className="border border-gray-300 rounded-lg overflow-hidden">
+
+  {/* HEADER */}
+  <table className="w-full text-sm">
     <thead>
-      <tr className="text-gray-500 text-[12px] text-left border-b">
-        <th className="pb-3">Property Name</th>
-        <th className="pb-3">Plan Type</th>
-        <th className="pb-3">Start Date</th>
-        <th className="pb-3">Expiry Date</th>
+      <tr className="text-gray-500 text-[12px] text-left border-b border-gray-300 bg-white">
+        <th className="py-3 px-4 w-[30%]">Property Name</th>
+        <th className="py-3 px-4 w-[20%]">Plan Type</th>
+        <th className="py-3 px-4 w-[25%]">Start Date</th>
+        <th className="py-3 px-4 w-[25%]">Expiry Date</th>
       </tr>
     </thead>
-
-    {/* BODY */}
-    <tbody className="text-gray-700">
-
-      {subscriptions.length > 0 ? (
-
-        subscriptions.map((item) => (
-          <tr key={item.id} className="border-b last:border-0">
-
-            {/* Property */}
-            <td className="py-4">{item.propertyName}</td>
-
-            {/* Plan */}
-            <td>
-              <span
-                className={`text-[10px] px-2 py-[2px] rounded
-                ${item.planType === "STANDARD"
-                  ? "bg-blue-100 text-blue-600"
-                  : "bg-orange-100 text-orange-600"}`}
-              >
-                {item.planType}
-              </span>
-            </td>
-
-            {/* Dates */}
-            <td>{item.startDate}</td>
-            <td>{item.expiryDate}</td>
-
-          </tr>
-        ))
-
-      ) : (
-
-        <tr>
-          <td
-            colSpan="4"
-            className="text-center py-8 text-gray-400 text-sm"
-          >
-            🚫 No Subscriptions Available
-          </td>
-        </tr>
-
-      )}
-
-    </tbody>
   </table>
+
+  {/* SCROLLABLE BODY */}
+  <div className="max-h-[300px] overflow-y-auto">
+    <table className="w-full text-sm">
+      <tbody className="text-gray-700">
+
+        {subscriptions.length > 0 ? (
+          subscriptions.map((item) => (
+            <tr
+              key={item.id}
+              className="border-b border-gray-300 last:border-0 text-[12px]"
+            >
+              <td className="py-4 px-4 w-[30%] text-left">
+                {item?.hostelName}
+              </td>
+
+              <td className="px-4 w-[20%] text-left">
+                <span
+                  className={`text-[10px] px-2 py-[2px] rounded
+                  ${
+                    item.planType === "STANDARD"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-orange-100 text-orange-600"
+                  }`}
+                >
+                  {item.planType}
+                </span>
+              </td>
+
+              <td className="px-4 w-[25%] text-left">
+                {item.planStartsAt}
+              </td>
+
+              <td className="px-4 w-[25%] text-left">
+                {item.planEndsAt}
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td
+              colSpan="4"
+              className="text-center py-8 text-gray-400"
+            >
+              🚫 No Subscriptions Available
+            </td>
+          </tr>
+        )}
+
+      </tbody>
+    </table>
+  </div>
+
 </div>
 
             )}
