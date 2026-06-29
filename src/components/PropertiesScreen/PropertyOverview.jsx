@@ -15,6 +15,7 @@ import InvoicesRedemption from "./InvoicesRedemption";
 import PropertyActive from "./ActiveScreen";
 import swap from "../../assets/arrowswap.png";
 import Star from "../../assets/star.png"
+import dayjs from "dayjs";
 import PropertyAmenities from "./PropertyAmenities";
 import { useHostel } from "../../Context/HostelListContext";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
@@ -962,24 +963,25 @@ fetchData()
 
   } else {
 
-    navigate(
-      `/properties/${adminDetails?.roleId}`,
-      {
-        state: {
-          currentPage:
-            location.state?.currentPage,
-
-          currentSearch:
-            location.state?.currentSearch,
-
-          currentDateRange:
-            location.state?.currentDateRange,
-
-          currentStatusFilter:
-            location.state?.currentStatusFilter,
-        },
-      }
-    );
+  navigate(`/properties/${adminDetails?.roleId}`, {
+  state: {
+    fromOverview: true,
+    currentPage: location.state?.currentPage,
+    currentSearch: location.state?.currentSearch,
+   currentDateRange:
+location.state?.currentDateRange?.length === 2
+  ? [
+      dayjs(
+        location.state.currentDateRange[0]
+      ).format("YYYY-MM-DD"),
+      dayjs(
+        location.state.currentDateRange[1]
+      ).format("YYYY-MM-DD"),
+    ]
+  : [],
+    currentStatusFilter: location.state?.currentStatusFilter,
+  },
+});
 
   }
 
@@ -2024,16 +2026,10 @@ fetchData()
     hover:underline
   "
   onClick={() =>
-    navigate(
-      `/tenant-overview/${item.customerId}`,
-      {
-        state: {
-          tenantData: item,
-          hostelData: hostelData
-        }
-      }
-    )
-  }
+  navigate(
+    `/tenant-overview/${item.customerId}`
+  )
+}
 >
   {item.fullName || item.firstName || "N/A"}
 </td>
@@ -2163,24 +2159,24 @@ fetchData()
   <div
     className="
       fixed
-      w-30
+      w-20
       bg-white
       border
       border-borderSoft
       rounded-card
       shadow-dropdown
       z-[9999]
-      py-2
+      py-1
       flex
       flex-col
     "
     style={{
       top: menuPosition.top,
-      left: menuPosition.left - 100,
+      left: menuPosition.left - 70,
     }}
   >
 
-    <button
+    {/* <button
       // onClick={() => {
       //   setSelectedTenantId(item.customerId);
       //   setShowDetectionsModal(true);
@@ -2213,7 +2209,7 @@ fetchData()
       "
     >
       Deductions
-    </button>
+    </button> */}
 
     <button
       disabled={!canDelete}

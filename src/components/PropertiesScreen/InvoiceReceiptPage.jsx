@@ -22,7 +22,7 @@ const navigate = useNavigate();
   const location = useLocation();
 const hostelData = location.state?.hostelData;
 const invoiceData = location.state?.invoiceData;
-
+console.log("invoiceData",invoiceData)
 console.log("hostelData",hostelData)
   const [receiptList, setReceiptList] = useState([]);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -31,6 +31,8 @@ const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
   const [balanceAmountError,setBalanceAmountError] = useState("")
+  const [canUpdateInvoice,setCanUpdateInvoice] = useState("")
+  console.log("canUpdateInvoice",canUpdateInvoice)
   const handleCloseModal = () => {
   setShowUpdateModal(false);
   setBalanceAmount("");
@@ -50,8 +52,9 @@ const [modalType, setModalType] = useState("success");
 
     if (res.success) {
       setReceiptList(
-        res.data || []
+        res?.data?.transactions || []
       );
+      setCanUpdateInvoice(res?.data?.canUpdateInvoiceBalance)
     }
 
   };
@@ -136,13 +139,32 @@ setBalanceAmountError(res.message)
   >
     Update
   </button> */}
-  <button
+  {/* <button
   onClick={() => setShowUpdateModal(true)}
-  disabled={invoiceData?.invoiceType !== "ADVANCE"}
+  disabled={
+    invoiceData?.invoiceType !== "ADVANCE" ||
+    invoiceData?.paymentStatus !== "PAID"
+  }
   className={`
     px-4 py-2 text-sm rounded-lg
     ${
-      invoiceData?.invoiceType === "ADVANCE"
+      invoiceData?.invoiceType === "ADVANCE" &&
+      invoiceData?.paymentStatus === "PAID"
+        ? "bg-[#2563EB] text-white hover:bg-[#1D4ED8] cursor-pointer"
+        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+    }
+  `}
+>
+  Update
+</button> */}
+
+<button
+  onClick={() => setShowUpdateModal(true)}
+  disabled={!canUpdateInvoice}
+  className={`
+    px-4 py-2 text-sm rounded-lg
+    ${
+      canUpdateInvoice
         ? "bg-[#2563EB] text-white hover:bg-[#1D4ED8] cursor-pointer"
         : "bg-gray-300 text-gray-500 cursor-not-allowed"
     }

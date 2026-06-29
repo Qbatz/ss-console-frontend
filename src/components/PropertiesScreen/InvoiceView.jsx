@@ -552,13 +552,30 @@ useEffect(() => {
   "
   style={{
     top: menuPosition.top,
-    left: menuPosition.left -30,
+    left: menuPosition.left + 20,
   }}
 >
 
                                                         
-
-                                                         <button  onClick={() =>
+{item?.canShowReceipts === true && (
+  <button
+    onClick={() =>
+      navigate(
+        `/invoice-receipt/${hostelData?.hostelId}/${item.invoiceId}`,
+        {
+          state: {
+            hostelData,
+            invoiceData: item,
+          },
+        }
+      )
+    }
+    className="w-full text-left px-3 py-2 text-sm cursor-pointer whitespace-nowrap"
+  >
+    Invoice Receipt
+  </button>
+)}
+                                                         {/* <button  onClick={() =>
     navigate(
       `/invoice-receipt/${hostelData?.hostelId}/${item.invoiceId}`,
       {
@@ -578,7 +595,7 @@ useEffect(() => {
 
                                                         >
                                                             Invoice Receipt
-                                                        </button>
+                                                        </button> */}
 <button
                                                             className="
           w-full text-left

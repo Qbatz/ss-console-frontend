@@ -105,9 +105,13 @@ axiosInstance.interceptors.response.use(
       
       const loginPath = (isLocal || isDev) ? "/internal/login" : "/";
 
-      if (window.location.pathname !== loginPath) {
-        window.location.replace(loginPath);
-      }
+    const alreadyOnAuthPage =
+  window.location.pathname === loginPath ||
+  window.location.pathname === "/";
+
+if (!alreadyOnAuthPage) {
+  window.location.replace(loginPath);
+}
     }
 
     return Promise.reject(error);

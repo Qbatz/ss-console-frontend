@@ -1336,11 +1336,22 @@ setCommentText("")
       </button>
       {item?.canAssignStaff && (
         <button
+          // onClick={() => {
+          //   setSelectedItem(item);
+          //   setShowModal(true);
+          //   setOpenMenu(null);
+          // }}
           onClick={() => {
-            setSelectedItem(item);
-            setShowModal(true);
-            setOpenMenu(null);
-          }}
+  setSelectedItem(item);
+
+  const currentAgent = agentList.find(
+    (a) => a.agentName?.trim() === item.assignedTo?.trim()
+  );
+
+  setDropdownValue(currentAgent?.agentId || "");
+  setShowModal(true);
+  setOpenMenu(null);
+}}
           className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
         >
           
@@ -1646,7 +1657,7 @@ setCommentText("")
             "
           >
 
-            <span className="text-sm ">
+            {/* <span className="text-sm ">
 
               {
                 agentList.find(
@@ -1654,7 +1665,16 @@ setCommentText("")
                 )?.agentName || "Select Staff"
               }
 
-            </span>
+            </span> */}
+            <span className="text-sm">
+  {
+    agentList.find(
+      (a) => a.agentId === dropdownValue
+    )?.agentName ||
+    selectedItem?.assignedTo ||
+    "Select Staff"
+  }
+</span>
 
             <img
               src={Arrow}
@@ -1680,7 +1700,7 @@ setCommentText("")
                 z-[9999]
               "
             >
-
+{/* 
               {agentList.map((agent) => (
 
                 <div
@@ -1705,7 +1725,42 @@ setCommentText("")
 
                 </div>
 
-              ))}
+              ))} */}
+              {agentList.map((agent) => {
+  const isAssignedAgent =
+    agent.agentName?.trim() === selectedItem?.assignedTo?.trim();
+
+  return (
+    <div
+      key={agent.agentId}
+      onClick={() => {
+        setDropdownValue(agent.agentId);
+        setOpenDropdown(false);
+      }}
+      className={`
+        px-4 py-3 text-sm cursor-pointer transition-all text-left
+
+        ${
+          dropdownValue === agent.agentId
+            ? "bg-blue-600 text-white"
+            : isAssignedAgent
+            ? "bg-yellow-100 border-l-4 border-yellow-500 font-semibold"
+            : "hover:bg-gray-100"
+        }
+      `}
+    >
+      <div className="flex justify-between items-center">
+        <span>{agent.agentName?.trim() || "Name not entered"}</span>
+
+        {isAssignedAgent && (
+          <span className="text-[10px] text-yellow-700">
+            Current
+          </span>
+        )}
+      </div>
+    </div>
+  );
+})}
 
             </div>
 

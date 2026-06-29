@@ -12,13 +12,34 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 const AddEditPlan = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { plans, getPlans, createPlan, updatePlan, deactivatePlanFeature, addPlanFeature, getSmartstayFeatures } = usePlan();
+  const { plans, getPlans, createPlan, updatePlan, deactivatePlanFeature, addPlanFeature, getSmartstayFeatures,getPlanById } = usePlan();
   useEffect(() => {
     getPlans();
   }, []);
 
-  const editData = location.state?.plan || null;
+  // const editData = location.state?.plan || null;
+  const planId = location.state?.plan?.planId;
+
+const [editData, setEditData] =
+  useState(null);
   console.log("editData", editData)
+  useEffect(() => {
+
+  const fetchPlan = async () => {
+
+    if (!planId) return;
+
+    const res =
+      await getPlanById(planId);
+
+    if (res.success) {
+      setEditData(res.data);
+    }
+  };
+
+  fetchPlan();
+
+}, [planId]);
 
   const [planType, setPlanType] = useState("");
   const [planCode, setPlanCode] = useState("");
@@ -59,7 +80,7 @@ const AddEditPlan = () => {
     endsAt: ""
   });
 
-  // INIT FEATURES
+  
   useEffect(() => {
     fetchSmartstayFeatures();
     getPlans();
@@ -186,13 +207,7 @@ initial[f.featureName] = enabled;
 
   }, [editData, smartstayFeatures]);
   const handleSaveFeature = () => {
-    // ❌ இந்த validation block-ஐ remove பண்ணுங்க
-    // if (!featureForm.labelText || !featureForm.labelDescription ||
-    //     !featureForm.startsFrom || !featureForm.endsAt) {
-    //   setFeatureError("All fields are required");
-    //   return;
-    // }
-
+    
     setFeatureError("");
 
     const featureData = smartstayFeatures.find(f => f.featureName === selectedFeature);
@@ -225,203 +240,438 @@ initial[f.featureName] = enabled;
     setShowFeatureModal(false);
   };
 
-  const handleSubmit = async () => {
+//   const handleSubmit = async () => {
 
-if(buttonRef.current) return;
-buttonRef.current = true
+// if(buttonRef.current) return;
+// buttonRef.current = true
      
-    let hasError = false;
-    if (!planName?.trim()) {
-      setPlanNameError("Plan name is required");
-      hasError = true;
-    }
+//     let hasError = false;
+//     if (!planName?.trim()) {
+//       setPlanNameError("Plan name is required");
+//       hasError = true;
+//     }
 
-    if (!planType?.trim()) {
-      setPlanTypeError("Plan type is required");
-      hasError = true;
-    }
+//     if (!planType?.trim()) {
+//       setPlanTypeError("Plan type is required");
+//       hasError = true;
+//     }
 
-    if (price === "" || price === null) {
-      setPriceError("Price is required");
-      hasError = true;
-    } else if (Number(price) < 0) {
-      setPriceError("Price cannot be less than 0");
-      hasError = true;
-    }
+//     if (price === "" || price === null) {
+//       setPriceError("Price is required");
+//       hasError = true;
+//     } else if (Number(price) < 0) {
+//       setPriceError("Price cannot be less than 0");
+//       hasError = true;
+//     }
 
-    if (duration === "" || duration === null) {
-      setDurationError("Duration is required");
-      hasError = true;
-    } else if (Number(duration) <= 0) {
-      setDurationError("Duration should be higher than 0");
-      hasError = true;
-    }
+//     if (duration === "" || duration === null) {
+//       setDurationError("Duration is required");
+//       hasError = true;
+//     } else if (Number(duration) <= 0) {
+//       setDurationError("Duration should be higher than 0");
+//       hasError = true;
+//     }
+
+//   if (hasError) {
+//   setIsSubmitting(false);
+//   return;
+// }
+
+
+//     const formatDate = (date) => {
+//       if (!date) return "";
+//       const parts = date.split("-");
+//       if (parts.length !== 3) return date;
+//       if (parts[0].length === 2) return date;
+//       return `${parts[2]}-${parts[1]}-${parts[0]}`;
+//     };
+
+//     const planFeatures = smartstayFeatures.map((feature) => {
+
+//       const addon = addons.find(
+//         (a) => a.smartstayFeatureId === feature.smartstayFeatureId
+//       );
+
+//       return {
+//         smartstayFeatureId: feature.smartstayFeatureId,
+//         isFeatureActive: !!addon,
+
+//         labelText: addon?.labelText || "",
+//         labelDescription: addon?.labelDescription || "",
+
+//         startsFrom: addon?.startsFrom
+//           ? formatDate(addon.startsFrom)
+//           : "",
+
+//         endsAt: addon?.endsAt
+//           ? formatDate(addon.endsAt)
+//           : ""
+//       };
+//     });
+
+
+//     const payload = {
+//       planName,
+//       planCode,
+//       planType,
+//       duration: Number(duration),
+//       price: Number(price),
+//       discountPercentage: Number(discount),
+//       gstPercentage,
+//       shouldShow,
+//       canCustomize,
+//       planFeatures
+//     };
+
+//     console.log("FINAL PAYLOAD:", payload);
+
+//     // if (editData) {
+
+
+//     //   const res = await updatePlan(editData.planId, payload);
+
+//     //   if (!res?.success) {
+//     //     setModalType("error");
+//     //     setMessage(res?.message || "Update failed");
+//     //     setShowSuccess(true);
+//     //     setTimeout(() => setShowSuccess(false), 1500);
+//     //     return;
+//     //   }
+
+//     //   setModalType("success");
+//     //   setMessage("Updated Successfully");
+//     //   setShowSuccess(true);
+//     //   setTimeout(() => {
+//     //     setShowSuccess(false);
+//     //     navigate(-1);
+//     //   }, 800);
+
+//     //   return;
+//     // }
+
+//     if (editData) {
+
+//       const oldFeatures = JSON.stringify(
+//         initialAddons.map(a => ({
+//           smartstayFeatureId: a.smartstayFeatureId,
+//           labelText: a.labelText || "",
+//           labelDescription: a.labelDescription || "",
+//           startsFrom: a.startsFrom || "",
+//           endsAt: a.endsAt || ""
+//         }))
+//       );
+
+//       const newFeatures = JSON.stringify(
+//         addons.map(a => ({
+//           smartstayFeatureId: a.smartstayFeatureId,
+//           labelText: a.labelText || "",
+//           labelDescription: a.labelDescription || "",
+//           startsFrom: a.startsFrom || "",
+//           endsAt: a.endsAt || ""
+//         }))
+//       );
+
+//       const noChanges =
+//         planName === editData.planName &&
+//         planCode === editData.planCode &&
+//         planType === editData.planType &&
+//         Number(price) === Number(editData.price) &&
+//         Number(duration) === Number(editData.duration) &&
+//         Number(discount) === Number(editData.discountPercentage) &&
+//         Number(gstPercentage) === Number(editData.gst) &&
+//         oldFeatures === newFeatures;
+
+//       if (noChanges) {
+//   setModalType("error");
+//   setMessage("No changes detected");
+//   setShowSuccess(true);
+
+//   buttonRef.current = false; // ✅ reset
+
+//   setTimeout(() => {
+//     setShowSuccess(false);
+//   }, 1500);
+
+//   return;
+// }
+
+//       // UPDATE API CALL
+//       const res = await updatePlan(
+//         editData.planId,
+//         payload
+//       );
+
+//       if (!res?.success) {
+//         setModalType("error");
+//         setMessage(res?.message || "Update failed");
+//         setShowSuccess(true);
+//         return;
+//       }
+
+//       setModalType("success");
+//       setMessage("Updated Successfully");
+//       setShowSuccess(true);
+
+//       setTimeout(() => {
+//         setShowSuccess(false);
+//         navigate(-1);
+//       }, 800);
+
+//       return;
+//     }
+//     const res = await createPlan(payload);
+
+//     if (res?.success) {
+//       setModalType("success");
+//       setMessage("Created Successfully");
+//       setShowSuccess(true);
+//       setTimeout(() => {
+//         setShowSuccess(false);
+//         navigate(-1);
+//       }, 800);
+//     } else {
+//       setModalType("error");
+//       setPlanError(res?.message || "");
+//       setMessage(res?.message || "Something went wrong");
+//       setShowSuccess(true);
+//       setTimeout(() => setShowSuccess(false), 1500);
+//     }
+
+//     buttonRef.current=false
+//   };
+
+const handleSubmit = async () => {
+
+  if (buttonRef.current) return;
+
+  buttonRef.current = true;
+
+  let hasError = false;
+
+  if (!planName?.trim()) {
+    setPlanNameError("Plan name is required");
+    hasError = true;
+  }
+
+  if (!planType?.trim()) {
+    setPlanTypeError("Plan type is required");
+    hasError = true;
+  }
+
+  if (price === "" || price === null) {
+    setPriceError("Price is required");
+    hasError = true;
+  } else if (Number(price) < 0) {
+    setPriceError("Price cannot be less than 0");
+    hasError = true;
+  }
+
+  if (duration === "" || duration === null) {
+    setDurationError("Duration is required");
+    hasError = true;
+  } else if (Number(duration) <= 0) {
+    setDurationError("Duration should be higher than 0");
+    hasError = true;
+  }
 
   if (hasError) {
-  setIsSubmitting(false);
-  return;
-}
+    buttonRef.current = false;
+    return;
+  }
 
+  const formatDate = (date) => {
+    if (!date) return "";
 
-    const formatDate = (date) => {
-      if (!date) return "";
-      const parts = date.split("-");
-      if (parts.length !== 3) return date;
-      if (parts[0].length === 2) return date;
-      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    const parts = date.split("-");
+
+    if (parts.length !== 3) return date;
+
+    if (parts[0].length === 2) return date;
+
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  };
+
+  const planFeatures = smartstayFeatures.map((feature) => {
+
+    const addon = addons.find(
+      (a) =>
+        a.smartstayFeatureId ===
+        feature.smartstayFeatureId
+    );
+
+    return {
+      smartstayFeatureId:
+        feature.smartstayFeatureId,
+
+      isFeatureActive: !!addon,
+
+      labelText:
+        addon?.labelText || "",
+
+      labelDescription:
+        addon?.labelDescription || "",
+
+      startsFrom: addon?.startsFrom
+        ? formatDate(addon.startsFrom)
+        : "",
+
+      endsAt: addon?.endsAt
+        ? formatDate(addon.endsAt)
+        : ""
     };
+  });
 
-    const planFeatures = smartstayFeatures.map((feature) => {
+  const payload = {
+    planName,
+    planCode,
+    planType,
+    duration: Number(duration),
+    price: Number(price),
+    discountPercentage: Number(discount),
+    gstPercentage,
+    shouldShow,
+    canCustomize,
+    planFeatures
+  };
 
-      const addon = addons.find(
-        (a) => a.smartstayFeatureId === feature.smartstayFeatureId
+  console.log("FINAL PAYLOAD:", payload);
+
+  // EDIT
+  if (editData) {
+
+    const oldFeatures = JSON.stringify(
+      initialAddons.map((a) => ({
+        smartstayFeatureId:
+          a.smartstayFeatureId,
+        labelText:
+          a.labelText || "",
+        labelDescription:
+          a.labelDescription || "",
+        startsFrom:
+          a.startsFrom || "",
+        endsAt:
+          a.endsAt || ""
+      }))
+    );
+
+    const newFeatures = JSON.stringify(
+      addons.map((a) => ({
+        smartstayFeatureId:
+          a.smartstayFeatureId,
+        labelText:
+          a.labelText || "",
+        labelDescription:
+          a.labelDescription || "",
+        startsFrom:
+          a.startsFrom || "",
+        endsAt:
+          a.endsAt || ""
+      }))
+    );
+
+    const noChanges =
+      planName === editData.planName &&
+      planCode === editData.planCode &&
+      planType === editData.planType &&
+      Number(price) ===
+        Number(editData.price) &&
+      Number(duration) ===
+        Number(editData.duration) &&
+      Number(discount) ===
+        Number(
+          editData.discountPercentage
+        ) &&
+      Number(gstPercentage) ===
+        Number(editData.gst) &&
+      oldFeatures === newFeatures;
+
+    if (noChanges) {
+
+      setModalType("error");
+      setMessage(
+        "No changes detected"
       );
-
-      return {
-        smartstayFeatureId: feature.smartstayFeatureId,
-        isFeatureActive: !!addon,
-
-        labelText: addon?.labelText || "",
-        labelDescription: addon?.labelDescription || "",
-
-        startsFrom: addon?.startsFrom
-          ? formatDate(addon.startsFrom)
-          : "",
-
-        endsAt: addon?.endsAt
-          ? formatDate(addon.endsAt)
-          : ""
-      };
-    });
-
-
-    const payload = {
-      planName,
-      planCode,
-      planType,
-      duration: Number(duration),
-      price: Number(price),
-      discountPercentage: Number(discount),
-      gstPercentage,
-      shouldShow,
-      canCustomize,
-      planFeatures
-    };
-
-    console.log("FINAL PAYLOAD:", payload);
-
-    // if (editData) {
-
-
-    //   const res = await updatePlan(editData.planId, payload);
-
-    //   if (!res?.success) {
-    //     setModalType("error");
-    //     setMessage(res?.message || "Update failed");
-    //     setShowSuccess(true);
-    //     setTimeout(() => setShowSuccess(false), 1500);
-    //     return;
-    //   }
-
-    //   setModalType("success");
-    //   setMessage("Updated Successfully");
-    //   setShowSuccess(true);
-    //   setTimeout(() => {
-    //     setShowSuccess(false);
-    //     navigate(-1);
-    //   }, 800);
-
-    //   return;
-    // }
-
-    if (editData) {
-
-      const oldFeatures = JSON.stringify(
-        initialAddons.map(a => ({
-          smartstayFeatureId: a.smartstayFeatureId,
-          labelText: a.labelText || "",
-          labelDescription: a.labelDescription || "",
-          startsFrom: a.startsFrom || "",
-          endsAt: a.endsAt || ""
-        }))
-      );
-
-      const newFeatures = JSON.stringify(
-        addons.map(a => ({
-          smartstayFeatureId: a.smartstayFeatureId,
-          labelText: a.labelText || "",
-          labelDescription: a.labelDescription || "",
-          startsFrom: a.startsFrom || "",
-          endsAt: a.endsAt || ""
-        }))
-      );
-
-      const noChanges =
-        planName === editData.planName &&
-        planCode === editData.planCode &&
-        planType === editData.planType &&
-        Number(price) === Number(editData.price) &&
-        Number(duration) === Number(editData.duration) &&
-        Number(discount) === Number(editData.discountPercentage) &&
-        Number(gstPercentage) === Number(editData.gst) &&
-        oldFeatures === newFeatures;
-
-      if (noChanges) {
-        setModalType("error");
-        setMessage("No changes detected");
-        setShowSuccess(true);
-
-        setTimeout(() => {
-          setShowSuccess(false);
-        }, 1500);
-
-        return;
-      }
-
-      // UPDATE API CALL
-      const res = await updatePlan(
-        editData.planId,
-        payload
-      );
-
-      if (!res?.success) {
-        setModalType("error");
-        setMessage(res?.message || "Update failed");
-        setShowSuccess(true);
-        return;
-      }
-
-      setModalType("success");
-      setMessage("Updated Successfully");
       setShowSuccess(true);
+
+      buttonRef.current = false;
 
       setTimeout(() => {
         setShowSuccess(false);
-        navigate(-1);
-      }, 800);
+      }, 1500);
 
       return;
     }
-    const res = await createPlan(payload);
 
-    if (res?.success) {
-      setModalType("success");
-      setMessage("Created Successfully");
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        navigate(-1);
-      }, 800);
-    } else {
+    const res = await updatePlan(
+      editData.planId,
+      payload
+    );
+
+    if (!res?.success) {
+
       setModalType("error");
-      setPlanError(res?.message || "");
-      setMessage(res?.message || "Something went wrong");
+      setMessage(
+        res?.message ||
+          "Update failed"
+      );
       setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 1500);
+
+      buttonRef.current = false;
+
+      return;
     }
 
-    buttonRef.current=false
-  };
+    // SUCCESS
+    setModalType("success");
+    setMessage(
+      "Updated Successfully"
+    );
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+      navigate(-1);
+    }, 800);
+
+    return;
+  }
+
+  // CREATE
+  const res = await createPlan(payload);
+
+  if (res?.success) {
+
+    setModalType("success");
+    setMessage(
+      "Created Successfully"
+    );
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+      navigate(-1);
+    }, 800);
+
+    return;
+  }
+
+  // CREATE ERROR
+  setModalType("error");
+  setPlanError(
+    res?.message || ""
+  );
+  setMessage(
+    res?.message ||
+      "Something went wrong"
+  );
+  setShowSuccess(true);
+
+  buttonRef.current = false;
+
+  setTimeout(() => {
+    setShowSuccess(false);
+  }, 1500);
+};
   //   const handleSubmit = async () => {
   //     let hasError = false;
   //     if (!planName?.trim()) {
@@ -801,16 +1051,16 @@ buttonRef.current = true
   //     );
   //   }
   // };
-  // ✅ helper function add பண்ணுங்க (component top-ல)
+  
   const toInputDate = (dateStr) => {
     if (!dateStr) return "";
     const parts = dateStr.split("-");
     if (parts.length !== 3) return "";
-    // DD-MM-YYYY -> YYYY-MM-DD
+    
     if (parts[0].length === 2) {
       return `${parts[2]}-${parts[1]}-${parts[0]}`;
     }
-    return dateStr; // already YYYY-MM-DD
+    return dateStr;
   };
   const toggleFeature = (name) => {
     const enabled = !features[name];
@@ -840,7 +1090,7 @@ buttonRef.current = true
     setAddons([...addons, { name: "", price: "" }]);
   };
   console.log("addAddon", addAddon)
-  // UPDATE ADDON
+  
   const updateAddon = (index, key, value) => {
     const updated = [...addons];
     updated[index][key] = value;
@@ -935,7 +1185,6 @@ buttonRef.current = true
 
   };
 
-  // TOTAL PRICE
   const totalPrice =
     Number(price) +
     addons.reduce((sum, a) => sum + Number(a.price || 0), 0);

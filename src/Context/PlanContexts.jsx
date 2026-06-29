@@ -339,6 +339,31 @@ const deleteSmartstayFeature = async (
     setLoading(false);
   }
 };
+const getPlanById = async (planId) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.get(
+      `/v2/plans/${planId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error)
+    };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <PlanContext.Provider
       value={{
@@ -346,7 +371,8 @@ const deleteSmartstayFeature = async (
         loading,
         errorMsg,
         getPlans,createPlan,updatePlan,deactivatePlan,deactivatePlanFeature,addPlanFeature,accessError,
-        getPlansDropdown,reactivatePlan,getSmartstayFeatures,createSmartstayFeature,updateSmartstayFeature,deleteSmartstayFeature
+        getPlansDropdown,reactivatePlan,getSmartstayFeatures,createSmartstayFeature,updateSmartstayFeature,
+        deleteSmartstayFeature,getPlanById
       }}
     >
       {children}

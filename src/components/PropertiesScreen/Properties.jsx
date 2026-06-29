@@ -62,6 +62,7 @@ useEffect(() => {
   console.log("dropdownPlans", dropdownPlans)
   // const skipApi = location.state?.skipApi;
   const { RangePicker } = DatePicker;
+  
   // const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
   // const [dateRange, setDateRange] = useState([]);
   const { canRead, canWrite, canUpdate, canDelete } =
@@ -71,42 +72,88 @@ useEffect(() => {
   // const [searchText, setSearchText] = useState("");
   const [pageSize, setPageSize] = useState(10);
   // const [statusFilter, setStatusFilter] = useState("");
+  
   const [page, setPage] = useState(
   location.state?.currentPage || 1
 );
 
-// const [searchText, setSearchText] = useState(
-//   location.state?.currentSearch || ""
-// );
+
+
 const locationSearch =
   location.state?.currentSearch;
 
 // const [searchText, setSearchText] = useState(
 //   locationSearch ?? ""
 // );
+// const [searchText, setSearchText] = useState(
+//   sessionStorage.getItem("propertiesSearch") || ""
+// );
+// const [searchText, setSearchText] = useState(
+//   location.state?.currentSearch ||
+//   sessionStorage.getItem("propertiesSearch") ||
+//   ""
+// );
 const [searchText, setSearchText] = useState(
-  sessionStorage.getItem("propertiesSearch") || ""
+  location.state?.fromOverview
+    ? location.state?.currentSearch || ""
+    : ""
 );
-
-const [statusFilter, setStatusFilter] = useState(
-  sessionStorage.getItem("propertiesStatus") || ""
-);
-
 const [dateRange, setDateRange] = useState(() => {
+  const range = location.state?.currentDateRange;
 
-  const stored =
-    sessionStorage.getItem("propertiesDate");
+  if (range?.length === 2) {
+    return [
+      dayjs(range[0], "YYYY-MM-DD"),
+      dayjs(range[1], "YYYY-MM-DD"),
+    ];
+  }
 
-  if (!stored) return [];
-
-  const parsed = JSON.parse(stored);
-
-  return [
-    dayjs(parsed[0]),
-    dayjs(parsed[1]),
-  ];
-
+  return null;
 });
+useEffect(() => {
+  const fromOverview = location.state?.fromOverview;
+
+  if (!fromOverview) {
+    setSearchText("");
+    setDateRange([]);
+    setStatusFilter("");
+    setPage(1);
+  }
+}, []);
+// const [statusFilter, setStatusFilter] = useState(
+//   sessionStorage.getItem("propertiesStatus") || ""
+// );
+
+// const [dateRange, setDateRange] = useState(() => {
+
+//   const stored =
+//     sessionStorage.getItem("propertiesDate");
+
+//   if (!stored) return [];
+
+//   const parsed = JSON.parse(stored);
+
+//   return [
+//     dayjs(parsed[0]),
+//     dayjs(parsed[1]),
+//   ];
+
+// });
+// const [statusFilter, setStatusFilter] = useState(
+//   location.state?.currentStatusFilter ||
+//   sessionStorage.getItem("propertiesStatus") ||
+//   ""
+// );
+const [statusFilter, setStatusFilter] = useState(
+  location.state?.fromOverview
+    ? location.state?.currentStatusFilter || ""
+    : ""
+);
+
+// const [dateRange, setDateRange] = useState(
+//   location.state?.currentDateRange || []
+// );
+
 useEffect(() => {
 
   sessionStorage.setItem(
@@ -147,18 +194,28 @@ useEffect(() => {
   }
 
 }, [dateRange]);
+
+
 useEffect(() => {
-
   if (!location.state?.currentPage) {
-
     setSearchText("");
     setDateRange([]);
     setStatusFilter("");
     setPage(1);
-
   }
-
 }, []);
+// useEffect(() => {
+
+//   if (!location.state?.currentPage) {
+
+//     setSearchText("");
+//     setDateRange([]);
+//     setStatusFilter("");
+//     setPage(1);
+
+//   }
+
+// }, []);
 
 // const [dateRange, setDateRange] = useState(
 //   location.state?.currentDateRange || []
@@ -368,14 +425,28 @@ useEffect(() => {
       //     trialPlan: item
       //   }
       // });
-      navigate(`/property-overview/${item.hostelId}`, {
-  state: {
-    hostelData: res.data,
-    trialPlan: item,
+//       navigate(`/property-overview/${item.hostelId}`, {
+//   state: {
+//     hostelData: res.data,
+//     trialPlan: item,
 
+//     currentPage: page,
+//     currentSearch: searchText,
+//     currentDateRange: dateRange,
+//     currentStatusFilter: statusFilter,
+//   }
+// });
+navigate(`/property-overview/${item.hostelId}`, {
+  state: {
     currentPage: page,
     currentSearch: searchText,
-    currentDateRange: dateRange,
+     currentDateRange:
+      dateRange?.length === 2
+        ? [
+            dateRange[0].format("YYYY-MM-DD"),
+            dateRange[1].format("YYYY-MM-DD"),
+          ]
+        : [],
     currentStatusFilter: statusFilter,
   }
 });
@@ -1350,6 +1421,7 @@ useEffect(() => {
         </label>
 
         <RangePicker
+        
           value={dateRange}
           onChange={(dates) => setDateRange(dates)}
           format="DD-MM-YYYY"
