@@ -8,12 +8,16 @@ import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import arrowleft from "../../assets/arrow-up.png";
 
-const TenantDeductions = () => {
+
+const TenantDeductions = ({
+  tenantData,
+  hostelData,
+}) => {
 const { getTenantDeductions,updateTenantDeductions } = useHostel();
-  const { state } = useLocation();
+  // const { state } = useLocation();
 const navigate = useNavigate();
-  const tenantData = state?.tenantData;
-  const hostelData = state?.hostelData;
+  // const tenantData = state?.tenantData;
+  // const hostelData = state?.hostelData;
   console.log("tenantData",tenantData)
 const [deductions, setDeductions] = useState([]);
 const [invoiceDeductions,setInvoiceDeductions] =useState([]);
@@ -35,12 +39,12 @@ const [paidAmount, setPaidAmount] =
   const fetchDeductions = async () => {
 
   const res = await getTenantDeductions(
-    hostelData?.hostelId,
+    tenantData?.hostelDetails?.hostelId,
     tenantData?.customerId
   );
 
   if (res?.success) {
-
+console.log("res.data",res.data)
     setDeductions(
       Array.isArray(
         res.data?.customerAdvanceDeductions
@@ -70,13 +74,13 @@ const [paidAmount, setPaidAmount] =
 useEffect(() => {
 
   if (
-    hostelData?.hostelId &&
+    tenantData?.hostelDetails?.hostelId &&
     tenantData?.customerId
   ) {
     fetchDeductions();
   }
 
-}, [hostelData?.hostelId, tenantData?.customerId]);
+}, [tenantData?.hostelDetails.hostelId, tenantData?.customerId]);
 
 // useEffect(() => {
 
@@ -138,7 +142,7 @@ const handleSaveDeduction =
 
       const res =
         await updateTenantDeductions(
-          hostelData?.hostelId,
+          tenantData?.hostelDetails?.hostelId,
           tenantData?.customerId,
           selectedInvoiceId
         );
@@ -179,7 +183,7 @@ const handleSaveDeduction =
 
   return (
 
-    <DashboardLayout>
+    <>
  <Toast
         show={showSuccess}
         message={message}
@@ -206,7 +210,7 @@ const handleSaveDeduction =
      
       cursor-pointer
     "
-    onClick={() => navigate(-1)}
+    onClick={() => window.history.back()}
   />
 
   <div className="text-left">
@@ -968,7 +972,7 @@ const handleSaveDeduction =
 
 )}
 
-    </DashboardLayout>
+    </>
 
   );
 };

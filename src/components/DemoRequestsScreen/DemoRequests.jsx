@@ -318,6 +318,10 @@ useEffect(() => {
       setAssignError("Please Select Agent");
       return;
     }
+    if (selectedItem?.assignedTo && !commentText.trim()) {
+  setCommentError("Please enter reason for reassignment");
+  return;
+}
 
     const res = await assignStaff(
       selectedItem.requestId,
@@ -468,6 +472,17 @@ setCommentText("")
   //     alert(res?.message);
   //   }
   // };
+    const sortedAgents = [...agentList].sort((a, b) => {
+    const aAssigned =
+      a.agentName?.trim() === selectedItem?.assignedTo?.trim();
+
+    const bAssigned =
+      b.agentName?.trim() === selectedItem?.assignedTo?.trim();
+
+    if (aAssigned) return -1;
+    if (bAssigned) return 1;
+    return 0;
+  });
 
   return (
     <DashboardLayout>
@@ -1341,7 +1356,7 @@ setCommentText("")
           //   setShowModal(true);
           //   setOpenMenu(null);
           // }}
-          onClick={() => {
+     onClick={() => {
   setSelectedItem(item);
 
   const currentAgent = agentList.find(
@@ -1349,6 +1364,8 @@ setCommentText("")
   );
 
   setDropdownValue(currentAgent?.agentId || "");
+  setCommentText("");
+  setCommentError(""); // add this
   setShowModal(true);
   setOpenMenu(null);
 }}
@@ -1573,6 +1590,7 @@ setCommentText("")
         setAssignError("");
         setDropdownValue("");
         setCommentText("")
+        setOpenDropdown(false);
       }}
     />
 
@@ -1615,6 +1633,7 @@ setCommentText("")
             setAssignError("");
             setDropdownValue("");
             setCommentText("")
+            setOpenDropdown(false);
           }}
           className="text-red-500 text-lg cursor-pointer"
         >
@@ -1726,9 +1745,10 @@ setCommentText("")
                 </div>
 
               ))} */}
-              {agentList.map((agent) => {
+  {sortedAgents.map((agent) => {
   const isAssignedAgent =
-    agent.agentName?.trim() === selectedItem?.assignedTo?.trim();
+    agent.agentName?.trim() ===
+    selectedItem?.assignedTo?.trim();
 
   return (
     <div
@@ -1738,8 +1758,7 @@ setCommentText("")
         setOpenDropdown(false);
       }}
       className={`
-        px-4 py-3 text-sm cursor-pointer transition-all text-left
-
+        px-4 py-3 text-sm cursor-pointer text-left
         ${
           dropdownValue === agent.agentId
             ? "bg-blue-600 text-white"
@@ -1750,7 +1769,7 @@ setCommentText("")
       `}
     >
       <div className="flex justify-between items-center">
-        <span>{agent.agentName?.trim() || "Name not entered"}</span>
+        <span>{agent.agentName}</span>
 
         {isAssignedAgent && (
           <span className="text-[10px] text-yellow-700">
@@ -1781,7 +1800,9 @@ setCommentText("")
 <div className="mt-5">
 
   <label className="text-[13px] font-medium text-left block mb-2">
-    Additional Comments
+    Additional Comments {selectedItem?.assignedTo && (
+    <span className="text-red-500 ml-1">*</span>
+  )}
   </label>
 
   <div
@@ -1796,9 +1817,10 @@ setCommentText("")
     <textarea
       placeholder="Type your comments here..."
       value={commentText}
-      onChange={(e) => {
-        setCommentText(e.target.value);
-      }}
+     onChange={(e) => {
+  setCommentText(e.target.value);
+  setCommentError("");
+}}
       className="
         w-full
         h-[110px]
@@ -1829,6 +1851,15 @@ setCommentText("")
   </div>
 
 </div>
+
+{commentError && (
+  <div className="mt-2">
+    <ErrorMessage
+      message={commentError}
+      type="error"
+    />
+  </div>
+)}
       </div>
 
     
@@ -1840,6 +1871,7 @@ setCommentText("")
             setAssignError("");
             setDropdownValue("");
             setCommentText("")
+            setOpenDropdown(false);
           }}
           className="
             px-4 py-2

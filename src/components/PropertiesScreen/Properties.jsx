@@ -414,44 +414,69 @@ useEffect(() => {
  
 
 
+const handlePropertyClick = async (item) => {
+  const res = await getHostelById(item.hostelId);
 
-  const handlePropertyClick = async (item) => {
-    const res = await getHostelById(item.hostelId);
+  if (res?.success) {
+    sessionStorage.setItem(
+      "propertyOverviewState",
+      JSON.stringify({
+        currentPage: page,
+        currentSearch: searchText,
+        currentDateRange:
+          dateRange?.length === 2
+            ? [
+                dateRange[0].format("YYYY-MM-DD"),
+                dateRange[1].format("YYYY-MM-DD"),
+              ]
+            : [],
+        currentStatusFilter: statusFilter,
+      })
+    );
 
-    if (res?.success) {
-      // navigate(`/property-overview/${item.hostelId}`, {
-      //   state: {
-      //     hostelData: res.data,
-      //     trialPlan: item
-      //   }
-      // });
-//       navigate(`/property-overview/${item.hostelId}`, {
+    window.open(
+      `/property-overview/${item.hostelId}`,
+      "_blank"
+    );
+  }
+};
+//   const handlePropertyClick = async (item) => {
+//     const res = await getHostelById(item.hostelId);
+
+//     if (res?.success) {
+//       // navigate(`/property-overview/${item.hostelId}`, {
+//       //   state: {
+//       //     hostelData: res.data,
+//       //     trialPlan: item
+//       //   }
+//       // });
+// //       navigate(`/property-overview/${item.hostelId}`, {
+// //   state: {
+// //     hostelData: res.data,
+// //     trialPlan: item,
+
+// //     currentPage: page,
+// //     currentSearch: searchText,
+// //     currentDateRange: dateRange,
+// //     currentStatusFilter: statusFilter,
+// //   }
+// // });
+// navigate(`/property-overview/${item.hostelId}`, {
 //   state: {
-//     hostelData: res.data,
-//     trialPlan: item,
-
 //     currentPage: page,
 //     currentSearch: searchText,
-//     currentDateRange: dateRange,
+//      currentDateRange:
+//       dateRange?.length === 2
+//         ? [
+//             dateRange[0].format("YYYY-MM-DD"),
+//             dateRange[1].format("YYYY-MM-DD"),
+//           ]
+//         : [],
 //     currentStatusFilter: statusFilter,
 //   }
 // });
-navigate(`/property-overview/${item.hostelId}`, {
-  state: {
-    currentPage: page,
-    currentSearch: searchText,
-     currentDateRange:
-      dateRange?.length === 2
-        ? [
-            dateRange[0].format("YYYY-MM-DD"),
-            dateRange[1].format("YYYY-MM-DD"),
-          ]
-        : [],
-    currentStatusFilter: statusFilter,
-  }
-});
-    }
-  };
+//     }
+//   };
 
   // };
   // const handleExport = () => {

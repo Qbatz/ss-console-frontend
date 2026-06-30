@@ -799,7 +799,44 @@ const getTrialDaysExtReason = async () => {
 
   }
 };
+const deleteTransaction = async (transactionId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
 
+    const res = await axiosInstance.delete(
+      `/v2/receipt/${transactionId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+        message: "Transaction deleted successfully",
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+
+    let msg = "Something went wrong";
+
+    if (error?.response?.status === 500) {
+      msg = "Internal Server Error";
+    } else {
+      msg = getErrorMessage(error);
+    }
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <SubscriptionContext.Provider
       value={{
@@ -807,7 +844,7 @@ const getTrialDaysExtReason = async () => {
         errorMsg,
         createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, 
         getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment,deleteDemoRequest,getDemoType,getDropReasons,getDemoRequestComments,
-        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes,getTrialDaysExtReason,
+        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes,getTrialDaysExtReason,deleteTransaction
       }}
     >
       {children}

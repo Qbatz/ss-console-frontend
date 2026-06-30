@@ -1594,6 +1594,43 @@ const getTenantById = async (customerId) => {
     setLoading(false);
   }
 };
+const updateAdvanceAmount = async (
+  hostelId,
+  invoiceId,
+  amount
+) => {
+  try {
+
+    const res = await axiosInstance.put(
+      `/v2/invoice/advance/amount/${hostelId}/${invoiceId}`,
+      {
+        amount: Number(amount)
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg =
+      typeof error?.response?.data === "string"
+        ? error.response.data
+        : error?.response?.data?.message;
+
+    return {
+      success: false,
+      message: msg || "Failed to update advance amount"
+    };
+
+  }
+};
   return (
     <HostelContext.Provider
       value={{
@@ -1605,7 +1642,7 @@ const getTenantById = async (customerId) => {
         deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns,
         resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,
         deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,
-        generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions,getInvoiceReceipt,updateInvoiceBalance,getTenantById
+        generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions,getInvoiceReceipt,updateInvoiceBalance,getTenantById,updateAdvanceAmount
       }}
     >
       {children}
