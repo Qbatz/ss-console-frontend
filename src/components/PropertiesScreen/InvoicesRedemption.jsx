@@ -267,11 +267,27 @@ const [deleteId, setDeleteId] = useState(null);
     : defaultInvoiceRedemptions;
   console.log("data", data)
   const handleUpdateInvoiceRedemption = async () => {
-    console.log("...........?")
-    if (!editAmount) {
-      setAmountError("Amount is required");
-      return;
-    }
+   if (!editAmount) {
+    setAmountError("Amount is required");
+    return;
+  }
+
+  if (
+    Number(editAmount) ===
+    Number(selectedItem?.redemptionAmount)
+  ) {
+    setModalType("error");
+    setMessage("No changes detected");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+    return;
+  }
+
+  
 
     const res = await updateInvoiceRedemption(
       selectedItem?.id,

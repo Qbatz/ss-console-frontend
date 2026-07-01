@@ -69,7 +69,7 @@ const getStatusColor = (status) => {
 const TenantOverview = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { getTenantById, deleteInvoice,updateInvoiceRedemption,deleteInvoiceRedemption } = useHostel();
+  const { getTenantById, deleteInvoice, updateInvoiceRedemption, deleteInvoiceRedemption, updateAdvanceAmount } = useHostel();
   const { deleteTransaction } = useSubscription();
   // const tenantData = location.state?.tenantData;
   const hostelData = location.state?.hostelData;
@@ -79,7 +79,7 @@ const TenantOverview = () => {
   const menuRef = useRef(null);
   const transactionMenuRef = useRef(null);
   const invoiceMenuRef = useRef(null);
-const redemptionMenuRef = useRef(null);
+  const redemptionMenuRef = useRef(null);
   const [tenantData, setTenantData] = useState(null);
   const [invoices, setInvoices] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -94,22 +94,23 @@ const redemptionMenuRef = useRef(null);
     top: 0,
     left: 0,
   });
- 
+
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletePhone, setDeletePhone] = useState("");
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [amountError, setAmountError] = useState("");
   console.log("deleteItem", deleteItem)
-const [openRedemptionMenu, setOpenRedemptionMenu] = useState(null);
+  const [openRedemptionMenu, setOpenRedemptionMenu] = useState(null);
 
-const [showRedemptionEditModal, setShowRedemptionEditModal] = useState(false);
-const [showRedemptionDeleteModal, setShowRedemptionDeleteModal] = useState(false);
-const [selectedRedemption, setSelectedRedemption] = useState(null);
-const [editAmount, setEditAmount] = useState("");
- const [isDeleting, setIsDeleting] = useState(false);
- const [deleteId, setDeleteId] = useState(null);
- console.log("selectedRedemption",selectedRedemption)
+  const [showRedemptionEditModal, setShowRedemptionEditModal] = useState(false);
+  const [showRedemptionDeleteModal, setShowRedemptionDeleteModal] = useState(false);
+  const [selectedRedemption, setSelectedRedemption] = useState(null);
+  const [editAmount, setEditAmount] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [showAmountModal, setShowAmountModal] = useState(false);
+  console.log("selectedRedemption", selectedRedemption)
   const fetchTenant = async () => {
     const res = await getTenantById(customerId);
 
@@ -124,29 +125,29 @@ const [editAmount, setEditAmount] = useState("");
     fetchTenant();
   }, [customerId]);
 
-useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (
-      redemptionMenuRef.current &&
-      !redemptionMenuRef.current.contains(
-        event.target
-      )
-    ) {
-      setOpenRedemptionMenu(null);
-    }
-  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        redemptionMenuRef.current &&
+        !redemptionMenuRef.current.contains(
+          event.target
+        )
+      ) {
+        setOpenRedemptionMenu(null);
+      }
+    };
 
-  document.addEventListener(
-    "mousedown",
-    handleClickOutside
-  );
-
-  return () =>
-    document.removeEventListener(
+    document.addEventListener(
       "mousedown",
       handleClickOutside
     );
-}, []);
+
+    return () =>
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+  }, []);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -247,17 +248,32 @@ useEffect(() => {
     }
   };
 
-   const handleUpdateInvoiceRedemption = async () => {
-    console.log("...........?")
-    if (!editAmount) {
-      setAmountError("Amount is required");
-      return;
-    }
+  const handleUpdateInvoiceRedemption = async () => {
+     if (!editAmount) {
+    setAmountError("Amount is required");
+    return;
+  }
 
-    const res = await updateInvoiceRedemption(
-      selectedRedemption?.id,
-      Number(editAmount)
-    );
+  if (
+    Number(editAmount) ===
+    Number(selectedRedemption?.redemptionAmount)
+  ) {
+    setModalType("error");
+    setMessage("No changes detected");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+    return;
+  }
+
+  const res = await updateInvoiceRedemption(
+    selectedRedemption?.id,
+    Number(editAmount)
+  );
+
 
     if (res.success) {
       setModalType("success");
@@ -282,55 +298,83 @@ useEffect(() => {
   };
   const handleDeleteInvoiceRedemption = async (id) => {
 
-  if (isDeleting) return;
+    if (isDeleting) return;
 
-  setIsDeleting(true);
-  setAmountError("");
+    setIsDeleting(true);
+    setAmountError("");
 
-  try {
+    try {
 
-    const res = await deleteInvoiceRedemption(id);
+      const res = await deleteInvoiceRedemption(id);
 
-    if (res.success) {
+      if (res.success) {
 
-      setModalType("success");
-      setMessage(res?.data);
-      setShowSuccess(true);
+        setModalType("success");
+        setMessage(res?.data);
+        setShowSuccess(true);
 
-      fetchTenant();
-      setShowRedemptionDeleteModal(false)
-setTimeout(() => {
-        setShowSuccess(false);
-        
-      }, 1500);
-      if (isMore) {
-        fetchInvoiceRedemptions(page);
+        fetchTenant();
+        setShowRedemptionDeleteModal(false)
+        setTimeout(() => {
+          setShowSuccess(false);
+
+        }, 1500);
+        if (isMore) {
+          fetchInvoiceRedemptions(page);
+        }
+
+
+
+
+
+      } else {
+
+        setModalType("error");
+        setMessage(res.message);
+        setAmountError(res.message);
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
+
       }
 
-     
+    } finally {
 
-      
+      setIsDeleting(false);
 
-    } else {
+    }
 
-      setModalType("error");
-      setMessage(res.message);
-      setAmountError(res.message);
+  };
+
+  const handleUpdateAmount = async () => {
+    const res = await updateAdvanceAmount(
+      tenantData?.hostelDetails?.hostelId,
+      selectedInvoice?.invoiceId
+    );
+
+    if (res?.success) {
+      fetchTenant();
+
+      setModalType("success");
+      setMessage(res.data);
       setShowSuccess(true);
 
       setTimeout(() => {
         setShowSuccess(false);
-      }, 1500);
+        setShowAmountModal(false);
+      }, 800);
+    } else {
+      setModalType("error");
+      setMessage(res.message);
+      setShowSuccess(true);
 
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 800);
     }
-
-  } finally {
-
-    setIsDeleting(false);
-
-  }
-
-};
+  };
   return (
     <DashboardLayout>
       <Toast
@@ -660,6 +704,18 @@ setTimeout(() => {
                               >
                                 Delete
                               </button>
+                              {item?.canUpdateAmount === true && (
+                                <button
+                                  className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                  onClick={() => {
+                                    setSelectedInvoice(item);
+                                    setShowAmountModal(true);
+                                    setOpenInvoiceMenu(null);
+                                  }}
+                                >
+                                  Update Amount
+                                </button>
+                              )}
 
                             </div>
                           )}
@@ -896,66 +952,66 @@ setTimeout(() => {
                             {item.createdBy}
                           </td>
                           <td className="px-4 py-4 text-left">
-  <button
-    onClick={(e) => {
-      const rect =
-        e.currentTarget.getBoundingClientRect();
+                            <button
+                              onClick={(e) => {
+                                const rect =
+                                  e.currentTarget.getBoundingClientRect();
 
-      const menuHeight = 100;
-      const spaceBelow =
-        window.innerHeight - rect.bottom;
+                                const menuHeight = 100;
+                                const spaceBelow =
+                                  window.innerHeight - rect.bottom;
 
-      setMenuPosition({
-        top:
-          spaceBelow > menuHeight
-            ? rect.bottom + 5
-            : rect.top - menuHeight,
-        left: rect.left - 120,
-      });
+                                setMenuPosition({
+                                  top:
+                                    spaceBelow > menuHeight
+                                      ? rect.bottom + 5
+                                      : rect.top - menuHeight,
+                                  left: rect.left - 120,
+                                });
 
-      setOpenRedemptionMenu(
-        openRedemptionMenu === item.redemptionId
-          ? null
-          : item.redemptionId
-      );
-    }}
-  >
-    <FiMoreVertical className="cursor-pointer" />
-  </button>
+                                setOpenRedemptionMenu(
+                                  openRedemptionMenu === item.redemptionId
+                                    ? null
+                                    : item.redemptionId
+                                );
+                              }}
+                            >
+                              <FiMoreVertical className="cursor-pointer" />
+                            </button>
 
-  {openRedemptionMenu === item.redemptionId && (
-    <div
-      className="fixed w-25 bg-white border rounded-lg shadow-lg z-[99999]"
-      style={{
-        top: menuPosition.top,
-        left: menuPosition.left,
-      }}
-    >
-     <button
-  className="w-full text-left px-4 py-2 hover:bg-gray-100"
-  onClick={() => {
-    setSelectedRedemption(item);
-    setEditAmount(item.redemptionAmount);
-    setShowRedemptionEditModal(true);
-    setOpenRedemptionMenu(null);
-  }}
->
-  Edit
-</button>
+                            {openRedemptionMenu === item.redemptionId && (
+                              <div
+                                className="fixed w-25 bg-white border rounded-lg shadow-lg z-[99999]"
+                                style={{
+                                  top: menuPosition.top,
+                                  left: menuPosition.left,
+                                }}
+                              >
+                                <button
+                                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                                  onClick={() => {
+                                    setSelectedRedemption(item);
+                                    setEditAmount(item.redemptionAmount);
+                                    setShowRedemptionEditModal(true);
+                                    setOpenRedemptionMenu(null);
+                                  }}
+                                >
+                                  Edit
+                                </button>
 
-      <button
-  className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
-  onClick={() => {
-    setSelectedRedemption(item);
-    setShowRedemptionDeleteModal(true);
-    setOpenRedemptionMenu(null);
-  }}
->
-  Delete
-</button>
-    </div>
-  )}
-</td>
+                                <button
+                                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+                                  onClick={() => {
+                                    setSelectedRedemption(item);
+                                    setShowRedemptionDeleteModal(true);
+                                    setOpenRedemptionMenu(null);
+                                  }}
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                          </td>
                         </tr>
                       ))
                     ) : (
@@ -1115,7 +1171,7 @@ setTimeout(() => {
         </div>
       )}
 
-           {showRedemptionEditModal  && (
+      {showRedemptionEditModal && (
         <div
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-[99999]"
           onClick={() => {
@@ -1124,22 +1180,22 @@ setTimeout(() => {
             setAmountError("")
           }}
         >
-      
+
           <div
             className="bg-white rounded-xl w-[400px] p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-      
+
             <h2 className="text-lg font-semibold mb-4 text-left">
               Edit Redemption Amount
             </h2>
-      
+
             <div className="mb-4">
-      
+
               <label className="block text-sm text-gray-600 mb-1 text-left">
                 Amount<span className="text-red-600 pl-1">*</span>
               </label>
-      
+
               <input
                 type="number"
                 value={editAmount}
@@ -1150,42 +1206,42 @@ setTimeout(() => {
                 }}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none"
               />
-      
+
               {amountError && (
                 <ErrorMessage
                   message={amountError}
                   type="error"
                 />
               )}
-      
+
             </div>
-      
+
             <div className="flex justify-end gap-3">
-      
+
               <button
                 onClick={() => {
-                 setShowRedemptionEditModal(false)
+                  setShowRedemptionEditModal(false)
                   setSelectedItem(null);
                 }}
                 className="px-4 py-2 border rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
-      
+
               <button
                 onClick={handleUpdateInvoiceRedemption}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
               >
                 Save
               </button>
-      
+
             </div>
-      
+
           </div>
-      
+
         </div>
       )}
-      {showRedemptionDeleteModal  && (
+      {showRedemptionDeleteModal && (
         <div
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-[99999]"
           onClick={() => {
@@ -1194,38 +1250,38 @@ setTimeout(() => {
             setAmountError("")
           }}
         >
-      
+
           <div
             className="bg-white rounded-xl w-[400px] p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-      
+
             <h2 className="text-lg font-semibold text-left mb-3">
               Delete Confirmation
             </h2>
-      
+
             <p className="text-sm text-gray-600 text-left mb-6">
               Are you sure you want to delete this invoice redemption?
             </p>
-       {amountError && (
-                <ErrorMessage
-                  message={amountError}
-                  type="error"
-                />
-              )}
+            {amountError && (
+              <ErrorMessage
+                message={amountError}
+                type="error"
+              />
+            )}
             <div className="flex justify-end gap-3">
-      
+
               <button
                 onClick={() => {
                   setShowRedemptionDeleteModal(false);
                   setDeleteId(null);
-                   setAmountError("")
+                  setAmountError("")
                 }}
                 className="px-4 py-2 border rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
-      
+
               {/* <button
                 onClick={async () => {
       
@@ -1238,32 +1294,66 @@ setTimeout(() => {
                 Delete
               </button> */}
               <button
-        onClick={async () => {
-      
-          await handleDeleteInvoiceRedemption(selectedRedemption?.id);
-          setDeleteId(null);
-      
-        }}
-        disabled={isDeleting}
-        className={`
+                onClick={async () => {
+
+                  await handleDeleteInvoiceRedemption(selectedRedemption?.id);
+                  setDeleteId(null);
+
+                }}
+                disabled={isDeleting}
+                className={`
           px-4 py-2 rounded-lg text-white
       
-          ${
-            isDeleting
-              ? "delete-btn-disabled"
-              : "delete-btn-active"
-          }
+          ${isDeleting
+                    ? "delete-btn-disabled"
+                    : "delete-btn-active"
+                  }
         `}
-      >
-        {isDeleting
-          ? "Deleting..."
-          : "Delete"}
-      </button>
-      
+              >
+                {isDeleting
+                  ? "Deleting..."
+                  : "Delete"}
+              </button>
+
             </div>
-      
+
           </div>
-      
+
+        </div>
+      )}
+      {showAmountModal && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setShowAmountModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl p-6 w-[400px]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold">
+              Update Amount
+            </h3>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Are you sure you want to update the advance amount?
+            </p>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                className="px-4 py-2 border rounded-lg"
+                onClick={() => setShowAmountModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                onClick={handleUpdateAmount}
+              >
+                Update
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </DashboardLayout>

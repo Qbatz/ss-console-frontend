@@ -414,6 +414,19 @@ const handleExport = () => {
   //     setError(res?.message)
   //   }
   // };
+  const resetPasswordModalClose = () => {
+  setShowResetPasswordModal(false);
+
+  setNewPassword("");
+  setConfirmPassword("");
+
+  setNewPasswordError("");
+  setConfirmPasswordError("");
+  setFinalError("");
+
+  setShowNewPassword(false);
+  setShowConfirmPassword(false);
+};
   return (
     <DashboardLayout>
  <Toast
@@ -1119,10 +1132,13 @@ const handleExport = () => {
                               </button>
         <button
   onClick={() => {
-    setSelectedOwner(item);
-    setShowResetPasswordModal(true);
-    setOpenMenuId(null);
-  }}
+  setSelectedOwner(item);
+
+  setSearch(""); 
+
+  setShowResetPasswordModal(true);
+  setOpenMenuId(null);
+}}
   className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
 >
   Reset Password
@@ -1362,14 +1378,9 @@ const handleExport = () => {
 <div
   className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
   onClick={() => {
-    setShowResetPasswordModal(false);
+   resetPasswordModalClose()
 
-    setNewPassword("");
-    setConfirmPassword("");
-
-    setNewPasswordError("");
-    setConfirmPasswordError("");
-    setFinalError("");
+   
   }}
 >
 
@@ -1395,18 +1406,18 @@ const handleExport = () => {
 
         <div className="relative">
 
-          <input
-            type={showNewPassword ? "text" : "password"}
-            placeholder="Enter new password"
-            value={newPassword}
-            // onChange={(e) => setNewPassword(e.target.value)}
-                      onChange={(e) => {
-  setNewPassword(e.target.value);
-  setNewPasswordError("");
-  setFinalError("")
-}}
-            className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
-          />
+         <input
+  type={showNewPassword ? "text" : "password"}
+  placeholder="Enter new password"
+  value={newPassword}
+  autoComplete="new-password"   
+  onChange={(e) => {
+    setNewPassword(e.target.value);
+    setNewPasswordError("");
+    setFinalError("");
+  }}
+  className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
+/>
 
           <button
             type="button"
@@ -1431,17 +1442,18 @@ const handleExport = () => {
 
         <div className="relative">
 
-          <input
-            type={showConfirmPassword ? "text" : "password"}
-            placeholder="Confirm password"
-            value={confirmPassword}
-            onChange={(e) => {
-  setConfirmPassword(e.target.value);
-  setConfirmPasswordError("");
-  setFinalError("")
-}}
-            className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
-          />
+         <input
+  type={showConfirmPassword ? "text" : "password"}
+  placeholder="Confirm password"
+  value={confirmPassword}
+  autoComplete="new-password"
+  onChange={(e) => {
+    setConfirmPassword(e.target.value);
+    setConfirmPasswordError("");
+    setFinalError("");
+  }}
+  className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
+/>
 
           <button
             type="button"
@@ -1467,7 +1479,7 @@ const handleExport = () => {
 
         <button
         onClick={() => {
-  setShowResetPasswordModal(false);
+  resetPasswordModalClose()
 
   setNewPassword("");
   setConfirmPassword("");

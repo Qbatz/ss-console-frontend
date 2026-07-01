@@ -1579,7 +1579,7 @@ const handleBulkGenerate = async () => {
                 {/* REASON */}
                 <div className="mb-3">
                   <p className="text-sm mb-1 text-left">
-                    Reason <span className="text-red-500">*</span>
+                    Reason 
                   </p>
                   <select
                     value={bulkReason}

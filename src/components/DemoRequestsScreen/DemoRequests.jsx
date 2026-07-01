@@ -318,9 +318,29 @@ useEffect(() => {
       setAssignError("Please Select Agent");
       return;
     }
-    if (selectedItem?.assignedTo && !commentText.trim()) {
-  setCommentError("Please enter reason for reassignment");
-  return;
+//     if (selectedItem?.assignedTo && !commentText.trim()) {
+//   setCommentError("Please enter reason for reassignment");
+//   return;
+// }
+if (selectedItem?.assignedTo) {
+  const lettersCount = commentText
+    .trim()
+    .replace(/[^a-zA-Z]/g, "")
+    .length;
+
+  if (!commentText.trim()) {
+    setCommentError(
+      "Please enter reason for reassignment"
+    );
+    return;
+  }
+
+  if (lettersCount < 5) {
+    setCommentError(
+      "Reason must contain at least 5 letters"
+    );
+    return;
+  }
 }
 
     const res = await assignStaff(
@@ -359,10 +379,22 @@ setCommentText("")
     }
   }, [comments]);
   const handleAddComment = async () => {
-    if (!commentText.trim()) {
-      setCommentError("Please enter comment");
-      return;
-    }
+  const lettersCount = commentText
+  .trim()
+  .replace(/[^a-zA-Z]/g, "")
+  .length;
+
+if (!commentText.trim()) {
+  setCommentError("Please enter comment");
+  return;
+}
+
+if (lettersCount < 5) {
+  setCommentError(
+    "Comment must contain at least 5 letters"
+  );
+  return;
+}
 
     const res = await addDemoRequestComment(
       selectedItem?.requestId,

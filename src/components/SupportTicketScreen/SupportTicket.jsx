@@ -72,6 +72,8 @@ const [selectedNoteTicketId,setSelectedNoteTicketId] = useState(null);
 const agentDropdownRef =
   useRef(null);
 const [statusList, setStatusList] = useState([]);
+const [commentError, setCommentError] =
+  useState("");
 useEffect(() => {
 
   const fetchPriority =
@@ -342,6 +344,26 @@ const handleAssignSave =
       setAssignError("");
 
     }
+ if (selectedTicket?.assignedTo) {
+  const lettersCount = commentText
+    .trim()
+    .replace(/[^a-zA-Z]/g, "")
+    .length;
+
+  if (!commentText.trim()) {
+    setCommentError(
+      "Please enter additional comments"
+    );
+    hasError = true;
+  } else if (lettersCount < 5) {
+    setCommentError(
+      "Additional comments must contain at least 5 letters"
+    );
+    hasError = true;
+  } else {
+    setCommentError("");
+  }
+}
 
     if (!priorityValue) {
 
@@ -425,84 +447,142 @@ const handleAssignSave =
   setAddNotesLoading
 ] = useState(false);
  
-const handleAddInternalNotes =
-  async () => {
+// const handleAddInternalNotes =
+//   async () => {
 
-    if (addNotesLoading)
-      return;
+//     if (addNotesLoading)
+//       return;
 
-    if (
-      !commentText.trim()
-    ) {
+//    if (!commentText.trim()) {
+//   setNotesError("Please enter additional comments");
+//   hasError = true;
+// } else if (commentText.trim().length < 5) {
+//   setNotesError(
+//     "Additional comments must be at least 5 characters"
+//   );
+//   hasError = true;
+// } else {
+//   setNotesError("");
+// }
 
-      setNotesError(
-        "Please enter notes"
-      );
+//     try {
 
-      return;
+//       setAddNotesLoading(true);
 
+//       setNotesError("");
+
+//       const res =
+//         await addSupportTicketNotes(
+//           selectedNoteTicketId,
+//           commentText
+//         );
+
+//       if (res.success) {
+
+//         setModalType("success");
+
+//         setMessage(
+//           res?.message
+//         );
+
+//         setShowSuccess(true);
+
+//         setTimeout(() => {
+
+//           setShowSuccess(false);
+
+//         }, 1300);
+
+//         setCommentText("");
+
+//         setShowCommentModal(
+//           false
+//         );
+
+//         fetchTickets();
+
+//       } else {
+
+//         setModalType("error");
+
+//         setMessage(
+//           res?.message
+//         );
+
+//         setShowSuccess(true);
+
+//         setTimeout(() => {
+
+//           setShowSuccess(false);
+
+//         }, 1300);
+
+//       }
+
+//     } finally {
+
+//       setAddNotesLoading(false);
+
+//     }
+
+// };
+const handleAddInternalNotes = async () => {
+  if (addNotesLoading) return;
+
+  let hasError = false;
+
+  const lettersCount = commentText
+    .trim()
+    .replace(/[^a-zA-Z]/g, "")
+    .length;
+
+  if (!commentText.trim()) {
+    setNotesError("Please enter additional comments");
+    hasError = true;
+  } else if (lettersCount < 5) {
+    setNotesError(
+      "Additional comments must contain at least 5 letters"
+    );
+    hasError = true;
+  } else {
+    setNotesError("");
+  }
+
+  if (hasError) return;
+
+  try {
+    setAddNotesLoading(true);
+
+    const res = await addSupportTicketNotes(
+      selectedNoteTicketId,
+      commentText
+    );
+
+    if (res.success) {
+      setModalType("success");
+      setMessage(res?.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1300);
+
+      setCommentText("");
+      setShowCommentModal(false);
+
+      fetchTickets();
+    } else {
+      setModalType("error");
+      setMessage(res?.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1300);
     }
-
-    try {
-
-      setAddNotesLoading(true);
-
-      setNotesError("");
-
-      const res =
-        await addSupportTicketNotes(
-          selectedNoteTicketId,
-          commentText
-        );
-
-      if (res.success) {
-
-        setModalType("success");
-
-        setMessage(
-          res?.message
-        );
-
-        setShowSuccess(true);
-
-        setTimeout(() => {
-
-          setShowSuccess(false);
-
-        }, 1300);
-
-        setCommentText("");
-
-        setShowCommentModal(
-          false
-        );
-
-        fetchTickets();
-
-      } else {
-
-        setModalType("error");
-
-        setMessage(
-          res?.message
-        );
-
-        setShowSuccess(true);
-
-        setTimeout(() => {
-
-          setShowSuccess(false);
-
-        }, 1300);
-
-      }
-
-    } finally {
-
-      setAddNotesLoading(false);
-
-    }
-
+  } finally {
+    setAddNotesLoading(false);
+  }
 };
 
 
@@ -533,6 +613,21 @@ const handleOpenComments =
     setShowCommentModal(true);
 
   };
+  const sortedAgents = [...agentList].sort(
+  (a, b) => {
+    const aAssigned =
+      a.agentName?.trim() ===
+      selectedTicket?.assignedTo?.trim();
+
+    const bAssigned =
+      b.agentName?.trim() ===
+      selectedTicket?.assignedTo?.trim();
+
+    if (aAssigned) return -1;
+    if (bAssigned) return 1;
+    return 0;
+  }
+);
   return (
     <DashboardLayout>
       <Toast
@@ -1313,14 +1408,39 @@ const handleOpenComments =
   );
   }
 
- if (
+//  if (
+//   menu === "Assign Staff" ||
+//   menu === "ReAssign Staff"
+// ) {
+//   setSelectedTicketId(
+//     item.ticketId
+//   );
+//   setSelectedTicket(item)
+//   setShowAssignDrawer(true);
+// }
+
+if (
   menu === "Assign Staff" ||
   menu === "ReAssign Staff"
 ) {
-  setSelectedTicketId(
-    item.ticketId
+  setSelectedTicketId(item.ticketId);
+  setSelectedTicket(item);
+
+  const currentAgent = agentList.find(
+    (a) =>
+      a.agentName?.trim() ===
+      item.assignedTo?.trim()
   );
-  setSelectedTicket(item)
+
+  setDropdownValue(
+    currentAgent?.agentId || ""
+  );
+
+  // Priority default select
+  setPriorityValue(
+    item.priority || ""
+  );
+
   setShowAssignDrawer(true);
 }
   if (menu === "Update Status") {
@@ -1723,6 +1843,8 @@ const handleOpenComments =
         setPriorityError("")
         setPriorityValue("");
         setOpenPriorityDropdown(false)
+        setOpenDropdown(false);
+        setCommentError("");
       }}
     />
 
@@ -1769,6 +1891,8 @@ const handleOpenComments =
              setPriorityValue("");
             setPriorityError("")
             setOpenPriorityDropdown(false)
+            setOpenDropdown(false);
+            setCommentError("");
             
           }}
           className="text-red-500 text-lg cursor-pointer"
@@ -1842,40 +1966,41 @@ const handleOpenComments =
               "
             >
 
-              {agentList.map((agent) => (
+             {sortedAgents.map((agent) => {
+  const isCurrentAgent =
+    agent.agentName?.trim() ===
+    selectedTicket?.assignedTo?.trim();
 
-                <div
-                  key={agent.agentId}
-                  onClick={() => {
-                    setDropdownValue(
-                      agent.agentId
-                    );
+  return (
+    <div
+      key={agent.agentId}
+      onClick={() => {
+        setDropdownValue(agent.agentId);
+        setOpenDropdown(false);
+        setAssignError("");
+      }}
+      className={`
+        px-4 py-3 text-sm cursor-pointer text-left
 
-                    setOpenDropdown(false);
+        ${
+          dropdownValue === agent.agentId
+            ? "bg-primary text-white"
+            : isCurrentAgent
+            ? "bg-yellow-100 border-l-4 border-yellow-500 font-semibold"
+            : "hover:bg-gray-100"
+        }
+      `}
+    >
+      {agent.agentName}
 
-                    setAssignError("");
-                  }}
-                  className={`
-                    px-4 py-3
-                    text-sm
-                    cursor-pointer
-                    transition-all
-                    text-left
-
-                    ${
-                      dropdownValue ===
-                      agent.agentId
-                        ? "bg-primary text-white"
-                        : "hover:bg-gray-100"
-                    }
-                  `}
-                >
-
-                  {agent.agentName}
-
-                </div>
-
-              ))}
+      {isCurrentAgent && (
+        <span className="ml-2 text-xs">
+          (Current)
+        </span>
+      )}
+    </div>
+  );
+})}
 
             </div>
 
@@ -2019,9 +2144,12 @@ const handleOpenComments =
         {/* COMMENTS */}
         <div className="mt-5">
 
-          <label className="text-[13px] font-medium text-left block mb-2">
-            Additional Comments 
-          </label>
+         <label className="text-[13px] font-medium text-left block mb-2">
+  Additional Comments
+  {selectedTicket?.assignedTo && (
+    <span className="text-red-500">*</span>
+  )}
+</label>
 
           <div
             className="
@@ -2035,9 +2163,13 @@ const handleOpenComments =
             <textarea
               placeholder="Type your comments here..."
               value={commentText}
-              onChange={(e) =>
-                setCommentText(e.target.value)
-              }
+              // onChange={(e) =>
+              //   setCommentText(e.target.value)
+              // }
+              onChange={(e) => {
+  setCommentText(e.target.value);
+  setCommentError("");
+}}
               className="
                 w-full
                 h-[110px]
@@ -2051,7 +2183,12 @@ const handleOpenComments =
           </div>
 
         </div>
-
+{commentError && (
+  <ErrorMessage
+    message={commentError}
+    type="error"
+  />
+)}
       </div>
 
       {/* FOOTER */}
@@ -2066,6 +2203,8 @@ const handleOpenComments =
           setPriorityValue("");
             setPriorityError("")
             setOpenPriorityDropdown(false)
+            setOpenDropdown(false);
+            setCommentError("");
           }}
           className="
             px-4 py-2

@@ -122,10 +122,22 @@ const handlePermissionChange = (moduleId, field, value) => {
       updatedPermission.canDelete = false;
     }
 
-    return [
-      ...prev.filter((p) => p.moduleId !== moduleId),
-      updatedPermission,
-    ];
+    // return [
+    //   ...prev.filter((p) => p.moduleId !== moduleId),
+    //   updatedPermission,
+    // ];
+    const newPermissions = [
+  ...prev.filter((p) => p.moduleId !== moduleId),
+  updatedPermission,
+];
+
+return newPermissions.filter(
+  (p) =>
+    p.canRead ||
+    p.canWrite ||
+    p.canUpdate ||
+    p.canDelete
+);
   });
 
   setPermissionError("");
@@ -267,20 +279,26 @@ const handlePermissionChange = (moduleId, field, value) => {
 
       hasError = true;
     }
+const validPermissions = permissions.filter(
+  (p) =>
+    p.canRead ||
+    p.canWrite ||
+    p.canUpdate ||
+    p.canDelete
+);
+   if (!validPermissions.length) {
+  setPermissionError("Select at least one permission");
 
-    if (!permissions.length) {
-      setPermissionError("Select at least one permission");
+  setTimeout(() => {
+    permissionRef.current?.focus();
+    permissionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, 0);
 
-      setTimeout(() => {
-        permissionRef.current?.focus();
-        permissionRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }, 0);
-
-      hasError = true;
-    }
+  hasError = true;
+}
     if (selectedRole) {
       const isNameSame = roleName === initialRoleName;
       const isDescriptionSame =

@@ -75,8 +75,33 @@ const [deleteId, setDeleteId] = useState(null);
   }, []);
   const handleUpdateInvoiceRedemption = async () => {
 
+  // if (!editAmount) {
+  //   setAmountError("Amount is required");
+  //   return;
+  // }
+
+  // const res = await updateInvoiceRedemption(
+  //   selectedItem?.id,
+  //   Number(editAmount)
+  // );
+
   if (!editAmount) {
     setAmountError("Amount is required");
+    return;
+  }
+
+  if (
+    Number(editAmount) ===
+    Number(selectedItem?.redemptionAmount)
+  ) {
+    setModalType("error");
+    setMessage("No changes detected");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
     return;
   }
 

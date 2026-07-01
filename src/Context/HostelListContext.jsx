@@ -1596,28 +1596,30 @@ const getTenantById = async (customerId) => {
 };
 const updateAdvanceAmount = async (
   hostelId,
-  invoiceId,
-  amount
+  invoiceId
 ) => {
   try {
-
     const res = await axiosInstance.put(
-      `/v2/invoice/advance/amount/${hostelId}/${invoiceId}`,
-      {
-        amount: Number(amount)
-      }
+      `/v2/invoice/advance/amount/${hostelId}/${invoiceId}`
     );
 
     if (res.status === 200) {
       return {
         success: true,
-        data: res.data
+        data: res.data,
       };
     }
 
     return { success: false };
 
   } catch (error) {
+
+    if (error?.response?.status === 500) {
+      return {
+        success: false,
+        message: "Internal Server Error",
+      };
+    }
 
     const msg =
       typeof error?.response?.data === "string"
@@ -1626,11 +1628,45 @@ const updateAdvanceAmount = async (
 
     return {
       success: false,
-      message: msg || "Failed to update advance amount"
+      message: msg || "Failed to update advance amount",
     };
-
   }
 };
+// const updateAdvanceAmount = async (
+//   hostelId,
+//   invoiceId,
+ 
+// ) => {
+//   try {
+
+//     const res = await axiosInstance.put(
+//       `/v2/invoice/advance/amount/${hostelId}/${invoiceId}`,
+     
+//     );
+
+//     if (res.status === 200) {
+//       return {
+//         success: true,
+//         data: res.data
+//       };
+//     }
+
+//     return { success: false };
+
+//   } catch (error) {
+
+//     const msg =
+//       typeof error?.response?.data === "string"
+//         ? error.response.data
+//         : error?.response?.data?.message;
+
+//     return {
+//       success: false,
+//       message: msg || "Failed to update advance amount"
+//     };
+
+//   }
+// };
   return (
     <HostelContext.Provider
       value={{
