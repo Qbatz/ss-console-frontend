@@ -15,7 +15,8 @@ import Roles from "../../assets/roles.png";
 import Admin from "../../assets/adminuser.png";
 import { useDashboard } from "../../Context/DashboardContext";
 import { useLocation } from "react-router-dom";
-import Drop from "../../assets/direction-down 01.png"
+import Drop from "../../assets/direction-down 01.png";
+import VerifyImg from "../../assets/verify.png"
 
 const DashboardLayout = ({ children }) => {
 
@@ -390,7 +391,8 @@ useEffect(() => {
 
             <SidebarItem title="Support Tickets" count="0" to={`/supportTicket/${adminDetails?.roleId}`} activeIcon={Support}
               inactiveIcon={Support} />
-
+ <SidebarItem title="KYC Pending Approval" to={`/Kyc-approve/${adminDetails?.roleId}`} activeIcon={VerifyImg}
+              inactiveIcon={VerifyImg} />
             {/* <SidebarItem title="CRM Dashboard" count="0" to={`/crmDashboard/${adminDetails?.roleId}`} activeIcon={Dashbord}
               inactiveIcon={Dashbord} /> */}
 

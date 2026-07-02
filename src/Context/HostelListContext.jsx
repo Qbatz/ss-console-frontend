@@ -1632,6 +1632,59 @@ const updateAdvanceAmount = async (
     };
   }
 };
+
+
+const createHostelNote = async (hostelId, notes) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.post(
+      `/v2/hostels/notes/${hostelId}`,
+      { notes }
+    );
+
+    if (res.status === 200 || res.status === 201) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const getHostelNotes = async (hostelId) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.get(
+      `/v2/hostels/notes/${hostelId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+  } finally {
+    setLoading(false);
+  }
+};
 // const updateAdvanceAmount = async (
 //   hostelId,
 //   invoiceId,
@@ -1678,7 +1731,8 @@ const updateAdvanceAmount = async (
         deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns,
         resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,
         deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,
-        generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions,getInvoiceReceipt,updateInvoiceBalance,getTenantById,updateAdvanceAmount
+        generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions,getInvoiceReceipt,updateInvoiceBalance,
+        getTenantById,updateAdvanceAmount, createHostelNote,getHostelNotes,
       }}
     >
       {children}

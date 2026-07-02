@@ -25,10 +25,11 @@ import UserIcon from "../../assets/user-block.png";
 import TrialIcon from "../../assets/timer.png";
 import Arrow from "../../assets/direction-down 01.png";
 import { createPortal } from "react-dom";
+import CommentBox from "../../assets/message-2.png";
 
 
 const Properties = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, deleteHostelExpense, exportHostels, deleteHostel } = useHostel();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, deleteHostelExpense, exportHostels, deleteHostel,createHostelNote,getHostelNotes } = useHostel();
   const { createSubscription,getAgentsDropdown } = useSubscription();
   const { getPlansDropdown } = usePlan();
   const [dropdownPlans, setDropdownPlans] = useState([]);
@@ -41,6 +42,36 @@ const agentDropdownRef = useRef(null);
 const [agentFilter, setAgentFilter] = useState("");
 const [openAgentDropdown, setOpenAgentDropdown] = useState(false);
 const [filterOption, setFilterOption] = useState("TOTAL_PROPERTIES");
+const [hostelError, setHostelError] = useState("");
+
+
+
+
+
+
+const [hostelNotes, setHostelNotes] =
+  useState([]);
+
+
+
+const [isAddingNote, setIsAddingNote] = useState(false);
+const fetchHostelNotes = async (
+  hostelId
+) => {
+
+  const res =
+    await getHostelNotes(hostelId);
+
+  if (res?.success) {
+
+    setHostelNotes(
+     
+      res?.data || []
+    );
+
+  }
+
+};
 useEffect(() => {
     const fetchAgents = async () => {
       const res = await getAgentsDropdown();
@@ -231,7 +262,7 @@ useEffect(() => {
   const [hostelDetails, setHostelDetails] = useState("")
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [selectedHostel, setSelectedHostel] = useState(null);
-  const [hostelerror, setHostelError] = useState("")
+ 
   const [noteText, setNoteText] = useState("");
   const [openMenu, setOpenMenu] = useState(null);
   const [showResetModal, setShowResetModal] = useState(false);
@@ -673,7 +704,81 @@ useEffect(() => {
 
   }
 };
+const closeNotesDrawer = () => {
 
+  setShowNoteModal(false);
+
+  setNoteText("");
+
+  setHostelError("");
+
+
+
+};
+const handleAddNote = async () => {
+
+  if (isAddingNote) return;
+
+  const lettersCount =
+    noteText
+      .trim()
+      .replace(/[^a-zA-Z]/g, "")
+      .length;
+
+  if (!noteText.trim()) {
+
+    setHostelError(
+      "Please enter notes"
+    );
+
+    return;
+
+  }
+
+  if (lettersCount < 5) {
+
+    setHostelError(
+      "Notes must contain at least 5 letters"
+    );
+
+    return;
+
+  }
+
+  try {
+
+    setIsAddingNote(true);
+
+    const res =
+      await createHostelNote(
+        selectedHostelId,
+        noteText
+      );
+
+    if (res?.success) {
+
+      setNoteText("");
+      setHostelError("");
+
+      await fetchHostelNotes(
+        selectedHostelId
+      );
+
+    } else {
+
+      setHostelError(
+        res?.message
+      );
+
+    }
+
+  } finally {
+
+    setIsAddingNote(false);
+
+  }
+
+};
   return (
     <>
 
@@ -1929,6 +2034,26 @@ useEffect(() => {
     }}
   >
     <button
+  onClick={async () => {
+
+    setSelectedHostelId(
+      item.hostelId
+    );
+
+    await fetchHostelNotes(
+      item.hostelId
+    );
+
+    setShowNoteModal(true);
+
+    setOpenMenu(null);
+
+  }}
+  className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+>
+  Add Notes
+</button>
+    <button
       onClick={() => {
         setSelectedHostelId(item.hostelId);
         setShowResetModal(true);
@@ -2457,6 +2582,284 @@ useEffect(() => {
           setShowSuccess={setShowSuccess}
           refreshData={() => getHostels(page, pageSize, searchText)}
         />
+        {showNoteModal && (
+  <div className="fixed inset-0 z-[9999]">
+
+    <div
+      className="absolute inset-0 bg-black/40"
+      onClick={closeNotesDrawer}
+    />
+
+    <div
+      className="
+        fixed
+        top-3
+        right-3
+        bottom-3
+        w-[420px]
+        bg-white
+        rounded-2xl
+        shadow-2xl
+        flex
+        flex-col
+        overflow-hidden
+      "
+    >
+
+      {/* Header */}
+
+      <div
+        className="
+          flex
+          justify-between
+          items-center
+          px-5
+          py-4
+          border-b
+        "
+      >
+
+        <h2
+          className="
+            text-[16px]
+            font-semibold
+          "
+        >
+          Internal Notes
+        </h2>
+
+        <button
+          onClick={closeNotesDrawer}
+          className="
+            text-red-500
+            text-lg
+            cursor-pointer
+          "
+        >
+          ✕
+        </button>
+
+      </div>
+
+      <div
+        className="
+          flex-1
+          flex
+          flex-col
+          px-5
+          py-4
+          overflow-hidden
+        "
+      >
+
+        <label
+          className="
+            text-xs
+            text-gray-500
+            mb-2
+            text-left
+          "
+        >
+          Additional Notes
+          <span className="text-red-500">
+            *
+          </span>
+        </label>
+
+        <div
+          className="
+            border
+            border-gray-300
+            rounded-xl
+            p-3
+          "
+        >
+
+          <textarea
+            placeholder="Note here"
+            value={noteText}
+            onChange={(e) => {
+
+              setNoteText(
+                e.target.value
+              );
+
+              setHostelError("");
+
+            }}
+            className="
+              w-full
+              h-24
+              resize-none
+              outline-none
+              text-sm
+            "
+          />
+
+        </div>
+
+        {hostelError && (
+          <div className="mt-2">
+            <ErrorMessage
+              message={hostelError}
+              type="error"
+            />
+          </div>
+        )}
+
+        <div
+          className="
+            flex
+            justify-end
+            mt-3
+          "
+        >
+
+          <button
+            onClick={handleAddNote}
+            disabled={isAddingNote}
+            className="
+              bg-blue-600
+              hover:bg-blue-700
+              text-white
+              px-5
+              py-2
+              rounded-lg
+              text-sm cursor-pointer
+            "
+          >
+            {isAddingNote
+              ? "Saving..."
+              : "Add"}
+          </button>
+
+        </div>
+
+        <p
+          className="
+            text-[11px]
+            text-gray-400
+            mt-5
+            mb-3
+            text-left
+          "
+        >
+          ALL NOTES
+        </p>
+
+        <div
+          className="
+            flex-1
+            overflow-y-auto
+            pr-1
+          "
+        >
+
+          <div className="space-y-5">
+
+            {hostelNotes?.map(
+              (item, index) => (
+
+              <div
+                key={index}
+                className="
+                  flex
+                  gap-3
+                "
+              >
+
+                <div
+                  className="
+                    flex
+                    flex-col
+                    items-center
+                  "
+                >
+
+                  <div
+                    className="
+                      w-9
+                      h-9
+                      rounded-full
+                      bg-[#EEF3FF]
+                      flex
+                      items-center
+                      justify-center
+                    "
+                  >
+                  <img src={CommentBox} className="w-4 h-4"/>
+                  </div>
+
+                  {index !==
+                    hostelNotes.length - 1 && (
+
+                    <div
+                      className="
+                        w-[1px]
+                        flex-1
+                        bg-gray-200
+                        mt-1
+                      "
+                    />
+
+                  )}
+
+                </div>
+
+                <div className="flex-1">
+
+                  <p
+                    className="
+                      text-sm
+                      font-semibold
+                      text-left
+                    "
+                  >
+                    {item.notes}
+                  </p>
+
+                  <p
+                    className="
+                      text-xs
+                      text-gray-500
+                      mt-1
+                      text-left
+                    "
+                  >
+                    {item.createdAtDate}
+                    {" "}
+                    {item.createdAtTime}
+                  </p>
+
+                  <p
+                    className="
+                      text-xs
+                      text-gray-400
+                      mt-2
+                      text-left
+                    "
+                  >
+                    Added by
+                    {" "}
+                    {item.createdBy}
+                  </p>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
       </DashboardLayout>
     </>
   );

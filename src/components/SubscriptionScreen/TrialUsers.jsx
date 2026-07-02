@@ -7,8 +7,12 @@ import Location from "../../assets/locationGrey.png";
 import Call from "../../assets/call.png";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import ArrowRight from "../../assets/arrow-right.png";
+import { useRole } from "../../Context/RoleContext";
+import { useNavigate } from "react-router-dom";
 
 const TrailPage = () => {
+  const { adminDetails} = useRole();
+  const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(null);
   const [activeAction, setActiveAction] = useState(null);
   const [showExtendTrial, setShowExtendTrial] = useState(false);
@@ -108,7 +112,7 @@ useEffect(() => {
             </div>
 
             {/* RIGHT SIDE BUTTON */}
-            <button className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit cursor-pointer">
+            <button className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit cursor-pointer" onClick={() => navigate(`/manage-plans/${adminDetails?.roleId}`)}>
               Manage Plans
             </button>
 

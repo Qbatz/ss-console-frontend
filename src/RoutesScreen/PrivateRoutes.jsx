@@ -37,6 +37,8 @@ import TenantDeductions from "../components/PropertiesScreen/TenantDeductions";
 import TenantOverview from "../components/PropertiesScreen/TenantOverview";
 import InvoiceReceipt from "../components/PropertiesScreen/InvoiceReceiptPage";
 import PlanFeatures from "../components/SubscriptionScreen/PlanFeaturesScreen";
+import KycApproval from "../components/KYCApproval/KYCApprovalScreen";
+import { KYCProvider } from "../Context/KYCContext";
 
 const PrivateRoute = ({ children }) => {
   const token =
@@ -82,6 +84,7 @@ const PrivateRoutesScreen = () => {
               <OwnersProvider>
                 <DashboardProvider>
                   <SupportTicketsProvider>
+                    <KYCProvider>
                     <Routes>
                       <Route path="/home/:roleId" element={<Home />} />
                       <Route path="/proprietors/:roleId" element={<Proprietors />} />
@@ -119,11 +122,12 @@ const PrivateRoutesScreen = () => {
   path="/invoice-receipt/:hostelId/:invoiceId"
   element={<InvoiceReceipt />}
 />
-
+<Route path="/Kyc-approve/:agentId" element={<KycApproval />} />
 
 
 
                     </Routes>
+                    </KYCProvider>
                   </SupportTicketsProvider>
                 </DashboardProvider>
               </OwnersProvider>

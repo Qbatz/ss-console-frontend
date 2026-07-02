@@ -198,8 +198,8 @@ const handleSaveDeduction =
         "
       >
 
-        {/* PAGE TITLE */}
-       <div className="flex items-center gap-3 mb-6">
+      
+       {/* <div className="flex items-center gap-3 mb-6">
 
   <img
     src={arrowleft}
@@ -240,7 +240,7 @@ const handleSaveDeduction =
 </div>
 
 
-        {/* TENANT DETAILS CARD */}
+       
         <div
           className="
             bg-white
@@ -298,7 +298,7 @@ const handleSaveDeduction =
   "
 >
 
-            {/* NAME */}
+            
             <div className="text-left">
 
               <p
@@ -324,7 +324,7 @@ const handleSaveDeduction =
             </div>
 
 
-            {/* MOBILE */}
+          
             <div className="text-left">
 
               <p
@@ -355,10 +355,10 @@ const handleSaveDeduction =
 
           </div>
 
-        </div>
+        </div> */}
 
 
-        {/* TABLE GRID */}
+     
         <div
           className="
             grid
@@ -381,7 +381,7 @@ const handleSaveDeduction =
   "
 >
 
-            {/* HEADER */}
+         
             <div
               className="
                 px-6
@@ -410,7 +410,7 @@ const handleSaveDeduction =
             </div>
 
 
-            {/* TABLE */}
+         
            <div
   className="
     border-t
@@ -418,7 +418,7 @@ const handleSaveDeduction =
   "
 >
 
-  {/* HEADER */}
+  
   <table className="w-full">
 
     <thead className="bg-gray-50">
