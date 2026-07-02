@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { useNavigate } from "react-router-dom";
 import { useSubscription } from "../../Context/SubscriptionContext";
@@ -54,24 +54,24 @@ const Subscription = () => {
 
   useEffect(() => {
 
-  const handleClickOutside = (event) => {
+    const handleClickOutside = (event) => {
 
-    if (
-      filterRef.current &&
-      !filterRef.current.contains(event.target)
-    ) {
-      setOpenFilter(false);
-    }
+      if (
+        filterRef.current &&
+        !filterRef.current.contains(event.target)
+      ) {
+        setOpenFilter(false);
+      }
 
-  };
+    };
 
-  document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
 
-}, []);
+  }, []);
 
   // const fetchSubscriptions = async (pageNo = 1, searchText = "") => {
 
@@ -205,109 +205,98 @@ const Subscription = () => {
 
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
 
- 
 
-  <div className="flex items-center justify-between gap-4">
 
-   
-    <div className="flex-1 text-center  rounded-lg py-1">
+                    <div className="flex items-center justify-between gap-4">
 
-      <p className="text-[12px] text-blue-600 font-medium">
-        Basic
-      </p>
 
-      <h2 className="text-2xl font-bold mt-1 text-gray-900">
-        {responseCard?.basicPlansCount || 0}
-      </h2>
+                      <div className="flex-1 text-center  rounded-lg py-1">
 
-    </div>
+                        <p className="text-gray-500 text-sm font-gilroy">
+                          Basic
+                        </p>
 
-    {/* ADVANCE */}
-    <div className="flex-1 text-center  rounded-lg py-1">
+                        <h2 className="text-2xl font-bold mt-1 text-gray-900">
+                          {responseCard?.basicPlansCount || 0}
+                        </h2>
 
-      <p className="text-[11px] text-orange-600 font-medium">
-        Advance
-      </p>
+                      </div>
 
-      <h2 className="text-2xl font-bold mt-1 text-gray-900">
-        {responseCard?.advancePlansCount || 0}
-      </h2>
 
-    </div>
 
-  </div>
+                    </div>
 
-</div>
+                  </div>
 
                   <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
-                    <p className="text-gray-500 text-sm font-gilroy">Trial</p>
-                    <h2 className="text-2xl font-bold mt-2">{responseCard?.trialPlansCount || 0}</h2>
+                    <p className="text-gray-500 text-sm font-gilroy">Advance</p>
+                    <h2 className="text-2xl font-bold mt-2">{responseCard?.advancePlansCount || 0}</h2>
                   </div>
 
                 </div>
-<div className="mb-4 bg-white py-3">
+                <div className="mb-4 bg-white py-3">
 
-  <div className="flex justify-between items-center gap-3">
+                  <div className="flex justify-between items-center gap-3">
 
-    {/* LEFT SIDE FILTER */}
-    <div className="relative w-[220px]" ref={filterRef}> 
+                    {/* LEFT SIDE FILTER */}
+                    <div className="relative w-[220px]" ref={filterRef}>
 
-  {/* SELECT BUTTON */}
-  <button
-    onClick={() => setOpenFilter(!openFilter)}
-    className="w-full border border-gray-300 px-4 py-2 rounded-lg text-sm bg-white flex items-center justify-between"
-  >
-    {filterBy
-      ?.replaceAll("_", " ")
-      .toLowerCase()
-      .replace(/\b\w/g, (c) => c.toUpperCase())}
+                      {/* SELECT BUTTON */}
+                      <button
+                        onClick={() => setOpenFilter(!openFilter)}
+                        className="w-full border border-gray-300 px-4 py-2 rounded-lg text-sm bg-white flex items-center justify-between"
+                      >
+                        {filterBy
+                          ?.replaceAll("_", " ")
+                          .toLowerCase()
+                          .replace(/\b\w/g, (c) => c.toUpperCase())}
 
-   <img src={Arrow} className="w-4 h-4 cursor-pointer"/>
-  </button>
+                        <img src={Arrow} className="w-4 h-4 cursor-pointer" />
+                      </button>
 
-  {/* DROPDOWN */}
-  {openFilter && (
-    <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-[180px] overflow-y-auto">
+                      {/* DROPDOWN */}
+                      {openFilter && (
+                        <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-[180px] overflow-y-auto">
 
-      {responseCard?.filterOptions?.map((item) => (
-        <div
-          key={item}
-          onClick={() => {
-            setFilterBy(item);
-            setPage(1);
-            setOpenFilter(false);
-          }}
-          className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50
+                          {responseCard?.filterOptions?.map((item) => (
+                            <div
+                              key={item}
+                              onClick={() => {
+                                setFilterBy(item);
+                                setPage(1);
+                                setOpenFilter(false);
+                              }}
+                              className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50
             ${filterBy === item ? "bg-blue-600 text-white" : ""}
           `}
-        >
-          {item
-            .replaceAll("_", " ")
-            .toLowerCase()
-            .replace(/\b\w/g, (c) => c.toUpperCase())}
-        </div>
-      ))}
+                            >
+                              {item
+                                .replaceAll("_", " ")
+                                .toLowerCase()
+                                .replace(/\b\w/g, (c) => c.toUpperCase())}
+                            </div>
+                          ))}
 
-    </div>
-  )}
+                        </div>
+                      )}
 
-</div>
+                    </div>
 
-    {/* RIGHT SIDE SEARCH */}
-    <input
-      type="text"
-      value={search}
-      onChange={(e) => {
-        setSearch(e.target.value);
-        setPage(1);
-      }}
-      placeholder="Search..."
-      className="border border-gray-300 px-4 py-2 rounded-lg text-sm w-64"
-    />
+                    {/* RIGHT SIDE SEARCH */}
+                    <input
+                      type="text"
+                      value={search}
+                      onChange={(e) => {
+                        setSearch(e.target.value);
+                        setPage(1);
+                      }}
+                      placeholder="Search..."
+                      className="border border-gray-300 px-4 py-2 rounded-lg text-sm w-64"
+                    />
 
-  </div>
+                  </div>
 
-</div>
+                </div>
 
                 {/* <div className="mb-4 bg-white py-3">
                   <div className="flex justify-end items-center">
@@ -345,8 +334,8 @@ const Subscription = () => {
                 </div> */}
 
 
-              <div
-  className="
+                <div
+                  className="
     bg-white
     rounded-xl
     shadow-sm
@@ -355,10 +344,10 @@ const Subscription = () => {
 
     overflow-hidden
   "
->
+                >
 
                   <div
-  className="
+                    className="
     max-h-[320px]
     overflow-y-auto
     overflow-x-auto
@@ -380,7 +369,7 @@ const Subscription = () => {
 
     hover:[&::-webkit-scrollbar-thumb]:bg-[#B7CCFF]
   "
->
+                  >
 
                     <table className="w-full text-sm">
 
@@ -389,8 +378,8 @@ const Subscription = () => {
                         <tr>
                           <th className="px-4 py-3 text-left">ID</th>
                           <th className="px-4 py-3 text-left">Property Name</th>
-                          {/* <th className="px-4 py-3 text-left">Proprietor</th>
-                          <th className="px-4 py-3 text-left">Status</th> */}
+
+                          <th className="px-4 py-3 text-left">Status</th>
                           <th className="px-4 py-3 text-left">Plan Name</th>
                           <th className="px-4 py-3 text-left">Start Date</th>
                           <th className="px-4 py-3 text-left">Expiry Date</th>
@@ -456,11 +445,21 @@ const Subscription = () => {
 
                               {/* <td className="px-4 py-2">
                                 {item.ownerName}
-                              </td>
-
-                              <td className="px-4 py-2">
-                                {item.status}
                               </td> */}
+
+                              {/* <td className="px-4 py-2">
+                                {item.isExpired}
+                              </td> */}
+                              <td className="px-4 py-2 text-left">
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs ${item.isExpired
+                                      ? "bg-red-100 text-red-600"
+                                      : "bg-green-100 text-green-600"
+                                    }`}
+                                >
+                                  {item.isExpired ? "Expired" : "Active"}
+                                </span>
+                              </td>
 
                               <td className="px-4 py-2 text-left">
                                 {item.planName}
@@ -528,7 +527,7 @@ const Subscription = () => {
                       <option value={10}>10</option>
                       <option value={20}>20</option>
                       <option value={50}>50</option>
-                       <option value={100}>100</option>
+                      <option value={100}>100</option>
                     </select>
 
                     {/* <button
@@ -538,26 +537,25 @@ const Subscription = () => {
                       <img src={ArrowRight} alt="Arrow" className="w-[15px] h-[15px]" />
                     </button> */}
                     <button
-  disabled={
-    page === 1 ||
-    subscriptions.length === 0
-  }
-  onClick={() => setPage((p) => p - 1)}
-  className={`
-    ${
-      page === 1 ||
-      subscriptions.length === 0
-        ? "opacity-40 cursor-not-allowed"
-        : "cursor-pointer"
-    }
+                      disabled={
+                        page === 1 ||
+                        subscriptions.length === 0
+                      }
+                      onClick={() => setPage((p) => p - 1)}
+                      className={`
+    ${page === 1 ||
+                          subscriptions.length === 0
+                          ? "opacity-40 cursor-not-allowed"
+                          : "cursor-pointer"
+                        }
   `}
->
-  <img
-    src={ArrowRight}
-    alt="Arrow"
-    className="w-[15px] h-[15px]"
-  />
-</button>
+                    >
+                      <img
+                        src={ArrowRight}
+                        alt="Arrow"
+                        className="w-[15px] h-[15px]"
+                      />
+                    </button>
 
                     <span className="border px-3 py-1 rounded bg-gray-50">
                       {page}
@@ -570,26 +568,25 @@ const Subscription = () => {
                       <img src={ArrowRight} alt="Arrow" className="w-[15px] h-[15px] scale-x-[-1]" />
                     </button> */}
                     <button
-  disabled={
-    page >= totalPages ||
-    subscriptions.length === 0
-  }
-  onClick={() => setPage((p) => p + 1)}
-  className={`
-    ${
-      page >= totalPages ||
-      subscriptions.length === 0
-        ? "opacity-40 cursor-not-allowed"
-        : "cursor-pointer"
-    }
+                      disabled={
+                        page >= totalPages ||
+                        subscriptions.length === 0
+                      }
+                      onClick={() => setPage((p) => p + 1)}
+                      className={`
+    ${page >= totalPages ||
+                          subscriptions.length === 0
+                          ? "opacity-40 cursor-not-allowed"
+                          : "cursor-pointer"
+                        }
   `}
->
-  <img
-    src={ArrowRight}
-    alt="Arrow"
-    className="w-[15px] h-[15px] scale-x-[-1]"
-  />
-</button>
+                    >
+                      <img
+                        src={ArrowRight}
+                        alt="Arrow"
+                        className="w-[15px] h-[15px] scale-x-[-1]"
+                      />
+                    </button>
 
                     <span className="text-gray-400">
                       {page} - {totalPages}

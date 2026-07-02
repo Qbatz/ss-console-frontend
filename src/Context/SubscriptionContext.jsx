@@ -837,6 +837,41 @@ const deleteTransaction = async (transactionId) => {
     setLoading(false);
   }
 };
+
+const getTrialSubscriptions = async (
+  page = 0,
+  size = 10,
+  hostelName = "",
+  filterBy = "ALL"
+) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.get(
+      "/v2/subscription/trial",
+      {
+        params: {
+          page,
+          size,
+          hostelName,
+          filterBy,
+        },
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <SubscriptionContext.Provider
       value={{
@@ -844,7 +879,7 @@ const deleteTransaction = async (transactionId) => {
         errorMsg,
         createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, 
         getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment,deleteDemoRequest,getDemoType,getDropReasons,getDemoRequestComments,
-        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes,getTrialDaysExtReason,deleteTransaction
+        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes,getTrialDaysExtReason,deleteTransaction,getTrialSubscriptions
       }}
     >
       {children}

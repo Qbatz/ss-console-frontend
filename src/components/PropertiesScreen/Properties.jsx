@@ -2033,7 +2033,7 @@ useEffect(() => {
                 </div>
 
               </div>
-              {hostels?.totalPages > 1&& (
+             
               <div className="flex-between px-4 py-1 text-sm bg-white">
 
                 {/* Total Count */}
@@ -2129,7 +2129,7 @@ useEffect(() => {
 
                 </div>
               </div>
-              )}
+             
 
             </div>
             {/* // )
