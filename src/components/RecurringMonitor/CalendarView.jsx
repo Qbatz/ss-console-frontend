@@ -44,7 +44,7 @@ const CalendarView = ({ currentMonth, currentYear, data = [] }) => {
   }
 
   return (
-    <div className="bg-white border border-gray-300 rounded-xl overflow-hidden">
+    <div className="bg-white-common border border-gray-300 rounded-xl overflow-hidden">
 
 
       <div className="grid grid-cols-7 text-xs text-gray-500 border-b">

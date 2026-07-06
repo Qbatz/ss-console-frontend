@@ -178,7 +178,7 @@ useEffect(() => {
         </div>
 
       </div> */}
-      <div className="bg-white rounded-xl px-4 py-2">
+      <div className="bg-white-common rounded-xl px-4 py-2">
 
   <div className="max-h-[350px] overflow-y-auto y-8">
 

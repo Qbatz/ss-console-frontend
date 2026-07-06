@@ -271,7 +271,7 @@ const RecurringStatus =
       />
 
       {/* BILLING RULE */}
-      <div className="border-soft rounded-xl p-5 bg-white h-[350px]">
+      <div className="border-soft rounded-xl p-5 bg-white-common h-[350px]">
 
         <div className="flex items-center justify-between mb-4">
 
@@ -471,7 +471,7 @@ const RecurringStatus =
       </h3>
 
       {/* TABLE */}
-      <div className="border-soft rounded-xl bg-white overflow-hidden">
+      <div className="border-soft rounded-xl bg-white-common overflow-hidden">
 
         <table className="w-full text-[13px]">
 
@@ -548,7 +548,7 @@ const RecurringStatus =
           {/* MODAL CENTER */}
           <div className="fixed inset-0 flex items-center justify-center z-50" onClick={() => setShowBillingModal(false)}>
 
-            <div className="bg-white w-[90%] max-h-[90vh] rounded-xl shadow-lg p-5 flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white-common w-[90%] max-h-[90vh] rounded-xl shadow-lg p-5 flex flex-col" onClick={(e) => e.stopPropagation()}>
 
               {/* HEADER */}
               <div className="flex justify-between items-center mb-4">
@@ -604,7 +604,7 @@ const RecurringStatus =
 
           {/* Modal */}
           <div
-            className="relative bg-white rounded-xl shadow-xl w-[400px] p-5 z-[10000]"
+            className="relative bg-white-common rounded-xl shadow-xl w-[400px] p-5 z-[10000]"
             onClick={(e) => e.stopPropagation()}
           >
 

@@ -24,6 +24,7 @@ const CreateRoleModal = ({ isOpen, onClose, selectedRole }) => {
   console.log("permissions", permissions)
   const roleInputRef = useRef(null);
   const permissionRef = useRef(null);
+  const submitRef = useRef(false);
   const resetForm = () => {
     setRoleName("");
     setPermissions([]);
@@ -261,99 +262,116 @@ return newPermissions.filter(
   useEffect(() => {
     getAgentRoles();
   }, []);
-  const handleCreate = async () => {
-    let hasError = false;
+  
 
-    setRoleNameError("");
-    setPermissionError("");
+const handleCreate = async () => {
 
-    if (!roleName.trim()) {
-      setRoleNameError("Role name is required");
+  if (submitRef.current) return;
+
+  let hasError = false;
+
+  setRoleNameError("");
+  setPermissionError("");
+
+  if (!roleName.trim()) {
+    setRoleNameError("Role name is required");
+
+    setTimeout(() => {
+      roleInputRef.current?.focus();
+      roleInputRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 0);
+
+    hasError = true;
+  }
+
+  const validPermissions = permissions.filter(
+    (p) =>
+      p.canRead ||
+      p.canWrite ||
+      p.canUpdate ||
+      p.canDelete
+  );
+
+  if (!validPermissions.length) {
+    setPermissionError("Select at least one permission");
+
+    setTimeout(() => {
+      permissionRef.current?.focus();
+      permissionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 0);
+
+    hasError = true;
+  }
+
+  if (selectedRole) {
+    const isNameSame = roleName === initialRoleName;
+
+    const isDescriptionSame =
+      description ===
+      (selectedRole.description || "");
+
+    const normalizePermissions = (list) =>
+      [...list]
+        .map((p) => ({
+          moduleId: p.moduleId,
+          canRead: !!p.canRead,
+          canWrite: !!p.canWrite,
+          canUpdate: !!p.canUpdate,
+          canDelete: !!p.canDelete,
+        }))
+        .sort((a, b) => a.moduleId - b.moduleId);
+
+    const isPermissionSame =
+      JSON.stringify(
+        normalizePermissions(permissions)
+      ) ===
+      JSON.stringify(
+        normalizePermissions(initialPermissions)
+      );
+
+    if (
+      isNameSame &&
+      isPermissionSame &&
+      isDescriptionSame
+    ) {
+      setModalType("error");
+      setMessage("No changes detected.");
+      setShowSuccess(true);
+
       setTimeout(() => {
-        roleInputRef.current?.focus();
-        roleInputRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }, 0);
+        setShowSuccess(false);
+      }, 1500);
 
-      hasError = true;
+      return;
     }
-const validPermissions = permissions.filter(
-  (p) =>
-    p.canRead ||
-    p.canWrite ||
-    p.canUpdate ||
-    p.canDelete
-);
-   if (!validPermissions.length) {
-  setPermissionError("Select at least one permission");
+  }
 
-  setTimeout(() => {
-    permissionRef.current?.focus();
-    permissionRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
-  }, 0);
+  if (hasError) return;
 
-  hasError = true;
-}
-    if (selectedRole) {
-      const isNameSame = roleName === initialRoleName;
-      const isDescriptionSame =
-  description ===
-  (selectedRole.description || "");
+  submitRef.current = true;
 
-      // const isPermissionSame =
-      //   JSON.stringify(
-      //     [...permissions].sort((a, b) => a.moduleId - b.moduleId)
-      //   ) ===
-      //   JSON.stringify(
-      //     [...initialPermissions].sort((a, b) => a.moduleId - b.moduleId)
-      //   );
-      const normalizePermissions = (list) =>
-  [...list]
-    .map((p) => ({
-      moduleId: p.moduleId,
-      canRead: !!p.canRead,
-      canWrite: !!p.canWrite,
-      canUpdate: !!p.canUpdate,
-      canDelete: !!p.canDelete,
-    }))
-    .sort((a, b) => a.moduleId - b.moduleId);
-
-const isPermissionSame =
-  JSON.stringify(normalizePermissions(permissions)) ===
-  JSON.stringify(normalizePermissions(initialPermissions));
-
-      if (isNameSame && isPermissionSame && isDescriptionSame) {
-        setModalType("error");
-        setMessage("No changes detected.");
-        setShowSuccess(true);
-
-        setTimeout(() => {
-          setShowSuccess(false);
-        }, 1500);
-
-        return; // 🚫 stop API call
-      }
-    }
-
-
-    if (hasError) return;
+  try {
 
     const payload = {
       roleName,
       isActive: true,
-      description:description,
+      description: description,
       permissionList: permissions,
     };
 
     let res;
 
     if (selectedRole) {
-      res = await updateAgentRole(selectedRole.id, payload);
+      res = await updateAgentRole(
+        selectedRole.id,
+        payload
+      );
     } else {
       res = await createAgentRole(payload);
     }
@@ -367,15 +385,12 @@ const isPermissionSame =
       setTimeout(() => {
         setShowSuccess(false);
         handleClose();
-
       }, 800);
 
-
-    }
-
-    else {
+    } else {
 
       setRoleNameError(res.message);
+
       setTimeout(() => {
         roleInputRef.current?.focus();
         roleInputRef.current?.scrollIntoView({
@@ -383,9 +398,139 @@ const isPermissionSame =
           block: "center",
         });
       }, 0);
-
     }
-  };
+
+  } finally {
+
+    submitRef.current = false;
+
+  }
+};
+//   const handleCreate = async () => {
+//     let hasError = false;
+
+//     setRoleNameError("");
+//     setPermissionError("");
+
+//     if (!roleName.trim()) {
+//       setRoleNameError("Role name is required");
+//       setTimeout(() => {
+//         roleInputRef.current?.focus();
+//         roleInputRef.current?.scrollIntoView({
+//           behavior: "smooth",
+//           block: "center",
+//         });
+//       }, 0);
+
+//       hasError = true;
+//     }
+// const validPermissions = permissions.filter(
+//   (p) =>
+//     p.canRead ||
+//     p.canWrite ||
+//     p.canUpdate ||
+//     p.canDelete
+// );
+//    if (!validPermissions.length) {
+//   setPermissionError("Select at least one permission");
+
+//   setTimeout(() => {
+//     permissionRef.current?.focus();
+//     permissionRef.current?.scrollIntoView({
+//       behavior: "smooth",
+//       block: "center",
+//     });
+//   }, 0);
+
+//   hasError = true;
+// }
+//     if (selectedRole) {
+//       const isNameSame = roleName === initialRoleName;
+//       const isDescriptionSame =
+//   description ===
+//   (selectedRole.description || "");
+
+//       // const isPermissionSame =
+//       //   JSON.stringify(
+//       //     [...permissions].sort((a, b) => a.moduleId - b.moduleId)
+//       //   ) ===
+//       //   JSON.stringify(
+//       //     [...initialPermissions].sort((a, b) => a.moduleId - b.moduleId)
+//       //   );
+//       const normalizePermissions = (list) =>
+//   [...list]
+//     .map((p) => ({
+//       moduleId: p.moduleId,
+//       canRead: !!p.canRead,
+//       canWrite: !!p.canWrite,
+//       canUpdate: !!p.canUpdate,
+//       canDelete: !!p.canDelete,
+//     }))
+//     .sort((a, b) => a.moduleId - b.moduleId);
+
+// const isPermissionSame =
+//   JSON.stringify(normalizePermissions(permissions)) ===
+//   JSON.stringify(normalizePermissions(initialPermissions));
+
+//       if (isNameSame && isPermissionSame && isDescriptionSame) {
+//         setModalType("error");
+//         setMessage("No changes detected.");
+//         setShowSuccess(true);
+
+//         setTimeout(() => {
+//           setShowSuccess(false);
+//         }, 1500);
+
+//         return; // 🚫 stop API call
+//       }
+//     }
+
+
+//     if (hasError) return;
+
+//     const payload = {
+//       roleName,
+//       isActive: true,
+//       description:description,
+//       permissionList: permissions,
+//     };
+
+//     let res;
+
+//     if (selectedRole) {
+//       res = await updateAgentRole(selectedRole.id, payload);
+//     } else {
+//       res = await createAgentRole(payload);
+//     }
+
+//     if (res.success) {
+
+//       setModalType("success");
+//       setMessage(res.data);
+//       setShowSuccess(true);
+
+//       setTimeout(() => {
+//         setShowSuccess(false);
+//         handleClose();
+
+//       }, 800);
+
+
+//     }
+
+//     else {
+
+//       setRoleNameError(res.message);
+//       setTimeout(() => {
+//         roleInputRef.current?.focus();
+//         roleInputRef.current?.scrollIntoView({
+//           behavior: "smooth",
+//           block: "center",
+//         });
+//       }, 0);
+
+//     }
+//   };
 
 
 
@@ -441,7 +586,7 @@ const isPermissionSame =
           } flex flex-col`}
       > */}
       <div
-  className={`fixed top-0 right-0 h-full w-full sm:w-[560px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
+  className={`fixed top-0 right-0 h-full w-full sm:w-[560px] bg-white-common shadow-2xl z-50 transform transition-transform duration-300 ${
     isOpen ? "translate-x-0" : "translate-x-full"
   } flex flex-col`}
 >
@@ -646,9 +791,13 @@ const isPermissionSame =
           >
             Cancel
           </button>
-          <button className="px-5 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700" onClick={handleCreate}>
-           {selectedRole ? "Update Role" : "Create Role"}
-          </button>
+         <button
+  onClick={handleCreate}
+  disabled={submitRef.current}
+  className="px-5 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+>
+  {selectedRole ? "Update Role" : "Create Role"}
+</button>
         </div>
       </div>
     </>

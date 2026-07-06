@@ -174,7 +174,7 @@ setBalanceAmountError(res.message)
 </button>
 
 </div>
-<div className="bg-white rounded-xl border border-gray-200 p-5 mb-4">
+<div className="bg-white-common rounded-xl border border-gray-200 p-5 mb-4">
 
   <div className="grid grid-cols-4 gap-6">
 
@@ -210,7 +210,7 @@ setBalanceAmountError(res.message)
   </div>
 
 </div>
-      <div className="bg-white rounded-xl border-soft overflow-hidden">
+      <div className="bg-white-common rounded-xl border-soft overflow-hidden">
 
         <table className="w-full text-[12px]">
 
@@ -304,7 +304,7 @@ setBalanceAmountError(res.message)
       onClick={handleCloseModal}
     />
 
-    <div className="relative bg-white rounded-xl w-[450px] p-6 shadow-xl text-left">
+    <div className="relative bg-white-common rounded-xl w-[450px] p-6 shadow-xl text-left">
 
       <h3 className="text-lg font-semibold mb-5 ">
         Update Balance Amount

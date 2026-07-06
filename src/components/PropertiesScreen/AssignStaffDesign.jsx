@@ -158,7 +158,7 @@ const AssignStaffModal = ({
   className="
     w-[500px]
     h-[calc(100vh-32px)]
-    bg-white
+    bg-white-common
     rounded-2xl
     shadow-2xl
     overflow-y-auto
@@ -200,7 +200,7 @@ const AssignStaffModal = ({
 
                         {/* DROPDOWN */}
                         {showStaffDropdown && (
-                            <div className="absolute w-full mt-1 bg-white border rounded-lg shadow-md max-h-40 overflow-y-auto z-50">
+                            <div className="absolute w-full mt-1 bg-white-common border rounded-lg shadow-md max-h-40 overflow-y-auto z-50">
 
                                 <div
                                     onClick={() => {
@@ -254,7 +254,7 @@ const AssignStaffModal = ({
 
                     {/* Dropdown */}
                     {showReasonDropdown && (
-                        <div className="absolute w-full mt-1 bg-white border rounded-lg shadow-md max-h-40 overflow-y-auto z-50">
+                        <div className="absolute w-full mt-1 bg-white-common border rounded-lg shadow-md max-h-40 overflow-y-auto z-50">
 
                             {reasonList.map((item) => (
                                 <div
@@ -336,7 +336,7 @@ const AssignStaffModal = ({
             relative
             flex
             gap-4
-            bg-white
+            bg-white-common
             border
             border-gray-200
             rounded-xl

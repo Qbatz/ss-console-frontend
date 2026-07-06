@@ -177,7 +177,7 @@ const TenantsList = () => {
           </h1>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
-            <div className="border border-gray-300 rounded-xl p-4 bg-white">
+            <div className="border border-gray-300 rounded-xl p-4 bg-white-common">
               <p className="text-gray-500 text-sm">Total Proprietors</p>
               <p className="text-xl font-semibold mt-1">{totalItems}</p>
             </div>
@@ -220,7 +220,7 @@ const TenantsList = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col mt-4">
+          <div className="bg-white-common border border-gray-300 rounded-xl shadow-sm flex flex-col mt-4">
 
             <div className="max-h-[350px] overflow-y-auto">
 
@@ -474,7 +474,7 @@ const TenantsList = () => {
         >
 
           <div
-            className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative"
+            className="bg-white-common rounded-xl shadow-xl w-full max-w-md p-6 relative"
             onClick={(e) => e.stopPropagation()}
           >
 

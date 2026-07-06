@@ -201,7 +201,7 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
 
                 <div
                     className="
-          bg-white
+          bg-white-common
           rounded-3xl
           border border-gray-100
           overflow-hidden
@@ -579,7 +579,7 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
                                                     <div
                                                         className="
     fixed
-    bg-white border border-gray-200
+    bg-white-common border border-gray-200
     rounded-lg shadow-lg z-[99999]
     max-w-[120px]
   "
@@ -697,7 +697,7 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
                             rounded-2xl
                             border border-gray-100
                             overflow-hidden
-                            bg-white
+                            bg-white-common
                           "
                                                     >
 
@@ -1002,7 +1002,7 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
                 >
 
                     <div
-                        className="bg-white rounded-2xl w-[350px] p-5 shadow-xl"
+                        className="bg-white-common rounded-2xl w-[350px] p-5 shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
 
@@ -1082,7 +1082,7 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
                     }}
                 >
                     <div
-                        className="bg-white rounded-2xl w-[350px] p-5 shadow-xl"
+                        className="bg-white-common rounded-2xl w-[350px] p-5 shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <h2 className="text-lg font-semibold mb-3 text-left">

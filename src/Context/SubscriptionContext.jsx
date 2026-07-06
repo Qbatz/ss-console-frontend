@@ -69,7 +69,8 @@ const getSubscriptions = async (
   page = 1,
   size = 10,
   hostelName = "",
-  filterBy = "ALL"
+  filterBy = "ALL",
+  isActive = null
 ) => {
   try {
     setLoading(true);
@@ -80,7 +81,8 @@ const getSubscriptions = async (
         page,
         size,
         hostelName,
-        filterBy
+        filterBy,
+        isActive
       }
     });
 
@@ -799,13 +801,23 @@ const getTrialDaysExtReason = async () => {
 
   }
 };
-const deleteTransaction = async (transactionId) => {
+
+
+const deleteTransaction = async (
+  transactionId,
+  tenantMobile
+) => {
   try {
     setLoading(true);
     setErrorMsg("");
 
     const res = await axiosInstance.delete(
-      `/v2/receipt/${transactionId}`
+      `/v2/receipt/${transactionId}`,
+      {
+        data: {
+          tenantMobile
+        }
+      }
     );
 
     if (res.status === 200) {
@@ -818,7 +830,6 @@ const deleteTransaction = async (transactionId) => {
 
     return { success: false };
   } catch (error) {
-
     let msg = "Something went wrong";
 
     if (error?.response?.status === 500) {
@@ -837,12 +848,51 @@ const deleteTransaction = async (transactionId) => {
     setLoading(false);
   }
 };
+// const deleteTransaction = async (transactionId) => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.delete(
+//       `/v2/receipt/${transactionId}`
+//     );
+
+//     if (res.status === 200) {
+//       return {
+//         success: true,
+//         data: res.data,
+//         message: "Transaction deleted successfully",
+//       };
+//     }
+
+//     return { success: false };
+//   } catch (error) {
+
+//     let msg = "Something went wrong";
+
+//     if (error?.response?.status === 500) {
+//       msg = "Internal Server Error";
+//     } else {
+//       msg = getErrorMessage(error);
+//     }
+
+//     setErrorMsg(msg);
+
+//     return {
+//       success: false,
+//       message: msg,
+//     };
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 
 const getTrialSubscriptions = async (
   page = 0,
   size = 10,
   hostelName = "",
-  filterBy = "ALL"
+  filterBy = "ALL",
+  isActive = null
 ) => {
   try {
     setLoading(true);
@@ -855,6 +905,7 @@ const getTrialSubscriptions = async (
           size,
           hostelName,
           filterBy,
+          isActive
         },
       }
     );

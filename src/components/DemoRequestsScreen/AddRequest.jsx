@@ -171,115 +171,201 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
     onClose();
   };
 
+  // const handleSubmit = async () => {
+
+
+  //   if (isSubmitting || loading) return;
+
+  //   setIsSubmitting(true);
+
+  //   const isValid = validateForm();
+
+  //   if (!isValid) {
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+  //   if (!formData.contactNo) {
+  //     setMobileError("Mobile number is required");
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+  //   if (
+  //     !/^[6-9]\d{9}$/.test(formData.contactNo) ||
+  //     /^(\d)\1{9}$/.test(formData.contactNo)
+  //   ) {
+  //     setMobileError("Enter valid mobile number");
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+
+  //   try {
+
+
+
+  //     const payload = {
+  //       ...formData,
+
+  //       noOfHostels:
+  //         Number(
+  //           formData.noOfHostels
+  //         ) || 0,
+
+  //       noOfTenants:
+  //         Number(
+  //           formData.noOfTenants
+  //         ) || 0,
+
+  //       requestedDate:
+  //         formatDate(
+  //           formData.requestedDate
+  //         ),
+
+  //       requestedTime:
+  //         formatTime(
+  //           formData.requestedTime
+  //         ),
+  //     };
+
+  //     const res =
+  //       await createDemoRequest(
+  //         payload
+  //       );
+
+  //     if (res.success) {
+
+  //       setModalType("success");
+
+  //       setMessage(
+  //         res?.message
+  //       );
+
+  //       setShowSuccess(true);
+
+  //       fetchData();
+
+  //       setTimeout(() => {
+
+  //         setShowSuccess(false);
+
+  //         handleCloseDrawer();
+
+  //       }, 1500);
+
+  //     } else {
+
+  //       setModalType("error");
+
+  //       setMessage(
+  //         res?.message
+  //       );
+
+  //       setShowSuccess(true);
+
+  //       setTimeout(() => {
+
+  //         setShowSuccess(false);
+
+  //       }, 1500);
+
+  //     }
+
+  //   } catch (error) {
+
+  //     setModalType("error");
+
+  //     setMessage(
+  //       error?.message ||
+  //       "Something went wrong"
+  //     );
+
+  //     setShowSuccess(true);
+
+  //     setTimeout(() => {
+
+  //       setShowSuccess(false);
+
+  //     }, 1500);
+
+  //   }
+
+
+
+
+  // };
   const handleSubmit = async () => {
 
+  if (isSubmitting || loading) return;
 
-    if (isSubmitting || loading) return;
+  setIsSubmitting(true);
 
-    setIsSubmitting(true);
+  const isValid = validateForm();
 
-    const isValid = validateForm();
+  if (!isValid) {
+    setIsSubmitting(false);
+    return;
+  }
 
-    if (!isValid) {
-      setIsSubmitting(false);
-      return;
-    }
+  if (!formData.contactNo) {
+    setMobileError("Mobile number is required");
+    setIsSubmitting(false);
+    return;
+  }
 
-    if (!formData.contactNo) {
-      setMobileError("Mobile number is required");
-      setIsSubmitting(false);
-      return;
-    }
+  if (
+    !/^[6-9]\d{9}$/.test(formData.contactNo) ||
+    /^(\d)\1{9}$/.test(formData.contactNo)
+  ) {
+    setMobileError("Enter valid mobile number");
+    setIsSubmitting(false);
+    return;
+  }
 
-    if (
-      !/^[6-9]\d{9}$/.test(formData.contactNo) ||
-      /^(\d)\1{9}$/.test(formData.contactNo)
-    ) {
-      setMobileError("Enter valid mobile number");
-      setIsSubmitting(false);
-      return;
-    }
+  try {
 
+    const payload = {
+      ...formData,
 
-    try {
+      noOfHostels:
+        Number(formData.noOfHostels) || 0,
 
+      noOfTenants:
+        Number(formData.noOfTenants) || 0,
 
+      requestedDate:
+        formatDate(formData.requestedDate),
 
-      const payload = {
-        ...formData,
+      requestedTime:
+        formatTime(formData.requestedTime),
+    };
 
-        noOfHostels:
-          Number(
-            formData.noOfHostels
-          ) || 0,
+    const res = await createDemoRequest(payload);
 
-        noOfTenants:
-          Number(
-            formData.noOfTenants
-          ) || 0,
+    if (res.success) {
 
-        requestedDate:
-          formatDate(
-            formData.requestedDate
-          ),
+      setModalType("success");
 
-        requestedTime:
-          formatTime(
-            formData.requestedTime
-          ),
-      };
+      setMessage(res?.message);
 
-      const res =
-        await createDemoRequest(
-          payload
-        );
+      setShowSuccess(true);
 
-      if (res.success) {
+      fetchData();
 
-        setModalType("success");
+      setTimeout(() => {
 
-        setMessage(
-          res?.message
-        );
+        setShowSuccess(false);
 
-        setShowSuccess(true);
+        handleCloseDrawer();
 
-        fetchData();
+      }, 1500);
 
-        setTimeout(() => {
-
-          setShowSuccess(false);
-
-          handleCloseDrawer();
-
-        }, 1500);
-
-      } else {
-
-        setModalType("error");
-
-        setMessage(
-          res?.message
-        );
-
-        setShowSuccess(true);
-
-        setTimeout(() => {
-
-          setShowSuccess(false);
-
-        }, 1500);
-
-      }
-
-    } catch (error) {
+    } else {
 
       setModalType("error");
 
-      setMessage(
-        error?.message ||
-        "Something went wrong"
-      );
+      setMessage(res?.message);
 
       setShowSuccess(true);
 
@@ -288,13 +374,32 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
         setShowSuccess(false);
 
       }, 1500);
-
     }
 
+  } catch (error) {
 
+    setModalType("error");
 
+    setMessage(
+      error?.message ||
+      "Something went wrong"
+    );
 
-  };
+    setShowSuccess(true);
+
+    setTimeout(() => {
+
+      setShowSuccess(false);
+
+    }, 1500);
+
+  } finally {
+
+    // IMPORTANT
+    setIsSubmitting(false);
+
+  }
+};
 
   if (!open) return null;
 
@@ -318,7 +423,7 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
         <div className="absolute right-0 top-0 h-full w-full max-w-md">
 
           <div
-            className="h-full bg-white shadow-xl overflow-y-auto p-6"
+            className="h-full bg-white-common shadow-xl overflow-y-auto p-6"
             onClick={(e) => e.stopPropagation()}
           >
 
@@ -549,7 +654,7 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
                   />
 
                   {showDropdown && (
-                    <div className="absolute z-50 w-full bg-white border rounded mt-1 max-h-40 overflow-y-auto shadow">
+                    <div className="absolute z-50 w-full bg-white-common border rounded mt-1 max-h-40 overflow-y-auto shadow">
                       {filteredStates.map((state, index) => (
                         <div
                           key={index}

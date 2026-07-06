@@ -94,10 +94,11 @@ const TenantOverview = () => {
     top: 0,
     left: 0,
   });
+  const [deletePhone, setDeletePhone] = useState("");
 
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deletePhone, setDeletePhone] = useState("");
+
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [amountError, setAmountError] = useState("");
   console.log("deleteItem", deleteItem)
@@ -173,38 +174,97 @@ const TenantOverview = () => {
         handleClickOutside
       );
   }, []);
-  const handleDelete = async (transactionId) => {
-    const res = await deleteTransaction(transactionId);
+  const handleDelete = async (
+  transactionId,
+  tenantMobile
+) => {
 
-    if (res?.success) {
+  if (!tenantMobile) {
+    setModalType("error");
+    setMessage("Mobile number is required");
+    setShowSuccess(true);
 
-      setModalType("success");
-      setMessage(res?.data);
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
 
-      setShowSuccess(true);
-      setDeleteItem(null);
+    return;
+  }
 
-      fetchTenant();
+  if (tenantMobile.length !== 10) {
+    setModalType("error");
+    setMessage("Mobile number must be 10 digits");
+    setShowSuccess(true);
 
-      setTimeout(() => {
-        setShowSuccess(false);
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
 
-      }, 1500);
+    return;
+  }
 
-    }
-    else {
-      setModalType("error");
-      setMessage(res?.message);
+  const res = await deleteTransaction(
+    transactionId,
+    tenantMobile
+  );
 
-      setShowSuccess(true);
+  if (res?.success) {
+    setModalType("success");
+    setMessage(res?.data);
+
+    setShowSuccess(true);
+    setDeleteItem(null);
+    setDeletePhone("");
+
+    fetchTenant();
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+  } else {
+    setModalType("error");
+    setMessage(res?.message);
+
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+  }
+};
+  // const handleDelete = async (transactionId) => {
+  //   const res = await deleteTransaction(transactionId);
+
+  //   if (res?.success) {
+
+  //     setModalType("success");
+  //     setMessage(res?.data);
+
+  //     setShowSuccess(true);
+  //     setDeleteItem(null);
+
+  //     fetchTenant();
+
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+
+  //     }, 1500);
+
+  //   }
+  //   else {
+  //     setModalType("error");
+  //     setMessage(res?.message);
+
+  //     setShowSuccess(true);
 
 
-      setTimeout(() => {
-        setShowSuccess(false);
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
 
-      }, 1500);
-    }
-  };
+  //     }, 1500);
+  //   }
+  // };
   const handleInvoiceReceipt = (item) => {
     navigate(`/invoice-receipt/${item.invoiceId}`);
   };
@@ -386,7 +446,7 @@ const TenantOverview = () => {
       <div className="min-h-screen">
 
 
-        <div className="bg-white border-b border-[#E5E7EB] px-6 py-4">
+        <div className="bg-white-common border-b border-[#E5E7EB] px-6 py-4">
           <div className="flex items-start gap-3">
             <button
               onClick={() => navigate(-1)}
@@ -408,7 +468,7 @@ const TenantOverview = () => {
         </div>
 
 
-        <div className="bg-white px-8 py-4 border-b border-[#E5E7EB]">
+        <div className="bg-white-common px-8 py-4 border-b border-[#E5E7EB]">
 
           <div className="flex justify-between">
 
@@ -425,7 +485,7 @@ const TenantOverview = () => {
     items-center
     justify-center
     overflow-hidden
-    bg-white
+    bg-white-common
   "
               >
                 {tenantData?.profileImage ? (
@@ -513,7 +573,7 @@ const TenantOverview = () => {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white px-6">
+        <div className="bg-white-common px-6">
 
           <div className="flex gap-10 border-b border-[#E5E7EB]">
 
@@ -587,7 +647,7 @@ const TenantOverview = () => {
 
         {
           activeTab === "invoice" && (
-            <div className="bg-white px-6 py-5">
+            <div className="bg-white-common px-6 py-5">
 
               <div className="max-h-[250px] overflow-auto">
 
@@ -667,7 +727,7 @@ const TenantOverview = () => {
 
                           {openInvoiceMenu === item.invoiceId && (
                             <div ref={invoiceMenuRef}
-                              className="fixed w-40 bg-white border rounded-lg shadow-lg z-[99999]"
+                              className="fixed w-40 bg-white-common border rounded-lg shadow-lg z-[99999]"
                               style={{
                                 top: menuPosition.top,
                                 left: menuPosition.left,
@@ -731,7 +791,7 @@ const TenantOverview = () => {
             </div>
           )}
         {activeTab === "transaction" && (
-          <div className="bg-white px-6 py-5">
+          <div className="bg-white-common px-6 py-5">
 
             <div className="max-h-[250px] overflow-auto">
 
@@ -769,7 +829,7 @@ const TenantOverview = () => {
                   </tr>
                 </thead>
 
-                <tbody className="bg-white">
+                <tbody className="bg-white-common">
 
                   {transactions?.length > 0 ? (
 
@@ -842,7 +902,7 @@ const TenantOverview = () => {
                               <div ref={transactionMenuRef}
                                 className="
         absolute right-0 bottom-full mb-2
-        w-32 bg-white border rounded-lg shadow-lg z-[9999]
+        w-32 bg-white-common border rounded-lg shadow-lg z-[9999]
       "
                               >
                                 <button
@@ -886,7 +946,7 @@ const TenantOverview = () => {
 
         {
           activeTab === "redemption" && (
-            <div className="bg-white px-6 py-5">
+            <div className="bg-white-common px-6 py-5">
 
               <div className="max-h-[250px] overflow-auto">
 
@@ -981,7 +1041,7 @@ const TenantOverview = () => {
 
                             {openRedemptionMenu === item.redemptionId && (
                               <div
-                                className="fixed w-25 bg-white border rounded-lg shadow-lg z-[99999]"
+                                className="fixed w-25 bg-white-common border rounded-lg shadow-lg z-[99999]"
                                 style={{
                                   top: menuPosition.top,
                                   left: menuPosition.left,
@@ -1043,7 +1103,7 @@ const TenantOverview = () => {
           )
         }
 
-        {deleteItem && (
+        {/* {deleteItem && (
           <div
             className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
             onClick={() => setDeleteItem(null)}
@@ -1080,7 +1140,78 @@ const TenantOverview = () => {
               </div>
             </div>
           </div>
-        )}
+        )} */}
+        {deleteItem && (
+  <div
+    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+    onClick={() => {
+      setDeleteItem(null);
+      setDeletePhone("");
+    }}
+  >
+    <div
+      className="bg-white-common rounded-lg p-6 w-[400px]"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h3 className="text-lg font-semibold mb-3 text-left">
+        Delete Transaction
+      </h3>
+
+      <p className="text-sm text-gray-600 mb-4 text-left">
+        Enter tenant mobile number to confirm transaction deletion.
+      </p>
+
+      <input
+        type="text"
+        value={deletePhone}
+        maxLength={10}
+        placeholder="Enter mobile number"
+        onChange={(e) => {
+          const value = e.target.value;
+
+          if (/^\d*$/.test(value)) {
+            setDeletePhone(value);
+          }
+        }}
+        className="
+          w-full
+          border
+          border-gray-300
+          rounded-lg
+          px-3
+          py-2
+          mb-5
+          outline-none
+          focus:border-blue-500
+        "
+      />
+
+      <div className="flex justify-end gap-3">
+        <button
+          className="px-4 py-2 border rounded cursor-pointer"
+          onClick={() => {
+            setDeleteItem(null);
+            setDeletePhone("");
+          }}
+        >
+          Cancel
+        </button>
+
+        <button
+          className="px-4 py-2 bg-red-600 text-white rounded cursor-pointer"
+          onClick={() => {
+            handleDelete(
+              deleteItem.transactionId,
+              deletePhone
+            );
+          }}
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       </div>
       <InvoiceOverviewDrawer
         show={showInvoiceDrawer}
@@ -1100,7 +1231,7 @@ const TenantOverview = () => {
           }}
         >
           <div
-            className="bg-white rounded-xl p-6 w-[420px]"
+            className="bg-white-common rounded-xl p-6 w-[420px]"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-left">
@@ -1182,7 +1313,7 @@ const TenantOverview = () => {
         >
 
           <div
-            className="bg-white rounded-xl w-[400px] p-6 shadow-xl"
+            className="bg-white-common rounded-xl w-[400px] p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
 
@@ -1252,7 +1383,7 @@ const TenantOverview = () => {
         >
 
           <div
-            className="bg-white rounded-xl w-[400px] p-6 shadow-xl"
+            className="bg-white-common rounded-xl w-[400px] p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
 
@@ -1327,7 +1458,7 @@ const TenantOverview = () => {
           onClick={() => setShowAmountModal(false)}
         >
           <div
-            className="bg-white rounded-xl p-6 w-[400px]"
+            className="bg-white-common rounded-xl p-6 w-[400px]"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold">

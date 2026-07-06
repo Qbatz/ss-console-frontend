@@ -4,7 +4,7 @@ import swap from "../../assets/arrowswap.png";
 const ProductSupport = ({ hostelData }) => {
 
   return (
-    <div className="bg-white border border-[#E6E8F0] rounded-xl overflow-hidden">
+    <div className="bg-white-common border border-[#E6E8F0] rounded-xl overflow-hidden">
 
       {/* FIXED HEIGHT */}
       <div className="h-[200px] flex flex-col">

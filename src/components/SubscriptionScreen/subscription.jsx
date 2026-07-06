@@ -29,6 +29,7 @@ const Subscription = () => {
   const [filterBy, setFilterBy] = useState("ALL");
   const [openFilter, setOpenFilter] = useState(false);
   const filterRef = useRef(null);
+  const [isActive, setIsActive] = useState(null);
 
   const fetchSubscriptions = async (
     pageNo = 1,
@@ -40,7 +41,8 @@ const Subscription = () => {
       pageNo,
       size,
       searchText,
-      filterType
+      filterType,
+       isActive
     );
 
     if (res.success) {
@@ -106,7 +108,7 @@ const Subscription = () => {
   // }, [page, size, debouncedSearch]);
   useEffect(() => {
     fetchSubscriptions(page, debouncedSearch, filterBy);
-  }, [page, size, debouncedSearch, filterBy]);
+  }, [page, size, debouncedSearch, filterBy,isActive]);
   return (
     <DashboardLayout>
       <div className="p-6 pt-1">
@@ -193,17 +195,17 @@ const Subscription = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
 
-                  <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
+                  <div className="bg-white-common p-5 rounded-xl shadow-sm border border-gray-300">
                     <p className="text-gray-500 text-sm font-gilroy">Active Properties</p>
                     <h2 className="text-2xl font-bold mt-2">{responseCard?.activePropertiesCount || 0}</h2>
                   </div>
 
-                  <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
+                  <div className="bg-white-common p-5 rounded-xl shadow-sm border border-gray-300">
                     <p className="text-gray-500 text-sm font-gilroy">Expired Properties</p>
                     <h2 className="text-2xl font-bold mt-2">{responseCard?.expiredPropertiesCount || 0}</h2>
                   </div>
 
-                  <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
+                  <div className="bg-white-common p-5 rounded-xl shadow-sm border border-gray-300">
 
 
 
@@ -228,75 +230,91 @@ const Subscription = () => {
 
                   </div>
 
-                  <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-300">
+                  <div className="bg-white-common p-5 rounded-xl shadow-sm border border-gray-300">
                     <p className="text-gray-500 text-sm font-gilroy">Advance</p>
                     <h2 className="text-2xl font-bold mt-2">{responseCard?.advancePlansCount || 0}</h2>
                   </div>
 
                 </div>
-                <div className="mb-4 bg-white py-3">
+              <div className="mb-4 bg-white-common py-3">
+  <div className="flex justify-between items-center">
+    
+    {/* Left Side */}
+    <div className="flex items-center gap-3">
+      {/* Filter */}
+      <div className="relative w-[220px]" ref={filterRef}>
+    <button
+      onClick={() => setOpenFilter(!openFilter)}
+      className="w-full border border-gray-300 px-4 py-2 rounded-lg text-sm bg-white-common flex items-center justify-between"
+    >
+      {filterBy
+        ?.replaceAll("_", " ")
+        .toLowerCase()
+        .replace(/\b\w/g, (c) => c.toUpperCase())}
 
-                  <div className="flex justify-between items-center gap-3">
+      <img src={Arrow} className="w-4 h-4 cursor-pointer" />
+    </button>
 
-                    {/* LEFT SIDE FILTER */}
-                    <div className="relative w-[220px]" ref={filterRef}>
+    {openFilter && (
+      <div className="absolute top-full left-0 mt-1 w-full bg-white-common border border-gray-300 rounded-lg shadow-lg z-50 max-h-[180px] overflow-y-auto">
+        {responseCard?.filterOptions?.map((item) => (
+          <div
+            key={item}
+            onClick={() => {
+              setFilterBy(item);
+              setPage(1);
+              setOpenFilter(false);
+            }}
+            className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50 ${
+              filterBy === item ? "bg-blue-600 text-white" : ""
+            }`}
+          >
+            {item
+              .replaceAll("_", " ")
+              .toLowerCase()
+              .replace(/\b\w/g, (c) => c.toUpperCase())}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
 
-                      {/* SELECT BUTTON */}
-                      <button
-                        onClick={() => setOpenFilter(!openFilter)}
-                        className="w-full border border-gray-300 px-4 py-2 rounded-lg text-sm bg-white flex items-center justify-between"
-                      >
-                        {filterBy
-                          ?.replaceAll("_", " ")
-                          .toLowerCase()
-                          .replace(/\b\w/g, (c) => c.toUpperCase())}
+      {/* Status */}
+     <select
+  value={isActive === null ? "" : isActive.toString()}
+  onChange={(e) => {
+    const value = e.target.value;
 
-                        <img src={Arrow} className="w-4 h-4 cursor-pointer" />
-                      </button>
+    setIsActive(
+      value === ""
+        ? null
+        : value === "true"
+    );
 
-                      {/* DROPDOWN */}
-                      {openFilter && (
-                        <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-[180px] overflow-y-auto">
+    setPage(1);
+  }}
+  className="border border-gray-300 px-4 py-2 pr-3 rounded-lg text-sm bg-white-common min-w-[120px]"
+>
+  <option value="">All Status</option>
+  <option value="true">Active</option>
+  <option value="false">Inactive</option>
+</select>
+    </div>
 
-                          {responseCard?.filterOptions?.map((item) => (
-                            <div
-                              key={item}
-                              onClick={() => {
-                                setFilterBy(item);
-                                setPage(1);
-                                setOpenFilter(false);
-                              }}
-                              className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50
-            ${filterBy === item ? "bg-blue-600 text-white" : ""}
-          `}
-                            >
-                              {item
-                                .replaceAll("_", " ")
-                                .toLowerCase()
-                                .replace(/\b\w/g, (c) => c.toUpperCase())}
-                            </div>
-                          ))}
-
-                        </div>
-                      )}
-
-                    </div>
-
-                    {/* RIGHT SIDE SEARCH */}
-                    <input
-                      type="text"
-                      value={search}
-                      onChange={(e) => {
-                        setSearch(e.target.value);
-                        setPage(1);
-                      }}
-                      placeholder="Search..."
-                      className="border border-gray-300 px-4 py-2 rounded-lg text-sm w-64"
-                    />
-
-                  </div>
-
-                </div>
+    {/* Right Side Search */}
+    <input
+      type="text"
+      value={search}
+      onChange={(e) => {
+        setSearch(e.target.value);
+        setPage(1);
+      }}
+      placeholder="Search..."
+      className="border border-gray-300 px-4 py-2 rounded-lg text-sm w-64"
+    />
+    
+  </div>
+</div>
 
                 {/* <div className="mb-4 bg-white py-3">
                   <div className="flex justify-end items-center">
@@ -336,7 +354,7 @@ const Subscription = () => {
 
                 <div
                   className="
-    bg-white
+    bg-white-common
     rounded-xl
     shadow-sm
     border

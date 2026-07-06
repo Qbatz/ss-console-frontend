@@ -56,8 +56,8 @@ const toggleOwner = (id) => {
 
   return (
     <DashboardLayout>
-      <div className="w-full min-h-screen bg-white">
-        <div className="sticky top-0 z-50 bg-white flex items-center gap-4 px-4 sm:px-8 py-3 border-b border-gray-200">
+      <div className="w-full min-h-screen bg-white-common">
+        <div className="sticky top-0 z-50 bg-white-common flex items-center gap-4 px-4 sm:px-8 py-3 border-b border-gray-200">
 
           <button
             onClick={() => navigate(-1)}
@@ -83,7 +83,7 @@ const toggleOwner = (id) => {
             <div className="bg-[#FAFBFF] border border-gray-200 rounded-lg p-5">
               <div className="flex justify-between items-start">
                 <div className="flex gap-3">
-                 <div className="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-sm font-semibold text-gray-700">
+                 <div className="w-12 h-12 bg-white-common border border-gray-200 rounded-xl flex items-center justify-center text-sm font-semibold text-gray-700">
   {agentDetails?.initials || "NA"}
 </div>
 
@@ -144,7 +144,7 @@ const toggleOwner = (id) => {
               Managing Clients
             </h4>
 
-   <div className="border border-gray-200 rounded-2xl bg-white max-h-[400px] flex flex-col overflow-visible">
+   <div className="border border-gray-200 rounded-2xl bg-white-common max-h-[400px] flex flex-col overflow-visible">
 
   {/* SCROLL AREA */}
 <div
@@ -536,7 +536,7 @@ const toggleOwner = (id) => {
   {/* HEADER */}
   <table className="w-full text-sm">
     <thead>
-      <tr className="text-gray-500 text-[12px] text-left border-b border-gray-300 bg-white">
+      <tr className="text-gray-500 text-[12px] text-left border-b border-gray-300 bg-white-common">
         <th className="py-3 px-4 w-[30%]">Property Name</th>
         <th className="py-3 px-4 w-[20%]">Plan Type</th>
         <th className="py-3 px-4 w-[25%]">Start Date</th>

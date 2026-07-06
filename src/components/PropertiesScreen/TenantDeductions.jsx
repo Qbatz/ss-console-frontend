@@ -371,7 +371,7 @@ const handleSaveDeduction =
         
           <div
   className="
-    bg-white
+    bg-white-common
     rounded-2xl
     border
     border-gray-200
@@ -580,7 +580,7 @@ const handleSaveDeduction =
          {/* RIGHT TABLE */}
 <div
   className="
-    bg-white
+    bg-white-common
     rounded-2xl
     border
     border-gray-200
@@ -692,7 +692,7 @@ const handleSaveDeduction =
                   "
                 >
 
-                  <button
+                  {/* <button
                     onClick={() => {
 
                       setSelectedInvoiceId(
@@ -713,7 +713,28 @@ const handleSaveDeduction =
                     "
                   >
                     + Add
-                  </button>
+                  </button> */}
+  <button
+  onClick={() => {
+    setSelectedInvoiceId(invoice.invoiceId);
+    setShowAddModal(true);
+  }}
+  disabled={!deductions?.length}
+  className={`
+    px-4
+    py-2
+    rounded-lg
+    text-white
+    text-sm
+    ${
+      !deductions?.length
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-blue-600 cursor-pointer"
+    }
+  `}
+>
+  + Add
+</button>
 
                 </td>
 
@@ -910,7 +931,7 @@ const handleSaveDeduction =
 
     <div
       className="
-        bg-white
+        bg-white-common
         rounded-2xl
         p-6
         w-[400px]

@@ -620,9 +620,9 @@ if (lettersCount < 5) {
     <div
       key={index}
       className="
-        bg-white
-        border
-        border-borderSoft
+        bg-white-common
+       
+        border-soft-light
         rounded-card
         shadow-card
         p-5
@@ -760,7 +760,7 @@ if (lettersCount < 5) {
       setOpenAgentDropdown(false);
 
     }}
-    className="border border-gray-300 rounded-lg px-3 py-1 cursor-pointer bg-white flex justify-between items-center h-[36px]"
+    className="border-soft-light rounded-lg px-3 py-1 cursor-pointer bg-white-common flex justify-between items-center h-[36px]"
   >
     <span className="text-sm truncate">
       {statusFilter || "All Status"}
@@ -770,7 +770,7 @@ if (lettersCount < 5) {
   </div>
 
   {openStatusDropdown && (
-    <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-xl z-[9999] max-h-[220px] overflow-y-auto">
+    <div className="absolute top-full left-0 mt-1 w-full bg-white-common border-soft-light rounded-lg shadow-xl z-[9999] max-h-[220px] overflow-y-auto">
 
       <div
         onClick={() => {
@@ -809,7 +809,7 @@ if (lettersCount < 5) {
       onClick={() =>
         setOpenAgentDropdown(!openAgentDropdown)
       }
-      className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white flex justify-between items-center"
+      className="border-soft-light rounded-lg px-3 py-2 cursor-pointer bg-white-common flex justify-between items-center"
     >
       <span className="text-sm truncate">
         {
@@ -831,9 +831,8 @@ if (lettersCount < 5) {
           left-0
           mt-1
           w-full
-          bg-white
-          border
-          border-gray-300
+          bg-white-common
+          border-soft-light
           rounded-lg
           shadow-xl
           max-h-[220px]
@@ -901,7 +900,7 @@ if (lettersCount < 5) {
                   setPage(1);
                 }}
                 placeholder="Search..."
-                className="w-full border border-gray-300 pl-9 pr-4 py-2 rounded-lg text-sm"
+                className="w-full border-soft-light pl-9 pr-4 py-2 rounded-lg text-sm"
               />
 
             </div>
@@ -911,11 +910,10 @@ if (lettersCount < 5) {
  
 <div
   className="
-    bg-white
+    bg-white-common
     rounded-xl
     shadow-sm
-    border
-    border-gray-200
+   border-soft-light
     flex
     flex-col
     max-h-[calc(100vh-230px)]
@@ -1098,11 +1096,11 @@ if (lettersCount < 5) {
                       
                      <tr key={item.requestId} className="group text-[13px] hover:bg-gray-50">
 
- <td className="sticky left-0 z-20 bg-white group-hover:bg-gray-50 px-4 py-2 w-[70px] min-w-[70px]">
+ <td className="sticky left-0 z-20 bg-white-common group-hover:bg-gray-50 px-4 py-2 w-[70px] min-w-[70px]">
   {(page - 1) * size + index + 1}
 </td>
 
-<td className="sticky left-[70px] z-20 bg-white group-hover:bg-gray-50 px-4 py-2 w-[180px] min-w-[180px] max-w-[180px] text-left">
+<td className="sticky left-[70px] z-20 bg-white-common group-hover:bg-gray-50 px-4 py-2 w-[180px] min-w-[180px] max-w-[180px] text-left">
   <button
     onClick={() => {
       setSelectedItem(item);
@@ -1342,7 +1340,7 @@ if (lettersCount < 5) {
     src={Circle}
     alt="menu"
     className={`
-      w-5 h-5 transition-all duration-200 cursor-pointer
+      w-5 h-5  cursor-pointer
 
       ${
         openMenu?.id === item.requestId
@@ -1357,7 +1355,7 @@ if (lettersCount < 5) {
   {openMenu?.id === item.requestId && (
 
    <div
-  className="fixed w-40 bg-white border border-gray-200 rounded-xl shadow-xl z-[99999] overflow-hidden"
+  className="fixed w-40 bg-white-common border-soft-light rounded-xl shadow-xl z-[99999] overflow-hidden"
   style={{
     top: openMenu.y,
     left: openMenu.x,
@@ -1634,7 +1632,7 @@ if (lettersCount < 5) {
         right-3
         bottom-3
         w-[420px]
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
         flex
@@ -1695,8 +1693,7 @@ if (lettersCount < 5) {
             }}
             className="
               w-full
-              border
-              border-gray-300
+              border-soft-light
               rounded-xl
               px-4
               py-3
@@ -1704,7 +1701,7 @@ if (lettersCount < 5) {
               justify-between
               items-center
               cursor-pointer
-              bg-white
+              bg-white-common
             "
           >
 
@@ -1742,7 +1739,7 @@ if (lettersCount < 5) {
                 absolute
                 mt-2
                 w-full
-                bg-white
+                bg-white-common
                 rounded-xl
                 shadow-xl
                 border
@@ -1793,7 +1790,7 @@ if (lettersCount < 5) {
         px-4 py-3 text-sm cursor-pointer text-left
         ${
           dropdownValue === agent.agentId
-            ? "bg-blue-600 text-white"
+            ? "bg-primary text-white"
             : isAssignedAgent
             ? "bg-yellow-100 border-l-4 border-yellow-500 font-semibold"
             : "hover:bg-gray-100"
@@ -1839,10 +1836,10 @@ if (lettersCount < 5) {
 
   <div
     className="
-      border border-gray-300
+      border-soft-light
       rounded-xl
       p-3
-      bg-white
+      bg-white-common
     "
   >
 
@@ -1907,7 +1904,7 @@ if (lettersCount < 5) {
           }}
           className="
             px-4 py-2
-            border border-gray-300
+            border-soft-light
             rounded-lg
             text-sm
             hover:bg-gray-50
@@ -1920,8 +1917,7 @@ if (lettersCount < 5) {
           onClick={handleAssignStaff}
           className="
             px-5 py-2
-            bg-blue-600
-            hover:bg-blue-700
+           bg-primary-hover
             text-white
             rounded-lg
             text-sm
@@ -1966,7 +1962,7 @@ if (lettersCount < 5) {
 
    
     <div
-      className="fixed top-3 right-3 bottom-3 w-[420px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+      className="fixed top-3 right-3 bottom-3 w-[420px] bg-white-common rounded-2xl shadow-2xl flex flex-col overflow-hidden"
       onClick={(e) => e.stopPropagation()}
     >
 
@@ -2001,7 +1997,7 @@ if (lettersCount < 5) {
         </label>
 
         
-        <div className="border border-gray-300 rounded-xl p-3">
+        <div className="border-soft-light rounded-xl p-3">
 
           <textarea
             placeholder="Comment here"
@@ -2030,7 +2026,7 @@ if (lettersCount < 5) {
         <div className="flex justify-end mt-3">
           <button
             onClick={handleAddComment}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm cursor-pointer flex items-center gap-2"
+            className="bg-primary-hover text-white px-5 py-2 rounded-lg text-sm cursor-pointer flex items-center gap-2"
           >
             ➤ Add
           </button>
@@ -2105,7 +2101,7 @@ if (lettersCount < 5) {
     }}
   >
     <div
-      className="bg-white rounded-xl w-[380px] p-6"
+      className="bg-white-common rounded-xl w-[380px] p-6"
       onClick={(e) => e.stopPropagation()}
     >
 
@@ -2121,7 +2117,7 @@ if (lettersCount < 5) {
 
         <button
           onClick={() => setShowDeleteModal(false)}
-          className="px-4 py-2 border border-gray-300 rounded-lg"
+          className="px-4 py-2 border-soft-light rounded-lg"
         >
           Cancel
         </button>

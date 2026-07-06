@@ -316,6 +316,15 @@ const getFilterParams = () => {
      navigate(`/ProprietorsOverview/${item.ownerId}`);
 
     }
+    else{
+        setModalType("error");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+    }
 
   };
   useEffect(() => {
@@ -757,7 +766,7 @@ closeNotesModal()
           rounded-lg
           text-xs
           font-sans
-          bg-white
+          bg-white-common
           min-w-[180px]
           text-left
           flex justify-between items-center
@@ -779,7 +788,7 @@ closeNotesModal()
           className="
             absolute z-50 mt-1
             w-full
-            bg-white
+            bg-white-common
             border border-gray-200
             rounded-xl
             shadow-lg
@@ -906,7 +915,7 @@ closeNotesModal()
           {/* Table Card */}
           <div
   className="
-    bg-white
+    bg-white-common
     border
     border-gray-300
     rounded-xl
@@ -1194,7 +1203,7 @@ closeNotesModal()
 
                           {openMenuId === item.ownerId && (
                           <div
-  className="fixed w-35 bg-white border border-gray-200 rounded-lg shadow-xl z-[9999]"
+  className="fixed w-35 bg-white-common border border-gray-200 rounded-lg shadow-xl z-[9999]"
   style={{
     top: menuPosition.top,
     left: menuPosition.left,
@@ -1372,7 +1381,7 @@ closeNotesModal()
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
-          <div className="bg-white rounded-xl p-5 w-[350px]">
+          <div className="bg-white-common rounded-xl p-5 w-[350px]">
 
             <h2 className="text-sm font-semibold mb-3 text-left">
               Update Mobile Number
@@ -1439,7 +1448,7 @@ closeNotesModal()
     }}
   >
     <div
-      className="bg-white rounded-xl p-5 w-[350px]"
+      className="bg-white-common rounded-xl p-5 w-[350px]"
       onClick={(e) => e.stopPropagation()}   // 🔥 inside click close aagadhu
     >
       <h2 className="text-sm font-semibold mb-2">
@@ -1506,7 +1515,7 @@ closeNotesModal()
 >
 
   <div
-  className="bg-white rounded-3xl w-[500px] p-5 shadow-2xl relative"
+  className="bg-white-common rounded-3xl w-[500px] p-5 shadow-2xl relative"
   onClick={(e) => e.stopPropagation()}
 >
 
@@ -1659,7 +1668,7 @@ closeNotesModal()
         right-3
         bottom-3
         w-[420px]
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
         flex

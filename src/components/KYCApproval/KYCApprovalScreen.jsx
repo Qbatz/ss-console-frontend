@@ -1,22 +1,25 @@
 import React, { useState, useEffect, useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { useKyc } from "../../Context/KYCContext";
-import User from "../../assets/userblack.png"
+import User from "../../assets/userblack.png";
+import Toast from "../SuccessModal/ToastDesign";
 
 const KycApproval = () => {
-  const { getKYCList, loading } = useKyc();
+  const { getKYCList, loading, approveKYC } = useKyc();
 
   const [totalPages, setTotalPages] = useState(4);
   const [kycList, setKycList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
-const [searchText, setSearchText] = useState("");
-const [showApproveModal, setShowApproveModal] =
-  useState(false);
-
-const [selectedTenant, setSelectedTenant] = useState(null);
-console.log("selectedTenant",selectedTenant)
+  const [searchText, setSearchText] = useState("");
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [approveLoading, setApproveLoading] = useState(false);
+  const [modalType, setModalType] = useState("success");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [message, setMessage] = useState("");
+  const [selectedTenant, setSelectedTenant] = useState(null);
+  console.log("selectedTenant", selectedTenant)
   const fetchKycList = async () => {
     const res = await getKYCList(
       currentPage,
@@ -33,16 +36,75 @@ console.log("selectedTenant",selectedTenant)
   useEffect(() => {
     fetchKycList();
   }, [currentPage, pageSize, searchValue]);
-useEffect(() => {
-  const timer = setTimeout(() => {
-    setSearchValue(searchText);
-    setCurrentPage(1);
-  }, 500);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchValue(searchText);
+      setCurrentPage(1);
+    }, 500);
 
-  return () => clearTimeout(timer);
-}, [searchText]);
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
+  const handleApproveKYC = async () => {
+
+    if (
+      approveLoading ||
+      !selectedTenant?.customerId
+    ) {
+      return;
+    }
+
+    try {
+
+      setApproveLoading(true);
+
+      const res = await approveKYC(
+        selectedTenant.customerId
+      );
+
+      if (res?.success) {
+        setModalType("success");
+        setMessage(res?.data);
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          setShowSuccess(false);
+
+
+        }, 800);
+        setShowApproveModal(false);
+
+        await fetchKycList();
+
+      } else {
+
+        setModalType("error");
+        setMessage(res?.message);
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          setShowSuccess(false);
+
+
+        }, 800);
+
+      }
+
+    } finally {
+
+      setApproveLoading(false);
+
+    }
+
+  };
   return (
     <DashboardLayout>
+      <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
+
+      />
       <div className="p-5">
 
         {/* Header */}
@@ -73,18 +135,18 @@ useEffect(() => {
             </button>
 
             <input
-  value={searchText}
-  className="border border-gray-300 rounded px-3 py-1 text-sm"
-  onChange={(e) => {
-    setSearchText(e.target.value);
-  }}
-  placeholder="Search Tenants..."
-/>
+              value={searchText}
+              className="border border-gray-300 rounded px-3 py-1 text-sm"
+              onChange={(e) => {
+                setSearchText(e.target.value);
+              }}
+              placeholder="Search Tenants..."
+            />
           </div>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white-common rounded-xl border border-gray-200 overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
@@ -153,15 +215,15 @@ useEffect(() => {
                     <td className="px-4 py-4 text-xs text-left">
                       {item.hostelName}
                     </td>
-                     <td className="px-4 py-4 text-xs text-left">
+                    <td className="px-4 py-4 text-xs text-left">
                       {item.createdAtDate}
                     </td>
 
                     <td className="px-4 py-4 text-left">
-                      <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-xs"  onClick={() => {
-    setSelectedTenant(item);
-    setShowApproveModal(true);
-  }}>
+                      <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-xs" onClick={() => {
+                        setSelectedTenant(item);
+                        setShowApproveModal(true);
+                      }}>
                         Approve KYC
                       </button>
                     </td>
@@ -213,11 +275,10 @@ useEffect(() => {
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((prev) => prev - 1)}
-              className={`text-xl ${
-                currentPage === 1
+              className={`text-xl ${currentPage === 1
                   ? "text-gray-300 cursor-not-allowed"
                   : "text-gray-500"
-              }`}
+                }`}
             >
               ‹
             </button>
@@ -233,11 +294,10 @@ useEffect(() => {
             <button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((prev) => prev + 1)}
-              className={`text-xl ${
-                currentPage === totalPages
+              className={`text-xl ${currentPage === totalPages
                   ? "text-gray-300 cursor-not-allowed"
                   : "text-gray-500"
-              }`}
+                }`}
             >
               ›
             </button>
@@ -248,68 +308,77 @@ useEffect(() => {
 
 
       {showApproveModal && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-2xl w-[500px] p-6 shadow-xl">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white-common rounded-2xl w-[500px] p-6 shadow-xl">
 
-      <h2 className="text-[20px] font-medium text-[#1f2937] text-left">
-        Do you wanna approve KYC for this Tenant ?
-      </h2>
+            <h2 className="text-[20px] font-medium text-[#1f2937] text-left">
+              Do you wanna approve KYC for this Tenant ?
+            </h2>
 
-      <p className="text-gray-500 mt-2 text-sm text-left">
-        Upon your approval, the KYC process will be completed.
-      </p>
+            <p className="text-gray-500 mt-2 text-sm text-left">
+              Upon your approval, the KYC process will be completed.
+            </p>
 
-      <div className="bg-[#f5f7fb] rounded-xl p-4 mt-6 flex items-center gap-4">
+            <div className="bg-[#f5f7fb] rounded-xl p-4 mt-6 flex items-center gap-4">
 
-        <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center">
-        <img src={User} className="w-5 h-6"/>
-        </div>
+              <div className="w-14 h-14 rounded-full bg-white-common flex items-center justify-center">
+                <img src={User} className="w-5 h-6" />
+              </div>
 
-        <div>
-          <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-[20px]">
-              {selectedTenant?.fullName}
-            </h3>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-[20px]">
+                    {selectedTenant?.fullName}
+                  </h3>
 
-            <button className="text-blue-600">
-              ↗
-            </button>
+                  <button className="text-blue-600">
+                    ↗
+                  </button>
+                </div>
+
+                <p className="text-sm text-gray-500 mt-1">
+                  SM{selectedTenant?.kycDetailsId} |
+                  {" "}
+                  +91 {selectedTenant?.mobile}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-8">
+
+              <button
+                onClick={() =>
+                  setShowApproveModal(false)
+                }
+                className="border border-gray-300 px-8 py-3 rounded-xl text-gray-700"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleApproveKYC}
+                disabled={approveLoading}
+                className={`
+    px-8 py-3 rounded-xl
+    flex items-center gap-2 text-white
+    ${approveLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-[#2952F3]"
+                  }
+  `}
+              >
+                <span>✈</span>
+
+                {approveLoading
+                  ? "Approving..."
+                  : "Confirm"}
+              </button>
+
+            </div>
+
           </div>
-
-          <p className="text-sm text-gray-500 mt-1">
-            SM{selectedTenant?.kycDetailsId} |
-            {" "}
-            +91 {selectedTenant?.mobile}
-          </p>
         </div>
-      </div>
-
-      <div className="flex justify-end gap-3 mt-8">
-
-        <button
-          onClick={() =>
-            setShowApproveModal(false)
-          }
-          className="border border-gray-300 px-8 py-3 rounded-xl text-gray-700"
-        >
-          Cancel
-        </button>
-
-        <button
-          onClick={() => {
-            // approve api call
-          }}
-          className="bg-[#2952F3] text-white px-8 py-3 rounded-xl flex items-center gap-2"
-        >
-          <span>✈</span>
-          Confirm
-        </button>
-
-      </div>
-
-    </div>
-  </div>
-)}
+      )}
     </DashboardLayout>
   );
 };

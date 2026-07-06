@@ -472,7 +472,7 @@ resetForm()
     fixed
     top-3
     right-3
-    bottom-3 w-[96%] sm:w-[92%] md:w-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slideLeft">
+    bottom-3 w-[96%] sm:w-[92%] md:w-[500px] bg-white-common rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slideLeft">
 
 
           <div className="flex items-center justify-between px-6 py-5 border-b border-[#edf0f7]">
@@ -536,7 +536,7 @@ resetForm()
           rounded-xl
           px-4
           flex items-center justify-between
-          bg-white
+          bg-white-common
         "
                   >
 
@@ -636,7 +636,7 @@ resetForm()
             top-[58px]
             left-0
             right-0
-            bg-white
+            bg-white-common
             border border-soft
             rounded-xl
             shadow-xl
@@ -760,7 +760,7 @@ resetForm()
         px-4
         flex items-center justify-between
         text-sm
-        bg-white
+       bg-white-common
       "
                 >
 
@@ -784,7 +784,7 @@ resetForm()
     top-[58px]
     left-0
     right-0
-    bg-white
+    bg-white-common
     border border-[#e5e7eb]
     rounded-xl
     shadow-xl
@@ -928,7 +928,7 @@ resetForm()
         px-4
         flex items-center justify-between
         text-sm
-        bg-white
+       bg-white-common
       "
                 >
 
@@ -948,7 +948,7 @@ resetForm()
           top-[58px]
           left-0
           right-0
-          bg-white
+          bg-white-common
           border border-[#e5e7eb]
           rounded-xl
           shadow-xl
@@ -1083,7 +1083,7 @@ resetForm()
         px-4
         flex items-center justify-between
         text-sm
-        bg-white
+        bg-white-common
       "
                 >
 
@@ -1103,7 +1103,7 @@ resetForm()
           top-[58px]
           left-0
           right-0
-          bg-white
+         bg-white
           border border-[#e5e7eb]
           rounded-xl
           shadow-xl

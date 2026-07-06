@@ -184,7 +184,7 @@ setModalType("success");
         </div>
 
   
-<div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+<div className="bg-white-common rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
  {/* <div
   className="
@@ -326,7 +326,7 @@ setModalType("success");
   <div
     ref={menuRef}
     className="
-      fixed w-28 bg-white rounded-xl
+      fixed w-28 bg-white-common rounded-xl
       border border-gray-100
       shadow-[0_12px_35px_rgba(0,0,0,0.18)]
       overflow-hidden
@@ -376,7 +376,7 @@ setModalType("success");
         </div>
 
         {/* PAGINATION */}
-        <div className="flex justify-between items-center bg-white px-4 py-3">
+        <div className="flex justify-between items-center bg-white-common px-4 py-3">
 
           <div className="text-sm text-gray-600">
             Total Record Count :{" "}
@@ -472,7 +472,7 @@ setModalType("success");
   >
 
     <div
-      className="bg-white rounded-xl w-[400px] p-6 shadow-xl"
+      className="bg-white-common rounded-xl w-[400px] p-6 shadow-xl"
       onClick={(e) => e.stopPropagation()}
     >
 
@@ -544,7 +544,7 @@ setModalType("success");
   >
 
     <div
-      className="bg-white rounded-xl w-[400px] p-6 shadow-xl"
+      className="bg-white-common rounded-xl w-[400px] p-6 shadow-xl"
       onClick={(e) => e.stopPropagation()}
     >
 

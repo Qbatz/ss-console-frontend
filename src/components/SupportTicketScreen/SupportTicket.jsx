@@ -717,7 +717,7 @@ const handleOpenComments =
     <div
       key={index}
       className="
-        bg-white
+        bg-white-common
         rounded-2xl
         border-soft-light
         p-6
@@ -821,7 +821,7 @@ const handleOpenComments =
         px-4
         border border-[#e5e7eb]
         rounded-xl
-        bg-white
+        bg-white-common
         flex items-center
         justify-between
         cursor-pointer
@@ -848,7 +848,7 @@ const handleOpenComments =
   left-0
   mt-2
   w-full
-  bg-white
+  bg-white-common
   border border-[#e5e7eb]
   rounded-xl
   shadow-xl
@@ -945,7 +945,7 @@ const handleOpenComments =
         px-4
         border border-[#e5e7eb]
         rounded-xl
-        bg-white
+        bg-white-common
         flex items-center
         justify-between
         cursor-pointer
@@ -980,7 +980,7 @@ const handleOpenComments =
           left-0
           mt-2
           w-full
-          bg-white
+          bg-white-common
           border border-[#e5e7eb]
           rounded-xl
           shadow-xl
@@ -1086,7 +1086,7 @@ const handleOpenComments =
               </button> */}
             </div>
           </div>
-       <div className="bg-white border-soft-light rounded-2xl shadow-sm relative overflow-hidden">
+       <div className="bg-white-common border-soft-light rounded-2xl shadow-sm relative overflow-hidden">
          {loading && (
 
   <div
@@ -1219,7 +1219,7 @@ const handleOpenComments =
 <td
   className="
     sticky left-0 z-30
-    bg-white
+    bg-white-common
     group-hover:bg-[#fafbff]
 
     min-w-[70px]
@@ -1242,7 +1242,7 @@ const handleOpenComments =
   }
   className="
     sticky left-[70px] z-20
-    bg-white
+    bg-white-common
     group-hover:bg-[#fafbff]
 
     min-w-[190px]
@@ -1349,7 +1349,7 @@ const handleOpenComments =
 
           </td>
 
-             <td className="sticky right-0 z-20 bg-white group-hover:bg-[#fafbff] px-5 py-2 relative overflow-visible">
+             <td className="sticky right-0 z-20 bg-white-common group-hover:bg-[#fafbff] px-5 py-2 relative overflow-visible">
                       <button
  onClick={(e) => { e.stopPropagation(); handleMenuToggle(e, index); }}
   className="
@@ -1371,7 +1371,7 @@ const handleOpenComments =
 }}
       className="
         z-[9999]
-        bg-white
+        bg-white-common
         border border-[#e5e7eb]
         rounded-xl
         shadow-xl
@@ -1685,7 +1685,7 @@ if (
       className="
         fixed top-3 right-3 bottom-3
         w-[420px]
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
         flex flex-col
@@ -1856,7 +1856,7 @@ if (
         right-3
         bottom-3
         w-[420px]
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
         flex
@@ -1930,7 +1930,7 @@ if (
               justify-between
               items-center
               cursor-pointer
-              bg-white
+              bg-white-common
             "
           >
 
@@ -1956,7 +1956,7 @@ if (
                 absolute
                 mt-2
                 w-full
-                bg-white
+                bg-white-common
                 rounded-xl
                 shadow-xl
                 border
@@ -2048,7 +2048,7 @@ if (
         px-4 py-3
         flex justify-between items-center
         cursor-pointer
-        bg-white
+        bg-white-common
       "
     >
 
@@ -2076,7 +2076,7 @@ if (
           absolute
           mt-2
           w-full
-          bg-white
+          bg-white-common
           rounded-xl
           shadow-xl
           border
@@ -2156,7 +2156,7 @@ if (
               border border-gray-300
               rounded-xl
               p-3
-              bg-white
+              bg-white-common
             "
           >
 

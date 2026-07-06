@@ -147,7 +147,7 @@ if (res?.success) {
           right-3
           bottom-3
           w-[520px]
-          bg-white
+          bg-white-common
           rounded-2xl
           shadow-2xl
           flex
@@ -244,7 +244,7 @@ if (res?.success) {
       flex
       items-center
       justify-between
-      bg-white
+      bg-white-common
     "
   >
 
@@ -272,7 +272,7 @@ if (res?.success) {
         left-0
         mt-1
         w-full
-        bg-white
+        bg-white-common
         border
         border-gray-300
         rounded-xl

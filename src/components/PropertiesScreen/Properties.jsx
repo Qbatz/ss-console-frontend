@@ -1324,7 +1324,7 @@ const handleAddNote = async () => {
 </div>
 
 
-           <div className="sticky top-0 z-20 bg-white pb-4">
+           <div className="sticky top-0 z-20 bg-white-common pb-4">
 
   <div
   className="
@@ -1393,7 +1393,7 @@ const handleAddNote = async () => {
       px-4
       rounded-xl
       border border-gray-300
-      bg-white
+      bg-white-common
       flex items-center justify-between
       gap-3
       text-sm
@@ -1447,7 +1447,7 @@ const handleAddNote = async () => {
         top-[48px]
         left-0
         w-full
-        bg-white
+        bg-white-common
         border border-gray-200
         rounded-xl
         shadow-[0_10px_30px_rgba(0,0,0,0.12)]
@@ -1720,12 +1720,12 @@ const handleAddNote = async () => {
                           <tr key={index} className="animate-pulse">
 
                             {/* Sticky ID */}
-                            <td className="px-4 py-2 sticky left-0 bg-white z-30 w-[80px]">
+                            <td className="px-4 py-2 sticky bg-white-common z-30 w-[80px]">
                               <div className="h-4 w-6 bg-gray-200 rounded"></div>
                             </td>
 
                             {/* Sticky Name */}
-                            <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px]">
+                            <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px]">
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
                                 <div className="flex flex-col gap-2">
@@ -1777,13 +1777,13 @@ const handleAddNote = async () => {
                           <tr key={item.hostelId} className="group hover:bg-gray-50 text-[13px]">
 
                           
-                            <td className="px-4 py-2 sticky left-0 bg-white z-30 w-[80px] group-hover:bg-gray-50">
+                            <td className="px-4 py-2 sticky left-0 bg-white-common z-30 w-[80px] group-hover:bg-gray-50">
                              
                               {(hostels?.currentPage - 1) * hostels?.sizePerPage + index + 1}
                             </td>
 
                             {/* Sticky Name */}
-                            <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] group-hover:bg-gray-50">
+                            <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] group-hover:bg-gray-50">
 
                               <div
                                 className="flex items-center gap-3 cursor-pointer"
@@ -1937,7 +1937,7 @@ const handleAddNote = async () => {
     sticky
     right-0
 
-    bg-white
+    bg-white-common
 
     z-[10]
 
@@ -2159,7 +2159,7 @@ const handleAddNote = async () => {
 
               </div>
              
-              <div className="flex-between px-4 py-1 text-sm bg-white">
+              <div className="flex-between px-4 py-1 text-sm bg-white-common">
 
                 {/* Total Count */}
                 <span className="text-muted">
@@ -2345,7 +2345,7 @@ const handleAddNote = async () => {
 
     <div
       className="
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
 
@@ -2425,7 +2425,7 @@ const handleAddNote = async () => {
             onClick={() => setShowTrialPopup(false)}
           >
             <div
-              className="bg-white rounded-2xl shadow-xl w-[380px] p-6 text-center"
+              className="bg-white-common rounded-2xl shadow-xl w-[380px] p-6 text-center"
               onClick={(e) => e.stopPropagation()}
             >
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
@@ -2477,7 +2477,7 @@ const handleAddNote = async () => {
 
     <div
       className="
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
 
@@ -2597,7 +2597,7 @@ const handleAddNote = async () => {
         right-3
         bottom-3
         w-[420px]
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
         flex

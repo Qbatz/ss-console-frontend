@@ -157,7 +157,7 @@ const handleCloseDrawer =
     w-full
     max-w-[520px]
     h-full
-    bg-white
+    bg-white-common
     rounded-[24px]
     shadow-2xl
     border border-[#E5E7EB]
@@ -1112,7 +1112,7 @@ const handleCloseDrawer =
           left-1/2
           -translate-x-1/2
           -translate-y-1/2
-          bg-white
+          bg-white-common
           w-full
           max-w-[650px]
           rounded-3xl

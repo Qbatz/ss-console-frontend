@@ -9,6 +9,7 @@ import { useSubscription } from "../../Context/SubscriptionContext";
 import ArrowRight from "../../assets/arrow-right.png";
 import { useRole } from "../../Context/RoleContext";
 import { useNavigate } from "react-router-dom";
+import Arrow from "../../assets/direction-down 01.png";
 
 const TrailPage = () => {
   const { adminDetails} = useRole();
@@ -33,6 +34,8 @@ const [expiredCount, setExpiredCount] = useState(0);
   const {getTrialSubscriptions} = useSubscription();
 const [loading, setLoading] = useState(false);
 const [extendableTrialCount,setExtendableTrialCount] = useState(0)
+const [isActive, setIsActive] = useState(null);
+const [debouncedSearch, setDebouncedSearch] = useState("");
 
  
 
@@ -43,8 +46,9 @@ const fetchTrialUsers = async () => {
     const res = await getTrialSubscriptions(
       currentPage,
       pageSize,
-      searchValue,
-      filterBy
+      debouncedSearch,
+      filterBy,
+      isActive
     );
 
     if (res.success) {
@@ -66,9 +70,16 @@ useEffect(() => {
 }, [
   currentPage,
   pageSize,
-  searchValue,
-  filterBy
+  debouncedSearch,
+  filterBy,isActive
 ]);
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedSearch(searchValue);
+  }, 500);
+
+  return () => clearTimeout(timer);
+}, [searchValue]);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -121,22 +132,22 @@ useEffect(() => {
         </div>
         {/* Cards */}
         <div className="flex gap-4 mb-4">
-          <div className="bg-white border border-gray-300 rounded-lg p-4 w-64">
+          <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
             <p className="text-sm text-gray-500">Active Properties</p>
             <h2 className="text-xl font-semibold">{activeCount}</h2>
           </div>
 
-          <div className="bg-white border border-gray-300 rounded-lg p-4 w-64">
+          <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
             <p className="text-sm text-gray-500">Expired Properties</p>
             <h2 className="text-xl font-semibold">{expiredCount}</h2>
           </div>
 
-           <div className="bg-white border border-gray-300 rounded-lg p-4 w-64">
+           <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
             <p className="text-sm text-gray-500">Trial PlanCount</p>
             <h2 className="text-xl font-semibold">{totalTrials}</h2>
           </div>
 
-          <div className="bg-white border border-gray-300 rounded-lg p-4 w-64">
+          <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
             <p className="text-sm text-gray-500">Expandable Trial PlansCount</p>
             <h2 className="text-xl font-semibold">{extendableTrialCount}</h2>
           </div>
@@ -163,7 +174,33 @@ useEffect(() => {
 
            
           </div>
+  <div className="relative">
+  <select
+    value={isActive === null ? "" : isActive.toString()}
+    onChange={(e) => {
+      const value = e.target.value;
 
+      setIsActive(
+        value === ""
+          ? null
+          : value === "true"
+      );
+
+      setCurrentPage(1);
+    }}
+    className="border border-gray-300 px-4 py-2 pr-10 rounded-lg text-sm bg-white-common min-w-[150px] appearance-none"
+  >
+    <option value="">All Status</option>
+    <option value="true">Active</option>
+    <option value="false">Inactive</option>
+  </select>
+
+  <img
+    src={Arrow}
+    alt="arrow"
+    className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+  />
+</div>
           <div className="flex items-center gap-2">
             <button className="bg-blue-500 text-white p-2 rounded" onClick={() => {
   setSearchValue("");
@@ -187,7 +224,7 @@ useEffect(() => {
         </div>
 
        
-        <div className="bg-white border-soft-light rounded-2xl shadow-sm relative overflow-hidden">
+        <div className="bg-white-common border-soft-light rounded-2xl shadow-sm relative overflow-hidden">
 
          
           <div
@@ -318,7 +355,7 @@ useEffect(() => {
 
                         {openMenu === index && (
                           <div
-                            className={`absolute right-0 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50 text-[13px] text-justify 
+                            className={`absolute right-0 w-36 bg-white-common border border-gray-200 rounded-lg shadow-lg z-50 text-[13px] text-justify 
           ${index >= trialList.length - 2 ? "bottom-full mb-2" : "top-full mt-2"}`}
                           >
 
@@ -410,7 +447,7 @@ useEffect(() => {
             ></div>
 
 
-            <div className="absolute top-0 right-0 h-full w-full sm:w-[550px] bg-white shadow-2xl animate-slideIn flex flex-col">
+            <div className="absolute top-0 right-0 h-full w-full sm:w-[550px] bg-white-common shadow-2xl animate-slideIn flex flex-col">
 
 
               <div className="flex items-center justify-between px-5 py-4 ">

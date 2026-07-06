@@ -230,6 +230,7 @@ body {
 .bg-cardBg {
   background-color: #F6F8FC;
 }
+
 .radius-md {
   @apply rounded-xl;
 }

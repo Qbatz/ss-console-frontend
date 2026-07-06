@@ -199,7 +199,7 @@ const ManagePlans = () => {
   + Add New Plan
 </button>
   </div> */}
-            <div className="w-full bg-white border-b border-gray-300 px-4 sm:px-6 py-3">
+            <div className="w-full bg-white-common border-b border-gray-300 px-4 sm:px-6 py-3">
 
               <div className="flex items-center justify-between">
 
@@ -436,7 +436,7 @@ const ManagePlans = () => {
                   return (
                     <div
                       key={plan.planId}
-                      className="bg-white border border-gray-300 rounded-xl p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition h-full"
+                      className="bg-white-common border border-gray-300 rounded-xl p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition h-full"
                     >
 
                       <div>
@@ -470,7 +470,7 @@ const ManagePlans = () => {
                           {openMenuId === plan.planId && (
                             <div
                               ref={menuRef}
-                              className="absolute right-0 top-8 bg-white border rounded-lg shadow-md w-32 z-10"
+                              className="absolute right-0 top-8 bg-white-common border rounded-lg shadow-md w-32 z-10"
                             >
                               {/* <button
       onClick={() => {
@@ -686,7 +686,7 @@ const ManagePlans = () => {
           <div className="absolute inset-0 bg-black/40"></div>
 
           {/* Modal Box */}
-          <div className="relative bg-white rounded-xl shadow-lg w-[320px] p-5 z-10">
+          <div className="relative bg-white-common rounded-xl shadow-lg w-[320px] p-5 z-10">
 
             <h3 className="text-base font-semibold text-gray-800 mb-2">
               Deactivate Plan
@@ -732,7 +732,7 @@ const ManagePlans = () => {
           <div className="absolute inset-0 bg-black/40"></div>
 
 
-          <div className="relative bg-white rounded-xl shadow-lg w-[320px] p-5 z-10">
+          <div className="relative bg-white-common rounded-xl shadow-lg w-[320px] p-5 z-10">
 
             <h3 className="text-base font-semibold text-gray-800 mb-2">
               Reactivate Plan

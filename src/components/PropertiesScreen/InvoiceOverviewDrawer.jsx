@@ -63,7 +63,7 @@ const InvoiceOverviewDrawer = ({
     right-4
     bottom-4
     w-[560px]
-    bg-white
+    bg-white-common
     rounded-[16px]
     shadow-xl
     overflow-y-auto

@@ -1213,7 +1213,7 @@ const handleSubmit = async () => {
           <div className="space-y-6">
 
             {/* PLAN INFO */}
-            <div className="bg-white p-5 rounded-xl border border-gray-300">
+            <div className="bg-white-common p-5 rounded-xl border border-gray-300">
               <div className="flex items-center gap-2 mb-4">
                 <img src={PlanImg} alt="plan" className="w-4 h-4" />
                 <h2 className="text-sm font-semibold text-gray-800">
@@ -1423,7 +1423,7 @@ const handleSubmit = async () => {
             </div>
 
 
-            <div className="bg-white p-5 rounded-xl border border-gray-300">
+            <div className="bg-white-common p-5 rounded-xl border border-gray-300">
               <div className="flex justify-between items-center mb-4 border-b border-gray-300 pb-2 font-medium">
                 <div className="flex items-center gap-3">
                   <span className="w-40 text-left">Feature Name</span>
@@ -1477,7 +1477,7 @@ const shouldDisable =
   }`}
 >
   <div
-    className={`bg-white w-4 h-4 rounded-full shadow transition-transform ${
+    className={`bg-white-common w-4 h-4 rounded-full shadow transition-transform ${
       isEnabled ? "translate-x-7" : ""
     }`}
   />
@@ -1494,7 +1494,7 @@ const shouldDisable =
 
 
             <div
-              className={`bg-white p-5 rounded-xl border border-gray-300 flex flex-col 
+              className={`bg-white-common p-5 rounded-xl border border-gray-300 flex flex-col 
   ${addons.length === 0 ? "h-auto" : "h-[330px]"}`}
             >
 
@@ -1614,7 +1614,7 @@ const shouldDisable =
           <div className="absolute inset-0 bg-black/40"></div>
 
           {/* Modal */}
-          <div className="relative bg-white rounded-xl shadow-lg w-[320px] p-5 z-10">
+          <div className="relative bg-white-common rounded-xl shadow-lg w-[320px] p-5 z-10">
 
             <h3 className="text-base font-semibold text-gray-800 mb-2">
               Remove Add-on
@@ -1657,7 +1657,7 @@ const shouldDisable =
             onClick={() => setShowFeatureModal(false)}
           />
 
-          <div className="relative bg-white rounded-xl w-[500px] p-6">
+          <div className="relative bg-white-common rounded-xl w-[500px] p-6">
 
             <h3 className="text-lg font-semibold mb-4">
               Feature Details

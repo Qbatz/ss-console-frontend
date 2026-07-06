@@ -4,7 +4,7 @@ import msgBox from "../../assets/message-2.png";
 const ActivityLogsTab = ({ activities }) => {
 
  return (
-  <div className="bg-white rounded-xl px-4 py-3">
+  <div className="bg-white-common rounded-xl px-4 py-3">
 
     <div className="max-h-[300px] overflow-y-auto pr-2 space-y-8">
 

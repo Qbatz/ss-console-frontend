@@ -40,12 +40,14 @@ const IamAdminUser = () => {
   const [pageSize, setPageSize] = useState(10);
   const [openRoleDropdown, setOpenRoleDropdown] = useState(false);
   const [roleOptions, setRoleOptions] = useState([]);
+  const [initialLoading, setInitialLoading] = useState(true);
   const {
     adminRoleId,
     filterRoleId
   } = useParams();
 
   const [roleId, setRoleId] = useState(filterRoleId || "");
+  const [searchInput, setSearchInput] = useState("");
   console.log("agentDetails", agentDetails)
 
   useEffect(() => {
@@ -76,21 +78,47 @@ const IamAdminUser = () => {
       });
     }
   }, [filterRoleId]);
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setSearch(searchInput);
+  }, 500);
 
+  return () => clearTimeout(timer);
+}, [searchInput]);
 
+useEffect(() => {
+  const fetchData = async () => {
+    setInitialLoading(true);
 
-  useEffect(() => {
-    getAllAgents({
+    await getAllAgents({
       name: search,
       isActive: status === "ACTIVE",
       roleId: roleId ? Number(roleId) : "",
       page,
-      size: pageSize
+      size: pageSize,
     });
-  }, [search, status, roleId, page, pageSize]);
+
+    setInitialLoading(false);
+  };
+
+  fetchData();
+}, [search, status, roleId, page, pageSize]);
+
+  // useEffect(() => {
+  //   getAllAgents({
+  //     name: search,
+  //     isActive: status === "ACTIVE",
+  //     roleId: roleId ? Number(roleId) : "",
+  //     page,
+  //     size: pageSize
+  //   });
+  // }, [search, status, roleId, page, pageSize]);
 
 
   const filteredAgents = agents?.agentList || [];
+  console.log("search", search);
+console.log("agents state", agents);
+console.log("filteredAgents", filteredAgents);
 
   const adminList = Array.isArray(admin) ? admin : [admin];
   const handleDeactivate = async (agentId) => {
@@ -247,7 +275,7 @@ const IamAdminUser = () => {
               </h2>
 
               <div className="flex flex-col items-center lg:flex-row lg:items-center gap-3">
-                <button className="flex items-center gap-2 bg-[#1E45E10D] text-blue-600 text-sm font-medium px-3 py-2 rounded-2xl hover:underline w-full sm:w-auto justify-center">
+                {/* <button className="flex items-center gap-2 bg-[#1E45E10D] text-blue-600 text-sm font-medium px-3 py-2 rounded-2xl hover:underline w-full sm:w-auto justify-center">
                   <img
                     src={Frame}
                     alt="Frame"
@@ -255,9 +283,9 @@ const IamAdminUser = () => {
                   />
 
                   Recent Activity
-                </button>
+                </button> */}
 
-                <button className="flex items-center gap-2 text-blue-600 text-sm px-4 py-2 rounded-lg  transition w-full sm:w-auto justify-center"
+                <button className="flex items-center gap-2 text-blue-600 text-sm px-4 py-2 rounded-lg  transition w-full sm:w-auto justify-center cursor-pointer"
                   onClick={() => setOpen(true)}>
                   <img
                     src={Add}
@@ -279,7 +307,7 @@ const IamAdminUser = () => {
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    className="appearance-none border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white w-full md:w-auto"
+                    className="appearance-none border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white-common w-full md:w-auto"
                   >
 
                     <option value="ACTIVE">Active</option>
@@ -301,7 +329,7 @@ const IamAdminUser = () => {
                       setRoleId(e.target.value);
                       setPage(1);
                     }}
-                    className="appearance-none border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white w-full md:w-auto"
+                    className="appearance-none border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white-common w-full md:w-auto"
                   >
                     <option value="">All Roles</option>
 
@@ -326,11 +354,11 @@ const IamAdminUser = () => {
               <div className="relative w-full md:w-64">
                 <input
                   type="text"
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                  }}
+                  value={searchInput}
+  onChange={(e) => {
+    setSearchInput(e.target.value);
+    setPage(1);
+  }}
                   placeholder="Search by name..."
                   className="w-full border border-gray-200 rounded-lg pl-4 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -343,7 +371,7 @@ const IamAdminUser = () => {
 
 
             <div className="px-2 md:px-4">
-              <div className="bg-white border border-gray-300 rounded-xl overflow-hidden shadow-sm relative">
+              <div className="bg-white-common border border-gray-300 rounded-xl overflow-hidden shadow-sm relative">
 
 
 
@@ -387,16 +415,12 @@ const IamAdminUser = () => {
                     </thead>
 
                     <tbody>
-                      {loading ? (
+                     {(loading || initialLoading) ? (
                         <TableSkeleton />
                       ) :
                         filteredAgents?.length > 0 ? (
                           filteredAgents.map((user, index) => (
-                            // <tr
-
-                            //   key={user.agentId}
-                            //   className="border-b last:border-0 hover:bg-gray-50 border-gray-300"
-                            // >
+                            
                             <tr
   key={user.agentId}
   className={`
@@ -466,7 +490,7 @@ const IamAdminUser = () => {
                                   {!user?.isLoggedInUser &&
     menuOpen === user.agentId && (
                                   <div
-                                    className="fixed w-36 bg-white border rounded-lg shadow-lg z-[9999]"
+                                    className="fixed w-36 bg-white-common border rounded-lg shadow-lg z-[9999]"
                                     style={{
                                       top: dropdownPosition.top,
                                       left: dropdownPosition.left
@@ -625,7 +649,7 @@ const IamAdminUser = () => {
                 ></div>
 
 
-                <div className="relative bg-white rounded-xl shadow-xl w-[350px] p-5 z-[10000]">
+                <div className="relative bg-white-common rounded-xl shadow-xl w-[350px] p-5 z-[10000]">
 
                   <h2 className="text-lg font-semibold mb-2">
                     Reactivate Agent
@@ -664,7 +688,7 @@ const IamAdminUser = () => {
                 onClick={() => setConfirmOpen(false)}
               >
                 <div
-                  className="bg-white rounded-xl w-[400px] p-6"
+                  className="bg-white-common rounded-xl w-[400px] p-6"
                   onClick={(e) => e.stopPropagation()}
                 >
 
@@ -714,7 +738,7 @@ const IamAdminUser = () => {
                 ></div>
 
 
-                <div className="relative bg-white rounded-2xl shadow-2xl w-[520px] max-h-[90vh] overflow-y-auto z-[10000]">
+                <div className="relative bg-white-common rounded-2xl shadow-2xl w-[520px] max-h-[90vh] overflow-y-auto z-[10000]">
 
 
                   <div className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-2xl">
@@ -862,7 +886,7 @@ const IamAdminUser = () => {
 
 
           <div
-            className="bg-white rounded-xl shadow-xl w-[320px] p-4 z-[10000]"
+            className="bg-white-common rounded-xl shadow-xl w-[320px] p-4 z-[10000]"
             onClick={(e) => e.stopPropagation()}
           >
 
@@ -876,7 +900,7 @@ const IamAdminUser = () => {
 
               <div
                 onClick={() => setOpenRoleDropdown(!openRoleDropdown)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[12px] font-medium cursor-pointer flex items-center justify-between bg-white"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[12px] font-medium cursor-pointer flex items-center justify-between bg-white-common"
               >
                 <span>
                   {selectedRoleId
@@ -891,7 +915,7 @@ const IamAdminUser = () => {
 
 
               {openRoleDropdown && (
-                <div className="absolute z-[9999] mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-[140px] overflow-y-auto">
+                <div className="absolute z-[9999] mt-1 w-full bg-white-common border border-gray-300 rounded-lg shadow-lg max-h-[140px] overflow-y-auto">
 
                   {agentRoles?.map((role) => (
                     <div

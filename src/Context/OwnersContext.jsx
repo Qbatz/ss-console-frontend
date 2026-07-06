@@ -109,29 +109,64 @@ export const OwnersProvider = ({ children }) => {
       setLoading(false);
     }
   };
+const getOwnerById = async (ownerId) => {
+  try {
 
-  const getOwnerById = async (ownerId) => {
-    try {
+    setLoading(true);
 
-      setLoading(true);
+    const res = await axiosInstance.get(
+      `/v2/owners/${ownerId}`
+    );
 
-      const res = await axiosInstance.get(`/v2/owners/${ownerId}`);
-
-      if (res.status === 200) {
-        return { success: true, data: res.data };
-      }
-
-      return { success: false };
-
-    } catch (error) {
-
-      const msg = getErrorMessage(error);
-      return { success: false, message: msg };
-
-    } finally {
-      setLoading(false);
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
     }
-  };
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg =
+      error?.response?.status === 500
+        ? "Internal Server Error"
+        : getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
+  // const getOwnerById = async (ownerId) => {
+  //   try {
+
+  //     setLoading(true);
+
+  //     const res = await axiosInstance.get(`/v2/owners/${ownerId}`);
+
+  //     if (res.status === 200) {
+  //       return { success: true, data: res.data };
+  //     }
+
+  //     return { success: false };
+
+  //   } catch (error) {
+
+  //     const msg = getErrorMessage(error);
+  //     return { success: false, message: msg };
+
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const getTenantSummary = async ({
     page = 0,
     size = 10,

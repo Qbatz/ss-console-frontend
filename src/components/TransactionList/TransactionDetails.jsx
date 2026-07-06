@@ -238,12 +238,12 @@ useEffect(() => {
           </div>
 
           <div className="flex gap-4 mb-4">
-            <div className="bg-white border border-gray-300 rounded-lg p-4 w-64">
+            <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
               <p className="text-sm text-gray-500">Total Revenue</p>
               <h2 className="text-xl font-semibold">₹{totalRevenue}</h2>
             </div>
 
-            <div className="bg-white border border-gray-300 rounded-lg p-4 w-64">
+            <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
               <p className="text-sm text-gray-500">Refunded Amount</p>
               <h2 className="text-xl font-semibold">0</h2>
             </div>
@@ -284,7 +284,7 @@ useEffect(() => {
           </div>
 
 
-          <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
+          <div className="bg-white-common border border-gray-300 rounded-lg overflow-hidden">
 
 
             <div className="max-h-[350px] overflow-y-auto">
@@ -604,7 +604,7 @@ useEffect(() => {
     <div
       ref={menuRef}
     className="
-  fixed w-32 bg-white rounded-xl z-[99999]
+  fixed w-32 bg-white-common rounded-xl z-[99999]
   border border-gray-100
   shadow-[0_10px_35px_rgba(0,0,0,0.18)]
   overflow-hidden
@@ -748,7 +748,7 @@ useEffect(() => {
           />
 
           {/* DRAWER WITH SPACE */}
-          <div className="fixed top-6 bottom-6 right-6 w-[400px] bg-white rounded-xl shadow-lg z-50 transform transition-transform duration-300 translate-x-0">
+          <div className="fixed top-6 bottom-6 right-6 w-[400px] bg-white-common rounded-xl shadow-lg z-50 transform transition-transform duration-300 translate-x-0">
 
             <div className="h-full overflow-y-auto p-5">
 
@@ -895,7 +895,7 @@ useEffect(() => {
         border
         border-gray-300
         rounded-xl
-        bg-white
+        bg-white-common
         p-3
         pr-24
       "
@@ -1016,7 +1016,7 @@ useEffect(() => {
       )}
       {hoveredProof && (
         <div
-          className="fixed z-[9999] pointer-events-none bg-white border border-gray-300 rounded-lg shadow-lg p-2"
+          className="fixed z-[9999] pointer-events-none bg-white-common border border-gray-300 rounded-lg shadow-lg p-2"
           style={{
             left: `${previewPos.x}px`,
             top: `${previewPos.y}px`,
@@ -1043,7 +1043,7 @@ useEffect(() => {
     <div className="fixed top-10 right-6 w-[380px] bg-[#FAFBFC] rounded-3xl shadow-2xl z-50 overflow-hidden animate-in slide-in-from-right duration-300">
 
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-[#E6E8F0] bg-white">
+      <div className="flex items-center justify-between px-6 py-5 border-b border-[#E6E8F0] bg-white-common">
 
         <h2 className="text-[20px] font-semibold text-gray-800">
           Payment Verification

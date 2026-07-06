@@ -67,7 +67,7 @@ const DemoRequestOverview = ({
     h-full
     w-full
     max-w-[520px]
-    bg-white
+    bg-white-common
     shadow-2xl
     rounded-[24px]
     border border-[#E5E7EB]
@@ -85,7 +85,7 @@ const DemoRequestOverview = ({
               }}
             >
               {/* HEADER */}
-              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 sticky top-0 bg-white z-50">
+              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 sticky top-0 bg-white-common z-50">
 
                 <div className="flex items-center text-center gap-2">
                   <img src={Messagequestion} className="w-5 h-5" />
@@ -469,7 +469,7 @@ const DemoRequestOverview = ({
               Activity Timeline:
             </h3> */}
                   {/* TIMELINE */}
-                  <div className="border border-[#E5E7EB] rounded-2xl p-5 bg-white">
+                  <div className="border border-[#E5E7EB] rounded-2xl p-5 bg-white-common">
 
                     {/* TITLE */}
                     <div className="flex items-center justify-between mb-5">
@@ -536,7 +536,7 @@ const DemoRequestOverview = ({
                               <div
                                 className="
     flex-1
-    bg-white
+    bg-white-common
     border border-[#E5E7EB]
     rounded-2xl
     p-4
@@ -682,7 +682,7 @@ const DemoRequestOverview = ({
 
             <div
               className="
-          bg-white
+          bg-white-common
           w-full
           max-w-[650px]
           rounded-2xl

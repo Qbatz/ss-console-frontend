@@ -55,12 +55,46 @@ const getKYCList = async (
   }
 };
 
+const approveKYC = async (
+  customerId
+) => {
+  try {
+
+    setLoading(true);
+
+    const res =
+      await axiosInstance.post(
+        `/v2/kyc/${customerId}`
+      );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      message:
+        error?.response?.status === 500
+          ? "Internal Server Error"
+          : getErrorMessage(error),
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
+
   return (
     <KYCContext.Provider
       value={{
         loading,
         accessError,
-        getKYCList,
+        getKYCList,approveKYC
       }}
     >
       {children}

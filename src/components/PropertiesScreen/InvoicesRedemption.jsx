@@ -524,7 +524,7 @@ const [deleteId, setDeleteId] = useState(null);
     <div
       ref={menuRef}
       className="
-        fixed w-28 bg-white rounded-xl z-[99999]
+        fixed w-28 bg-white-common rounded-xl z-[99999]
         border border-gray-100
         shadow-[0_12px_35px_rgba(0,0,0,0.18)]
         overflow-hidden
@@ -729,7 +729,7 @@ const [deleteId, setDeleteId] = useState(null);
   >
 
     <div
-      className="bg-white rounded-xl w-[400px] p-6 shadow-xl"
+      className="bg-white-common rounded-xl w-[400px] p-6 shadow-xl"
       onClick={(e) => e.stopPropagation()}
     >
 
@@ -799,7 +799,7 @@ const [deleteId, setDeleteId] = useState(null);
   >
 
     <div
-      className="bg-white rounded-xl w-[400px] p-6 shadow-xl"
+      className="bg-white-common rounded-xl w-[400px] p-6 shadow-xl"
       onClick={(e) => e.stopPropagation()}
     >
 

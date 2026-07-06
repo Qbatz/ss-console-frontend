@@ -210,7 +210,7 @@ const confirmDelete = async () => {
      
 
       
-   <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+   <div className="bg-white-common rounded-2xl shadow-sm border border-gray-200 p-6">
 
   {/* Header */}
   <div className="flex items-center justify-between mb-6">
@@ -299,7 +299,7 @@ const confirmDelete = async () => {
     onClick={handleCloseModal}
   >
     <div
-      className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+      className="bg-white-common rounded-2xl shadow-xl w-full max-w-md p-6"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex justify-between items-center mb-5">
@@ -385,7 +385,7 @@ const confirmDelete = async () => {
     }}
   >
     <div
-      className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl"
+      className="bg-white-common rounded-2xl p-6 w-full max-w-md shadow-xl"
       onClick={(e) => e.stopPropagation()}
     >
       <h2 className="text-xl font-semibold text-gray-800 mb-3">

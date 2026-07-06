@@ -169,7 +169,7 @@ const handleEditClick = async (role) => {
 
 
 
-          <div className="bg-white rounded-xl border border-gray-200 max-h-[350px] flex flex-col overflow-hidden">
+          <div className="bg-white-common rounded-xl border border-gray-200 max-h-[350px] flex flex-col overflow-hidden">
 
             <div className="flex-1 overflow-y-auto overflow-x-auto">
 
@@ -320,7 +320,7 @@ const handleEditClick = async (role) => {
                             {openMenu === index && role.editable !== false && (
                               <div
                                 onClick={(e) => e.stopPropagation()}
-  className="fixed w-32 bg-white border rounded-lg shadow-lg z-[9999]"
+  className="fixed w-32 bg-white-common border rounded-lg shadow-lg z-[9999]"
   style={{
     top: dropdownPosition.top,
     left: dropdownPosition.left,
@@ -361,7 +361,7 @@ const handleEditClick = async (role) => {
 
 
 
-          <div className="flex justify-between items-center px-4 py-3  bg-white text-sm">
+          <div className="flex justify-between items-center px-4 py-3  bg-white-common text-sm">
 
 
             <span className="text-gray-600">
@@ -457,7 +457,7 @@ const handleEditClick = async (role) => {
           {deleteRole && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
 
-              <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 sm:p-8 text-center">
+              <div className="bg-white-common w-full max-w-md rounded-2xl shadow-xl p-6 sm:p-8 text-center">
 
                 <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-3">
                   Delete Role?

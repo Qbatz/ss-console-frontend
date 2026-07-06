@@ -82,7 +82,9 @@ const TenantRecurring = () => {
     subscriptionExpiredCount: 0
   });
   const customerDropdownRef = useRef(null);
-
+const generateRef = useRef(false);
+const [isBulkGenerating, setIsBulkGenerating] = useState(false);
+const [isGenerating, setIsGenerating] = useState(false);
   const [resStatusOptions, setResStatusOptions] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [openStatusFilter, setOpenStatusFilter] = useState(false);
@@ -356,51 +358,260 @@ const [cameFromHostelDrawer, setCameFromHostelDrawer] = useState(false);
   // }, [page, size, filter, search, statusFilter, appliedSystemFilter, billingModelFilterBy, isTableView]);
   const start = (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
-const handleGenerate = async (ids = []) => {
-  const res = await generateTenantRecurring(ids);
-  if (res?.success) {
-    setModalType("success");
-    setMessage(res?.data);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 1500);
+  const handleGenerate = async (ids = []) => {
 
-    setData(prev =>
-      prev.map(item =>
-        ids.includes(item.customerId) ? { ...item, recurringStatus: true } : item
-      )
-    );
-
-    setSelectedCustomers(prev =>
-      prev.map(item =>
-        ids.includes(item.customerId) ? { ...item, recurringStatus: true } : item
-      )
-    );
-
-    // ✅ Hostel drawer-oda customerList-ஐயும் immediate-ஆ update pannunga
-    setSelectedHostel(prev =>
-      prev
-        ? {
-            ...prev,
-            customerList: prev.customerList?.map(c =>
-              ids.includes(c.customerId) ? { ...c, recurringStatus: true } : c
-            )
-          }
-        : prev
-    );
-
-    // ✅ generate ஆன ids-ஐ selected list-ல இருந்து remove pannunga
-    setDrawerSelectedIds(prev => prev.filter(id => !ids.includes(id)));
-
-    fetchRecurring();
+  if (generateRef.current || isGenerating) {
+    return;
   }
-  else {
-    setMessage(res?.message);
-    setModalType("error");
-    setGenrateError(res?.message)
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 1500);
+
+  generateRef.current = true;
+  setIsGenerating(true);
+
+  try {
+
+    const res = await generateTenantRecurring(ids);
+
+    if (res?.success) {
+
+      setModalType("success");
+      setMessage(res?.data);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
+      setData(prev =>
+        prev.map(item =>
+          ids.includes(item.customerId)
+            ? { ...item, recurringStatus: true }
+            : item
+        )
+      );
+
+      setSelectedCustomers(prev =>
+        prev.map(item =>
+          ids.includes(item.customerId)
+            ? { ...item, recurringStatus: true }
+            : item
+        )
+      );
+
+      setSelectedHostel(prev =>
+        prev
+          ? {
+              ...prev,
+              customerList: prev.customerList?.map(c =>
+                ids.includes(c.customerId)
+                  ? { ...c, recurringStatus: true }
+                  : c
+              )
+            }
+          : prev
+      );
+
+      setDrawerSelectedIds(prev =>
+        prev.filter(id => !ids.includes(id))
+      );
+
+      fetchRecurring();
+
+    } else {
+
+      setModalType("error");
+      setMessage(res?.message);
+      setGenrateError(res?.message);
+
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+    }
+
+  } catch (err) {
+
+    console.log(err);
+
+  } finally {
+
+    generateRef.current = false;
+    setIsGenerating(false);
+
   }
 };
+const handleBulkGenerate = async () => {
+
+  if (isBulkGenerating) return;
+
+  setIsBulkGenerating(true);
+
+  try {
+
+    const res = await generateTenantRecurring(selectedIds);
+
+    if (res?.success) {
+
+      setShowBulkModal(false);
+      setSelectedIds([]);
+      setConfirmBulk(false);
+      setBulkReason("");
+      setBulkDesc("");
+
+      setModalType("success");
+      setMessage(res?.data || "Bulk Generated Successfully");
+      setShowSuccess(true);
+
+      setTimeout(() => setShowSuccess(false), 1500);
+
+      setData(prev =>
+        prev.map(item =>
+          selectedIds.includes(item.customerId)
+            ? { ...item, recurringStatus: true }
+            : item
+        )
+      );
+
+      setSelectedCustomers(prev =>
+        prev.map(item =>
+          selectedIds.includes(item.customerId)
+            ? { ...item, recurringStatus: true }
+            : item
+        )
+      );
+
+      fetchRecurring();
+
+    } else {
+
+      setModalType("error");
+      setMessage(res?.message || "Failed");
+      setGenrateError(res?.message);
+
+      setShowSuccess(true);
+
+      setTimeout(() => setShowSuccess(false), 1500);
+    }
+
+  } finally {
+
+    setIsBulkGenerating(false);
+
+  }
+};
+// const handleGenerate = async (ids = []) => {
+
+//   if (generateRef.current) return;
+
+//   generateRef.current = true;
+
+//   try {
+
+//     const res = await generateTenantRecurring(ids);
+
+//     if (res?.success) {
+
+//       setModalType("success");
+//       setMessage(res?.data);
+//       setShowSuccess(true);
+
+//       setTimeout(() => setShowSuccess(false), 1500);
+
+//       setData(prev =>
+//         prev.map(item =>
+//           ids.includes(item.customerId)
+//             ? { ...item, recurringStatus: true }
+//             : item
+//         )
+//       );
+
+//       setSelectedCustomers(prev =>
+//         prev.map(item =>
+//           ids.includes(item.customerId)
+//             ? { ...item, recurringStatus: true }
+//             : item
+//         )
+//       );
+
+//       setSelectedHostel(prev =>
+//         prev
+//           ? {
+//               ...prev,
+//               customerList: prev.customerList?.map(c =>
+//                 ids.includes(c.customerId)
+//                   ? { ...c, recurringStatus: true }
+//                   : c
+//               )
+//             }
+//           : prev
+//       );
+
+//       setDrawerSelectedIds(prev =>
+//         prev.filter(id => !ids.includes(id))
+//       );
+
+//       fetchRecurring();
+
+//     } else {
+
+//       setMessage(res?.message);
+//       setModalType("error");
+//       setGenrateError(res?.message);
+//       setShowSuccess(true);
+
+//       setTimeout(() => setShowSuccess(false), 1500);
+//     }
+
+//   } finally {
+
+//     generateRef.current = false;
+
+//   }
+// };
+// const handleGenerate = async (ids = []) => {
+//   const res = await generateTenantRecurring(ids);
+//   if (res?.success) {
+//     setModalType("success");
+//     setMessage(res?.data);
+//     setShowSuccess(true);
+//     setTimeout(() => setShowSuccess(false), 1500);
+
+//     setData(prev =>
+//       prev.map(item =>
+//         ids.includes(item.customerId) ? { ...item, recurringStatus: true } : item
+//       )
+//     );
+
+//     setSelectedCustomers(prev =>
+//       prev.map(item =>
+//         ids.includes(item.customerId) ? { ...item, recurringStatus: true } : item
+//       )
+//     );
+
+  
+//     setSelectedHostel(prev =>
+//       prev
+//         ? {
+//             ...prev,
+//             customerList: prev.customerList?.map(c =>
+//               ids.includes(c.customerId) ? { ...c, recurringStatus: true } : c
+//             )
+//           }
+//         : prev
+//     );
+
+//     setDrawerSelectedIds(prev => prev.filter(id => !ids.includes(id)));
+
+//     fetchRecurring();
+//   }
+//   else {
+//     setMessage(res?.message);
+//     setModalType("error");
+//     setGenrateError(res?.message)
+//     setShowSuccess(true);
+//     setTimeout(() => setShowSuccess(false), 1500);
+//   }
+// };
   // const handleGenerate = async (ids = []) => {
 
   //   const res = await generateTenantRecurring(ids);
@@ -516,9 +727,9 @@ const handleGenerate = async (ids = []) => {
               </button>
 
             </div> */}
-            <div className="flex items-center bg-blue-600 p-[2px] rounded-full border border-gray-300 w-fit">
+            <div className="flex items-center bg-primary p-[2px] rounded-full border border-gray-300 w-fit">
 
-              {/* TABLE VIEW */}
+             
               <button
                 // onClick={() => setIsTableView(false) setShowCustomerTable(false)}
                 onClick={() => {
@@ -528,7 +739,7 @@ const handleGenerate = async (ids = []) => {
 
                 }}
                 className={`p-2 rounded-full transition-all duration-200
-      ${!isTableView ? "bg-white shadow-sm" : ""}
+      ${!isTableView ? "bg-white-common shadow-sm" : ""}
     `}
               >
                 <img
@@ -541,7 +752,7 @@ const handleGenerate = async (ids = []) => {
               <button
                 onClick={() => setIsTableView(true)}
                 className={`p-2 rounded-full transition-all duration-200
-      ${isTableView ? "bg-white shadow-sm " : ""}
+      ${isTableView ? "bg-white-common shadow-sm " : ""}
     `}
               >
                 <img
@@ -558,17 +769,17 @@ const handleGenerate = async (ids = []) => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 
-              <div className="border border-gray-200 rounded-xl p-4 bg-white">
+              <div className="border border-gray-200 rounded-xl p-4 bg-white-common">
                 <p className="text-sm text-gray-500">Total Tenant</p>
                 <p className="text-xl font-semibold mt-1">{totalTenants.totalTenants}</p>
               </div>
 
-              <div className="border border-gray-200 rounded-xl p-4 bg-white">
+              <div className="border border-gray-200 rounded-xl p-4 bg-white-common">
                 <p className="text-sm text-gray-500">Billing Today</p>
                 <p className="text-xl font-semibold mt-1">{totalTenants.billingToday}</p>
               </div>
 
-              <div className="border border-gray-200 rounded-xl p-4 bg-white">
+              <div className="border border-gray-200 rounded-xl p-4 bg-white-common">
                 <p className="text-sm text-gray-500">Due Tomorrow</p>
                 <p className="text-xl font-semibold mt-1">{totalTenants.billingTomorrow}</p>
               </div>
@@ -649,7 +860,7 @@ const handleGenerate = async (ids = []) => {
                     <button
                       onClick={() => !showFilterDrawer && setOpenFilter(!openFilter)}
                       disabled={showFilterDrawer}
-                      className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
+                      className={`border-soft-light rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
     ${showFilterDrawer ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
   `}
                     >
@@ -658,7 +869,7 @@ const handleGenerate = async (ids = []) => {
                     </button>
 
                     {openFilter && (
-                      <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50 max-h-40 overflow-y-auto">
+                      <div className="absolute mt-1 w-full bg-white-common border-soft-light rounded-lg shadow-md z-[9999] max-h-40 overflow-y-auto">
 
                         {filterOptions.map((item) => (
                           <div
@@ -669,7 +880,7 @@ const handleGenerate = async (ids = []) => {
                               setOpenFilter(false);
                             }}
                             className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
-          ${filter === item.key ? "bg-blue-600 text-white" : ""}`}
+          ${filter === item.key ? "bg-primary text-white" : ""}`}
                           >
                             {item.label}
                           </div>
@@ -691,7 +902,7 @@ const handleGenerate = async (ids = []) => {
                     <button
                       onClick={() => !showFilterDrawer && setOpenStatusFilter(!openStatusFilter)}
                       disabled={showFilterDrawer}
-                      className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
+                      className={`border-soft-light rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
     ${showFilterDrawer ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
   `}
                     >
@@ -702,7 +913,7 @@ const handleGenerate = async (ids = []) => {
                     </button>
 
                     {openStatusFilter && (
-                      <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50">
+                      <div className="absolute top-full left-0 mt-1 w-full bg-white-common border-soft-light rounded-lg shadow-lg z-[9999]">
 
                         {resStatusOptions.map((item) => (
                           <div
@@ -713,7 +924,7 @@ const handleGenerate = async (ids = []) => {
                               setOpenStatusFilter(false);
                             }}
                             className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
-            ${statusFilter === item.key ? "bg-blue-600 text-white" : ""}
+            ${statusFilter === item.key ? "bg-primary text-white" : ""}
           `}
                           >
                             {item.label}
@@ -735,7 +946,7 @@ const handleGenerate = async (ids = []) => {
                       setBillingModelFilterBy(e.target.value);
                       setPage(1);
                     }}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer w-40"
+                    className="border-soft-light rounded-lg px-3 py-2 text-sm cursor-pointer w-40"
                   >
                     {billingModelOptions?.map((item) => (
                       <option key={item.key} value={item.key}>
@@ -758,7 +969,7 @@ const handleGenerate = async (ids = []) => {
 
                 <button
                   onClick={fetchRecurring}
-                  className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 cursor-pointer"
+                  className="bg-primary-hover text-white p-2 rounded-lg  cursor-pointer"
                 >
                   ⟳
                 </button>
@@ -777,7 +988,7 @@ const handleGenerate = async (ids = []) => {
                       setSearch(e.target.value);
                       setPage(1);
                     }}
-                    className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm w-56"
+                    className="pl-9 pr-3 py-2 border-soft-light rounded-lg text-sm w-56"
                   />
                 </div>
 
@@ -800,7 +1011,7 @@ const handleGenerate = async (ids = []) => {
                     {selectedIds.length} properties selected
                   </span>
 
-                  <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs">
+                  <span className="bg-primary-hover text-white px-2 py-0.5 rounded text-xs">
                     Cycle: 2 → 1
                   </span>
 
@@ -815,7 +1026,7 @@ const handleGenerate = async (ids = []) => {
 
                   <button
                     onClick={() => setShowBulkModal(true)}
-                    className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 cursor-pointer"
+                    className="bg-primary-hover text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 cursor-pointer"
 
                   >
                     ⟳ Bulk Generate Recurring
@@ -823,7 +1034,7 @@ const handleGenerate = async (ids = []) => {
 
                   <button
                     onClick={() => setSelectedIds([])}
-                    className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm cursor-pointer"
+                    className="border-soft-light px-3 py-1.5 rounded-lg text-sm cursor-pointer"
                   >
                     ✕ Clear
                   </button>
@@ -833,7 +1044,7 @@ const handleGenerate = async (ids = []) => {
               </div>
             )}
             {!showCustomerTable && (
-              <div className="bg-white border border-gray-200 rounded-xl overflow-visible">
+              <div className="bg-white-common border-soft-light rounded-xl overflow-visible">
 
                 <div
                   ref={tableRef}
@@ -842,10 +1053,10 @@ const handleGenerate = async (ids = []) => {
 
                   <table className="w-max min-w-full table-fixed text-sm text-left">
 
-                    <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-40">
+                    <thead className="bg-light-blue text-gray-600 text-xs uppercase sticky  top-0 z-[100]">
                       <tr>
-                        <th className="px-4 py-3 sticky left-0 bg-[#F8F9FF] z-50 w-[80px]">ID</th>
-                        <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">Property</th>
+                        <th className="px-4 py-3 sticky left-0 bg-light-blue z-50 w-[80px]">ID</th>
+                        <th className="px-4 py-3 sticky left-[80px] bg-light-blue z-50 w-[100px]">Property</th>
                         <th className=" py-3 w-[150px] whitespace-nowrap text-left">Tenant Name</th>
                         {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Sub Status</th> */}
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Sub Status</th>
@@ -855,7 +1066,10 @@ const handleGenerate = async (ids = []) => {
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Recurring mode</th>
                         {/* <th className="px-4 py-3 w-[150px] whitespace-nowrap">Tenant Count</th> */}
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Recurring Status</th>
-                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Actions</th>
+                        {/* <th className="py-3 w-[150px] whitespace-nowrap text-left">Actions</th> */}
+                        <th className="sticky right-0 bg-light-blue z-50 py-3 px-4 w-[150px] whitespace-nowrap text-left">
+  Actions
+</th>
                       </tr>
                     </thead>
 
@@ -893,7 +1107,7 @@ const handleGenerate = async (ids = []) => {
 
                               {/* 🔹 MAIN ROW */}
                               <tr>
-                                <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] flex items-center gap-2 text-[12px]">
+                                <td className="px-4 py-2 sticky left-0 bg-white-common z-40 w-[80px] flex items-center gap-2 text-[12px]">
 
                                   {!isTableView && (
                                     <input
@@ -912,7 +1126,7 @@ const handleGenerate = async (ids = []) => {
                                   {(page - 1) * size + index + 1}
                                 </td>
 
-                                <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] text-[12px]">
+                                <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] text-[12px]">
                                   <div className="flex items-center gap-2">
 
                                     {/* 🔽 dropdown trigger */}
@@ -955,7 +1169,7 @@ const handleGenerate = async (ids = []) => {
                                       {openCustomerDropdown && (
                                         <div
                                          ref={customerDropdownRef}
-                                          className="fixed w-64 bg-white border rounded-lg shadow-lg z-[99999]"
+                                          className="fixed w-64 bg-white-common border rounded-lg shadow-lg z-[99999]"
                                           style={{
                                             top: dropdownPosition.top,
                                             left: dropdownPosition.left
@@ -987,7 +1201,7 @@ const handleGenerate = async (ids = []) => {
                                           </div>
 
                                           {/* FOOTER */}
-                                          <div className="flex justify-between items-center p-2 border-t bg-white">
+                                          <div className="flex justify-between items-center p-2 border-t bg-white-common">
                                             <button
                                               onClick={() => setOpenCustomerDropdown(null)}
                                               className="text-gray-500 text-sm cursor-pointer"
@@ -1000,7 +1214,7 @@ const handleGenerate = async (ids = []) => {
                                                 setShowCustomerTable(true);
                                                 setOpenCustomerDropdown(null);
                                               }}
-                                              className="bg-blue-600 text-white px-3 py-1 rounded text-sm cursor-pointer"
+                                              className="bg-primary-hover text-white px-3 py-1 rounded text-sm cursor-pointer"
                                             >
                                               Done
                                             </button>
@@ -1055,12 +1269,12 @@ const handleGenerate = async (ids = []) => {
                                     : item.recurringStatus ? "Generated" : "Not Generated"}
                                 </td>
 
-                                <td>
+                               <td className="sticky right-0 bg-white-common z-40 px-4 py-2">
                                   {!isTableView ? (
                                     !item.recurringStatus ? (
                                       <button
                                         onClick={() => handleOpenDetails(item)}
-                                        className="px-3 py-1 bg-blue-600 text-white rounded cursor-pointer"
+                                        className="px-3 py-1 bg-primary-hover text-white rounded cursor-pointer"
                                       >
                                         Generate
                                       </button>
@@ -1073,7 +1287,7 @@ const handleGenerate = async (ids = []) => {
                                       // </button>
                                       <button
                                         onClick={() => handleOpenDetails(item)}
-                                        className="px-3 py-1 rounded-lg text-xs border border-gray-300 text-blue-600 bg-white hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
+                                        className="px-3 py-1 rounded-lg text-xs border-soft-light text-blue-600 bg-white-common hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
                                       >
                                         👁 View Details
                                       </button>
@@ -1105,7 +1319,7 @@ const handleGenerate = async (ids = []) => {
 
                                           <tr key={cust.customerId} className="border-t">
 
-                                            <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] flex items-center gap-2">
+                                            <td className="px-4 py-2 sticky left-0 bg-white-common z-40 w-[80px] flex items-center gap-2">
                                               <input
                                                 type="checkbox"
                                                 checked={selectedIds.includes(id)}
@@ -1128,7 +1342,7 @@ const handleGenerate = async (ids = []) => {
                                               {!cust.recurringStatus ? (
                                                 <button
                                                   onClick={() => handleOpenDetails(cust)}
-                                                  className="px-2 py-1 text-xs bg-blue-600 text-white rounded"
+                                                  className="px-2 py-1 text-xs bg-primary-hover text-white rounded"
                                                 >
                                                   Generate
                                                 </button>
@@ -1179,12 +1393,12 @@ const handleGenerate = async (ids = []) => {
                         left: tooltip.x + 10
                       }}
                     >
-                      <div className="bg-white text-gray-600 text-xs rounded-xl px-4 py-3 shadow-lg border border-gray-200 max-w-xs break-words">
+                      <div className="bg-white-common text-gray-600 text-xs rounded-xl px-4 py-3 shadow-lg border-soft-light max-w-xs break-words">
                         {tooltip.text}
                       </div>
 
                       {/* Arrow */}
-                      <div className="w-3 h-3 bg-white rotate-45 ml-4 -mt-1 border-l border-b border-gray-200"></div>
+                      <div className="w-3 h-3 bg-white-common rotate-45 ml-4 -mt-1 border-l border-b border-gray-200"></div>
                     </div>
                   )}
 
@@ -1196,7 +1410,7 @@ const handleGenerate = async (ids = []) => {
               </div>
             )}
             {showCustomerTable && (
-              <div className="bg-white border border-gray-200 rounded-xl p-4 mt-4">
+              <div className="bg-white-common border-soft-light rounded-xl p-4 mt-4">
 
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="font-semibold text-sm">Selected Customers</h3>
@@ -1206,13 +1420,13 @@ const handleGenerate = async (ids = []) => {
                       setShowCustomerTable(false);
                       setSelectedCustomers([]);
                     }}
-                    className="text-sm border border-gray-200 px-3 py-1 rounded cursor-pointer"
+                    className="text-sm border-soft-light px-3 py-1 rounded cursor-pointer"
                   >
                     Back
                   </button>
                 </div>
 
-                <div className="border border-gray-200 rounded-xl overflow-hidden">
+                <div className="border-soft-light rounded-xl overflow-hidden">
                   <table className="w-full text-sm">
 
 
@@ -1306,7 +1520,7 @@ const handleGenerate = async (ids = []) => {
                               {!cust.recurringStatus ? (
                                 <button
                                   onClick={() => handleOpenDetails(cust)}
-                                  className="px-2 py-1 bg-blue-600 text-white rounded text-xs cursor-pointer"
+                                  className="px-2 py-1 bg-primary-hover text-white rounded text-xs cursor-pointer"
                                 >
                                   Generate
                                 </button>
@@ -1447,7 +1661,7 @@ const handleGenerate = async (ids = []) => {
 
 
               <div className="relative z-[10000] flex items-center">
-                <div className="w-[420px] h-[calc(100%-40px)] my-5 mr-5 bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
+                <div className="w-[420px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
 
 
                   <div className="flex justify-between items-start p-5 border-b border-gray-200">
@@ -1744,14 +1958,43 @@ const handleGenerate = async (ids = []) => {
 
                       {/* Show only if BOTH are false */}
 
-                      <button
+                      {/* <button
                         // onClick={() => handleGenerate(selectedItem)}
                         onClick={() => handleGenerate([selectedItem.customerId])}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg text-[12px] flex items-center gap-2 cursor-pointer"
                       >
                         <img src={refreshWhite} className="w-4 h-4" />
                         Generate Recurring
-                      </button>
+                      </button> */}
+                      {/* <button
+  disabled={generateRef.current}
+  onClick={() =>
+    handleGenerate([selectedItem.customerId])
+  }
+  className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 ${
+    generateRef.current
+      ? "bg-gray-400 cursor-not-allowed text-white"
+      : "bg-blue-600 cursor-pointer text-white"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  Generate Recurring
+</button> */}
+
+<button
+  disabled={isGenerating}
+  onClick={() =>
+    handleGenerate([selectedItem.customerId])
+  }
+  className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 ${
+    isGenerating
+      ? "bg-gray-400 cursor-not-allowed text-white"
+      : "bg-primary-hover cursor-pointer text-white"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  {isGenerating ? "Generating..." : "Generate Recurring"}
+</button>
 
 
                     </div>
@@ -1777,7 +2020,7 @@ const handleGenerate = async (ids = []) => {
 
           {/* RIGHT DRAWER */}
           <div className="relative z-[10000] flex items-center">
-            <div className="w-[520px] h-[calc(100%-40px)] my-5 mr-5 bg-white rounded-xl shadow-xl border border-gray-300 flex flex-col animate-slideIn">
+            <div className="w-[520px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common rounded-xl shadow-xl border border-gray-300 flex flex-col animate-slideIn">
 
               {/* HEADER */}
               <div className="flex justify-between items-center p-5 border-b border-gray-300">
@@ -1965,7 +2208,7 @@ const handleGenerate = async (ids = []) => {
                   <img src={refreshWhite} className="w-4 h-4" />
                   Generate
                 </button> */}
-                <button
+                {/* <button
                   // disabled={!confirmBulk || !bulkReason}
                   onClick={async () => {
                     const res = await generateTenantRecurring(selectedIds);
@@ -2021,7 +2264,19 @@ setSelectedCustomers(prev =>
                 >
                   <img src={refreshWhite} className="w-4 h-4" />
                   Generate
-                </button>
+                </button> */}
+                <button
+  disabled={isBulkGenerating}
+  onClick={handleBulkGenerate}
+  className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 ${
+    isBulkGenerating
+      ? "bg-gray-300 cursor-not-allowed"
+      : "bg-blue-700 cursor-pointer"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  {isBulkGenerating ? "Generating..." : "Generate"}
+</button>
               </div>
 
             </div>
@@ -2039,7 +2294,7 @@ setSelectedCustomers(prev =>
 
 
           <div className="relative z-[10000] flex items-center">
-            <div className="w-[380px] h-[calc(100%-40px)] my-5 mr-5 bg-white shadow-xl border border-gray-300 flex flex-col animate-slideInRight rounded-xl">        {/* HEADER */}
+            <div className="w-[380px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common shadow-xl border border-gray-300 flex flex-col animate-slideInRight rounded-xl">        {/* HEADER */}
               <div className="flex justify-between items-center p-4 border-b">
                 <p className="font-semibold flex items-center gap-2">
                   ⚙ Filter
@@ -2091,7 +2346,7 @@ setSelectedCustomers(prev =>
 
                   {/* DROPDOWN */}
                   {openSystemDropdown && (
-                    <div className="absolute mt-1 w-full bg-white border rounded-lg shadow z-50 max-h-40 overflow-y-auto text-left">
+                    <div className="absolute mt-1 w-full bg-white-common border rounded-lg shadow z-50 max-h-40 overflow-y-auto text-left">
 
                       {Array.from({ length: 31 }, (_, i) => (
                         <div
@@ -2101,7 +2356,7 @@ setSelectedCustomers(prev =>
                             setOpenSystemDropdown(false);
                           }}
                           className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
-            ${systemFilter === i + 1 ? "bg-blue-600 text-white" : ""}
+            ${systemFilter === i + 1 ? "bg-primary text-white" : ""}
           `}
                         >
                           {i + 1}
@@ -2137,7 +2392,7 @@ setSelectedCustomers(prev =>
                     setShowFilterDrawer(false);
 
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
+                  className="px-4 py-2 bg-primary text-white rounded-lg text-sm"
                 >
                   Apply Filters
                 </button>
@@ -2159,7 +2414,7 @@ setSelectedCustomers(prev =>
 
     {/* Drawer */}
     <div className="relative z-[10000] flex items-center">
-      <div className="w-[480px] h-[calc(100%-40px)] my-5 mr-5 bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
+      <div className="w-[480px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
 
         {/* HEADER */}
         <div className="flex justify-between items-start p-5 border-b border-gray-200">
@@ -2339,17 +2594,32 @@ setSelectedCustomers(prev =>
       View
     </button>
   ) : (
-   <button
-  disabled={drawerSelectedIds.includes(cust.customerId)}
+//    <button
+//   disabled={drawerSelectedIds.includes(cust.customerId)}
+//   onClick={() => handleGenerate([cust.customerId])}
+//   className={`px-2 py-1 rounded text-[10px] text-white whitespace-nowrap ${
+//     drawerSelectedIds.includes(cust.customerId)
+//       ? "bg-gray-300 cursor-not-allowed"
+//       : "bg-blue-600 cursor-pointer"
+//   }`}
+// >
+//   Generate
+// </button>
+<button
+  disabled={
+    cust.recurringStatus ||
+    isGenerating
+  }
   onClick={() => handleGenerate([cust.customerId])}
   className={`px-2 py-1 rounded text-[10px] text-white whitespace-nowrap ${
-    drawerSelectedIds.includes(cust.customerId)
+    cust.recurringStatus || isGenerating
       ? "bg-gray-300 cursor-not-allowed"
-      : "bg-blue-600 cursor-pointer"
+      : "bg-primary cursor-pointer"
   }`}
 >
-  Generate
+  {isGenerating ? "Generating..." : "Generate"}
 </button>
+
   )}
 </td>
                         
@@ -2373,7 +2643,7 @@ setSelectedCustomers(prev =>
           >
             Close
           </button>
-          <button
+          {/* <button
   disabled={drawerSelectedIds.length === 0}
   onClick={() => handleGenerate(drawerSelectedIds)}
   className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 text-white ${
@@ -2384,6 +2654,21 @@ setSelectedCustomers(prev =>
 >
   <img src={refreshWhite} className="w-4 h-4" />
   Generate Recurring
+</button> */}
+<button
+  disabled={
+    drawerSelectedIds.length === 0 ||
+    isGenerating
+  }
+  onClick={() => handleGenerate(drawerSelectedIds)}
+  className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 text-white ${
+    drawerSelectedIds.length === 0 || isGenerating
+      ? "bg-gray-300 cursor-not-allowed"
+      : "bg-primary cursor-pointer"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  {isGenerating ? "Generating..." : "Generate Recurring"}
 </button>
         </div>
 
