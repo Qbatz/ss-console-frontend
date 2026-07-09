@@ -78,7 +78,7 @@ const PrivateRoutesScreen = () => {
   return (
     <PrivateRoute>
       <PlanProvider>
-        <RoleProvider>
+       
           <HostelProvider>
             <SubscriptionProvider>
               <OwnersProvider>
@@ -133,7 +133,7 @@ const PrivateRoutesScreen = () => {
               </OwnersProvider>
             </SubscriptionProvider>
           </HostelProvider>
-        </RoleProvider>
+      
       </PlanProvider>
     </PrivateRoute>
   );

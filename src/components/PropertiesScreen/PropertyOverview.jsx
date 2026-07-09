@@ -60,10 +60,8 @@ const PropertyOverview = () => {
   const [showCustomDays, setShowCustomDays] = useState(false);
   const [reasonError, setReasonError] = useState("")
     const [selectedTenant, setSelectedTenant] = useState(null);
-  const [remarks, setRemarks] =
-    useState("");
-  const [selectedReason, setSelectedReason] =
-    useState("");
+  const [remarks, setRemarks] =useState("");
+  const [selectedReason, setSelectedReason] = useState("");
   const [showReasonDropdown, setShowReasonDropdown] = useState(false);
   const [generateLoading, setGenerateLoading] = useState(false);
   const [isPaymentGenerated, setIsPaymentGenerated] = useState(false);

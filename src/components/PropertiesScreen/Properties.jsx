@@ -444,33 +444,51 @@ useEffect(() => {
 
  
 
+const handlePropertyClick = (item) => {
+  sessionStorage.setItem(
+    "propertyOverviewState",
+    JSON.stringify({
+      currentPage: page,
+      currentSearch: searchText,
+      currentDateRange:
+        dateRange?.length === 2
+          ? [
+              dateRange[0].format("YYYY-MM-DD"),
+              dateRange[1].format("YYYY-MM-DD"),
+            ]
+          : [],
+      currentStatusFilter: statusFilter,
+    })
+  );
 
-const handlePropertyClick = async (item) => {
-  const res = await getHostelById(item.hostelId);
-
-  if (res?.success) {
-    sessionStorage.setItem(
-      "propertyOverviewState",
-      JSON.stringify({
-        currentPage: page,
-        currentSearch: searchText,
-        currentDateRange:
-          dateRange?.length === 2
-            ? [
-                dateRange[0].format("YYYY-MM-DD"),
-                dateRange[1].format("YYYY-MM-DD"),
-              ]
-            : [],
-        currentStatusFilter: statusFilter,
-      })
-    );
-
-    window.open(
-      `/property-overview/${item.hostelId}`,
-      "_blank"
-    );
-  }
+  window.open(`/property-overview/${item.hostelId}`, "_blank");
 };
+// const handlePropertyClick = async (item) => {
+//   const res = await getHostelById(item.hostelId);
+
+//   if (res?.success) {
+//     sessionStorage.setItem(
+//       "propertyOverviewState",
+//       JSON.stringify({
+//         currentPage: page,
+//         currentSearch: searchText,
+//         currentDateRange:
+//           dateRange?.length === 2
+//             ? [
+//                 dateRange[0].format("YYYY-MM-DD"),
+//                 dateRange[1].format("YYYY-MM-DD"),
+//               ]
+//             : [],
+//         currentStatusFilter: statusFilter,
+//       })
+//     );
+
+//     window.open(
+//       `/property-overview/${item.hostelId}`,
+//       "_blank"
+//     );
+//   }
+// };
 //   const handlePropertyClick = async (item) => {
 //     const res = await getHostelById(item.hostelId);
 
@@ -800,7 +818,15 @@ const handleAddNote = async () => {
 
           </div>
 
-        ) : (
+        )
+        : canRead === undefined ? (
+
+  
+  <div className="flex items-center justify-center h-[400px]">
+    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+) : (
 
           <>
             <Toast

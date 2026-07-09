@@ -307,26 +307,30 @@ const getFilterParams = () => {
     }
     setPage(1);
   };
-  const handleOwnerClick = async (item) => {
 
-    const res = await getOwnerById(item.ownerId);
+  const handleOwnerClick = (item) => {
+  navigate(`/ProprietorsOverview/${item.ownerId}`);
+};
+  // const handleOwnerClick = async (item) => {
 
-    if (res?.success) {
+  //   const res = await getOwnerById(item.ownerId);
 
-     navigate(`/ProprietorsOverview/${item.ownerId}`);
+  //   if (res?.success) {
 
-    }
-    else{
-        setModalType("error");
-    setMessage(res.message);
-    setShowSuccess(true);
+  //    navigate(`/ProprietorsOverview/${item.ownerId}`);
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
-    }
+  //   }
+  //   else{
+  //       setModalType("error");
+  //   setMessage(res.message);
+  //   setShowSuccess(true);
 
-  };
+  //   setTimeout(() => {
+  //     setShowSuccess(false);
+  //   }, 1500);
+  //   }
+
+  // };
   useEffect(() => {
     const handleClick = () => setOpenMenuId(null);
     window.addEventListener("click", handleClick);

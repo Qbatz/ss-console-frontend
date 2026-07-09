@@ -16,6 +16,7 @@ import Team from "../../assets/Team.png";
 import { useNavigate,useParams  } from "react-router-dom";
 import { useHostel } from "../../Context/HostelListContext";
 import Toast from "../SuccessModal/ToastDesign";
+import { createPortal } from "react-dom";
 
 
 const TransactionsPage = () => {
@@ -238,12 +239,12 @@ useEffect(() => {
           </div>
 
           <div className="flex gap-4 mb-4">
-            <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
+            <div className="bg-white-common border-soft rounded-lg p-4 w-64">
               <p className="text-sm text-gray-500">Total Revenue</p>
               <h2 className="text-xl font-semibold">₹{totalRevenue}</h2>
             </div>
 
-            <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
+            <div className="bg-white-common border-soft rounded-lg p-4 w-64">
               <p className="text-sm text-gray-500">Refunded Amount</p>
               <h2 className="text-xl font-semibold">0</h2>
             </div>
@@ -284,19 +285,27 @@ useEffect(() => {
           </div>
 
 
-          <div className="bg-white-common border border-gray-300 rounded-lg overflow-hidden">
+          <div className="bg-white-common border-soft rounded-lg overflow-visible">
 
 
-            <div className="max-h-[350px] overflow-y-auto">
+            <div className="max-h-[350px] overflow-y-auto overflow-x-auto">
 
               <table className="w-full text-sm">
 
 
-                <thead className="bg-gray-100 text-gray-600 sticky top-0 z-10">
+              <thead className="sticky top-0 z-50 bg-gray-100 uppercase">
                   <tr>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-left">ID</th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-left">DATE</th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-left">CUSTOMER</th>
+<th className="sticky left-0 min-w-[70px] bg-gray-100 z-30 text-[12px] font-semibold">
+  ID
+</th>
+
+<th className="sticky left-[70px] min-w-[140px] bg-gray-100 z-30 text-[12px] font-semibold">
+  DATE
+</th>
+
+<th className="sticky left-[210px] min-w-[180px] bg-gray-100 z-30 text-[12px] font-semibold">
+  CUSTOMER
+</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left">PROPERTY</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">REGION / CITY</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">PLAN TYPE</th>
@@ -306,7 +315,9 @@ useEffect(() => {
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Payment proof</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">status</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Collected By</th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Action</th>
+                 <th className="sticky right-0 min-w-[100px] bg-gray-100 z-30 text-[12px] font-semibold">
+  ACTION
+</th>
                   </tr>
                 </thead>
 
@@ -325,17 +336,17 @@ useEffect(() => {
                     data.map((item, index) => (
                       <tr key={index} className="border-t border-gray-300">
 
-                        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-                          {index + 1}
-                        </td>
+   <td className="sticky left-0 min-w-[70px] bg-white-common z-20">
+  {index + 1}
+</td>
 
-                        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-                          {item.createdAtDate}
-                        </td>
+<td className="sticky left-[70px] min-w-[140px] bg-white-common z-20">
+  {item.createdAtDate}
+</td>
 
-                        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-blue-600 text-left">
-                          {item.paidBy}
-                        </td>
+<td className="sticky left-[210px] min-w-[180px] bg-white-common z-20">
+  {item.paidBy}
+</td>
 
                        {/* <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
 
@@ -536,7 +547,15 @@ useEffect(() => {
 
                         </td> */}
 
-<td className="px-4 py-2 relative">
+<td className="
+    sticky
+    right-0
+    z-40
+    bg-white-common
+    px-4
+    py-2
+    relative
+  ">
 
   <button
     onClick={(e) => {
@@ -599,46 +618,46 @@ useEffect(() => {
 
   </button>
 
-  {openMenu === item.historyId && (
-
-    <div
-      ref={menuRef}
+ {openMenu === item.historyId && createPortal(
+  <div
+    ref={menuRef}
+    style={{
+      position: "fixed",
+      top: menuPos.top,
+      left: menuPos.left,
+      width: "160px",
+    }}
     className="
-  fixed w-32 bg-white-common rounded-xl z-[99999]
-  border border-gray-100
-  shadow-[0_10px_35px_rgba(0,0,0,0.18)]
-  overflow-hidden
-"
-      style={{
-        top: menuPos.top,
-        left: menuPos.left
+      bg-white-common
+      rounded-xl
+      border
+      shadow-xl
+      z-[99999]
+    "
+  >
+    <button
+      onClick={() => {
+        setSelectedTxn(item);
+        setShowModal(true);
+        setOpenMenu(null);
       }}
+      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
     >
+      View Details
+    </button>
 
-      <button
-        onClick={() => {
-          setSelectedTxn(item);
-          setShowModal(true);
-          setOpenMenu(null);
-        }}
-        className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-      >
-        View Details
-      </button>
-
-      <button
-        onClick={() => {
-          handleVerifyPayment(item);
-          setOpenMenu(null);
-        }}
-        className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-      >
-        Verify Payment
-      </button>
-
-    </div>
-
-  )}
+    <button
+      onClick={() => {
+        handleVerifyPayment(item);
+        setOpenMenu(null);
+      }}
+      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+    >
+      Verify Payment
+    </button>
+  </div>,
+  document.body
+)}
 
 </td>
                       </tr>
@@ -991,7 +1010,7 @@ useEffect(() => {
 )}
 
   
-  <div className="rounded-lg overflow-hidden border border-gray-300">
+  <div className="rounded-lg overflow-hidden border-soft">
 
     <img
       src={selectedTxn.paymentProof}
@@ -1016,7 +1035,7 @@ useEffect(() => {
       )}
       {hoveredProof && (
         <div
-          className="fixed z-[9999] pointer-events-none bg-white-common border border-gray-300 rounded-lg shadow-lg p-2"
+          className="fixed z-[9999] pointer-events-none bg-white-common border-soft rounded-lg shadow-lg p-2"
           style={{
             left: `${previewPos.x}px`,
             top: `${previewPos.y}px`,

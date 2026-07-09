@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
@@ -34,6 +34,8 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
   const filteredStates = states.filter((s) =>
     s.toLowerCase().includes(search.toLowerCase())
   );
+
+  const submitRef = useRef(false);
   useEffect(() => {
     const handleClickOutside = () => setShowDropdown(false);
     document.addEventListener("click", handleClickOutside);
@@ -295,21 +297,132 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
 
 
   // };
-  const handleSubmit = async () => {
+//   const handleSubmit = async () => {
 
-  if (isSubmitting || loading) return;
+//   if (isSubmitting || loading) return;
 
+//   setIsSubmitting(true);
+
+//   const isValid = validateForm();
+
+//   if (!isValid) {
+//     setIsSubmitting(false);
+//     return;
+//   }
+
+//   if (!formData.contactNo) {
+//     setMobileError("Mobile number is required");
+//     setIsSubmitting(false);
+//     return;
+//   }
+
+//   if (
+//     !/^[6-9]\d{9}$/.test(formData.contactNo) ||
+//     /^(\d)\1{9}$/.test(formData.contactNo)
+//   ) {
+//     setMobileError("Enter valid mobile number");
+//     setIsSubmitting(false);
+//     return;
+//   }
+
+//   try {
+
+//     const payload = {
+//       ...formData,
+
+//       noOfHostels:
+//         Number(formData.noOfHostels) || 0,
+
+//       noOfTenants:
+//         Number(formData.noOfTenants) || 0,
+
+//       requestedDate:
+//         formatDate(formData.requestedDate),
+
+//       requestedTime:
+//         formatTime(formData.requestedTime),
+//     };
+
+//     const res = await createDemoRequest(payload);
+
+//     if (res.success) {
+
+//       setModalType("success");
+
+//       setMessage(res?.message);
+
+//       setShowSuccess(true);
+
+//       fetchData();
+
+//       setTimeout(() => {
+
+//         setShowSuccess(false);
+
+//         handleCloseDrawer();
+
+//       }, 1500);
+
+//     } else {
+
+//       setModalType("error");
+
+//       setMessage(res?.message);
+
+//       setShowSuccess(true);
+
+//       setTimeout(() => {
+
+//         setShowSuccess(false);
+
+//       }, 1500);
+//     }
+
+//   } catch (error) {
+
+//     setModalType("error");
+
+//     setMessage(
+//       error?.message ||
+//       "Something went wrong"
+//     );
+
+//     setShowSuccess(true);
+
+//     setTimeout(() => {
+
+//       setShowSuccess(false);
+
+//     }, 1500);
+
+//   } finally {
+
+//     // IMPORTANT
+//     setIsSubmitting(false);
+
+//   }
+// };
+
+
+
+const handleSubmit = async () => {
+
+  if (submitRef.current || loading || isSubmitting) return;
+
+  submitRef.current = true;
   setIsSubmitting(true);
 
   const isValid = validateForm();
 
   if (!isValid) {
+    submitRef.current = false;
     setIsSubmitting(false);
     return;
   }
 
   if (!formData.contactNo) {
     setMobileError("Mobile number is required");
+    submitRef.current = false;
     setIsSubmitting(false);
     return;
   }
@@ -319,6 +432,7 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
     /^(\d)\1{9}$/.test(formData.contactNo)
   ) {
     setMobileError("Enter valid mobile number");
+    submitRef.current = false;
     setIsSubmitting(false);
     return;
   }
@@ -327,77 +441,58 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
 
     const payload = {
       ...formData,
-
-      noOfHostels:
-        Number(formData.noOfHostels) || 0,
-
-      noOfTenants:
-        Number(formData.noOfTenants) || 0,
-
-      requestedDate:
-        formatDate(formData.requestedDate),
-
-      requestedTime:
-        formatTime(formData.requestedTime),
+      noOfHostels: Number(formData.noOfHostels) || 0,
+      noOfTenants: Number(formData.noOfTenants) || 0,
+      requestedDate: formatDate(formData.requestedDate),
+      requestedTime: formatTime(formData.requestedTime),
     };
 
     const res = await createDemoRequest(payload);
 
-    if (res.success) {
+    if (res?.success) {
 
       setModalType("success");
-
       setMessage(res?.message);
-
       setShowSuccess(true);
 
       fetchData();
 
       setTimeout(() => {
-
         setShowSuccess(false);
-
         handleCloseDrawer();
 
-      }, 1500);
-
-    } else {
-
-      setModalType("error");
-
-      setMessage(res?.message);
-
-      setShowSuccess(true);
-
-      setTimeout(() => {
-
-        setShowSuccess(false);
+        // reset only after drawer closes
+        submitRef.current = false;
+        setIsSubmitting(false);
 
       }, 1500);
+
+      return;
     }
+
+    setModalType("error");
+    setMessage(res?.message);
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+    submitRef.current = false;
+    setIsSubmitting(false);
 
   } catch (error) {
 
     setModalType("error");
-
-    setMessage(
-      error?.message ||
-      "Something went wrong"
-    );
-
+    setMessage(error?.message || "Something went wrong");
     setShowSuccess(true);
 
     setTimeout(() => {
-
       setShowSuccess(false);
-
     }, 1500);
 
-  } finally {
-
-    // IMPORTANT
+    submitRef.current = false;
     setIsSubmitting(false);
-
   }
 };
 
@@ -747,7 +842,7 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
                   Cancel
                 </button>
 
-                <button
+                {/* <button
                   onClick={handleSubmit}
                   disabled={isSubmitting || loading}
                   className={`
@@ -761,7 +856,20 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
                   {isSubmitting || loading
                     ? "Submitting..."
                     : "Submit"}
-                </button>
+                </button> */}
+                <button
+  onClick={handleSubmit}
+  disabled={isSubmitting || loading}
+  className={`px-4 py-2 rounded text-white ${
+    isSubmitting || loading
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-blue-500 cursor-pointer"
+  }`}
+>
+  {isSubmitting || loading
+    ? "Submitting..."
+    : "Submit"}
+</button>
               </div>
             </div>
           </div>

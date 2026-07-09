@@ -193,7 +193,7 @@ const Subscription = () => {
 
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mb-6">
 
                   <div className="bg-white-common p-5 rounded-xl shadow-sm border border-gray-300">
                     <p className="text-gray-500 text-sm font-gilroy">Active Properties</p>
@@ -233,6 +233,10 @@ const Subscription = () => {
                   <div className="bg-white-common p-5 rounded-xl shadow-sm border border-gray-300">
                     <p className="text-gray-500 text-sm font-gilroy">Advance</p>
                     <h2 className="text-2xl font-bold mt-2">{responseCard?.advancePlansCount || 0}</h2>
+                  </div>
+                    <div className="bg-white-common p-5 rounded-xl shadow-sm border border-gray-300">
+                    <p className="text-gray-500 text-sm font-gilroy">Others</p>
+                    <h2 className="text-2xl font-bold mt-2">{responseCard?.otherPlansCount || 0}</h2>
                   </div>
 
                 </div>

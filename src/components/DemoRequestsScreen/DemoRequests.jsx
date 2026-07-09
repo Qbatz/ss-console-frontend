@@ -17,6 +17,7 @@ import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import MarkAsLostDrawer from "./MarkAsLostDrawer";
 import { useNavigate, useLocation } from "react-router-dom";
+import { createPortal } from "react-dom";
 
 const DemoRequests = () => {
 
@@ -1023,9 +1024,24 @@ if (lettersCount < 5) {
             CONVERSION RESULT
           </th> */}
 
-          <th className="px-4 py-3 text-left whitespace-nowrap">
+          {/* <th className="px-4 py-3 text-left whitespace-nowrap">
             ACTIONS
-          </th>
+          </th> */}
+          <th
+  className="
+    sticky
+    right-0
+    z-30
+    bg-gray-100
+    px-4
+    py-3
+    text-left
+    whitespace-nowrap
+    min-w-[120px]
+  "
+>
+  ACTIONS
+</th>
 
         </tr>
 
@@ -1096,11 +1112,11 @@ if (lettersCount < 5) {
                       
                      <tr key={item.requestId} className="group text-[13px] hover:bg-gray-50">
 
- <td className="sticky left-0 z-20 bg-white-common group-hover:bg-gray-50 px-4 py-2 w-[70px] min-w-[70px]">
+ <td className="sticky left-0 z-20 bg-white-common group-hover:!bg-gray-50 px-4 py-2 w-[70px] min-w-[70px]">
   {(page - 1) * size + index + 1}
 </td>
 
-<td className="sticky left-[70px] z-20 bg-white-common group-hover:bg-gray-50 px-4 py-2 w-[180px] min-w-[180px] max-w-[180px] text-left">
+<td className="sticky left-[70px] z-20 bg-white-common group-hover:!bg-gray-50 px-4 py-2 w-[180px] min-w-[180px] max-w-[180px] text-left">
   <button
     onClick={() => {
       setSelectedItem(item);
@@ -1287,7 +1303,19 @@ if (lettersCount < 5) {
                           {item.convertedToPlanName || "----"}
                         </td> */}
 
-                       <td className="px-4 py-2 relative">
+                       <td
+  className="
+    sticky
+    right-0
+    z-20
+    bg-white-common
+    group-hover:bg-gray-50
+    px-4
+    py-2
+    relative
+    min-w-[100px] group-hover:!bg-gray-50
+  "
+>
 
   <button
   onClick={(e) => {
@@ -1352,131 +1380,72 @@ if (lettersCount < 5) {
 
 </button>
 
-  {openMenu?.id === item.requestId && (
-
-   <div
-  className="fixed w-40 bg-white-common border-soft-light rounded-xl shadow-xl z-[99999] overflow-hidden"
-  style={{
-    top: openMenu.y,
-    left: openMenu.x,
-  }}
->
- <button
+  {openMenu?.id === item.requestId &&
+  createPortal(
+    <div
+      className="fixed w-40 bg-white-common border-soft-light rounded-xl shadow-xl z-[99999] overflow-hidden"
+      style={{
+        top: openMenu.y,
+        left: openMenu.x,
+      }}
+    >
+      <button
         className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-      onClick={async () => {
-
-  setSelectedItem(item);
-
-  await fetchAllComments(
-    item.requestId
-  );
-
-  setShowCommentModal(true);
-
-  setOpenMenu(null);
-
-}}
-      >
-        Add Notes
-      </button>
-      {item?.canAssignStaff && (
-        <button
-          // onClick={() => {
-          //   setSelectedItem(item);
-          //   setShowModal(true);
-          //   setOpenMenu(null);
-          // }}
-     onClick={() => {
-  setSelectedItem(item);
-
-  const currentAgent = agentList.find(
-    (a) => a.agentName?.trim() === item.assignedTo?.trim()
-  );
-
-  setDropdownValue(currentAgent?.agentId || "");
-  setCommentText("");
-  setCommentError(""); // add this
-  setShowModal(true);
-  setOpenMenu(null);
-}}
-          className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-        >
-          
-          {item?.assignedTo ? "ReAssign Staff" : "Assign Staff "}
-        </button>
-      )}
-{item?.demoRequestStatus !==
-  "CONVERTED" && (
-
-  <button
-    className="
-      w-full
-      text-left
-      px-4
-      py-2.5
-      text-sm
-      hover:bg-gray-50
-      transition-colors
-      cursor-pointer
-    "
-    onClick={() => {
-
-      setSelectedId(
-        item.requestId
-      );
-
-      setSelectedItem(item);
-
-      setOpenStatusModal(true);
-
-      setOpenMenu(null);
-
-    }}
-  >
-    Change Status
-  </button>
-
-)}
-      {/* <button
-        className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-        onClick={() => {
-          setSelectedId(item.requestId);
+        onClick={async () => {
           setSelectedItem(item);
-          setOpenStatusModal(true);
+          await fetchAllComments(item.requestId);
+          setShowCommentModal(true);
           setOpenMenu(null);
         }}
       >
-        Change Status
-      </button> */}
-{item?.canMarkDropped && (
+        Add Notes
+      </button>
 
-  <button
-    onClick={() => {
+      {item?.canAssignStaff && (
+        <button
+          onClick={() => {
+            setSelectedItem(item);
+            const currentAgent = agentList.find(
+              (a) => a.agentName?.trim() === item.assignedTo?.trim()
+            );
+            setDropdownValue(currentAgent?.agentId || "");
+            setCommentText("");
+            setCommentError("");
+            setShowModal(true);
+            setOpenMenu(null);
+          }}
+          className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+        >
+          {item?.assignedTo ? "ReAssign Staff" : "Assign Staff "}
+        </button>
+      )}
 
-      setSelectedItem(item);
+      {item?.demoRequestStatus !== "CONVERTED" && (
+        <button
+          className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+          onClick={() => {
+            setSelectedId(item.requestId);
+            setSelectedItem(item);
+            setOpenStatusModal(true);
+            setOpenMenu(null);
+          }}
+        >
+          Change Status
+        </button>
+      )}
 
-      setShowMarkLostDrawer(true);
-
-      setOpenMenu(null);
-
-    }}
-    className="
-      w-full
-      text-left
-      px-4
-      py-2.5
-      text-sm
-      hover:bg-red-50
-      text-red-500
-      transition-colors
-      cursor-pointer
-    "
-  >
-    Mark as Lost
-  </button>
-
-)}
-     
+      {item?.canMarkDropped && (
+        <button
+          onClick={() => {
+            setSelectedItem(item);
+            setShowMarkLostDrawer(true);
+            setOpenMenu(null);
+          }}
+          className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-500 transition-colors cursor-pointer"
+        >
+          Mark as Lost
+        </button>
+      )}
 
       <button
         className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-500 transition-colors cursor-pointer"
@@ -1488,9 +1457,8 @@ if (lettersCount < 5) {
       >
         Delete
       </button>
-
-    </div>
-
+    </div>,
+    document.body
   )}
 
 </td>

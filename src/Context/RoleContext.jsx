@@ -42,6 +42,7 @@
 // export const useRole = () => useContext(RoleContext);
 import React, { createContext, useContext, useEffect, useState } from "react";
 import api from "../Config/AxiosConfig";
+import { useLocation } from "react-router-dom";
 
 const RoleContext = createContext(null);
 
@@ -54,7 +55,7 @@ export const RoleProvider = ({ children }) => {
   const [accessError,setAccessError] = useState("")
   const [adminPermissions, setAdminPermissions] = useState([]);
   const [adminDetails, setAdminDetails] = useState(null);
-
+const location = useLocation();
 const getErrorMessage = (error) => {
   if (error?.response?.data) {
     if (typeof error.response.data === "string") {
@@ -145,16 +146,21 @@ useEffect(() => {
     localStorage.getItem("mock_token");
 
   if (!token || !isTokenValid(token)) {
-    // expired/missing token — clear silently, API call பண்ண வேண்டாம்
     localStorage.removeItem("access_token");
     localStorage.removeItem("mock_token");
     return;
   }
 
-  fetchModules();
-  getAdminDetails();
 
-}, []);
+  if (modules.length === 0) {
+    fetchModules();
+  }
+
+  if (!adminDetails) {
+    getAdminDetails();
+  }
+
+}, [location.pathname]);
   const createAgentRole = async (payload) => {
     try {
       setLoading(true);

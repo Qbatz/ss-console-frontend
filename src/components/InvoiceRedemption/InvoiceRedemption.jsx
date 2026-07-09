@@ -204,7 +204,7 @@ setModalType("success");
 > */}
 <div
   className="
-    max-h-[400px]
+    max-h-[350px]
     overflow-y-auto
    overflow-x-auto
 
@@ -224,13 +224,19 @@ setModalType("success");
     hover:[&::-webkit-scrollbar-thumb]:bg-[#B7CCFF]
   "
 >
-            <table className="w-full text-sm">
+           <table className="w-max min-w-full text-sm">
 
-              <thead className="bg-[#F8F9FF] sticky top-0 z-10 text-gray-600">
+             <thead className="sticky top-0 z-50 bg-[#F8F9FF]">
                 <tr>
-                  <th className="px-3 py-2 text-left whitespace-nowrap">Source Invoice</th>
+                  <th className="sticky left-0 z-30 bg-[#F8F9FF] px-3 py-2 text-left whitespace-nowrap min-w-[180px]">
+  Source Invoice
+</th>
+
+<th className="sticky left-[180px] z-30 bg-[#F8F9FF] px-3 py-2 text-left whitespace-nowrap min-w-[200px]">
+  Hostel Name
+</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Target Invoice</th>
-                  <th className="px-3 py-2 text-left whitespace-nowrap">Hostel Name</th>
+                  
                   <th className="px-3 py-2 text-left whitespace-nowrap">Tenant Name</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Amount</th>
                   {/* <th className="px-3 py-2 text-left whitespace-nowrap">Reference</th>
@@ -238,7 +244,9 @@ setModalType("success");
                   {/* <th className="px-3 py-2 text-left whitespace-nowrap">Redeemed At</th> */}
                   <th className="px-3 py-2 text-left whitespace-nowrap">Created At</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Created By</th>
-                  <th className="px-3 py-2 text-left whitespace-nowrap">Action</th>
+                 <th className="sticky right-0 z-30 bg-[#F8F9FF] px-3 py-2  whitespace-nowrap min-w-[100px] ">
+  Action
+</th>
 
                 </tr>
               </thead>
@@ -264,9 +272,15 @@ setModalType("success");
                   data.map((item, i) => (
                     <tr key={i} className="border-t border-gray-300 hover:bg-gray-50">
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.sourceInvoiceNumber}</td>
+                     <td className="sticky left-0 z-20 bg-white-common px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap min-w-[180px]">
+  {item.sourceInvoiceNumber}
+</td>
+
+<td className="sticky left-[180px] z-20 bg-white-common px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap min-w-[200px]">
+  {item.hostelName}
+</td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.targetInvoiceNumber}</td>
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.hostelName}</td>
+                      
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.tenantName}</td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.redemptionAmount}</td>
                       {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.referenceNumber}</td>
@@ -278,7 +292,7 @@ setModalType("success");
                         {item.createdAtDate} {item.createdAtTime}
                       </td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.createdBy}</td>
-                   <td className="px-4 py-2 relative overflow-visible">
+                  <td className="sticky right-0 z-20 bg-white-common px-4 py-2 relative overflow-visible min-w-[100px]">
 
   <div className="flex justify-center">
 
