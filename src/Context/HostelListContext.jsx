@@ -1720,6 +1720,35 @@ const getHostelNotes = async (hostelId) => {
 
 //   }
 // };
+const getTenantSettlement = async (customerId, date) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      `/v2/tenants/settlement/${customerId}`,
+      {
+        date,
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
     <HostelContext.Provider
       value={{
@@ -1732,7 +1761,7 @@ const getHostelNotes = async (hostelId) => {
         resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,
         deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,
         generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions,getInvoiceReceipt,updateInvoiceBalance,
-        getTenantById,updateAdvanceAmount, createHostelNote,getHostelNotes,
+        getTenantById,updateAdvanceAmount, createHostelNote,getHostelNotes,getTenantSettlement
       }}
     >
       {children}

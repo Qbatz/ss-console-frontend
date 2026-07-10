@@ -39,6 +39,8 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
     const [modalType, setModalType] = useState("success");
     const [showSuccess, setShowSuccess] = useState(false);
     const [message, setMessage] = useState("");
+    const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+const [activeFilter, setActiveFilter] = useState("All");
     const [menuPosition, setMenuPosition] = useState({
         top: 0,
         left: 0,
@@ -218,7 +220,6 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
 
                         <table className="w-full">
 
-                            {/* HEADER */}
                             <thead
                                 className="
     bg-[#f8fafc]

@@ -37,6 +37,8 @@ import LocationGrey from "../../assets/locationGrey.png";
 import Call from "../../assets/call.png";
 import { useKyc } from "../../Context/KYCContext";
 import User from "../../assets/userblack.png";
+import RoomView from "./RoomView";
+
 const PropertyOverview = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory, sharePaymentLink, getTenantDeductions } = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
@@ -70,7 +72,19 @@ const PropertyOverview = () => {
   useState(false);
  const { getKYCList, approveKYC } = useKyc();
  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+ const [showSummary, setShowSummary] = useState(false);
 const approveLock = useRef(false);
+const [activeFilter, setActiveFilter] = useState("All");
+const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+
+const [showAllMenu, setShowAllMenu] = useState(false);
+const [showStatusMenu, setShowStatusMenu] = useState(false);
+const [showViewMenu, setShowViewMenu] = useState(false);
+
+const [selectedType, setSelectedType] = useState("All");
+const [selectedStatus, setSelectedStatus] = useState("All");
+const [selectedView, setSelectedView] = useState("Select");
+
  console.log("selectedCustomerId",selectedCustomerId)
 const [approveLoading, setApproveLoading] =
   useState(false);
@@ -105,6 +119,7 @@ const [approveLoading, setApproveLoading] =
 
   const { canWrite: canResetWrite } = usePermission("Reset hostel");
   const { plans, getPlans, getPlansDropdown } = usePlan();
+ 
   console.log("paidBy", paidBy)
   useEffect(() => {
     getPlansDropdown().then((res) => {
@@ -2050,7 +2065,7 @@ const handleApproveKYC = async (customerId) => {
     "
           >
 
-            {/* TABS */}
+          
             <div
               className="
         flex
@@ -2098,7 +2113,277 @@ const handleApproveKYC = async (customerId) => {
               ))}
 
             </div>
+            {activeTab === "Invoice" && (
+<div className="flex items-center gap-1 pb-4">
+ 
 
+  <button
+  onClick={() => setShowFilterDrawer(true)}
+  className="
+    h-7
+    px-4
+    border
+    rounded-lg
+    flex
+    items-center
+    gap-1
+    bg-white
+    cursor-pointer
+  "
+>
+  Filters
+  <img
+    src={ArrowSelect}
+    alt=""
+    className="w-3 h-3"
+  />
+</button>
+</div>
+            )}
+
+ {showFilterDrawer && (
+  <>
+    <div
+      className="fixed inset-0 bg-black/30 z-40"
+      onClick={() => setShowFilterDrawer(false)}
+    />
+
+   <div
+  className="
+    fixed
+    top-4
+    right-4
+    bottom-4
+    w-[420px]
+    bg-white
+    z-50
+    shadow-xl
+    rounded-3xl
+    flex
+    flex-col
+    overflow-hidden
+  "
+>
+  <div className="flex-1 overflow-y-auto p-5">
+     <div className="flex justify-between items-center mb-5">
+    <h3 className="text-lg font-semibold">
+      Filters
+    </h3>
+
+    <button
+      onClick={() => setShowFilterDrawer(false)}
+    >
+      ✕
+    </button>
+  </div>
+
+     <div className="space-y-3">
+
+  {/* ALL */}
+  {/* All Dropdown */}
+<div className="relative">
+  <button
+    onClick={() => setShowAllMenu(!showAllMenu)}
+    className="w-full h-[60px] px-5 border-soft rounded-2xl flex items-center justify-between"
+  >
+    <span>{selectedType}</span>
+    <img src={ArrowSelect} className="w-4 h-4"/>
+  </button>
+
+  {showAllMenu && (
+    <div
+      className="
+        absolute
+        top-[70px]
+        left-0
+        w-full
+        bg-white
+        border
+        rounded-2xl
+        shadow-lg
+        z-50
+        max-h-[250px]
+        overflow-y-auto
+      "
+    >
+      {[
+        "Rent",
+        "Advance",
+        "Booking",
+        "Retainer",
+        "EB",
+        "Manual",
+      ].map((item) => (
+        <div
+          key={item}
+          onClick={() => {
+            setSelectedType(item);
+            setShowAllMenu(false);
+          }}
+          className="px-5 py-4 cursor-pointer hover:bg-[#F2F4F7]"
+        >
+          {item}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+  {/* STATUS */}
+  <div className="relative">
+  <div className="border-soft rounded-xl">
+    <button
+      onClick={() => setShowStatusMenu(!showStatusMenu)}
+      className="w-full flex justify-between items-center p-3"
+    >
+      <span>{selectedStatus}</span>
+       <img src={ArrowSelect} className="w-4 h-4"/>
+    </button>
+  </div>
+
+  {showStatusMenu && (
+    <div
+      className="
+        absolute
+        top-[60px]
+        left-0
+        w-full
+        bg-white
+        border
+        rounded-xl
+        shadow-lg
+        z-50
+        max-h-[220px]
+        overflow-y-auto
+      "
+    >
+      {["All", "Paid", "Unpaid", "Partial Paid", "Cancelled"].map(
+        (item) => (
+          <div
+            key={item}
+            onClick={() => {
+              setSelectedStatus(item);
+              setShowStatusMenu(false);
+            }}
+            className="
+              px-4
+              py-3
+              cursor-pointer
+              hover:bg-[#F2F4F7]
+            "
+          >
+            {item}
+          </div>
+        )
+      )}
+    </div>
+  )}
+</div>
+
+ <div className="relative">
+  <div className="border-soft rounded-xl">
+    <button
+      onClick={() => setShowViewMenu(!showViewMenu)}
+      className="w-full flex items-center justify-between p-3"
+    >
+      <span>{selectedView}</span>
+       <img src={ArrowSelect} className="w-4 h-4"/>
+    </button>
+  </div>
+
+  {showViewMenu && (
+    <div
+      className="
+        absolute
+        top-[60px]
+        left-0
+        w-full
+        bg-white
+        border
+        rounded-xl
+        shadow-lg
+        z-50
+      "
+    >
+      {["Room View", "List View"].map((item) => (
+        <div
+          key={item}
+          onClick={() => {
+            setSelectedView(item);
+            setShowViewMenu(false);
+          }}
+          className="
+            px-4
+            py-3
+            cursor-pointer
+            hover:bg-[#F2F4F7]
+          "
+        >
+          {item}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+</div>
+    </div>
+
+
+<div
+  className="
+    border-t
+    border-gray-300
+    px-5
+    py-4
+    flex
+    gap-3
+    bg-white
+    shrink-0
+  "
+>
+  <button
+    onClick={() => {
+      setSelectedType("All");
+      setSelectedStatus("All");
+      setSelectedView("List View");
+
+      setShowAllMenu(false);
+      setShowStatusMenu(false);
+      setShowViewMenu(false);
+    }}
+    className="
+      flex-1
+      h-11
+      border
+      border-gray-300
+      rounded-xl
+      font-medium
+    "
+  >
+    Clear
+  </button>
+
+  <button
+    onClick={() => {
+      setShowFilterDrawer(false);
+    }}
+    className="
+      flex-1
+      h-11
+      bg-blue-600
+      text-white
+      rounded-xl
+      font-medium
+    "
+  >
+    OK
+  </button>
+</div>
+    </div>
+  </>
+  
+)}
           </div>
 
           {/* TENANTS */}
@@ -2291,7 +2576,7 @@ const handleApproveKYC = async (customerId) => {
 
                             {/* STATUS */}
 
-                            <td
+                            {/* <td
                               className="
                         px-4
                         py-3
@@ -2300,8 +2585,19 @@ const handleApproveKYC = async (customerId) => {
                         text-tableCell
                       "
                             >
-                              {item.kycStatus || "N/A"}
-                            </td>
+                              {item.kycDetailsStatus || "NOT_AVAILABLE"}
+                            </td> */}
+                           <td className="px-4 py-3 text-left font-medium">
+  <span
+    className={
+      item.kycDetailsStatus === "NOT_AVAILABLE" || !item.kycDetailsStatus
+        ? "text-orange-500"
+        : "text-green-500"
+    }
+  >
+    {item.kycDetailsStatus || "NOT_AVAILABLE"}
+  </span>
+</td>
                             <td
                               className="
                         px-4
@@ -2466,6 +2762,23 @@ const handleApproveKYC = async (customerId) => {
                                     >
                                       Delete
                                     </button>
+
+
+
+                                    <button  onClick={() =>
+    navigate(`/settlement-summary/${item.customerId}`)
+  }
+                                     
+                                     
+                                      className="
+       
+        text-left
+        px-4
+        py-2
+        text-cardTitle"
+                                    >
+                                      Generate
+                                    </button>
   {/* <button
  onClick={() => {
     setSelectedCustomerId(item.customerId);
@@ -2590,12 +2903,25 @@ const handleApproveKYC = async (customerId) => {
             />
           )}
 
-          {activeTab === "Invoice" && (
+          {/* {activeTab === "Invoice" && (
             <InvoiceView
               hostelData={hostelData}
               refreshHostel={fetchData}
             />
-          )}
+          )} */}
+         {activeTab === "Invoice" && (
+  selectedView === "Room View" ? (
+    <RoomView
+      hostelData={hostelData}
+      refreshHostel={fetchData}
+    />
+  ) : (
+    <InvoiceView
+      hostelData={hostelData}
+      refreshHostel={fetchData}
+    />
+  )
+)}
 
           {activeTab === "Invoice Redemption" && (
             <InvoicesRedemption
@@ -6197,6 +6523,8 @@ const handleApproveKYC = async (customerId) => {
             </div>
           </div>
 )}
+
+
     </DashboardLayout>
   );
 };

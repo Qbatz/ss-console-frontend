@@ -1220,7 +1220,7 @@ const handleOpenComments =
   className="
     sticky left-0 z-30
     bg-white-common
-    group-hover:bg-[#fafbff]
+    group-hover:!bg-[#fafbff]
 
     min-w-[70px]
     w-[70px]
@@ -1243,7 +1243,7 @@ const handleOpenComments =
   className="
     sticky left-[70px] z-20
     bg-white-common
-    group-hover:bg-[#fafbff]
+    group-hover:!bg-[#fafbff]
 
     min-w-[190px]
     w-[190px]
@@ -1349,7 +1349,7 @@ const handleOpenComments =
 
           </td>
 
-             <td className="sticky right-0 z-20 bg-white-common group-hover:bg-[#fafbff] px-5 py-2 relative overflow-visible">
+             <td className="sticky right-0 z-20 bg-white-common group-hover:!bg-[#fafbff] px-5 py-2 relative overflow-visible">
                       <button
  onClick={(e) => { e.stopPropagation(); handleMenuToggle(e, index); }}
   className="

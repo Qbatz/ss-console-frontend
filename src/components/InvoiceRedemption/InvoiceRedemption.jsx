@@ -270,13 +270,43 @@ setModalType("success");
                   </tr>
                 ) : (
                   data.map((item, i) => (
-                    <tr key={i} className="border-t border-gray-300 hover:bg-gray-50">
+                   <tr
+  key={i}
+   className="
+    group
+    border-t
+    border-gray-300
+    hover:bg-gray-50
+    transition-colors
+    duration-150
+  "
+>
 
-                     <td className="sticky left-0 z-20 bg-white-common px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap min-w-[180px]">
+                     <td  className="
+    sticky left-0 z-20
+    bg-white-common
+    group-hover:!bg-gray-50
+    px-4 py-2
+    text-left
+    font-medium
+    text-[12px]
+    whitespace-nowrap
+    min-w-[180px]
+  ">
   {item.sourceInvoiceNumber}
 </td>
 
-<td className="sticky left-[180px] z-20 bg-white-common px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap min-w-[200px]">
+<td className="
+    sticky left-[180px] z-20
+    bg-white-common
+    group-hover:!bg-gray-50
+    px-4 py-2
+    text-left
+    font-medium
+    text-[12px]
+    whitespace-nowrap
+    min-w-[200px]
+  ">
   {item.hostelName}
 </td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.targetInvoiceNumber}</td>
@@ -292,7 +322,15 @@ setModalType("success");
                         {item.createdAtDate} {item.createdAtTime}
                       </td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.createdBy}</td>
-                  <td className="sticky right-0 z-20 bg-white-common px-4 py-2 relative overflow-visible min-w-[100px]">
+                  <td  className="
+    sticky right-0 z-20
+    bg-white-common
+    group-hover:!bg-gray-50
+    px-4 py-2
+    relative
+    overflow-visible
+    min-w-[100px]
+  ">
 
   <div className="flex justify-center">
 

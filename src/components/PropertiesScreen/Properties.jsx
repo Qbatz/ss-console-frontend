@@ -1803,13 +1803,13 @@ const handleAddNote = async () => {
                           <tr key={item.hostelId} className="group hover:bg-gray-50 text-[13px]">
 
                           
-                            <td className="px-4 py-2 sticky left-0 bg-white-common z-30 w-[80px] group-hover:bg-gray-50">
+                            <td className="px-4 py-2 sticky left-0 bg-white-common z-30 w-[80px] group-hover:!bg-gray-50">
                              
                               {(hostels?.currentPage - 1) * hostels?.sizePerPage + index + 1}
                             </td>
 
                             {/* Sticky Name */}
-                            <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] group-hover:bg-gray-50">
+                            <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] group-hover:!bg-gray-50">
 
                               <div
                                 className="flex items-center gap-3 cursor-pointer"
@@ -1967,7 +1967,7 @@ const handleAddNote = async () => {
 
     z-[10]
 
-    group-hover:bg-gray-50
+    group-hover:!bg-gray-50
   "
 >
 

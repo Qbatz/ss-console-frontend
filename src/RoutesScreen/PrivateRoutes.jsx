@@ -39,6 +39,7 @@ import InvoiceReceipt from "../components/PropertiesScreen/InvoiceReceiptPage";
 import PlanFeatures from "../components/SubscriptionScreen/PlanFeaturesScreen";
 import KycApproval from "../components/KYCApproval/KYCApprovalScreen";
 import { KYCProvider } from "../Context/KYCContext";
+import SettlementSummary from "../components/PropertiesScreen/SettlementSummary";
 
 const PrivateRoute = ({ children }) => {
   const token =
@@ -124,7 +125,10 @@ const PrivateRoutesScreen = () => {
 />
 <Route path="/Kyc-approve/:agentId" element={<KycApproval />} />
 
-
+<Route
+  path="/settlement-summary/:customerId"
+element={<SettlementSummary />}
+/>
 
                     </Routes>
                     </KYCProvider>
