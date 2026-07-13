@@ -7,10 +7,13 @@ import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
 import Edit from "../../assets/editIcon.png";
 import Toast from "../SuccessModal/ToastDesign";
+import { useNavigate } from "react-router-dom";
+import ArrowImg from "../../assets/arrow-up.png";
 
 
 
 const SettlementSummary = () => {
+  const navigate = useNavigate();
   const { getTenantSettlement } = useHostel();
   const { customerId } = useParams();
   const [showUnpaid, setShowUnpaid] = useState(true);
@@ -127,15 +130,25 @@ const finalPayableAmount =
       <div className="h-screen bg-[#F8FAFC] flex flex-col">
 
 
-        <div className="px-8 pt-6 shrink-0">
-          <h1 className="block text-[20px] font-semibold text-[#222222] text-left">
-            Final Settlement
-          </h1>
+       <div className="px-8 pt-6 shrink-0">
+  <div className="flex items-center gap-3">
 
-          <p className="mt-1 text-[18px] text-[#667085] text-left">
-            Tenants / Final Settlement
-          </p>
-        </div>
+   
+      <img src={ArrowImg} className="w-4 h-4 cursor-pointer"  onClick={() => navigate(-1)}/>
+    
+
+    <div>
+      <h1 className="block text-[20px] font-semibold text-[#222222] text-left">
+        Final Settlement
+      </h1>
+
+      <p className="mt-1 text-[18px] text-[#667085] text-left">
+        Tenants / Final Settlement
+      </p>
+    </div>
+
+  </div>
+</div>
 
 
         <div className="flex-1 px-8 py-4 overflow-hidden">

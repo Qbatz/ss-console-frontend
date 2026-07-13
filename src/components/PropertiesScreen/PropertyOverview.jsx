@@ -2764,8 +2764,9 @@ const handleApproveKYC = async (customerId) => {
                                     </button>
 
 
-
-                                    <button  onClick={() =>
+{
+  item?.canGenerateSettlement === true &&(
+     <button  onClick={() =>
     navigate(`/settlement-summary/${item.customerId}`)
   }
                                      
@@ -2775,22 +2776,14 @@ const handleApproveKYC = async (customerId) => {
         text-left
         px-4
         py-2
-        text-cardTitle"
+        text-cardTitle cursor-pointer"
                                     >
                                       Generate
                                     </button>
-  {/* <button
- onClick={() => {
-    setSelectedCustomerId(item.customerId);
-    setShowApproveModal(true);
-    setOpenMenu(null);
-   setSelectedTenant(item)
-
-  }}
-  className="text-left px-4 py-2 text-cardTitle hover:bg-cardBg  cursor-pointer"
->
-  Approve KYC
-</button> */}
+  )
+}
+                                   
+ 
 {item?.canApproveKyc === true && (
   <button
     onClick={() => {
