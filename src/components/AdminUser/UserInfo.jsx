@@ -44,6 +44,7 @@ console.log("agentDetails",agentDetails)
     return () => document.removeEventListener("click", handleClick);
   }, []);
 const subscriptions = agentDetails?.subscriptions || [];
+const trial = agentDetails?.trials || [];
 const toggleOwner = (id) => {
 
   setExpandedOwners((prev) =>
@@ -489,7 +490,16 @@ const toggleOwner = (id) => {
               >
                 Subscriptions
               </button>
-
+ <button
+    onClick={() => setActiveTab("trial")}
+    className={`pb-2 text-[13px] font-semibold border-b-2 cursor-pointer ${
+      activeTab === "trial"
+        ? "text-blue-600 border-blue-600"
+        : "text-gray-400 border-transparent"
+    }`}
+  >
+    Trial
+  </button>
             </div>
 
 
@@ -530,24 +540,22 @@ const toggleOwner = (id) => {
     <p className="text-gray-400 text-sm">No Activity Found</p>
   )}
 </div>
-            ) : (
-   <div className="border border-gray-300 rounded-lg overflow-hidden">
+            ) : activeTab === "subscription" ? (
+ <div className="border border-gray-300 rounded-lg overflow-hidden">
 
-  {/* HEADER */}
-  <table className="w-full text-sm">
+  <table className="w-full text-sm table-fixed">
     <thead>
       <tr className="text-gray-500 text-[12px] text-left border-b border-gray-300 bg-white-common">
-        <th className="py-3 px-4 w-[30%]">Property Name</th>
-        <th className="py-3 px-4 w-[20%]">Plan Type</th>
-        <th className="py-3 px-4 w-[25%]">Start Date</th>
-        <th className="py-3 px-4 w-[25%]">Expiry Date</th>
+        <th className="py-3 px-4 w-[26%]">Property Name</th>
+        <th className="py-3 px-4 w-[28%] text-left">Plan Type</th>
+        <th className="py-3 px-4 w-[23%]">Start Date</th>
+        <th className="py-3 px-4 w-[23%]">Expiry Date</th>
       </tr>
     </thead>
   </table>
 
-  {/* SCROLLABLE BODY */}
   <div className="max-h-[300px] overflow-y-auto">
-    <table className="w-full text-sm">
+    <table className="w-full text-sm table-fixed">
       <tbody className="text-gray-700">
 
         {subscriptions.length > 0 ? (
@@ -556,28 +564,31 @@ const toggleOwner = (id) => {
               key={item.id}
               className="border-b border-gray-300 last:border-0 text-[12px]"
             >
-              <td className="py-4 px-4 w-[30%] text-left">
+              <td
+                className="py-4 px-4 w-[26%] text-left truncate"
+                title={item?.hostelName}
+              >
                 {item?.hostelName}
               </td>
 
-              <td className="px-4 w-[20%] text-left">
+              <td className="py-4 px-4 w-[28%] text-left overflow-hidden">
                 <span
-                  className={`text-[10px] px-2 py-[2px] rounded
+                  className={`inline-block text-[10px] font-medium px-2 py-[3px] rounded whitespace-nowrap
                   ${
                     item.planType === "STANDARD"
                       ? "bg-blue-100 text-blue-600"
                       : "bg-orange-100 text-orange-600"
                   }`}
                 >
-                  {item.planType}
+                  {item.planType?.replace(/_/g, " ")}
                 </span>
               </td>
 
-              <td className="px-4 w-[25%] text-left">
+              <td className="px-4 w-[23%] text-left">
                 {item.planStartsAt}
               </td>
 
-              <td className="px-4 w-[25%] text-left">
+              <td className="px-4 w-[23%] text-left">
                 {item.planEndsAt}
               </td>
             </tr>
@@ -588,7 +599,7 @@ const toggleOwner = (id) => {
               colSpan="4"
               className="text-center py-8 text-gray-400"
             >
-              🚫 No Subscriptions Available
+              🚫 No Trial Available
             </td>
           </tr>
         )}
@@ -598,8 +609,80 @@ const toggleOwner = (id) => {
   </div>
 
 </div>
+            ):(
+              <>
+<div className="border border-gray-300 rounded-lg overflow-hidden">
 
+  <table className="w-full text-sm table-fixed">
+    <thead>
+      <tr className="text-gray-500 text-[12px] text-left border-b border-gray-300 bg-white-common">
+        <th className="py-3 px-4 w-[26%]">Property Name</th>
+        <th className="py-3 px-4 w-[28%] text-left">Plan Type</th>
+        <th className="py-3 px-4 w-[23%]">Start Date</th>
+        <th className="py-3 px-4 w-[23%]">Expiry Date</th>
+      </tr>
+    </thead>
+  </table>
+
+  <div className="max-h-[300px] overflow-y-auto">
+    <table className="w-full text-sm table-fixed">
+      <tbody className="text-gray-700">
+
+        {trial.length > 0 ? (
+          trial.map((item) => (
+            <tr
+              key={item.id}
+              className="border-b border-gray-300 last:border-0 text-[12px]"
+            >
+              <td
+                className="py-4 px-4 w-[26%] text-left truncate"
+                title={item?.hostelName}
+              >
+                {item?.hostelName}
+              </td>
+
+              <td className="py-4 px-4 w-[28%] text-left overflow-hidden">
+                <span
+                  className={`inline-block text-[10px] font-medium px-2 py-[3px] rounded whitespace-nowrap
+                  ${
+                    item.planType === "STANDARD"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-orange-100 text-orange-600"
+                  }`}
+                >
+                  {item.planType?.replace(/_/g, " ")}
+                </span>
+              </td>
+
+              <td className="px-4 w-[23%] text-left">
+                {item.planStartsAt}
+              </td>
+
+              <td className="px-4 w-[23%] text-left">
+                {item.planEndsAt}
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td
+              colSpan="4"
+              className="text-center py-8 text-gray-400"
+            >
+              🚫 No Trial Available
+            </td>
+          </tr>
+        )}
+
+      </tbody>
+    </table>
+  </div>
+
+</div>
+              </>
             )}
+
+            
           </div>
         </div>
       </div>

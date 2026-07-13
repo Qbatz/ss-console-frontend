@@ -5890,7 +5890,7 @@ const handleApproveKYC = async (customerId) => {
       text-left
     "
                 >
-                  Paid By
+                  Requested By
 
                   <span className="text-dangerRed">
                     *
