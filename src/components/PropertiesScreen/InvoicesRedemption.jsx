@@ -267,11 +267,27 @@ const [deleteId, setDeleteId] = useState(null);
     : defaultInvoiceRedemptions;
   console.log("data", data)
   const handleUpdateInvoiceRedemption = async () => {
-    console.log("...........?")
-    if (!editAmount) {
-      setAmountError("Amount is required");
-      return;
-    }
+   if (!editAmount) {
+    setAmountError("Amount is required");
+    return;
+  }
+
+  if (
+    Number(editAmount) ===
+    Number(selectedItem?.redemptionAmount)
+  ) {
+    setModalType("error");
+    setMessage("No changes detected");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+    return;
+  }
+
+  
 
     const res = await updateInvoiceRedemption(
       selectedItem?.id,
@@ -508,7 +524,7 @@ const [deleteId, setDeleteId] = useState(null);
     <div
       ref={menuRef}
       className="
-        fixed w-28 bg-white rounded-xl z-[99999]
+        fixed w-28 bg-white-common rounded-xl z-[99999]
         border border-gray-100
         shadow-[0_12px_35px_rgba(0,0,0,0.18)]
         overflow-hidden
@@ -622,7 +638,9 @@ const [deleteId, setDeleteId] = useState(null);
               <span className="border px-3 py-1 rounded bg-gray-50">
                 {page + 1}
               </span>
-
+              <span className="text-textDark/60 text-cardTitle">
+  {page + 1} - {totalPages}
+</span>
              <button
   disabled={
     page + 1 >= totalPages ||
@@ -711,7 +729,7 @@ const [deleteId, setDeleteId] = useState(null);
   >
 
     <div
-      className="bg-white rounded-xl w-[400px] p-6 shadow-xl"
+      className="bg-white-common rounded-xl w-[400px] p-6 shadow-xl"
       onClick={(e) => e.stopPropagation()}
     >
 
@@ -781,7 +799,7 @@ const [deleteId, setDeleteId] = useState(null);
   >
 
     <div
-      className="bg-white rounded-xl w-[400px] p-6 shadow-xl"
+      className="bg-white-common rounded-xl w-[400px] p-6 shadow-xl"
       onClick={(e) => e.stopPropagation()}
     >
 

@@ -33,6 +33,13 @@ import TableCustomization from "../components/TableCustomizationScreen/TableCust
 import TenantRecurring from "../components/RecurringMonitor/TenantRecurring";
 import InvoiceRedemption from "../components/InvoiceRedemption/InvoiceRedemption";
 import { SupportTicketsProvider } from "../Context/SupportTicketsContext";
+import TenantDeductions from "../components/PropertiesScreen/TenantDeductions";
+import TenantOverview from "../components/PropertiesScreen/TenantOverview";
+import InvoiceReceipt from "../components/PropertiesScreen/InvoiceReceiptPage";
+import PlanFeatures from "../components/SubscriptionScreen/PlanFeaturesScreen";
+import KycApproval from "../components/KYCApproval/KYCApprovalScreen";
+import { KYCProvider } from "../Context/KYCContext";
+import SettlementSummary from "../components/PropertiesScreen/SettlementSummary";
 
 const PrivateRoute = ({ children }) => {
   const token =
@@ -72,12 +79,13 @@ const PrivateRoutesScreen = () => {
   return (
     <PrivateRoute>
       <PlanProvider>
-        <RoleProvider>
+       
           <HostelProvider>
             <SubscriptionProvider>
               <OwnersProvider>
                 <DashboardProvider>
                   <SupportTicketsProvider>
+                    <KYCProvider>
                     <Routes>
                       <Route path="/home/:roleId" element={<Home />} />
                       <Route path="/proprietors/:roleId" element={<Proprietors />} />
@@ -86,7 +94,7 @@ const PrivateRoutesScreen = () => {
                       <Route path="/roles/:roleId" element={<Roles />} />
                       <Route path="/properties/:roleId" element={<Properties />} />
                       <Route path="/subscription/:roleId" element={<Subscription />} />
-                      {/* <Route path="/subscription/:roleId" element={<Manageplans />} /> */}
+                      <Route path="/plan-features/:roleId" element={<PlanFeatures />} />
                       <Route path="/billing/:roleId" element={<Billing />} />
                       <Route path="/supportTicket/:roleId" element={<SupportTicket />} />
                       <Route path="/crmDashboard/:roleId" element={<CRMDashboard />} />
@@ -109,17 +117,27 @@ const PrivateRoutesScreen = () => {
                       <Route path="/iam-user/:agentId" element={<UserInfo />} />
                       <Route path="/tableCustomize/:agentId" element={<TableCustomization />} />
                       <Route path="/invoice-redemption/:agentId" element={<InvoiceRedemption />} />
+                      <Route path="/tenant-deductions/:customerId"element={<TenantDeductions />}/>
+<Route path="/tenant-overview/:customerId" element={<TenantOverview />}/>
+<Route
+  path="/invoice-receipt/:hostelId/:invoiceId"
+  element={<InvoiceReceipt />}
+/>
+<Route path="/Kyc-approve/:agentId" element={<KycApproval />} />
 
-
-
+<Route
+  path="/settlement-summary/:customerId"
+element={<SettlementSummary />}
+/>
 
                     </Routes>
+                    </KYCProvider>
                   </SupportTicketsProvider>
                 </DashboardProvider>
               </OwnersProvider>
             </SubscriptionProvider>
           </HostelProvider>
-        </RoleProvider>
+      
       </PlanProvider>
     </PrivateRoute>
   );

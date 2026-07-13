@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
@@ -27,13 +27,15 @@ const DemoRequestDrawer = ({ open, onClose, fetchData }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
   const [emailError, setEmailError] = useState("");
-  const[requestDateError,setRequestDateError] = useState("")
-  const [requestTimeError,setRequestTimeError] = useState("")
-const [isSubmitting, setIsSubmitting] =
-  useState(false);
+  const [requestDateError, setRequestDateError] = useState("")
+  const [requestTimeError, setRequestTimeError] = useState("")
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
   const filteredStates = states.filter((s) =>
     s.toLowerCase().includes(search.toLowerCase())
   );
+
+  const submitRef = useRef(false);
   useEffect(() => {
     const handleClickOutside = () => setShowDropdown(false);
     document.addEventListener("click", handleClickOutside);
@@ -79,8 +81,8 @@ const [isSubmitting, setIsSubmitting] =
     // reset
     setNameError("");
     setMobileError("");
-      setRequestDateError("");
-  setRequestTimeError("");
+    setRequestDateError("");
+    setRequestTimeError("");
 
     if (!formData.name) {
       setNameError("Name is required");
@@ -95,14 +97,14 @@ const [isSubmitting, setIsSubmitting] =
       valid = false;
     }
     if (
-  formData.email &&
-  !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
-) {
+      formData.email &&
+      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
+    ) {
 
-  setEmailError("Enter valid email address");
-  valid = false;
+      setEmailError("Enter valid email address");
+      valid = false;
 
-}
+    }
 
     if (!formData.countryCode) {
       setCountryError("Country code is required");
@@ -118,16 +120,16 @@ const [isSubmitting, setIsSubmitting] =
       setTenantError("Tenants cannot be negative");
       valid = false;
     }
-     if (!formData.requestedDate) {
-    setRequestDateError("Requested date is required");
-    valid = false;
-  }
+    if (!formData.requestedDate) {
+      setRequestDateError("Requested date is required");
+      valid = false;
+    }
 
- 
-  if (!formData.requestedTime) {
-    setRequestTimeError("Requested time is required");
-    valid = false;
-  }
+
+    if (!formData.requestedTime) {
+      setRequestTimeError("Requested time is required");
+      valid = false;
+    }
 
     return valid;
   };
@@ -148,13 +150,14 @@ const [isSubmitting, setIsSubmitting] =
       comments: "",
       requestedDate: "",
       requestedTime: "",
-      
+
     });
 
-    // reset search
-    setSearch("");
 
-    // reset errors
+    setSearch("");
+    setIsSubmitting(false)
+
+
     setNameError("");
     setMobileError("");
     setCountryError("");
@@ -170,146 +173,327 @@ const [isSubmitting, setIsSubmitting] =
     onClose();
   };
 
- const handleSubmit = async () => {
+  // const handleSubmit = async () => {
 
-  // 🔥 prevent multiple clicks
-  if (
-  isSubmitting ||
-  loading
-) return;
 
-// 🔥 immediately lock button
-setIsSubmitting(true);
+  //   if (isSubmitting || loading) return;
+
+  //   setIsSubmitting(true);
+
+  //   const isValid = validateForm();
+
+  //   if (!isValid) {
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+  //   if (!formData.contactNo) {
+  //     setMobileError("Mobile number is required");
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+  //   if (
+  //     !/^[6-9]\d{9}$/.test(formData.contactNo) ||
+  //     /^(\d)\1{9}$/.test(formData.contactNo)
+  //   ) {
+  //     setMobileError("Enter valid mobile number");
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+
+  //   try {
+
+
+
+  //     const payload = {
+  //       ...formData,
+
+  //       noOfHostels:
+  //         Number(
+  //           formData.noOfHostels
+  //         ) || 0,
+
+  //       noOfTenants:
+  //         Number(
+  //           formData.noOfTenants
+  //         ) || 0,
+
+  //       requestedDate:
+  //         formatDate(
+  //           formData.requestedDate
+  //         ),
+
+  //       requestedTime:
+  //         formatTime(
+  //           formData.requestedTime
+  //         ),
+  //     };
+
+  //     const res =
+  //       await createDemoRequest(
+  //         payload
+  //       );
+
+  //     if (res.success) {
+
+  //       setModalType("success");
+
+  //       setMessage(
+  //         res?.message
+  //       );
+
+  //       setShowSuccess(true);
+
+  //       fetchData();
+
+  //       setTimeout(() => {
+
+  //         setShowSuccess(false);
+
+  //         handleCloseDrawer();
+
+  //       }, 1500);
+
+  //     } else {
+
+  //       setModalType("error");
+
+  //       setMessage(
+  //         res?.message
+  //       );
+
+  //       setShowSuccess(true);
+
+  //       setTimeout(() => {
+
+  //         setShowSuccess(false);
+
+  //       }, 1500);
+
+  //     }
+
+  //   } catch (error) {
+
+  //     setModalType("error");
+
+  //     setMessage(
+  //       error?.message ||
+  //       "Something went wrong"
+  //     );
+
+  //     setShowSuccess(true);
+
+  //     setTimeout(() => {
+
+  //       setShowSuccess(false);
+
+  //     }, 1500);
+
+  //   }
+
+
+
+
+  // };
+//   const handleSubmit = async () => {
+
+//   if (isSubmitting || loading) return;
+
+//   setIsSubmitting(true);
+
+//   const isValid = validateForm();
+
+//   if (!isValid) {
+//     setIsSubmitting(false);
+//     return;
+//   }
+
+//   if (!formData.contactNo) {
+//     setMobileError("Mobile number is required");
+//     setIsSubmitting(false);
+//     return;
+//   }
+
+//   if (
+//     !/^[6-9]\d{9}$/.test(formData.contactNo) ||
+//     /^(\d)\1{9}$/.test(formData.contactNo)
+//   ) {
+//     setMobileError("Enter valid mobile number");
+//     setIsSubmitting(false);
+//     return;
+//   }
+
+//   try {
+
+//     const payload = {
+//       ...formData,
+
+//       noOfHostels:
+//         Number(formData.noOfHostels) || 0,
+
+//       noOfTenants:
+//         Number(formData.noOfTenants) || 0,
+
+//       requestedDate:
+//         formatDate(formData.requestedDate),
+
+//       requestedTime:
+//         formatTime(formData.requestedTime),
+//     };
+
+//     const res = await createDemoRequest(payload);
+
+//     if (res.success) {
+
+//       setModalType("success");
+
+//       setMessage(res?.message);
+
+//       setShowSuccess(true);
+
+//       fetchData();
+
+//       setTimeout(() => {
+
+//         setShowSuccess(false);
+
+//         handleCloseDrawer();
+
+//       }, 1500);
+
+//     } else {
+
+//       setModalType("error");
+
+//       setMessage(res?.message);
+
+//       setShowSuccess(true);
+
+//       setTimeout(() => {
+
+//         setShowSuccess(false);
+
+//       }, 1500);
+//     }
+
+//   } catch (error) {
+
+//     setModalType("error");
+
+//     setMessage(
+//       error?.message ||
+//       "Something went wrong"
+//     );
+
+//     setShowSuccess(true);
+
+//     setTimeout(() => {
+
+//       setShowSuccess(false);
+
+//     }, 1500);
+
+//   } finally {
+
+//     // IMPORTANT
+//     setIsSubmitting(false);
+
+//   }
+// };
+
+
+
+const handleSubmit = async () => {
+
+  if (submitRef.current || loading || isSubmitting) return;
+
+  submitRef.current = true;
+  setIsSubmitting(true);
+
   const isValid = validateForm();
 
-  if (!formData.contactNo) {
-
-    setMobileError(
-      "Mobile number is required"
-    );
-
+  if (!isValid) {
+    submitRef.current = false;
+    setIsSubmitting(false);
     return;
-
-  } else if (
-    !/^[6-9]\d{9}$/.test(
-      formData.contactNo
-    ) ||
-    /^(\d)\1{9}$/.test(
-      formData.contactNo
-    )
-  ) {
-
-    setMobileError(
-      "Enter valid mobile number"
-    );
-
-    return;
-
   }
 
- if (!isValid) {
+  if (!formData.contactNo) {
+    setMobileError("Mobile number is required");
+    submitRef.current = false;
+    setIsSubmitting(false);
+    return;
+  }
 
-  setIsSubmitting(false);
-
-  return;
-
-}
+  if (
+    !/^[6-9]\d{9}$/.test(formData.contactNo) ||
+    /^(\d)\1{9}$/.test(formData.contactNo)
+  ) {
+    setMobileError("Enter valid mobile number");
+    submitRef.current = false;
+    setIsSubmitting(false);
+    return;
+  }
 
   try {
 
-   
-
     const payload = {
       ...formData,
-
-      noOfHostels:
-        Number(
-          formData.noOfHostels
-        ) || 0,
-
-      noOfTenants:
-        Number(
-          formData.noOfTenants
-        ) || 0,
-
-      requestedDate:
-        formatDate(
-          formData.requestedDate
-        ),
-
-      requestedTime:
-        formatTime(
-          formData.requestedTime
-        ),
+      noOfHostels: Number(formData.noOfHostels) || 0,
+      noOfTenants: Number(formData.noOfTenants) || 0,
+      requestedDate: formatDate(formData.requestedDate),
+      requestedTime: formatTime(formData.requestedTime),
     };
 
-    const res =
-      await createDemoRequest(
-        payload
-      );
+    const res = await createDemoRequest(payload);
 
-    if (res.success) {
+    if (res?.success) {
 
       setModalType("success");
-
-      setMessage(
-        res?.message
-      );
-
+      setMessage(res?.message);
       setShowSuccess(true);
 
       fetchData();
 
       setTimeout(() => {
-
         setShowSuccess(false);
-
         handleCloseDrawer();
 
-      }, 1500);
-
-    } else {
-
-      setModalType("error");
-
-      setMessage(
-        res?.message
-      );
-
-      setShowSuccess(true);
-
-      setTimeout(() => {
-
-        setShowSuccess(false);
+        // reset only after drawer closes
+        submitRef.current = false;
+        setIsSubmitting(false);
 
       }, 1500);
 
+      return;
     }
+
+    setModalType("error");
+    setMessage(res?.message);
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+    submitRef.current = false;
+    setIsSubmitting(false);
 
   } catch (error) {
 
     setModalType("error");
-
-    setMessage(
-      error?.message ||
-      "Something went wrong"
-    );
-
+    setMessage(error?.message || "Something went wrong");
     setShowSuccess(true);
 
     setTimeout(() => {
-
       setShowSuccess(false);
-
     }, 1500);
 
-  } finally {
-
-    // 🔥 enable again
+    submitRef.current = false;
     setIsSubmitting(false);
-
   }
-
 };
 
   if (!open) return null;
@@ -334,7 +518,7 @@ setIsSubmitting(true);
         <div className="absolute right-0 top-0 h-full w-full max-w-md">
 
           <div
-            className="h-full bg-white shadow-xl overflow-y-auto p-6"
+            className="h-full bg-white-common shadow-xl overflow-y-auto p-6"
             onClick={(e) => e.stopPropagation()}
           >
 
@@ -352,57 +536,57 @@ setIsSubmitting(true);
                   Name <span className="text-red-500">*</span>
                 </label>
                 <div className="w-full">
-                 <input
-  name="name"
-  placeholder="Enter Name"
-  value={formData.name}
-  onChange={(e) => {
+                  <input
+                    name="name"
+                    placeholder="Enter Name"
+                    value={formData.name}
+                    onChange={(e) => {
 
-    const value = e.target.value;
+                      const value = e.target.value;
 
 
-    if (/^[A-Za-z\s]*$/.test(value)) {
+                      if (/^[A-Za-z\s]*$/.test(value)) {
 
-      handleChange({
-        target: {
-          name: "name",
-          value,
-        },
-      });
+                        handleChange({
+                          target: {
+                            name: "name",
+                            value,
+                          },
+                        });
 
-      setNameError("");
-    }
+                        setNameError("");
+                      }
 
-  }}
-  className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-/>
+                    }}
+                    className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                  />
                   {nameError && <ErrorMessage message={nameError} type="error" />}
                 </div>
               </div>
 
               {/* Email */}
-             <div className="flex items-start text-left gap-3">
-  <label className="w-40 text-[12px] font-medium">
-    Email ID
-  </label>
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">
+                  Email ID
+                </label>
 
-  <div className="w-full">
-    <input
-      name="email"
-      placeholder="Enter Email"
-      value={formData.email}
-      onChange={(e) => {
-        handleChange(e);
-        setEmailError("");
-      }}
-      className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-    />
+                <div className="w-full">
+                  <input
+                    name="email"
+                    placeholder="Enter Email"
+                    value={formData.email}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setEmailError("");
+                    }}
+                    className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                  />
 
-    {emailError && (
-      <ErrorMessage message={emailError} type="error" />
-    )}
-  </div>
-</div>
+                  {emailError && (
+                    <ErrorMessage message={emailError} type="error" />
+                  )}
+                </div>
+              </div>
 
               {/* Contact Number */}
               {/* <div className="flex items-start text-left gap-3">
@@ -565,7 +749,7 @@ setIsSubmitting(true);
                   />
 
                   {showDropdown && (
-                    <div className="absolute z-50 w-full bg-white border rounded mt-1 max-h-40 overflow-y-auto shadow">
+                    <div className="absolute z-50 w-full bg-white-common border rounded mt-1 max-h-40 overflow-y-auto shadow">
                       {filteredStates.map((state, index) => (
                         <div
                           key={index}
@@ -597,52 +781,52 @@ setIsSubmitting(true);
               </div>
 
               {/* Date */}
-             <div className="flex items-start text-left gap-3">
-  <label className="w-40 text-[12px] font-medium">
-    Requested Date <span className="text-red-500">*</span>
-  </label>
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">
+                  Requested Date <span className="text-red-500">*</span>
+                </label>
 
-  <div className="w-full">
-    <input
-      type="date"
-      name="requestedDate"
-      value={formData.requestedDate}
-      onChange={(e) => {
-        handleChange(e);
-        setRequestDateError("");
-      }}
-      className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-    />
+                <div className="w-full">
+                  <input
+                    type="date"
+                    name="requestedDate"
+                    value={formData.requestedDate}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setRequestDateError("");
+                    }}
+                    className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                  />
 
-    {requestDateError && (
-      <ErrorMessage message={requestDateError} type="error" />
-    )}
-  </div>
-</div>
+                  {requestDateError && (
+                    <ErrorMessage message={requestDateError} type="error" />
+                  )}
+                </div>
+              </div>
 
               {/* Time */}
-       <div className="flex items-start text-left gap-3">
-  <label className="w-40 text-[12px] font-medium">
-    Requested Time <span className="text-red-500">*</span>
-  </label>
+              <div className="flex items-start text-left gap-3">
+                <label className="w-40 text-[12px] font-medium">
+                  Requested Time <span className="text-red-500">*</span>
+                </label>
 
-  <div className="w-full">
-    <input
-      type="time"
-      name="requestedTime"
-      value={formData.requestedTime}
-      onChange={(e) => {
-        handleChange(e);
-        setRequestTimeError("");
-      }}
-      className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
-    />
+                <div className="w-full">
+                  <input
+                    type="time"
+                    name="requestedTime"
+                    value={formData.requestedTime}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setRequestTimeError("");
+                    }}
+                    className="w-full border p-2 rounded border-gray-300 placeholder:text-sm"
+                  />
 
-    {requestTimeError && (
-      <ErrorMessage message={requestTimeError} type="error" />
-    )}
-  </div>
-</div>
+                  {requestTimeError && (
+                    <ErrorMessage message={requestTimeError} type="error" />
+                  )}
+                </div>
+              </div>
               {/* Comments */}
               <div className="flex items-start text-left gap-3">
                 <label className="w-40 text-[12px] font-medium">Comments</label>
@@ -658,16 +842,34 @@ setIsSubmitting(true);
                   Cancel
                 </button>
 
-                <button
+                {/* <button
                   onClick={handleSubmit}
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                  disabled={isSubmitting || loading}
+                  className={`
+    px-4 py-2 rounded text-white
+    ${isSubmitting || loading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 cursor-pointer"
+                    }
+  `}
                 >
-                 {
+                  {isSubmitting || loading
+                    ? "Submitting..."
+                    : "Submit"}
+                </button> */}
+                <button
+  onClick={handleSubmit}
+  disabled={isSubmitting || loading}
+  className={`px-4 py-2 rounded text-white ${
     isSubmitting || loading
-      ? "Submitting..."
-      : "Submit"
-  }
-                </button>
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-blue-500 cursor-pointer"
+  }`}
+>
+  {isSubmitting || loading
+    ? "Submitting..."
+    : "Submit"}
+</button>
               </div>
             </div>
           </div>

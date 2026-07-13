@@ -69,7 +69,8 @@ const getSubscriptions = async (
   page = 1,
   size = 10,
   hostelName = "",
-  filterBy = "ALL"
+  filterBy = "ALL",
+  isActive = null
 ) => {
   try {
     setLoading(true);
@@ -80,7 +81,8 @@ const getSubscriptions = async (
         page,
         size,
         hostelName,
-        filterBy
+        filterBy,
+        isActive
       }
     });
 
@@ -760,6 +762,167 @@ const addSupportTicketNotes = async (
   }
 
 };
+const getTrialDaysExtReason = async () => {
+  try {
+
+    setLoading(true);
+
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      "/v2/subscription/trialDaysExtReason"
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
+
+
+const deleteTransaction = async (
+  transactionId,
+  tenantMobile
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.delete(
+      `/v2/receipt/${transactionId}`,
+      {
+        data: {
+          tenantMobile
+        }
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+        message: "Transaction deleted successfully",
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    let msg = "Something went wrong";
+
+    if (error?.response?.status === 500) {
+      msg = "Internal Server Error";
+    } else {
+      msg = getErrorMessage(error);
+    }
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+// const deleteTransaction = async (transactionId) => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.delete(
+//       `/v2/receipt/${transactionId}`
+//     );
+
+//     if (res.status === 200) {
+//       return {
+//         success: true,
+//         data: res.data,
+//         message: "Transaction deleted successfully",
+//       };
+//     }
+
+//     return { success: false };
+//   } catch (error) {
+
+//     let msg = "Something went wrong";
+
+//     if (error?.response?.status === 500) {
+//       msg = "Internal Server Error";
+//     } else {
+//       msg = getErrorMessage(error);
+//     }
+
+//     setErrorMsg(msg);
+
+//     return {
+//       success: false,
+//       message: msg,
+//     };
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+const getTrialSubscriptions = async (
+  page = 0,
+  size = 10,
+  hostelName = "",
+  filterBy = "ALL",
+  isActive = null
+) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.get(
+      "/v2/subscription/trial",
+      {
+        params: {
+          page,
+          size,
+          hostelName,
+          filterBy,
+          isActive
+        },
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <SubscriptionContext.Provider
       value={{
@@ -767,7 +930,7 @@ const addSupportTicketNotes = async (
         errorMsg,
         createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, 
         getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment,deleteDemoRequest,getDemoType,getDropReasons,getDemoRequestComments,
-        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes
+        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes,getTrialDaysExtReason,deleteTransaction,getTrialSubscriptions
       }}
     >
       {children}

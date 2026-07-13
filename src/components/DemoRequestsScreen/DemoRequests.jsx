@@ -17,6 +17,7 @@ import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import MarkAsLostDrawer from "./MarkAsLostDrawer";
 import { useNavigate, useLocation } from "react-router-dom";
+import { createPortal } from "react-dom";
 
 const DemoRequests = () => {
 
@@ -318,6 +319,30 @@ useEffect(() => {
       setAssignError("Please Select Agent");
       return;
     }
+//     if (selectedItem?.assignedTo && !commentText.trim()) {
+//   setCommentError("Please enter reason for reassignment");
+//   return;
+// }
+if (selectedItem?.assignedTo) {
+  const lettersCount = commentText
+    .trim()
+    .replace(/[^a-zA-Z]/g, "")
+    .length;
+
+  if (!commentText.trim()) {
+    setCommentError(
+      "Please enter reason for reassignment"
+    );
+    return;
+  }
+
+  if (lettersCount < 5) {
+    setCommentError(
+      "Reason must contain at least 5 letters"
+    );
+    return;
+  }
+}
 
     const res = await assignStaff(
       selectedItem.requestId,
@@ -355,10 +380,22 @@ setCommentText("")
     }
   }, [comments]);
   const handleAddComment = async () => {
-    if (!commentText.trim()) {
-      setCommentError("Please enter comment");
-      return;
-    }
+  const lettersCount = commentText
+  .trim()
+  .replace(/[^a-zA-Z]/g, "")
+  .length;
+
+if (!commentText.trim()) {
+  setCommentError("Please enter comment");
+  return;
+}
+
+if (lettersCount < 5) {
+  setCommentError(
+    "Comment must contain at least 5 letters"
+  );
+  return;
+}
 
     const res = await addDemoRequestComment(
       selectedItem?.requestId,
@@ -468,6 +505,17 @@ setCommentText("")
   //     alert(res?.message);
   //   }
   // };
+    const sortedAgents = [...agentList].sort((a, b) => {
+    const aAssigned =
+      a.agentName?.trim() === selectedItem?.assignedTo?.trim();
+
+    const bAssigned =
+      b.agentName?.trim() === selectedItem?.assignedTo?.trim();
+
+    if (aAssigned) return -1;
+    if (bAssigned) return 1;
+    return 0;
+  });
 
   return (
     <DashboardLayout>
@@ -573,9 +621,9 @@ setCommentText("")
     <div
       key={index}
       className="
-        bg-white
-        border
-        border-borderSoft
+        bg-white-common
+       
+        border-soft-light
         rounded-card
         shadow-card
         p-5
@@ -713,7 +761,7 @@ setCommentText("")
       setOpenAgentDropdown(false);
 
     }}
-    className="border border-gray-300 rounded-lg px-3 py-1 cursor-pointer bg-white flex justify-between items-center h-[36px]"
+    className="border-soft-light rounded-lg px-3 py-1 cursor-pointer bg-white-common flex justify-between items-center h-[36px]"
   >
     <span className="text-sm truncate">
       {statusFilter || "All Status"}
@@ -723,7 +771,7 @@ setCommentText("")
   </div>
 
   {openStatusDropdown && (
-    <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-xl z-[9999] max-h-[220px] overflow-y-auto">
+    <div className="absolute top-full left-0 mt-1 w-full bg-white-common border-soft-light rounded-lg shadow-xl z-[9999] max-h-[220px] overflow-y-auto">
 
       <div
         onClick={() => {
@@ -762,7 +810,7 @@ setCommentText("")
       onClick={() =>
         setOpenAgentDropdown(!openAgentDropdown)
       }
-      className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white flex justify-between items-center"
+      className="border-soft-light rounded-lg px-3 py-2 cursor-pointer bg-white-common flex justify-between items-center"
     >
       <span className="text-sm truncate">
         {
@@ -784,9 +832,8 @@ setCommentText("")
           left-0
           mt-1
           w-full
-          bg-white
-          border
-          border-gray-300
+          bg-white-common
+          border-soft-light
           rounded-lg
           shadow-xl
           max-h-[220px]
@@ -854,7 +901,7 @@ setCommentText("")
                   setPage(1);
                 }}
                 placeholder="Search..."
-                className="w-full border border-gray-300 pl-9 pr-4 py-2 rounded-lg text-sm"
+                className="w-full border-soft-light pl-9 pr-4 py-2 rounded-lg text-sm"
               />
 
             </div>
@@ -864,11 +911,10 @@ setCommentText("")
  
 <div
   className="
-    bg-white
+    bg-white-common
     rounded-xl
     shadow-sm
-    border
-    border-gray-200
+   border-soft-light
     flex
     flex-col
     max-h-[calc(100vh-230px)]
@@ -978,9 +1024,24 @@ setCommentText("")
             CONVERSION RESULT
           </th> */}
 
-          <th className="px-4 py-3 text-left whitespace-nowrap">
+          {/* <th className="px-4 py-3 text-left whitespace-nowrap">
             ACTIONS
-          </th>
+          </th> */}
+          <th
+  className="
+    sticky
+    right-0
+    z-30
+    bg-gray-100
+    px-4
+    py-3
+    text-left
+    whitespace-nowrap
+    min-w-[120px]
+  "
+>
+  ACTIONS
+</th>
 
         </tr>
 
@@ -1051,11 +1112,11 @@ setCommentText("")
                       
                      <tr key={item.requestId} className="group text-[13px] hover:bg-gray-50">
 
- <td className="sticky left-0 z-20 bg-white group-hover:bg-gray-50 px-4 py-2 w-[70px] min-w-[70px]">
+ <td className="sticky left-0 z-20 bg-white-common group-hover:!bg-gray-50 px-4 py-2 w-[70px] min-w-[70px]">
   {(page - 1) * size + index + 1}
 </td>
 
-<td className="sticky left-[70px] z-20 bg-white group-hover:bg-gray-50 px-4 py-2 w-[180px] min-w-[180px] max-w-[180px] text-left">
+<td className="sticky left-[70px] z-20 bg-white-common group-hover:!bg-gray-50 px-4 py-2 w-[180px] min-w-[180px] max-w-[180px] text-left">
   <button
     onClick={() => {
       setSelectedItem(item);
@@ -1242,7 +1303,19 @@ setCommentText("")
                           {item.convertedToPlanName || "----"}
                         </td> */}
 
-                       <td className="px-4 py-2 relative">
+                       <td
+  className="
+    sticky
+    right-0
+    z-20
+    bg-white-common
+    group-hover:bg-gray-50
+    px-4
+    py-2
+    relative
+    min-w-[100px] group-hover:!bg-gray-50
+  "
+>
 
   <button
   onClick={(e) => {
@@ -1295,7 +1368,7 @@ setCommentText("")
     src={Circle}
     alt="menu"
     className={`
-      w-5 h-5 transition-all duration-200 cursor-pointer
+      w-5 h-5  cursor-pointer
 
       ${
         openMenu?.id === item.requestId
@@ -1307,117 +1380,72 @@ setCommentText("")
 
 </button>
 
-  {openMenu?.id === item.requestId && (
-
-   <div
-  className="fixed w-40 bg-white border border-gray-200 rounded-xl shadow-xl z-[99999] overflow-hidden"
-  style={{
-    top: openMenu.y,
-    left: openMenu.x,
-  }}
->
- <button
+  {openMenu?.id === item.requestId &&
+  createPortal(
+    <div
+      className="fixed w-40 bg-white-common border-soft-light rounded-xl shadow-xl z-[99999] overflow-hidden"
+      style={{
+        top: openMenu.y,
+        left: openMenu.x,
+      }}
+    >
+      <button
         className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-      onClick={async () => {
-
-  setSelectedItem(item);
-
-  await fetchAllComments(
-    item.requestId
-  );
-
-  setShowCommentModal(true);
-
-  setOpenMenu(null);
-
-}}
+        onClick={async () => {
+          setSelectedItem(item);
+          await fetchAllComments(item.requestId);
+          setShowCommentModal(true);
+          setOpenMenu(null);
+        }}
       >
         Add Notes
       </button>
+
       {item?.canAssignStaff && (
         <button
           onClick={() => {
             setSelectedItem(item);
+            const currentAgent = agentList.find(
+              (a) => a.agentName?.trim() === item.assignedTo?.trim()
+            );
+            setDropdownValue(currentAgent?.agentId || "");
+            setCommentText("");
+            setCommentError("");
             setShowModal(true);
             setOpenMenu(null);
           }}
           className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
         >
-          Assign Staff
+          {item?.assignedTo ? "ReAssign Staff" : "Assign Staff "}
         </button>
       )}
-{item?.demoRequestStatus !==
-  "CONVERTED" && (
 
-  <button
-    className="
-      w-full
-      text-left
-      px-4
-      py-2.5
-      text-sm
-      hover:bg-gray-50
-      transition-colors
-      cursor-pointer
-    "
-    onClick={() => {
+      {item?.demoRequestStatus !== "CONVERTED" && (
+        <button
+          className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+          onClick={() => {
+            setSelectedId(item.requestId);
+            setSelectedItem(item);
+            setOpenStatusModal(true);
+            setOpenMenu(null);
+          }}
+        >
+          Change Status
+        </button>
+      )}
 
-      setSelectedId(
-        item.requestId
-      );
-
-      setSelectedItem(item);
-
-      setOpenStatusModal(true);
-
-      setOpenMenu(null);
-
-    }}
-  >
-    Change Status
-  </button>
-
-)}
-      {/* <button
-        className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-        onClick={() => {
-          setSelectedId(item.requestId);
-          setSelectedItem(item);
-          setOpenStatusModal(true);
-          setOpenMenu(null);
-        }}
-      >
-        Change Status
-      </button> */}
-{item?.canMarkDropped && (
-
-  <button
-    onClick={() => {
-
-      setSelectedItem(item);
-
-      setShowMarkLostDrawer(true);
-
-      setOpenMenu(null);
-
-    }}
-    className="
-      w-full
-      text-left
-      px-4
-      py-2.5
-      text-sm
-      hover:bg-red-50
-      text-red-500
-      transition-colors
-      cursor-pointer
-    "
-  >
-    Mark as Lost
-  </button>
-
-)}
-     
+      {item?.canMarkDropped && (
+        <button
+          onClick={() => {
+            setSelectedItem(item);
+            setShowMarkLostDrawer(true);
+            setOpenMenu(null);
+          }}
+          className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-500 transition-colors cursor-pointer"
+        >
+          Mark as Lost
+        </button>
+      )}
 
       <button
         className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-500 transition-colors cursor-pointer"
@@ -1429,9 +1457,8 @@ setCommentText("")
       >
         Delete
       </button>
-
-    </div>
-
+    </div>,
+    document.body
   )}
 
 </td>
@@ -1480,6 +1507,7 @@ setCommentText("")
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
+                <option value={100}>100</option>
               </select>
 
 
@@ -1541,7 +1569,7 @@ setCommentText("")
 
 
               <span className="text-gray-400">
-                {start} - {end}
+                {page} - {totalPages}
               </span>
 
             </div>
@@ -1560,6 +1588,7 @@ setCommentText("")
         setAssignError("");
         setDropdownValue("");
         setCommentText("")
+        setOpenDropdown(false);
       }}
     />
 
@@ -1571,7 +1600,7 @@ setCommentText("")
         right-3
         bottom-3
         w-[420px]
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
         flex
@@ -1586,7 +1615,9 @@ setCommentText("")
 
         <div>
           <h2 className="text-[18px] font-semibold text-left">
-            Assign Staff
+           {selectedItem?.assignedTo
+    ? "Reassign Staff"
+    : "Assign Staff"}
           </h2>
 
           <p className="text-[12px] text-gray-500 mt-1">
@@ -1600,6 +1631,7 @@ setCommentText("")
             setAssignError("");
             setDropdownValue("");
             setCommentText("")
+            setOpenDropdown(false);
           }}
           className="text-red-500 text-lg cursor-pointer"
         >
@@ -1629,8 +1661,7 @@ setCommentText("")
             }}
             className="
               w-full
-              border
-              border-gray-300
+              border-soft-light
               rounded-xl
               px-4
               py-3
@@ -1638,11 +1669,11 @@ setCommentText("")
               justify-between
               items-center
               cursor-pointer
-              bg-white
+              bg-white-common
             "
           >
 
-            <span className="text-sm ">
+            {/* <span className="text-sm ">
 
               {
                 agentList.find(
@@ -1650,7 +1681,16 @@ setCommentText("")
                 )?.agentName || "Select Staff"
               }
 
-            </span>
+            </span> */}
+            <span className="text-sm">
+  {
+    agentList.find(
+      (a) => a.agentId === dropdownValue
+    )?.agentName ||
+    selectedItem?.assignedTo ||
+    "Select Staff"
+  }
+</span>
 
             <img
               src={Arrow}
@@ -1667,7 +1707,7 @@ setCommentText("")
                 absolute
                 mt-2
                 w-full
-                bg-white
+                bg-white-common
                 rounded-xl
                 shadow-xl
                 border
@@ -1676,7 +1716,7 @@ setCommentText("")
                 z-[9999]
               "
             >
-
+{/* 
               {agentList.map((agent) => (
 
                 <div
@@ -1701,7 +1741,42 @@ setCommentText("")
 
                 </div>
 
-              ))}
+              ))} */}
+  {sortedAgents.map((agent) => {
+  const isAssignedAgent =
+    agent.agentName?.trim() ===
+    selectedItem?.assignedTo?.trim();
+
+  return (
+    <div
+      key={agent.agentId}
+      onClick={() => {
+        setDropdownValue(agent.agentId);
+        setOpenDropdown(false);
+      }}
+      className={`
+        px-4 py-3 text-sm cursor-pointer text-left
+        ${
+          dropdownValue === agent.agentId
+            ? "bg-primary text-white"
+            : isAssignedAgent
+            ? "bg-yellow-100 border-l-4 border-yellow-500 font-semibold"
+            : "hover:bg-gray-100"
+        }
+      `}
+    >
+      <div className="flex justify-between items-center">
+        <span>{agent.agentName}</span>
+
+        {isAssignedAgent && (
+          <span className="text-[10px] text-yellow-700">
+            Current
+          </span>
+        )}
+      </div>
+    </div>
+  );
+})}
 
             </div>
 
@@ -1722,24 +1797,27 @@ setCommentText("")
 <div className="mt-5">
 
   <label className="text-[13px] font-medium text-left block mb-2">
-    Additional Comments
+    Additional Comments {selectedItem?.assignedTo && (
+    <span className="text-red-500 ml-1">*</span>
+  )}
   </label>
 
   <div
     className="
-      border border-gray-300
+      border-soft-light
       rounded-xl
       p-3
-      bg-white
+      bg-white-common
     "
   >
 
     <textarea
       placeholder="Type your comments here..."
       value={commentText}
-      onChange={(e) => {
-        setCommentText(e.target.value);
-      }}
+     onChange={(e) => {
+  setCommentText(e.target.value);
+  setCommentError("");
+}}
       className="
         w-full
         h-[110px]
@@ -1770,6 +1848,15 @@ setCommentText("")
   </div>
 
 </div>
+
+{commentError && (
+  <div className="mt-2">
+    <ErrorMessage
+      message={commentError}
+      type="error"
+    />
+  </div>
+)}
       </div>
 
     
@@ -1781,10 +1868,11 @@ setCommentText("")
             setAssignError("");
             setDropdownValue("");
             setCommentText("")
+            setOpenDropdown(false);
           }}
           className="
             px-4 py-2
-            border border-gray-300
+            border-soft-light
             rounded-lg
             text-sm
             hover:bg-gray-50
@@ -1797,8 +1885,7 @@ setCommentText("")
           onClick={handleAssignStaff}
           className="
             px-5 py-2
-            bg-blue-600
-            hover:bg-blue-700
+           bg-primary-hover
             text-white
             rounded-lg
             text-sm
@@ -1843,7 +1930,7 @@ setCommentText("")
 
    
     <div
-      className="fixed top-3 right-3 bottom-3 w-[420px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+      className="fixed top-3 right-3 bottom-3 w-[420px] bg-white-common rounded-2xl shadow-2xl flex flex-col overflow-hidden"
       onClick={(e) => e.stopPropagation()}
     >
 
@@ -1878,7 +1965,7 @@ setCommentText("")
         </label>
 
         
-        <div className="border border-gray-300 rounded-xl p-3">
+        <div className="border-soft-light rounded-xl p-3">
 
           <textarea
             placeholder="Comment here"
@@ -1907,7 +1994,7 @@ setCommentText("")
         <div className="flex justify-end mt-3">
           <button
             onClick={handleAddComment}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm cursor-pointer flex items-center gap-2"
+            className="bg-primary-hover text-white px-5 py-2 rounded-lg text-sm cursor-pointer flex items-center gap-2"
           >
             ➤ Add
           </button>
@@ -1982,7 +2069,7 @@ setCommentText("")
     }}
   >
     <div
-      className="bg-white rounded-xl w-[380px] p-6"
+      className="bg-white-common rounded-xl w-[380px] p-6"
       onClick={(e) => e.stopPropagation()}
     >
 
@@ -1998,7 +2085,7 @@ setCommentText("")
 
         <button
           onClick={() => setShowDeleteModal(false)}
-          className="px-4 py-2 border border-gray-300 rounded-lg"
+          className="px-4 py-2 border-soft-light rounded-lg"
         >
           Cancel
         </button>

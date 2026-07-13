@@ -179,7 +179,7 @@ const DemoRequests = () => {
         </div>
 
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]">
+        <div className="bg-white-common rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col max-h-[calc(100vh-230px)]">
 
           <div className="max-h-[420px] overflow-y-auto">
 
@@ -292,7 +292,7 @@ const DemoRequests = () => {
 
                         {openMenu?.id === item.requestId && (
                           <div
-                            className="fixed w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-[99999]"
+                            className="fixed w-36 bg-white-common border border-gray-200 rounded-lg shadow-lg z-[99999]"
                             style={{
                               top: openMenu.y + 5,
                               left: openMenu.x - 120
@@ -400,7 +400,7 @@ const DemoRequests = () => {
           }}
         >
           <div
-            className="bg-white rounded-xl w-[400px] p-6"
+            className="bg-white-common rounded-xl w-[400px] p-6"
             onClick={(e) => e.stopPropagation()}
           >
 
@@ -429,7 +429,7 @@ const DemoRequests = () => {
 
               {/* Dropdown list */}
               {openDropdown && (
-                <div className="absolute mt-2 w-full bg-white rounded-xl shadow-lg border max-h-44 overflow-y-auto z-[9999] text-left">
+                <div className="absolute mt-2 w-full bg-white-common rounded-xl shadow-lg border max-h-44 overflow-y-auto z-[9999] text-left">
 
                   {agentList.map((agent) => (
                     <div

@@ -318,7 +318,7 @@ const UpdateSupportStatusModal = ({
         />
 
 
-        <div className="fixed top-3 right-3 bottom-3 w-[420px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed top-3 right-3 bottom-3 w-[420px] bg-white-common rounded-2xl shadow-2xl flex flex-col overflow-hidden">
 
           <div className="flex items-center justify-between px-6 py-5 border-b border-[#edf0f7]">
 
@@ -585,7 +585,7 @@ const UpdateSupportStatusModal = ({
         flex items-center
         justify-between
         text-sm
-        bg-white
+        bg-white-common
         cursor-pointer
       "
                   >
@@ -616,7 +616,7 @@ const UpdateSupportStatusModal = ({
           left-0
           mt-2
           w-full
-          bg-white
+          bg-white-common
           border border-[#e5e7eb]
           rounded-xl
           shadow-xl
@@ -644,7 +644,7 @@ const UpdateSupportStatusModal = ({
                           className="
               px-4 py-3
               text-sm
-              hover:bg-[#f8f9fc]
+              hover:bg-cardBg
               cursor-pointer
               text-left
             "
@@ -714,7 +714,7 @@ const UpdateSupportStatusModal = ({
       px-4
       flex items-center justify-between
       cursor-pointer
-      bg-white
+      bg-white-common
     "
                       >
 
@@ -740,7 +740,7 @@ const UpdateSupportStatusModal = ({
                           className="
         absolute top-full left-0
         mt-2 w-full
-        bg-white
+        bg-white-common
         border border-[#e5e7eb]
         rounded-xl
         shadow-xl
@@ -767,7 +767,7 @@ const UpdateSupportStatusModal = ({
                               }}
                               className="
             px-4 py-3
-            hover:bg-[#f8f9fc]
+            hover:bg-cardBg
             cursor-pointer
             text-sm
           "
@@ -838,7 +838,7 @@ const UpdateSupportStatusModal = ({
       px-4
       flex items-center justify-between
       cursor-pointer
-      bg-white
+      bg-white-common
     "
                       >
 
@@ -864,7 +864,7 @@ const UpdateSupportStatusModal = ({
                           className="
         absolute top-full left-0
         mt-2 w-full
-        bg-white
+        bg-white-common
         border border-[#e5e7eb]
         rounded-xl
         shadow-xl
@@ -891,7 +891,7 @@ const UpdateSupportStatusModal = ({
                               }}
                               className="
             px-4 py-3
-            hover:bg-[#f8f9fc]
+            hover:bg-cardBg
             cursor-pointer
             text-sm
           "
@@ -979,7 +979,7 @@ const UpdateSupportStatusModal = ({
     py-5
     border-t border-[#edf0f7]
     flex justify-end gap-3
-    bg-white
+    bg-white-common
   "
           >
 

@@ -72,6 +72,8 @@ const [selectedNoteTicketId,setSelectedNoteTicketId] = useState(null);
 const agentDropdownRef =
   useRef(null);
 const [statusList, setStatusList] = useState([]);
+const [commentError, setCommentError] =
+  useState("");
 useEffect(() => {
 
   const fetchPriority =
@@ -342,6 +344,26 @@ const handleAssignSave =
       setAssignError("");
 
     }
+ if (selectedTicket?.assignedTo) {
+  const lettersCount = commentText
+    .trim()
+    .replace(/[^a-zA-Z]/g, "")
+    .length;
+
+  if (!commentText.trim()) {
+    setCommentError(
+      "Please enter additional comments"
+    );
+    hasError = true;
+  } else if (lettersCount < 5) {
+    setCommentError(
+      "Additional comments must contain at least 5 letters"
+    );
+    hasError = true;
+  } else {
+    setCommentError("");
+  }
+}
 
     if (!priorityValue) {
 
@@ -425,84 +447,142 @@ const handleAssignSave =
   setAddNotesLoading
 ] = useState(false);
  
-const handleAddInternalNotes =
-  async () => {
+// const handleAddInternalNotes =
+//   async () => {
 
-    if (addNotesLoading)
-      return;
+//     if (addNotesLoading)
+//       return;
 
-    if (
-      !commentText.trim()
-    ) {
+//    if (!commentText.trim()) {
+//   setNotesError("Please enter additional comments");
+//   hasError = true;
+// } else if (commentText.trim().length < 5) {
+//   setNotesError(
+//     "Additional comments must be at least 5 characters"
+//   );
+//   hasError = true;
+// } else {
+//   setNotesError("");
+// }
 
-      setNotesError(
-        "Please enter notes"
-      );
+//     try {
 
-      return;
+//       setAddNotesLoading(true);
 
+//       setNotesError("");
+
+//       const res =
+//         await addSupportTicketNotes(
+//           selectedNoteTicketId,
+//           commentText
+//         );
+
+//       if (res.success) {
+
+//         setModalType("success");
+
+//         setMessage(
+//           res?.message
+//         );
+
+//         setShowSuccess(true);
+
+//         setTimeout(() => {
+
+//           setShowSuccess(false);
+
+//         }, 1300);
+
+//         setCommentText("");
+
+//         setShowCommentModal(
+//           false
+//         );
+
+//         fetchTickets();
+
+//       } else {
+
+//         setModalType("error");
+
+//         setMessage(
+//           res?.message
+//         );
+
+//         setShowSuccess(true);
+
+//         setTimeout(() => {
+
+//           setShowSuccess(false);
+
+//         }, 1300);
+
+//       }
+
+//     } finally {
+
+//       setAddNotesLoading(false);
+
+//     }
+
+// };
+const handleAddInternalNotes = async () => {
+  if (addNotesLoading) return;
+
+  let hasError = false;
+
+  const lettersCount = commentText
+    .trim()
+    .replace(/[^a-zA-Z]/g, "")
+    .length;
+
+  if (!commentText.trim()) {
+    setNotesError("Please enter additional comments");
+    hasError = true;
+  } else if (lettersCount < 5) {
+    setNotesError(
+      "Additional comments must contain at least 5 letters"
+    );
+    hasError = true;
+  } else {
+    setNotesError("");
+  }
+
+  if (hasError) return;
+
+  try {
+    setAddNotesLoading(true);
+
+    const res = await addSupportTicketNotes(
+      selectedNoteTicketId,
+      commentText
+    );
+
+    if (res.success) {
+      setModalType("success");
+      setMessage(res?.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1300);
+
+      setCommentText("");
+      setShowCommentModal(false);
+
+      fetchTickets();
+    } else {
+      setModalType("error");
+      setMessage(res?.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1300);
     }
-
-    try {
-
-      setAddNotesLoading(true);
-
-      setNotesError("");
-
-      const res =
-        await addSupportTicketNotes(
-          selectedNoteTicketId,
-          commentText
-        );
-
-      if (res.success) {
-
-        setModalType("success");
-
-        setMessage(
-          res?.message
-        );
-
-        setShowSuccess(true);
-
-        setTimeout(() => {
-
-          setShowSuccess(false);
-
-        }, 1300);
-
-        setCommentText("");
-
-        setShowCommentModal(
-          false
-        );
-
-        fetchTickets();
-
-      } else {
-
-        setModalType("error");
-
-        setMessage(
-          res?.message
-        );
-
-        setShowSuccess(true);
-
-        setTimeout(() => {
-
-          setShowSuccess(false);
-
-        }, 1300);
-
-      }
-
-    } finally {
-
-      setAddNotesLoading(false);
-
-    }
-
+  } finally {
+    setAddNotesLoading(false);
+  }
 };
 
 
@@ -533,6 +613,21 @@ const handleOpenComments =
     setShowCommentModal(true);
 
   };
+  const sortedAgents = [...agentList].sort(
+  (a, b) => {
+    const aAssigned =
+      a.agentName?.trim() ===
+      selectedTicket?.assignedTo?.trim();
+
+    const bAssigned =
+      b.agentName?.trim() ===
+      selectedTicket?.assignedTo?.trim();
+
+    if (aAssigned) return -1;
+    if (bAssigned) return 1;
+    return 0;
+  }
+);
   return (
     <DashboardLayout>
       <Toast
@@ -622,7 +717,7 @@ const handleOpenComments =
     <div
       key={index}
       className="
-        bg-white
+        bg-white-common
         rounded-2xl
         border-soft-light
         p-6
@@ -726,7 +821,7 @@ const handleOpenComments =
         px-4
         border border-[#e5e7eb]
         rounded-xl
-        bg-white
+        bg-white-common
         flex items-center
         justify-between
         cursor-pointer
@@ -753,7 +848,7 @@ const handleOpenComments =
   left-0
   mt-2
   w-full
-  bg-white
+  bg-white-common
   border border-[#e5e7eb]
   rounded-xl
   shadow-xl
@@ -784,7 +879,7 @@ const handleOpenComments =
           className="
             px-4 py-3
             text-sm
-            hover:bg-[#f8f9fc]
+            hover:bg-cardBg
             cursor-pointer
           "
         >
@@ -809,7 +904,7 @@ const handleOpenComments =
     className="
       px-4 py-3
       text-sm
-      hover:bg-[#f8f9fc]
+      hover:bg-cardBg
       cursor-pointer
     "
   >
@@ -850,7 +945,7 @@ const handleOpenComments =
         px-4
         border border-[#e5e7eb]
         rounded-xl
-        bg-white
+        bg-white-common
         flex items-center
         justify-between
         cursor-pointer
@@ -885,7 +980,7 @@ const handleOpenComments =
           left-0
           mt-2
           w-full
-          bg-white
+          bg-white-common
           border border-[#e5e7eb]
           rounded-xl
           shadow-xl
@@ -911,7 +1006,7 @@ const handleOpenComments =
           className="
             px-4 py-3
             text-sm
-            hover:bg-[#f8f9fc]
+            hover:bg-cardBg
             cursor-pointer
           "
         >
@@ -938,7 +1033,7 @@ const handleOpenComments =
             className="
               px-4 py-3
               text-sm
-              hover:bg-[#f8f9fc]
+              hover:bg-cardBg
               cursor-pointer
             "
           >
@@ -991,7 +1086,7 @@ const handleOpenComments =
               </button> */}
             </div>
           </div>
-       <div className="bg-white border-soft-light rounded-2xl shadow-sm relative overflow-hidden">
+       <div className="bg-white-common border-soft-light rounded-2xl shadow-sm relative overflow-hidden">
          {loading && (
 
   <div
@@ -1038,13 +1133,15 @@ const handleOpenComments =
             <table className="min-w-[1100px] w-full border-separate border-spacing-0">
        <thead className="sticky top-0 z-40">
   <tr>
- <th
+<th
   className="
     sticky left-0 z-50
-    bg-[#f8f9fc]
+    bg-cardBg
     min-w-[70px]
     w-[70px]
-    px-5 py-4 text-[12px] text-[#6b7280]
+    px-5 py-4
+    text-[12px]
+    text-[#6b7280]
   "
 >
   ID
@@ -1053,7 +1150,7 @@ const handleOpenComments =
 <th
   className="
     sticky left-[70px] z-40
-    bg-[#f8f9fc]
+    bg-cardBg
     min-w-[190px]
     w-[190px]
     px-5 py-4 text-[12px] text-[#6b7280]
@@ -1075,7 +1172,7 @@ const handleOpenComments =
         key={i}
         className="
           sticky top-0 z-30
-          bg-[#f8f9fc]
+          bg-cardBg
           px-5 py-4
           text-left text-[12px]
           font-semibold text-[#6b7280]
@@ -1090,7 +1187,7 @@ const handleOpenComments =
     <th
       className="
         sticky top-0 right-0 z-50
-        bg-[#f8f9fc]
+       bg-cardBg
         px-5 py-4
         text-left text-[12px]
         font-semibold text-[#6b7280]
@@ -1122,8 +1219,8 @@ const handleOpenComments =
 <td
   className="
     sticky left-0 z-30
-    bg-white
-    group-hover:bg-[#fafbff]
+    bg-white-common
+    group-hover:!bg-[#fafbff]
 
     min-w-[70px]
     w-[70px]
@@ -1145,8 +1242,8 @@ const handleOpenComments =
   }
   className="
     sticky left-[70px] z-20
-    bg-white
-    group-hover:bg-[#fafbff]
+    bg-white-common
+    group-hover:!bg-[#fafbff]
 
     min-w-[190px]
     w-[190px]
@@ -1252,7 +1349,7 @@ const handleOpenComments =
 
           </td>
 
-             <td className="sticky right-0 z-20 bg-white group-hover:bg-[#fafbff] px-5 py-2 relative overflow-visible">
+             <td className="sticky right-0 z-20 bg-white-common group-hover:!bg-[#fafbff] px-5 py-2 relative overflow-visible">
                       <button
  onClick={(e) => { e.stopPropagation(); handleMenuToggle(e, index); }}
   className="
@@ -1274,7 +1371,7 @@ const handleOpenComments =
 }}
       className="
         z-[9999]
-        bg-white
+        bg-white-common
         border border-[#e5e7eb]
         rounded-xl
         shadow-xl
@@ -1290,7 +1387,9 @@ const handleOpenComments =
     ? ["Update Status"]
     : []),
 
-  "Assign Staff",
+   ...(item.canAssignStaff !== false
+  ? [item.assignedTo ? "ReAssign Staff" : "Assign Staff"]
+  : []),
 
 ].map((menu, idx) => (
        <button
@@ -1309,12 +1408,41 @@ const handleOpenComments =
   );
   }
 
-  if (menu === "Assign Staff") {
-     setSelectedTicketId(
-    item.ticketId
+//  if (
+//   menu === "Assign Staff" ||
+//   menu === "ReAssign Staff"
+// ) {
+//   setSelectedTicketId(
+//     item.ticketId
+//   );
+//   setSelectedTicket(item)
+//   setShowAssignDrawer(true);
+// }
+
+if (
+  menu === "Assign Staff" ||
+  menu === "ReAssign Staff"
+) {
+  setSelectedTicketId(item.ticketId);
+  setSelectedTicket(item);
+
+  const currentAgent = agentList.find(
+    (a) =>
+      a.agentName?.trim() ===
+      item.assignedTo?.trim()
   );
-    setShowAssignDrawer(true);
-  }
+
+  setDropdownValue(
+    currentAgent?.agentId || ""
+  );
+
+  // Priority default select
+  setPriorityValue(
+    item.priority || ""
+  );
+
+  setShowAssignDrawer(true);
+}
   if (menu === "Update Status") {
   setShowUpdateStatus(true);
    setSelectedTicketId(
@@ -1333,7 +1461,7 @@ const handleOpenComments =
   className="
     w-full text-left px-3 py-2.5
     text-sm text-[#374151]
-    hover:bg-[#f8f9fc] cursor-pointer
+    hover:bg-cardBg cursor-pointer
   "
 >
   {menu}
@@ -1557,7 +1685,7 @@ const handleOpenComments =
       className="
         fixed top-3 right-3 bottom-3
         w-[420px]
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
         flex flex-col
@@ -1715,6 +1843,8 @@ const handleOpenComments =
         setPriorityError("")
         setPriorityValue("");
         setOpenPriorityDropdown(false)
+        setOpenDropdown(false);
+        setCommentError("");
       }}
     />
 
@@ -1726,7 +1856,7 @@ const handleOpenComments =
         right-3
         bottom-3
         w-[420px]
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
         flex
@@ -1740,9 +1870,11 @@ const handleOpenComments =
 
         <div>
 
-          <h2 className="text-[18px] font-semibold text-left">
-            Assign Staff
-          </h2>
+         <h2 className="text-[18px] font-semibold text-left">
+  {selectedTicket?.assignedTo
+    ? "ReAssign Staff"
+    : "Assign Staff"}
+</h2>
 
           <p className="text-[12px] text-gray-500 mt-1">
             Select staff for this support ticket
@@ -1759,6 +1891,8 @@ const handleOpenComments =
              setPriorityValue("");
             setPriorityError("")
             setOpenPriorityDropdown(false)
+            setOpenDropdown(false);
+            setCommentError("");
             
           }}
           className="text-red-500 text-lg cursor-pointer"
@@ -1796,7 +1930,7 @@ const handleOpenComments =
               justify-between
               items-center
               cursor-pointer
-              bg-white
+              bg-white-common
             "
           >
 
@@ -1822,7 +1956,7 @@ const handleOpenComments =
                 absolute
                 mt-2
                 w-full
-                bg-white
+                bg-white-common
                 rounded-xl
                 shadow-xl
                 border
@@ -1832,40 +1966,41 @@ const handleOpenComments =
               "
             >
 
-              {agentList.map((agent) => (
+             {sortedAgents.map((agent) => {
+  const isCurrentAgent =
+    agent.agentName?.trim() ===
+    selectedTicket?.assignedTo?.trim();
 
-                <div
-                  key={agent.agentId}
-                  onClick={() => {
-                    setDropdownValue(
-                      agent.agentId
-                    );
+  return (
+    <div
+      key={agent.agentId}
+      onClick={() => {
+        setDropdownValue(agent.agentId);
+        setOpenDropdown(false);
+        setAssignError("");
+      }}
+      className={`
+        px-4 py-3 text-sm cursor-pointer text-left
 
-                    setOpenDropdown(false);
+        ${
+          dropdownValue === agent.agentId
+            ? "bg-primary text-white"
+            : isCurrentAgent
+            ? "bg-yellow-100 border-l-4 border-yellow-500 font-semibold"
+            : "hover:bg-gray-100"
+        }
+      `}
+    >
+      {agent.agentName}
 
-                    setAssignError("");
-                  }}
-                  className={`
-                    px-4 py-3
-                    text-sm
-                    cursor-pointer
-                    transition-all
-                    text-left
-
-                    ${
-                      dropdownValue ===
-                      agent.agentId
-                        ? "bg-primary text-white"
-                        : "hover:bg-gray-100"
-                    }
-                  `}
-                >
-
-                  {agent.agentName}
-
-                </div>
-
-              ))}
+      {isCurrentAgent && (
+        <span className="ml-2 text-xs">
+          (Current)
+        </span>
+      )}
+    </div>
+  );
+})}
 
             </div>
 
@@ -1913,7 +2048,7 @@ const handleOpenComments =
         px-4 py-3
         flex justify-between items-center
         cursor-pointer
-        bg-white
+        bg-white-common
       "
     >
 
@@ -1941,7 +2076,7 @@ const handleOpenComments =
           absolute
           mt-2
           w-full
-          bg-white
+          bg-white-common
           rounded-xl
           shadow-xl
           border
@@ -1975,7 +2110,7 @@ const handleOpenComments =
             className="
               px-4 py-3
               text-sm
-              hover:bg-[#f8f9fc]
+              hover:bg-cardBg
               cursor-pointer text-left
             "
           >
@@ -2009,25 +2144,32 @@ const handleOpenComments =
         {/* COMMENTS */}
         <div className="mt-5">
 
-          <label className="text-[13px] font-medium text-left block mb-2">
-            Additional Comments 
-          </label>
+         <label className="text-[13px] font-medium text-left block mb-2">
+  Additional Comments
+  {selectedTicket?.assignedTo && (
+    <span className="text-red-500">*</span>
+  )}
+</label>
 
           <div
             className="
               border border-gray-300
               rounded-xl
               p-3
-              bg-white
+              bg-white-common
             "
           >
 
             <textarea
               placeholder="Type your comments here..."
               value={commentText}
-              onChange={(e) =>
-                setCommentText(e.target.value)
-              }
+              // onChange={(e) =>
+              //   setCommentText(e.target.value)
+              // }
+              onChange={(e) => {
+  setCommentText(e.target.value);
+  setCommentError("");
+}}
               className="
                 w-full
                 h-[110px]
@@ -2041,7 +2183,12 @@ const handleOpenComments =
           </div>
 
         </div>
-
+{commentError && (
+  <ErrorMessage
+    message={commentError}
+    type="error"
+  />
+)}
       </div>
 
       {/* FOOTER */}
@@ -2056,6 +2203,8 @@ const handleOpenComments =
           setPriorityValue("");
             setPriorityError("")
             setOpenPriorityDropdown(false)
+            setOpenDropdown(false);
+            setCommentError("");
           }}
           className="
             px-4 py-2

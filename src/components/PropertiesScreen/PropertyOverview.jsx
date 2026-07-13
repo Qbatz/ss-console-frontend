@@ -15,6 +15,7 @@ import InvoicesRedemption from "./InvoicesRedemption";
 import PropertyActive from "./ActiveScreen";
 import swap from "../../assets/arrowswap.png";
 import Star from "../../assets/star.png"
+import dayjs from "dayjs";
 import PropertyAmenities from "./PropertyAmenities";
 import { useHostel } from "../../Context/HostelListContext";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
@@ -34,11 +35,15 @@ import CustImag from "../../assets/single.png";
 import CustTenImg from "../../assets/team.png"
 import LocationGrey from "../../assets/locationGrey.png";
 import Call from "../../assets/call.png";
+import { useKyc } from "../../Context/KYCContext";
+import User from "../../assets/userblack.png";
+import RoomView from "./RoomView";
+
 const PropertyOverview = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory,sharePaymentLink} = useHostel();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory, sharePaymentLink, getTenantDeductions } = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
-  const { createSubscription } = useSubscription();
+  const { createSubscription, getTrialDaysExtReason } = useSubscription();
   const [hostelData, setHostelData] = useState(null);
   const [dropdownPlans, setDropdownPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState("");
@@ -53,6 +58,56 @@ const PropertyOverview = () => {
   const [phone, setPhone] = useState("");
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [generatedPaymentUrl, setGeneratedPaymentUrl] = useState("");
+  const [trialReasons, setTrialReasons] = useState([]);
+  const [showCustomDays, setShowCustomDays] = useState(false);
+  const [reasonError, setReasonError] = useState("")
+    const [selectedTenant, setSelectedTenant] = useState(null);
+  const [remarks, setRemarks] =useState("");
+  const [selectedReason, setSelectedReason] = useState("");
+  const [showReasonDropdown, setShowReasonDropdown] = useState(false);
+  const [generateLoading, setGenerateLoading] = useState(false);
+  const [isPaymentGenerated, setIsPaymentGenerated] = useState(false);
+  const generateLock = useRef(false);
+  const [showApproveModal, setShowApproveModal] =
+  useState(false);
+ const { getKYCList, approveKYC } = useKyc();
+ const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+ const [showSummary, setShowSummary] = useState(false);
+const approveLock = useRef(false);
+const [activeFilter, setActiveFilter] = useState("All");
+const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+
+const [showAllMenu, setShowAllMenu] = useState(false);
+const [showStatusMenu, setShowStatusMenu] = useState(false);
+const [showViewMenu, setShowViewMenu] = useState(false);
+
+const [selectedType, setSelectedType] = useState("All");
+const [selectedStatus, setSelectedStatus] = useState("All");
+const [selectedView, setSelectedView] = useState("Select");
+
+ console.log("selectedCustomerId",selectedCustomerId)
+const [approveLoading, setApproveLoading] =
+  useState(false);
+  useEffect(() => {
+
+    const fetchReasons = async () => {
+
+      const res =
+        await getTrialDaysExtReason();
+
+      if (res?.success) {
+
+        setTrialReasons(
+          res.data || []
+        );
+
+      }
+
+    };
+
+    fetchReasons();
+
+  }, []);
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenants");
   const {
@@ -64,6 +119,7 @@ const PropertyOverview = () => {
 
   const { canWrite: canResetWrite } = usePermission("Reset hostel");
   const { plans, getPlans, getPlansDropdown } = usePlan();
+ 
   console.log("paidBy", paidBy)
   useEffect(() => {
     getPlansDropdown().then((res) => {
@@ -72,7 +128,7 @@ const PropertyOverview = () => {
       }
     });
   }, []);
-  console.log("hostelData",hostelData)
+  console.log("hostelData", hostelData)
   const paidByUsers = [
     {
       id: hostelData?.owner?.userId,
@@ -97,7 +153,9 @@ const PropertyOverview = () => {
   useEffect(() => {
     getPlans()
   }, [])
-  const [activeTab, setActiveTab] = useState("tenants");
+  // const [activeTab, setActiveTab] = useState("tenants");
+
+
   const [showSharing, setShowSharing] = useState(false);
   const [showBillingRule, setShowBillingRule] = useState(false);
   const [modalType, setModalType] = useState("success");
@@ -126,7 +184,7 @@ const PropertyOverview = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showPaidByDropdown, setShowPaidByDropdown] = useState(false);
-   const [showPaidByDropdownGenerate, setShowPaidByDropdownGenerate] = useState(false);
+  const [showPaidByDropdownGenerate, setShowPaidByDropdownGenerate] = useState(false);
   const [showPlanDropdown, setShowPlanDropdown] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [showAgentModal, setShowAgentModal] = useState(false);
@@ -143,7 +201,18 @@ const PropertyOverview = () => {
   const loginType = localStorage.getItem("login_type");
   const showInvoices = loginType === "normal";
   const { hostelId } = useParams();
-
+  const [activeTab, setActiveTab] =
+    useState(
+      location.state?.activeTab ||
+      "tenants"
+    );
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(
+        location.state.activeTab
+      );
+    }
+  }, [location.state]);
 
   const fetchData = async () => {
     if (!hostelId) return;
@@ -192,7 +261,7 @@ const PropertyOverview = () => {
     if (res?.success) {
       setModalType("success");
       setMessage(res?.message);
-fetchData()
+      fetchData()
 
       setShowNoteModal(false);
       setShowSuccess(true);
@@ -220,8 +289,17 @@ fetchData()
         state: { ownerData: res.data }
       });
 
-    }
 
+    }
+else{
+      setModalType("error");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+}
   };
 
   const handleTrialOnly = async () => {
@@ -279,6 +357,12 @@ fetchData()
       setDaysError("Please Choose Days");
       hasError = true;
     }
+    if (!selectedReason) {
+      setReasonError(
+        "Please Select Reason"
+      );
+      hasError = true;
+    }
 
     if (hasError) return;
 
@@ -294,9 +378,14 @@ fetchData()
       trialDays: Number(days),
       paidAmount: 0,
       discountAmount: 0,
-      planCode: firstPlan.planCode
-    };
+      planCode: firstPlan.planCode,
 
+      trialDaysReason:
+        selectedReason,
+
+      trialDaysRemarks:
+        remarks
+    };
     const res = await createSubscription(
       // trialPlan?.hostelId,
       hostelId,
@@ -317,7 +406,8 @@ fetchData()
       setTimeout(() => {
         setShowSuccess(false);
         setShowTrialModal(false);
-        setDays(""); // reset
+        setDays("");
+        setSelectedReason("")
       }, 1000);
 
     } else {
@@ -649,6 +739,51 @@ fetchData()
       setMenuError(res?.message);
     }
   };
+
+const handleApproveKYC = async (customerId) => {
+  if (
+    approveLock.current ||
+    approveLoading
+  ) {
+    return;
+  }
+
+  approveLock.current = true;
+
+  try {
+    setApproveLoading(true);
+
+    const res = await approveKYC(customerId);
+
+    if (res?.success) {
+      setModalType("success");
+      setMessage(
+        res?.message ||
+          "KYC approved successfully"
+      );
+
+      setShowSuccess(true);
+      setShowApproveModal(false);
+
+    } else {
+      setModalType("error");
+      setMessage(
+        res?.message ||
+          "Approval failed"
+      );
+
+      setShowSuccess(true);
+    }
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+  } finally {
+    setApproveLoading(false);
+    approveLock.current = false;
+  }
+};
   //   const handleGeneratePayment = async () => {
 
   //   let hasError = false;
@@ -739,33 +874,179 @@ fetchData()
   //   );
 
   // };
+  // const handleGeneratePayment = async () => {
+
+  //   let hasError = false;
+
+  //   if (!paymentPlan) {
+  //     setPaymentPlanError("Please select plan");
+  //     hasError = true;
+  //   }
+
+  //   // if (!paymentAmount) {
+  //   //   setPaymentAmountError("Please enter amount");
+  //   //   hasError = true;
+  //   // }
+  //     if (!paidBy) {
+  //     setPaidByError("Please select Paid By");
+  //     hasError = true;
+  //   }
+  //   if (!paymentDiscount) {
+  //     setPaymentDiscountError("Please enter discount");
+  //     hasError = true;
+  //   }
+
+  //   if (hasError) return;
+
+  //   const payload = {
+  //     planCode: paymentPlan,
+  //     // paidAmount: Number(paymentAmount),
+  //     discountAmount: Number(paymentDiscount || 0),
+  //     paidBy
+  //   };
+
+  //   const res = await generateOrderHistory(
+  //     hostelId,
+  //     payload
+  //   );
+
+  //   console.log("generate payment response", res);
+
+  //   if (res?.success) {
+
+  //     setGeneratedPaymentUrl(
+  //       res?.data?.paymentUrl || ""
+  //     );
+
+  //     setModalType("success");
+  //     setMessage("Payment generated successfully");
+  //     setShowSuccess(true);
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1500)
+
+  //   } else {
+
+  //     setModalType("error");
+  //     setMessage(res?.message || "Something went wrong");
+  //     setShowSuccess(true);
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1500)
+
+  //   }
+
+  // };
+
+  // const handleGeneratePayment = async () => {
+
+  //   if (generateLoading) return;
+
+  //   let hasError = false;
+
+  //   if (!paymentPlan) {
+  //     setPaymentPlanError("Please select plan");
+  //     hasError = true;
+  //   }
+
+  //   if (!paidBy) {
+  //     setPaidByError("Please select Paid By");
+  //     hasError = true;
+  //   }
+
+  //   if (!paymentDiscount) {
+  //     setPaymentDiscountError("Please enter discount");
+  //     hasError = true;
+  //   }
+
+  //   if (hasError) return;
+
+  //   try {
+
+  //     setGenerateLoading(true);
+
+  //     const payload = {
+  //       planCode: paymentPlan,
+  //       discountAmount: Number(paymentDiscount || 0),
+  //       paidBy
+  //     };
+
+  //     const res = await generateOrderHistory(
+  //       hostelId,
+  //       payload
+  //     );
+
+  //     if (res?.success) {
+  //       setIsPaymentGenerated(true);
+  //       setGeneratedPaymentUrl(
+  //         res?.data?.paymentUrl || ""
+  //       );
+
+  //       setModalType("success");
+  //       setMessage("Payment generated successfully");
+  //       setShowSuccess(true);
+
+  //     } else {
+
+  //       setModalType("error");
+  //       setMessage(
+  //         res?.message || "Something went wrong"
+  //       );
+  //       setShowSuccess(true);
+
+  //     }
+
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1500);
+
+  //   } finally {
+
+  //     setGenerateLoading(false);
+
+  //   }
+  // };
+
   const handleGeneratePayment = async () => {
 
-    let hasError = false;
+  if (
+    generateLock.current ||
+    generateLoading ||
+    isPaymentGenerated
+  ) {
+    return;
+  }
 
-    if (!paymentPlan) {
-      setPaymentPlanError("Please select plan");
-      hasError = true;
-    }
+  generateLock.current = true;
 
-    // if (!paymentAmount) {
-    //   setPaymentAmountError("Please enter amount");
-    //   hasError = true;
-    // }
-      if (!paidBy) {
-      setPaidByError("Please select Paid By");
-      hasError = true;
-    }
-    if (!paymentDiscount) {
-      setPaymentDiscountError("Please enter discount");
-      hasError = true;
-    }
+  let hasError = false;
 
-    if (hasError) return;
+  if (!paymentPlan) {
+    setPaymentPlanError("Please select plan");
+    hasError = true;
+  }
+
+  if (!paidBy) {
+    setPaidByError("Please select Paid By");
+    hasError = true;
+  }
+
+  if (!paymentDiscount) {
+    setPaymentDiscountError("Please enter discount");
+    hasError = true;
+  }
+
+  if (hasError) {
+    generateLock.current = false;
+    return;
+  }
+
+  try {
+
+    setGenerateLoading(true);
 
     const payload = {
       planCode: paymentPlan,
-      // paidAmount: Number(paymentAmount),
       discountAmount: Number(paymentDiscount || 0),
       paidBy
     };
@@ -775,63 +1056,71 @@ fetchData()
       payload
     );
 
-    console.log("generate payment response", res);
-
     if (res?.success) {
+
+      setIsPaymentGenerated(true);
 
       setGeneratedPaymentUrl(
         res?.data?.paymentUrl || ""
       );
 
       setModalType("success");
-      setMessage("Payment generated successfully");
+      setMessage(
+        "Payment generated successfully"
+      );
       setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 1500)
 
     } else {
 
       setModalType("error");
-      setMessage(res?.message || "Something went wrong");
+      setMessage(
+        res?.message || "Something went wrong"
+      );
       setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 1500)
 
     }
-
-  };
- const handleSharePayment = async () => {
-
-  if (!generatedPaymentUrl) {
-    return;
-  }
-
-  const res = await sharePaymentLink(
-    hostelId,
-    generatedPaymentUrl
-  );
-
-  if (res?.success) {
-
-    setModalType("success");
-    setMessage("Payment link shared successfully");
-    setShowSuccess(true);
 
     setTimeout(() => {
       setShowSuccess(false);
     }, 1500);
 
-  } else {
+  } finally {
 
-    setModalType("error");
-    setMessage(res?.message || "Share failed");
-    setShowSuccess(true);
+    setGenerateLoading(false);
 
+    generateLock.current = false;
   }
-
 };
+  const handleSharePayment = async () => {
+
+    if (!generatedPaymentUrl) {
+      return;
+    }
+
+    const res = await sharePaymentLink(
+      hostelId,
+      generatedPaymentUrl
+    );
+
+    if (res?.success) {
+
+      setModalType("success");
+      setMessage("Payment link shared successfully");
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
+    } else {
+
+      setModalType("error");
+      setMessage(res?.message || "Share failed");
+      setShowSuccess(true);
+
+    }
+
+  };
 
   if (!hostelData) {
     return (
@@ -852,89 +1141,90 @@ fetchData()
       <div className="px-pageX min-h-screen">
 
 
-       <div className="flex items-center gap-rowGap">
+        <div className="flex items-center gap-rowGap">
 
           <img
-  src={arrowleft}
-  className="
+            src={arrowleft}
+            className="
     w-5
     h-5
     cursor-pointer
   "
 
-         
-          onClick={() => {
 
-  if (
-    location.state?.from === "supportTickets"
-  ) {
+            onClick={() => {
 
-    navigate(
-      `/supportTicket/${adminDetails?.roleId}`,
-      {
-        state: {
-          currentPage:
-            location.state?.currentPage,
+              if (
+                location.state?.from === "supportTickets"
+              ) {
 
-          currentSearch:
-            location.state?.currentSearch,
+                navigate(
+                  `/supportTicket/${adminDetails?.roleId}`,
+                  {
+                    state: {
+                      currentPage:
+                        location.state?.currentPage,
 
-          currentStatusFilter:
-            location.state?.currentStatusFilter,
-        },
-      }
-    );
+                      currentSearch:
+                        location.state?.currentSearch,
 
-  }
+                      currentStatusFilter:
+                        location.state?.currentStatusFilter,
+                    },
+                  }
+                );
 
-  else if (
-    location.state?.from === "transactions"
-  ) {
+              }
 
-    navigate(
-      `/transactions/${adminDetails?.roleId}`,
-      {
-        state: {
-          currentPage:
-            location.state?.currentPage,
+              else if (
+                location.state?.from === "transactions"
+              ) {
 
-          currentSearch:
-            location.state?.currentSearch,
+                navigate(
+                  `/transactions/${adminDetails?.roleId}`,
+                  {
+                    state: {
+                      currentPage:
+                        location.state?.currentPage,
 
-          currentDateRange:
-            location.state?.currentDateRange,
-        },
-      }
-    );
+                      currentSearch:
+                        location.state?.currentSearch,
 
-  } else {
+                      currentDateRange:
+                        location.state?.currentDateRange,
+                    },
+                  }
+                );
 
-    navigate(
-      `/properties/${adminDetails?.roleId}`,
-      {
-        state: {
-          currentPage:
-            location.state?.currentPage,
+              } else {
 
-          currentSearch:
-            location.state?.currentSearch,
+                navigate(`/properties/${adminDetails?.roleId}`, {
+                  state: {
+                    fromOverview: true,
+                    currentPage: location.state?.currentPage,
+                    currentSearch: location.state?.currentSearch,
+                    currentDateRange:
+                      location.state?.currentDateRange?.length === 2
+                        ? [
+                          dayjs(
+                            location.state.currentDateRange[0]
+                          ).format("YYYY-MM-DD"),
+                          dayjs(
+                            location.state.currentDateRange[1]
+                          ).format("YYYY-MM-DD"),
+                        ]
+                        : [],
+                    currentStatusFilter: location.state?.currentStatusFilter,
+                  },
+                });
 
-          currentDateRange:
-            location.state?.currentDateRange,
+              }
 
-          currentStatusFilter:
-            location.state?.currentStatusFilter,
-        },
-      }
-    );
-
-  }
-
-}}
+            }}
           />
-        <p className="text-pageTitle leading-pageTitle text-headingDark font-medium">
-  Property Overview
-</p>
+          <p className="text-pageTitle leading-pageTitle text-headingDark font-medium">
+            Property Overview
+          </p>
         </div>
 
 
@@ -943,43 +1233,43 @@ fetchData()
           {/* Top Section */}
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
 
-  {/* LEFT */}
-  <div className="flex items-center gap-3 min-w-0 flex-1">
+            {/* LEFT */}
+            <div className="flex items-center gap-3 min-w-0 flex-1">
 
-    {/* PROFILE */}
-    <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-lg font-semibold shrink-0">
+              {/* PROFILE */}
+              <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-lg font-semibold shrink-0">
 
-      {hostelData?.mainImage ? (
+                {hostelData?.mainImage ? (
 
-        <img
-          src={hostelData.mainImage}
-          alt="profile"
-          className="w-full h-full object-cover"
-        />
+                  <img
+                    src={hostelData.mainImage}
+                    alt="profile"
+                    className="w-full h-full object-cover"
+                  />
 
-      ) : (
+                ) : (
 
-        <span>
-          {hostelData?.initials}
-        </span>
+                  <span>
+                    {hostelData?.initials}
+                  </span>
 
-      )}
+                )}
 
-    </div>
+              </div>
 
 
-    {/* CONTENT */}
-    <div className="min-w-0 flex-1">
+              {/* CONTENT */}
+              <div className="min-w-0 flex-1">
 
-      {/* NAME + RIGHT */}
-      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
+                {/* NAME + RIGHT */}
+                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
 
-        {/* NAME */}
-        <div className="min-w-0">
+                  {/* NAME */}
+                  <div className="min-w-0">
 
-          <h2
-            title={hostelData.hostelName}
-            className="
+                    <h2
+                      title={hostelData.hostelName}
+                      className="
               text-sectionTitle
               font-semibold
               text-headingDark
@@ -989,77 +1279,73 @@ fetchData()
               overflow-hidden
               max-w-[500px] text-left
             "
-          >
-            {hostelData.hostelName}
-          </h2>
+                    >
+                      {hostelData.hostelName}
+                    </h2>
 
-          <p
-            className="
-              text-cardTitle
-              text-textDark/60
-              flex
-              items-center
-              gap-1
-              whitespace-nowrap
-              overflow-hidden
-              mt-1
-            "
-          >
+                    <p
+                      className="
+    text-cardTitle
+    text-textDark/60
+    flex
+    items-center
+    gap-1
+    mt-1
+    min-w-0
+    w-full
+  "
+                    >
+                      <span className="shrink-0">
+                        {hostelData.hostelId} |
+                      </span>
 
-            <span className="shrink-0">
-              {hostelData.hostelId} |
-            </span>
+                      <span
+                        title={hostelData.owner?.fullName}
+                        className="
+    text-primaryBlue
+    cursor-pointer
+    hover:underline
+    break-words whitespace-nowrap
+  "
+                        onClick={() => handleOwnerClick(hostelData)}
+                      >
+                        {hostelData.owner?.fullName}
+                      </span>
 
-            <span
-              title={hostelData.owner?.fullName}
-              className="
-                text-primaryBlue
-                cursor-pointer
-                hover:underline
-                truncate
-                overflow-hidden
-                max-w-[260px]
-              "
-              onClick={() => handleOwnerClick(hostelData)}
-            >
-              {hostelData.owner?.fullName}
-            </span>
+                      <img
+                        src={Arrow}
+                        className="w-3 h-3 shrink-0"
+                      />
+                    </p>
 
-            <img
-              src={Arrow}
-              className="w-3 h-3 ml-1 shrink-0"
-            />
-
-          </p>
-
-        </div>
+                  </div>
 
 
-        {/* RIGHT SECTION */}
-        <div className="flex items-center gap-3 shrink-0 flex-wrap mb-5">
+                  {/* RIGHT SECTION */}
+                  <div className="flex items-center gap-3 shrink-0 flex-wrap mb-5">
 
-          {/* BUTTONS */}
-          <div className="flex items-center gap-2 flex-wrap">
+                    {/* BUTTONS */}
+                    <div className="flex items-center gap-2 flex-wrap">
 
-            {/* TRIAL */}
-            <button
-              disabled={
-                hostelData?.canAddExpandableTrial === false ||
-                !canSubscriptionWrite
-              }
-              onClick={() => {
+                      {/* TRIAL */}
+                      <button
+                        disabled={
+                          hostelData?.canAddExpandableTrial === false ||
+                          !canSubscriptionWrite
+                        }
+                        onClick={() => {
 
-                if (
-                  hostelData?.canAddExpandableTrial !== false &&
-                  canSubscriptionWrite
-                ) {
+                          if (
+                            hostelData?.canAddExpandableTrial !== false &&
+                            canSubscriptionWrite
+                          ) {
 
-                  setShowTrialModal(true);
+                            setShowTrialModal(true);
 
-                }
+                          }
 
-              }}
-              className={`
+                        }}
+                        className={`
                 px-3
                 py-1
                 rounded-[6px]
@@ -1070,31 +1356,30 @@ fetchData()
                 duration-200
                 shadow-card
                 font-inter
-                ${
-                  hostelData?.canAddExpandableTrial === false ||
-                  !canSubscriptionWrite
-                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    : "bg-warningYellow text-white cursor-pointer hover:opacity-90"
-                }
+                ${hostelData?.canAddExpandableTrial === false ||
+                            !canSubscriptionWrite
+                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                            : "bg-warningYellow text-white cursor-pointer hover:opacity-90"
+                          }
               `}
-            >
-              Trial + Days
-            </button>
+                      >
+                        Trial + Days
+                      </button>
 
 
-            {/* BUY PLAN */}
-            <button
-              disabled={!canSubscriptionWrite}
-              onClick={() => {
+                      {/* BUY PLAN */}
+                      <button
+                        disabled={!canSubscriptionWrite}
+                        onClick={() => {
 
-                if (canSubscriptionWrite) {
+                          if (canSubscriptionWrite) {
 
-                  setShowPlanModal(true);
+                            setShowPlanModal(true);
 
-                }
+                          }
 
-              }}
-              className={`
+                        }}
+                        className={`
                 px-3
                 py-1
                 rounded-[6px]
@@ -1105,21 +1390,20 @@ fetchData()
                 duration-200
                 shadow-card
                 font-inter
-                ${
-                  canSubscriptionWrite
-                    ? "bg-primaryBlue text-white cursor-pointer hover:opacity-90"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                }
+                ${canSubscriptionWrite
+                            ? "bg-primaryBlue text-white cursor-pointer hover:opacity-90"
+                            : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          }
               `}
-            >
-              Buy Plan
-            </button>
+                      >
+                        Buy Plan
+                      </button>
 
 
-            {/* PAYMENT */}
-            <button
-              onClick={() => setShowPaymentDrawer(true)}
-              className="
+                      {/* PAYMENT */}
+                      <button
+                        onClick={() => setShowPaymentDrawer(true)}
+                        className="
                 px-3
                 py-1
                 rounded-[6px]
@@ -1135,32 +1419,32 @@ fetchData()
                 shadow-card
                 font-inter
               "
-            >
-              Generate Payment
-            </button>
+                      >
+                        Generate Payment
+                      </button>
 
-          </div>
-
-
-          {/* DATE */}
-          <div className="flex items-center gap-2">
-
-            <img
-              src={refresh}
-              className="w-8 h-8 object-contain"
-              alt="refresh"
-            />
-
-            <span className="whitespace-nowrap text-textDark text-[13px] font-inter">
-              {hostelData.createdAtDate}
-            </span>
-
-          </div>
+                    </div>
 
 
-          {/* VIEW */}
-          <button
-            className="
+                    {/* DATE */}
+                    <div className="flex items-center gap-2">
+
+                      <img
+                        src={refresh}
+                        className="w-8 h-8 object-contain"
+                        alt="refresh"
+                      />
+
+                      <span className="whitespace-nowrap text-textDark text-[13px] font-inter">
+                        {hostelData.createdAtDate}
+                      </span>
+
+                    </div>
+
+
+                    {/* VIEW */}
+                    <button
+                      className="
               w-8
               h-8
               flex
@@ -1172,20 +1456,20 @@ fetchData()
               duration-200
               cursor-pointer
             "
-          >
-            <img
-              src={ViewImg}
-              width={18}
-              height={18}
-              alt="view"
-              className="object-contain"
-            />
-          </button>
+                    >
+                      <img
+                        src={ViewImg}
+                        width={18}
+                        height={18}
+                        alt="view"
+                        className="object-contain"
+                      />
+                    </button>
 
 
-          {/* MENU */}
-          <button
-            className="
+                    {/* MENU */}
+                    <button
+                      className="
               w-8
               h-8
               flex
@@ -1199,24 +1483,24 @@ fetchData()
               duration-200
               cursor-pointer
             "
-          >
-            ⋮
-          </button>
+                    >
+                      ⋮
+                    </button>
 
-        </div>
+                  </div>
 
-      </div>
+                </div>
 
-    </div>
+              </div>
 
-  </div>
+            </div>
 
-</div>
+          </div>
 
 
-          
+
           <div
-  className="
+            className="
     grid
     grid-cols-1
     sm:grid-cols-2
@@ -1224,88 +1508,88 @@ fetchData()
     gap-6
     mt-6
   "
->
+          >
 
-  {/* MOBILE */}
-  <div className="flex items-start gap-3">
+            {/* MOBILE */}
+            <div className="flex items-start gap-3">
 
-    <div>
+              <div>
 
-      <p
-        className="
+                <p
+                  className="
           text-label
           text-textDark
           text-left
           font-inter
           font-medium
         "
-      >
-        Mob No
-      </p>
+                >
+                  Mob No
+                </p>
 
-      <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1">
 
-        <img
-          src={Mobile}
-          className="w-4 h-4"
-        />
+                  <img
+                    src={Mobile}
+                    className="w-4 h-4"
+                  />
 
-        <p
-          className="
+                  <p
+                    className="
             text-cardTitle
             font-medium
             font-inter
             text-textDark
           "
-        >
-          +91 {hostelData.mobile}
-        </p>
+                  >
+                    +91 {hostelData.mobile}
+                  </p>
 
-      </div>
+                </div>
 
-    </div>
+              </div>
 
-  </div>
+            </div>
 
-  {/* LOCATION */}
-  <div className="flex items-start gap-3">
+            {/* LOCATION */}
+            <div className="flex items-start gap-3">
 
-   <div className="min-w-0">
+              <div className="min-w-0">
 
-  <p
-    className="
+                <p
+                  className="
       text-label
       text-textDark
       text-left
       font-inter
       font-medium
     "
-  >
-    Region / City
-  </p>
+                >
+                  Region / City
+                </p>
 
-  <div
-    className="
+                <div
+                  className="
       flex
       items-center
       gap-2
       mt-1
       min-w-0
     "
-  >
+                >
 
-    <img
-      src={locationImg}
-      className="
+                  <img
+                    src={locationImg}
+                    className="
         w-4
         h-4
         shrink-0
       "
-    />
+                  />
 
-    <p
-      title={`${hostelData.city}, ${hostelData.state}`}
-      className="
+                  <p
+                    title={`${hostelData.city}, ${hostelData.state}`}
+                    className="
         text-cardTitle
         font-medium
         text-primaryBlue
@@ -1314,101 +1598,101 @@ fetchData()
         min-w-0
         truncate
       "
-    >
-      <span className="truncate">
-        {hostelData.city}, {hostelData.state}
-      </span>
+                  >
+                    <span className="truncate">
+                      {hostelData.city}, {hostelData.state}
+                    </span>
 
-      <img
-        src={Arrow}
-        className="
+                    <img
+                      src={Arrow}
+                      className="
           w-3
           h-3
           ml-1
           shrink-0
         "
-      />
-    </p>
+                    />
+                  </p>
 
-  </div>
+                </div>
 
-</div>
+              </div>
 
-  </div>
+            </div>
 
-  {/* SUBSCRIPTION */}
-  <div className="flex items-start gap-3">
+            {/* SUBSCRIPTION */}
+            <div className="flex items-start gap-3">
 
-    <div>
+              <div>
 
-      <p
-        className="
+                <p
+                  className="
           text-label
           text-textDark
           text-left
           font-inter
           font-medium
         "
-      >
-        Subscription Plan
-      </p>
+                >
+                  Subscription Plan
+                </p>
 
-      <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1">
 
-        <img
-          src={
-            plan === "Basic"
-              ? Star
-              : plan === "Premium"
-              ? Crown
-              : null
-          }
-          className="w-4 h-4"
-          style={{
-            display:
-              plan === "basic" ||
-              plan === "premium"
-                ? "block"
-                : "none"
-          }}
-        />
+                  <img
+                    src={
+                      plan === "Basic"
+                        ? Star
+                        : plan === "Premium"
+                          ? Crown
+                          : null
+                    }
+                    className="w-4 h-4"
+                    style={{
+                      display:
+                        plan === "basic" ||
+                          plan === "premium"
+                          ? "block"
+                          : "none"
+                    }}
+                  />
 
-        <p
-          className="
+                  <p
+                    className="
             text-cardTitle
             font-medium
             text-textDark
           "
-        >
-          {hostelData?.currentSubscription?.planName || "N/A"}
-        </p>
+                  >
+                    {hostelData?.currentSubscription?.planName || "N/A"}
+                  </p>
 
-      </div>
+                </div>
 
-    </div>
+              </div>
 
-  </div>
+            </div>
 
-  {/* AGENT */}
-  <div className="flex items-start gap-3">
+            {/* AGENT */}
+            <div className="flex items-start gap-3">
 
-    <div>
+              <div>
 
-      <p
-        className="
+                <p
+                  className="
           text-label
           text-textDark
           text-left
           font-inter
           font-medium
         "
-      >
-        Current Agent
-      </p>
+                >
+                  Current Agent
+                </p>
 
-      <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1">
 
-        {/* <p
+                  {/* <p
           className="
             text-cardTitle
             font-medium
@@ -1419,20 +1703,20 @@ fetchData()
         >
           {hostelData?.relationalAgents?.[0]?.agentName || "N/A"}
         </p> */}
-        <p
-  onClick={() => {
+                  <p
+                    onClick={() => {
 
-    const agentId =
-      hostelData?.relationalAgents?.[0]?.agentId;
+                      const agentId =
+                        hostelData?.relationalAgents?.[0]?.agentId;
 
-    if (agentId) {
+                      if (agentId) {
 
-      navigate(`/iam-user/${agentId}`);
+                        navigate(`/iam-user/${agentId}`);
 
-    }
+                      }
 
-  }}
-  className="
+                    }}
+                    className="
     text-cardTitle
     font-medium
     text-primaryBlue
@@ -1441,15 +1725,15 @@ fetchData()
     cursor-pointer
     hover:underline
   "
->
-  {hostelData?.relationalAgents?.[0]?.agentName || "N/A"}
-</p>
+                  >
+                    {hostelData?.relationalAgents?.[0]?.agentName || "N/A"}
+                  </p>
 
-        {hostelData?.relationalAgents?.length > 0 && (
+                  {hostelData?.relationalAgents?.length > 0 && (
 
-          <button
-            onClick={() => setShowAgentModal(true)}
-            className="
+                    <button
+                      onClick={() => setShowAgentModal(true)}
+                      className="
               text-[10px]
               px-2
               py-[2px]
@@ -1458,37 +1742,37 @@ fetchData()
               rounded-pill
               whitespace-nowrap cursor-pointer
             "
-          >
-            View
-          </button>
+                    >
+                      View
+                    </button>
 
-        )}
+                  )}
 
-      </div>
+                </div>
 
-    </div>
+              </div>
 
-  </div>
+            </div>
 
-  {/* STATUS */}
-  <div className="flex items-start gap-3">
+            {/* STATUS */}
+            <div className="flex items-start gap-3">
 
-    <div>
+              <div>
 
-      <p
-        className="
+                <p
+                  className="
           text-label
           text-textDark
           text-left
           font-inter
           font-medium
         "
-      >
-        Status
-      </p>
+                >
+                  Status
+                </p>
 
-      <p
-        className="
+                <p
+                  className="
           text-cardTitle
           font-medium
           flex
@@ -1496,76 +1780,73 @@ fetchData()
           gap-2
           mt-1
         "
-      >
+                >
 
-        <span
-          className={`
+                  <span
+                    className={`
             w-2
             h-2
             rounded-full
-            ${
-              hostelData?.subscriptionStatus?.toLowerCase() === "active"
-                ? "bg-successGreen"
-                : "bg-dangerRed"
-            }
+            ${hostelData?.subscriptionStatus?.toLowerCase() === "active"
+                        ? "bg-successGreen"
+                        : "bg-dangerRed"
+                      }
           `}
-        ></span>
+                  ></span>
 
-        <span
-          className={`
+                  <span
+                    className={`
             font-medium
-            ${
-              hostelData?.subscriptionStatus === "Active"
-                ? "text-successGreen"
-                : "text-dangerRed"
-            }
+            ${hostelData?.subscriptionStatus === "Active"
+                        ? "text-successGreen"
+                        : "text-dangerRed"
+                      }
           `}
-        >
-          {hostelData?.subscriptionStatus || "N/A"}
-        </span>
+                  >
+                    {hostelData?.subscriptionStatus || "N/A"}
+                  </span>
 
-      </p>
+                </p>
 
-    </div>
+              </div>
 
-  </div>
+            </div>
 
-  {/* RESET */}
-  <div className="flex items-start gap-3">
+            {/* RESET */}
+            <div className="flex items-start gap-3">
 
-    <button
-      disabled={!canResetWrite}
-      onClick={() => {
-        if (canResetWrite === true) {
-          setShowNoteModal(true);
-        }
-      }}
-      className={`
+              <button
+                disabled={!canResetWrite}
+                onClick={() => {
+                  if (canResetWrite === true) {
+                    setShowNoteModal(true);
+                  }
+                }}
+                className={`
         px-3
         py-[2px]
         rounded-card
         text-tableCell
         font-medium
-        ${
-          canResetWrite === true
-            ? "bg-primaryBlue hover:bg-blue-700 text-white cursor-pointer"
-            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-        }
+        ${canResetWrite === true
+                    ? "bg-primaryBlue hover:bg-blue-700 text-white cursor-pointer"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }
       `}
-    >
-      Reset
-    </button>
+              >
+                Reset
+              </button>
 
-  </div>
+            </div>
 
-</div>
+          </div>
 
         </div>
 
 
 
-       <div
-  className="
+        <div
+          className="
     bg-white
     border
     border-borderSoft
@@ -1574,10 +1855,10 @@ fetchData()
     mt-4
     shadow-card
   "
->
+        >
 
-  <div
-    className="
+          <div
+            className="
       grid
       grid-cols-2
       md:grid-cols-3
@@ -1586,113 +1867,113 @@ fetchData()
       lg:divide-x
       lg:divide-borderSoft
     "
-  >
+          >
 
-    {/* ACTIVE TENANTS */}
-    <div className="px-2 lg:px-4">
+            {/* ACTIVE TENANTS */}
+            <div className="px-2 lg:px-4">
 
-      <p
-        className="
+              <p
+                className="
           text-tableCell
           text-textDark/60
         "
-      >
-        Active Tenants
-      </p>
+              >
+                Active Tenants
+              </p>
 
-      <p
-        className="
+              <p
+                className="
           text-sectionTitle
           font-semibold
           mt-1
           text-headingDark
         "
-      >
-        {hostelData.noOfActiveTenants}
-      </p>
+              >
+                {hostelData.noOfActiveTenants}
+              </p>
 
-    </div>
+            </div>
 
-    {/* ROOMS & BEDS */}
-    <div className="px-2 lg:px-4">
+            {/* ROOMS & BEDS */}
+            <div className="px-2 lg:px-4">
 
-      <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1">
 
-        <p
-          className="
+                <p
+                  className="
             text-tableCell
             text-textDark/60
           "
-        >
-          Rooms & Beds
-        </p>
+                >
+                  Rooms & Beds
+                </p>
 
-        <img
-          src={ViewImg}
-          className="
+                <img
+                  src={ViewImg}
+                  className="
             w-3.5
             h-3.5
             opacity-70
             cursor-pointer
           "
-          onClick={() => setShowSharing(true)}
-        />
+                  onClick={() => setShowSharing(true)}
+                />
 
-      </div>
+              </div>
 
-      <p
-        className="
+              <p
+                className="
           text-sectionTitle
           font-semibold
           mt-1
           text-headingDark text-left
         "
-      >
-        {hostelData.noOfRooms} | {hostelData.noOfBeds}
-      </p>
+              >
+                {hostelData.noOfRooms} | {hostelData.noOfBeds}
+              </p>
 
-    </div>
+            </div>
 
-    {/* REVENUE */}
-    <div className="px-2 lg:px-4">
+            {/* REVENUE */}
+            <div className="px-2 lg:px-4">
 
-      <p
-        className="
+              <p
+                className="
           text-tableCell
           text-textDark/60
         "
-      >
-        Revenue Generated
-      </p>
+              >
+                Revenue Generated
+              </p>
 
-      <p
-        className="
+              <p
+                className="
           text-sectionTitle
           font-semibold
           mt-1
           text-headingDark
         "
-      >
-        ₹0
-      </p>
+              >
+                ₹0
+              </p>
 
-    </div>
+            </div>
 
-    {/* INVOICES */}
-    <div className="px-2 lg:px-4">
+            {/* INVOICES */}
+            <div className="px-2 lg:px-4">
 
-      <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1">
 
-        <p
-          className="
+                <p
+                  className="
             text-tableCell
             text-textDark/60
           "
-        >
-          Total Invoices
-        </p>
+                >
+                  Total Invoices
+                </p>
 
-        {/* <img
+                {/* <img
           src={ViewImg}
           className="
             w-3.5
@@ -1703,54 +1984,54 @@ fetchData()
           onClick={() => setShowBillingRule(true)}
         /> */}
 
-      </div>
+              </div>
 
-      <p
-        className="
+              <p
+                className="
           text-sectionTitle
           font-semibold
           mt-1
           text-headingDark text-left
         "
-      >
-        0
-      </p>
+              >
+                0
+              </p>
 
-    </div>
+            </div>
 
-    {/* SUPPORT */}
-    <div className="px-2 lg:px-4">
+            {/* SUPPORT */}
+            <div className="px-2 lg:px-4">
 
-      <p
-        className="
+              <p
+                className="
           text-tableCell
           text-textDark/60
         "
-      >
-        Support Tickets
-      </p>
+              >
+                Support Tickets
+              </p>
 
-      <p
-        className="
+              <p
+                className="
           text-sectionTitle
           font-semibold
           mt-1
           text-headingDark
         "
-      >
-        0
-      </p>
+              >
+                0
+              </p>
 
-    </div>
+            </div>
 
-  </div>
+          </div>
 
-</div>
+        </div>
 
 
 
-       <div
-  className="
+        <div
+          className="
     bg-white
     rounded-card
     pt-4
@@ -1760,11 +2041,11 @@ fetchData()
     border
     border-borderSoft
   "
->
+        >
 
-  {/* HEADER */}
-  <div
-    className="
+          {/* HEADER */}
+          <div
+            className="
       sticky
       top-0
       z-40
@@ -1782,33 +2063,33 @@ fetchData()
       border-b
       border-borderSoft
     "
-  >
+          >
 
-    {/* TABS */}
-    <div
-      className="
+          
+            <div
+              className="
         flex
         gap-6
         overflow-x-auto
       "
-    >
+            >
 
-      {[
-        "tenants",
-        "subscriptions",
-        "Product Support",
-        "staffs",
-        "Invoice",
-        "Invoice Redemption",
-        "activity",
-        "Amenities",
-        "Configuration"
-      ].map((tab) => (
+              {[
+                "tenants",
+                "subscriptions",
+                "Product Support",
+                "staffs",
+                "Invoice",
+                "Invoice Redemption",
+                "activity",
+                "Amenities",
+                "Configuration"
+              ].map((tab) => (
 
-        <button
-          key={tab}
-          onClick={() => setActiveTab(tab)}
-          className={`
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`
             pb-3
             text-cardTitle
             font-medium
@@ -1820,74 +2101,344 @@ fetchData()
             transition-all
             duration-200
 
-            ${
-              activeTab === tab
-                ? "border-primaryBlue text-primaryBlue"
-                : "border-transparent text-textDark/60 hover:text-primaryBlue"
-            }
+            ${activeTab === tab
+                      ? "border-primaryBlue text-primaryBlue"
+                      : "border-transparent text-textDark/60 hover:text-primaryBlue"
+                    }
           `}
-        >
-          {tab}
-        </button>
+                >
+                  {tab}
+                </button>
 
-      ))}
+              ))}
 
-    </div>
+            </div>
+            {activeTab === "Invoice" && (
+<div className="flex items-center gap-1 pb-4">
+ 
 
+  <button
+  onClick={() => setShowFilterDrawer(true)}
+  className="
+    h-7
+    px-4
+    border
+    rounded-lg
+    flex
+    items-center
+    gap-1
+    bg-white
+    cursor-pointer
+  "
+>
+  Filters
+  <img
+    src={ArrowSelect}
+    alt=""
+    className="w-3 h-3"
+  />
+</button>
+</div>
+            )}
+
+ {showFilterDrawer && (
+  <>
+    <div
+      className="fixed inset-0 bg-black/30 z-40"
+      onClick={() => setShowFilterDrawer(false)}
+    />
+
+   <div
+  className="
+    fixed
+    top-4
+    right-4
+    bottom-4
+    w-[420px]
+    bg-white
+    z-50
+    shadow-xl
+    rounded-3xl
+    flex
+    flex-col
+    overflow-hidden
+  "
+>
+  <div className="flex-1 overflow-y-auto p-5">
+     <div className="flex justify-between items-center mb-5">
+    <h3 className="text-lg font-semibold">
+      Filters
+    </h3>
+
+    <button
+      onClick={() => setShowFilterDrawer(false)}
+    >
+      ✕
+    </button>
   </div>
 
-  {/* TENANTS */}
-  {activeTab === "tenants" && (
+     <div className="space-y-3">
 
-    canRead === true ? (
+  {/* ALL */}
+  {/* All Dropdown */}
+<div className="relative">
+  <button
+    onClick={() => setShowAllMenu(!showAllMenu)}
+    className="w-full h-[60px] px-5 border-soft rounded-2xl flex items-center justify-between"
+  >
+    <span>{selectedType}</span>
+    <img src={ArrowSelect} className="w-4 h-4"/>
+  </button>
 
-      <div className="overflow-x-auto p-4">
-
+  {showAllMenu && (
+    <div
+      className="
+        absolute
+        top-[70px]
+        left-0
+        w-full
+        bg-white
+        border
+        rounded-2xl
+        shadow-lg
+        z-50
+        max-h-[250px]
+        overflow-y-auto
+      "
+    >
+      {[
+        "Rent",
+        "Advance",
+        "Booking",
+        "Retainer",
+        "EB",
+        "Manual",
+      ].map((item) => (
         <div
+          key={item}
+          onClick={() => {
+            setSelectedType(item);
+            setShowAllMenu(false);
+          }}
+          className="px-5 py-4 cursor-pointer hover:bg-[#F2F4F7]"
+        >
+          {item}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+  {/* STATUS */}
+  <div className="relative">
+  <div className="border-soft rounded-xl">
+    <button
+      onClick={() => setShowStatusMenu(!showStatusMenu)}
+      className="w-full flex justify-between items-center p-3"
+    >
+      <span>{selectedStatus}</span>
+       <img src={ArrowSelect} className="w-4 h-4"/>
+    </button>
+  </div>
+
+  {showStatusMenu && (
+    <div
+      className="
+        absolute
+        top-[60px]
+        left-0
+        w-full
+        bg-white
+        border
+        rounded-xl
+        shadow-lg
+        z-50
+        max-h-[220px]
+        overflow-y-auto
+      "
+    >
+      {["All", "Paid", "Unpaid", "Partial Paid", "Cancelled"].map(
+        (item) => (
+          <div
+            key={item}
+            onClick={() => {
+              setSelectedStatus(item);
+              setShowStatusMenu(false);
+            }}
+            className="
+              px-4
+              py-3
+              cursor-pointer
+              hover:bg-[#F2F4F7]
+            "
+          >
+            {item}
+          </div>
+        )
+      )}
+    </div>
+  )}
+</div>
+
+ <div className="relative">
+  <div className="border-soft rounded-xl">
+    <button
+      onClick={() => setShowViewMenu(!showViewMenu)}
+      className="w-full flex items-center justify-between p-3"
+    >
+      <span>{selectedView}</span>
+       <img src={ArrowSelect} className="w-4 h-4"/>
+    </button>
+  </div>
+
+  {showViewMenu && (
+    <div
+      className="
+        absolute
+        top-[60px]
+        left-0
+        w-full
+        bg-white
+        border
+        rounded-xl
+        shadow-lg
+        z-50
+      "
+    >
+      {["Room View", "List View"].map((item) => (
+        <div
+          key={item}
+          onClick={() => {
+            setSelectedView(item);
+            setShowViewMenu(false);
+          }}
           className="
+            px-4
+            py-3
+            cursor-pointer
+            hover:bg-[#F2F4F7]
+          "
+        >
+          {item}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+</div>
+    </div>
+
+
+<div
+  className="
+    border-t
+    border-gray-300
+    px-5
+    py-4
+    flex
+    gap-3
+    bg-white
+    shrink-0
+  "
+>
+  <button
+    onClick={() => {
+      setSelectedType("All");
+      setSelectedStatus("All");
+      setSelectedView("List View");
+
+      setShowAllMenu(false);
+      setShowStatusMenu(false);
+      setShowViewMenu(false);
+    }}
+    className="
+      flex-1
+      h-11
+      border
+      border-gray-300
+      rounded-xl
+      font-medium
+    "
+  >
+    Clear
+  </button>
+
+  <button
+    onClick={() => {
+      setShowFilterDrawer(false);
+    }}
+    className="
+      flex-1
+      h-11
+      bg-blue-600
+      text-white
+      rounded-xl
+      font-medium
+    "
+  >
+    OK
+  </button>
+</div>
+    </div>
+  </>
+  
+)}
+          </div>
+
+          {/* TENANTS */}
+          {activeTab === "tenants" && (
+
+            canRead === true ? (
+
+              <div className="overflow-x-auto p-4">
+
+                <div
+                  className="
             max-h-[300px]
             overflow-y-auto
             border
             border-borderSoft
             rounded-card
           "
-        >
+                >
 
-          <table className="w-full text-cardTitle">
+                  <table className="w-full text-cardTitle">
 
-            {/* TABLE HEADER */}
-            <thead
-              className="
+                    {/* TABLE HEADER */}
+                    <thead
+                      className="
                 bg-cardBg
                 sticky
                 top-0
                 z-10
               "
-            >
+                    >
 
-              <tr>
+                      <tr>
 
-                {[
-                  "ID",
-                  "Name",
-                  "Mail",
-                  "Mobile No",
-                  "Joining Date",
-                  "Status",
-                  "Action"
-                ].map((header) => (
+                        {[
+                          "ID",
+                          "Name",
+                          "Mail",
+                          "Mobile No",
+                          "Joining Date",
+                          "KYCStatus",
+                          "Status",
+                          "Action"
+                        ].map((header) => (
 
-                  <th
-                    key={header}
-                    className="
+                          <th
+                            key={header}
+                            className="
                       px-4
                       py-3
                       text-left text-[12px]
                     "
-                  >
+                          >
 
-                    <div
-                      className="
+                            <div
+                              className="
                         flex
                         items-center
                         gap-1
@@ -1897,61 +2448,61 @@ fetchData()
                         text-textDark/60
                         font-inter
                       "
-                    >
+                            >
 
-                      {header}
+                              {header}
 
-                      <img
-                        src={swap}
-                        alt="sort"
-                        className="
+                              <img
+                                src={swap}
+                                alt="sort"
+                                className="
                           w-3
                           h-3
                           opacity-70
                         "
-                      />
+                              />
 
-                    </div>
+                            </div>
 
-                  </th>
+                          </th>
 
-                ))}
+                        ))}
 
-              </tr>
+                      </tr>
 
-            </thead>
+                    </thead>
 
-            {/* TABLE BODY */}
-            <tbody className="divide-y divide-borderSoft">
+                    {/* TABLE BODY */}
+                    <tbody className="divide-y divide-borderSoft">
 
-              {hostelData?.tenantList &&
-              hostelData?.tenantList?.length > 0 ? (
+                      {hostelData?.tenantList &&
+                        hostelData?.tenantList?.length > 0 ? (
 
-                hostelData?.tenantList?.map((item, index) => (
+                        hostelData?.tenantList?.map((item, index) => (
 
-                  <tr
-                    key={item.customerId || index}
-                    className="
+                          <tr
+                            key={item.customerId || index}
+                            className="
                       hover:bg-cardBg
                       transition-all1 text-[12px]
                     "
-                  >
+                          >
 
-                    {/* ID */}
-                    <td
-                      className="
+                            {/* ID */}
+                            <td
+                              className="
                         px-4
                         py-3
                         text-left
                         font-medium
                         text-tableCell
                       "
-                    >
-                      {index + 1}
-                    </td>
+                            >
+                              {index + 1}
+                            </td>
 
-                    {/* NAME */}
-                    <td
+                            {/* NAME */}
+                            {/* <td
                       className="
                         px-4
                         py-3
@@ -1962,11 +2513,30 @@ fetchData()
                       "
                     >
                       {item.fullName || item.firstName || "N/A"}
-                    </td>
+                    </td> */}
+                            <td
+                              className="
+    px-4
+    py-3
+    text-primaryBlue
+    text-left
+    font-medium
+    text-tableCell
+    cursor-pointer
+    hover:underline
+  "
+                              onClick={() =>
+                                navigate(
+                                  `/tenant-overview/${item.customerId}`
+                                )
+                              }
+                            >
+                              {item.fullName || item.firstName || "N/A"}
+                            </td>
 
-                    {/* MAIL */}
-                    <td
-                      className="
+                            {/* MAIL */}
+                            <td
+                              className="
                         px-4
                         py-3
                         text-left
@@ -1974,64 +2544,87 @@ fetchData()
                         text-tableCell
                         text-textDark
                       "
-                    >
-                      {item.emailId || "N/A"}
-                    </td>
+                            >
+                              {item.emailId || "N/A"}
+                            </td>
 
-                    {/* MOBILE */}
-                    <td
-                      className="
+                            {/* MOBILE */}
+                            <td
+                              className="
                         px-4
                         py-3
                         text-left
                         font-medium
                         text-tableCell
                       "
-                    >
-                      {item.mobile || "N/A"}
-                    </td>
+                            >
+                              {item.mobile || "N/A"}
+                            </td>
 
-                    {/* JOIN DATE */}
-                    <td
-                      className="
+                            {/* JOIN DATE */}
+                            <td
+                              className="
                         px-4
                         py-3
                         text-left
                         font-medium
                         text-tableCell
                       "
-                    >
-                      {item.joiningDate || "N/A"}
-                    </td>
+                            >
+                              {item.joiningDate || "N/A"}
+                            </td>
 
-                    {/* STATUS */}
-                    <td
-                      className="
+                            {/* STATUS */}
+
+                            {/* <td
+                              className="
                         px-4
                         py-3
                         text-left
                         font-medium
                         text-tableCell
                       "
-                    >
+                            >
+                              {item.kycDetailsStatus || "NOT_AVAILABLE"}
+                            </td> */}
+                           <td className="px-4 py-3 text-left font-medium">
+  <span
+    className={
+      item.kycDetailsStatus === "NOT_AVAILABLE" || !item.kycDetailsStatus
+        ? "text-orange-500"
+        : "text-green-500"
+    }
+  >
+    {item.kycDetailsStatus || "NOT_AVAILABLE"}
+  </span>
+</td>
+                            <td
+                              className="
+                        px-4
+                        py-3
+                        text-left
+                        font-medium
+                        text-tableCell
+                      "
+                            >
 
-                      <span
-                        className="
+                              <span
+                                className="
                           text-successGreen
                           bg-green-50
                           px-2
                           py-[2px]
                           rounded-pill
                         "
-                      >
-                        {item.currentStatus || "N/A"}
-                      </span>
+                              >
+                                {item.currentStatus || "N/A"}
+                              </span>
 
-                    </td>
+                            </td>
 
-                    {/* ACTION */}
-                    <td
-                      className="
+                            {/* ACTION */}
+                            <td
+                              className="
                         px-4
                         py-3
                         text-tableCell
@@ -2039,226 +2632,326 @@ fetchData()
                         whitespace-nowrap
                         relative
                       "
-                    >
+                            >
 
-                      <div className="relative menu-container">
+                              <div className="relative menu-container">
 
-                       <img
-  src={Circle}
-  alt="menu"
-  className="
+                                <img
+                                  src={Circle}
+                                  alt="menu"
+                                  className="
     w-5
     h-5
     cursor-pointer
   "
-  onClick={(e) => {
+                                  onClick={(e) => {
 
-    e.stopPropagation();
+                                    e.stopPropagation();
 
-    const rect =
-      e.currentTarget.getBoundingClientRect();
+                                    const rect =
+                                      e.currentTarget.getBoundingClientRect();
 
-    const menuHeight = 50; // menu approx height
-    const spaceBelow =
-      window.innerHeight - rect.bottom;
+                                    const menuHeight = 100;
 
-    const showAbove =
-      spaceBelow < menuHeight;
+                                    let top =
+                                      rect.bottom + 5;
 
-    setMenuPosition({
-      top: showAbove
-        ? rect.top - menuHeight
-        : rect.bottom + 5,
+                                    if (
+                                      top + menuHeight >
+                                      window.innerHeight
+                                    ) {
+                                      top =
+                                        rect.top - menuHeight;
+                                    }
 
-      left: rect.left,
-    });
+                                    setMenuPosition({
+                                      top,
+                                      left: rect.left,
+                                    });
 
-    setOpenMenu(
-      openMenu === index
-        ? null
-        : index
-    );
+                                    setOpenMenu(
+                                      openMenu === index
+                                        ? null
+                                        : index
+                                    );
+                                  }}
+                                />
 
-  }}
-/>
+                                {openMenu === index && (
 
-{openMenu === index && (
-
-  <div
-    className="
+                                  <div
+                                    className="
       fixed
-      w-28
+      w-30
       bg-white
       border
       border-borderSoft
       rounded-card
       shadow-dropdown
       z-[9999]
+      py-1
+      flex
+      flex-col
     "
-    style={{
-      top: menuPosition.top,
-      left: menuPosition.left - 100,
-    }}
-  >
+                                    style={{
+                                      top: menuPosition.top,
+                                      left: menuPosition.left - 70,
+                                    }}
+                                  >
 
-    <button
-      disabled={!canDelete}
-      onClick={() => {
+                                    {/* <button
+      // onClick={() => {
+      //   setSelectedTenantId(item.customerId);
+      //   setShowDetectionsModal(true);
+      //   setOpenMenu(null);
+      // }}
+       onClick={() => {
 
-        if (!canDelete) return;
+    navigate(
+      `/tenant-deductions/${item.customerId}`,
+      {
+        state: {
+          tenantData: item,
+          hostelData: hostelData
+        }
+      }
+    );
 
-        setSelectedTenantId(
-          item.customerId
-        );
+    setOpenMenu(null);
 
-        setShowDeleteModal(true);
-        setOpenMenu(null);
+  }}
+      className="
+      
+        text-left
+        px-4
+        py-1
+        text-cardTitle
+        hover:bg-cardBg
+        text-gray-700
+        cursor-pointer
+      "
+    >
+      Deductions
+    </button> */}
 
-      }}
-      className={`
-        w-full
+                                    <button
+                                      disabled={!canDelete}
+                                      onClick={() => {
+
+                                        if (!canDelete) return;
+
+                                        setSelectedTenantId(
+                                          item.customerId
+                                        );
+
+                                        setShowDeleteModal(true);
+                                        setOpenMenu(null);
+                                      }}
+                                      className={`
+       
         text-left
         px-4
         py-2
         text-cardTitle
 
-        ${
-          canDelete
-            ? "hover:bg-cardBg text-dangerRed cursor-pointer"
-            : "bg-gray-100 text-gray-400 cursor-not-allowed"
-        }
+        ${canDelete
+                                          ? "hover:bg-cardBg text-dangerRed cursor-pointer"
+                                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                        }
       `}
-    >
-      Delete
-    </button>
+                                    >
+                                      Delete
+                                    </button>
 
-  </div>
 
+
+                                    <button  onClick={() =>
+    navigate(`/settlement-summary/${item.customerId}`)
+  }
+                                     
+                                     
+                                      className="
+       
+        text-left
+        px-4
+        py-2
+        text-cardTitle"
+                                    >
+                                      Generate
+                                    </button>
+  {/* <button
+ onClick={() => {
+    setSelectedCustomerId(item.customerId);
+    setShowApproveModal(true);
+    setOpenMenu(null);
+   setSelectedTenant(item)
+
+  }}
+  className="text-left px-4 py-2 text-cardTitle hover:bg-cardBg  cursor-pointer"
+>
+  Approve KYC
+</button> */}
+{item?.canApproveKyc === true && (
+  <button
+    onClick={() => {
+      setSelectedCustomerId(
+        item.customerId
+      );
+      setShowApproveModal(true);
+      setOpenMenu(null);
+      setSelectedTenant(item);
+    }}
+    className="
+      text-left
+      px-4
+      py-2
+      text-cardTitle
+      hover:bg-cardBg
+      cursor-pointer
+    "
+  >
+    Approve KYC
+  </button>
 )}
+                                  </div>
 
-                      </div>
+                                )}
+                              </div>
 
-                    </td>
+                            </td>
 
-                  </tr>
+                          </tr>
 
-                ))
+                        ))
 
-              ) : (
+                      ) : (
 
-                <tr>
+                        <tr>
 
-                  <td
-                    colSpan={7}
-                    className="
+                          <td
+                            colSpan={7}
+                            className="
                       text-center
                       py-6
                       text-textDark/50
                     "
-                  >
-                    No Data Found
-                  </td>
+                          >
+                            No Data Found
+                          </td>
 
-                </tr>
+                        </tr>
 
-              )}
+                      )}
 
-            </tbody>
+                    </tbody>
 
-          </table>
+                  </table>
 
-        </div>
+                </div>
 
-      </div>
+              </div>
 
-    ) : (
+            ) : (
 
-      <div
-        className="
+              <div
+                className="
           flex
           flex-col
           items-center
           justify-center
           py-10
         "
-      >
+              >
 
-        <img
-          src={LoginImg}
-          alt="Access Restricted"
-          className="
+                <img
+                  src={LoginImg}
+                  alt="Access Restricted"
+                  className="
             w-48
             mb-3
           "
-        />
+                />
 
-        <p
-          className="
+                <p
+                  className="
             text-dangerRed
             font-medium
           "
-        >
-          Access Restricted
-        </p>
+                >
+                  Access Restricted
+                </p>
 
-      </div>
+              </div>
 
-    )
+            )
 
-  )}
+          )}
 
-  {/* OTHER TABS */}
-  {activeTab === "subscriptions" && (
-    <OverviewSubscriptions hostelData={hostelData} />
-  )}
+          {/* OTHER TABS */}
+          {activeTab === "subscriptions" && (
+            <OverviewSubscriptions hostelData={hostelData} />
+          )}
 
-  {activeTab === "Product Support" && (
-    <ProductSupport hostelData={hostelData} />
-  )}
+          {activeTab === "Product Support" && (
+            <ProductSupport hostelData={hostelData} />
+          )}
 
-  {activeTab === "staffs" && (
-    <StaffScreen
+          {activeTab === "staffs" && (
+            <StaffScreen
+              hostelData={hostelData}
+              refreshHostel={fetchData}
+            />
+          )}
+
+          {/* {activeTab === "Invoice" && (
+            <InvoiceView
+              hostelData={hostelData}
+              refreshHostel={fetchData}
+            />
+          )} */}
+         {activeTab === "Invoice" && (
+  selectedView === "Room View" ? (
+    <RoomView
       hostelData={hostelData}
       refreshHostel={fetchData}
     />
-  )}
-
-  {activeTab === "Invoice" && (
+  ) : (
     <InvoiceView
       hostelData={hostelData}
       refreshHostel={fetchData}
     />
-  )}
+  )
+)}
 
-  {activeTab === "Invoice Redemption" && (
-    <InvoicesRedemption
-      hostelData={hostelData}
-      refreshHostel={fetchData}
-    />
-  )}
+          {activeTab === "Invoice Redemption" && (
+            <InvoicesRedemption
+              hostelData={hostelData}
+              refreshHostel={fetchData}
+            />
+          )}
 
-  {activeTab === "activity" && (
-    <PropertyActive hostelData={hostelData} />
-  )}
+          {activeTab === "activity" && (
+            <PropertyActive hostelData={hostelData} />
+          )}
 
-  {activeTab === "Amenities" && (
-    <PropertyAmenities hostelData={hostelData} />
-  )}
+          {activeTab === "Amenities" && (
+            <PropertyAmenities hostelData={hostelData} />
+          )}
 
-  {activeTab === "Configuration" && (
-    <ReccuringBill
-      hostelData={hostelData}
-      refreshHostel={fetchData}
-    />
-  )}
+          {activeTab === "Configuration" && (
+            <ReccuringBill
+              hostelData={hostelData}
+              refreshHostel={fetchData}
+            />
+          )}
 
-</div>
+        </div>
 
       </div>
       {showSharing && (
 
-  <div
-    className="
+        <div
+          className="
       fixed
       inset-0
       bg-black/40
@@ -2268,11 +2961,11 @@ fetchData()
       z-50
       px-4
     "
-  >
+        >
 
-    <div
-      className="
-        bg-white
+          <div
+            className="
+       bg-white-common
         rounded-modal
         shadow-modal
         w-full
@@ -2283,52 +2976,52 @@ fetchData()
         overflow-y-auto
         animate-fadeIn
       "
-    >
+          >
 
-      {/* HEADER */}
-      <div
-        className="
+            {/* HEADER */}
+            <div
+              className="
           flex
           items-center
           justify-between
           mb-5
         "
-      >
+            >
 
-        <h2
-          className="
+              <h2
+                className="
             text-cardTitle
             font-semibold
             text-headingDark
           "
-        >
-          Detailed Sharing Breakdown
-        </h2>
+              >
+                Detailed Sharing Breakdown
+              </h2>
 
-        <button
-          onClick={() => setShowSharing(false)}
-          className="
+              <button
+                onClick={() => setShowSharing(false)}
+                className="
             text-textDark/40
             hover:text-textDark
             text-xl
             cursor-pointer
           "
-        >
-          ✕
-        </button>
+              >
+                ✕
+              </button>
 
-      </div>
+            </div>
 
-      {/* SHARING LIST */}
-      {hostelData?.sharingBreakdown?.length > 0 ? (
+            {/* SHARING LIST */}
+            {hostelData?.sharingBreakdown?.length > 0 ? (
 
-        [...hostelData.sharingBreakdown]
-          .sort((a, b) => a.sharingType - b.sharingType)
-          .map((item, index) => (
+              [...hostelData.sharingBreakdown]
+                .sort((a, b) => a.sharingType - b.sharingType)
+                .map((item, index) => (
 
-            <div
-              key={index}
-              className="
+                  <div
+                    key={index}
+                    className="
                 border
                 border-borderSoft
                 rounded-card
@@ -2336,156 +3029,155 @@ fetchData()
                 mb-4
                 bg-cardBg
               "
-            >
+                  >
 
-              {/* TOP */}
-              <div
-                className="
+                    {/* TOP */}
+                    <div
+                      className="
                   flex
                   items-center
                   justify-between
                   mb-3
                   gap-3
                 "
-              >
+                    >
 
-                <p
-                  className="
+                      <p
+                        className="
                     font-semibold
                     text-headingDark
                   "
-                >
-                  {item.sharingTypeDisplay || "N/A"}
-                </p>
+                      >
+                        {item.sharingTypeDisplay || "N/A"}
+                      </p>
 
-                <span
-                  className="
+                      <span
+                        className="
                     text-tableCell
                     text-textDark/60
                     whitespace-nowrap
                   "
-                >
-                  {item.noOfRoomsAvailable ?? 0} Rooms Available
-                </span>
+                      >
+                        {item.noOfRoomsAvailable ?? 0} Rooms Available
+                      </span>
 
-              </div>
+                    </div>
 
-              {/* GRID */}
-              <div
-                className="
+                    {/* GRID */}
+                    <div
+                      className="
                   grid
                   grid-cols-3
                   gap-4
                 "
-              >
+                    >
 
-                {/* ROOMS */}
-                <div>
+                      {/* ROOMS */}
+                      <div>
 
-                  <p
-                    className="
+                        <p
+                          className="
                       text-tableCell
                       text-textDark/60
                     "
-                  >
-                    Rooms
-                  </p>
+                        >
+                          Rooms
+                        </p>
 
-                  <p
-                    className="
+                        <p
+                          className="
                       font-semibold
                       text-sectionTitle
                       text-headingDark
                     "
-                  >
-                    {item.noOfRooms ?? 0}
-                  </p>
+                        >
+                          {item.noOfRooms ?? 0}
+                        </p>
 
-                </div>
+                      </div>
 
-                {/* TOTAL BEDS */}
-                <div>
+                      {/* TOTAL BEDS */}
+                      <div>
 
-                  <p
-                    className="
+                        <p
+                          className="
                       text-tableCell
                       text-textDark/60
                     "
-                  >
-                    Total Beds
-                  </p>
+                        >
+                          Total Beds
+                        </p>
 
-                  <p
-                    className="
+                        <p
+                          className="
                       font-semibold
                       text-sectionTitle
                       text-headingDark
                     "
-                  >
-                    {item.noOfBeds ?? 0}
-                  </p>
+                        >
+                          {item.noOfBeds ?? 0}
+                        </p>
 
-                </div>
+                      </div>
 
-                {/* OCCUPIED */}
-                <div>
+                      {/* OCCUPIED */}
+                      <div>
 
-                  <p
-                    className="
+                        <p
+                          className="
                       text-tableCell
                       text-textDark/60
                     "
-                  >
-                    Occupied
-                  </p>
+                        >
+                          Occupied
+                        </p>
 
-                  <p
-                    className={`
+                        <p
+                          className={`
                       font-semibold
                       text-sectionTitle
-                      ${
-                        item.noOfOccupiedBeds > 0
-                          ? "text-successGreen"
-                          : "text-textDark/40"
-                      }
+                      ${item.noOfOccupiedBeds > 0
+                              ? "text-successGreen"
+                              : "text-textDark/40"
+                            }
                     `}
-                  >
-                    {item.noOfOccupiedBeds ?? 0}
-                  </p>
+                        >
+                          {item.noOfOccupiedBeds ?? 0}
+                        </p>
 
-                </div>
+                      </div>
 
-              </div>
+                    </div>
 
-            </div>
+                  </div>
 
-          ))
+                ))
 
-      ) : (
+            ) : (
 
-        <div
-          className="
+              <div
+                className="
             text-center
             py-6
             text-textDark/40
           "
-        >
-          No Sharing Data Found
+              >
+                No Sharing Data Found
+              </div>
+
+            )}
+
+          </div>
+
         </div>
 
       )}
 
-    </div>
+      {/* BILLING RULE */}
+      {showBillingRule && (
 
-  </div>
-
-)}
-
-{/* BILLING RULE */}
-{showBillingRule && (
-
-  <div
-    className="
+        <div
+          className="
       fixed
       inset-0
       z-50
@@ -2495,11 +3187,11 @@ fetchData()
       bg-black/40
       px-4
     "
-  >
+        >
 
-    <div
-      className="
-        bg-white
+          <div
+            className="
+        bg-white-common
         rounded-card
         w-full
         max-w-[360px]
@@ -2508,12 +3200,12 @@ fetchData()
         relative
         animate-fadeIn
       "
-    >
+          >
 
-      {/* CLOSE */}
-      <button
-        onClick={() => setShowBillingRule(false)}
-        className="
+            {/* CLOSE */}
+            <button
+              onClick={() => setShowBillingRule(false)}
+              className="
           absolute
           top-3
           right-3
@@ -2521,94 +3213,94 @@ fetchData()
           hover:text-textDark
           cursor-pointer
         "
-      >
-        ✕
-      </button>
+            >
+              ✕
+            </button>
 
-      <h2
-        className="
+            <h2
+              className="
           text-cardTitle
           font-semibold
           text-headingDark
           mb-4
         "
-      >
-        Billing Rule
-      </h2>
+            >
+              Billing Rule
+            </h2>
 
-      <div
-        className="
+            <div
+              className="
           border-t
           border-borderSoft
           pt-4
           space-y-4
         "
-      >
+            >
 
-        <div className="flex justify-between gap-4">
+              <div className="flex justify-between gap-4">
 
-          <span className="text-textDark/60">
-            Billing Start Date
-          </span>
+                <span className="text-textDark/60">
+                  Billing Start Date
+                </span>
 
-          <span
-            className="
+                <span
+                  className="
               font-semibold
               text-headingDark
             "
-          >
-            {hostelData?.billingRules[0]?.billingStartDate}
-          </span>
+                >
+                  {hostelData?.billingRules[0]?.billingStartDate}
+                </span>
 
-        </div>
+              </div>
 
-        <div className="flex justify-between gap-4">
+              <div className="flex justify-between gap-4">
 
-          <span className="text-textDark/60">
-            Bill Due Days
-          </span>
+                <span className="text-textDark/60">
+                  Bill Due Days
+                </span>
 
-          <span
-            className="
+                <span
+                  className="
               font-semibold
               text-headingDark
             "
-          >
-            {hostelData?.billingRules[0]?.billDueDays}
-          </span>
+                >
+                  {hostelData?.billingRules[0]?.billDueDays}
+                </span>
 
-        </div>
+              </div>
 
-        <div className="flex justify-between gap-4">
+              <div className="flex justify-between gap-4">
 
-          <span className="text-textDark/60">
-            Notice Period
-          </span>
+                <span className="text-textDark/60">
+                  Notice Period
+                </span>
 
-          <span
-            className="
+                <span
+                  className="
               font-semibold
               text-headingDark
             "
-          >
-            {hostelData?.billingRules[0]?.noticePeriod}
-          </span>
+                >
+                  {hostelData?.billingRules[0]?.noticePeriod}
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
 
         </div>
 
-      </div>
+      )}
 
-    </div>
+      {/* RESET MODAL */}
+      {showNoteModal && (
 
-  </div>
-
-)}
-
-{/* RESET MODAL */}
-{showNoteModal && (
-
-  <div
-    className="
+        <div
+          className="
       fixed
       inset-0
       bg-black/40
@@ -2618,18 +3310,18 @@ fetchData()
       z-50
       px-4
     "
-    onClick={() => {
+          onClick={() => {
 
-      setShowNoteModal(false);
-      setNoteText("");
-      setHostelError("");
+            setShowNoteModal(false);
+            setNoteText("");
+            setHostelError("");
 
-    }}
-  >
+          }}
+        >
 
-    <div
-      className="
-        bg-white
+          <div
+            className="
+        bg-white-common
         rounded-card
         shadow-modal
         w-full
@@ -2638,19 +3330,19 @@ fetchData()
         relative
         animate-fadeIn
       "
-      onClick={(e) => e.stopPropagation()}
-    >
+            onClick={(e) => e.stopPropagation()}
+          >
 
-      {/* CLOSE */}
-      <button
-        onClick={() => {
+            {/* CLOSE */}
+            <button
+              onClick={() => {
 
-          setShowNoteModal(false);
-          setNoteText("");
-          setHostelError("");
+                setShowNoteModal(false);
+                setNoteText("");
+                setHostelError("");
 
-        }}
-        className="
+              }}
+              className="
           absolute
           top-3
           right-3
@@ -2658,45 +3350,45 @@ fetchData()
           hover:text-textDark
           cursor-pointer
         "
-      >
-        ✕
-      </button>
+            >
+              ✕
+            </button>
 
-      {/* TITLE */}
-      <h2
-        className="
+            {/* TITLE */}
+            <h2
+              className="
           text-cardTitle
           font-semibold
           text-headingDark
           mb-4
           text-left
         "
-      >
-        Enter Hostel ID
+            >
+              Enter Hostel ID
 
-        <span className="text-dangerRed">
-          *
-        </span>
+              <span className="text-dangerRed">
+                *
+              </span>
 
-      </h2>
+            </h2>
 
-      <div className="space-y-4">
+            <div className="space-y-4">
 
-        {/* INPUT */}
-        <input
-          type="text"
-          placeholder="Enter Hostel ID"
-          value={noteText}
-          onChange={(e) => {
+              {/* INPUT */}
+              <input
+                type="text"
+                placeholder="Enter Hostel ID"
+                value={noteText}
+                onChange={(e) => {
 
-            setNoteText(e.target.value);
-            setHostelError("");
+                  setNoteText(e.target.value);
+                  setHostelError("");
 
-          }}
-          onPaste={(e) => {
-            e.preventDefault();
-          }}
-          className="
+                }}
+                onPaste={(e) => {
+                  e.preventDefault();
+                }}
+                className="
             w-full
             border
             border-borderSoft
@@ -2707,20 +3399,20 @@ fetchData()
             outline-none
             focus:border-primaryBlue
           "
-        />
+              />
 
-        {/* ERROR */}
-        {hostelerror && (
-          <ErrorMessage
-            message={hostelerror}
-            type="error"
-          />
-        )}
+              {/* ERROR */}
+              {hostelerror && (
+                <ErrorMessage
+                  message={hostelerror}
+                  type="error"
+                />
+              )}
 
-        {/* BUTTON */}
-        <button
-          onClick={handleHardReset}
-          className="
+              {/* BUTTON */}
+              <button
+                onClick={handleHardReset}
+                className="
             w-full
             bg-primaryBlue
             hover:bg-blue-700
@@ -2732,17 +3424,17 @@ fetchData()
             transition
             cursor-pointer
           "
-        >
-          Submit
-        </button>
+              >
+                Submit
+              </button>
 
-      </div>
+            </div>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-)}
+      )}
       {/* {showTrialModal && (
         <div
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
@@ -2867,26 +3559,28 @@ fetchData()
           </div>
         </div>
       )} */}
-  {showTrialModal && (
+      {showTrialModal && (
 
-  <div
-    className="
+        <div
+          className="
       fixed inset-0
       bg-black/40
       z-[99999]
     "
-    onClick={() => {
+          onClick={() => {
 
-      setShowTrialModal(false);
-      setDays("");
-      setDaysError("");
+            setShowTrialModal(false);
+            setDays("");
+            setDaysError("");
+            setReasonError("")
+            setSelectedReason("")
 
-    }}
-  >
+          }}
+        >
 
-    {/* DRAWER */}
-    <div
-      className="
+          {/* DRAWER */}
+          <div
+            className="
         absolute
         top-4
         right-4
@@ -2895,7 +3589,7 @@ fetchData()
         w-full
         max-w-[480px]
 
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
 
@@ -2905,38 +3599,40 @@ fetchData()
         overflow-hidden
         animate-slideLeft
       "
-      onClick={(e) => e.stopPropagation()}
-    >
+            onClick={(e) => e.stopPropagation()}
+          >
 
-      {/* HEADER */}
-      <div
-        className="
+            {/* HEADER */}
+            <div
+              className="
           flex items-center justify-between
           px-6 py-5
           border-b border-gray-200
           shrink-0
         "
-      >
+            >
 
-        <h2
-          className="
+              <h2
+                className="
             text-[22px]
             font-semibold
             text-gray-800
           "
-        >
-          Extend Trial Period
-        </h2>
+              >
+                Extend Trial Period
+              </h2>
 
-        <button
-          onClick={() => {
+              <button
+                onClick={() => {
 
-            setShowTrialModal(false);
-            setDays("");
-            setDaysError("");
+                  setShowTrialModal(false);
+                  setDays("");
+                  setDaysError("");
+                  setSelectedReason("")
+                  setReasonError("")
 
-          }}
-          className="
+                }}
+                className="
             w-8 h-8
             rounded-full
             flex items-center justify-center
@@ -2945,36 +3641,36 @@ fetchData()
             text-lg
             cursor-pointer
           "
-        >
-          ✕
-        </button>
+              >
+                ✕
+              </button>
 
-      </div>
+            </div>
 
 
-    
-      <div
-        className="
+
+            <div
+              className="
           flex-1
           overflow-y-auto
           px-6 py-5
         "
-      >
+            >
 
-        
-        <div
-  className="
+
+              <div
+                className="
     bg-[#F9FAFB]
     rounded-xl
     p-5
     mb-6
     border border-[#F1F3F5]
   "
->
+              >
 
-  {/* TITLE */}
-  <p
-    className="
+                {/* TITLE */}
+                <p
+                  className="
       text-[13px]
       font-semibold
       text-[#6B7280]
@@ -2982,169 +3678,169 @@ fetchData()
       mb-5
       text-left
     "
-  >
-    PROPERTY INFO
-  </p>
+                >
+                  PROPERTY INFO
+                </p>
 
-  {/* ROWS */}
-  <div className="space-y-4">
+                {/* ROWS */}
+                <div className="space-y-4">
 
-    {/* CUSTOMER */}
-    <div className="flex items-start gap-3">
+                  {/* CUSTOMER */}
+                  <div className="flex items-start gap-3">
 
-      <img
-        src={CustImag}
-        className="w-4 h-4 mt-[2px] shrink-0"
-      />
+                    <img
+                      src={CustImag}
+                      className="w-4 h-4 mt-[2px] shrink-0"
+                    />
 
-      <div className="flex items-center">
+                    <div className="flex items-center">
 
-        <p
-          className="
+                      <p
+                        className="
             w-[150px]
             text-[12px]
             text-[#6B7280]
             font-medium text-left
           "
-        >
-          Customer Name
-        </p>
+                      >
+                        Customer Name
+                      </p>
 
-        <p
-          className="
+                      <p
+                        className="
             text-[12px]
             font-semibold
             text-[#111827] text-left
           "
-        >
-         {hostelData.owner?.fullName}
-        </p>
+                      >
+                        {hostelData.owner?.fullName}
+                      </p>
 
-      </div>
+                    </div>
 
-    </div>
+                  </div>
 
 
-    {/* PROPERTY */}
-    <div className="flex items-start gap-3">
+                  {/* PROPERTY */}
+                  <div className="flex items-start gap-3">
 
-      <img
-        src={CustTenImg}
-        className="w-4 h-4 mt-[2px] shrink-0"
-      />
+                    <img
+                      src={CustTenImg}
+                      className="w-4 h-4 mt-[2px] shrink-0"
+                    />
 
-      <div className="flex items-center">
+                    <div className="flex items-center">
 
-        <p
-          className="
+                      <p
+                        className="
             w-[150px]
             text-[12px]
             text-[#6B7280]
             font-medium text-left
           "
-        >
-          Property Name
-        </p>
+                      >
+                        Property Name
+                      </p>
 
-        <p
-          className="
+                      <p
+                        className="
             text-[12px]
             font-semibold
             text-[#1D4ED8] text-left
           "
-        >
-          {hostelData?.hostelName}
-        </p>
+                      >
+                        {hostelData?.hostelName}
+                      </p>
 
-      </div>
+                    </div>
 
-    </div>
+                  </div>
 
 
-    {/* LOCATION */}
-    <div className="flex items-start gap-3">
+                  {/* LOCATION */}
+                  <div className="flex items-start gap-3">
 
-      <img
-        src={LocationGrey}
-        className="w-4 h-4 mt-[2px] shrink-0"
-      />
+                    <img
+                      src={LocationGrey}
+                      className="w-4 h-4 mt-[2px] shrink-0"
+                    />
 
-      <div className="flex items-center">
+                    <div className="flex items-center">
 
-        <p
-          className="
+                      <p
+                        className="
             w-[150px]
             text-[12px]
             text-[#6B7280]
             font-medium text-left
           "
-        >
-          Location
-        </p>
+                      >
+                        Location
+                      </p>
 
-        <p
-          className="
+                      <p
+                        className="
             text-[12px]
             font-semibold
             text-[#111827]
           "
-        >
-           {hostelData.city}, {hostelData.state}
-        </p>
+                      >
+                        {hostelData.city}, {hostelData.state}
+                      </p>
 
-      </div>
+                    </div>
 
-    </div>
+                  </div>
 
 
-    {/* MOBILE */}
-    <div className="flex items-start gap-3">
+                  {/* MOBILE */}
+                  <div className="flex items-start gap-3">
 
-      <img
-        src={Call}
-        className="w-4 h-4 mt-[2px] shrink-0"
-      />
+                    <img
+                      src={Call}
+                      className="w-4 h-4 mt-[2px] shrink-0"
+                    />
 
-      <div className="flex items-center">
+                    <div className="flex items-center">
 
-        <p
-          className="
+                      <p
+                        className="
             w-[150px]
             text-[12px]
             text-[#6B7280]
             font-medium text-left
           "
-        >
-          Mobile
-        </p>
+                      >
+                        Mobile
+                      </p>
 
-        <p
-          className="
+                      <p
+                        className="
             text-[12px]
             font-semibold
             text-[#111827]
           "
-        >
-         +91 {hostelData.mobile}
-        </p>
+                      >
+                        +91 {hostelData.mobile}
+                      </p>
 
-      </div>
+                    </div>
 
-    </div>
+                  </div>
 
-  </div>
+                </div>
 
-</div>
+              </div>
 
 
-      
-   <div className="flex items-start gap-3">
 
-  {/* LEFT */}
-  <div className="w-[140px] pt-1">
+              <div className="flex items-start gap-3">
 
-    <label
-      className="
+                {/* LEFT */}
+                <div className="w-[140px] pt-1">
+
+                  <label
+                    className="
         text-xs
         font-medium
         text-gray-700
@@ -3152,207 +3848,365 @@ fetchData()
         text-left
         block
       "
-    >
-      Extension
-      <br />
-      Duration
-      <span className="text-red-500 ml-1">
-        *
-      </span>
-    </label>
+                  >
+                    Extension
+                    <br />
+                    Duration
+                    <span className="text-red-500 ml-1">
+                      *
+                    </span>
+                  </label>
 
-  </div>
+                </div>
 
 
-  {/* RIGHT */}
-  <div className="pt-[2px]">
+                {/* RIGHT */}
+                <div className="pt-[2px]">
 
-    <div
-      className="
+                  <div
+                    className="
         flex
         items-center
         gap-8
         whitespace-nowrap
       "
-    >
+                  >
 
-      {[
-        { label: "+7 Days", value: 7 },
-        { label: "+10 Days", value: 10 },
-        { label: "+14 Days (Max)", value: 14 }
-      ].map((item) => (
+                    {[
+                      { label: "+7 Days", value: 7 },
+                      { label: "+10 Days", value: 10 },
+                      { label: "+14 Days (Max)", value: 14 }
+                    ].map((item) => (
 
-        <label
-          key={item.value}
-          className="
+                      <label
+                        key={item.value}
+                        className="
             flex items-center gap-2
             text-sm text-gray-700
             cursor-pointer
           "
-        >
+                      >
 
-          <input
-            type="radio"
-            name="days"
-            value={item.value}
-            checked={Number(days) === item.value}
-            onChange={(e) => {
+                        <input
+                          type="radio"
+                          name="days"
+                          value={item.value}
+                          checked={Number(days) === item.value}
+                          onChange={(e) => {
 
-              setDays(e.target.value);
-              setDaysError("");
+                            setDays(e.target.value);
+                            setDaysError("");
 
-            }}
-            className="accent-blue-600"
-          />
+                          }}
+                          className="accent-blue-600"
+                        />
 
-          {item.label}
+                        {item.label}
 
-        </label>
+                      </label>
 
-      ))}
+                    ))}
 
-    </div>
+                  </div>
 
 
-    <div className="text-left">
+                  <div className="text-left">
 
-  <button
-    className="
-      mt-3
-      block
-      text-xs
-      text-blue-600
-      hover:underline
-      cursor-pointer
+                    <button
+                      onClick={() => {
+
+                        setShowCustomDays(true);
+
+                        setDays("");
+
+                        setDaysError("");
+
+                      }}
+                      className="
+    mt-3
+    block
+    text-xs
+    text-blue-600
+    hover:underline
+    cursor-pointer
+  "
+                    >
+                      Select Custom
+                    </button>
+                  </div>
+                  {showCustomDays && (
+
+                    <div
+                      className="
+      mt-4
+      flex
+      items-center
+      gap-4
     "
-  >
-    Select Custom
-  </button>
+                    >
 
-</div>
-
-  </div>
-
-</div>
- {daysError && (
-
-          <div className="mt-4">
-
-            <ErrorMessage
-              message={daysError}
-              type="error"
-            />
-
-          </div>
-
-        )}
-       
-       <div className="flex items-start gap-6 mt-5">
-
- 
-  <div className=" pt-3">
-
-    <label
-      className="
+                      {/* LABEL */}
+                      <label
+                        className="
         text-xs
         font-medium
         text-gray-700
         text-left
         block
       "
-    >
-      Reason
-      <span className="text-red-500 ml-1">
-        *
-      </span>
-    </label>
+                      >
+                        Custom Days
+                      </label>
 
-  </div>
+                      {/* INPUT */}
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={showCustomDays ? days : ""}
+                        onFocus={() => {
 
+                          setShowCustomDays(true);
+                          setDays("");
 
+                        }}
+                        onChange={(e) => {
 
-  <div className="flex-1">
+                          const value =
+                            e.target.value;
 
-    <select
-      className="
-        w-full
-        h-[48px]
+                          // only numbers
+                          if (!/^\d*$/.test(value))
+                            return;
+
+                          // max 30
+                          if (
+                            Number(value) > 30
+                          )
+                            return;
+
+                          setDays(value);
+
+                          setDaysError("");
+
+                        }}
+                        placeholder="Enter custom days"
+                        className="
+        w-[220px]
+        h-[44px]
         border
         border-gray-300
         rounded-xl
         px-4
         text-sm
-        text-gray-700
         outline-none
-        bg-white
         focus:border-blue-500
       "
-    >
+                      />
 
-      <option>
-        Sales Follow-up
-      </option>
+                    </div>
 
-    </select>
+                  )}
+                </div>
 
-  </div>
+              </div>
+              <div className="md:pl-[80px] pl-0">
+                {daysError && (
 
-</div>
+                  <div className="mt-4">
+
+                    <ErrorMessage
+                      message={daysError}
+                      type="error"
+                    />
+
+                  </div>
+
+                )}
+              </div>
+
+              <div className="flex items-start gap-6 mt-5">
 
 
-        {/* REMARKS */}
-        <div className="flex items-start gap-6 mt-5">
+                <div className=" pt-3">
 
-  {/* LABEL */}
-  <div className=" pt-3">
-
-    <label
-      className="
+                  <label
+                    className="
         text-xs
         font-medium
         text-gray-700
         text-left
         block
       "
-    >
-      Remarks
-    </label>
+                  >
+                    Reason
+                    <span className="text-red-500 ml-1">
+                      *
+                    </span>
+                  </label>
 
-  </div>
+                </div>
 
 
-  {/* TEXTAREA */}
-  <div className="flex-1">
 
-    <textarea
-      rows={4}
-      placeholder="Add internal notes..."
-      className="
+                <div className="relative flex-1">
+
+                  <div
+                    onClick={() =>
+                      setShowReasonDropdown(
+                        !showReasonDropdown
+                      )
+                    }
+                    className="
+      w-full
+      h-[48px]
+      border
+      border-gray-300
+      rounded-xl
+      px-4
+      flex
+      items-center
+      justify-between
+      cursor-pointer
+     bg-white-common
+    "
+                  >
+
+                    <span className="text-sm text-gray-700">
+
+                      {selectedReason
+                        ? trialReasons.find(
+                          (x) =>
+                            x.key === selectedReason
+                        )?.label
+                        : "Select Reason"}
+
+                    </span>
+
+                  </div>
+
+                  {showReasonDropdown && (
+
+                    <div
+                      className="
+        absolute
+        top-full
+        mt-2
         w-full
-        min-h-[120px]
+        bg-white-common
         border
-        border-gray-300
+        border-gray-200
         rounded-xl
-        px-4
-        py-3
-        text-sm
-        text-gray-700
-        resize-none
-        outline-none
-        bg-white
-        placeholder:text-gray-400
-        focus:border-blue-500
+        shadow-lg
+        max-h-[100px]
+        overflow-y-auto
+        z-50
       "
-    />
+                    >
 
-  </div>
+                      {trialReasons?.map((item) => (
 
-</div>
+                        <div
+                          key={item.key}
+                          onClick={() => {
+
+                            setSelectedReason(item.key);
+                            setShowReasonDropdown(false);
+                            setReasonError("")
+
+                          }}
+                          className="
+            px-4
+            py-3
+            text-sm
+            hover:bg-gray-100
+            cursor-pointer
+          "
+                        >
+                          {item.label}
+                        </div>
+
+                      ))}
+
+                    </div>
+
+                  )}
+
+                </div>
+
+              </div>
+              <div className="md:pl-[80px] pl-0">
+                {reasonError && (
+
+                  <div className="mt-4">
+
+                    <ErrorMessage
+                      message={reasonError}
+                      type="error"
+                    />
+
+                  </div>
+
+                )}
+              </div>
+
+              {/* REMARKS */}
+              <div className="flex items-start gap-6 mt-5">
+
+                {/* LABEL */}
+                <div className=" pt-3">
+
+                  <label
+                    className="
+        text-xs
+        font-medium
+        text-gray-700
+        text-left
+        block
+      "
+                  >
+                    Remarks
+                  </label>
+
+                </div>
 
 
-        {/* INFO */}
-        <div
-          className="
+                {/* TEXTAREA */}
+                <div className="flex-1">
+
+                  <textarea
+                    rows={4}
+                    value={remarks}
+                    onChange={(e) =>
+                      setRemarks(e.target.value)
+                    }
+                    placeholder="Add internal notes..."
+                    className="
+    w-full
+    min-h-[120px]
+    border
+    border-gray-300
+    rounded-xl
+    px-4
+    py-3
+    text-sm
+    text-gray-700
+    resize-none
+    outline-none
+    bg-white-common
+    placeholder:text-gray-400
+    focus:border-blue-500
+  "
+                  />
+
+                </div>
+
+              </div>
+
+
+              {/* INFO */}
+              <div
+                className="
             bg-blue-50
             border border-blue-100
             rounded-xl
@@ -3360,38 +4214,41 @@ fetchData()
             text-xs
             text-blue-700
           "
-        >
-          ℹ Maximum extension allowed: 14 days,
-          Max 1 times per customer.
-        </div>
+              >
+                ℹ Maximum extension allowed: 14 days,
+                Max 1 times per customer.
+              </div>
 
 
-        {/* ERROR */}
-       
-
-      </div>
+              {/* ERROR */}
 
 
-      {/* FOOTER */}
-      <div
-        className="
+            </div>
+
+
+            {/* FOOTER */}
+            <div
+              className="
           px-6 py-5
           border-t border-gray-200
           flex justify-end gap-3
           shrink-0
-          bg-white
+          bg-white-common
         "
-      >
+            >
 
-        <button
-          onClick={() => {
+              <button
+                onClick={() => {
 
-            setShowTrialModal(false);
-            setDays("");
-            setDaysError("");
+                  setShowTrialModal(false);
+                  setDays("");
+                  setDaysError("");
+                  setReasonError("")
+                  setSelectedReason("")
 
-          }}
-          className="
+
+                }}
+                className="
             px-5 py-2.5
             rounded-xl
             border border-gray-300
@@ -3399,13 +4256,13 @@ fetchData()
             hover:bg-gray-50
             cursor-pointer
           "
-        >
-          Cancel
-        </button>
+              >
+                Cancel
+              </button>
 
-        <button
-          onClick={handleTrialWithDays}
-          className="
+              <button
+                onClick={handleTrialWithDays}
+                className="
             px-5 py-2.5
             rounded-xl
             bg-blue-600
@@ -3413,21 +4270,21 @@ fetchData()
             hover:bg-blue-700
             cursor-pointer
           "
-        >
-          Confirm Extension
-        </button>
+              >
+                Confirm Extension
+              </button>
 
-      </div>
+            </div>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-)}
+      )}
       {showPlanModal && (
 
-  <div
-    className="
+        <div
+          className="
       fixed
       inset-0
       bg-black/40
@@ -3437,17 +4294,17 @@ fetchData()
       z-50
       px-4
     "
-    onClick={() => {
+          onClick={() => {
 
-      setShowPlanModal(false);
-      resetPlanForm();
+            setShowPlanModal(false);
+            resetPlanForm();
 
-    }}
-  >
+          }}
+        >
 
-    <div
-      className="
-        bg-white
+          <div
+            className="
+        bg-white-common
         rounded-modal
         shadow-modal
         w-full
@@ -3457,34 +4314,34 @@ fetchData()
         p-6
         animate-fadeIn
       "
-      onClick={(e) => e.stopPropagation()}
-    >
+            onClick={(e) => e.stopPropagation()}
+          >
 
-      {/* TITLE */}
-      <h2
-        className="
+            {/* TITLE */}
+            <h2
+              className="
           text-cardTitle
           font-semibold
           text-headingDark
           mb-5
           text-left
         "
-      >
-        Buy Subscription Plan
-      </h2>
+            >
+              Buy Subscription Plan
+            </h2>
 
-      {/* PLAN NAME */}
-      <div
-        className="
+            {/* PLAN NAME */}
+            <div
+              className="
           relative
           w-full
           text-left
         "
-        ref={dropdownRef}
-      >
+              ref={dropdownRef}
+            >
 
-        <label
-          className="
+              <label
+                className="
             block
             text-cardTitle
             text-textDark/70
@@ -3492,16 +4349,16 @@ fetchData()
             text-left
             font-medium
           "
-        >
-          Plan Name
-        </label>
+              >
+                Plan Name
+              </label>
 
-        <div
-         onClick={() => {
-  setShowDropdown(!showDropdown);
-  setShowPaidByDropdown(false);
-}}
-          className="
+              <div
+                onClick={() => {
+                  setShowDropdown(!showDropdown);
+                  setShowPaidByDropdown(false);
+                }}
+                className="
             border
             border-borderSoft
             rounded-card
@@ -3512,59 +4369,57 @@ fetchData()
             flex
             items-center
             justify-between
-            bg-white
+            bg-white-common
           "
-        >
+              >
 
-          <span
-            className={`
+                <span
+                  className={`
               text-cardTitle
-              ${
-                planCode
-                  ? "text-textDark"
-                  : "text-textDark/40"
-              }
+              ${planCode
+                      ? "text-textDark"
+                      : "text-textDark/40"
+                    }
             `}
-          >
-            {
-              dropdownPlans?.otherPlans?.find(
-                p => p.planCode === planCode
-              )?.planName || "Select Plan"
-            }
-          </span>
+                >
+                  {
+                    dropdownPlans?.otherPlans?.find(
+                      p => p.planCode === planCode
+                    )?.planName || "Select Plan"
+                  }
+                </span>
 
-          <svg
-            className={`
+                <svg
+                  className={`
               w-4
               h-4
               text-textDark/50
               transition-transform
-              ${
-                showDropdown
-                  ? "rotate-180"
-                  : ""
-              }
+              ${showDropdown
+                      ? "rotate-180"
+                      : ""
+                    }
             `}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
 
-        </div>
+              </div>
 
-        {/* DROPDOWN */}
-        {showDropdown && (
+              {/* DROPDOWN */}
+              {showDropdown && (
 
-          <div
-            className="
+                <div
+                  className="
               absolute
               z-10
               mt-1
               w-full
-              bg-white
+              bg-white-common
               border
               border-borderSoft
               rounded-card
@@ -3572,24 +4427,24 @@ fetchData()
               max-h-40
               overflow-y-auto
             "
-          >
+                >
 
-            {dropdownPlans?.otherPlans?.length > 0 ? (
+                  {dropdownPlans?.otherPlans?.length > 0 ? (
 
-              dropdownPlans.otherPlans.map((plan) => (
+                    dropdownPlans.otherPlans.map((plan) => (
 
-                <div
-                  key={plan.planId}
-                  onClick={() => {
+                      <div
+                        key={plan.planId}
+                        onClick={() => {
 
-                    setPlanCode(plan.planCode);
-                    setShowDropdown(false);
-                    setPlanError("");
-                   
-                  
+                          setPlanCode(plan.planCode);
+                          setShowDropdown(false);
+                          setPlanError("");
 
-                  }}
-                  className={`
+
+
+                        }}
+                        className={`
                     px-3
                     py-2.5
                     cursor-pointer
@@ -3598,67 +4453,66 @@ fetchData()
                     justify-between
                     items-center
 
-                    ${
-                      plan.planCode === planCode
-                        ? "bg-primarySoft text-primaryBlue"
-                        : "hover:bg-cardBg"
-                    }
+                    ${plan.planCode === planCode
+                            ? "bg-primarySoft text-primaryBlue"
+                            : "hover:bg-cardBg"
+                          }
                   `}
-                >
+                      >
 
-                  <span>{plan.planName}</span>
+                        <span>{plan.planName}</span>
 
-                  {plan.planCode === planCode && (
-                    <span className="text-primaryBlue">
-                      ✔
-                    </span>
-                  )}
+                        {plan.planCode === planCode && (
+                          <span className="text-primaryBlue">
+                            ✔
+                          </span>
+                        )}
 
-                </div>
+                      </div>
 
-              ))
+                    ))
 
-            ) : (
+                  ) : (
 
-              <div
-                className="
+                    <div
+                      className="
                   px-3
                   py-2
                   text-cardTitle
                   text-textDark/40
                 "
-              >
-                No Plans Available
-              </div>
+                    >
+                      No Plans Available
+                    </div>
 
+                  )}
+
+                </div>
+
+              )}
+
+            </div>
+
+            {/* PLAN ERROR */}
+            {planError && (
+              <ErrorMessage
+                message={planError}
+                type="error"
+              />
             )}
 
-          </div>
-
-        )}
-
-      </div>
-
-      {/* PLAN ERROR */}
-      {planError && (
-        <ErrorMessage
-          message={planError}
-          type="error"
-        />
-      )}
-
-      {/* STAFFS */}
-      <div
-        className="
+            {/* STAFFS */}
+            <div
+              className="
           relative
           w-full
           text-left
           mt-3
         "
-      >
+            >
 
-        <label
-          className="
+              <label
+                className="
             block
             text-cardTitle
             text-textDark/70
@@ -3666,16 +4520,16 @@ fetchData()
             text-left
             font-medium
           "
-        >
-          Staffs
-        </label>
+              >
+                Staffs
+              </label>
 
-        <div
-         onClick={() => {
-  setShowPaidByDropdown(!showPaidByDropdown);
-  setShowDropdown(false);
-}}
-          className="
+              <div
+                onClick={() => {
+                  setShowPaidByDropdown(!showPaidByDropdown);
+                  setShowDropdown(false);
+                }}
+                className="
             border
             border-borderSoft
             rounded-card
@@ -3685,57 +4539,55 @@ fetchData()
             flex
             items-center
             justify-between
-            bg-white
+            bg-white-common
           "
-        >
+              >
 
-          <span
-            className={`
+                <span
+                  className={`
               text-cardTitle
-              ${
-                paidBy
-                  ? "text-textDark"
-                  : "text-textDark/40"
-              }
+              ${paidBy
+                      ? "text-textDark"
+                      : "text-textDark/40"
+                    }
             `}
-          >
-            {
-              paidByUsers.find(
-                u => u.id === paidBy
-              )?.name || "Select Paid By"
-            }
-          </span>
+                >
+                  {
+                    paidByUsers.find(
+                      u => u.id === paidBy
+                    )?.name || "Select Paid By"
+                  }
+                </span>
 
-          <svg
-            className={`
+                <svg
+                  className={`
               w-4
               h-4
               text-textDark/50
               transition-transform
-              ${
-                showPaidByDropdown
-                  ? "rotate-180"
-                  : ""
-              }
+              ${showPaidByDropdown
+                      ? "rotate-180"
+                      : ""
+                    }
             `}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
 
-        </div>
+              </div>
 
-        {/* DROPDOWN */}
-        {showPaidByDropdown && (
+              {/* DROPDOWN */}
+              {showPaidByDropdown && (
 
-          <div
-            className="
+                <div
+                  className="
               absolute
               w-full
-              bg-white
+              bg-white-common
               border
               border-borderSoft
               rounded-card
@@ -3745,21 +4597,21 @@ fetchData()
               overflow-y-auto
               z-[9999]
             "
-          >
+                >
 
-            {paidByUsers.map((user) => (
+                  {paidByUsers.map((user) => (
 
-              <div
-                key={user.id}
-                onClick={() => {
+                    <div
+                      key={user.id}
+                      onClick={() => {
 
-                  setPaidBy(user.id);
-                  setShowPaidByDropdown(false);
-                  setPaidByError("");
-                
+                        setPaidBy(user.id);
+                        setShowPaidByDropdown(false);
+                        setPaidByError("");
 
-                }}
-                className={`
+
+                      }}
+                      className={`
                   px-3
                   py-2.5
                   cursor-pointer
@@ -3768,73 +4620,72 @@ fetchData()
                   justify-between
                   items-center
 
-                  ${
-                    paidBy === user.id
-                      ? "bg-primarySoft text-primaryBlue"
-                      : "hover:bg-cardBg"
-                  }
+                  ${paidBy === user.id
+                          ? "bg-primarySoft text-primaryBlue"
+                          : "hover:bg-cardBg"
+                        }
                 `}
+                    >
+
+                      <span>
+                        {user.name} ({user.role})
+                      </span>
+
+                      {paidBy === user.id && (
+                        <span>✔</span>
+                      )}
+
+                    </div>
+
+                  ))}
+
+                </div>
+
+              )}
+
+            </div>
+
+            {/* STAFF ERROR */}
+            {paidByError && (
+              <ErrorMessage
+                message={paidByError}
+                type="error"
+              />
+            )}
+
+            {/* PAID AMOUNT */}
+            <div className="w-full mt-4">
+
+              <label
+                className="
+            block
+            text-cardTitle
+            text-textDark/70
+            mb-1
+            text-left
+            font-medium
+          "
               >
+                Paid Amount
+              </label>
 
-                <span>
-                  {user.name} ({user.role})
-                </span>
+              <input
+                type="number"
+                placeholder={
+                  selectedPlanothers
+                    ? `₹${selectedPlanothers.finalPrice}`
+                    : "Paid Amount"
+                }
+                value={paidAmount}
+                onChange={(e) => {
 
-                {paidBy === user.id && (
-                  <span>✔</span>
-                )}
+                  setPaidAmount(e.target.value);
+                  setPaidAmountError("");
+                  setShowDropdown(false);
+                  setShowPaidByDropdown(false)
 
-              </div>
-
-            ))}
-
-          </div>
-
-        )}
-
-      </div>
-
-      {/* STAFF ERROR */}
-      {paidByError && (
-        <ErrorMessage
-          message={paidByError}
-          type="error"
-        />
-      )}
-
-      {/* PAID AMOUNT */}
-      <div className="w-full mt-4">
-
-        <label
-          className="
-            block
-            text-cardTitle
-            text-textDark/70
-            mb-1
-            text-left
-            font-medium
-          "
-        >
-          Paid Amount
-        </label>
-
-        <input
-          type="number"
-          placeholder={
-            selectedPlanothers
-              ? `₹${selectedPlanothers.finalPrice}`
-              : "Paid Amount"
-          }
-          value={paidAmount}
-          onChange={(e) => {
-
-            setPaidAmount(e.target.value);
-            setPaidAmountError("");
-            setShowDropdown(false);
-            setShowPaidByDropdown(false)
-
-          }}
-          className="
+                }}
+                className="
             w-full
             border
             border-borderSoft
@@ -3845,22 +4696,22 @@ fetchData()
             outline-none
             focus:border-primaryBlue
           "
-        />
+              />
 
-        {paidAmountError && (
-          <ErrorMessage
-            message={paidAmountError}
-            type="error"
-          />
-        )}
+              {paidAmountError && (
+                <ErrorMessage
+                  message={paidAmountError}
+                  type="error"
+                />
+              )}
 
-      </div>
+            </div>
 
-      {/* DISCOUNT */}
-      <div className="w-full mt-4">
+            {/* DISCOUNT */}
+            <div className="w-full mt-4">
 
-        <label
-          className="
+              <label
+                className="
             block
             text-cardTitle
             text-textDark/70
@@ -3868,16 +4719,16 @@ fetchData()
             text-left
             font-medium
           "
-        >
-          Discount Amount
-        </label>
+              >
+                Discount Amount
+              </label>
 
-        <input
-          type="number"
-          placeholder="Discount Amount"
-          value={discountAmount}
-          onChange={(e) => setDiscountAmount(e.target.value)}
-          className="
+              <input
+                type="number"
+                placeholder="Discount Amount"
+                value={discountAmount}
+                onChange={(e) => setDiscountAmount(e.target.value)}
+                className="
             w-full
             border
             border-borderSoft
@@ -3888,15 +4739,15 @@ fetchData()
             outline-none
             focus:border-primaryBlue
           "
-        />
+              />
 
-      </div>
+            </div>
 
-      {/* FILE UPLOAD */}
-      <div className="w-full mt-5">
+            {/* FILE UPLOAD */}
+            <div className="w-full mt-5">
 
-        <label
-          className="
+              <label
+                className="
             flex
             flex-col
             items-center
@@ -3911,118 +4762,118 @@ fetchData()
             hover:bg-cardBg
             transition
           "
-        >
+              >
 
-          <input
-            type="file"
-            className="hidden"
-            onChange={(e) => {
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => {
 
-              setPaymentProof(e.target.files[0]);
-              setProofError("");
+                    setPaymentProof(e.target.files[0]);
+                    setProofError("");
 
-            }}
-          />
+                  }}
+                />
 
-          <div
-            className="
+                <div
+                  className="
               flex
               flex-col
               items-center
               justify-center
             "
-          >
+                >
 
-            <svg
-              className="
+                  <svg
+                    className="
                 w-8
                 h-8
                 mb-2
                 text-textDark/30
               "
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M7 16V4m0 0l-4 4m4-4l4 4M17 8v12m0 0l-4-4m4 4l4-4" />
-            </svg>
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M7 16V4m0 0l-4 4m4-4l4 4M17 8v12m0 0l-4-4m4 4l4-4" />
+                  </svg>
 
-            <p
-              className="
+                  <p
+                    className="
                 text-cardTitle
                 text-textDark/70
               "
-            >
-              <span
-                className="
+                  >
+                    <span
+                      className="
                   font-medium
                   text-primaryBlue
                 "
-              >
-                Choose Image
-              </span>
+                    >
+                      Choose Image
+                    </span>
 
-              {" "}to Upload
-            </p>
+                    {" "}to Upload
+                  </p>
 
-            <p
-              className="
+                  <p
+                    className="
                 text-tableCell
                 text-textDark/40
                 mt-1
               "
-            >
-              JPG/JPEG Format
-            </p>
+                  >
+                    JPG/JPEG Format
+                  </p>
 
-          </div>
+                </div>
 
-        </label>
+              </label>
 
-        {/* FILE NAME */}
-        {paymentProof && (
+              {/* FILE NAME */}
+              {paymentProof && (
 
-          <p
-            className="
+                <p
+                  className="
               text-cardTitle
               text-successGreen
               mt-2
             "
-          >
-            Selected: {paymentProof.name}
-          </p>
+                >
+                  Selected: {paymentProof.name}
+                </p>
 
-        )}
+              )}
 
-      </div>
+            </div>
 
-      {/* PROOF ERROR */}
-      {proofError && (
-        <ErrorMessage
-          message={proofError}
-          type="error"
-        />
-      )}
+            {/* PROOF ERROR */}
+            {proofError && (
+              <ErrorMessage
+                message={proofError}
+                type="error"
+              />
+            )}
 
-      {/* BUTTONS */}
-      <div
-        className="
+            {/* BUTTONS */}
+            <div
+              className="
           flex
           justify-end
           gap-3
           mt-5
         "
-      >
+            >
 
-        <button
-          onClick={() => {
+              <button
+                onClick={() => {
 
-            setShowPlanModal(false);
-            resetPlanForm();
+                  setShowPlanModal(false);
+                  resetPlanForm();
 
-          }}
-          className="
+                }}
+                className="
             px-4
             py-2
             border
@@ -4032,38 +4883,37 @@ fetchData()
             hover:bg-cardBg
             cursor-pointer
           "
-        >
-          Cancel
-        </button>
+              >
+                Cancel
+              </button>
 
-        <button
-          disabled={subscriptionLoading}
-          onClick={handleSubscription}
-          className={`
+              <button
+                disabled={subscriptionLoading}
+                onClick={handleSubscription}
+                className={`
             px-4
             py-2
             rounded-card
             text-white
 
-            ${
-              subscriptionLoading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-primaryBlue cursor-pointer hover:bg-blue-700"
-            }
+            ${subscriptionLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-primaryBlue cursor-pointer hover:bg-blue-700"
+                  }
           `}
-        >
-          {subscriptionLoading
-            ? "Submit..."
-            : "Submit"}
-        </button>
+              >
+                {subscriptionLoading
+                  ? "Submit..."
+                  : "Submit"}
+              </button>
 
-      </div>
+            </div>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-)}
+      )}
       {/* {showTrialConfirm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
@@ -4177,8 +5027,8 @@ fetchData()
       )} */}
       {showTrialConfirm && (
 
-  <div
-    className="
+        <div
+          className="
       fixed
       inset-0
       z-[9999]
@@ -4187,23 +5037,23 @@ fetchData()
       justify-center
       px-4
     "
-  >
+        >
 
-    {/* OVERLAY */}
-    <div
-      className="
+          {/* OVERLAY */}
+          <div
+            className="
         absolute
         inset-0
         bg-black/40
       "
-      onClick={() => setShowTrialConfirm(false)}
-    />
+            onClick={() => setShowTrialConfirm(false)}
+          />
 
-    {/* MODAL */}
-    <div
-      className="
+          {/* MODAL */}
+          <div
+            className="
         relative
-        bg-white
+       bg-white-common
         rounded-modal
         shadow-modal
         w-full
@@ -4214,46 +5064,46 @@ fetchData()
         border
         border-borderSoft
       "
-    >
+          >
 
-      {/* TITLE */}
-      <h2
-        className="
+            {/* TITLE */}
+            <h2
+              className="
           text-cardTitle
           font-semibold
           text-headingDark
           mb-3
           text-center
         "
-      >
-        Extend Trial
-      </h2>
+            >
+              Extend Trial
+            </h2>
 
-      {/* DESCRIPTION */}
-      <p
-        className="
+            {/* DESCRIPTION */}
+            <p
+              className="
           text-cardTitle
           text-textDark/60
           mb-5
           text-center
           leading-6
         "
-      >
-        Are you sure you want to extend the trial?
-      </p>
+            >
+              Are you sure you want to extend the trial?
+            </p>
 
-      {/* BUTTONS */}
-      <div
-        className="
+            {/* BUTTONS */}
+            <div
+              className="
           flex
           justify-end
           gap-3
         "
-      >
+            >
 
-        <button
-          onClick={() => setShowTrialConfirm(false)}
-          className="
+              <button
+                onClick={() => setShowTrialConfirm(false)}
+                className="
             px-4
             py-2
             border
@@ -4264,13 +5114,13 @@ fetchData()
             hover:bg-cardBg
             cursor-pointer
           "
-        >
-          Cancel
-        </button>
+              >
+                Cancel
+              </button>
 
-        <button
-          onClick={handleTrialOnly}
-          className="
+              <button
+                onClick={handleTrialOnly}
+                className="
             px-4
             py-2
             bg-successGreen
@@ -4280,21 +5130,21 @@ fetchData()
             text-cardTitle
             cursor-pointer
           "
-        >
-          Confirm
-        </button>
+              >
+                Confirm
+              </button>
 
-      </div>
+            </div>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-)}
+      )}
       {showDeleteModal && (
 
-  <div
-    className="
+        <div
+          className="
       fixed
       inset-0
       bg-black/40
@@ -4304,18 +5154,18 @@ fetchData()
       z-50
       px-4
     "
-    onClick={() => {
+          onClick={() => {
 
-      setShowDeleteModal(false);
-      setMenuError("");
-      setPhone("");
+            setShowDeleteModal(false);
+            setMenuError("");
+            setPhone("");
 
-    }}
-  >
+          }}
+        >
 
-    <div
-      className="
-        bg-white
+          <div
+            className="
+        bg-white-common
         rounded-modal
         shadow-modal
         w-full
@@ -4325,55 +5175,55 @@ fetchData()
         border
         border-borderSoft
       "
-      onClick={(e) => e.stopPropagation()}
-    >
+            onClick={(e) => e.stopPropagation()}
+          >
 
-      {/* TITLE */}
-      <h2
-        className="
+            {/* TITLE */}
+            <h2
+              className="
           text-cardTitle
           font-semibold
           text-headingDark
           mb-3
           text-left
         "
-      >
-        Delete Tenant
-      </h2>
+            >
+              Delete Tenant
+            </h2>
 
-      {/* DESCRIPTION */}
-      <p
-        className="
+            {/* DESCRIPTION */}
+            <p
+              className="
           text-cardTitle
           text-textDark/60
           mb-4
           text-left
           leading-6
         "
-      >
-        Please enter tenant mobile number to confirm
-      </p>
+            >
+              Please enter tenant mobile number to confirm
+            </p>
 
-      {/* PHONE INPUT */}
-      <input
-        type="text"
-        placeholder="Enter Phone Number"
-        value={phone}
-        onChange={(e) => {
+            {/* PHONE INPUT */}
+            <input
+              type="text"
+              placeholder="Enter Phone Number"
+              value={phone}
+              onChange={(e) => {
 
-          const value = e.target.value.replace(
-            /\D/g,
-            ""
-          );
+                const value = e.target.value.replace(
+                  /\D/g,
+                  ""
+                );
 
-          if (value.length <= 10) {
-            setPhone(value);
-          }
-          setMenuError("")
+                if (value.length <= 10) {
+                  setPhone(value);
+                }
+                setMenuError("")
 
-        }}
-        maxLength={10}
-        className="
+              }}
+              maxLength={10}
+              className="
           w-full
           border
           border-borderSoft
@@ -4385,37 +5235,37 @@ fetchData()
           focus:border-primaryBlue
           mb-3
         "
-      />
+            />
 
-      {/* ERROR */}
-      {menuError && (
+            {/* ERROR */}
+            {menuError && (
 
-        <ErrorMessage
-          message={menuError}
-          type="error"
-        />
+              <ErrorMessage
+                message={menuError}
+                type="error"
+              />
 
-      )}
+            )}
 
-      {/* BUTTONS */}
-      <div
-        className="
+            {/* BUTTONS */}
+            <div
+              className="
           flex
           justify-end
           gap-3
           mt-5
         "
-      >
+            >
 
-        <button
-          onClick={() => {
+              <button
+                onClick={() => {
 
-            setShowDeleteModal(false);
-            setMenuError("");
-            setPhone("");
+                  setShowDeleteModal(false);
+                  setMenuError("");
+                  setPhone("");
 
-          }}
-          className="
+                }}
+                className="
             px-4
             py-2
             border
@@ -4425,13 +5275,13 @@ fetchData()
             hover:bg-cardBg
             cursor-pointer
           "
-        >
-          Cancel
-        </button>
+              >
+                Cancel
+              </button>
 
-        <button
-          onClick={handleDeleteTenant}
-          className="
+              <button
+                onClick={handleDeleteTenant}
+                className="
             px-4
             py-2
             bg-primaryBlue
@@ -4440,21 +5290,21 @@ fetchData()
             rounded-card
             cursor-pointer
           "
-        >
-          Submit
-        </button>
+              >
+                Submit
+              </button>
 
-      </div>
+            </div>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-)}
+      )}
       {showAgentModal && (
 
-  <div
-    className="
+        <div
+          className="
       fixed
       inset-0
       z-[9999]
@@ -4463,23 +5313,23 @@ fetchData()
       justify-center
       px-4
     "
-  >
+        >
 
-    {/* OVERLAY */}
-    <div
-      className="
+          {/* OVERLAY */}
+          <div
+            className="
         absolute
         inset-0
         bg-black/40
       "
-      onClick={() => setShowAgentModal(false)}
-    />
+            onClick={() => setShowAgentModal(false)}
+          />
 
-    
-    <div
-      className="
+
+          <div
+            className="
         relative
-        bg-white
+        bg-white-common
         rounded-modal
         shadow-modal
         w-full
@@ -4491,11 +5341,11 @@ fetchData()
         border
         border-borderSoft
       "
-    >
+          >
 
-     
-      <div
-        className="
+
+            <div
+              className="
           flex
           items-center
           justify-between
@@ -4504,109 +5354,109 @@ fetchData()
           border-b
           border-borderSoft
         "
-      >
+            >
 
-        <h2
-          className="
+              <h2
+                className="
             text-sectionTitle
             font-semibold
             text-headingDark
           "
-        >
-          Agent Details
-        </h2>
+              >
+                Agent Details
+              </h2>
 
-        <button
-          onClick={() => setShowAgentModal(false)}
-          className="
+              <button
+                onClick={() => setShowAgentModal(false)}
+                className="
             text-textDark/40
             hover:text-dangerRed
             text-xl
             cursor-pointer
           "
-        >
-          ✕
-        </button>
+              >
+                ✕
+              </button>
 
-      </div>
+            </div>
 
-      
-      <div
-        className="
+
+            <div
+              className="
           overflow-x-auto
           overflow-y-auto
           max-h-[65vh]
         "
-      >
+            >
 
-        <table className="w-full">
+              <table className="w-full">
 
-         
-          <thead
-            className="
+
+                <thead
+                  className="
               bg-cardBg
               sticky
               top-0
               z-10
             "
-          >
+                >
 
-            <tr>
+                  <tr>
 
-              {[
-                "Agent Name",
-                "Reason",
-                "Created By",
-                "Date"
-              ].map((header) => (
+                    {[
+                      "Agent Name",
+                      "Reason",
+                      "Created By",
+                      "Date"
+                    ].map((header) => (
 
-                <th
-                  key={header}
-                  className="
+                      <th
+                        key={header}
+                        className="
                     px-4
                     py-3
                     text-left
                     whitespace-nowrap
                   "
-                >
+                      >
 
-                  <div
-                    className="
+                        <div
+                          className="
                       text-tableHeader
                       uppercase
                       font-semibold
                       text-textDark/60
                       tracking-wide
                     "
-                  >
-                    {header}
-                  </div>
+                        >
+                          {header}
+                        </div>
 
-                </th>
+                      </th>
 
-              ))}
+                    ))}
 
-            </tr>
+                  </tr>
 
-          </thead>
+                </thead>
 
-          
-          <tbody className="divide-y divide-borderSoft">
 
-            {hostelData?.relationalAgents?.length > 0 ? (
+                <tbody className="divide-y divide-borderSoft">
 
-              hostelData.relationalAgents.map((item, i) => (
+                  {hostelData?.relationalAgents?.length > 0 ? (
 
-                <tr
-                  key={i}
-                  className="
+                    hostelData.relationalAgents.map((item, i) => (
+
+                      <tr
+                        key={i}
+                        className="
                     hover:bg-cardBg
                     transition-all
                   "
-                >
+                      >
 
-                  {/* AGENT NAME */}
-                  {/* <td
+                        {/* AGENT NAME */}
+                        {/* <td
                     className="
                       px-4
                       py-3
@@ -4618,13 +5468,13 @@ fetchData()
                   >
                     {item.agentName || "N/A"}
                   </td> */}
-                  <td
-  onClick={() => {
-    if (item.agentId) {
-      navigate(`/iam-user/${item.agentId}`);
-    }
-  }}
-  className="
+                        <td
+                          onClick={() => {
+                            if (item.agentId) {
+                              navigate(`/iam-user/${item.agentId}`);
+                            }
+                          }}
+                          className="
     px-4
     py-3
     text-cardTitle
@@ -4635,141 +5485,141 @@ fetchData()
     cursor-pointer
     hover:underline
   "
->
-  {item.agentName || "N/A"}
-</td>
+                        >
+                          {item.agentName || "N/A"}
+                        </td>
 
-                  
-                  <td
-                    className="
+
+                        <td
+                          className="
                       px-4
                       py-3
                       text-cardTitle
                       text-textDark/70
                       min-w-[180px]
                     "
-                  >
-                    {item.reason || "N/A"}
-                  </td>
+                        >
+                          {item.reason || "N/A"}
+                        </td>
 
-                  {/* CREATED BY */}
-                  <td
-                    className="
+                        {/* CREATED BY */}
+                        <td
+                          className="
                       px-4
                       py-3
                       text-cardTitle
                       text-textDark/70
                       whitespace-nowrap
                     "
-                  >
-                    {item.createdBy || "N/A"}
-                  </td>
+                        >
+                          {item.createdBy || "N/A"}
+                        </td>
 
-                  {/* DATE */}
-                  <td
-  className="
+                        {/* DATE */}
+                        <td
+                          className="
     px-4
     py-3
     text-cardTitle
     text-textDark/70 text-start
   "
->
+                        >
 
-  <div className="flex flex-col">
+                          <div className="flex flex-col">
 
-    <span className="whitespace-nowrap">
-      {item.createdAtDate || "N/A"}
-    </span>
+                            <span className="whitespace-nowrap">
+                              {item.createdAtDate || "N/A"}
+                            </span>
 
-    <span
-      className="
+                            <span
+                              className="
         text-[11px]
         text-textDark/50
         mt-[2px]
       "
-    >
-      {item.createdAtTime || ""}
-    </span>
+                            >
+                              {item.createdAtTime || ""}
+                            </span>
 
-  </div>
+                          </div>
 
-</td>
+                        </td>
 
-                </tr>
+                      </tr>
 
-              ))
+                    ))
 
-            ) : (
+                  ) : (
 
-              <tr>
+                    <tr>
 
-                <td
-                  colSpan="4"
-                  className="
+                      <td
+                        colSpan="4"
+                        className="
                     text-center
                     py-8
                     text-textDark/40
                     text-cardTitle
                   "
-                >
-                  No Data Found
-                </td>
+                      >
+                        No Data Found
+                      </td>
 
-              </tr>
+                    </tr>
 
-            )}
+                  )}
 
-          </tbody>
+                </tbody>
 
-        </table>
+              </table>
 
-      </div>
+            </div>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-)}
-     
+      )}
+
       {showPaymentDrawer && (
 
-  <div className="fixed inset-0 z-[9999]">
+        <div className="fixed inset-0 z-[9999]">
 
-    
-    <div
-      className="
+
+          <div
+            className="
         absolute
         inset-0
         bg-black/40
       "
-      onClick={() => {
+            onClick={() => {
 
-        setShowPaymentDrawer(false);
+              setShowPaymentDrawer(false);
+              setIsPaymentGenerated(false);
+              setPaymentPlan("");
+              setPaymentAmount("");
+              setPaymentDiscount("");
 
-        setPaymentPlan("");
-        setPaymentAmount("");
-        setPaymentDiscount("");
+              setPaymentPlanError("");
+              setPaymentAmountError("");
+              setPaymentDiscountError("");
 
-        setPaymentPlanError("");
-        setPaymentAmountError("");
-        setPaymentDiscountError("");
+              setGeneratedPaymentUrl("");
+              setShowPaidByDropdownGenerate(false)
+              setPaidBy()
 
-        setGeneratedPaymentUrl("");
-        setShowPaidByDropdownGenerate(false)
-        setPaidBy()
+            }}
+          />
 
-      }}
-    />
 
-    
-    <div
-      className="
+          <div
+            className="
         absolute
         top-4
         right-4
         bottom-4
         w-[450px]
-        bg-white
+        bg-white-common
         shadow-modal
         rounded-modal
         flex
@@ -4778,12 +5628,12 @@ fetchData()
         border
         border-borderSoft
       "
-      onClick={(e) => e.stopPropagation()}
-    >
+            onClick={(e) => e.stopPropagation()}
+          >
 
-      
-      <div
-        className="
+
+            <div
+              className="
           px-6
           py-5
           border-b
@@ -4792,76 +5642,76 @@ fetchData()
           items-start
           justify-between
         "
-      >
+            >
 
-        <div>
+              <div>
 
-          <h2
-            className="
+                <h2
+                  className="
               text-sectionTitle
               font-semibold
               text-headingDark
               text-left
             "
-          >
-            Generate Payment
-          </h2>
+                >
+                  Generate Payment
+                </h2>
 
-          <p
-            className="
+                <p
+                  className="
               text-cardTitle
               text-textDark/60
               mt-1
             "
-          >
-            Create payment for subscription plan
-          </p>
+                >
+                  Create payment for subscription plan
+                </p>
 
-        </div>
+              </div>
 
-        <button
-          onClick={() => {
+              <button
+                onClick={() => {
 
-            setShowPaymentDrawer(false);
+                  setShowPaymentDrawer(false);
+                  setIsPaymentGenerated(false);
+                  setPaymentPlan("");
+                  setPaymentAmount("");
+                  setPaymentDiscount("");
 
-            setPaymentPlan("");
-            setPaymentAmount("");
-            setPaymentDiscount("");
+                  setPaymentPlanError("");
+                  setPaymentAmountError("");
+                  setPaymentDiscountError("");
 
-            setPaymentPlanError("");
-            setPaymentAmountError("");
-            setPaymentDiscountError("");
+                  setGeneratedPaymentUrl("");
 
-            setGeneratedPaymentUrl("");
-
-          }}
-          className="
+                }}
+                className="
             text-textDark/40
             hover:text-dangerRed
             text-2xl
             cursor-pointer
           "
-        >
-          ✕
-        </button>
+              >
+                ✕
+              </button>
 
-      </div>
+            </div>
 
-     
-      <div
-        className="
+
+            <div
+              className="
           flex-1
           overflow-y-auto
           px-6
           py-5
         "
-      >
+            >
 
-        
-        <div className="mb-5">
 
-          <label
-            className="
+              <div className="mb-5">
+
+                <label
+                  className="
               block
               text-cardTitle
               font-medium
@@ -4869,21 +5719,21 @@ fetchData()
               mb-2
               text-left
             "
-          >
-            Plan Name
+                >
+                  Plan Name
 
-            <span className="text-dangerRed">
-              *
-            </span>
+                  <span className="text-dangerRed">
+                    *
+                  </span>
 
-          </label>
+                </label>
 
-          <div className="relative">
+                <div className="relative">
 
-  
-  <div
-    onClick={() => setShowDropdown(!showDropdown)}
-    className="
+
+                  <div
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="
       w-full
       h-[43px]
       border
@@ -4891,57 +5741,55 @@ fetchData()
       rounded-card
       px-4
       cursor-pointer
-      bg-white
+     bg-white-common
       flex
       items-center
       justify-between
     "
-  >
+                  >
 
-    <span
-      className={`
+                    <span
+                      className={`
         text-cardTitle
-        ${
-          paymentPlan
-            ? "text-textDark"
-            : "text-textDark/40"
-        }
+        ${paymentPlan
+                          ? "text-textDark"
+                          : "text-textDark/40"
+                        }
       `}
-    >
-      {
-        dropdownPlans?.otherPlans?.find(
-          item => item.planCode === paymentPlan
-        )?.planName || "Select Plan"
-      }
-    </span>
+                    >
+                      {
+                        dropdownPlans?.otherPlans?.find(
+                          item => item.planCode === paymentPlan
+                        )?.planName || "Select Plan"
+                      }
+                    </span>
 
-    <img
-      src={ArrowSelect}
-      className={`
+                    <img
+                      src={ArrowSelect}
+                      className={`
         w-4
         h-4
         transition-transform
-        ${
-          showDropdown
-            ? "rotate-180"
-            : ""
-        }
+        ${showDropdown
+                          ? "rotate-180"
+                          : ""
+                        }
       `}
-    />
+                    />
 
-  </div>
+                  </div>
 
-  {/* DROPDOWN */}
-  {showDropdown && (
+                  {/* DROPDOWN */}
+                  {showDropdown && (
 
-    <div
-      className="
+                    <div
+                      className="
         absolute
         top-full
         left-0
         mt-2
         w-full
-        bg-white
+        bg-white-common
         border
         border-borderSoft
         rounded-card
@@ -4950,16 +5798,16 @@ fetchData()
         overflow-y-auto
         z-50
       "
-    >
+                    >
 
-      <div
-        onClick={() => {
+                      <div
+                        onClick={() => {
 
-          setPaymentPlan("");
-          setShowDropdown(false);
+                          setPaymentPlan("");
+                          setShowDropdown(false);
 
-        }}
-        className="
+                        }}
+                        className="
           px-4
           py-3
           cursor-pointer
@@ -4967,24 +5815,24 @@ fetchData()
           text-cardTitle
           text-textDark/50
         "
-      >
-        Select Plan
-      </div>
+                      >
+                        Select Plan
+                      </div>
 
-      {dropdownPlans?.otherPlans?.map((item) => (
+                      {dropdownPlans?.otherPlans?.map((item) => (
 
-        <div
-          key={item.planId}
-          onClick={() => {
+                        <div
+                          key={item.planId}
+                          onClick={() => {
 
-            setPaymentPlan(item.planCode);
-            setPaymentPlanError("");
-            setPaymentAmount("");
+                            setPaymentPlan(item.planCode);
+                            setPaymentPlanError("");
+                            setPaymentAmount("");
 
-            setShowDropdown(false);
+                            setShowDropdown(false);
 
-          }}
-          className={`
+                          }}
+                          className={`
             px-4
             py-3
             cursor-pointer
@@ -4993,48 +5841,47 @@ fetchData()
             items-center
             justify-between
 
-            ${
-              paymentPlan === item.planCode
-                ? "bg-primarySoft text-primaryBlue"
-                : "hover:bg-cardBg"
-            }
+            ${paymentPlan === item.planCode
+                              ? "bg-primarySoft text-primaryBlue"
+                              : "hover:bg-cardBg"
+                            }
           `}
-        >
+                        >
 
-          <span>
-            {item.planName}
-          </span>
+                          <span>
+                            {item.planName}
+                          </span>
 
-          {paymentPlan === item.planCode && (
-            <span>✔</span>
-          )}
+                          {paymentPlan === item.planCode && (
+                            <span>✔</span>
+                          )}
 
-        </div>
+                        </div>
 
-      ))}
+                      ))}
 
-    </div>
+                    </div>
 
-  )}
+                  )}
 
-</div>
+                </div>
 
-          {paymentPlanError && (
+                {paymentPlanError && (
 
-            <ErrorMessage
-              message={paymentPlanError}
-              type="error"
-            />
+                  <ErrorMessage
+                    message={paymentPlanError}
+                    type="error"
+                  />
 
-          )}
+                )}
 
-        </div>
+              </div>
 
-        {/* PAID BY */}
-<div className="mb-5">
+              {/* PAID BY */}
+              <div className="mb-5">
 
-  <label
-    className="
+                <label
+                  className="
       block
       text-cardTitle
       font-medium
@@ -5042,25 +5889,25 @@ fetchData()
       mb-2
       text-left
     "
-  >
-    Paid By
+                >
+                  Requested By
 
-    <span className="text-dangerRed">
-      *
-    </span>
+                  <span className="text-dangerRed">
+                    *
+                  </span>
 
-  </label>
+                </label>
 
-  <div className="relative">
+                <div className="relative">
 
-    {/* SELECT BOX */}
-    <div
-      onClick={() =>
-        setShowPaidByDropdownGenerate(
-          !showPaidByDropdownGenerate
-        )
-      }
-      className="
+                  {/* SELECT BOX */}
+                  <div
+                    onClick={() =>
+                      setShowPaidByDropdownGenerate(
+                        !showPaidByDropdownGenerate
+                      )
+                    }
+                    className="
         w-full
         h-[43px]
         border
@@ -5068,59 +5915,57 @@ fetchData()
         rounded-card
         px-4
         cursor-pointer
-        bg-white
+        bg-white-common
         flex
         items-center
         justify-between
       "
-    >
+                  >
 
-      <span
-        className={`
+                    <span
+                      className={`
           text-cardTitle
-          ${
-            paidBy
-              ? "text-textDark"
-              : "text-textDark/40"
-          }
+          ${paidBy
+                          ? "text-textDark"
+                          : "text-textDark/40"
+                        }
         `}
-      >
+                    >
 
-        {
-          paidByUsers?.find(
-            item => item.id === paidBy
-          )?.name || "Select Paid By"
-        }
+                      {
+                        paidByUsers?.find(
+                          item => item.id === paidBy
+                        )?.name || "Select Paid By"
+                      }
 
-      </span>
+                    </span>
 
-      <img
-        src={ArrowSelect}
-        className={`
+                    <img
+                      src={ArrowSelect}
+                      className={`
           w-4
           h-4
           transition-transform
-          ${
-            showPaidByDropdownGenerate
-              ? "rotate-180"
-              : ""
-          }
+          ${showPaidByDropdownGenerate
+                          ? "rotate-180"
+                          : ""
+                        }
         `}
-      />
+                    />
 
-    </div>
+                  </div>
 
-    {/* DROPDOWN */}
-    {showPaidByDropdownGenerate && (
+                  {/* DROPDOWN */}
+                  {showPaidByDropdownGenerate && (
 
-      <div
-        className="
+                    <div
+                      className="
           absolute
           top-full
           left-0
           mt-2
           w-full
-          bg-white
+          bg-white-common
           border
           border-borderSoft
           rounded-card
@@ -5129,22 +5974,22 @@ fetchData()
           overflow-y-auto
           z-50
         "
-      >
+                    >
 
-        {paidByUsers?.map((item) => (
+                      {paidByUsers?.map((item) => (
 
-          <div
-            key={item.id}
-            onClick={() => {
+                        <div
+                          key={item.id}
+                          onClick={() => {
 
-              setPaidBy(item.id);
+                            setPaidBy(item.id);
 
-              setPaidByError("");
+                            setPaidByError("");
 
-              setShowPaidByDropdownGenerate(false);
+                            setShowPaidByDropdownGenerate(false);
 
-            }}
-            className={`
+                          }}
+                          className={`
               px-4
               py-3
               cursor-pointer
@@ -5153,59 +5998,58 @@ fetchData()
               items-center
               justify-between
 
-              ${
-                paidBy === item.id
-                  ? "bg-primarySoft text-primaryBlue"
-                  : "hover:bg-cardBg"
-              }
+              ${paidBy === item.id
+                              ? "bg-primarySoft text-primaryBlue"
+                              : "hover:bg-cardBg"
+                            }
             `}
-          >
+                        >
 
-            <div className="flex flex-col">
+                          <div className="flex flex-col">
 
-              <span>
-                {item.name}
-              </span>
+                            <span>
+                              {item.name}
+                            </span>
 
-              <span
-                className="
+                            <span
+                              className="
                   text-[11px]
                   text-textDark/50
                 "
-              >
-                {item.role}
-              </span>
+                            >
+                              {item.role}
+                            </span>
 
-            </div>
+                          </div>
 
-            {paidBy === item.id && (
-              <span>✔</span>
-            )}
+                          {paidBy === item.id && (
+                            <span>✔</span>
+                          )}
 
-          </div>
+                        </div>
 
-        ))}
+                      ))}
 
-      </div>
+                    </div>
 
-    )}
+                  )}
 
-  </div>
+                </div>
 
-  {paidByError && (
+                {paidByError && (
 
-    <ErrorMessage
-      message={paidByError}
-      type="error"
-    />
+                  <ErrorMessage
+                    message={paidByError}
+                    type="error"
+                  />
 
-  )}
+                )}
 
-</div>
-        <div className="mb-5">
+              </div>
+              <div className="mb-5">
 
-          <label
-            className="
+                <label
+                  className="
               block
               text-cardTitle
               font-medium
@@ -5213,32 +6057,32 @@ fetchData()
               mb-2
               text-left
             "
-          >
-            Amount
+                >
+                  Amount
 
-            <span className="text-dangerRed">
-              *
-            </span>
+                  <span className="text-dangerRed">
+                    *
+                  </span>
 
-          </label>
+                </label>
 
-          <input
-            type="text"
-            readOnly
-            placeholder={
-              selectedPaymentPlan
-                ? `₹${selectedPaymentPlan.finalPrice}`
-                : "Amount"
-            }
-            value={
-              paymentAmount ||
-              (
-                selectedPaymentPlan
-                  ? selectedPaymentPlan.finalPrice
-                  : ""
-              )
-            }
-            className="
+                <input
+                  type="text"
+                  readOnly
+                  placeholder={
+                    selectedPaymentPlan
+                      ? `₹${selectedPaymentPlan.finalPrice}`
+                      : "Amount"
+                  }
+                  value={
+                    paymentAmount ||
+                    (
+                      selectedPaymentPlan
+                        ? selectedPaymentPlan.finalPrice
+                        : ""
+                    )
+                  }
+                  className="
               w-full
               h-[43px]
               border
@@ -5250,24 +6094,24 @@ fetchData()
               cursor-not-allowed
               outline-none
             "
-          />
+                />
 
-          {paymentAmountError && (
+                {paymentAmountError && (
 
-            <ErrorMessage
-              message={paymentAmountError}
-              type="error"
-            />
+                  <ErrorMessage
+                    message={paymentAmountError}
+                    type="error"
+                  />
 
-          )}
+                )}
 
-        </div>
+              </div>
 
-        
-        <div className="mb-5">
 
-          <label
-            className="
+              <div className="mb-5">
+
+                <label
+                  className="
               block
               text-cardTitle
               font-medium
@@ -5275,41 +6119,41 @@ fetchData()
               mb-2
               text-left
             "
-          >
-            Discount
+                >
+                  Discount
 
-            <span className="text-dangerRed">
-              *
-            </span>
+                  <span className="text-dangerRed">
+                    *
+                  </span>
 
-          </label>
+                </label>
 
-          <input
-            placeholder="Enter Discount"
-            value={paymentDiscount}
-            onChange={(e) => {
+                <input
+                  placeholder="Enter Discount"
+                  value={paymentDiscount}
+                  onChange={(e) => {
 
-              let value = e.target.value.replace(
-                /[^0-9.]/g,
-                ""
-              );
+                    let value = e.target.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
 
-              const parts = value.split(".");
+                    const parts = value.split(".");
 
-              if (parts.length > 2) {
+                    if (parts.length > 2) {
 
-                value =
-                  parts[0] +
-                  "." +
-                  parts.slice(1).join("");
+                      value =
+                        parts[0] +
+                        "." +
+                        parts.slice(1).join("");
 
-              }
+                    }
 
-              setPaymentDiscount(value);
-              setPaymentDiscountError("");
+                    setPaymentDiscount(value);
+                    setPaymentDiscountError("");
 
-            }}
-            className="
+                  }}
+                  className="
               w-full
               h-[43px]
               border
@@ -5320,25 +6164,25 @@ fetchData()
               text-cardTitle
               focus:border-primaryBlue
             "
-          />
+                />
 
-        </div>
+              </div>
 
-        {paymentDiscountError && (
+              {paymentDiscountError && (
 
-          <ErrorMessage
-            message={paymentDiscountError}
-            type="error"
-          />
+                <ErrorMessage
+                  message={paymentDiscountError}
+                  type="error"
+                />
 
-        )}
+              )}
 
-      
-{generatedPaymentUrl && (
-  <div className="w-full mt-4">
 
-    <label
-      className="
+              {generatedPaymentUrl && (
+                <div className="w-full mt-4">
+
+                  <label
+                    className="
         block
         text-cardTitle
         text-textDark/70
@@ -5346,17 +6190,17 @@ fetchData()
         text-left
         font-medium
       "
-    >
-      Payment URL
-    </label>
+                  >
+                    Payment URL
+                  </label>
 
-    <div className="relative">
+                  <div className="relative">
 
-      <textarea
-        value={generatedPaymentUrl}
-        readOnly
-        rows={4}
-        className="
+                    <textarea
+                      value={generatedPaymentUrl}
+                      readOnly
+                      rows={4}
+                      className="
           w-full
           border
           border-borderSoft
@@ -5369,24 +6213,24 @@ fetchData()
           outline-none
           resize-none
         "
-      />
+                    />
 
-      
-      <button
-        onClick={() => {
-          navigator.clipboard.writeText(
-            generatedPaymentUrl
-          );
 
-          setModalType("success");
-          setMessage("Link copied");
-          setShowSuccess(true);
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          generatedPaymentUrl
+                        );
 
-          setTimeout(() => {
-            setShowSuccess(false);
-          }, 1200);
-        }}
-        className="
+                        setModalType("success");
+                        setMessage("Link copied");
+                        setShowSuccess(true);
+
+                        setTimeout(() => {
+                          setShowSuccess(false);
+                        }, 1200);
+                      }}
+                      className="
           absolute
           top-2
           right-2
@@ -5402,20 +6246,20 @@ fetchData()
           duration-200
           cursor-pointer
         "
-      >
-        <img src={CopyImg} className="w-4 h-4"/>
-      </button>
+                    >
+                      <img src={CopyImg} className="w-4 h-4" />
+                    </button>
 
-    </div>
+                  </div>
 
-  </div>
-)}
+                </div>
+              )}
 
-      </div>
+            </div>
 
-      {/* FOOTER */}
-      <div
-        className="
+            {/* FOOTER */}
+            <div
+              className="
           border-t
           border-borderSoft
           px-6
@@ -5424,25 +6268,25 @@ fetchData()
           justify-end
           gap-3
         "
-      >
+            >
 
-        <button
-          onClick={() => {
+              <button
+                onClick={() => {
 
-            setShowPaymentDrawer(false);
+                  setShowPaymentDrawer(false);
+                  setIsPaymentGenerated(false);
+                  setPaymentPlan("");
+                  setPaymentAmount("");
+                  setPaymentDiscount("");
 
-            setPaymentPlan("");
-            setPaymentAmount("");
-            setPaymentDiscount("");
+                  setPaymentPlanError("");
+                  setPaymentAmountError("");
+                  setPaymentDiscountError("");
 
-            setPaymentPlanError("");
-            setPaymentAmountError("");
-            setPaymentDiscountError("");
+                  setGeneratedPaymentUrl("");
 
-            setGeneratedPaymentUrl("");
-
-          }}
-          className="
+                }}
+                className="
             px-5
             py-2.5
             border
@@ -5452,11 +6296,11 @@ fetchData()
             hover:bg-cardBg
             cursor-pointer
           "
-        >
-          Cancel
-        </button>
+              >
+                Cancel
+              </button>
 
-        <button
+              {/* <button
           onClick={handleGeneratePayment}
           className="
             px-6
@@ -5469,12 +6313,59 @@ fetchData()
           "
         >
           Generate
-        </button>
-{generatedPaymentUrl && (
+        </button> */}
 
-  <button
-    onClick={handleSharePayment}
-    className="
+              {/* <button
+                onClick={handleGeneratePayment}
+                disabled={
+                  generateLoading ||
+                  isPaymentGenerated
+                }
+                className={`
+    px-6 py-2.5 rounded-card text-white
+    ${generateLoading || isPaymentGenerated
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-primaryBlue hover:bg-blue-700 cursor-pointer"
+                  }
+  `}
+              >
+                {generateLoading
+                  ? "Generating..."
+                  : isPaymentGenerated
+                    ? "Generated"
+                    : "Generate"}
+              </button> */}
+
+              <button
+  onClick={handleGeneratePayment}
+  disabled={
+    generateLoading ||
+    isPaymentGenerated
+  }
+  onMouseDown={(e) => {
+    if (generateLock.current) {
+      e.preventDefault();
+    }
+  }}
+  className={`
+    px-6 py-2.5 rounded-card text-white
+    ${generateLoading || isPaymentGenerated
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-primaryBlue hover:bg-blue-700 cursor-pointer"
+    }
+  `}
+>
+  {generateLoading
+    ? "Generating..."
+    : isPaymentGenerated
+      ? "Generated"
+      : "Generate"}
+</button>
+              {generatedPaymentUrl && (
+
+                <button
+                  onClick={handleSharePayment}
+                  className="
       w-10
       h-10
       flex
@@ -5489,29 +6380,151 @@ fetchData()
       duration-200
       shadow-card
     "
-    title="Share Payment Link"
-  >
+                  title="Share Payment Link"
+                >
 
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 32 32"
-      className="w-5 h-5 fill-current"
-    >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 32 32"
+                    className="w-5 h-5 fill-current"
+                  >
 
-      <path d="M16 .396C7.164.396 0 7.56 0 16.396c0 2.82.737 5.57 2.137 7.992L0 32l7.828-2.053a15.93 15.93 0 0 0 8.172 2.242c8.836 0 16-7.164 16-16S24.836.396 16 .396zm0 29.09a13.1 13.1 0 0 1-6.672-1.832l-.477-.281-4.645 1.219 1.238-4.527-.312-.492a13.045 13.045 0 0 1-2.012-7.016c0-7.223 5.879-13.102 13.102-13.102 3.5 0 6.793 1.363 9.266 3.836a13.02 13.02 0 0 1 3.836 9.266c0 7.223-5.879 13.102-13.102 13.102zm7.188-9.844c-.394-.199-2.332-1.152-2.695-1.285-.363-.133-.629-.199-.895.199-.266.394-1.027 1.285-1.258 1.551-.23.266-.465.297-.859.098-.394-.199-1.664-.613-3.172-1.953-1.172-1.043-1.965-2.332-2.195-2.727-.23-.394-.024-.609.172-.808.176-.176.394-.465.594-.695.199-.23.266-.394.398-.66.133-.266.066-.496-.031-.695-.098-.199-.895-2.156-1.227-2.953-.324-.777-.652-.672-.895-.684l-.762-.012c-.266 0-.695.098-1.059.496-.363.394-1.391 1.359-1.391 3.312 0 1.953 1.426 3.84 1.625 4.105.199.266 2.809 4.289 6.805 6.016.949.41 1.688.656 2.266.84.953.305 1.82.262 2.504.159.764-.114 2.332-.953 2.66-1.875.328-.922.328-1.711.23-1.875-.098-.164-.363-.262-.758-.461z" />
+                    <path d="M16 .396C7.164.396 0 7.56 0 16.396c0 2.82.737 5.57 2.137 7.992L0 32l7.828-2.053a15.93 15.93 0 0 0 8.172 2.242c8.836 0 16-7.164 16-16S24.836.396 16 .396zm0 29.09a13.1 13.1 0 0 1-6.672-1.832l-.477-.281-4.645 1.219 1.238-4.527-.312-.492a13.045 13.045 0 0 1-2.012-7.016c0-7.223 5.879-13.102 13.102-13.102 3.5 0 6.793 1.363 9.266 3.836a13.02 13.02 0 0 1 3.836 9.266c0 7.223-5.879 13.102-13.102 13.102zm7.188-9.844c-.394-.199-2.332-1.152-2.695-1.285-.363-.133-.629-.199-.895.199-.266.394-1.027 1.285-1.258 1.551-.23.266-.465.297-.859.098-.394-.199-1.664-.613-3.172-1.953-1.172-1.043-1.965-2.332-2.195-2.727-.23-.394-.024-.609.172-.808.176-.176.394-.465.594-.695.199-.23.266-.394.398-.66.133-.266.066-.496-.031-.695-.098-.199-.895-2.156-1.227-2.953-.324-.777-.652-.672-.895-.684l-.762-.012c-.266 0-.695.098-1.059.496-.363.394-1.391 1.359-1.391 3.312 0 1.953 1.426 3.84 1.625 4.105.199.266 2.809 4.289 6.805 6.016.949.41 1.688.656 2.266.84.953.305 1.82.262 2.504.159.764-.114 2.332-.953 2.66-1.875.328-.922.328-1.711.23-1.875-.098-.164-.363-.262-.758-.461z" />
 
-    </svg>
+                  </svg>
 
-  </button>
+                </button>
 
+              )}
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+      {showApproveModal && (
+  // <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  //   <div className="bg-white rounded-2xl w-[500px] p-6 shadow-xl">
+
+  //     <h2 className="text-[20px] font-medium text-left">
+  //       Do you want to approve this Property?
+  //     </h2>
+
+  //     <p className="text-gray-500 mt-2 text-sm text-left">
+  //       Upon your approval, the property approval process will be completed.
+  //     </p>
+
+  //     <div className="flex justify-end gap-3 mt-8">
+
+  //       <button
+  //         onClick={() => setShowApproveModal(false)}
+  //         className="border border-gray-300 px-8 py-3 rounded-xl"
+  //       >
+  //         Cancel
+  //       </button>
+
+  //       <button
+  //        onClick={() => {
+  //   handleApproveKYC(selectedCustomerId);
+  //   setShowApproveModal(false);
+  // }}
+  //         disabled={approveLoading}
+  //         className={`
+  //           px-8 py-3 rounded-xl text-white
+  //           ${
+  //             approveLoading
+  //               ? "bg-gray-400 cursor-not-allowed"
+  //               : "bg-[#2952F3]"
+  //           }
+  //         `}
+  //       >
+  //         {approveLoading
+  //           ? "Approving..."
+  //           : "Confirm"}
+  //       </button>
+
+  //     </div>
+
+  //   </div>
+  // </div>
+   <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white-common rounded-2xl w-[500px] p-6 shadow-xl">
+  
+              <h2 className="text-[20px] font-medium text-[#1f2937] text-left">
+                Do you wanna approve KYC for this Tenant ?
+              </h2>
+  
+              <p className="text-gray-500 mt-2 text-sm text-left">
+                Upon your approval, the KYC process will be completed.
+              </p>
+  
+              <div className="bg-[#f5f7fb] rounded-xl p-4 mt-6 flex items-center gap-4">
+  
+                <div className="w-14 h-14 rounded-full bg-white-common flex items-center justify-center">
+                  <img src={User} className="w-5 h-6" />
+                </div>
+  
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-[20px]">
+                      {selectedTenant?.fullName}
+                    </h3>
+  
+                    <button className="text-blue-600">
+                      ↗
+                    </button>
+                  </div>
+  
+                  <p className="text-sm text-gray-500 mt-1">
+                    SM{selectedTenant?.kycDetailsId} |
+                    {" "}
+                    +91 {selectedTenant?.mobile}
+                  </p>
+                </div>
+              </div>
+  
+              <div className="flex justify-end gap-3 mt-8">
+  
+                <button
+                  onClick={() =>
+                    setShowApproveModal(false)
+                  }
+                  className="border border-gray-300 px-8 py-3 rounded-xl text-gray-700"
+                >
+                  Cancel
+                </button>
+  
+                <button
+  type="button"
+  onClick={() =>
+    handleApproveKYC(selectedCustomerId)
+  }
+  disabled={approveLoading}
+  className={`
+    px-8 py-3 rounded-xl
+    flex items-center gap-2 text-white
+    ${
+      approveLoading
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-[#2952F3] hover:bg-[#1f46e5]"
+    }
+  `}
+>
+  <span>✈</span>
+
+  {approveLoading
+    ? "Approving..."
+    : "Confirm"}
+</button>
+  
+              </div>
+  
+            </div>
+          </div>
 )}
-      </div>
 
-    </div>
 
-  </div>
-
-)}
     </DashboardLayout>
   );
 };

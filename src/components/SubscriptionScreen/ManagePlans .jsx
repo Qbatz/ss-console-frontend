@@ -199,7 +199,7 @@ const ManagePlans = () => {
   + Add New Plan
 </button>
   </div> */}
-            <div className="w-full bg-white border-b border-gray-300 px-4 sm:px-6 py-3">
+            <div className="w-full bg-white-common border-b border-gray-300 px-4 sm:px-6 py-3">
 
               <div className="flex items-center justify-between">
 
@@ -230,9 +230,9 @@ const ManagePlans = () => {
                       Plans List
                     </button>
 
-                    <button className="text-sm text-gray-400 pb-1">
+                    {/* <button className="text-sm text-gray-400 pb-1">
                       Approvals
-                    </button>
+                    </button> */}
                   </div>
 
                 </div>
@@ -301,19 +301,19 @@ const ManagePlans = () => {
 
   </div>
 </div> */}
-              <div className="relative bg-white border border-gray-200 rounded-xl px-5 py-4 mb-4 shadow-sm overflow-hidden">
+              {/* <div className="relative bg-white border border-gray-200 rounded-xl px-5 py-4 mb-4 shadow-sm overflow-hidden">
 
-                {/* IMAGE */}
+               
                 <img
                   src={rightsideimage}
                   alt="graph"
                   className="absolute right-0 top-0 h-[80px] max-w-[180px] opacity-3 pointer-events-none"
                 />
 
-                {/* CONTENT */}
+                
                 <div className="relative z-10 flex items-center gap-8">
 
-                  {/* LEFT */}
+                  
                   <div className="min-w-[200px]">
                     <p className="text-[11px] text-gray-400 mb-1 tracking-wide">
                       TOTAL RECURRING REVENUE
@@ -328,7 +328,7 @@ const ManagePlans = () => {
                     </span>
                   </div>
 
-                  {/* RIGHT */}
+                  
                   <div className="flex items-center gap-8 text-xs text-gray-500">
 
                     <div>
@@ -348,7 +348,7 @@ const ManagePlans = () => {
                   </div>
 
                 </div>
-              </div>
+              </div> */}
 
 
               {/* <h2 className="text-lg font-semibold text-gray-800 mb-4 text-left">
@@ -436,7 +436,7 @@ const ManagePlans = () => {
                   return (
                     <div
                       key={plan.planId}
-                      className="bg-white border border-gray-300 rounded-xl p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition h-full"
+                      className="bg-white-common border border-gray-300 rounded-xl p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition h-full"
                     >
 
                       <div>
@@ -470,7 +470,7 @@ const ManagePlans = () => {
                           {openMenuId === plan.planId && (
                             <div
                               ref={menuRef}
-                              className="absolute right-0 top-8 bg-white border rounded-lg shadow-md w-32 z-10"
+                              className="absolute right-0 top-8 bg-white-common border rounded-lg shadow-md w-32 z-10"
                             >
                               {/* <button
       onClick={() => {
@@ -566,15 +566,60 @@ const ManagePlans = () => {
                         </div>
 
                         {/* FEATURES */}
-                        <ul className="space-y-3 text-sm text-gray-600 min-h-[180px]">
+                        {/* <ul className="space-y-3 text-sm text-gray-600 min-h-[180px]">
                           {uniqueFeatures.map((f, i) => (
                             <li key={i} className="flex items-start gap-3 text-left whitespace-nowrap">
-                              {/* <span className="text-blue-600 mt-1 text-xs">■</span> */}
+                            
                               <img src={Tick} className="w-4 h-4 mt-0" />
                               {f.featureName}
                             </li>
                           ))}
-                        </ul>
+                        </ul> */}
+                        <ul className="space-y-3 text-sm text-gray-600 min-h-[180px]">
+  {uniqueFeatures.map((f, i) => {
+    
+    let dateText = "";
+
+    if (f.startsFrom && f.endsAt) {
+      dateText = `${f.startsFrom} to ${f.endsAt}`;
+    } else if (f.startsFrom && !f.endsAt) {
+      dateText = `${f.startsFrom} to Infinity`;
+    } else if (!f.startsFrom && f.endsAt) {
+      dateText = `Present to ${f.endsAt}`;
+    }
+
+    return (
+      <li
+        key={i}
+        className="flex items-center justify-between gap-3"
+      >
+        {/* Left Side */}
+        <div className="flex items-center gap-3">
+          <img
+            src={Tick}
+            className="w-4 h-4"
+            alt=""
+          />
+
+          <span>{f.featureName}</span>
+
+          {dateText && (
+            <span className="text-[10px] text-gray-500 bg-gray-100 px-2 py-1 rounded whitespace-nowrap">
+              {dateText}
+            </span>
+          )}
+        </div>
+
+        {/* Right Side Label */}
+        {f.labelText && (
+          <span className="text-[10px] font-medium text-blue-600 ">
+            {f.labelText}
+          </span>
+        )}
+      </li>
+    );
+  })}
+</ul>
 
                       </div>
 
@@ -641,7 +686,7 @@ const ManagePlans = () => {
           <div className="absolute inset-0 bg-black/40"></div>
 
           {/* Modal Box */}
-          <div className="relative bg-white rounded-xl shadow-lg w-[320px] p-5 z-10">
+          <div className="relative bg-white-common rounded-xl shadow-lg w-[320px] p-5 z-10">
 
             <h3 className="text-base font-semibold text-gray-800 mb-2">
               Deactivate Plan
@@ -687,7 +732,7 @@ const ManagePlans = () => {
           <div className="absolute inset-0 bg-black/40"></div>
 
 
-          <div className="relative bg-white rounded-xl shadow-lg w-[320px] p-5 z-10">
+          <div className="relative bg-white-common rounded-xl shadow-lg w-[320px] p-5 z-10">
 
             <h3 className="text-base font-semibold text-gray-800 mb-2">
               Reactivate Plan

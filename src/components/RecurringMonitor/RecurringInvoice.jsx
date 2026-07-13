@@ -28,6 +28,8 @@ const RecurringInvoice = () => {
   const [search, setSearch] = useState("");
   const dropdownRef = useRef(null);
   const statusDropdownRef = useRef(null);
+  const generateRef = useRef(false);
+const [isGenerating, setIsGenerating] = useState(false);
   const [data, setData] = useState([]);
   console.log("data", data)
   const [filterOptions, setFilterOptions] = useState([]);
@@ -268,37 +270,151 @@ const [totalProperty,setTotalProperty] = useState("")
   }, [page, size, filter, search, statusFilter, appliedSystemFilter, billingModelFilterBy]);
   const start = (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
+const handleGenerate = async (ids = []) => {
 
-  const handleGenerate = async (ids = []) => {
+  if (generateRef.current) return;
+
+  generateRef.current = true;
+  setIsGenerating(true);
+
+  try {
 
     const res = await bulkGenerateRecurring(ids);
-    if (res?.success) {
 
+    if (res?.success) {
 
       setModalType("success");
       setMessage(res?.data);
       setShowSuccess(true);
+
       setTimeout(() => {
         setShowSuccess(false);
+        setShowDetailsModal(false);
       }, 1500);
+
       fetchRecurring();
 
-    }
-    else {
+    } else {
 
       setMessage(res?.message);
       setModalType("error");
-      setGenrateError(res?.message)
+      setGenrateError(res?.message);
 
       setShowSuccess(true);
+
       setTimeout(() => {
         setShowSuccess(false);
       }, 1500);
-
     }
 
-  };
+  } finally {
 
+    generateRef.current = false;
+    setIsGenerating(false);
+
+  }
+};
+
+const handleBulkGenerate = async () => {
+
+  if (generateRef.current) return;
+
+  generateRef.current = true;
+  setIsGenerating(true);
+
+  try {
+
+    const res = await bulkGenerateRecurring(selectedIds);
+
+    if (res?.success) {
+
+      setShowBulkModal(false);
+      setSelectedIds([]);
+      setConfirmBulk(false);
+      setBulkReason("");
+      setBulkDesc("");
+
+      setModalType("success");
+      setMessage(res?.data || "Bulk Generated Successfully");
+      setShowSuccess(true);
+
+      setTimeout(() => setShowSuccess(false), 1500);
+
+      fetchRecurring();
+
+    } else {
+
+      setModalType("error");
+      setMessage(res?.message || "Failed");
+      setGenrateError(res?.message);
+      setShowSuccess(true);
+
+      setTimeout(() => setShowSuccess(false), 1500);
+    }
+
+  } finally {
+
+    generateRef.current = false;
+    setIsGenerating(false);
+
+  }
+};
+  // const handleGenerate = async (ids = []) => {
+
+  //   const res = await bulkGenerateRecurring(ids);
+  //   if (res?.success) {
+
+
+  //     setModalType("success");
+  //     setMessage(res?.data);
+  //     setShowSuccess(true);
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //        setShowDetailsModal(false);
+  //     }, 1500);
+  //     fetchRecurring();
+
+  //   }
+  //   else {
+
+  //     setMessage(res?.message);
+  //     setModalType("error");
+  //     setGenrateError(res?.message)
+
+  //     setShowSuccess(true);
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1500);
+
+  //   }
+
+  // };
+// const handleBulkGenerate = async () => {
+//   const res = await bulkGenerateRecurring(selectedIds);
+
+//   if (res?.success) {
+//     setShowBulkModal(false);
+//     setSelectedIds([]);
+//     setConfirmBulk(false);
+//     setBulkReason("");
+//     setBulkDesc("");
+
+//     setModalType("success");
+//     setMessage(res?.data || "Bulk Generated Successfully");
+//     setShowSuccess(true);
+
+//     setTimeout(() => setShowSuccess(false), 1500);
+
+//     fetchRecurring();
+//   } else {
+//     setModalType("error");
+//     setMessage(res?.message || "Failed");
+//     setGenrateError(res?.message);
+//     setShowSuccess(true);
+
+//     setTimeout(() => setShowSuccess(false), 1500);
+//   }
+// };
 
   return (
 
@@ -366,7 +482,7 @@ const [totalProperty,setTotalProperty] = useState("")
 
               <button
                 onClick={() => setViewType("table")}
-                className={`p-2 rounded-md cursor-pointer ${viewType === "table" ? "bg-white shadow-sm" : ""
+                className={`p-2 rounded-md cursor-pointer ${viewType === "table" ? "bg-white-common shadow-sm" : ""
                   }`}
               >
                 <img src={MonthBlue} className="w-4 h-4 cursor-pointer" />
@@ -375,7 +491,7 @@ const [totalProperty,setTotalProperty] = useState("")
 
               <button
                 onClick={() => setViewType("calendar")}
-                className={`p-2 rounded-md cursor-pointer ${viewType === "calendar" ? "bg-white shadow-sm" : ""
+                className={`p-2 rounded-md cursor-pointer ${viewType === "calendar" ? "bg-white-common shadow-sm" : ""
                   }`}
               >
                 <img src={Monthlycalendar} className="w-4 h-4" />
@@ -389,17 +505,17 @@ const [totalProperty,setTotalProperty] = useState("")
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 
-                <div className="border border-gray-200 rounded-xl p-4 bg-white">
+                <div className="border border-gray-200 rounded-xl p-4 bg-white-common">
                   <p className="text-sm text-gray-500">Total Properties</p>
                   <p className="text-xl font-semibold mt-1">{totalProperty}</p>
                 </div>
 
-                <div className="border border-gray-200 rounded-xl p-4 bg-white">
+                <div className="border border-gray-200 rounded-xl p-4 bg-white-common">
                   <p className="text-sm text-gray-500">Recurring Pending</p>
                   <p className="text-xl font-semibold mt-1">{recurringPending?.recurringPendingCount || 0}</p>
                 </div>
 
-                <div className="border border-gray-200 rounded-xl p-4 bg-white">
+                <div className="border border-gray-200 rounded-xl p-4 bg-white-common">
                   <p className="text-sm text-gray-500">Subscription Expired</p>
                   <p className="text-xl font-semibold mt-1">{recurringPending?.subscriptionExpiredCount || 0}</p>
                 </div>
@@ -432,7 +548,7 @@ const [totalProperty,setTotalProperty] = useState("")
                       </button>
 
                       {openFilter && (
-                        <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50 max-h-40 overflow-y-auto">
+                        <div className="absolute mt-1 w-full bg-white-common border border-gray-300 rounded-lg shadow-md z-[9999] max-h-40 overflow-y-auto">
 
                           {filterOptions.map((item) => (
                             <div
@@ -476,7 +592,7 @@ const [totalProperty,setTotalProperty] = useState("")
                       </button>
 
                       {openStatusFilter && (
-                        <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50">
+                        <div className="absolute top-full left-0 mt-1 w-full bg-white-common border border-gray-300 rounded-lg shadow-lg z-[9999]">
 
                           {resStatusOptions.map((item) => (
                             <div
@@ -606,16 +722,16 @@ const [totalProperty,setTotalProperty] = useState("")
 
                 </div>
               )}
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+              <div className="bg-white-common border border-gray-200 rounded-xl overflow-hidden">
 
                 <div className="max-h-[400px]  overflow-x-auto overflow-y-auto">
 
                   <table className="w-max min-w-full table-fixed text-sm text-left">
 
-                    <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-40">
+                    <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-[100]">
                       <tr>
-                        <th className="px-4 py-3 sticky left-0 bg-[#F8F9FF] z-50 w-[80px]">ID</th>
-                        <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">Property</th>
+                       <th className="px-4 py-3 sticky left-0 bg-[#F8F9FF] z-[110] w-[80px]">ID</th>
+                        <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-[110] w-[260px]">Property</th>
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Mobile No</th>
                         {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Sub Status</th> */}
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Sub Status</th>
@@ -625,7 +741,10 @@ const [totalProperty,setTotalProperty] = useState("")
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring mode</th>
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Tenant Count</th>
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Recurring Status</th>
-                        <th className="px-4 py-3 w-[150px] whitespace-nowrap">Actions</th>
+                        {/* <th className="px-4 py-3 w-[150px] whitespace-nowrap">Actions</th> */}
+                       <th className="px-4 py-3 sticky right-0 bg-[#F8F9FF] z-[110] w-[150px]">
+  Actions
+</th>
                       </tr>
                     </thead>
 
@@ -685,7 +804,7 @@ const [totalProperty,setTotalProperty] = useState("")
                                 {(page - 1) * size + index + 1}
                               </span>
                             </td> */}
-                            <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] shadow-[2px_0_5px_rgba(0,0,0,0.05)] gap-2">
+                            <td className="px-4 py-2 sticky left-0 bg-white-common z-40 w-[80px] shadow-[2px_0_5px_rgba(0,0,0,0.05)] gap-2">
 
   <input
     type="checkbox"
@@ -710,7 +829,7 @@ const [totalProperty,setTotalProperty] = useState("")
 </td>
 
 
-                            <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] group-hover:bg-gray-50">
+                            <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] group-hover:bg-gray-50">
                               <div className="flex items-center gap-3">
 
                                 {/* Avatar */}
@@ -806,7 +925,7 @@ const [totalProperty,setTotalProperty] = useState("")
                             Generate
                           </button>
                         </td> */}
-                            <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                            <td className="px-4 py-2 sticky right-0 bg-white-common z-40 shadow-[-2px_0_5px_rgba(0,0,0,0.05)] text-left font-medium text-[12px] whitespace-nowrap">
                               {!item.recurringStatus ? (
                                 <button
                                   // disabled={filter === "UP_COMING"}
@@ -822,7 +941,15 @@ const [totalProperty,setTotalProperty] = useState("")
 
                                   //   getRecurringByHostelId(item.hostelId);
                                   // }}
-                                  onClick={() => handleOpenDetails(item)}
+                                  onClick={() => {
+
+    setSelectedIds((prev) =>
+      prev.filter((id) => id !== item.hostelId)
+    );
+
+    handleOpenDetails(item);
+
+  }}
                                   className="px-3 py-1 rounded-lg text-xs text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 cursor-pointer"
 
                                 >
@@ -831,7 +958,7 @@ const [totalProperty,setTotalProperty] = useState("")
                               ) : (
                                 <button
                                   onClick={() => handleOpenDetails(item)}
-                                  className="px-3 py-1 rounded-lg text-xs border border-gray-300 text-blue-600 bg-white hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
+                                  className="px-3 py-1 rounded-lg text-xs border border-gray-300 text-blue-600 bg-white-common hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
                                 >
                                   👁 View Details
                                 </button>
@@ -871,12 +998,12 @@ const [totalProperty,setTotalProperty] = useState("")
                         left: tooltip.x + 10
                       }}
                     >
-                      <div className="bg-white text-gray-600 text-xs rounded-xl px-4 py-3 shadow-lg border border-gray-200 max-w-xs break-words">
+                      <div className="bg-white-common text-gray-600 text-xs rounded-xl px-4 py-3 shadow-lg border border-gray-200 max-w-xs break-words">
                         {tooltip.text}
                       </div>
 
                       {/* Arrow */}
-                      <div className="w-3 h-3 bg-white rotate-45 ml-4 -mt-1 border-l border-b border-gray-200"></div>
+                      <div className="w-3 h-3 bg-white-common rotate-45 ml-4 -mt-1 border-l border-b border-gray-200"></div>
                     </div>
                   )}
 
@@ -940,7 +1067,9 @@ const [totalProperty,setTotalProperty] = useState("")
                   <span className="border px-2 py-1 rounded bg-gray-50">
                     {page}
                   </span>
-
+<span className="text-textDark/60 text-cardTitle">
+  {page} - {totalPages}
+</span>
                  
                   <button
   onClick={() =>
@@ -970,9 +1099,9 @@ const [totalProperty,setTotalProperty] = useState("")
 </button>
 
                   {/* Range */}
-                  <span className="text-gray-400">
+                  {/* <span className="text-gray-400">
                     {start} - {end}
-                  </span>
+                  </span> */}
 
                 </div>
 
@@ -1008,7 +1137,7 @@ const [totalProperty,setTotalProperty] = useState("")
 
 
               <div className="relative z-[10000] flex items-center">
-                <div className="w-[420px] h-[calc(100%-40px)] my-5 mr-5 bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
+                <div className="w-[420px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
 
 
                   <div className="flex justify-between items-start p-5 border-b border-gray-200">
@@ -1366,7 +1495,7 @@ const [totalProperty,setTotalProperty] = useState("")
 
                       {/* Show only if BOTH are false */}
 
-                      <button
+                      {/* <button
   onClick={() =>
     handleGenerate([
       selectedItem.hostelId
@@ -1397,8 +1526,43 @@ const [totalProperty,setTotalProperty] = useState("")
   />
 
   Generate Recurring
-</button>
+</button> */}
+<button
+  onClick={() =>
+    handleGenerate([
+      selectedItem.hostelId
+    ])
+  }
+  disabled={
+    selectedItem?.canGenerateRecurring === false ||
+    isGenerating
+  }
+  className={`
+    px-6
+    py-2
+    rounded-lg
+    text-[12px]
+    flex
+    items-center
+    gap-2
 
+    ${
+      selectedItem?.canGenerateRecurring === false ||
+      isGenerating
+        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+        : "bg-blue-600 text-white cursor-pointer"
+    }
+  `}
+>
+  <img
+    src={refreshWhite}
+    className="w-4 h-4"
+  />
+
+  {isGenerating
+    ? "Generating..."
+    : "Generate Recurring"}
+</button>
 
                     </div>
                   )}
@@ -1423,7 +1587,7 @@ const [totalProperty,setTotalProperty] = useState("")
 
           {/* RIGHT DRAWER */}
           <div className="relative z-[10000] flex items-center">
-            <div className="w-[520px] h-[calc(100%-40px)] my-5 mr-5 bg-white rounded-xl shadow-xl border border-gray-300 flex flex-col animate-slideIn">
+            <div className="w-[520px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common rounded-xl shadow-xl border border-gray-300 flex flex-col animate-slideIn">
 
               {/* HEADER */}
               <div className="flex justify-between items-center p-5 border-b border-gray-300">
@@ -1543,7 +1707,7 @@ const [totalProperty,setTotalProperty] = useState("")
                 {/* REASON */}
                 <div className="mb-3">
                   <p className="text-sm mb-1 text-left">
-                    Reason <span className="text-red-500">*</span>
+                    Reason 
                   </p>
                   <select
                     value={bulkReason}
@@ -1600,54 +1764,18 @@ const [totalProperty,setTotalProperty] = useState("")
                   Cancel
                 </button>
 
-                {/* <button
-                  disabled={!confirmBulk || !bulkReason}
-                  className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2
-    ${confirmBulk && bulkReason
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : "bg-gray-300 cursor-not-allowed"
-                    }`}
-                >
-                  <img src={refreshWhite} className="w-4 h-4" />
-                  Generate
-                </button> */}
-                <button
-                  // disabled={!confirmBulk || !bulkReason}
-                  onClick={async () => {
-                    const res = await bulkGenerateRecurring(selectedIds);
-
-                    if (res?.success) {
-                      setShowBulkModal(false);
-                      setSelectedIds([]);
-                      setConfirmBulk(false);
-                      setBulkReason("");
-                      setBulkDesc("");
-
-                      setModalType("success");
-                      setMessage(res?.data || "Bulk Generated Successfully");
-                      setShowSuccess(true);
-
-                      setTimeout(() => setShowSuccess(false), 1500);
-
-                      fetchRecurring();
-                    } else {
-                      setModalType("error");
-                      setMessage(res?.message || "Failed");
-                      setGenrateError(res?.message)
-                      setShowSuccess(true);
-
-                      setTimeout(() => setShowSuccess(false), 1500);
-                    }
-                  }}
-                  className="px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 bg-blue-700"
-                // ${confirmBulk && bulkReason
-                //   ? "bg-blue-600 hover:bg-blue-700"
-                //   : "bg-gray-300 cursor-not-allowed"
-                // }`}
-                >
-                  <img src={refreshWhite} className="w-4 h-4" />
-                  Generate
-                </button>
+              <button
+  disabled={isGenerating}
+  onClick={handleBulkGenerate}
+  className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 ${
+    isGenerating
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-blue-700 cursor-pointer"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  {isGenerating ? "Generating..." : "Generate"}
+</button>
               </div>
 
             </div>
@@ -1665,7 +1793,7 @@ const [totalProperty,setTotalProperty] = useState("")
 
 
           <div className="relative z-[10000] flex items-center">
-            <div className="w-[380px] h-[calc(100%-40px)] my-5 mr-5 bg-white shadow-xl border border-gray-300 flex flex-col animate-slideInRight rounded-xl">        {/* HEADER */}
+            <div className="w-[380px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common shadow-xl border border-gray-300 flex flex-col animate-slideInRight rounded-xl">        {/* HEADER */}
               <div className="flex justify-between items-center p-4 border-b">
                 <p className="font-semibold flex items-center gap-2">
                   ⚙ Filter
@@ -1717,7 +1845,7 @@ const [totalProperty,setTotalProperty] = useState("")
 
                   {/* DROPDOWN */}
                   {openSystemDropdown && (
-                    <div className="absolute mt-1 w-full bg-white border rounded-lg shadow z-50 max-h-40 overflow-y-auto text-left">
+                    <div className="absolute mt-1 w-full bg-white-common border rounded-lg shadow z-50 max-h-40 overflow-y-auto text-left">
 
                       {Array.from({ length: 31 }, (_, i) => (
                         <div

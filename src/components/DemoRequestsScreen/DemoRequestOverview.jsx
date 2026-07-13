@@ -67,7 +67,7 @@ const DemoRequestOverview = ({
     h-full
     w-full
     max-w-[520px]
-    bg-white
+    bg-white-common
     shadow-2xl
     rounded-[24px]
     border border-[#E5E7EB]
@@ -85,7 +85,7 @@ const DemoRequestOverview = ({
               }}
             >
               {/* HEADER */}
-              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 sticky top-0 bg-white z-50">
+              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 sticky top-0 bg-white-common z-50">
 
                 <div className="flex items-center text-center gap-2">
                   <img src={Messagequestion} className="w-5 h-5" />
@@ -308,7 +308,8 @@ const DemoRequestOverview = ({
                       <div className="flex items-center">
 
                         <p className="w-[100px] text-[12px] text-[#9CA3AF]">
-                          Add Assigned
+                          {selectedItem?.assignedTo ? "ReAssign" : "Add Assign "}
+
                         </p>
 
                         <span className="mr-5 text-[#9CA3AF]">:</span>
@@ -328,17 +329,25 @@ const DemoRequestOverview = ({
                         {selectedItem?.canAssignStaff === true && (
 
                           <button
-                            onClick={onAssignStaff}
-                            className="
-      text-[14px]
-      font-semibold
-      text-[#2563EB]
-      cursor-pointer
-      hover:underline
-    "
-                          >
-                            Assign +
-                          </button>
+  onClick={onAssignStaff}
+  className="
+    px-2
+    py-1
+    rounded-lg
+    border
+    border-[#315CEC]
+    text-[#315CEC]
+    text-[13px]
+    font-medium
+    hover:bg-[#EEF4FF]
+    transition-all
+    cursor-pointer
+  "
+>
+  {selectedItem?.assignedTo
+    ? "↻ Reassign"
+    : "+ Assign"}
+</button>
 
                         )}
 
@@ -460,7 +469,7 @@ const DemoRequestOverview = ({
               Activity Timeline:
             </h3> */}
                   {/* TIMELINE */}
-                  <div className="border border-[#E5E7EB] rounded-2xl p-5 bg-white">
+                  <div className="border border-[#E5E7EB] rounded-2xl p-5 bg-white-common">
 
                     {/* TITLE */}
                     <div className="flex items-center justify-between mb-5">
@@ -527,7 +536,7 @@ const DemoRequestOverview = ({
                               <div
                                 className="
     flex-1
-    bg-white
+    bg-white-common
     border border-[#E5E7EB]
     rounded-2xl
     p-4
@@ -673,7 +682,7 @@ const DemoRequestOverview = ({
 
             <div
               className="
-          bg-white
+          bg-white-common
           w-full
           max-w-[650px]
           rounded-2xl

@@ -11,149 +11,150 @@ import axiosInstance from "../../Config/AxiosConfig";
 import { useRole } from "../../Context/RoleContext";
 
 const Verify = () => {
- const {adminDetails, getAdminDetails,
-        agentRoles, getAgentRoles,getAgentRoleById,deleteAgentRole,errorMsg,accessError} = useRole();
+  const { adminDetails, getAdminDetails,
+    agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, errorMsg, accessError } = useRole();
   const navigate = useNavigate();
   const hash = window.location.hash.substring(1);
   const [searchParams] = useSearchParams(hash);
   const [error, shouldShowError] = useState(false);
   const calledRef = useRef(false);
 
-//  useEffect(() => {
-//   if (calledRef.current) return;
-//   calledRef.current = true;
+  //  useEffect(() => {
+  //   if (calledRef.current) return;
+  //   calledRef.current = true;
 
-//   const code = searchParams.get("code");
-//   const location = searchParams.get("location");
-//   const idToken = searchParams.get("id_token");
-//   const accountsServer = searchParams.get("accounts-server");
+  //   const code = searchParams.get("code");
+  //   const location = searchParams.get("location");
+  //   const idToken = searchParams.get("id_token");
+  //   const accountsServer = searchParams.get("accounts-server");
 
-//   axiosInstance.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
-//     params: { code, location, accountsServer, idToken }
-//   })
-//   .then((response) => {
-//     if (response.status === 200) {
-//       console.log("response", response.data);
-      
-//        const accessToken = response.data;
+  //   axiosInstance.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
+  //     params: { code, location, accountsServer, idToken }
+  //   })
+  //   .then((response) => {
+  //     if (response.status === 200) {
+  //       console.log("response", response.data);
 
-//     // localStorage.setItem("access_token", accessToken);
-//     localStorage.removeItem("mock_token");
-// localStorage.setItem("access_token", accessToken);
-// localStorage.setItem("login_type", "normal");
- 
+  //        const accessToken = response.data;
 
-//     navigate("/home");
-
-//     }
-//   })
-//   .catch((err) => {
-//     console.log("Verification failed:", err);
-//     shouldShowError(true);
-//   });
-
-// }, []);
-
-useEffect(() => {
-
-  if (calledRef.current) return;
-  calledRef.current = true;
-
-  const code = searchParams.get("code");
-  const location = searchParams.get("location");
-  const idToken = searchParams.get("id_token");
-  const accountsServer = searchParams.get("accounts-server");
-
-  axios.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
-    params: { code, location, accountsServer, idToken }
-  })
-  .then(async(response) => {
-
-    if (response.status === 200) {
-
-      const accessToken = response.data;
-
-      localStorage.removeItem("mock_token");
-      localStorage.setItem("access_token", accessToken);
-      localStorage.setItem("login_type", "normal");
-
-               const adminRes = await getAdminDetails();
-      if (adminRes?.success) {
-        const roleId = adminRes?.data?.roleId;
-
-        navigate(`/home/${roleId}`, { replace: true });
-
-      }
-
-      // navigate("/home");
-    }
-
-  })
-  .catch((err) => {
-    console.log("Verification failed:", err);
-    shouldShowError(true);
-  });
-
-}, []);
-
-return (
-<>
+  //     // localStorage.setItem("access_token", accessToken);
+  //     localStorage.removeItem("mock_token");
+  // localStorage.setItem("access_token", accessToken);
+  // localStorage.setItem("login_type", "normal");
 
 
-    {error && (
-  <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50">
-    
-    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center animate-fadeIn">
+  //     navigate("/home");
 
-      {/* Icon */}
-        <div className="flex justify-center mb-6">
-        <img
-          src={AccessRestricted}
-          alt="Access Restricted"
-          className="w-40 md:w-48"
-        />
-      </div>
+  //     }
+  //   })
+  //   .catch((err) => {
+  //     console.log("Verification failed:", err);
+  //     shouldShowError(true);
+  //   });
 
-      {/* Title */}
-      <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-        Access Restricted..!
-      </h2>
+  // }, []);
 
-      {/* Description */}
-      <p className="text-gray-600 text-sm mb-6">
-        You are not authorized to access the SmartStay Admin Console with this account.
-      </p>
+  useEffect(() => {
 
-      {/* Buttons */}
-      <div className="flex flex-col gap-3">
+    if (calledRef.current) return;
+    calledRef.current = true;
 
-       <button
-  onClick={() => {
-    shouldShowError(false);
-    window.location.href = ConfigV2.apiBaseUrl + "/v2/agents/authorize";
-  }}
-  className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition"
->
-  Go Back to Login
-</button>
+    const code = searchParams.get("code");
+    const location = searchParams.get("location");
+    const idToken = searchParams.get("id_token");
+    const accountsServer = searchParams.get("accounts-server");
+
+    axios.get(ConfigV2.apiBaseUrl + "/v2/agents/verify", {
+      params: { code, location, accountsServer, idToken }
+    })
+      .then(async (response) => {
+
+        if (response.status === 200) {
+
+          const accessToken = response.data;
+
+          localStorage.removeItem("mock_token");
+          localStorage.setItem("access_token", accessToken);
+          localStorage.setItem("login_type", "normal");
+
+          const adminRes = await getAdminDetails();
+          if (adminRes?.success) {
+            const roleId = adminRes?.data?.roleId;
+            navigate(`/home/${roleId}`, { replace: true });
+          }
+else {
+  localStorage.removeItem("access_token");
+  shouldShowError(true);
+}
+
+        }
+
+      })
+      .catch((err) => {
+        console.log("Verification failed:", err);
+        shouldShowError(true);
+      });
+
+  }, []);
+
+  return (
+    <>
 
 
-        <button
-          onClick={() => shouldShowError(false)}
-          className="border border-gray-300 py-2 rounded-md text-gray-700 hover:bg-gray-100 transition"
-        >
-          Contact Support
-        </button>
+      {error && (
+        <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50">
 
-      </div>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center animate-fadeIn">
 
-    </div>
+            {/* Icon */}
+            <div className="flex justify-center mb-6">
+              <img
+                src={AccessRestricted}
+                alt="Access Restricted"
+                className="w-40 md:w-48"
+              />
+            </div>
 
-  </div>
-)}
+            {/* Title */}
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+              Access Restricted..!
+            </h2>
+
+            {/* Description */}
+            <p className="text-gray-600 text-sm mb-6">
+              You are not authorized to access the SmartStay Admin Console with this account.
+            </p>
+
+            {/* Buttons */}
+            <div className="flex flex-col gap-3">
+
+              <button
+                onClick={() => {
+                  shouldShowError(false);
+                  window.location.href = ConfigV2.apiBaseUrl + "/v2/agents/authorize";
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition"
+              >
+                Go Back to Login
+              </button>
+
+
+              <button
+                onClick={() => shouldShowError(false)}
+                className="border border-gray-300 py-2 rounded-md text-gray-700 hover:bg-gray-100 transition"
+              >
+                Contact Support
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
 
     </>
-);
+  );
 
 
 

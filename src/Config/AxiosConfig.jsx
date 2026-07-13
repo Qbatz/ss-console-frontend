@@ -1,3 +1,66 @@
+// import axios from "axios";
+// import ConfigV2 from "./ConfigV2";
+
+// const axiosInstance = axios.create({
+//   baseURL: ConfigV2.apiBaseUrl,
+// });
+
+// axiosInstance.interceptors.request.use(
+//   (config) => {
+//     const loginType =
+//       localStorage.getItem("login_type");
+
+//     let token = null;
+
+//     if (loginType === "mock") {
+//       token =
+//         localStorage.getItem(
+//           "mock_token"
+//         );
+//     } else {
+//       token =
+//         localStorage.getItem(
+//           "access_token"
+//         );
+//     }
+
+//     if (token) {
+//       config.headers.Authorization =
+//         `Bearer ${token}`;
+//     }
+
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
+
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+
+//   (error) => {
+//     const status =
+//       error?.response?.status;
+
+//     if (status === 401) {
+//       localStorage.clear();
+
+//       if (
+//         window.location.pathname !==
+//         "/internal/login"
+//       ) {
+//         window.location.replace(
+//           "/internal/login"
+//         );
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
+// export default axiosInstance;
+
+
 import axios from "axios";
 import ConfigV2 from "./ConfigV2";
 
@@ -5,152 +68,50 @@ const axiosInstance = axios.create({
   baseURL: ConfigV2.apiBaseUrl,
 });
 
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const loginType = localStorage.getItem("login_type");
 
+    let token = null;
 
-let isRefreshing = false;
-let failedQueue = [];
-
-
-
-const processQueue = (error, token = null) => {
-
-  failedQueue.forEach((prom) => {
-
-    if (error) {
-      prom.reject(error);
+    if (loginType === "mock") {
+      token = localStorage.getItem("mock_token");
     } else {
-      prom.resolve(token);
+      token = localStorage.getItem("access_token");
     }
 
-  });
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-  failedQueue = [];
-};
-
-
-
-axiosInstance.interceptors.request.use((config) => {
-
-  const loginType = localStorage.getItem("login_type");
-
-  let token = null;
-
-  if (loginType === "mock") {
-    token = localStorage.getItem("mock_token");
-  } else {
-    token = localStorage.getItem("access_token");
-  }
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-});
-
-
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 axiosInstance.interceptors.response.use(
-
   (response) => response,
 
-  async (error) => {
+  (error) => {
+    const status = error?.response?.status;
 
-    const originalRequest = error.config;
+    if (status === 401) {
+      localStorage.clear();
 
+      const host = window.location.hostname;
+      const isLocal = host === "localhost";
+      const isDev = host.includes("consoledev");
 
-    if (
-      error?.response?.status === 401 &&
-      !originalRequest._retry
-    ) {
+      
+      const loginPath = (isLocal || isDev) ? "/internal/login" : "/";
 
+    const alreadyOnAuthPage =
+  window.location.pathname === loginPath ||
+  window.location.pathname === "/";
 
-      if (isRefreshing) {
-
-        return new Promise((resolve, reject) => {
-
-          failedQueue.push({ resolve, reject });
-
-        })
-          .then((token) => {
-
-            originalRequest.headers.Authorization =
-              "Bearer " + token;
-
-            return axiosInstance(originalRequest);
-
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      const refreshToken =
-        localStorage.getItem("refreshToken");
-
-
-      if (!refreshToken) {
-
-        localStorage.clear();
-        window.location.replace("/");
-
-        return Promise.reject(error);
-      }
-
-      try {
-
-
-        const res = await axios.post(
-          `${ConfigV2.apiBaseUrl}/refresh-token`,
-          {
-            refreshToken,
-          }
-        );
-
-
-        const newAccessToken =
-          res?.data?.accessToken;
-
-
-        if (!newAccessToken) {
-          throw new Error("No access token received");
-        }
-
-
-        localStorage.setItem(
-          "access_token",
-          newAccessToken
-        );
-
-
-        axiosInstance.defaults.headers.common.Authorization =
-          "Bearer " + newAccessToken;
-
-
-        processQueue(null, newAccessToken);
-
-
-        originalRequest.headers.Authorization =
-          "Bearer " + newAccessToken;
-
-        return axiosInstance(originalRequest);
-
-      } catch (err) {
-
-        processQueue(err, null);
-
-
-        localStorage.clear();
-
-        window.location.replace("/");
-
-        return Promise.reject(err);
-
-      } finally {
-
-        isRefreshing = false;
-      }
+if (!alreadyOnAuthPage) {
+  window.location.replace(loginPath);
+}
     }
 
     return Promise.reject(error);

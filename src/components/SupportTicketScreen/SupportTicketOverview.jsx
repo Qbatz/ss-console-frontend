@@ -157,7 +157,7 @@ const handleCloseDrawer =
     w-full
     max-w-[520px]
     h-full
-    bg-white
+    bg-white-common
     rounded-[24px]
     shadow-2xl
     border border-[#E5E7EB]
@@ -653,14 +653,17 @@ const handleCloseDrawer =
 
 </div>
 
-{/* ADD ASSIGNED */}
+
 {
   selectedTicket?.canAssignStaff === true && (
 
     <div className="flex items-center">
 
       <p className="w-[120px] text-[13px] text-[#9CA3AF]">
-        Add Assigned
+                 {selectedTicket?.assignedTo
+          ? "ReAssign Staff"
+          : "Assign Staff"}
+
       </p>
 
       <span className="mr-5 text-[#9CA3AF]">
@@ -674,14 +677,20 @@ const handleCloseDrawer =
           )
         }
         className="
-          text-[14px]
-          font-semibold
-          text-[#2563EB]
-          cursor-pointer
-          hover:underline
-        "
+    px-3 py-1.5
+    rounded-lg
+    bg-[#315CEC]
+    text-white
+    text-[13px]
+    font-medium
+    cursor-pointer
+    hover:bg-[#2648C9]
+    transition-all
+  "
       >
-        Assign +
+        {selectedTicket?.assignedTo
+    ? "↻ Reassign"
+    : "+ Assign"}
       </button>
 
     </div>
@@ -1103,7 +1112,7 @@ const handleCloseDrawer =
           left-1/2
           -translate-x-1/2
           -translate-y-1/2
-          bg-white
+          bg-white-common
           w-full
           max-w-[650px]
           rounded-3xl

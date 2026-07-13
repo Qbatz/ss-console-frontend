@@ -5,12 +5,81 @@ import Single from "../../assets/single.png";
 import Team from "../../assets/team.png";
 import Location from "../../assets/locationGrey.png";
 import Call from "../../assets/call.png";
+import { useSubscription } from "../../Context/SubscriptionContext";
+import ArrowRight from "../../assets/arrow-right.png";
+import { useRole } from "../../Context/RoleContext";
+import { useNavigate } from "react-router-dom";
+import Arrow from "../../assets/direction-down 01.png";
 
 const TrailPage = () => {
+  const { adminDetails} = useRole();
+  const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(null);
   const [activeAction, setActiveAction] = useState(null);
   const [showExtendTrial, setShowExtendTrial] = useState(false);
+  const [trialList, setTrialList] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+const [pageSize, setPageSize] = useState(10);
+const [searchValue, setSearchValue] = useState("");
+const [filterBy, setFilterBy] = useState("ALL");
+
+const [totalCount, setTotalCount] = useState(0);
+const [totalPages, setTotalPages] = useState(0);
+
+const [totalTrials, setTotalTrials] = useState(0);
+const [activeCount, setActiveCount] = useState(0);
+const [expiredCount, setExpiredCount] = useState(0);
   const menuRef = useRef(null);
+  const {getTrialSubscriptions} = useSubscription();
+const [loading, setLoading] = useState(false);
+const [extendableTrialCount,setExtendableTrialCount] = useState(0)
+const [isActive, setIsActive] = useState(null);
+const [debouncedSearch, setDebouncedSearch] = useState("");
+
+ 
+
+const fetchTrialUsers = async () => {
+  try {
+    setLoading(true);
+
+    const res = await getTrialSubscriptions(
+      currentPage,
+      pageSize,
+      debouncedSearch,
+      filterBy,
+      isActive
+    );
+
+    if (res.success) {
+      setTrialList(res.data.content || []);
+      setTotalCount(res.data.totalItems || 0);
+      setTotalPages(res.data.totalPages || 0);
+
+      setTotalTrials(res.data.trialPlansCount || 0);
+      setActiveCount(res.data.activePropertiesCount || 0);
+      setExpiredCount(res.data.expiredPropertiesCount || 0);
+      setExtendableTrialCount(res.data.expandableTrialPlansCount || 0)
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+useEffect(() => {
+  fetchTrialUsers();
+}, [
+  currentPage,
+  pageSize,
+  debouncedSearch,
+  filterBy,isActive
+]);
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedSearch(searchValue);
+  }, 500);
+
+  return () => clearTimeout(timer);
+}, [searchValue]);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -25,14 +94,7 @@ const TrailPage = () => {
     };
   }, []);
 
-  const data = Array.from({ length: 50 }).map((_, i) => ({
-    id: `TXN00${i + 1}`,
-    date: "05 Apr 2026",
-    customer: "Arunachalam R",
-    property: "Laksha Ladies Hostel",
-    city: "Velachery , Chennai",
-    plan: i % 2 === 0 ? "Basic" : "Pro plan",
-  }));
+ 
 
   return (
     <DashboardLayout>
@@ -61,7 +123,7 @@ const TrailPage = () => {
             </div>
 
             {/* RIGHT SIDE BUTTON */}
-            <button className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit cursor-pointer">
+            <button className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit cursor-pointer" onClick={() => navigate(`/manage-plans/${adminDetails?.roleId}`)}>
               Manage Plans
             </button>
 
@@ -70,14 +132,24 @@ const TrailPage = () => {
         </div>
         {/* Cards */}
         <div className="flex gap-4 mb-4">
-          <div className="bg-white border border-gray-300 rounded-lg p-4 w-64">
-            <p className="text-sm text-gray-500">Total Trials</p>
-            <h2 className="text-xl font-semibold">85</h2>
+          <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
+            <p className="text-sm text-gray-500">Active Properties</p>
+            <h2 className="text-xl font-semibold">{activeCount}</h2>
           </div>
 
-          <div className="bg-white border border-gray-300 rounded-lg p-4 w-64">
-            <p className="text-sm text-gray-500">Expiring Today</p>
-            <h2 className="text-xl font-semibold">0</h2>
+          <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
+            <p className="text-sm text-gray-500">Expired Properties</p>
+            <h2 className="text-xl font-semibold">{expiredCount}</h2>
+          </div>
+
+           <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
+            <p className="text-sm text-gray-500">Trial PlanCount</p>
+            <h2 className="text-xl font-semibold">{totalTrials}</h2>
+          </div>
+
+          <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
+            <p className="text-sm text-gray-500">Expandable Trial PlansCount</p>
+            <h2 className="text-xl font-semibold">{extendableTrialCount}</h2>
           </div>
         </div>
 
@@ -85,32 +157,85 @@ const TrailPage = () => {
         <div className="flex justify-between items-center mb-3">
 
           <div className="flex gap-2">
-            <select className="border border-gray-300 rounded px-3 py-1 text-sm">
-              <option>This Month</option>
-            </select>
+           <select
+  value={filterBy}
+  onChange={(e) => {
+    setFilterBy(e.target.value);
+    setCurrentPage(1);
+  }}
+  className="border border-gray-300 rounded px-3 py-1 text-sm"
+>
+  <option value="ALL">ALL</option>
+  <option value="TRIAL">TRIAL</option>
+  <option value="EXPANDABLE_TRIAL">
+    EXPANDABLE TRIAL
+  </option>
+</select>
 
-            <button className="border border-gray-300 px-3 py-1 rounded text-sm">
-              Filter
-            </button>
+           
           </div>
+  <div className="relative">
+  <select
+    value={isActive === null ? "" : isActive.toString()}
+    onChange={(e) => {
+      const value = e.target.value;
 
+      setIsActive(
+        value === ""
+          ? null
+          : value === "true"
+      );
+
+      setCurrentPage(1);
+    }}
+    className="border border-gray-300 px-4 py-2 pr-10 rounded-lg text-sm bg-white-common min-w-[150px] appearance-none"
+  >
+    <option value="">All Status</option>
+    <option value="true">Active</option>
+    <option value="false">Inactive</option>
+  </select>
+
+  <img
+    src={Arrow}
+    alt="arrow"
+    className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+  />
+</div>
           <div className="flex items-center gap-2">
-            <button className="bg-blue-500 text-white p-2 rounded">
+            <button className="bg-blue-500 text-white p-2 rounded" onClick={() => {
+  setSearchValue("");
+  setFilterBy("ALL");
+  setCurrentPage(1);
+  fetchTrialUsers();
+}}>
               🔄
             </button>
 
-            <input
-              placeholder="Search..."
-              className="border border-gray-300 rounded px-3 py-1 text-sm"
-            />
+          <input
+  value={searchValue}
+  onChange={(e) => {
+    setSearchValue(e.target.value);
+    setCurrentPage(1);
+  }}
+  placeholder="Search Property..."
+  className="border border-gray-300 rounded px-3 py-1 text-sm"
+/>
           </div>
         </div>
 
-        {/* Table */}
-        <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
+       
+        <div className="bg-white-common border-soft-light rounded-2xl shadow-sm relative overflow-hidden">
 
-          {/* Wrapper with fixed height */}
-          <div className="max-h-[350px] overflow-y-auto">
+         
+          <div
+  className="
+    table-scroll
+    relative
+    overflow-auto
+    max-h-[420px]
+    rounded-2xl
+  "
+>
 
             <table className="w-full text-sm">
 
@@ -118,27 +243,72 @@ const TrailPage = () => {
               <thead className="bg-gray-100 text-gray-600 sticky top-0 z-10">
                 <tr>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left">ID</th>
-                  <th className="px-4 py-3 text-[12px] font-semibold text-left">NAME</th>
+                 
                   <th className="px-4 py-3 text-[12px] font-semibold text-left">PROPERTY NAME</th>
-                  <th className="px-4 py-3 text-[12px] font-semibold text-left">MOBLIE NAME</th>
-                  <th className="px-4 py-3 text-[12px] font-semibold text-left">ACTIVITY SCORE</th>
+                  <th className="px-4 py-3 text-[12px] font-semibold text-left">PLAN NAME</th>
+                  <th className="px-4 py-3 text-[12px] font-semibold text-left">Status</th>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left">START DATE</th>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left">EXPRIY</th>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left">ACTION</th>
                 </tr>
               </thead>
 
-              <tbody>
-                {data.map((item, index) => (
+             <tbody>
+  {loading ? (
+    [...Array(10)].map((_, index) => (
+      <tr key={index} className="border-t border-gray-200 animate-pulse">
+        <td className="px-4 py-3">
+          <div className="h-4 w-10 bg-gray-200 rounded"></div>
+        </td>
+
+        <td className="px-4 py-3">
+          <div className="h-4 w-40 bg-gray-200 rounded"></div>
+        </td>
+
+        <td className="px-4 py-3">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </td>
+
+        <td className="px-4 py-3">
+          <div className="h-6 w-20 bg-gray-200 rounded-full"></div>
+        </td>
+
+        <td className="px-4 py-3">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </td>
+
+        <td className="px-4 py-3">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </td>
+
+        <td className="px-4 py-3">
+          <div className="h-4 w-6 bg-gray-200 rounded"></div>
+        </td>
+      </tr>
+    ))
+  ) : trialList.length > 0 ? (
+   trialList.map((item, index) => (
                   <tr key={index} className="border-t border-gray-300">
 
-                    <td className="px-4 py-2 text-[12px] text-left">{item.id}</td>
-                    <td className="px-4 py-2 text-[12px] text-left">{item.date}</td>
-                    <td className="px-4 py-2 text-[12px] text-left">{item.customer}</td>
-                    <td className="px-4 py-2 text-[12px] text-left">{item.property}</td>
-                    <td className="px-4 py-2 text-[12px] text-left">{item.city}</td>
-                    <td className="px-4 py-2 text-[12px] text-left">{item.plan}</td>
-                    <td className="px-4 py-2 text-[12px] text-left">{item.plan}</td>
+                    {/* <td className="px-4 py-2 text-[12px] text-left">{index + 1}</td> */}
+                    <td className="px-4 py-2 text-left">
+                                {(currentPage - 1) * pageSize + index + 1}
+                              </td>
+                    
+                    <td className="px-4 py-2 text-[12px] text-left">{item.hostelName}</td>
+                    <td className="px-4 py-2 text-[12px] text-left">{item.planName}</td>
+                     <td className="px-4 py-2 text-left">
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs ${item.isExpired
+                                      ? "bg-red-100 text-red-600"
+                                      : "bg-green-100 text-green-600"
+                                    }`}
+                                >
+                                  {item.isExpired ? "Expired" : "Active"}
+                                </span>
+                              </td>
+                    <td className="px-4 py-2 text-[12px] text-left">{item.planStartsAt}</td>
+                    <td className="px-4 py-2 text-[12px] text-left">{item.planEndsAt}</td>
 
                     {/* <td className="px-4 py-2 relative" ref={openMenu === index ? menuRef : null}>
                       <img
@@ -185,8 +355,8 @@ const TrailPage = () => {
 
                         {openMenu === index && (
                           <div
-                            className={`absolute right-0 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50 text-[13px] text-justify 
-          ${index >= data.length - 2 ? "bottom-full mb-2" : "top-full mt-2"}`}
+                            className={`absolute right-0 w-36 bg-white-common border border-gray-200 rounded-lg shadow-lg z-50 text-[13px] text-justify 
+          ${index >= trialList.length - 2 ? "bottom-full mb-2" : "top-full mt-2"}`}
                           >
 
 
@@ -250,8 +420,18 @@ const TrailPage = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
+                ))
+  ) : (
+    <tr>
+      <td
+        colSpan="7"
+        className="text-center py-10 text-gray-500"
+      >
+        No Records Found
+      </td>
+    </tr>
+  )}
+</tbody>
 
             </table>
 
@@ -267,7 +447,7 @@ const TrailPage = () => {
             ></div>
 
 
-            <div className="absolute top-0 right-0 h-full w-full sm:w-[550px] bg-white shadow-2xl animate-slideIn flex flex-col">
+            <div className="absolute top-0 right-0 h-full w-full sm:w-[550px] bg-white-common shadow-2xl animate-slideIn flex flex-col">
 
 
               <div className="flex items-center justify-between px-5 py-4 ">
@@ -418,17 +598,48 @@ const TrailPage = () => {
         {/* Footer */}
         <div className="flex justify-between items-center mt-3 text-sm">
           <p>
-            Total Record Count : <span className="text-blue-600">{data.length || 0}</span>
+            Total Record Count : <span className="text-blue-600">{trialList.length || 0}</span>
           </p>
 
           <div className="flex items-center gap-2">
-            <select className="border rounded px-2 py-1">
-              <option>20</option>
-            </select>
+           <select
+  value={pageSize}
+  onChange={(e) => {
+    setPageSize(Number(e.target.value));
+    setCurrentPage(1);
+  }}
+  className="border rounded px-2 py-1"
+>
+  <option value={10}>10</option>
+  <option value={20}>20</option>
+  <option value={50}>50</option>
+  <option value={100}>100</option>
+</select>
 
-            <button>{"<"}</button>
-            <span>1 - 10</span>
-            <button>{">"}</button>
+           <button
+  disabled={currentPage === 1}
+  onClick={() =>
+    setCurrentPage((prev) => prev - 1)
+  }
+>
+  <img src={ArrowRight} className="w-4 h-4"/>
+</button>
+ <span className="border px-3 py-1 rounded bg-gray-50">
+                      {currentPage}
+                    </span>
+                    <button
+  disabled={currentPage === totalPages}
+  onClick={() =>
+    setCurrentPage((prev) => prev + 1)
+  }
+>
+  <img src={ArrowRight} className="w-4 h-4 scale-x-[-1]"/>
+</button>
+<span>
+  {currentPage} - {totalPages}
+</span>
+
+
           </div>
         </div>
 

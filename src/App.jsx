@@ -72,36 +72,73 @@ import Index from './components/Login/Index'
 import Verify from './components/Login/Verify';
 import Login from './components/internalLogin/Login';
 import PrivateRoutesScreen from './RoutesScreen/PrivateRoutes';
-import { RoleProvider } from './Context/RoleContext';   // ⭐ add this
+import { RoleProvider } from './Context/RoleContext';   
+
+// function TokenWatcher() {
+
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+
+//     const token = localStorage.getItem("access_token");
+
+//     if (!token) return;
+
+//     try {
+
+//       if (!token.includes(".")) return;
+
+//       const payload = JSON.parse(atob(token.split(".")[1]));
+//       const exp = payload.exp * 1000;
+
+//       if (Date.now() > exp) {
+
+//         localStorage.removeItem("access_token");
+//         navigate("/internal/login");
+
+//       }
+
+//     } catch (err) {
+//       console.log("Token parse error", err);
+//     }
+
+//   }, []);
+
+//   return null;
+// }
 
 function TokenWatcher() {
-
   const navigate = useNavigate();
 
   useEffect(() => {
-
     const token = localStorage.getItem("access_token");
 
     if (!token) return;
 
     try {
-
       if (!token.includes(".")) return;
 
       const payload = JSON.parse(atob(token.split(".")[1]));
       const exp = payload.exp * 1000;
 
       if (Date.now() > exp) {
-
         localStorage.removeItem("access_token");
-        navigate("/internal/login");
 
+        const host = window.location.hostname;
+        const isLocal = host === "localhost";
+        const isDev = host.includes("consoledev");
+        const loginPath = (isLocal || isDev) ? "/internal/login" : "/";
+
+        
+        const currentPath = window.location.pathname;
+        if (currentPath !== "/" && currentPath !== "/internal/login") {
+          navigate(loginPath);
+        }
       }
 
     } catch (err) {
       console.log("Token parse error", err);
     }
-
   }, []);
 
   return null;
@@ -112,7 +149,7 @@ function App() {
   return (
     <Router>
 
-      <RoleProvider>   {/* ⭐ wrap here */}
+      <RoleProvider> 
 
         <TokenWatcher />
 

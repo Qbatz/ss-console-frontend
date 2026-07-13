@@ -10,11 +10,12 @@ import Toast from "../SuccessModal/ToastDesign";
 import Menucircle from "../../assets/menucircle.png";
 import Arrow from "../../assets/direction-down 01.png";
 import AssignStaffModal from "../PropertiesScreen/AssignStaffDesign";
+import CommentBox from "../../assets/message-2.png";
 
 
 const Proprietors = () => {
 
-  const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById, updateOwnerMobile, deleteOwner,ownerCount,activeCount ,changeOwnerPassword,exportOwners } = useOwners();
+  const { owners, totalItems, totalPages, loading, getOwners, accessError, getOwnerById, updateOwnerMobile, deleteOwner,ownerCount,activeCount ,changeOwnerPassword,exportOwners,addUserNotes,getUserNotes } = useOwners();
   const navigate = useNavigate();
  
   const { canRead, canWrite, canUpdate, canDelete } =
@@ -61,9 +62,32 @@ const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+const [showNotesModal, setShowNotesModal] =useState(false);
 
+const [notesText, setNotesText] = useState("");
+
+const [notesError, setNotesError] =useState("");
+
+const [allNotes, setAllNotes] = useState([]);
+const [isAddingNote, setIsAddingNote] =
+  useState(false);
   console.log("owners", owners)
+const fetchOwnerNotes = async (
+  ownerId
+) => {
 
+  const res =
+    await getUserNotes(ownerId);
+
+  if (res?.success) {
+
+    setAllNotes(
+      res?.data || []
+    );
+
+  }
+
+};
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -283,17 +307,30 @@ const getFilterParams = () => {
     }
     setPage(1);
   };
-  const handleOwnerClick = async (item) => {
 
-    const res = await getOwnerById(item.ownerId);
+  const handleOwnerClick = (item) => {
+  navigate(`/ProprietorsOverview/${item.ownerId}`);
+};
+  // const handleOwnerClick = async (item) => {
 
-    if (res?.success) {
+  //   const res = await getOwnerById(item.ownerId);
 
-     navigate(`/ProprietorsOverview/${item.ownerId}`);
+  //   if (res?.success) {
 
-    }
+  //    navigate(`/ProprietorsOverview/${item.ownerId}`);
 
-  };
+  //   }
+  //   else{
+  //       setModalType("error");
+  //   setMessage(res.message);
+  //   setShowSuccess(true);
+
+  //   setTimeout(() => {
+  //     setShowSuccess(false);
+  //   }, 1500);
+  //   }
+
+  // };
   useEffect(() => {
     const handleClick = () => setOpenMenuId(null);
     window.addEventListener("click", handleClick);
@@ -414,6 +451,97 @@ const handleExport = () => {
   //     setError(res?.message)
   //   }
   // };
+  const resetPasswordModalClose = () => {
+  setShowResetPasswordModal(false);
+
+  setNewPassword("");
+  setConfirmPassword("");
+
+  setNewPasswordError("");
+  setConfirmPasswordError("");
+  setFinalError("");
+
+  setShowNewPassword(false);
+  setShowConfirmPassword(false);
+};
+const closeNotesModal = () => {
+
+  setShowNotesModal(false);
+
+  setNotesText("");
+  setNotesError("");
+ 
+
+};
+const handleAddNote = async () => {
+
+  const lettersCount = notesText
+    .trim()
+    .replace(/[^a-zA-Z]/g, "")
+    .length;
+
+  if (!notesText.trim()) {
+
+    setNotesError(
+      "Please enter notes"
+    );
+
+    return;
+
+  }
+
+  if (lettersCount < 5) {
+
+    setNotesError(
+      "Notes must contain at least 5 letters"
+    );
+
+    return;
+
+  }
+
+  setNotesError("");
+
+  const res =
+    await addUserNotes(
+      selectedOwner.ownerId,
+      notesText
+    );
+
+  if (res?.success) {
+
+    setModalType("success");
+    setMessage(res.data);
+    setShowSuccess(true);
+closeNotesModal()
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+    setNotesText("");
+
+    await fetchOwnerNotes(
+      selectedOwner.ownerId
+    );
+
+  } else {
+
+    setModalType("error");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+    setNotesError(
+      res?.message ||
+      "Failed to add note"
+    );
+
+  }
+
+};
   return (
     <DashboardLayout>
  <Toast
@@ -642,7 +770,7 @@ const handleExport = () => {
           rounded-lg
           text-xs
           font-sans
-          bg-white
+          bg-white-common
           min-w-[180px]
           text-left
           flex justify-between items-center
@@ -664,7 +792,7 @@ const handleExport = () => {
           className="
             absolute z-50 mt-1
             w-full
-            bg-white
+            bg-white-common
             border border-gray-200
             rounded-xl
             shadow-lg
@@ -791,7 +919,7 @@ const handleExport = () => {
           {/* Table Card */}
           <div
   className="
-    bg-white
+    bg-white-common
     border
     border-gray-300
     rounded-xl
@@ -1079,12 +1207,31 @@ const handleExport = () => {
 
                           {openMenuId === item.ownerId && (
                           <div
-  className="fixed w-35 bg-white border border-gray-200 rounded-lg shadow-xl z-[9999]"
+  className="fixed w-35 bg-white-common border border-gray-200 rounded-lg shadow-xl z-[9999]"
   style={{
     top: menuPosition.top,
     left: menuPosition.left,
   }}
 >
+
+  <button
+  onClick={async () => {
+
+    setSelectedOwner(item);
+
+    await fetchOwnerNotes(
+      item.ownerId
+    );
+
+    setShowNotesModal(true);
+
+    setOpenMenuId(null);
+
+  }}
+  className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+>
+  Add Notes
+</button>
 
                               <button
                                 onClick={() => {
@@ -1119,10 +1266,13 @@ const handleExport = () => {
                               </button>
         <button
   onClick={() => {
-    setSelectedOwner(item);
-    setShowResetPasswordModal(true);
-    setOpenMenuId(null);
-  }}
+  setSelectedOwner(item);
+
+  setSearch(""); 
+
+  setShowResetPasswordModal(true);
+  setOpenMenuId(null);
+}}
   className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
 >
   Reset Password
@@ -1235,7 +1385,7 @@ const handleExport = () => {
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
-          <div className="bg-white rounded-xl p-5 w-[350px]">
+          <div className="bg-white-common rounded-xl p-5 w-[350px]">
 
             <h2 className="text-sm font-semibold mb-3 text-left">
               Update Mobile Number
@@ -1302,7 +1452,7 @@ const handleExport = () => {
     }}
   >
     <div
-      className="bg-white rounded-xl p-5 w-[350px]"
+      className="bg-white-common rounded-xl p-5 w-[350px]"
       onClick={(e) => e.stopPropagation()}   // 🔥 inside click close aagadhu
     >
       <h2 className="text-sm font-semibold mb-2">
@@ -1362,19 +1512,14 @@ const handleExport = () => {
 <div
   className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
   onClick={() => {
-    setShowResetPasswordModal(false);
+   resetPasswordModalClose()
 
-    setNewPassword("");
-    setConfirmPassword("");
-
-    setNewPasswordError("");
-    setConfirmPasswordError("");
-    setFinalError("");
+   
   }}
 >
 
   <div
-  className="bg-white rounded-3xl w-[500px] p-5 shadow-2xl relative"
+  className="bg-white-common rounded-3xl w-[500px] p-5 shadow-2xl relative"
   onClick={(e) => e.stopPropagation()}
 >
 
@@ -1395,18 +1540,18 @@ const handleExport = () => {
 
         <div className="relative">
 
-          <input
-            type={showNewPassword ? "text" : "password"}
-            placeholder="Enter new password"
-            value={newPassword}
-            // onChange={(e) => setNewPassword(e.target.value)}
-                      onChange={(e) => {
-  setNewPassword(e.target.value);
-  setNewPasswordError("");
-  setFinalError("")
-}}
-            className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
-          />
+         <input
+  type={showNewPassword ? "text" : "password"}
+  placeholder="Enter new password"
+  value={newPassword}
+  autoComplete="new-password"   
+  onChange={(e) => {
+    setNewPassword(e.target.value);
+    setNewPasswordError("");
+    setFinalError("");
+  }}
+  className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
+/>
 
           <button
             type="button"
@@ -1431,17 +1576,18 @@ const handleExport = () => {
 
         <div className="relative">
 
-          <input
-            type={showConfirmPassword ? "text" : "password"}
-            placeholder="Confirm password"
-            value={confirmPassword}
-            onChange={(e) => {
-  setConfirmPassword(e.target.value);
-  setConfirmPasswordError("");
-  setFinalError("")
-}}
-            className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
-          />
+         <input
+  type={showConfirmPassword ? "text" : "password"}
+  placeholder="Confirm password"
+  value={confirmPassword}
+  autoComplete="new-password"
+  onChange={(e) => {
+    setConfirmPassword(e.target.value);
+    setConfirmPasswordError("");
+    setFinalError("");
+  }}
+  className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
+/>
 
           <button
             type="button"
@@ -1467,7 +1613,7 @@ const handleExport = () => {
 
         <button
         onClick={() => {
-  setShowResetPasswordModal(false);
+  resetPasswordModalClose()
 
   setNewPassword("");
   setConfirmPassword("");
@@ -1511,6 +1657,188 @@ const handleExport = () => {
     });
   }}
 />
+{showNotesModal && (
+  <div className="fixed inset-0 z-[9999]">
+
+    <div
+      className="absolute inset-0 bg-black/40"
+       onClick={closeNotesModal}
+    />
+
+    <div
+      className="
+        fixed
+        top-3
+        right-3
+        bottom-3
+        w-[420px]
+        bg-white-common
+        rounded-2xl
+        shadow-2xl
+        flex
+        flex-col
+        overflow-hidden
+      "
+    >
+
+      <div className="flex justify-between items-center px-5 py-4 border-b">
+
+        <h2 className="text-[16px] font-semibold">
+          Internal Notes
+        </h2>
+
+        <button
+           onClick={closeNotesModal}
+          className="text-red-500 text-lg"
+        >
+          ✕
+        </button>
+
+      </div>
+
+      <div className="flex-1 flex flex-col px-5 py-4 overflow-hidden">
+
+        <label className="text-xs text-gray-500 mb-2 text-left">
+          Add Notes
+        </label>
+
+        <div className="border border-gray-300 rounded-xl p-3">
+
+          <textarea
+            value={notesText}
+            onChange={(e) => {
+              setNotesText(
+                e.target.value
+              );
+              setNotesError("");
+            }}
+            placeholder="Notes here..."
+            className="
+              w-full
+              h-24
+              resize-none
+              outline-none
+              text-sm
+            "
+          />
+
+        </div>
+
+        {notesError && (
+          <ErrorMessage
+            message={notesError}
+            type="error"
+          />
+        )}
+
+        <div className="flex justify-end mt-3">
+
+          <button
+            onClick={handleAddNote}
+            className="
+              bg-blue-600
+              text-white
+              px-5
+              py-2
+              rounded-lg
+            "
+          >
+            Add
+          </button>
+
+        </div>
+
+        <p className="text-[11px] text-gray-400 mt-5 mb-3 text-left">
+          ALL NOTES
+        </p>
+
+        {/* <div className="flex-1 overflow-y-auto">
+
+          <div className="space-y-4">
+
+            {allNotes?.map((item) => (
+
+              <div
+                key={item.id}
+                className="
+                  border-b
+                  pb-3
+                "
+              >
+
+                <p className="text-sm text-left">
+                  {item.notes}
+                </p>
+
+                <p className="text-xs text-gray-500 text-left mt-1">
+                  {item.createdAt}
+                </p>
+
+                <p className="text-xs text-gray-400 text-left">
+                  Added by {item.createdBy}
+                </p>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </div> */}
+        <div className="flex-1 overflow-y-auto pr-1">
+
+          <div className="space-y-5">
+
+            {allNotes.map((item, index) => (
+
+              <div
+                key={item.id}
+                className="flex gap-3"
+              >
+
+                
+                <div className="flex flex-col items-center">
+
+                  <div className="w-9 h-9 rounded-full bg-[#EEF3FF] flex items-center justify-center border border-[#DCE6FF]">
+                    <img src={CommentBox} className="w-4 h-4" />
+                  </div>
+
+                  {index !== allNotes.length - 1 && (
+                    <div className="w-[1px] flex-1 bg-gray-200 mt-1"></div>
+                  )}
+
+                </div>
+
+               
+                <div className="flex-1">
+
+                  <p className="text-sm font-semibold text-gray-800 text-left">
+                    {item.notes}
+                  </p>
+
+                  <p className="text-xs text-gray-500 mt-1 text-left">
+                    {item.createdAtDate} , {item.createdAtTime}
+                  </p>
+
+                  <p className="text-xs text-gray-400 mt-2 text-left">
+                    Added by {item.createdBy}
+                  </p>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+)}
     </DashboardLayout>
   );
 };

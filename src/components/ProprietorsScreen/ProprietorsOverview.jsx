@@ -370,7 +370,7 @@ const ProprietorsOverview = () => {
         {/* Tab Content */}
 
         {activeTab === "properties" &&
-          <div className="bg-white border border-[#E6E8F0] rounded-xl max-h-[300px] overflow-y-auto">
+          <div className="bg-white-common border border-[#E6E8F0] rounded-xl max-h-[300px] overflow-y-auto">
 
             <table className="min-w-full text-sm">
 
@@ -464,7 +464,7 @@ const ProprietorsOverview = () => {
 
           {/* Modal Box */}
           <div
-            className="bg-white rounded-xl shadow-lg w-[400px] p-6"
+            className="bg-white-common rounded-xl shadow-lg w-[400px] p-6"
             onClick={(e) => e.stopPropagation()}
           >
 
@@ -542,7 +542,7 @@ const ProprietorsOverview = () => {
     <div
       className="
         relative
-        bg-white
+        bg-white-common
         rounded-modal
         shadow-modal
         w-full

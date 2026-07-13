@@ -75,8 +75,33 @@ const [deleteId, setDeleteId] = useState(null);
   }, []);
   const handleUpdateInvoiceRedemption = async () => {
 
+  // if (!editAmount) {
+  //   setAmountError("Amount is required");
+  //   return;
+  // }
+
+  // const res = await updateInvoiceRedemption(
+  //   selectedItem?.id,
+  //   Number(editAmount)
+  // );
+
   if (!editAmount) {
     setAmountError("Amount is required");
+    return;
+  }
+
+  if (
+    Number(editAmount) ===
+    Number(selectedItem?.redemptionAmount)
+  ) {
+    setModalType("error");
+    setMessage("No changes detected");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
     return;
   }
 
@@ -159,7 +184,7 @@ setModalType("success");
         </div>
 
   
-<div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+<div className="bg-white-common rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
  {/* <div
   className="
@@ -179,7 +204,7 @@ setModalType("success");
 > */}
 <div
   className="
-    max-h-[400px]
+    max-h-[350px]
     overflow-y-auto
    overflow-x-auto
 
@@ -199,13 +224,19 @@ setModalType("success");
     hover:[&::-webkit-scrollbar-thumb]:bg-[#B7CCFF]
   "
 >
-            <table className="w-full text-sm">
+           <table className="w-max min-w-full text-sm">
 
-              <thead className="bg-[#F8F9FF] sticky top-0 z-10 text-gray-600">
+             <thead className="sticky top-0 z-50 bg-[#F8F9FF]">
                 <tr>
-                  <th className="px-3 py-2 text-left whitespace-nowrap">Source Invoice</th>
+                  <th className="sticky left-0 z-30 bg-[#F8F9FF] px-3 py-2 text-left whitespace-nowrap min-w-[180px]">
+  Source Invoice
+</th>
+
+<th className="sticky left-[180px] z-30 bg-[#F8F9FF] px-3 py-2 text-left whitespace-nowrap min-w-[200px]">
+  Hostel Name
+</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Target Invoice</th>
-                  <th className="px-3 py-2 text-left whitespace-nowrap">Hostel Name</th>
+                  
                   <th className="px-3 py-2 text-left whitespace-nowrap">Tenant Name</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Amount</th>
                   {/* <th className="px-3 py-2 text-left whitespace-nowrap">Reference</th>
@@ -213,7 +244,9 @@ setModalType("success");
                   {/* <th className="px-3 py-2 text-left whitespace-nowrap">Redeemed At</th> */}
                   <th className="px-3 py-2 text-left whitespace-nowrap">Created At</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Created By</th>
-                  <th className="px-3 py-2 text-left whitespace-nowrap">Action</th>
+                 <th className="sticky right-0 z-30 bg-[#F8F9FF] px-3 py-2  whitespace-nowrap min-w-[100px] ">
+  Action
+</th>
 
                 </tr>
               </thead>
@@ -237,11 +270,47 @@ setModalType("success");
                   </tr>
                 ) : (
                   data.map((item, i) => (
-                    <tr key={i} className="border-t border-gray-300 hover:bg-gray-50">
+                   <tr
+  key={i}
+   className="
+    group
+    border-t
+    border-gray-300
+    hover:bg-gray-50
+    transition-colors
+    duration-150
+  "
+>
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.sourceInvoiceNumber}</td>
+                     <td  className="
+    sticky left-0 z-20
+    bg-white-common
+    group-hover:!bg-gray-50
+    px-4 py-2
+    text-left
+    font-medium
+    text-[12px]
+    whitespace-nowrap
+    min-w-[180px]
+  ">
+  {item.sourceInvoiceNumber}
+</td>
+
+<td className="
+    sticky left-[180px] z-20
+    bg-white-common
+    group-hover:!bg-gray-50
+    px-4 py-2
+    text-left
+    font-medium
+    text-[12px]
+    whitespace-nowrap
+    min-w-[200px]
+  ">
+  {item.hostelName}
+</td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.targetInvoiceNumber}</td>
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.hostelName}</td>
+                      
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.tenantName}</td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.redemptionAmount}</td>
                       {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.referenceNumber}</td>
@@ -253,7 +322,15 @@ setModalType("success");
                         {item.createdAtDate} {item.createdAtTime}
                       </td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.createdBy}</td>
-                   <td className="px-4 py-2 relative overflow-visible">
+                  <td  className="
+    sticky right-0 z-20
+    bg-white-common
+    group-hover:!bg-gray-50
+    px-4 py-2
+    relative
+    overflow-visible
+    min-w-[100px]
+  ">
 
   <div className="flex justify-center">
 
@@ -301,7 +378,7 @@ setModalType("success");
   <div
     ref={menuRef}
     className="
-      fixed w-28 bg-white rounded-xl
+      fixed w-28 bg-white-common rounded-xl
       border border-gray-100
       shadow-[0_12px_35px_rgba(0,0,0,0.18)]
       overflow-hidden
@@ -351,7 +428,7 @@ setModalType("success");
         </div>
 
         {/* PAGINATION */}
-        <div className="flex justify-between items-center bg-white px-4 py-3">
+        <div className="flex justify-between items-center bg-white-common px-4 py-3">
 
           <div className="text-sm text-gray-600">
             Total Record Count :{" "}
@@ -373,7 +450,7 @@ setModalType("success");
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
-               <option value={100}>100</option>
+              <option value={100}>100</option>
             </select>
 
            <button
@@ -404,7 +481,9 @@ setModalType("success");
             <div className="border px-3 py-1 rounded-md text-sm">
               {page}
             </div>
-
+<span className="text-textDark/60 text-cardTitle">
+  {page} - {totalPages}
+</span>
             <button
   onClick={() =>
     setPage(prev =>
@@ -445,7 +524,7 @@ setModalType("success");
   >
 
     <div
-      className="bg-white rounded-xl w-[400px] p-6 shadow-xl"
+      className="bg-white-common rounded-xl w-[400px] p-6 shadow-xl"
       onClick={(e) => e.stopPropagation()}
     >
 
@@ -517,7 +596,7 @@ setModalType("success");
   >
 
     <div
-      className="bg-white rounded-xl w-[400px] p-6 shadow-xl"
+      className="bg-white-common rounded-xl w-[400px] p-6 shadow-xl"
       onClick={(e) => e.stopPropagation()}
     >
 

@@ -37,13 +37,14 @@ console.log("agentDetails",agentDetails)
 
     fetchDetails();
   }, [agentId]);
-
+console.log("agentDetails",agentDetails)
   useEffect(() => {
     const handleClick = () => setOpenMenu(null);
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, []);
 const subscriptions = agentDetails?.subscriptions || [];
+const trial = agentDetails?.trials || [];
 const toggleOwner = (id) => {
 
   setExpandedOwners((prev) =>
@@ -56,8 +57,8 @@ const toggleOwner = (id) => {
 
   return (
     <DashboardLayout>
-      <div className="w-full min-h-screen bg-white">
-        <div className="sticky top-0 z-50 bg-white flex items-center gap-4 px-4 sm:px-8 py-3 border-b border-gray-200">
+      <div className="w-full min-h-screen bg-white-common">
+        <div className="sticky top-0 z-50 bg-white-common flex items-center gap-4 px-4 sm:px-8 py-3 border-b border-gray-200">
 
           <button
             onClick={() => navigate(-1)}
@@ -83,7 +84,7 @@ const toggleOwner = (id) => {
             <div className="bg-[#FAFBFF] border border-gray-200 rounded-lg p-5">
               <div className="flex justify-between items-start">
                 <div className="flex gap-3">
-                 <div className="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-sm font-semibold text-gray-700">
+                 <div className="w-12 h-12 bg-white-common border border-gray-200 rounded-xl flex items-center justify-center text-sm font-semibold text-gray-700">
   {agentDetails?.initials || "NA"}
 </div>
 
@@ -144,7 +145,7 @@ const toggleOwner = (id) => {
               Managing Clients
             </h4>
 
-   <div className="border border-gray-200 rounded-2xl bg-white max-h-[400px] flex flex-col overflow-visible">
+   <div className="border border-gray-200 rounded-2xl bg-white-common max-h-[400px] flex flex-col overflow-visible">
 
   {/* SCROLL AREA */}
 <div
@@ -489,7 +490,16 @@ const toggleOwner = (id) => {
               >
                 Subscriptions
               </button>
-
+ <button
+    onClick={() => setActiveTab("trial")}
+    className={`pb-2 text-[13px] font-semibold border-b-2 cursor-pointer ${
+      activeTab === "trial"
+        ? "text-blue-600 border-blue-600"
+        : "text-gray-400 border-transparent"
+    }`}
+  >
+    Trial
+  </button>
             </div>
 
 
@@ -530,68 +540,149 @@ const toggleOwner = (id) => {
     <p className="text-gray-400 text-sm">No Activity Found</p>
   )}
 </div>
-            ) : (
-            <div className="border border-gray-200 rounded-lg p-4 overflow-x-auto">
-  <table className="w-full min-w-[650px] text-sm">
-    
-    {/* HEADER */}
+            ) : activeTab === "subscription" ? (
+ <div className="border border-gray-300 rounded-lg overflow-hidden">
+
+  <table className="w-full text-sm table-fixed">
     <thead>
-      <tr className="text-gray-500 text-[12px] text-left border-b">
-        <th className="pb-3">Property Name</th>
-        <th className="pb-3">Plan Type</th>
-        <th className="pb-3">Start Date</th>
-        <th className="pb-3">Expiry Date</th>
+      <tr className="text-gray-500 text-[12px] text-left border-b border-gray-300 bg-white-common">
+        <th className="py-3 px-4 w-[26%]">Property Name</th>
+        <th className="py-3 px-4 w-[28%] text-left">Plan Type</th>
+        <th className="py-3 px-4 w-[23%]">Start Date</th>
+        <th className="py-3 px-4 w-[23%]">Expiry Date</th>
       </tr>
     </thead>
-
-    {/* BODY */}
-    <tbody className="text-gray-700">
-
-      {subscriptions.length > 0 ? (
-
-        subscriptions.map((item) => (
-          <tr key={item.id} className="border-b last:border-0">
-
-            {/* Property */}
-            <td className="py-4">{item.propertyName}</td>
-
-            {/* Plan */}
-            <td>
-              <span
-                className={`text-[10px] px-2 py-[2px] rounded
-                ${item.planType === "STANDARD"
-                  ? "bg-blue-100 text-blue-600"
-                  : "bg-orange-100 text-orange-600"}`}
-              >
-                {item.planType}
-              </span>
-            </td>
-
-            {/* Dates */}
-            <td>{item.startDate}</td>
-            <td>{item.expiryDate}</td>
-
-          </tr>
-        ))
-
-      ) : (
-
-        <tr>
-          <td
-            colSpan="4"
-            className="text-center py-8 text-gray-400 text-sm"
-          >
-            🚫 No Subscriptions Available
-          </td>
-        </tr>
-
-      )}
-
-    </tbody>
   </table>
-</div>
 
+  <div className="max-h-[300px] overflow-y-auto">
+    <table className="w-full text-sm table-fixed">
+      <tbody className="text-gray-700">
+
+        {subscriptions.length > 0 ? (
+          subscriptions.map((item) => (
+            <tr
+              key={item.id}
+              className="border-b border-gray-300 last:border-0 text-[12px]"
+            >
+              <td
+                className="py-4 px-4 w-[26%] text-left truncate"
+                title={item?.hostelName}
+              >
+                {item?.hostelName}
+              </td>
+
+              <td className="py-4 px-4 w-[28%] text-left overflow-hidden">
+                <span
+                  className={`inline-block text-[10px] font-medium px-2 py-[3px] rounded whitespace-nowrap
+                  ${
+                    item.planType === "STANDARD"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-orange-100 text-orange-600"
+                  }`}
+                >
+                  {item.planType?.replace(/_/g, " ")}
+                </span>
+              </td>
+
+              <td className="px-4 w-[23%] text-left">
+                {item.planStartsAt}
+              </td>
+
+              <td className="px-4 w-[23%] text-left">
+                {item.planEndsAt}
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td
+              colSpan="4"
+              className="text-center py-8 text-gray-400"
+            >
+              🚫 No Trial Available
+            </td>
+          </tr>
+        )}
+
+      </tbody>
+    </table>
+  </div>
+
+</div>
+            ):(
+              <>
+<div className="border border-gray-300 rounded-lg overflow-hidden">
+
+  <table className="w-full text-sm table-fixed">
+    <thead>
+      <tr className="text-gray-500 text-[12px] text-left border-b border-gray-300 bg-white-common">
+        <th className="py-3 px-4 w-[26%]">Property Name</th>
+        <th className="py-3 px-4 w-[28%] text-left">Plan Type</th>
+        <th className="py-3 px-4 w-[23%]">Start Date</th>
+        <th className="py-3 px-4 w-[23%]">Expiry Date</th>
+      </tr>
+    </thead>
+  </table>
+
+  <div className="max-h-[300px] overflow-y-auto">
+    <table className="w-full text-sm table-fixed">
+      <tbody className="text-gray-700">
+
+        {trial.length > 0 ? (
+          trial.map((item) => (
+            <tr
+              key={item.id}
+              className="border-b border-gray-300 last:border-0 text-[12px]"
+            >
+              <td
+                className="py-4 px-4 w-[26%] text-left truncate"
+                title={item?.hostelName}
+              >
+                {item?.hostelName}
+              </td>
+
+              <td className="py-4 px-4 w-[28%] text-left overflow-hidden">
+                <span
+                  className={`inline-block text-[10px] font-medium px-2 py-[3px] rounded whitespace-nowrap
+                  ${
+                    item.planType === "STANDARD"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-orange-100 text-orange-600"
+                  }`}
+                >
+                  {item.planType?.replace(/_/g, " ")}
+                </span>
+              </td>
+
+              <td className="px-4 w-[23%] text-left">
+                {item.planStartsAt}
+              </td>
+
+              <td className="px-4 w-[23%] text-left">
+                {item.planEndsAt}
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td
+              colSpan="4"
+              className="text-center py-8 text-gray-400"
+            >
+              🚫 No Trial Available
+            </td>
+          </tr>
+        )}
+
+      </tbody>
+    </table>
+  </div>
+
+</div>
+              </>
             )}
+
+            
           </div>
         </div>
       </div>

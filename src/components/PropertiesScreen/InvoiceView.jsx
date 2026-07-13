@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef  } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     Calendar,
     ReceiptItem,
@@ -12,11 +12,13 @@ import { useHostel } from "../../Context/HostelListContext";
 import Circle from "../../assets/menucircle.png";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
-import Arrow from "../../assets/arrow-right.png"
+import Arrow from "../../assets/arrow-right.png";
+import { useNavigate } from "react-router-dom";
+
 
 const InvoiceView = ({ hostelData, refreshHostel }) => {
-
-    const { getInvoicesByHostelId, deleteInvoice } = useHostel();
+    const navigate = useNavigate();
+    const { getInvoicesByHostelId, deleteInvoice, updateAdvanceAmount } = useHostel();
     const defaultInvoices = hostelData?.invoices || [];
     const [expandedInvoice, setExpandedInvoice] = useState(null);
     const [invoiceData, setInvoiceData] = useState([]);
@@ -37,32 +39,36 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
     const [modalType, setModalType] = useState("success");
     const [showSuccess, setShowSuccess] = useState(false);
     const [message, setMessage] = useState("");
+    const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+const [activeFilter, setActiveFilter] = useState("All");
     const [menuPosition, setMenuPosition] = useState({
-  top: 0,
-  left: 0,
-});
+        top: 0,
+        left: 0,
+    });
+    const [showAmountModal, setShowAmountModal] = useState(false);
+
     const menuRef = useRef(null);
 
-useEffect(() => {
+    useEffect(() => {
 
-  const handleClickOutside = (e) => {
+        const handleClickOutside = (e) => {
 
-    if (
-      menuRef.current &&
-      !menuRef.current.contains(e.target)
-    ) {
-      setOpenMenu(null);
-    }
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(e.target)
+            ) {
+                setOpenMenu(null);
+            }
 
-  };
+        };
 
-  document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
 
-}, []);
+    }, []);
     const invoices = isMore
         ? invoiceData
         : defaultInvoices;
@@ -106,16 +112,16 @@ useEffect(() => {
 
     }, [page, size, isMore]);
     const handleDeleteInvoice = async () => {
-         if (!deletePhone) {
-        setAmountError("Mobile number is required");
-        return;
-    }
+        if (!deletePhone) {
+            setAmountError("Mobile number is required");
+            return;
+        }
 
-    // 10 digit validation
-    if (deletePhone.length !== 10) {
-        setAmountError("Mobile number must be 10 digits");
-        return;
-    }
+        // 10 digit validation
+        if (deletePhone.length !== 10) {
+            setAmountError("Mobile number must be 10 digits");
+            return;
+        }
 
         const payload = [
             {
@@ -152,8 +158,39 @@ useEffect(() => {
         }
 
     };
-    console.log("setAmountError", amountError)
 
+    const handleUpdateAmount = async () => {
+        const res = await updateAdvanceAmount(
+            hostelData?.hostelId,
+            selectedInvoice?.invoiceId,
+
+        );
+
+        if (res?.success) {
+
+            setModalType("success");
+            setMessage(res.data);
+            setShowSuccess(true);
+
+
+            setTimeout(() => {
+                setShowSuccess(false);
+                setShowAmountModal(false);
+            }, 800);
+
+
+            fetchInvoices(page);
+        }
+        else {
+            setModalType("error");
+            setMessage(res.message);
+            setShowSuccess(true);
+            setTimeout(() => {
+                setShowSuccess(false);
+
+            }, 800);
+        }
+    };
     return (
         <>
             <Toast
@@ -166,7 +203,7 @@ useEffect(() => {
 
                 <div
                     className="
-          bg-white
+          bg-white-common
           rounded-3xl
           border border-gray-100
           overflow-hidden
@@ -183,7 +220,6 @@ useEffect(() => {
 
                         <table className="w-full">
 
-                            {/* HEADER */}
                             <thead
                                 className="
     bg-[#f8fafc]
@@ -215,10 +251,10 @@ useEffect(() => {
                                     </th>
 
                                     <th className="px-3 py-4 w-[140px] text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-  Status
-</th>
-                                   <th
-  className="
+                                        Status
+                                    </th>
+                                    <th
+                                        className="
     px-1 py-4
     w-[50px]
     text-center
@@ -228,9 +264,9 @@ useEffect(() => {
     tracking-wide
     text-gray-500
   "
->
-  Action
-</th>
+                                    >
+                                        Action
+                                    </th>
 
                                 </tr>
 
@@ -290,7 +326,7 @@ useEffect(() => {
 
                                                     </div> */}
 
-                                                   
+
                                                     <div
                                                         className="
                             w-9 h-9
@@ -485,14 +521,14 @@ useEffect(() => {
 
                                             </td>
                                             <td
-  className="
+                                                className="
     px-1 py-3
     w-[50px]
     text-center
     relative
   "
-  ref={openMenu === item.invoiceId ? menuRef : null}
->
+                                                ref={openMenu === item.invoiceId ? menuRef : null}
+                                            >
 
                                                 <div className="flex items-center justify-start">
 
@@ -509,51 +545,91 @@ useEffect(() => {
                                                         // }
                                                         onClick={(e) => {
 
-  e.stopPropagation();
+                                                            e.stopPropagation();
 
-  const rect = e.currentTarget.getBoundingClientRect();
+                                                            const rect = e.currentTarget.getBoundingClientRect();
 
-  const viewportHeight = window.innerHeight;
+                                                            const viewportHeight = window.innerHeight;
 
-  const menuHeight = 50;
+                                                            const menuHeight = 100;
 
-  const spaceBelow = viewportHeight - rect.bottom;
+                                                            const spaceBelow = window.innerHeight - rect.bottom;
 
-  setMenuPosition({
-    top:
-      spaceBelow < menuHeight
-        ? rect.top - menuHeight
-        : rect.bottom + 5,
+                                                            setMenuPosition({
+                                                                top:
+                                                                    spaceBelow < menuHeight
+                                                                        ? rect.top - menuHeight
+                                                                        : rect.bottom + 5,
 
-    left: rect.left - 90,
-  });
+                                                                left: rect.left - 120,
+                                                            });
 
-  setOpenMenu(
-    openMenu === item.invoiceId
-      ? null
-      : item.invoiceId
-  );
+                                                            setOpenMenu(
+                                                                openMenu === item.invoiceId
+                                                                    ? null
+                                                                    : item.invoiceId
+                                                            );
 
-}}
+                                                        }}
                                                     />
 
                                                 </div>
 
                                                 {openMenu === item.invoiceId && (
 
-                                                  <div
-  className="
+                                                    <div
+                                                        className="
     fixed
-    bg-white border border-gray-200
+    bg-white-common border border-gray-200
     rounded-lg shadow-lg z-[99999]
-    min-w-[120px]
+    max-w-[120px]
   "
-  style={{
-    top: menuPosition.top,
-    left: menuPosition.left -30,
-  }}
->
+                                                        style={{
+                                                            top: menuPosition.top,
+                                                            left: menuPosition.left + 10,
+                                                        }}
+                                                    >
 
+
+                                                        {item?.canShowReceipts === true && (
+                                                            <button
+                                                                onClick={() =>
+                                                                    navigate(
+                                                                        `/invoice-receipt/${hostelData?.hostelId}/${item.invoiceId}`,
+                                                                        {
+                                                                            state: {
+                                                                                hostelData,
+                                                                                invoiceData: item,
+                                                                            },
+                                                                        }
+                                                                    )
+                                                                }
+                                                                className="w-full text-left px-3 py-2 text-sm cursor-pointer whitespace-nowrap"
+                                                            >
+                                                                Invoice Receipt
+                                                            </button>
+                                                        )}
+                                                        {/* <button  onClick={() =>
+    navigate(
+      `/invoice-receipt/${hostelData?.hostelId}/${item.invoiceId}`,
+      {
+        state: {
+          hostelData,
+          invoiceData: item,
+        },
+      }
+    )
+  }
+                                                            className="
+          w-full text-left
+          px-3 py-2 text-sm
+          
+           cursor-pointer whitespace-nowrap
+        "
+
+                                                        >
+                                                            Invoice Receipt
+                                                        </button> */}
                                                         <button
                                                             className="
           w-full text-left
@@ -574,6 +650,31 @@ useEffect(() => {
                                                             Delete
                                                         </button>
 
+
+
+                                                        {/* <button
+                                                            className="w-full text-left px-3 py-2 text-sm cursor-pointer whitespace-nowrap"
+                                                            onClick={() => {
+                                                                setSelectedInvoice(item);
+
+                                                                setShowAmountModal(true);
+                                                                setOpenMenu(null);
+                                                            }}
+                                                        >
+                                                            Update Amount
+                                                        </button> */}
+                                                        {item?.canUpdateAmount === true && (
+                                                            <button
+                                                                className="w-full text-left px-3 py-2 text-sm cursor-pointer whitespace-nowrap"
+                                                                onClick={() => {
+                                                                    setSelectedInvoice(item);
+                                                                    setShowAmountModal(true);
+                                                                    setOpenMenu(null);
+                                                                }}
+                                                            >
+                                                                Update Amount
+                                                            </button>
+                                                        )}
                                                     </div>
 
                                                 )}
@@ -597,7 +698,7 @@ useEffect(() => {
                             rounded-2xl
                             border border-gray-100
                             overflow-hidden
-                            bg-white
+                            bg-white-common
                           "
                                                     >
 
@@ -828,56 +929,57 @@ useEffect(() => {
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
                                     <option value={50}>50</option>
+                                    <option value={100}>100</option>
                                 </select>
 
 
                                 <button
-  disabled={
-    page === 1 ||
-    invoices?.length === 0
-  }
-  onClick={() => setPage((p) => p - 1)}
-  className={`
-    ${
-      page === 1 ||
-      invoices?.length === 0
-        ? "opacity-40 cursor-not-allowed"
-        : "cursor-pointer"
-    }
+                                    disabled={
+                                        page === 1 ||
+                                        invoices?.length === 0
+                                    }
+                                    onClick={() => setPage((p) => p - 1)}
+                                    className={`
+    ${page === 1 ||
+                                            invoices?.length === 0
+                                            ? "opacity-40 cursor-not-allowed"
+                                            : "cursor-pointer"
+                                        }
   `}
->
-  <img
-    src={Arrow}
-    className="w-4 h-4"
-  />
-</button>
+                                >
+                                    <img
+                                        src={Arrow}
+                                        className="w-4 h-4"
+                                    />
+                                </button>
 
 
-<span className="border px-3 py-1 rounded bg-gray-50">
-  {page}
-</span>
+                                <span className="border px-3 py-1 rounded bg-gray-50">
+                                    {page}
+                                </span>
 
-
-<button
-  disabled={
-    page >= totalPages ||
-    invoices?.length === 0
-  }
-  onClick={() => setPage((p) => p + 1)}
-  className={`
-    ${
-      page >= totalPages ||
-      invoices?.length === 0
-        ? "opacity-40 cursor-not-allowed"
-        : "cursor-pointer"
-    }
+                                <span className="text-textDark/60 text-cardTitle">
+                                    {page} - {totalPages}
+                                </span>
+                                <button
+                                    disabled={
+                                        page >= totalPages ||
+                                        invoices?.length === 0
+                                    }
+                                    onClick={() => setPage((p) => p + 1)}
+                                    className={`
+    ${page >= totalPages ||
+                                            invoices?.length === 0
+                                            ? "opacity-40 cursor-not-allowed"
+                                            : "cursor-pointer"
+                                        }
   `}
->
-  <img
-    src={Arrow}
-    className="w-4 h-4 rotate-[-180deg]"
-  />
-</button>
+                                >
+                                    <img
+                                        src={Arrow}
+                                        className="w-4 h-4 rotate-[-180deg]"
+                                    />
+                                </button>
 
                             </div>
 
@@ -896,12 +998,12 @@ useEffect(() => {
                         setShowDeleteModal(false);
                         setAmountError("");
                         setDeletePhone("")
-                        
+
                     }}
                 >
 
                     <div
-                        className="bg-white rounded-2xl w-[350px] p-5 shadow-xl"
+                        className="bg-white-common rounded-2xl w-[350px] p-5 shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
 
@@ -910,29 +1012,29 @@ useEffect(() => {
                         </h2>
 
                         <label className="text-sm text-gray-600 block mb-2 text-left">
-  Phone Number
-</label>
+                            Phone Number
+                        </label>
 
-<input
-  type="text"
-  value={deletePhone}
-  maxLength={10}
-  onChange={(e) => {
-    const value = e.target.value;
+                        <input
+                            type="text"
+                            value={deletePhone}
+                            maxLength={10}
+                            onChange={(e) => {
+                                const value = e.target.value;
 
-    // numbers மட்டும் allow
-    if (/^\d*$/.test(value)) {
-      setDeletePhone(value);
-      setAmountError("");
-    }
-  }}
-  placeholder="Enter phone number"
-  className="
+                                // numbers மட்டும் allow
+                                if (/^\d*$/.test(value)) {
+                                    setDeletePhone(value);
+                                    setAmountError("");
+                                }
+                            }}
+                            placeholder="Enter phone number"
+                            className="
     w-full border border-gray-300
     rounded-lg px-3 py-2 text-sm
     outline-none
   "
-/>
+                        />
 
                         {amountError && (
                             <ErrorMessage message={amountError} type="error" />
@@ -970,6 +1072,47 @@ useEffect(() => {
 
                 </div>
 
+            )}
+
+
+            {showAmountModal && (
+                <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30"
+                    onClick={() => {
+                        setShowAmountModal(false);
+                    }}
+                >
+                    <div
+                        className="bg-white-common rounded-2xl w-[350px] p-5 shadow-xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2 className="text-lg font-semibold mb-3 text-left">
+                            Update Amount
+                        </h2>
+
+                        <p className="text-sm text-gray-600 mb-5">
+                            Are you sure you want to update the advance amount?
+                        </p>
+
+                        <div className="flex justify-end gap-2">
+                            <button
+                                onClick={() => {
+                                    setShowAmountModal(false);
+                                }}
+                                className="px-4 py-2 border border-gray-300 rounded-lg text-sm cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={handleUpdateAmount}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm cursor-pointer"
+                            >
+                                Update
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </>
 

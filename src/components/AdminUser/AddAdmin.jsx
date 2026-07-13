@@ -127,7 +127,7 @@ const AddAdmin = ({ isOpen, onClose,refreshList }) => {
 
 
         <div
-          className={`absolute right-0 top-0  h-[calc(100%-16px)]  w-full sm:w-[420px] bg-white shadow-xl transform  rounded-lg my-2 overflow-hidden flex flex-col  transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"
+          className={`absolute right-0 top-0  h-[calc(100%-16px)]  w-full sm:w-[420px] bg-white-common shadow-xl transform  rounded-lg my-2 overflow-hidden flex flex-col  transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"
             }`}
         >
 
@@ -183,7 +183,7 @@ const AddAdmin = ({ isOpen, onClose,refreshList }) => {
 
               <div
                 onClick={() => setOpenDropdown(!openDropdown)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 flex justify-between items-center cursor-pointer bg-white"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 flex justify-between items-center cursor-pointer bg-white-common"
               >
                 <span className={selectedRole ? "text-gray-800" : "text-gray-400"}>
                   {selectedRole?.name || "Select role"}
@@ -194,7 +194,7 @@ const AddAdmin = ({ isOpen, onClose,refreshList }) => {
 
 
               {openDropdown && (
-                <div className="absolute z-10 mt-1 w-full bg-white rounded-md  shadow-lg max-h-48 overflow-y-auto">
+                <div className="absolute z-10 mt-1 w-full bg-white-common rounded-md  shadow-lg max-h-48 overflow-y-auto">
                   {agentRoles.map((role) => (
                     <div
                       key={role.id}
@@ -243,7 +243,7 @@ const AddAdmin = ({ isOpen, onClose,refreshList }) => {
 
 
           {/* <div className="absolute bottom-0 w-full px-6 py-4 border-t border-gray-300 bg-white flex justify-end gap-3"> */}
-          <div className="w-full px-6 py-4 border-t border-gray-300 bg-white flex justify-end gap-3">
+          <div className="w-full px-6 py-4 border-t border-gray-300 bg-white-common flex justify-end gap-3">
             <button
               onClick={onClose}
               className="px-4 py-2 border rounded-lg text-sm"

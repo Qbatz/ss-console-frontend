@@ -9,6 +9,7 @@ import Trash from "../../assets/trash.png";
 import LoginImg from "../../assets/LoginImg.png";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import Toast from "../SuccessModal/ToastDesign";
 
 const Roles = () => {
   const { agentRoles, getAgentRoles, getAgentRoleById, loading, deleteAgentRole, errorMsg, accessError, adminDetails } = useRole();
@@ -27,6 +28,9 @@ const Roles = () => {
   top: 0,
   left: 0,
 });
+const [modalType, setModalType] = useState("success");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   console.log("accessError", accessError)
@@ -45,24 +49,61 @@ const Roles = () => {
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
+const handleEditClick = async (role) => {
+  try {
+    const response = await getAgentRoleById(role.id);
 
-  const handleEditClick = async (role) => {
-    try {
-      const response = await getAgentRoleById(role.id);
+    if (response.success) {
+      setSelectedRole(response.data);
+      setOpen(true);
+    } else {
 
-      if (response.success) {
-        setSelectedRole(response.data);
-        setOpen(true);
-      } else {
-        alert(response.message || "Failed to fetch role details");
-      }
-    } catch (err) {
-      console.log("Edit fetch error:", err);
-      alert("Something went wrong");
-    } finally {
-      setOpenMenu(null);
+      setModalType("error");
+      setMessage(
+        response.message || "Failed to fetch role details"
+      );
+      setShowSuccess(true);
+ setTimeout(() => {
+            setShowSuccess(false);
+            
+
+          }, 1300);
     }
-  };
+
+  } catch (err) {
+
+    console.log("Edit fetch error:", err);
+
+    setModalType("error");
+    setMessage("Something went wrong");
+    setShowSuccess(true);
+    setTimeout(() => {
+            setShowSuccess(false);
+            
+
+          }, 1300);
+
+  } finally {
+    setOpenMenu(null);
+  }
+};
+  // const handleEditClick = async (role) => {
+  //   try {
+  //     const response = await getAgentRoleById(role.id);
+
+  //     if (response.success) {
+  //       setSelectedRole(response.data);
+  //       setOpen(true);
+  //     } else {
+  //       alert(response.message || "Failed to fetch role details");
+  //     }
+  //   } catch (err) {
+  //     console.log("Edit fetch error:", err);
+  //     alert("Something went wrong");
+  //   } finally {
+  //     setOpenMenu(null);
+  //   }
+  // };
   const handleConfirmDelete = async () => {
     if (!deleteRole) return;
 
@@ -90,7 +131,12 @@ const Roles = () => {
 
   return (
     <DashboardLayout>
+ <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
 
+      />
       {accessError === "Access Restricted" ? (
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
@@ -123,7 +169,7 @@ const Roles = () => {
 
 
 
-          <div className="bg-white rounded-xl border border-gray-200 max-h-[350px] flex flex-col overflow-hidden">
+          <div className="bg-white-common rounded-xl border border-gray-200 max-h-[350px] flex flex-col overflow-hidden">
 
             <div className="flex-1 overflow-y-auto overflow-x-auto">
 
@@ -139,6 +185,7 @@ const Roles = () => {
                       <th className="px-4 py-3 w-[25%]">Description</th>
                       <th className="px-4 py-3 w-[15%]">Users Count</th>
                       <th className="px-4 py-3 w-[20%]">Created On</th>
+                      <th className="px-4 py-3 w-[20%]">Updated On</th>
                       <th className="px-4 py-3 w-[10%]">Actions</th>
                     </tr>
                   </thead>
@@ -178,9 +225,60 @@ const Roles = () => {
                             </span>
                           </td>
 
-                          <td className="px-4 py-3 text-black-600">
-                            {role.created || "N/A"}
-                          </td>
+                          <td
+  className="
+    px-4
+    py-3
+    text-black-600
+  "
+>
+
+  <div className="flex flex-col">
+
+    <span>
+      {role.createdAtDate || "N/A"}
+    </span>
+
+    <span
+      className="
+        text-xs
+        text-gray-400
+        mt-1
+      "
+    >
+      {role.createdAtTime || ""}
+    </span>
+
+  </div>
+
+</td>
+<td
+  className="
+    px-4
+    py-3
+    text-black-600
+  "
+>
+
+  <div className="flex flex-col">
+
+    <span>
+      {role.updatedAtDate || "N/A"}
+    </span>
+
+    <span
+      className="
+        text-xs
+        text-gray-400
+        mt-1
+      "
+    >
+      {role.updatedAtTime || ""}
+    </span>
+
+  </div>
+
+</td>
 
                           <td className="px-4 py-3 text-center relative">
                             <button
@@ -222,7 +320,7 @@ const Roles = () => {
                             {openMenu === index && role.editable !== false && (
                               <div
                                 onClick={(e) => e.stopPropagation()}
-  className="fixed w-32 bg-white border rounded-lg shadow-lg z-[9999]"
+  className="fixed w-32 bg-white-common border rounded-lg shadow-lg z-[9999]"
   style={{
     top: dropdownPosition.top,
     left: dropdownPosition.left,
@@ -263,7 +361,7 @@ const Roles = () => {
 
 
 
-          <div className="flex justify-between items-center px-4 py-3  bg-white text-sm">
+          <div className="flex justify-between items-center px-4 py-3  bg-white-common text-sm">
 
 
             <span className="text-gray-600">
@@ -359,7 +457,7 @@ const Roles = () => {
           {deleteRole && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
 
-              <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 sm:p-8 text-center">
+              <div className="bg-white-common w-full max-w-md rounded-2xl shadow-xl p-6 sm:p-8 text-center">
 
                 <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-3">
                   Delete Role?

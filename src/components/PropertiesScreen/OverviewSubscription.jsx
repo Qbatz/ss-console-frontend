@@ -71,7 +71,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
 
       <div
         className="
-          bg-white
+          bg-white-common
           border
           border-borderSoft
           rounded-card
@@ -315,7 +315,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
 
       <div
         className="
-          bg-white
+          bg-white-common
           border
           border-borderSoft
           rounded-card

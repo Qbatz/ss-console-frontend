@@ -109,29 +109,64 @@ export const OwnersProvider = ({ children }) => {
       setLoading(false);
     }
   };
+const getOwnerById = async (ownerId) => {
+  try {
 
-  const getOwnerById = async (ownerId) => {
-    try {
+    setLoading(true);
 
-      setLoading(true);
+    const res = await axiosInstance.get(
+      `/v2/owners/${ownerId}`
+    );
 
-      const res = await axiosInstance.get(`/v2/owners/${ownerId}`);
-
-      if (res.status === 200) {
-        return { success: true, data: res.data };
-      }
-
-      return { success: false };
-
-    } catch (error) {
-
-      const msg = getErrorMessage(error);
-      return { success: false, message: msg };
-
-    } finally {
-      setLoading(false);
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
     }
-  };
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg =
+      error?.response?.status === 500
+        ? "Internal Server Error"
+        : getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
+  // const getOwnerById = async (ownerId) => {
+  //   try {
+
+  //     setLoading(true);
+
+  //     const res = await axiosInstance.get(`/v2/owners/${ownerId}`);
+
+  //     if (res.status === 200) {
+  //       return { success: true, data: res.data };
+  //     }
+
+  //     return { success: false };
+
+  //   } catch (error) {
+
+  //     const msg = getErrorMessage(error);
+  //     return { success: false, message: msg };
+
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const getTenantSummary = async ({
     page = 0,
     size = 10,
@@ -398,6 +433,76 @@ export const OwnersProvider = ({ children }) => {
 
 };
 
+
+const addUserNotes = async (
+  userId,
+  notes
+) => {
+
+  try {
+
+    const res = await axiosInstance.post(
+      `/v2/users/notes/${userId}`,
+      {
+        notes: notes
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      message:
+        error?.response?.data?.message ||
+        error?.response?.data ||
+        "Failed"
+    };
+
+  }
+
+};
+
+const getUserNotes = async (
+  userId
+) => {
+  try {
+    setLoading(true);
+
+    const res =
+      await axiosInstance.get(
+        `/v2/users/notes/${userId}`
+      );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return {
+      success: false,
+    };
+  } catch (error) {
+
+    const msg =
+      getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg,
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
     <OwnersContext.Provider
       value={{
@@ -407,7 +512,7 @@ export const OwnersProvider = ({ children }) => {
         ownerCount,
         loading, accessError,
         getOwners, changeOwnerPassword, getOwnerById, getTenantSummary, updateOwnerEmail, deleteTenant, updateOwnerMobile, deleteOwner,
-        activeCount,exportOwners
+        activeCount,exportOwners,addUserNotes,getUserNotes
       }}
 
     >

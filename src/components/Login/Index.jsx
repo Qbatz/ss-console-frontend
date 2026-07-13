@@ -95,7 +95,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { getAdminDetails } = useRole();
 
-  const [isChecking, setIsChecking] = useState(true); // ⭐ add
+  const [isChecking, setIsChecking] = useState(true);
 
   const isTokenValid = (token) => {
     try {
@@ -122,7 +122,7 @@ const Index = () => {
     } else {
       localStorage.removeItem("access_token");
       localStorage.removeItem("mock_token");
-      setIsChecking(false); // ⭐ allow login page
+      setIsChecking(false); 
     }
   }, []);
 

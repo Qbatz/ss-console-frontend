@@ -954,38 +954,110 @@ const updateTableColumns = async (payload) => {
   try {
     setLoading(true);
 
-    const res = await axiosInstance.put("/v2/table-columns", payload);
+    const res = await axiosInstance.put(
+      "/v2/table-columns",
+      payload
+    );
 
     if (res.status === 200) {
-      return { success: true, message: "Columns updated successfully" };
+      return {
+        success: true,
+        message: "Columns updated successfully"
+      };
     }
 
     return { success: false };
+
   } catch (error) {
+
+    if (error?.response?.status === 500) {
+      return {
+        success: false,
+        message: "Internal Server Error"
+      };
+    }
+
     const msg = getErrorMessage(error);
-    return { success: false, message: msg };
+
+    return {
+      success: false,
+      message: msg
+    };
+
   } finally {
     setLoading(false);
   }
 };
+// const updateTableColumns = async (payload) => {
+//   try {
+//     setLoading(true);
+
+//     const res = await axiosInstance.put("/v2/table-columns", payload);
+
+//     if (res.status === 200) {
+//       return { success: true, message: "Columns updated successfully" };
+//     }
+
+//     return { success: false };
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+//     return { success: false, message: msg };
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+// const resetTableColumns = async (payload) => {
+//   try {
+//     const res = await axiosInstance.put(
+//       "/v2/table-columns/reset",
+//       payload
+//     );
+    
+
+//     if (res.status === 200) {
+      
+//       return { success: true , data: res?.data};
+//     }
+
+//     return { success: false };
+//   } catch (err) {
+//     return { success: false, message: err.message };
+//   }
+  
+// };
+
 const resetTableColumns = async (payload) => {
   try {
     const res = await axiosInstance.put(
       "/v2/table-columns/reset",
       payload
     );
-    
 
     if (res.status === 200) {
-      
-      return { success: true , data: res?.data};
+      return {
+        success: true,
+        data: res?.data
+      };
     }
 
     return { success: false };
-  } catch (err) {
-    return { success: false, message: err.message };
+
+  } catch (error) {
+
+    if (error?.response?.status === 500) {
+      return {
+        success: false,
+        message: "Internal Server Error"
+      };
+    }
+
+    return {
+      success: false,
+      message:
+        error?.response?.data?.message ||
+        error?.message
+    };
   }
-  
 };
 const getTableColumns = async (page = 1, size = 10, name = "") => {
   try {
@@ -1342,6 +1414,341 @@ const sharePaymentLink = async (
 
   }
 };
+
+const getTenantDeductions = async (
+  hostelId,
+  customerId
+) => {
+  try {
+
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      `/v2/tenants/deductions/${hostelId}/${customerId}`
+    );
+
+    if (res.status === 200) {
+
+      return {
+        success: true,
+        data: res.data
+      };
+
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
+const updateTenantDeductions = async (
+  hostelId,
+  customerId,
+  invoiceId,
+  payload
+) => {
+  try {
+
+    setLoading(true);
+
+    const res = await axiosInstance.put(
+      `/v2/tenants/deductions/${hostelId}/${customerId}/${invoiceId}`,
+      payload
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      message: getErrorMessage(error)
+    };
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
+const getInvoiceReceipt = async (
+  hostelId,
+  invoiceId
+) => {
+  try {
+
+    const response = await axiosInstance.get(
+      `/v2/invoice/receipt/${hostelId}/${invoiceId}`
+    );
+
+    return {
+      success: true,
+      data: response.data
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      message:
+        error?.response?.data?.message ||
+        "Something went wrong"
+    };
+
+  }
+};
+const updateInvoiceBalance = async (
+  hostelId,
+  invoiceId,
+  balanceAmount
+) => {
+  try {
+
+    const res = await api.put(
+      `/v2/invoice/balance/${hostelId}/${invoiceId}`,
+      {
+        balanceAmount: Number(balanceAmount),
+      }
+    );
+    console.log("res",res)
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+
+  } 
+ catch (error) {
+  const msg =
+    typeof error?.response?.data === "string"
+      ? error.response.data
+      : error?.response?.data?.message;
+
+  return {
+    success: false,
+    message: msg || "Failed to update balance amount",
+  };
+}
+};
+
+
+const getTenantById = async (customerId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      `/v2/tenants/${customerId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    const msg =
+      error?.response?.status >= 500
+        ? "Internal Server Error"
+        : getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const updateAdvanceAmount = async (
+  hostelId,
+  invoiceId
+) => {
+  try {
+    const res = await axiosInstance.put(
+      `/v2/invoice/advance/amount/${hostelId}/${invoiceId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+
+    if (error?.response?.status === 500) {
+      return {
+        success: false,
+        message: "Internal Server Error",
+      };
+    }
+
+    const msg =
+      typeof error?.response?.data === "string"
+        ? error.response.data
+        : error?.response?.data?.message;
+
+    return {
+      success: false,
+      message: msg || "Failed to update advance amount",
+    };
+  }
+};
+
+
+const createHostelNote = async (hostelId, notes) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.post(
+      `/v2/hostels/notes/${hostelId}`,
+      { notes }
+    );
+
+    if (res.status === 200 || res.status === 201) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const getHostelNotes = async (hostelId) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.get(
+      `/v2/hostels/notes/${hostelId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+// const updateAdvanceAmount = async (
+//   hostelId,
+//   invoiceId,
+ 
+// ) => {
+//   try {
+
+//     const res = await axiosInstance.put(
+//       `/v2/invoice/advance/amount/${hostelId}/${invoiceId}`,
+     
+//     );
+
+//     if (res.status === 200) {
+//       return {
+//         success: true,
+//         data: res.data
+//       };
+//     }
+
+//     return { success: false };
+
+//   } catch (error) {
+
+//     const msg =
+//       typeof error?.response?.data === "string"
+//         ? error.response.data
+//         : error?.response?.data?.message;
+
+//     return {
+//       success: false,
+//       message: msg || "Failed to update advance amount"
+//     };
+
+//   }
+// };
+const getTenantSettlement = async (customerId, date) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      `/v2/tenants/settlement/${customerId}`,
+      {
+        date,
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
     <HostelContext.Provider
       value={{
@@ -1352,7 +1759,9 @@ const sharePaymentLink = async (
         bulkGenerateRecurring,exportHostels,getTenantRecurring,generateTenantRecurring,getRecurringByTenantId,getRecurringMonth,updateBillingRule,
         deleteHostel,assignRelationalAgent,getRelationalReasons,updateTableColumns,
         resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,
-        deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,generateOrderHistory,sharePaymentLink
+        deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,
+        generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions,getInvoiceReceipt,updateInvoiceBalance,
+        getTenantById,updateAdvanceAmount, createHostelNote,getHostelNotes,getTenantSettlement
       }}
     >
       {children}

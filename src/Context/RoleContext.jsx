@@ -42,6 +42,7 @@
 // export const useRole = () => useContext(RoleContext);
 import React, { createContext, useContext, useEffect, useState } from "react";
 import api from "../Config/AxiosConfig";
+import { useLocation } from "react-router-dom";
 
 const RoleContext = createContext(null);
 
@@ -54,7 +55,7 @@ export const RoleProvider = ({ children }) => {
   const [accessError,setAccessError] = useState("")
   const [adminPermissions, setAdminPermissions] = useState([]);
   const [adminDetails, setAdminDetails] = useState(null);
-
+const location = useLocation();
 const getErrorMessage = (error) => {
   if (error?.response?.data) {
     if (typeof error.response.data === "string") {
@@ -89,10 +90,10 @@ const getErrorMessage = (error) => {
     }
   };
 
- useEffect(() => {
-  fetchModules();
-    getAdminDetails();   
-}, []);
+//  useEffect(() => {
+//   fetchModules();
+//     getAdminDetails();   
+// }, []);
   const getAgentRoles = async () => {
     try {
       setLoading(true);
@@ -115,14 +116,51 @@ const getErrorMessage = (error) => {
   };
 
   // Auto load modules on mount
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      fetchModules();
-     
-        getAdminDetails();   
-    }
-  }, []);
+//  useEffect(() => {
+
+//   const token =
+//     localStorage.getItem("access_token") ||
+//     localStorage.getItem("mock_token");
+
+//   if (!token) return;
+
+//   fetchModules();
+//   getAdminDetails();
+
+// }, []);
+
+const isTokenValid = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const currentTime = Date.now() / 1000;
+    return payload.exp > currentTime;
+  } catch {
+    return false;
+  }
+};
+
+useEffect(() => {
+
+  const token =
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("mock_token");
+
+  if (!token || !isTokenValid(token)) {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("mock_token");
+    return;
+  }
+
+
+  if (modules.length === 0) {
+    fetchModules();
+  }
+
+  if (!adminDetails) {
+    getAdminDetails();
+  }
+
+}, [location.pathname]);
   const createAgentRole = async (payload) => {
     try {
       setLoading(true);
@@ -203,12 +241,43 @@ const getAgentRoleById = async (roleId) => {
 
     return { success: false };
   } catch (error) {
+
+    if (error?.response?.status === 500) {
+      return {
+        success: false,
+        message: "Internal Server Error",
+      };
+    }
+
     const msg = getErrorMessage(error);
-    return { success: false, message: msg };
+
+    return {
+      success: false,
+      message: msg,
+    };
+
   } finally {
     setLoading(false);
   }
 };
+// const getAgentRoleById = async (roleId) => {
+//   try {
+//     setLoading(true);
+
+//     const res = await api.get(`/v2/agent-role/${roleId}`);
+
+//     if (res.status === 200) {
+//       return { success: true, data: res.data };
+//     }
+
+//     return { success: false };
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+//     return { success: false, message: msg };
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 
 const deleteAgentRole = async (roleId) => {
   try {

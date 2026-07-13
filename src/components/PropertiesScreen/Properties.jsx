@@ -25,10 +25,11 @@ import UserIcon from "../../assets/user-block.png";
 import TrialIcon from "../../assets/timer.png";
 import Arrow from "../../assets/direction-down 01.png";
 import { createPortal } from "react-dom";
+import CommentBox from "../../assets/message-2.png";
 
 
 const Properties = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, deleteHostelExpense, exportHostels, deleteHostel } = useHostel();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, deleteHostelExpense, exportHostels, deleteHostel,createHostelNote,getHostelNotes } = useHostel();
   const { createSubscription,getAgentsDropdown } = useSubscription();
   const { getPlansDropdown } = usePlan();
   const [dropdownPlans, setDropdownPlans] = useState([]);
@@ -41,6 +42,36 @@ const agentDropdownRef = useRef(null);
 const [agentFilter, setAgentFilter] = useState("");
 const [openAgentDropdown, setOpenAgentDropdown] = useState(false);
 const [filterOption, setFilterOption] = useState("TOTAL_PROPERTIES");
+const [hostelError, setHostelError] = useState("");
+
+
+
+
+
+
+const [hostelNotes, setHostelNotes] =
+  useState([]);
+
+
+
+const [isAddingNote, setIsAddingNote] = useState(false);
+const fetchHostelNotes = async (
+  hostelId
+) => {
+
+  const res =
+    await getHostelNotes(hostelId);
+
+  if (res?.success) {
+
+    setHostelNotes(
+     
+      res?.data || []
+    );
+
+  }
+
+};
 useEffect(() => {
     const fetchAgents = async () => {
       const res = await getAgentsDropdown();
@@ -62,6 +93,7 @@ useEffect(() => {
   console.log("dropdownPlans", dropdownPlans)
   // const skipApi = location.state?.skipApi;
   const { RangePicker } = DatePicker;
+  
   // const [skipFirstApi, setSkipFirstApi] = useState(location.state?.skipApi || false);
   // const [dateRange, setDateRange] = useState([]);
   const { canRead, canWrite, canUpdate, canDelete } =
@@ -71,42 +103,88 @@ useEffect(() => {
   // const [searchText, setSearchText] = useState("");
   const [pageSize, setPageSize] = useState(10);
   // const [statusFilter, setStatusFilter] = useState("");
+  
   const [page, setPage] = useState(
   location.state?.currentPage || 1
 );
 
-// const [searchText, setSearchText] = useState(
-//   location.state?.currentSearch || ""
-// );
+
+
 const locationSearch =
   location.state?.currentSearch;
 
 // const [searchText, setSearchText] = useState(
 //   locationSearch ?? ""
 // );
+// const [searchText, setSearchText] = useState(
+//   sessionStorage.getItem("propertiesSearch") || ""
+// );
+// const [searchText, setSearchText] = useState(
+//   location.state?.currentSearch ||
+//   sessionStorage.getItem("propertiesSearch") ||
+//   ""
+// );
 const [searchText, setSearchText] = useState(
-  sessionStorage.getItem("propertiesSearch") || ""
+  location.state?.fromOverview
+    ? location.state?.currentSearch || ""
+    : ""
 );
-
-const [statusFilter, setStatusFilter] = useState(
-  sessionStorage.getItem("propertiesStatus") || ""
-);
-
 const [dateRange, setDateRange] = useState(() => {
+  const range = location.state?.currentDateRange;
 
-  const stored =
-    sessionStorage.getItem("propertiesDate");
+  if (range?.length === 2) {
+    return [
+      dayjs(range[0], "YYYY-MM-DD"),
+      dayjs(range[1], "YYYY-MM-DD"),
+    ];
+  }
 
-  if (!stored) return [];
-
-  const parsed = JSON.parse(stored);
-
-  return [
-    dayjs(parsed[0]),
-    dayjs(parsed[1]),
-  ];
-
+  return null;
 });
+useEffect(() => {
+  const fromOverview = location.state?.fromOverview;
+
+  if (!fromOverview) {
+    setSearchText("");
+    setDateRange([]);
+    setStatusFilter("");
+    setPage(1);
+  }
+}, []);
+// const [statusFilter, setStatusFilter] = useState(
+//   sessionStorage.getItem("propertiesStatus") || ""
+// );
+
+// const [dateRange, setDateRange] = useState(() => {
+
+//   const stored =
+//     sessionStorage.getItem("propertiesDate");
+
+//   if (!stored) return [];
+
+//   const parsed = JSON.parse(stored);
+
+//   return [
+//     dayjs(parsed[0]),
+//     dayjs(parsed[1]),
+//   ];
+
+// });
+// const [statusFilter, setStatusFilter] = useState(
+//   location.state?.currentStatusFilter ||
+//   sessionStorage.getItem("propertiesStatus") ||
+//   ""
+// );
+const [statusFilter, setStatusFilter] = useState(
+  location.state?.fromOverview
+    ? location.state?.currentStatusFilter || ""
+    : ""
+);
+
+// const [dateRange, setDateRange] = useState(
+//   location.state?.currentDateRange || []
+// );
+
 useEffect(() => {
 
   sessionStorage.setItem(
@@ -147,18 +225,28 @@ useEffect(() => {
   }
 
 }, [dateRange]);
+
+
 useEffect(() => {
-
   if (!location.state?.currentPage) {
-
     setSearchText("");
     setDateRange([]);
     setStatusFilter("");
     setPage(1);
-
   }
-
 }, []);
+// useEffect(() => {
+
+//   if (!location.state?.currentPage) {
+
+//     setSearchText("");
+//     setDateRange([]);
+//     setStatusFilter("");
+//     setPage(1);
+
+//   }
+
+// }, []);
 
 // const [dateRange, setDateRange] = useState(
 //   location.state?.currentDateRange || []
@@ -174,7 +262,7 @@ useEffect(() => {
   const [hostelDetails, setHostelDetails] = useState("")
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [selectedHostel, setSelectedHostel] = useState(null);
-  const [hostelerror, setHostelError] = useState("")
+ 
   const [noteText, setNoteText] = useState("");
   const [openMenu, setOpenMenu] = useState(null);
   const [showResetModal, setShowResetModal] = useState(false);
@@ -356,31 +444,88 @@ useEffect(() => {
 
  
 
+const handlePropertyClick = (item) => {
+  sessionStorage.setItem(
+    "propertyOverviewState",
+    JSON.stringify({
+      currentPage: page,
+      currentSearch: searchText,
+      currentDateRange:
+        dateRange?.length === 2
+          ? [
+              dateRange[0].format("YYYY-MM-DD"),
+              dateRange[1].format("YYYY-MM-DD"),
+            ]
+          : [],
+      currentStatusFilter: statusFilter,
+    })
+  );
 
+  window.open(`/property-overview/${item.hostelId}`, "_blank");
+};
+// const handlePropertyClick = async (item) => {
+//   const res = await getHostelById(item.hostelId);
 
-  const handlePropertyClick = async (item) => {
-    const res = await getHostelById(item.hostelId);
+//   if (res?.success) {
+//     sessionStorage.setItem(
+//       "propertyOverviewState",
+//       JSON.stringify({
+//         currentPage: page,
+//         currentSearch: searchText,
+//         currentDateRange:
+//           dateRange?.length === 2
+//             ? [
+//                 dateRange[0].format("YYYY-MM-DD"),
+//                 dateRange[1].format("YYYY-MM-DD"),
+//               ]
+//             : [],
+//         currentStatusFilter: statusFilter,
+//       })
+//     );
 
-    if (res?.success) {
-      // navigate(`/property-overview/${item.hostelId}`, {
-      //   state: {
-      //     hostelData: res.data,
-      //     trialPlan: item
-      //   }
-      // });
-      navigate(`/property-overview/${item.hostelId}`, {
-  state: {
-    hostelData: res.data,
-    trialPlan: item,
+//     window.open(
+//       `/property-overview/${item.hostelId}`,
+//       "_blank"
+//     );
+//   }
+// };
+//   const handlePropertyClick = async (item) => {
+//     const res = await getHostelById(item.hostelId);
 
-    currentPage: page,
-    currentSearch: searchText,
-    currentDateRange: dateRange,
-    currentStatusFilter: statusFilter,
-  }
-});
-    }
-  };
+//     if (res?.success) {
+//       // navigate(`/property-overview/${item.hostelId}`, {
+//       //   state: {
+//       //     hostelData: res.data,
+//       //     trialPlan: item
+//       //   }
+//       // });
+// //       navigate(`/property-overview/${item.hostelId}`, {
+// //   state: {
+// //     hostelData: res.data,
+// //     trialPlan: item,
+
+// //     currentPage: page,
+// //     currentSearch: searchText,
+// //     currentDateRange: dateRange,
+// //     currentStatusFilter: statusFilter,
+// //   }
+// // });
+// navigate(`/property-overview/${item.hostelId}`, {
+//   state: {
+//     currentPage: page,
+//     currentSearch: searchText,
+//      currentDateRange:
+//       dateRange?.length === 2
+//         ? [
+//             dateRange[0].format("YYYY-MM-DD"),
+//             dateRange[1].format("YYYY-MM-DD"),
+//           ]
+//         : [],
+//     currentStatusFilter: statusFilter,
+//   }
+// });
+//     }
+//   };
 
   // };
   // const handleExport = () => {
@@ -577,7 +722,81 @@ useEffect(() => {
 
   }
 };
+const closeNotesDrawer = () => {
 
+  setShowNoteModal(false);
+
+  setNoteText("");
+
+  setHostelError("");
+
+
+
+};
+const handleAddNote = async () => {
+
+  if (isAddingNote) return;
+
+  const lettersCount =
+    noteText
+      .trim()
+      .replace(/[^a-zA-Z]/g, "")
+      .length;
+
+  if (!noteText.trim()) {
+
+    setHostelError(
+      "Please enter notes"
+    );
+
+    return;
+
+  }
+
+  if (lettersCount < 5) {
+
+    setHostelError(
+      "Notes must contain at least 5 letters"
+    );
+
+    return;
+
+  }
+
+  try {
+
+    setIsAddingNote(true);
+
+    const res =
+      await createHostelNote(
+        selectedHostelId,
+        noteText
+      );
+
+    if (res?.success) {
+
+      setNoteText("");
+      setHostelError("");
+
+      await fetchHostelNotes(
+        selectedHostelId
+      );
+
+    } else {
+
+      setHostelError(
+        res?.message
+      );
+
+    }
+
+  } finally {
+
+    setIsAddingNote(false);
+
+  }
+
+};
   return (
     <>
 
@@ -599,7 +818,15 @@ useEffect(() => {
 
           </div>
 
-        ) : (
+        )
+        : canRead === undefined ? (
+
+  
+  <div className="flex items-center justify-center h-[400px]">
+    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+) : (
 
           <>
             <Toast
@@ -1123,7 +1350,7 @@ useEffect(() => {
 </div>
 
 
-           <div className="sticky top-0 z-20 bg-white pb-4">
+           <div className="sticky top-0 z-20 bg-white-common pb-4">
 
   <div
   className="
@@ -1192,7 +1419,7 @@ useEffect(() => {
       px-4
       rounded-xl
       border border-gray-300
-      bg-white
+      bg-white-common
       flex items-center justify-between
       gap-3
       text-sm
@@ -1246,7 +1473,7 @@ useEffect(() => {
         top-[48px]
         left-0
         w-full
-        bg-white
+        bg-white-common
         border border-gray-200
         rounded-xl
         shadow-[0_10px_30px_rgba(0,0,0,0.12)]
@@ -1350,6 +1577,7 @@ useEffect(() => {
         </label>
 
         <RangePicker
+        
           value={dateRange}
           onChange={(dates) => setDateRange(dates)}
           format="DD-MM-YYYY"
@@ -1518,12 +1746,12 @@ useEffect(() => {
                           <tr key={index} className="animate-pulse">
 
                             {/* Sticky ID */}
-                            <td className="px-4 py-2 sticky left-0 bg-white z-30 w-[80px]">
+                            <td className="px-4 py-2 sticky bg-white-common z-30 w-[80px]">
                               <div className="h-4 w-6 bg-gray-200 rounded"></div>
                             </td>
 
                             {/* Sticky Name */}
-                            <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px]">
+                            <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px]">
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
                                 <div className="flex flex-col gap-2">
@@ -1575,13 +1803,13 @@ useEffect(() => {
                           <tr key={item.hostelId} className="group hover:bg-gray-50 text-[13px]">
 
                           
-                            <td className="px-4 py-2 sticky left-0 bg-white z-30 w-[80px] group-hover:bg-gray-50">
+                            <td className="px-4 py-2 sticky left-0 bg-white-common z-30 w-[80px] group-hover:!bg-gray-50">
                              
                               {(hostels?.currentPage - 1) * hostels?.sizePerPage + index + 1}
                             </td>
 
                             {/* Sticky Name */}
-                            <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] group-hover:bg-gray-50">
+                            <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] group-hover:!bg-gray-50">
 
                               <div
                                 className="flex items-center gap-3 cursor-pointer"
@@ -1652,9 +1880,10 @@ useEffect(() => {
                              <td className="px-4 py-2">
                               {item.noOfdaysSubscriptionActive || "----"}
                             </td>
-                             <td className="px-4 py-2">
-                              {item.expiredOn || "----"}
-                            </td>
+                            <td className="px-4 py-2">
+  {item.expiredOn || item.expiringAt || "----"}
+</td>
+                            
                             <td className="px-4 py-2 whitespace-nowrap">
                               {item.ownerInfo?.mobile}
                             </td>
@@ -1734,11 +1963,11 @@ useEffect(() => {
     sticky
     right-0
 
-    bg-white
+    bg-white-common
 
     z-[10]
 
-    group-hover:bg-gray-50
+    group-hover:!bg-gray-50
   "
 >
 
@@ -1830,6 +2059,26 @@ useEffect(() => {
       zIndex: 999999,
     }}
   >
+    <button
+  onClick={async () => {
+
+    setSelectedHostelId(
+      item.hostelId
+    );
+
+    await fetchHostelNotes(
+      item.hostelId
+    );
+
+    setShowNoteModal(true);
+
+    setOpenMenu(null);
+
+  }}
+  className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+>
+  Add Notes
+</button>
     <button
       onClick={() => {
         setSelectedHostelId(item.hostelId);
@@ -1935,8 +2184,8 @@ useEffect(() => {
                 </div>
 
               </div>
-              {hostels?.totalPages > 1&& (
-              <div className="flex-between px-4 py-1 text-sm bg-white">
+             
+              <div className="flex-between px-4 py-1 text-sm bg-white-common">
 
                 {/* Total Count */}
                 <span className="text-muted">
@@ -2031,7 +2280,7 @@ useEffect(() => {
 
                 </div>
               </div>
-              )}
+             
 
             </div>
             {/* // )
@@ -2122,7 +2371,7 @@ useEffect(() => {
 
     <div
       className="
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
 
@@ -2202,7 +2451,7 @@ useEffect(() => {
             onClick={() => setShowTrialPopup(false)}
           >
             <div
-              className="bg-white rounded-2xl shadow-xl w-[380px] p-6 text-center"
+              className="bg-white-common rounded-2xl shadow-xl w-[380px] p-6 text-center"
               onClick={(e) => e.stopPropagation()}
             >
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
@@ -2254,7 +2503,7 @@ useEffect(() => {
 
     <div
       className="
-        bg-white
+        bg-white-common
         rounded-2xl
         shadow-2xl
 
@@ -2359,6 +2608,284 @@ useEffect(() => {
           setShowSuccess={setShowSuccess}
           refreshData={() => getHostels(page, pageSize, searchText)}
         />
+        {showNoteModal && (
+  <div className="fixed inset-0 z-[9999]">
+
+    <div
+      className="absolute inset-0 bg-black/40"
+      onClick={closeNotesDrawer}
+    />
+
+    <div
+      className="
+        fixed
+        top-3
+        right-3
+        bottom-3
+        w-[420px]
+        bg-white-common
+        rounded-2xl
+        shadow-2xl
+        flex
+        flex-col
+        overflow-hidden
+      "
+    >
+
+      {/* Header */}
+
+      <div
+        className="
+          flex
+          justify-between
+          items-center
+          px-5
+          py-4
+          border-b
+        "
+      >
+
+        <h2
+          className="
+            text-[16px]
+            font-semibold
+          "
+        >
+          Internal Notes
+        </h2>
+
+        <button
+          onClick={closeNotesDrawer}
+          className="
+            text-red-500
+            text-lg
+            cursor-pointer
+          "
+        >
+          ✕
+        </button>
+
+      </div>
+
+      <div
+        className="
+          flex-1
+          flex
+          flex-col
+          px-5
+          py-4
+          overflow-hidden
+        "
+      >
+
+        <label
+          className="
+            text-xs
+            text-gray-500
+            mb-2
+            text-left
+          "
+        >
+          Additional Notes
+          <span className="text-red-500">
+            *
+          </span>
+        </label>
+
+        <div
+          className="
+            border
+            border-gray-300
+            rounded-xl
+            p-3
+          "
+        >
+
+          <textarea
+            placeholder="Note here"
+            value={noteText}
+            onChange={(e) => {
+
+              setNoteText(
+                e.target.value
+              );
+
+              setHostelError("");
+
+            }}
+            className="
+              w-full
+              h-24
+              resize-none
+              outline-none
+              text-sm
+            "
+          />
+
+        </div>
+
+        {hostelError && (
+          <div className="mt-2">
+            <ErrorMessage
+              message={hostelError}
+              type="error"
+            />
+          </div>
+        )}
+
+        <div
+          className="
+            flex
+            justify-end
+            mt-3
+          "
+        >
+
+          <button
+            onClick={handleAddNote}
+            disabled={isAddingNote}
+            className="
+              bg-blue-600
+              hover:bg-blue-700
+              text-white
+              px-5
+              py-2
+              rounded-lg
+              text-sm cursor-pointer
+            "
+          >
+            {isAddingNote
+              ? "Saving..."
+              : "Add"}
+          </button>
+
+        </div>
+
+        <p
+          className="
+            text-[11px]
+            text-gray-400
+            mt-5
+            mb-3
+            text-left
+          "
+        >
+          ALL NOTES
+        </p>
+
+        <div
+          className="
+            flex-1
+            overflow-y-auto
+            pr-1
+          "
+        >
+
+          <div className="space-y-5">
+
+            {hostelNotes?.map(
+              (item, index) => (
+
+              <div
+                key={index}
+                className="
+                  flex
+                  gap-3
+                "
+              >
+
+                <div
+                  className="
+                    flex
+                    flex-col
+                    items-center
+                  "
+                >
+
+                  <div
+                    className="
+                      w-9
+                      h-9
+                      rounded-full
+                      bg-[#EEF3FF]
+                      flex
+                      items-center
+                      justify-center
+                    "
+                  >
+                  <img src={CommentBox} className="w-4 h-4"/>
+                  </div>
+
+                  {index !==
+                    hostelNotes.length - 1 && (
+
+                    <div
+                      className="
+                        w-[1px]
+                        flex-1
+                        bg-gray-200
+                        mt-1
+                      "
+                    />
+
+                  )}
+
+                </div>
+
+                <div className="flex-1">
+
+                  <p
+                    className="
+                      text-sm
+                      font-semibold
+                      text-left
+                    "
+                  >
+                    {item.notes}
+                  </p>
+
+                  <p
+                    className="
+                      text-xs
+                      text-gray-500
+                      mt-1
+                      text-left
+                    "
+                  >
+                    {item.createdAtDate}
+                    {" "}
+                    {item.createdAtTime}
+                  </p>
+
+                  <p
+                    className="
+                      text-xs
+                      text-gray-400
+                      mt-2
+                      text-left
+                    "
+                  >
+                    Added by
+                    {" "}
+                    {item.createdBy}
+                  </p>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
       </DashboardLayout>
     </>
   );

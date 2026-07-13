@@ -268,7 +268,7 @@ const TableCustomization = () => {
           py-2.5
           rounded-xl
           border border-gray-200
-          bg-white
+          bg-white-common
           shadow-sm
           outline-none
           focus:ring-4
@@ -285,7 +285,7 @@ const TableCustomization = () => {
 
     <div
       className="
-        bg-white
+        bg-white-common
         rounded-2xl
         border border-gray-100
         shadow-sm
@@ -329,7 +329,7 @@ const TableCustomization = () => {
   {/* TABLE SECTION */}
   <div
     className="
-      bg-white
+      bg-white-common
       rounded-3xl
       border border-gray-100
       shadow-sm
@@ -518,7 +518,7 @@ const TableCustomization = () => {
             {/* USER ROW */}
             <tr
               className="
-                bg-white
+                bg-white-common
                 border-b border-gray-100
                 hover:bg-gray-50
                 transition-all duration-200
@@ -764,7 +764,7 @@ const TableCustomization = () => {
    
 
   </div>
-    <div className="flex justify-between items-center mt-4 bg-white px-4 py-3  w-full">
+    <div className="flex justify-between items-center mt-4 bg-white-common px-4 py-3  w-full">
 
           {/* 🔥 LEFT SIDE */}
           <div className="text-sm text-gray-600">
@@ -785,7 +785,7 @@ const TableCustomization = () => {
                   setRowsPerPage(Number(e.target.value));
                   setPage(1);
                 }}
-                className="border rounded-md px-3 py-1 text-sm bg-white"
+                className="border rounded-md px-3 py-1 text-sm bg-white-common"
               >
                 
                 <option value={10}>10</option>
@@ -810,7 +810,9 @@ const TableCustomization = () => {
               {page}
             </div>
 
-            {/* Next Button */}
+                     <span className="text-textDark/60 text-cardTitle">
+  {page} - {totalPages}
+</span>
             <button
               onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
               disabled={page === totalPages}
@@ -823,10 +825,10 @@ const TableCustomization = () => {
             </button>
 
 
-            <div className="text-sm text-gray-500">
+            {/* <div className="text-sm text-gray-500">
               {(page - 1) * rowsPerPage + 1} -{" "}
               {Math.min(page * rowsPerPage, totalRecords)}
-            </div>
+            </div> */}
 
           </div>
         </div>
@@ -847,7 +849,7 @@ const TableCustomization = () => {
           />
 
 
-          <div className="w-[420px] bg-white h-screen shadow-xl flex flex-col">
+          <div className="w-[420px] bg-white-common h-screen shadow-xl flex flex-col">
 
             {/* HEADER */}
             {/* <div className="px-5 py-4 border-b flex justify-between items-center">

@@ -82,15 +82,21 @@ const TenantRecurring = () => {
     subscriptionExpiredCount: 0
   });
   const customerDropdownRef = useRef(null);
-
+const generateRef = useRef(false);
+const [isBulkGenerating, setIsBulkGenerating] = useState(false);
+const [isGenerating, setIsGenerating] = useState(false);
   const [resStatusOptions, setResStatusOptions] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [openStatusFilter, setOpenStatusFilter] = useState(false);
   const [hostelBasedTrue, setHostelBasedTrue] = useState([])
   const [openCustomerDropdown, setOpenCustomerDropdown] = useState(null);
   const [selectedHostel, setSelectedHostel] = useState(null);
-
-  console.log("selectedItem", selectedItem)
+const [showHostelDrawer, setShowHostelDrawer] = useState(false);
+const [drawerFilterTab, setDrawerFilterTab] = useState("THIS_WEEK"); // THIS_WEEK | THIS_MONTH | MONTH_WISE | CUSTOM
+const [drawerSearch, setDrawerSearch] = useState("");
+const [drawerSelectedIds, setDrawerSelectedIds] = useState([]);
+const [cameFromHostelDrawer, setCameFromHostelDrawer] = useState(false);
+  console.log("selectedHostel", selectedHostel)
 
 
   // const fetchRecurring = async () => {
@@ -352,19 +358,29 @@ const TenantRecurring = () => {
   // }, [page, size, filter, search, statusFilter, appliedSystemFilter, billingModelFilterBy, isTableView]);
   const start = (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
-
   const handleGenerate = async (ids = []) => {
 
-    const res = await generateTenantRecurring(ids);
-    if (res?.success) {
+  if (generateRef.current || isGenerating) {
+    return;
+  }
 
+  generateRef.current = true;
+  setIsGenerating(true);
+
+  try {
+
+    const res = await generateTenantRecurring(ids);
+
+    if (res?.success) {
 
       setModalType("success");
       setMessage(res?.data);
       setShowSuccess(true);
+
       setTimeout(() => {
         setShowSuccess(false);
       }, 1500);
+
       setData(prev =>
         prev.map(item =>
           ids.includes(item.customerId)
@@ -373,7 +389,6 @@ const TenantRecurring = () => {
         )
       );
 
-
       setSelectedCustomers(prev =>
         prev.map(item =>
           ids.includes(item.customerId)
@@ -381,24 +396,268 @@ const TenantRecurring = () => {
             : item
         )
       );
+
+      setSelectedHostel(prev =>
+        prev
+          ? {
+              ...prev,
+              customerList: prev.customerList?.map(c =>
+                ids.includes(c.customerId)
+                  ? { ...c, recurringStatus: true }
+                  : c
+              )
+            }
+          : prev
+      );
+
+      setDrawerSelectedIds(prev =>
+        prev.filter(id => !ids.includes(id))
+      );
+
       fetchRecurring();
 
+    } else {
 
-    }
-    else {
-
-      setMessage(res?.message);
       setModalType("error");
-      setGenrateError(res?.message)
+      setMessage(res?.message);
+      setGenrateError(res?.message);
 
       setShowSuccess(true);
+
       setTimeout(() => {
         setShowSuccess(false);
       }, 1500);
-
     }
 
-  };
+  } catch (err) {
+
+    console.log(err);
+
+  } finally {
+
+    generateRef.current = false;
+    setIsGenerating(false);
+
+  }
+};
+const handleBulkGenerate = async () => {
+
+  if (isBulkGenerating) return;
+
+  setIsBulkGenerating(true);
+
+  try {
+
+    const res = await generateTenantRecurring(selectedIds);
+
+    if (res?.success) {
+
+      setShowBulkModal(false);
+      setSelectedIds([]);
+      setConfirmBulk(false);
+      setBulkReason("");
+      setBulkDesc("");
+
+      setModalType("success");
+      setMessage(res?.data || "Bulk Generated Successfully");
+      setShowSuccess(true);
+
+      setTimeout(() => setShowSuccess(false), 1500);
+
+      setData(prev =>
+        prev.map(item =>
+          selectedIds.includes(item.customerId)
+            ? { ...item, recurringStatus: true }
+            : item
+        )
+      );
+
+      setSelectedCustomers(prev =>
+        prev.map(item =>
+          selectedIds.includes(item.customerId)
+            ? { ...item, recurringStatus: true }
+            : item
+        )
+      );
+
+      fetchRecurring();
+
+    } else {
+
+      setModalType("error");
+      setMessage(res?.message || "Failed");
+      setGenrateError(res?.message);
+
+      setShowSuccess(true);
+
+      setTimeout(() => setShowSuccess(false), 1500);
+    }
+
+  } finally {
+
+    setIsBulkGenerating(false);
+
+  }
+};
+// const handleGenerate = async (ids = []) => {
+
+//   if (generateRef.current) return;
+
+//   generateRef.current = true;
+
+//   try {
+
+//     const res = await generateTenantRecurring(ids);
+
+//     if (res?.success) {
+
+//       setModalType("success");
+//       setMessage(res?.data);
+//       setShowSuccess(true);
+
+//       setTimeout(() => setShowSuccess(false), 1500);
+
+//       setData(prev =>
+//         prev.map(item =>
+//           ids.includes(item.customerId)
+//             ? { ...item, recurringStatus: true }
+//             : item
+//         )
+//       );
+
+//       setSelectedCustomers(prev =>
+//         prev.map(item =>
+//           ids.includes(item.customerId)
+//             ? { ...item, recurringStatus: true }
+//             : item
+//         )
+//       );
+
+//       setSelectedHostel(prev =>
+//         prev
+//           ? {
+//               ...prev,
+//               customerList: prev.customerList?.map(c =>
+//                 ids.includes(c.customerId)
+//                   ? { ...c, recurringStatus: true }
+//                   : c
+//               )
+//             }
+//           : prev
+//       );
+
+//       setDrawerSelectedIds(prev =>
+//         prev.filter(id => !ids.includes(id))
+//       );
+
+//       fetchRecurring();
+
+//     } else {
+
+//       setMessage(res?.message);
+//       setModalType("error");
+//       setGenrateError(res?.message);
+//       setShowSuccess(true);
+
+//       setTimeout(() => setShowSuccess(false), 1500);
+//     }
+
+//   } finally {
+
+//     generateRef.current = false;
+
+//   }
+// };
+// const handleGenerate = async (ids = []) => {
+//   const res = await generateTenantRecurring(ids);
+//   if (res?.success) {
+//     setModalType("success");
+//     setMessage(res?.data);
+//     setShowSuccess(true);
+//     setTimeout(() => setShowSuccess(false), 1500);
+
+//     setData(prev =>
+//       prev.map(item =>
+//         ids.includes(item.customerId) ? { ...item, recurringStatus: true } : item
+//       )
+//     );
+
+//     setSelectedCustomers(prev =>
+//       prev.map(item =>
+//         ids.includes(item.customerId) ? { ...item, recurringStatus: true } : item
+//       )
+//     );
+
+  
+//     setSelectedHostel(prev =>
+//       prev
+//         ? {
+//             ...prev,
+//             customerList: prev.customerList?.map(c =>
+//               ids.includes(c.customerId) ? { ...c, recurringStatus: true } : c
+//             )
+//           }
+//         : prev
+//     );
+
+//     setDrawerSelectedIds(prev => prev.filter(id => !ids.includes(id)));
+
+//     fetchRecurring();
+//   }
+//   else {
+//     setMessage(res?.message);
+//     setModalType("error");
+//     setGenrateError(res?.message)
+//     setShowSuccess(true);
+//     setTimeout(() => setShowSuccess(false), 1500);
+//   }
+// };
+  // const handleGenerate = async (ids = []) => {
+
+  //   const res = await generateTenantRecurring(ids);
+  //   if (res?.success) {
+
+
+  //     setModalType("success");
+  //     setMessage(res?.data);
+  //     setShowSuccess(true);
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1500);
+  //     setData(prev =>
+  //       prev.map(item =>
+  //         ids.includes(item.customerId)
+  //           ? { ...item, recurringStatus: true }
+  //           : item
+  //       )
+  //     );
+
+
+  //     setSelectedCustomers(prev =>
+  //       prev.map(item =>
+  //         ids.includes(item.customerId)
+  //           ? { ...item, recurringStatus: true }
+  //           : item
+  //       )
+  //     );
+  //     fetchRecurring();
+
+
+  //   }
+  //   else {
+
+  //     setMessage(res?.message);
+  //     setModalType("error");
+  //     setGenrateError(res?.message)
+
+  //     setShowSuccess(true);
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1500);
+
+  //   }
+
+  // };
   //   const handleGenerate = async (item) => {
 
   //   const res = await generateRecurringInvoice(
@@ -468,9 +727,9 @@ const TenantRecurring = () => {
               </button>
 
             </div> */}
-            <div className="flex items-center bg-blue-600 p-[2px] rounded-full border border-gray-300 w-fit">
+            <div className="flex items-center bg-primary p-[2px] rounded-full border border-gray-300 w-fit">
 
-              {/* TABLE VIEW */}
+             
               <button
                 // onClick={() => setIsTableView(false) setShowCustomerTable(false)}
                 onClick={() => {
@@ -480,7 +739,7 @@ const TenantRecurring = () => {
 
                 }}
                 className={`p-2 rounded-full transition-all duration-200
-      ${!isTableView ? "bg-white shadow-sm" : ""}
+      ${!isTableView ? "bg-white-common shadow-sm" : ""}
     `}
               >
                 <img
@@ -493,7 +752,7 @@ const TenantRecurring = () => {
               <button
                 onClick={() => setIsTableView(true)}
                 className={`p-2 rounded-full transition-all duration-200
-      ${isTableView ? "bg-white shadow-sm " : ""}
+      ${isTableView ? "bg-white-common shadow-sm " : ""}
     `}
               >
                 <img
@@ -510,17 +769,17 @@ const TenantRecurring = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 
-              <div className="border border-gray-200 rounded-xl p-4 bg-white">
+              <div className="border border-gray-200 rounded-xl p-4 bg-white-common">
                 <p className="text-sm text-gray-500">Total Tenant</p>
                 <p className="text-xl font-semibold mt-1">{totalTenants.totalTenants}</p>
               </div>
 
-              <div className="border border-gray-200 rounded-xl p-4 bg-white">
+              <div className="border border-gray-200 rounded-xl p-4 bg-white-common">
                 <p className="text-sm text-gray-500">Billing Today</p>
                 <p className="text-xl font-semibold mt-1">{totalTenants.billingToday}</p>
               </div>
 
-              <div className="border border-gray-200 rounded-xl p-4 bg-white">
+              <div className="border border-gray-200 rounded-xl p-4 bg-white-common">
                 <p className="text-sm text-gray-500">Due Tomorrow</p>
                 <p className="text-xl font-semibold mt-1">{totalTenants.billingTomorrow}</p>
               </div>
@@ -601,7 +860,7 @@ const TenantRecurring = () => {
                     <button
                       onClick={() => !showFilterDrawer && setOpenFilter(!openFilter)}
                       disabled={showFilterDrawer}
-                      className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
+                      className={`border-soft-light rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
     ${showFilterDrawer ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
   `}
                     >
@@ -610,7 +869,7 @@ const TenantRecurring = () => {
                     </button>
 
                     {openFilter && (
-                      <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50 max-h-40 overflow-y-auto">
+                      <div className="absolute mt-1 w-full bg-white-common border-soft-light rounded-lg shadow-md z-[9999] max-h-40 overflow-y-auto">
 
                         {filterOptions.map((item) => (
                           <div
@@ -621,7 +880,7 @@ const TenantRecurring = () => {
                               setOpenFilter(false);
                             }}
                             className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
-          ${filter === item.key ? "bg-blue-600 text-white" : ""}`}
+          ${filter === item.key ? "bg-primary text-white" : ""}`}
                           >
                             {item.label}
                           </div>
@@ -643,7 +902,7 @@ const TenantRecurring = () => {
                     <button
                       onClick={() => !showFilterDrawer && setOpenStatusFilter(!openStatusFilter)}
                       disabled={showFilterDrawer}
-                      className={`border border-gray-300 rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
+                      className={`border-soft-light rounded-lg px-3 py-2 text-sm w-full flex justify-between items-center
     ${showFilterDrawer ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
   `}
                     >
@@ -654,7 +913,7 @@ const TenantRecurring = () => {
                     </button>
 
                     {openStatusFilter && (
-                      <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50">
+                      <div className="absolute top-full left-0 mt-1 w-full bg-white-common border-soft-light rounded-lg shadow-lg z-[9999]">
 
                         {resStatusOptions.map((item) => (
                           <div
@@ -665,7 +924,7 @@ const TenantRecurring = () => {
                               setOpenStatusFilter(false);
                             }}
                             className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
-            ${statusFilter === item.key ? "bg-blue-600 text-white" : ""}
+            ${statusFilter === item.key ? "bg-primary text-white" : ""}
           `}
                           >
                             {item.label}
@@ -687,7 +946,7 @@ const TenantRecurring = () => {
                       setBillingModelFilterBy(e.target.value);
                       setPage(1);
                     }}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer w-40"
+                    className="border-soft-light rounded-lg px-3 py-2 text-sm cursor-pointer w-40"
                   >
                     {billingModelOptions?.map((item) => (
                       <option key={item.key} value={item.key}>
@@ -710,7 +969,7 @@ const TenantRecurring = () => {
 
                 <button
                   onClick={fetchRecurring}
-                  className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 cursor-pointer"
+                  className="bg-primary-hover text-white p-2 rounded-lg  cursor-pointer"
                 >
                   ⟳
                 </button>
@@ -729,7 +988,7 @@ const TenantRecurring = () => {
                       setSearch(e.target.value);
                       setPage(1);
                     }}
-                    className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm w-56"
+                    className="pl-9 pr-3 py-2 border-soft-light rounded-lg text-sm w-56"
                   />
                 </div>
 
@@ -752,7 +1011,7 @@ const TenantRecurring = () => {
                     {selectedIds.length} properties selected
                   </span>
 
-                  <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs">
+                  <span className="bg-primary-hover text-white px-2 py-0.5 rounded text-xs">
                     Cycle: 2 → 1
                   </span>
 
@@ -767,7 +1026,7 @@ const TenantRecurring = () => {
 
                   <button
                     onClick={() => setShowBulkModal(true)}
-                    className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 cursor-pointer"
+                    className="bg-primary-hover text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 cursor-pointer"
 
                   >
                     ⟳ Bulk Generate Recurring
@@ -775,7 +1034,7 @@ const TenantRecurring = () => {
 
                   <button
                     onClick={() => setSelectedIds([])}
-                    className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm cursor-pointer"
+                    className="border-soft-light px-3 py-1.5 rounded-lg text-sm cursor-pointer"
                   >
                     ✕ Clear
                   </button>
@@ -785,7 +1044,7 @@ const TenantRecurring = () => {
               </div>
             )}
             {!showCustomerTable && (
-              <div className="bg-white border border-gray-200 rounded-xl overflow-visible">
+              <div className="bg-white-common border-soft-light rounded-xl overflow-visible">
 
                 <div
                   ref={tableRef}
@@ -794,10 +1053,10 @@ const TenantRecurring = () => {
 
                   <table className="w-max min-w-full table-fixed text-sm text-left">
 
-                    <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-40">
+                    <thead className="bg-light-blue text-gray-600 text-xs uppercase sticky  top-0 z-[100]">
                       <tr>
-                        <th className="px-4 py-3 sticky left-0 bg-[#F8F9FF] z-50 w-[80px]">ID</th>
-                        <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-50 w-[100px]">Property</th>
+                        <th className="px-4 py-3 sticky left-0 bg-light-blue z-50 w-[80px]">ID</th>
+                        <th className="px-4 py-3 sticky left-[80px] bg-light-blue z-50 w-[100px]">Property</th>
                         <th className=" py-3 w-[150px] whitespace-nowrap text-left">Tenant Name</th>
                         {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Sub Status</th> */}
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Sub Status</th>
@@ -807,7 +1066,10 @@ const TenantRecurring = () => {
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Recurring mode</th>
                         {/* <th className="px-4 py-3 w-[150px] whitespace-nowrap">Tenant Count</th> */}
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Recurring Status</th>
-                        <th className="py-3 w-[150px] whitespace-nowrap text-left">Actions</th>
+                        {/* <th className="py-3 w-[150px] whitespace-nowrap text-left">Actions</th> */}
+                        <th className="sticky right-0 bg-light-blue z-50 py-3 px-4 w-[150px] whitespace-nowrap text-left">
+  Actions
+</th>
                       </tr>
                     </thead>
 
@@ -845,7 +1107,7 @@ const TenantRecurring = () => {
 
                               {/* 🔹 MAIN ROW */}
                               <tr>
-                                <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] flex items-center gap-2 text-[12px]">
+                                <td className="px-4 py-2 sticky left-0 bg-white-common z-40 w-[80px] flex items-center gap-2 text-[12px]">
 
                                   {!isTableView && (
                                     <input
@@ -864,42 +1126,50 @@ const TenantRecurring = () => {
                                   {(page - 1) * size + index + 1}
                                 </td>
 
-                                <td className="px-4 py-2 sticky left-[80px] bg-white z-30 w-[260px] text-[12px]">
+                                <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] text-[12px]">
                                   <div className="flex items-center gap-2">
 
                                     {/* 🔽 dropdown trigger */}
-                                    {isTableView && (
+                                    {/* {isTableView && (
                                       <button className="cursor-pointer"
-                                        onClick={(e) => {
-                                          const rect = e.currentTarget.getBoundingClientRect();
-
-                                          setDropdownPosition({
-                                            top: rect.bottom + window.scrollY,
-                                            left: rect.left
-                                          });
-
-                                          setSelectedHostel(item);
-
-                                          setOpenCustomerDropdown(
-                                            prev => prev === item.hostelId ? null : item.hostelId
-                                          );
-                                        }}
+                                     
                                       >
                                         <img src={ArrowDrop} className="w-5 h-5" />
                                       </button>
-                                    )}
+                                    )} */}
 
-                                    <div className="relative">
+      <div
+  className={`relative ${isTableView ? "cursor-pointer" : "cursor-not-allowed"}`}
+  onClick={() => {
+    if (!isTableView) return;
 
-                                      <span className="font-semibold">
+    setSelectedHostel(item);
+    setDrawerSelectedIds([]);
+    setDrawerSearch("");
+    setDrawerFilterTab("THIS_WEEK");
+    setShowHostelDrawer(true);
+  }}
+>
+
+                                      {/* <span className="font-semibold">
                                         {item.hostelName}
-                                      </span>
+                                      </span> */}
+                                      <span
+  className="
+    font-semibold
+    text-[#2563EB]
+    cursor-pointer
+    hover:underline
+  "
+>
+  {item.hostelName}
+</span>
 
                                       {/* DROPDOWN */}
                                       {openCustomerDropdown && (
                                         <div
                                          ref={customerDropdownRef}
-                                          className="fixed w-64 bg-white border rounded-lg shadow-lg z-[99999]"
+                                          className="fixed w-64 bg-white-common border rounded-lg shadow-lg z-[99999]"
                                           style={{
                                             top: dropdownPosition.top,
                                             left: dropdownPosition.left
@@ -931,7 +1201,7 @@ const TenantRecurring = () => {
                                           </div>
 
                                           {/* FOOTER */}
-                                          <div className="flex justify-between items-center p-2 border-t bg-white">
+                                          <div className="flex justify-between items-center p-2 border-t bg-white-common">
                                             <button
                                               onClick={() => setOpenCustomerDropdown(null)}
                                               className="text-gray-500 text-sm cursor-pointer"
@@ -944,7 +1214,7 @@ const TenantRecurring = () => {
                                                 setShowCustomerTable(true);
                                                 setOpenCustomerDropdown(null);
                                               }}
-                                              className="bg-blue-600 text-white px-3 py-1 rounded text-sm cursor-pointer"
+                                              className="bg-primary-hover text-white px-3 py-1 rounded text-sm cursor-pointer"
                                             >
                                               Done
                                             </button>
@@ -999,12 +1269,12 @@ const TenantRecurring = () => {
                                     : item.recurringStatus ? "Generated" : "Not Generated"}
                                 </td>
 
-                                <td>
+                               <td className="sticky right-0 bg-white-common z-40 px-4 py-2">
                                   {!isTableView ? (
                                     !item.recurringStatus ? (
                                       <button
                                         onClick={() => handleOpenDetails(item)}
-                                        className="px-3 py-1 bg-blue-600 text-white rounded cursor-pointer"
+                                        className="px-3 py-1 bg-primary-hover text-white rounded cursor-pointer"
                                       >
                                         Generate
                                       </button>
@@ -1017,7 +1287,7 @@ const TenantRecurring = () => {
                                       // </button>
                                       <button
                                         onClick={() => handleOpenDetails(item)}
-                                        className="px-3 py-1 rounded-lg text-xs border border-gray-300 text-blue-600 bg-white hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
+                                        className="px-3 py-1 rounded-lg text-xs border-soft-light text-blue-600 bg-white-common hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
                                       >
                                         👁 View Details
                                       </button>
@@ -1049,7 +1319,7 @@ const TenantRecurring = () => {
 
                                           <tr key={cust.customerId} className="border-t">
 
-                                            <td className="px-4 py-2 sticky left-0 bg-white z-40 w-[80px] flex items-center gap-2">
+                                            <td className="px-4 py-2 sticky left-0 bg-white-common z-40 w-[80px] flex items-center gap-2">
                                               <input
                                                 type="checkbox"
                                                 checked={selectedIds.includes(id)}
@@ -1072,7 +1342,7 @@ const TenantRecurring = () => {
                                               {!cust.recurringStatus ? (
                                                 <button
                                                   onClick={() => handleOpenDetails(cust)}
-                                                  className="px-2 py-1 text-xs bg-blue-600 text-white rounded"
+                                                  className="px-2 py-1 text-xs bg-primary-hover text-white rounded"
                                                 >
                                                   Generate
                                                 </button>
@@ -1123,12 +1393,12 @@ const TenantRecurring = () => {
                         left: tooltip.x + 10
                       }}
                     >
-                      <div className="bg-white text-gray-600 text-xs rounded-xl px-4 py-3 shadow-lg border border-gray-200 max-w-xs break-words">
+                      <div className="bg-white-common text-gray-600 text-xs rounded-xl px-4 py-3 shadow-lg border-soft-light max-w-xs break-words">
                         {tooltip.text}
                       </div>
 
                       {/* Arrow */}
-                      <div className="w-3 h-3 bg-white rotate-45 ml-4 -mt-1 border-l border-b border-gray-200"></div>
+                      <div className="w-3 h-3 bg-white-common rotate-45 ml-4 -mt-1 border-l border-b border-gray-200"></div>
                     </div>
                   )}
 
@@ -1140,7 +1410,7 @@ const TenantRecurring = () => {
               </div>
             )}
             {showCustomerTable && (
-              <div className="bg-white border border-gray-200 rounded-xl p-4 mt-4">
+              <div className="bg-white-common border-soft-light rounded-xl p-4 mt-4">
 
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="font-semibold text-sm">Selected Customers</h3>
@@ -1150,13 +1420,13 @@ const TenantRecurring = () => {
                       setShowCustomerTable(false);
                       setSelectedCustomers([]);
                     }}
-                    className="text-sm border border-gray-200 px-3 py-1 rounded cursor-pointer"
+                    className="text-sm border-soft-light px-3 py-1 rounded cursor-pointer"
                   >
                     Back
                   </button>
                 </div>
 
-                <div className="border border-gray-200 rounded-xl overflow-hidden">
+                <div className="border-soft-light rounded-xl overflow-hidden">
                   <table className="w-full text-sm">
 
 
@@ -1250,7 +1520,7 @@ const TenantRecurring = () => {
                               {!cust.recurringStatus ? (
                                 <button
                                   onClick={() => handleOpenDetails(cust)}
-                                  className="px-2 py-1 bg-blue-600 text-white rounded text-xs cursor-pointer"
+                                  className="px-2 py-1 bg-primary-hover text-white rounded text-xs cursor-pointer"
                                 >
                                   Generate
                                 </button>
@@ -1337,7 +1607,9 @@ const TenantRecurring = () => {
                   {page}
                 </span>
 
-                {/* Next */}
+             <span className="text-textDark/60 text-cardTitle">
+  {page} - {totalPages}
+</span>
              <button
   onClick={() =>
     setPage(p =>
@@ -1365,10 +1637,7 @@ const TenantRecurring = () => {
   />
 </button>
 
-                {/* Range */}
-                <span className="text-gray-400">
-                  {start} - {end}
-                </span>
+               
 
               </div>
 
@@ -1392,7 +1661,7 @@ const TenantRecurring = () => {
 
 
               <div className="relative z-[10000] flex items-center">
-                <div className="w-[420px] h-[calc(100%-40px)] my-5 mr-5 bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
+                <div className="w-[420px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
 
 
                   <div className="flex justify-between items-start p-5 border-b border-gray-200">
@@ -1689,14 +1958,43 @@ const TenantRecurring = () => {
 
                       {/* Show only if BOTH are false */}
 
-                      <button
+                      {/* <button
                         // onClick={() => handleGenerate(selectedItem)}
                         onClick={() => handleGenerate([selectedItem.customerId])}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg text-[12px] flex items-center gap-2 cursor-pointer"
                       >
                         <img src={refreshWhite} className="w-4 h-4" />
                         Generate Recurring
-                      </button>
+                      </button> */}
+                      {/* <button
+  disabled={generateRef.current}
+  onClick={() =>
+    handleGenerate([selectedItem.customerId])
+  }
+  className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 ${
+    generateRef.current
+      ? "bg-gray-400 cursor-not-allowed text-white"
+      : "bg-blue-600 cursor-pointer text-white"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  Generate Recurring
+</button> */}
+
+<button
+  disabled={isGenerating}
+  onClick={() =>
+    handleGenerate([selectedItem.customerId])
+  }
+  className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 ${
+    isGenerating
+      ? "bg-gray-400 cursor-not-allowed text-white"
+      : "bg-primary-hover cursor-pointer text-white"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  {isGenerating ? "Generating..." : "Generate Recurring"}
+</button>
 
 
                     </div>
@@ -1722,7 +2020,7 @@ const TenantRecurring = () => {
 
           {/* RIGHT DRAWER */}
           <div className="relative z-[10000] flex items-center">
-            <div className="w-[520px] h-[calc(100%-40px)] my-5 mr-5 bg-white rounded-xl shadow-xl border border-gray-300 flex flex-col animate-slideIn">
+            <div className="w-[520px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common rounded-xl shadow-xl border border-gray-300 flex flex-col animate-slideIn">
 
               {/* HEADER */}
               <div className="flex justify-between items-center p-5 border-b border-gray-300">
@@ -1910,7 +2208,7 @@ const TenantRecurring = () => {
                   <img src={refreshWhite} className="w-4 h-4" />
                   Generate
                 </button> */}
-                <button
+                {/* <button
                   // disabled={!confirmBulk || !bulkReason}
                   onClick={async () => {
                     const res = await generateTenantRecurring(selectedIds);
@@ -1966,7 +2264,19 @@ setSelectedCustomers(prev =>
                 >
                   <img src={refreshWhite} className="w-4 h-4" />
                   Generate
-                </button>
+                </button> */}
+                <button
+  disabled={isBulkGenerating}
+  onClick={handleBulkGenerate}
+  className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 ${
+    isBulkGenerating
+      ? "bg-gray-300 cursor-not-allowed"
+      : "bg-blue-700 cursor-pointer"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  {isBulkGenerating ? "Generating..." : "Generate"}
+</button>
               </div>
 
             </div>
@@ -1984,7 +2294,7 @@ setSelectedCustomers(prev =>
 
 
           <div className="relative z-[10000] flex items-center">
-            <div className="w-[380px] h-[calc(100%-40px)] my-5 mr-5 bg-white shadow-xl border border-gray-300 flex flex-col animate-slideInRight rounded-xl">        {/* HEADER */}
+            <div className="w-[380px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common shadow-xl border border-gray-300 flex flex-col animate-slideInRight rounded-xl">        {/* HEADER */}
               <div className="flex justify-between items-center p-4 border-b">
                 <p className="font-semibold flex items-center gap-2">
                   ⚙ Filter
@@ -2036,7 +2346,7 @@ setSelectedCustomers(prev =>
 
                   {/* DROPDOWN */}
                   {openSystemDropdown && (
-                    <div className="absolute mt-1 w-full bg-white border rounded-lg shadow z-50 max-h-40 overflow-y-auto text-left">
+                    <div className="absolute mt-1 w-full bg-white-common border rounded-lg shadow z-50 max-h-40 overflow-y-auto text-left">
 
                       {Array.from({ length: 31 }, (_, i) => (
                         <div
@@ -2046,7 +2356,7 @@ setSelectedCustomers(prev =>
                             setOpenSystemDropdown(false);
                           }}
                           className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
-            ${systemFilter === i + 1 ? "bg-blue-600 text-white" : ""}
+            ${systemFilter === i + 1 ? "bg-primary text-white" : ""}
           `}
                         >
                           {i + 1}
@@ -2082,7 +2392,7 @@ setSelectedCustomers(prev =>
                     setShowFilterDrawer(false);
 
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
+                  className="px-4 py-2 bg-primary text-white rounded-lg text-sm"
                 >
                   Apply Filters
                 </button>
@@ -2093,7 +2403,279 @@ setSelectedCustomers(prev =>
           </div>
         </div>
       )}
+{showHostelDrawer && selectedHostel && (
+  <div className="fixed inset-0 z-[9999] flex justify-end">
 
+    {/* Overlay */}
+    <div
+      className="fixed inset-0 bg-black/20"
+      onClick={() => setShowHostelDrawer(false)}
+    ></div>
+
+    {/* Drawer */}
+    <div className="relative z-[10000] flex items-center">
+      <div className="w-[480px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
+
+        {/* HEADER */}
+        <div className="flex justify-between items-start p-5 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-sm">
+              {selectedHostel.initials || selectedHostel.hostelName?.slice(0, 2)?.toUpperCase()}
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-sm">{selectedHostel.hostelName}</p>
+              <p className="text-xs text-gray-400">{selectedHostel.hostelId?.slice(0, 8)}</p>
+            </div>
+          </div>
+          <button className="cursor-pointer" onClick={() => setShowHostelDrawer(false)}>✕</button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5 text-xs">
+
+          {/* PROPERTY INFO */}
+          <div className="mb-4">
+            <p className="font-semibold text-gray-400 text-[11px] mb-3 text-left">PROPERTY INFO</p>
+            <div className="space-y-3 text-[13px]">
+              <div className="flex items-center gap-3">
+                <img src={location} className="w-4 h-4 opacity-60" />
+                <span className="text-gray-500 w-24 text-left">Location</span>
+                <span className="font-medium text-gray-800 text-left">
+                  {selectedHostel.city}{selectedHostel.state ? `, ${selectedHostel.state}` : ""}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <img src={call} className="w-4 h-4 opacity-60" />
+                <span className="text-gray-500 w-24 text-left">Mobile</span>
+                <span className="font-medium text-gray-800 text-left">
+                  {selectedHostel.HostelMobile || selectedHostel.mobile || "--"}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <img src={OwnerImg} className="w-4 h-4 opacity-60" />
+                <span className="text-gray-500 w-24 text-left">Owner</span>
+                <span className="font-medium text-gray-800 text-left">
+                  {selectedHostel.ownerInfo?.fullName || "--"}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <img src={team} className="w-4 h-4 opacity-60" />
+                <span className="text-gray-500 w-24 text-left">Active Tenants</span>
+                <span className="font-medium text-gray-800 text-left">
+                  {selectedHostel.activeTenantCount ?? "--"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* BILLING RULE */}
+          <div className="bg-[#F7F8FA] border border-gray-200 rounded-xl p-4 mb-4">
+            <p className="text-gray-400 text-[11px] font-semibold mb-3 text-left">BILLING RULE</p>
+            <div className="grid grid-cols-2 gap-y-3 gap-x-6 text-[13px] text-left">
+              <div>
+                <p className="text-gray-400 mb-1">Billing Method</p>
+                <p className="font-medium text-gray-800">{selectedHostel.billingType || "--"}</p>
+              </div>
+              {/* <div>
+                <p className="text-gray-400 mb-1">Billing Cycle</p>
+                <p className="font-medium text-gray-800">
+                  {selectedHostel.billingStartDay} → {selectedHostel.billingEndDay}
+                </p>
+              </div> */}
+            </div>
+          </div>
+
+          {/* STATUS BADGES */}
+          {/* <div className="flex gap-2 mb-1">
+            <span className={`px-2 py-1 text-xs rounded-full ${selectedHostel.isSubscriptionActive ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}>
+              {selectedHostel.isSubscriptionActive ? "Active" : "Expired"}
+            </span>
+            <span className={`px-2 py-1 text-xs rounded-full ${selectedHostel.recurringStatus ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"}`}>
+              {selectedHostel.recurringStatus ? "Generated" : "Pending"}
+            </span>
+          </div> */}
+
+          {/* {!selectedHostel.recurringStatus && (
+            <div className="bg-orange-100 text-orange-600 text-xs p-3 rounded-lg my-3 text-left">
+              Recurring invoices were not generated for this property. Subscription is expired.
+            </div>
+          )} */}
+
+          {/* TENANT BILLING STATUS */}
+          <div className="mt-2">
+            <div className="flex justify-between items-center mb-3">
+              <p className="font-semibold text-sm">Tenant Billing Status</p>
+              <div className="relative">
+                <img src={Search} className="absolute left-3 top-2.5 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search tenants..."
+                  value={drawerSearch}
+                  onChange={(e) => setDrawerSearch(e.target.value)}
+                  className="pl-9 pr-3 py-1.5 border border-gray-300 rounded-lg text-xs w-44"
+                />
+              </div>
+            </div>
+
+            {/* FILTER TABS */}
+            {/* <div className="flex items-center bg-gray-100 p-1 rounded-lg mb-3 w-fit text-xs">
+              {[
+                { key: "THIS_WEEK", label: "This Week" },
+                { key: "THIS_MONTH", label: "This Month" },
+                { key: "MONTH_WISE", label: "Month Wise" },
+                { key: "CUSTOM", label: "Custom Date" },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => {
+                    setDrawerFilterTab(tab.key);
+                    // 🔁 same API logic: call getRecurringByHostelId(selectedHostel.hostelId, tab.key) here if needed
+                  }}
+                  className={`px-3 py-1.5 rounded-md cursor-pointer ${drawerFilterTab === tab.key ? "bg-blue-600 text-white" : "text-gray-500"}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div> */}
+
+            {/* TENANT TABLE */}
+            <div className="border border-gray-200 rounded-xl overflow-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50 text-gray-500">
+                  <tr>
+                    <th className="p-2"></th>
+                    <th className="p-2 text-left whitespace-nowrap">Tenant Name</th>
+                    <th className="p-2 text-left whitespace-nowrap">Join Date</th>
+                    <th className="p-2 text-left whitespace-nowrap">Billing Cycle</th>
+                    {/* <th className="p-2 text-left whitespace-nowrap">Next Invoice</th> */}
+                    <th className="p-2 text-left whitespace-nowrap">Status</th>
+                    <th className="p-2 text-left whitespace-nowrap">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(selectedHostel.customerList || [])
+                    .filter(c => c.fullName?.toLowerCase().includes(drawerSearch.toLowerCase()))
+                    .map((cust) => (
+                      <tr key={cust.customerId} className="border-t border-gray-100">
+                        <td className="p-2">
+                          <input
+                            type="checkbox"
+                            checked={drawerSelectedIds.includes(cust.customerId)}
+                            disabled={cust.recurringStatus}
+                            className={`cursor-pointer ${cust.recurringStatus ? "opacity-50 cursor-not-allowed" : ""}`}
+                            onChange={() => {
+                              setDrawerSelectedIds(prev =>
+                                prev.includes(cust.customerId)
+                                  ? prev.filter(id => id !== cust.customerId)
+                                  : [...prev, cust.customerId]
+                              );
+                            }}
+                          />
+                        </td>
+                        <td className="p-2 text-left whitespace-nowrap">{cust.fullName}</td>
+                        <td className="p-2 text-left whitespace-nowrap">{cust.joiningDate || "--"}</td>
+                        <td className="p-2 text-left whitespace-nowrap">{cust.billingStartDay} → {cust.billingEndDay}</td>
+                        {/* <td className="p-2 text-left whitespace-nowrap">{formatDate(cust.nextRecurringDate) || "--"}</td> */}
+                        <td className="p-2 text-left">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px]  whitespace-nowrap ${cust.recurringStatus ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"}`}>
+                            {cust.recurringStatus ? "Generated" : "Pending"}
+                          </span>
+                        </td>
+                        
+   <td className="p-2 text-left">
+  {cust.recurringStatus ? (
+    <button
+      onClick={() => {
+        setCameFromHostelDrawer(true);
+        setShowHostelDrawer(false);
+        handleOpenDetails(cust);
+      }}
+      className="px-2 py-1 rounded text-[10px] border text-blue-600 cursor-pointer whitespace-nowrap"
+    >
+      View
+    </button>
+  ) : (
+//    <button
+//   disabled={drawerSelectedIds.includes(cust.customerId)}
+//   onClick={() => handleGenerate([cust.customerId])}
+//   className={`px-2 py-1 rounded text-[10px] text-white whitespace-nowrap ${
+//     drawerSelectedIds.includes(cust.customerId)
+//       ? "bg-gray-300 cursor-not-allowed"
+//       : "bg-blue-600 cursor-pointer"
+//   }`}
+// >
+//   Generate
+// </button>
+<button
+  disabled={
+    cust.recurringStatus ||
+    isGenerating
+  }
+  onClick={() => handleGenerate([cust.customerId])}
+  className={`px-2 py-1 rounded text-[10px] text-white whitespace-nowrap ${
+    cust.recurringStatus || isGenerating
+      ? "bg-gray-300 cursor-not-allowed"
+      : "bg-primary cursor-pointer"
+  }`}
+>
+  {isGenerating ? "Generating..." : "Generate"}
+</button>
+
+  )}
+</td>
+                        
+                      </tr>
+                    ))}
+                  {(!selectedHostel.customerList || selectedHostel.customerList.length === 0) && (
+                    <tr><td colSpan="7" className="text-center py-4 text-gray-400">No Tenants Found</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        {/* FOOTER */}
+        <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
+          <button
+            onClick={() => setShowHostelDrawer(false)}
+            className="px-4 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer"
+          >
+            Close
+          </button>
+          {/* <button
+  disabled={drawerSelectedIds.length === 0}
+  onClick={() => handleGenerate(drawerSelectedIds)}
+  className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 text-white ${
+    drawerSelectedIds.length === 0
+      ? "bg-gray-300 cursor-not-allowed"
+      : "bg-blue-600 cursor-pointer"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  Generate Recurring
+</button> */}
+<button
+  disabled={
+    drawerSelectedIds.length === 0 ||
+    isGenerating
+  }
+  onClick={() => handleGenerate(drawerSelectedIds)}
+  className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 text-white ${
+    drawerSelectedIds.length === 0 || isGenerating
+      ? "bg-gray-300 cursor-not-allowed"
+      : "bg-primary cursor-pointer"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  {isGenerating ? "Generating..." : "Generate Recurring"}
+</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };

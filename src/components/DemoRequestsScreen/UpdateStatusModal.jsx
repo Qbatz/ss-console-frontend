@@ -641,7 +641,7 @@ if (
   />
 
   {/* Drawer */}
-  <div className="fixed top-3 right-3 bottom-3 w-[420px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+  <div className="fixed top-3 right-3 bottom-3 w-[420px] bg-white-common rounded-2xl shadow-2xl flex flex-col overflow-hidden">
 
     {/* Header */}
     <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
@@ -681,7 +681,7 @@ if (
         </div>
 
         {openStatus && (
-          <div className="absolute mt-2 w-full bg-white border rounded-xl shadow max-h-40 overflow-y-auto z-50 text-left">
+          <div className="absolute mt-2 w-full bg-white-common border rounded-xl shadow max-h-40 overflow-y-auto z-50 text-left">
 
             {filteredStatuses.map((item) => (
               <div
@@ -878,7 +878,7 @@ if (
       flex
       items-center
       justify-between
-      bg-white
+      bg-white-common
     "
   >
 
@@ -903,7 +903,7 @@ if (
         left-0
         mt-1
         w-full
-        bg-white
+        bg-white-common
         border
         border-gray-300
         rounded-xl
@@ -1209,7 +1209,7 @@ onChange={(e) => {
         border-borderSoft
         rounded-2xl
         overflow-hidden
-        bg-white
+        bg-white-common
         shadow-sm
       "
     >
@@ -1346,7 +1346,7 @@ onChange={(e) => {
           </div>
 
           {openDropdown && (
-            <div className="absolute mt-2 w-full bg-white rounded-xl shadow-lg border max-h-44 overflow-y-auto z-[9999]">
+            <div className="absolute mt-2 w-full bg-white-common rounded-xl shadow-lg border max-h-44 overflow-y-auto z-[9999]">
 
               {agentList.map((agent) => (
                 <div

@@ -46,6 +46,7 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
   }, []);
 
   const customerRef = useRef(null);
+  const saveRef = useRef()
   const [propertyList, setPropertyList] = useState([]);
   const [showPropertyDropdown, setShowPropertyDropdown] = useState(false);
 
@@ -161,144 +162,288 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
     }
 
   }, [customerSearch]);
- const handleSubmit =
-  async () => {
+//  const handleSubmit = async () => {
 
-    // 🔥 already submitting na stop
-    if (isSubmitting) return;
+    
+//      if (saveRef.current) return;
 
-    const newErrors = {};
+//   saveRef.current = true;
+// setIsSubmitting(true);
+//     const newErrors = {};
 
-    if (!selectedOwner) {
-      newErrors.customer =
-        "Customer is required";
-    }
+//     if (!selectedOwner) {
+//       newErrors.customer =
+//         "Customer is required";
+//     }
 
-    if (!selectedHostel) {
-      newErrors.property =
-        "Property is required";
-    }
+//     if (!selectedHostel) {
+//       newErrors.property =
+//         "Property is required";
+//     }
 
-    if (!selectedStaff) {
-      newErrors.raisedBy =
-        "Raised by is required";
-    }
+//     if (!selectedStaff) {
+//       newErrors.raisedBy =
+//         "Raised by is required";
+//     }
 
-    if (!selectedQueryType) {
-      newErrors.queryType =
-        "Query Type is required";
-    }
+//     if (!selectedQueryType) {
+//       newErrors.queryType =
+//         "Query Type is required";
+//     }
 
-    if (!formData.subject.trim()) {
-      newErrors.subject =
-        "Subject is required";
-    }
+    
+//     const subject = formData.subject.trim();
 
-    if (!formData.date) {
-      newErrors.date =
-        "Date is required";
-    }
+// if (!subject) {
+//   newErrors.subject = "Subject is required";
+// }
+// else if (!/[a-zA-Z0-9]/.test(subject)) {
+//   newErrors.subject =
+//     "Subject must contain at least one letter or number";
+// }
+// else if (subject.length < 3) {
+//   newErrors.subject =
+//     "Subject must be at least 3 characters";
+// }
 
-    if (
-      Object.keys(newErrors)
-        .length > 0
-    ) {
+//     if (!formData.date) {
+//       newErrors.date =
+//         "Date is required";
+//     }
 
-      setErrors(newErrors);
+//     if (
+//       Object.keys(newErrors)
+//         .length > 0
+//     ) {
 
-      return;
+//       setErrors(newErrors);
 
-    }
+//       return;
 
-    setErrors({});
+//     }
 
-    try {
+//     setErrors({});
 
-      // 🔥 disable button
-      setIsSubmitting(true);
+//     try {
 
-      const payload = {
+//       // 🔥 disable button
+//       setIsSubmitting(true);
 
-        parentId:
-          selectedOwner?.parentId,
+//       const payload = {
 
-        hostelId:
-          selectedHostel?.hostelId,
+//         parentId:
+//           selectedOwner?.parentId,
 
-        raisedBy:
-          selectedStaff?.userId,
+//         hostelId:
+//           selectedHostel?.hostelId,
 
-        queryType:
-          selectedQueryType?.key,
+//         raisedBy:
+//           selectedStaff?.userId,
 
-        subject:
-          formData.subject,
+//         queryType:
+//           selectedQueryType?.key,
 
-        issueDate:
-          dayjs(formData.date)
-            .format(
-              "DD-MM-YYYY"
-            ),
+//         subject:
+//           formData.subject,
 
-        remarks:
-          formData.remarks,
+//         issueDate:
+//           dayjs(formData.date)
+//             .format(
+//               "DD-MM-YYYY"
+//             ),
 
-      };
+//         remarks:
+//           formData.remarks,
 
-      const res =
-        await createSupportTicket(
-          payload,
-          formData.file
-        );
+//       };
 
-      if (res.success) {
+//       const res =
+//         await createSupportTicket(
+//           payload,
+//           formData.file
+//         );
 
-        setModalType("success");
+//       if (res.success) {
 
-        setMessage(
-          res?.message ||
-          "Ticket Created Successfully"
-        );
+//         setModalType("success");
 
-        reFreshData();
+//         setMessage(
+//           res?.message ||
+//           "Ticket Created Successfully"
+//         );
 
-        setShowSuccess(true);
+//         reFreshData();
 
-        setTimeout(() => {
+//         setShowSuccess(true);
 
-          setShowSuccess(false);
+//         setTimeout(() => {
 
-          onClose();
+//           setShowSuccess(false);
 
-        }, 1300);
+//           onClose();
 
-      }
+//         }, 1300);
 
-    } catch (error) {
+//       }
 
+//     } catch (error) {
+
+//       setModalType("error");
+
+//       setMessage(
+//         error?.message ||
+//         "Something went wrong"
+//       );
+
+//       setShowSuccess(true);
+
+//       setTimeout(() => {
+
+//         setShowSuccess(false);
+
+//       }, 1300);
+
+//     } finally {
+
+//     saveRef.current = false;
+//       setIsSubmitting(false);
+
+//     }
+
+//   };
+
+
+const resetForm = () => {
+  setCustomerSearch("");
+  setSelectedOwner(null);
+  setSelectedHostel(null);
+  setSelectedStaff(null);
+  setSelectedQueryType(null);
+  setOwnersList([]);
+  setPropertyList([]);
+  setStaffList([]);
+  setShowDropdown(false);
+  setShowPropertyDropdown(false);
+  setShowStaffDropdown(false);
+  setShowQueryDropdown(false);
+  setErrors({});
+
+  setFormData({
+    customer: "",
+    property: "",
+    queryType: "",
+    subject: "",
+    priority: "",
+    date: dayjs(),
+    raisedBy: "",
+    remarks: "",
+    file: null,
+  });
+};
+const handleSubmit = async () => {
+
+  // 🔒 IMMEDIATELY LOCK — before anything else runs
+  if (saveRef.current) return;
+  saveRef.current = true;
+
+  const newErrors = {};
+
+  if (!selectedOwner) {
+    newErrors.customer = "Customer is required";
+  }
+
+  if (!selectedHostel) {
+    newErrors.property = "Property is required";
+  }
+
+  if (!selectedStaff) {
+    newErrors.raisedBy = "Raised by is required";
+  }
+
+  if (!selectedQueryType) {
+    newErrors.queryType = "Query Type is required";
+  }
+
+  // const subject = formData.subject.trim();
+
+  // if (!subject) {
+  //   newErrors.subject = "Subject is required";
+  // } else if (!/[a-zA-Z0-9]/.test(subject)) {
+  //   newErrors.subject =
+  //     "Subject must contain at least one letter or number";
+  // } else if (subject.length < 3) {
+  //   newErrors.subject =
+  //     "Subject must be at least 3 characters";
+  // }
+  const subject = formData.subject.trim();
+const letterCount = subject.replace(/[^a-zA-Z]/g, "").length;
+
+if (!subject) {
+  newErrors.subject = "Subject is required";
+} else if (letterCount < 5) {
+  newErrors.subject =
+    "Subject must contain at least 5 letters";
+}
+
+  if (!formData.date) {
+    newErrors.date = "Date is required";
+  }
+
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    saveRef.current = false;   // 🔓 unlock so user can retry after fixing errors
+    return;
+  }
+
+  setErrors({});
+  setIsSubmitting(true);
+
+  try {
+    const payload = {
+      parentId: selectedOwner?.parentId,
+      hostelId: selectedHostel?.hostelId,
+      raisedBy: selectedStaff?.userId,
+      queryType: selectedQueryType?.key,
+      subject: formData.subject,
+      issueDate: dayjs(formData.date).format("DD-MM-YYYY"),
+      remarks: formData.remarks,
+    };
+
+    const res = await createSupportTicket(payload, formData.file);
+
+    if (res.success) {
+      setModalType("success");
+      setMessage(res?.message || "Ticket Created Successfully");
+      reFreshData();
+      setShowSuccess(true);
+resetForm()
+      setTimeout(() => {
+        setShowSuccess(false);
+        onClose();
+        
+      }, 1300);
+    } else {
       setModalType("error");
-
-      setMessage(
-        error?.message ||
-        "Something went wrong"
-      );
-
+      setMessage(res?.message || "Something went wrong");
       setShowSuccess(true);
 
       setTimeout(() => {
-
         setShowSuccess(false);
-
       }, 1300);
-
-    } finally {
-
-      // 🔥 enable again
-      setIsSubmitting(false);
-
     }
+  } catch (error) {
+    setModalType("error");
+    setMessage(error?.message || "Something went wrong");
+    setShowSuccess(true);
 
-  };
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1300);
+  } finally {
+    saveRef.current = false;
+    setIsSubmitting(false);
+  }
+};
 
   if (!open) return null;
 
@@ -315,7 +460,10 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
 
         <div
           className="absolute inset-0 bg-black/40"
-          onClick={onClose}
+           onClick={() => {
+    resetForm();
+    onClose();
+  }}
         />
 
 
@@ -324,7 +472,7 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
     fixed
     top-3
     right-3
-    bottom-3 w-[96%] sm:w-[92%] md:w-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slideLeft">
+    bottom-3 w-[96%] sm:w-[92%] md:w-[500px] bg-white-common rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slideLeft">
 
 
           <div className="flex items-center justify-between px-6 py-5 border-b border-[#edf0f7]">
@@ -334,7 +482,10 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
             </h2>
 
             <button
-              onClick={onClose}
+               onClick={() => {
+    resetForm();
+    onClose();
+  }}
               className="text-red-500"
             >
               <X size={22} />
@@ -385,7 +536,7 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
           rounded-xl
           px-4
           flex items-center justify-between
-          bg-white
+          bg-white-common
         "
                   >
 
@@ -485,7 +636,7 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
             top-[58px]
             left-0
             right-0
-            bg-white
+            bg-white-common
             border border-soft
             rounded-xl
             shadow-xl
@@ -609,7 +760,7 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
         px-4
         flex items-center justify-between
         text-sm
-        bg-white
+       bg-white-common
       "
                 >
 
@@ -633,7 +784,7 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
     top-[58px]
     left-0
     right-0
-    bg-white
+    bg-white-common
     border border-[#e5e7eb]
     rounded-xl
     shadow-xl
@@ -777,7 +928,7 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
         px-4
         flex items-center justify-between
         text-sm
-        bg-white
+       bg-white-common
       "
                 >
 
@@ -797,7 +948,7 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
           top-[58px]
           left-0
           right-0
-          bg-white
+          bg-white-common
           border border-[#e5e7eb]
           rounded-xl
           shadow-xl
@@ -932,7 +1083,7 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
         px-4
         flex items-center justify-between
         text-sm
-        bg-white
+        bg-white-common
       "
                 >
 
@@ -952,7 +1103,7 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
           top-[58px]
           left-0
           right-0
-          bg-white
+         bg-white
           border border-[#e5e7eb]
           rounded-xl
           shadow-xl
@@ -1386,7 +1537,10 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
           <div className="px-6 py-5 border-t border-[#edf0f7] flex justify-end gap-3">
 
             <button
-              onClick={onClose}
+               onClick={() => {
+    resetForm();
+    onClose();
+  }}
               className="
               h-[44px]
               px-6
@@ -1399,7 +1553,7 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
               Cancel
             </button>
 
-            <button
+            {/* <button
               onClick={handleSubmit}
               className="
               h-[44px]
@@ -1416,8 +1570,22 @@ const CreateTicketModal = ({ open, onClose,reFreshData }) => {
       ? "Submitting..."
       : "Send & Schedule"
   }
-            </button>
-
+            </button> */}
+<button
+  onClick={handleSubmit}
+  disabled={isSubmitting}
+   onMouseDown={(e) => {
+    if (saveRef.current) e.preventDefault();
+  }}
+  className={`
+    h-[44px] px-6 rounded-xl text-white text-sm font-medium
+    ${isSubmitting
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-[#315CEC] cursor-pointer"}
+  `}
+>
+  {isSubmitting ? "Submitting..." : "Send & Schedule"}
+</button>
           </div>
 
         </div>

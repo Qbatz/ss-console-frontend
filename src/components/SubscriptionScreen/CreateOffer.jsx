@@ -48,7 +48,7 @@ const CreateOffer = () => {
           <div className="col-span-1 lg:col-span-2 space-y-6">
 
             {/* STEP 1 */}
-            <div className="bg-white p-5 rounded-xl border border-gray-200">
+            <div className="bg-white-common p-5 rounded-xl border border-gray-200">
 
               <h2 className="flex items-center gap-2 mb-4 text-left font-semibold">
 

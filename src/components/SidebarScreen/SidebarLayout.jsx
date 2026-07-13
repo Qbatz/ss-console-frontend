@@ -15,7 +15,8 @@ import Roles from "../../assets/roles.png";
 import Admin from "../../assets/adminuser.png";
 import { useDashboard } from "../../Context/DashboardContext";
 import { useLocation } from "react-router-dom";
-import Drop from "../../assets/direction-down 01.png"
+import Drop from "../../assets/direction-down 01.png";
+import VerifyImg from "../../assets/verify.png"
 
 const DashboardLayout = ({ children }) => {
 
@@ -28,7 +29,9 @@ const DashboardLayout = ({ children }) => {
   const [recurringOpen, setRecurringOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const location = useLocation();
+  const [openPlans, setOpenPlans] = useState(false);
   const menuRef = useRef(null);
+  const [plansOpen, setPlansOpen] = useState(false);
 useEffect(() => {
   const handleClickOutside = (event) => {
     if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -53,6 +56,15 @@ useEffect(() => {
       setOpenSales(true);
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+  if (
+    location.pathname.includes("/manage-plans") ||
+    location.pathname.includes("/plan-features")
+  ) {
+    setPlansOpen(true);
+  }
+}, [location.pathname]);
 
   useEffect(() => {
     getDashboard()
@@ -80,11 +92,11 @@ useEffect(() => {
   }, [location.pathname]);
   console.log("dashboardData", dashboardData);
   return (
-    <div className="h-screen flex flex-col bg-white overflow-hidden">
+    <div className="h-screen flex flex-col bg-white-common overflow-hidden">
 
 
 
-      <div className="h-[50px] bg-white border-b border-gray-200 flex items-center justify-between px-6 md:px-10 shrink-0 pb-2">
+      <div className="h-[50px] bg-white-common border-b border-gray-200 flex items-center justify-between px-6 md:px-10 shrink-0 pb-2">
 
 
         <div className="flex items-center gap-2">
@@ -147,7 +159,7 @@ useEffect(() => {
 
   {/* DROPDOWN */}
   {showProfileMenu && (
-  <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-md z-[9999]">
+  <div className="absolute right-0 mt-2 w-36 bg-white-common border border-gray-200 rounded-lg shadow-md z-[9999]">
     <button
       onClick={handleLogout}
       className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-500 cursor-pointer"
@@ -179,7 +191,7 @@ useEffect(() => {
 
         <div
           className={`
-    fixed md:static top-0 left-0 h-full w-[240px] bg-white border-r border-gray-200 pt-6 px-4
+    fixed md:static top-0 left-0 h-full w-[240px] bg-white-common border-r border-gray-200 pt-6 px-4
     transform transition-transform duration-300 z-40
     ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
   `}
@@ -271,6 +283,7 @@ useEffect(() => {
                     // activeIcon={Subscription}
                     // inactiveIcon={Subscription}
                   />
+                  
 
                   <SidebarItem
                     title="Trial Users"
@@ -290,8 +303,45 @@ useEffect(() => {
               )}
 
             </div>
-            <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} activeIcon={Billings}
-              inactiveIcon={Billings} />
+            <div>
+  {/* Parent */}
+  <div
+    onClick={() => setPlansOpen(!plansOpen)}
+    className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg"
+  >
+    <div className="flex items-center gap-3">
+      <img src={Subscription} className="w-5 h-5" />
+      <span className="text-[12px]">Plans</span>
+    </div>
+
+    <span
+      className={`transform transition ${
+        plansOpen ? "rotate-180" : ""
+      }`}
+    >
+      <img src={Drop} className="w-5 h-5" />
+    </span>
+  </div>
+
+  {/* Children */}
+  {plansOpen && (
+    <div className="ml-8 mt-1 space-y-1">
+
+      <SidebarItem
+        title="Manage Plans"
+        to={`/manage-plans/${adminDetails?.roleId}`}
+      />
+
+      <SidebarItem
+        title="Plan Features"
+        to={`/plan-features/${adminDetails?.roleId}`}
+      />
+
+    </div>
+  )}
+</div>
+            {/* <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} activeIcon={Billings}
+              inactiveIcon={Billings} /> */}
               <SidebarItem title="Invoice-Redemption" to={`/invoice-redemption/${adminDetails?.roleId}`} activeIcon={Billings}
               inactiveIcon={Billings} />
 
@@ -349,9 +399,10 @@ useEffect(() => {
 
             <SidebarItem title="Support Tickets" count="0" to={`/supportTicket/${adminDetails?.roleId}`} activeIcon={Support}
               inactiveIcon={Support} />
-
-            <SidebarItem title="CRM Dashboard" count="0" to={`/crmDashboard/${adminDetails?.roleId}`} activeIcon={Dashbord}
-              inactiveIcon={Dashbord} />
+ <SidebarItem title="KYC Pending Approval" to={`/Kyc-approve/${adminDetails?.roleId}`} activeIcon={VerifyImg}
+              inactiveIcon={VerifyImg} />
+            {/* <SidebarItem title="CRM Dashboard" count="0" to={`/crmDashboard/${adminDetails?.roleId}`} activeIcon={Dashbord}
+              inactiveIcon={Dashbord} /> */}
 
 
             <SidebarItem title="IAM-Admin User" count={dashboardData?.agentCount || 0} to={`/iam-admin-user/${adminDetails?.roleId}`} activeIcon={Admin}
@@ -372,7 +423,7 @@ useEffect(() => {
 
         {/* Scrollable Content */}
        {/* <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-6 mt-1 md:px-2 bg-white pb-14"> */}
-   <div className="flex-1 min-h-0 overflow-y-auto hide-scrollbar px-6 mt-1 md:px-2 bg-white pb-14">
+   <div className="flex-1 min-h-0 overflow-y-auto hide-scrollbar px-6 mt-1 md:px-2 bg-white-common pb-14">
           <div className="w-full">
             {children}
           </div>
