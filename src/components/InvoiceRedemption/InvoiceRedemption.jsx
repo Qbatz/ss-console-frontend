@@ -296,7 +296,7 @@ setModalType("success");
   {item.sourceInvoiceNumber}
 </td>
 
-<td className="
+{/* <td className="
     sticky left-[180px] z-20
     bg-white-common
     group-hover:!bg-gray-50
@@ -308,20 +308,64 @@ setModalType("success");
     min-w-[200px]
   ">
   {item.hostelName}
+</td> */}
+<td
+  className="
+    sticky left-[180px] z-20
+    bg-white-common
+    group-hover:!bg-gray-50
+    px-4 py-2
+    text-left
+    font-medium
+    text-[12px]
+    min-w-[200px]
+    max-w-[200px]
+  "
+>
+  <div
+    className="w-[200px] truncate"
+    title={item?.hostelName || "N/A"}
+  >
+    {item?.hostelName || "N/A"}
+  </div>
 </td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.targetInvoiceNumber}</td>
                       
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.tenantName}</td>
+                      {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.tenantName}</td> */}
+                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+  <div
+    className="w-[180px] truncate"
+    title={item?.tenantName || "N/A"}
+  >
+    {item?.tenantName || "N/A"}
+  </div>
+</td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.redemptionAmount}</td>
                       {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.referenceNumber}</td>
                         <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.reason}</td> */}
                       {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                         {item.redeemedAtDate} {item.redeemedAtTime}
                       </td> */}
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
+                      {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                         {item.createdAtDate} {item.createdAtTime}
-                      </td>
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.createdBy}</td>
+                      </td> */}
+                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+  <div className="flex flex-col">
+    <span>{item?.createdAtDate || "N/A"}</span>
+    <span className="text-[11px] text-gray-500">
+      {item?.createdAtTime || ""}
+    </span>
+  </div>
+</td>
+                      {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.createdBy}</td> */}
+                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+  <div
+    className="w-[180px] truncate"
+    title={item?.createdBy || "N/A"}
+  >
+    {item?.createdBy || "N/A"}
+  </div>
+</td>
                   <td  className="
     sticky right-0 z-20
     bg-white-common

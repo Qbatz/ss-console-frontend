@@ -845,15 +845,30 @@ const handleBulkGenerate = async () => {
                                   </div>
                                 )}
 
-                                {/* Text */}
-                                <div className="flex flex-col">
+                               
+                                {/* <div className="flex flex-col">
                                   <span className="text-[13px] font-semibold text-gray-900 text-left">
-                                    {item.hostelName}
+                                    {item?.hostelName}
                                   </span>
                                   <span className="text-[11px] text-gray-500 text-left">
-                                    {item.ownerInfo?.fullName || "----"}
+                                    {item?.ownerInfo?.fullName || "----"}
                                   </span>
-                                </div>
+                                </div> */}
+                                <div className="flex flex-col w-[180px]">
+  <span
+    className="text-[13px] font-semibold text-gray-900 text-left truncate"
+    title={item?.hostelName || "N/A"}
+  >
+    {item?.hostelName || "N/A"}
+  </span>
+
+  <span
+    className="text-[11px] text-gray-500 text-left truncate"
+    title={item?.ownerInfo?.fullName || "----"}
+  >
+    {item?.ownerInfo?.fullName || "----"}
+  </span>
+</div>
 
                               </div>
                             </td>

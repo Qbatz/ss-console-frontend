@@ -679,3 +679,26 @@ input[type=number] {
     transform: translateX(100%);
   }
 }
+.modal-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-scroll::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 999px;
+}
+
+.modal-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #7aa8ff, #315cec);
+  border-radius: 999px;
+  border: 2px solid #f8fafc;
+}
+
+.modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #5b8ef5, #1d4ed8);
+}
+
+.modal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #315cec #f8fafc;
+}

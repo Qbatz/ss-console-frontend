@@ -38,11 +38,13 @@ import Call from "../../assets/call.png";
 import { useKyc } from "../../Context/KYCContext";
 import User from "../../assets/userblack.png";
 import RoomView from "./RoomView";
+import Share from "../../assets/share.png";
+import Maxmize from "../../assets/maximize.png"
 
 const PropertyOverview = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory, sharePaymentLink, getTenantDeductions } = useHostel();
-  const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
-  const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
+  const {owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
+  const {adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription, getTrialDaysExtReason } = useSubscription();
   const [hostelData, setHostelData] = useState(null);
   const [dropdownPlans, setDropdownPlans] = useState([]);
@@ -2415,7 +2417,7 @@ const handleApproveKYC = async (customerId) => {
               "
                     >
 
-                      <tr>
+                      <tr className="whitespace-nowrap">
 
                         {[
                           "ID",
@@ -2514,7 +2516,7 @@ const handleApproveKYC = async (customerId) => {
                     >
                       {item.fullName || item.firstName || "N/A"}
                     </td> */}
-                            <td
+                            {/* <td
                               className="
     px-4
     py-3
@@ -2532,10 +2534,35 @@ const handleApproveKYC = async (customerId) => {
                               }
                             >
                               {item.fullName || item.firstName || "N/A"}
-                            </td>
+                            </td> */}
+                            <td
+  className="
+    px-4
+    py-3
+    text-left
+  "
+>
+  <div
+    className="
+      w-[120px]
+      truncate
+      text-primaryBlue
+      font-medium
+      text-tableCell
+      cursor-pointer
+      hover:underline
+    "
+    title={item.fullName || item.firstName || "N/A"}
+    onClick={() =>
+      navigate(`/tenant-overview/${item.customerId}`)
+    }
+  >
+    {item.fullName || item.firstName || "N/A"}
+  </div>
+</td>
 
                             {/* MAIL */}
-                            <td
+                            {/* <td
                               className="
                         px-4
                         py-3
@@ -2546,7 +2573,27 @@ const handleApproveKYC = async (customerId) => {
                       "
                             >
                               {item.emailId || "N/A"}
-                            </td>
+                            </td> */}
+                            <td
+  className="
+    px-4
+    py-3
+    text-left
+  "
+>
+  <div
+    className="
+      w-[130px]
+      truncate
+      font-medium
+      text-tableCell
+      text-textDark
+    "
+    title={item.emailId || "N/A"}
+  >
+    {item.emailId || "N/A"}
+  </div>
+</td>
 
                             {/* MOBILE */}
                             <td
@@ -2766,9 +2813,16 @@ const handleApproveKYC = async (customerId) => {
 
 {
   item?.canGenerateSettlement === true &&(
-     <button  onClick={() =>
-    navigate(`/settlement-summary/${item.customerId}`)
-  }
+     <button onClick={() =>
+  navigate(
+    `/settlement-summary/${item.customerId}`,
+    {
+      state: {
+        tenantData: item
+      }
+    }
+  )
+}
                                      
                                      
                                       className="
@@ -4274,10 +4328,9 @@ const handleApproveKYC = async (customerId) => {
         </div>
 
       )}
-      {showPlanModal && (
-
-        <div
-          className="
+     {showPlanModal && (
+  <div
+    className="
       fixed
       inset-0
       bg-black/40
@@ -4287,44 +4340,57 @@ const handleApproveKYC = async (customerId) => {
       z-50
       px-4
     "
-          onClick={() => {
-
-            setShowPlanModal(false);
-            resetPlanForm();
-
-          }}
-        >
-
-          <div
-            className="
+    onClick={() => {
+      setShowPlanModal(false);
+      resetPlanForm();
+    }}
+  >
+    <div
+      className="
         bg-white-common
         rounded-modal
         shadow-modal
         w-full
         max-w-[400px]
         max-h-[90vh]
-        overflow-y-auto
-        p-6
+        flex
+        flex-col
+        overflow-hidden
         animate-fadeIn
       "
-            onClick={(e) => e.stopPropagation()}
-          >
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* HEADER */}
+      <div className="shrink-0 p-6 pb-4 border-b border-[#EAECF0]">
+        <h2 className="text-cardTitle font-semibold text-headingDark text-left">
+          Buy Subscription Plan
+        </h2>
+      </div>
 
-            {/* TITLE */}
-            <h2
-              className="
-          text-cardTitle
-          font-semibold
-          text-headingDark
-          mb-5
-          text-left
+      {/* SCROLLABLE CONTENT */}
+      <div
+        className="
+          flex-1
+          overflow-y-auto
+          p-6
+
+          [&::-webkit-scrollbar]:w-[8px]
+          [&::-webkit-scrollbar-track]:bg-transparent
+          [&::-webkit-scrollbar-track]:rounded-full
+
+          [&::-webkit-scrollbar-thumb]:bg-[#bfd3ff]
+          [&::-webkit-scrollbar-thumb]:rounded-full
+          [&::-webkit-scrollbar-thumb]:border-[2px]
+          [&::-webkit-scrollbar-thumb]:border-transparent
+          [&::-webkit-scrollbar-thumb]:bg-clip-content
+
+          [&::-webkit-scrollbar-thumb:hover]:bg-[#9dbdff]
+
+          [scrollbar-width:thin]
+          [scrollbar-color:#bfd3ff_transparent]
         "
-            >
-              Buy Subscription Plan
-            </h2>
-
-            {/* PLAN NAME */}
-            <div
+      >
+  <div
               className="
           relative
           w-full
@@ -4841,72 +4907,59 @@ const handleApproveKYC = async (customerId) => {
 
             </div>
 
-            {/* PROOF ERROR */}
+        
             {proofError && (
               <ErrorMessage
                 message={proofError}
                 type="error"
               />
             )}
+      </div>
 
-            {/* BUTTONS */}
-            <div
-              className="
-          flex
-          justify-end
-          gap-3
-          mt-5
-        "
-            >
+     
+      <div className="shrink-0 border-t border-[#EAECF0] p-6">
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={() => {
+              setShowPlanModal(false);
+              resetPlanForm();
+            }}
+            className="
+              px-4
+              py-2
+              border
+              border-borderSoft
+              rounded-card
+              text-textDark/70
+              hover:bg-cardBg
+              cursor-pointer
+            "
+          >
+            Cancel
+          </button>
 
-              <button
-                onClick={() => {
-
-                  setShowPlanModal(false);
-                  resetPlanForm();
-
-                }}
-                className="
-            px-4
-            py-2
-            border
-            border-borderSoft
-            rounded-card
-            text-textDark/70
-            hover:bg-cardBg
-            cursor-pointer
-          "
-              >
-                Cancel
-              </button>
-
-              <button
-                disabled={subscriptionLoading}
-                onClick={handleSubscription}
-                className={`
-            px-4
-            py-2
-            rounded-card
-            text-white
-
-            ${subscriptionLoading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-primaryBlue cursor-pointer hover:bg-blue-700"
-                  }
-          `}
-              >
-                {subscriptionLoading
-                  ? "Submit..."
-                  : "Submit"}
-              </button>
-
-            </div>
-
-          </div>
-
+          <button
+            disabled={subscriptionLoading}
+            onClick={handleSubscription}
+            className={`
+              px-4
+              py-2
+              rounded-card
+              text-white
+              ${
+                subscriptionLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-primaryBlue cursor-pointer hover:bg-blue-700"
+              }
+            `}
+          >
+            {subscriptionLoading ? "Submit..." : "Submit"}
+          </button>
         </div>
-
-      )}
+      </div>
+    </div>
+  </div>
+)}
       {/* {showTrialConfirm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
@@ -6464,9 +6517,7 @@ const handleApproveKYC = async (customerId) => {
                       {selectedTenant?.fullName}
                     </h3>
   
-                    <button className="text-blue-600">
-                      ↗
-                    </button>
+                    <img src={Maxmize} className="w-4 h-4"/>
                   </div>
   
                   <p className="text-sm text-gray-500 mt-1">
@@ -6504,7 +6555,7 @@ const handleApproveKYC = async (customerId) => {
     }
   `}
 >
-  <span>✈</span>
+  <img src={Share} className="w-4 h-4"/>
 
   {approveLoading
     ? "Approving..."

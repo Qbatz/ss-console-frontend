@@ -1089,12 +1089,21 @@ closeNotesModal()
                         {/* <td className="px-4 py-1 text-blue-600 text-[12px] text-left">
           {item.fullName}
         </td> */}
-                        <td
+                        {/* <td
                           className="px-4 py-1 text-blue-600 text-[12px] text-left cursor-pointer hover:underline"
                           onClick={() => handleOwnerClick(item)}
                         >
                           {item.fullName}
-                        </td>
+                        </td> */}
+                        <td className="px-4 py-1 text-left">
+  <div
+    className="w-[180px] truncate text-[12px] text-blue-600 cursor-pointer hover:underline"
+    title={item.fullName}
+    onClick={() => handleOwnerClick(item)}
+  >
+    {item.fullName}
+  </div>
+</td>
 
                         <td className="px-4 py-1 text-[12px] text-left">
                           {item.emailId}
@@ -1111,7 +1120,7 @@ closeNotesModal()
                          {/* <td className="px-4 py-2 text-center text-[12px] text-left whitespace-nowrap">
   {item?.relationalAgents?.[0]?.agentName || "----"}
 </td> */}
-<td
+{/* <td
   className="
     px-4
     py-2
@@ -1145,6 +1154,37 @@ closeNotesModal()
 
   )}
 
+</td> */}
+<td
+  className="
+    px-4
+    py-2
+    text-[12px]
+    text-left
+  "
+>
+  {item?.relationalAgents?.[0]?.agentId ? (
+    <div
+      className="w-[150px] truncate"
+      title={item.relationalAgents[0].agentName}
+    >
+      <span
+        onClick={() =>
+          navigate(`/iam-user/${item.relationalAgents[0].agentId}`)
+        }
+        className="
+          text-blue-600
+          cursor-pointer
+          hover:underline
+          font-medium
+        "
+      >
+        {item.relationalAgents[0].agentName}
+      </span>
+    </div>
+  ) : (
+    "----"
+  )}
 </td>
 
                         <td className="px-4 py-1 text-[12px] text-left">

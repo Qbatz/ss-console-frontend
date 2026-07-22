@@ -461,9 +461,17 @@ const Subscription = () => {
                                 {(page - 1) * size + index + 1}
                               </td>
 
-                              <td className="px-4 py-2 text-blue-600 text-left">
+                              {/* <td className="px-4 py-2 text-blue-600 text-left">
                                 {item.hostelName}
-                              </td>
+                              </td> */}
+                              <td className="px-4 py-2 text-left">
+  <div
+    className="w-[180px] truncate text-blue-600"
+    title={item.hostelName || "N/A"}
+  >
+    {item.hostelName || "N/A"}
+  </div>
+</td>
 
                               {/* <td className="px-4 py-2">
                                 {item.ownerName}

@@ -1116,13 +1116,35 @@ if (lettersCount < 5) {
   {(page - 1) * size + index + 1}
 </td>
 
-<td className="sticky left-[70px] z-20 bg-white-common group-hover:!bg-gray-50 px-4 py-2 w-[180px] min-w-[180px] max-w-[180px] text-left">
+{/* <td className="sticky left-[70px] z-20 bg-white-common group-hover:!bg-gray-50 px-4 py-2 w-[180px] min-w-[180px] max-w-[180px] text-left">
   <button
     onClick={() => {
       setSelectedItem(item);
       setOpenOverview(true);
     }}
     className="text-blue-600 hover:underline cursor-pointer"
+  >
+    {item.name || "----"}
+  </button>
+</td> */}
+<td className="sticky left-[70px] z-20 bg-white-common group-hover:!bg-gray-50 px-4 py-2 w-[100px] min-w-[100px] max-w-[100px] text-left">
+  <button
+    onClick={() => {
+      setSelectedItem(item);
+      setOpenOverview(true);
+    }}
+    className="
+      block
+      w-full
+      overflow-hidden
+      text-ellipsis
+      whitespace-nowrap
+      text-blue-600
+      hover:underline
+      cursor-pointer
+      text-left
+    "
+    title={item.name || "----"}
   >
     {item.name || "----"}
   </button>
@@ -1288,13 +1310,31 @@ if (lettersCount < 5) {
   )}
 </td>
 
-                        <td className="px-4 py-2 text-[12px] text-left">
+                        {/* <td className="px-4 py-2 text-[12px] text-left">
                           {item.assignedTo === null
                             ? "Un Assigned"
                             : item.assignedTo?.trim() === ""
                               ? "N/A"
                               : item.assignedTo}
-                        </td>
+                        </td> */}
+                        <td className="px-4 py-2 text-left">
+  <div
+    className="w-[100px] truncate text-[12px]"
+    title={
+      item.assignedTo === null
+        ? "Un Assigned"
+        : item.assignedTo?.trim() === ""
+          ? "N/A"
+          : item.assignedTo
+    }
+  >
+    {item.assignedTo === null
+      ? "Un Assigned"
+      : item.assignedTo?.trim() === ""
+        ? "N/A"
+        : item.assignedTo}
+  </div>
+</td>
 
                         <td className="px-4 py-2 text-[12px] text-left">
                           {item.demoRequestStatus}

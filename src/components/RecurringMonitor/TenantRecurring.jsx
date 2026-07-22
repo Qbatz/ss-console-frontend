@@ -82,20 +82,20 @@ const TenantRecurring = () => {
     subscriptionExpiredCount: 0
   });
   const customerDropdownRef = useRef(null);
-const generateRef = useRef(false);
-const [isBulkGenerating, setIsBulkGenerating] = useState(false);
-const [isGenerating, setIsGenerating] = useState(false);
+  const generateRef = useRef(false);
+  const [isBulkGenerating, setIsBulkGenerating] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [resStatusOptions, setResStatusOptions] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [openStatusFilter, setOpenStatusFilter] = useState(false);
   const [hostelBasedTrue, setHostelBasedTrue] = useState([])
   const [openCustomerDropdown, setOpenCustomerDropdown] = useState(null);
   const [selectedHostel, setSelectedHostel] = useState(null);
-const [showHostelDrawer, setShowHostelDrawer] = useState(false);
-const [drawerFilterTab, setDrawerFilterTab] = useState("THIS_WEEK"); // THIS_WEEK | THIS_MONTH | MONTH_WISE | CUSTOM
-const [drawerSearch, setDrawerSearch] = useState("");
-const [drawerSelectedIds, setDrawerSelectedIds] = useState([]);
-const [cameFromHostelDrawer, setCameFromHostelDrawer] = useState(false);
+  const [showHostelDrawer, setShowHostelDrawer] = useState(false);
+  const [drawerFilterTab, setDrawerFilterTab] = useState("THIS_WEEK"); // THIS_WEEK | THIS_MONTH | MONTH_WISE | CUSTOM
+  const [drawerSearch, setDrawerSearch] = useState("");
+  const [drawerSelectedIds, setDrawerSelectedIds] = useState([]);
+  const [cameFromHostelDrawer, setCameFromHostelDrawer] = useState(false);
   console.log("selectedHostel", selectedHostel)
 
 
@@ -158,21 +158,21 @@ const [cameFromHostelDrawer, setCameFromHostelDrawer] = useState(false);
     }
   };
   useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (
-      customerDropdownRef.current &&
-      !customerDropdownRef.current.contains(event.target)
-    ) {
-      setOpenCustomerDropdown(null);
-    }
-  };
+    const handleClickOutside = (event) => {
+      if (
+        customerDropdownRef.current &&
+        !customerDropdownRef.current.contains(event.target)
+      ) {
+        setOpenCustomerDropdown(null);
+      }
+    };
 
-  document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   useEffect(() => {
     fetchRecurring();
   }, [page, size, filter, search, statusFilter, appliedSystemFilter, billingModelFilterBy, isTableView]);
@@ -360,46 +360,46 @@ const [cameFromHostelDrawer, setCameFromHostelDrawer] = useState(false);
   const end = Math.min(page * size, totalItems);
   const handleGenerate = async (ids = []) => {
 
-  if (generateRef.current || isGenerating) {
-    return;
-  }
+    if (generateRef.current || isGenerating) {
+      return;
+    }
 
-  generateRef.current = true;
-  setIsGenerating(true);
+    generateRef.current = true;
+    setIsGenerating(true);
 
-  try {
+    try {
 
-    const res = await generateTenantRecurring(ids);
+      const res = await generateTenantRecurring(ids);
 
-    if (res?.success) {
+      if (res?.success) {
 
-      setModalType("success");
-      setMessage(res?.data);
-      setShowSuccess(true);
+        setModalType("success");
+        setMessage(res?.data);
+        setShowSuccess(true);
 
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 1500);
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
 
-      setData(prev =>
-        prev.map(item =>
-          ids.includes(item.customerId)
-            ? { ...item, recurringStatus: true }
-            : item
-        )
-      );
+        setData(prev =>
+          prev.map(item =>
+            ids.includes(item.customerId)
+              ? { ...item, recurringStatus: true }
+              : item
+          )
+        );
 
-      setSelectedCustomers(prev =>
-        prev.map(item =>
-          ids.includes(item.customerId)
-            ? { ...item, recurringStatus: true }
-            : item
-        )
-      );
+        setSelectedCustomers(prev =>
+          prev.map(item =>
+            ids.includes(item.customerId)
+              ? { ...item, recurringStatus: true }
+              : item
+          )
+        );
 
-      setSelectedHostel(prev =>
-        prev
-          ? {
+        setSelectedHostel(prev =>
+          prev
+            ? {
               ...prev,
               customerList: prev.customerList?.map(c =>
                 ids.includes(c.customerId)
@@ -407,211 +407,211 @@ const [cameFromHostelDrawer, setCameFromHostelDrawer] = useState(false);
                   : c
               )
             }
-          : prev
-      );
+            : prev
+        );
 
-      setDrawerSelectedIds(prev =>
-        prev.filter(id => !ids.includes(id))
-      );
+        setDrawerSelectedIds(prev =>
+          prev.filter(id => !ids.includes(id))
+        );
 
-      fetchRecurring();
+        fetchRecurring();
 
-    } else {
+      } else {
 
-      setModalType("error");
-      setMessage(res?.message);
-      setGenrateError(res?.message);
+        setModalType("error");
+        setMessage(res?.message);
+        setGenrateError(res?.message);
 
-      setShowSuccess(true);
+        setShowSuccess(true);
 
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 1500);
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
+      }
+
+    } catch (err) {
+
+      console.log(err);
+
+    } finally {
+
+      generateRef.current = false;
+      setIsGenerating(false);
+
     }
+  };
+  const handleBulkGenerate = async () => {
 
-  } catch (err) {
+    if (isBulkGenerating) return;
 
-    console.log(err);
+    setIsBulkGenerating(true);
 
-  } finally {
+    try {
 
-    generateRef.current = false;
-    setIsGenerating(false);
+      const res = await generateTenantRecurring(selectedIds);
 
-  }
-};
-const handleBulkGenerate = async () => {
+      if (res?.success) {
 
-  if (isBulkGenerating) return;
+        setShowBulkModal(false);
+        setSelectedIds([]);
+        setConfirmBulk(false);
+        setBulkReason("");
+        setBulkDesc("");
 
-  setIsBulkGenerating(true);
+        setModalType("success");
+        setMessage(res?.data || "Bulk Generated Successfully");
+        setShowSuccess(true);
 
-  try {
+        setTimeout(() => setShowSuccess(false), 1500);
 
-    const res = await generateTenantRecurring(selectedIds);
+        setData(prev =>
+          prev.map(item =>
+            selectedIds.includes(item.customerId)
+              ? { ...item, recurringStatus: true }
+              : item
+          )
+        );
 
-    if (res?.success) {
+        setSelectedCustomers(prev =>
+          prev.map(item =>
+            selectedIds.includes(item.customerId)
+              ? { ...item, recurringStatus: true }
+              : item
+          )
+        );
 
-      setShowBulkModal(false);
-      setSelectedIds([]);
-      setConfirmBulk(false);
-      setBulkReason("");
-      setBulkDesc("");
+        fetchRecurring();
 
-      setModalType("success");
-      setMessage(res?.data || "Bulk Generated Successfully");
-      setShowSuccess(true);
+      } else {
 
-      setTimeout(() => setShowSuccess(false), 1500);
+        setModalType("error");
+        setMessage(res?.message || "Failed");
+        setGenrateError(res?.message);
 
-      setData(prev =>
-        prev.map(item =>
-          selectedIds.includes(item.customerId)
-            ? { ...item, recurringStatus: true }
-            : item
-        )
-      );
+        setShowSuccess(true);
 
-      setSelectedCustomers(prev =>
-        prev.map(item =>
-          selectedIds.includes(item.customerId)
-            ? { ...item, recurringStatus: true }
-            : item
-        )
-      );
+        setTimeout(() => setShowSuccess(false), 1500);
+      }
 
-      fetchRecurring();
+    } finally {
 
-    } else {
+      setIsBulkGenerating(false);
 
-      setModalType("error");
-      setMessage(res?.message || "Failed");
-      setGenrateError(res?.message);
-
-      setShowSuccess(true);
-
-      setTimeout(() => setShowSuccess(false), 1500);
     }
+  };
+  // const handleGenerate = async (ids = []) => {
 
-  } finally {
+  //   if (generateRef.current) return;
 
-    setIsBulkGenerating(false);
+  //   generateRef.current = true;
 
-  }
-};
-// const handleGenerate = async (ids = []) => {
+  //   try {
 
-//   if (generateRef.current) return;
+  //     const res = await generateTenantRecurring(ids);
 
-//   generateRef.current = true;
+  //     if (res?.success) {
 
-//   try {
+  //       setModalType("success");
+  //       setMessage(res?.data);
+  //       setShowSuccess(true);
 
-//     const res = await generateTenantRecurring(ids);
+  //       setTimeout(() => setShowSuccess(false), 1500);
 
-//     if (res?.success) {
+  //       setData(prev =>
+  //         prev.map(item =>
+  //           ids.includes(item.customerId)
+  //             ? { ...item, recurringStatus: true }
+  //             : item
+  //         )
+  //       );
 
-//       setModalType("success");
-//       setMessage(res?.data);
-//       setShowSuccess(true);
+  //       setSelectedCustomers(prev =>
+  //         prev.map(item =>
+  //           ids.includes(item.customerId)
+  //             ? { ...item, recurringStatus: true }
+  //             : item
+  //         )
+  //       );
 
-//       setTimeout(() => setShowSuccess(false), 1500);
+  //       setSelectedHostel(prev =>
+  //         prev
+  //           ? {
+  //               ...prev,
+  //               customerList: prev.customerList?.map(c =>
+  //                 ids.includes(c.customerId)
+  //                   ? { ...c, recurringStatus: true }
+  //                   : c
+  //               )
+  //             }
+  //           : prev
+  //       );
 
-//       setData(prev =>
-//         prev.map(item =>
-//           ids.includes(item.customerId)
-//             ? { ...item, recurringStatus: true }
-//             : item
-//         )
-//       );
+  //       setDrawerSelectedIds(prev =>
+  //         prev.filter(id => !ids.includes(id))
+  //       );
 
-//       setSelectedCustomers(prev =>
-//         prev.map(item =>
-//           ids.includes(item.customerId)
-//             ? { ...item, recurringStatus: true }
-//             : item
-//         )
-//       );
+  //       fetchRecurring();
 
-//       setSelectedHostel(prev =>
-//         prev
-//           ? {
-//               ...prev,
-//               customerList: prev.customerList?.map(c =>
-//                 ids.includes(c.customerId)
-//                   ? { ...c, recurringStatus: true }
-//                   : c
-//               )
-//             }
-//           : prev
-//       );
+  //     } else {
 
-//       setDrawerSelectedIds(prev =>
-//         prev.filter(id => !ids.includes(id))
-//       );
+  //       setMessage(res?.message);
+  //       setModalType("error");
+  //       setGenrateError(res?.message);
+  //       setShowSuccess(true);
 
-//       fetchRecurring();
+  //       setTimeout(() => setShowSuccess(false), 1500);
+  //     }
 
-//     } else {
+  //   } finally {
 
-//       setMessage(res?.message);
-//       setModalType("error");
-//       setGenrateError(res?.message);
-//       setShowSuccess(true);
+  //     generateRef.current = false;
 
-//       setTimeout(() => setShowSuccess(false), 1500);
-//     }
+  //   }
+  // };
+  // const handleGenerate = async (ids = []) => {
+  //   const res = await generateTenantRecurring(ids);
+  //   if (res?.success) {
+  //     setModalType("success");
+  //     setMessage(res?.data);
+  //     setShowSuccess(true);
+  //     setTimeout(() => setShowSuccess(false), 1500);
 
-//   } finally {
+  //     setData(prev =>
+  //       prev.map(item =>
+  //         ids.includes(item.customerId) ? { ...item, recurringStatus: true } : item
+  //       )
+  //     );
 
-//     generateRef.current = false;
+  //     setSelectedCustomers(prev =>
+  //       prev.map(item =>
+  //         ids.includes(item.customerId) ? { ...item, recurringStatus: true } : item
+  //       )
+  //     );
 
-//   }
-// };
-// const handleGenerate = async (ids = []) => {
-//   const res = await generateTenantRecurring(ids);
-//   if (res?.success) {
-//     setModalType("success");
-//     setMessage(res?.data);
-//     setShowSuccess(true);
-//     setTimeout(() => setShowSuccess(false), 1500);
 
-//     setData(prev =>
-//       prev.map(item =>
-//         ids.includes(item.customerId) ? { ...item, recurringStatus: true } : item
-//       )
-//     );
+  //     setSelectedHostel(prev =>
+  //       prev
+  //         ? {
+  //             ...prev,
+  //             customerList: prev.customerList?.map(c =>
+  //               ids.includes(c.customerId) ? { ...c, recurringStatus: true } : c
+  //             )
+  //           }
+  //         : prev
+  //     );
 
-//     setSelectedCustomers(prev =>
-//       prev.map(item =>
-//         ids.includes(item.customerId) ? { ...item, recurringStatus: true } : item
-//       )
-//     );
+  //     setDrawerSelectedIds(prev => prev.filter(id => !ids.includes(id)));
 
-  
-//     setSelectedHostel(prev =>
-//       prev
-//         ? {
-//             ...prev,
-//             customerList: prev.customerList?.map(c =>
-//               ids.includes(c.customerId) ? { ...c, recurringStatus: true } : c
-//             )
-//           }
-//         : prev
-//     );
-
-//     setDrawerSelectedIds(prev => prev.filter(id => !ids.includes(id)));
-
-//     fetchRecurring();
-//   }
-//   else {
-//     setMessage(res?.message);
-//     setModalType("error");
-//     setGenrateError(res?.message)
-//     setShowSuccess(true);
-//     setTimeout(() => setShowSuccess(false), 1500);
-//   }
-// };
+  //     fetchRecurring();
+  //   }
+  //   else {
+  //     setMessage(res?.message);
+  //     setModalType("error");
+  //     setGenrateError(res?.message)
+  //     setShowSuccess(true);
+  //     setTimeout(() => setShowSuccess(false), 1500);
+  //   }
+  // };
   // const handleGenerate = async (ids = []) => {
 
   //   const res = await generateTenantRecurring(ids);
@@ -729,7 +729,7 @@ const handleBulkGenerate = async () => {
             </div> */}
             <div className="flex items-center bg-primary p-[2px] rounded-full border border-gray-300 w-fit">
 
-             
+
               <button
                 // onClick={() => setIsTableView(false) setShowCustomerTable(false)}
                 onClick={() => {
@@ -955,13 +955,13 @@ const handleBulkGenerate = async () => {
                     ))}
                   </select>
                 </div>
-<div className="mb-3">
-  <img
-    src={Filter}
-    className="w-4 h-4 cursor-pointer"
-    onClick={() => setShowFilterDrawer(true)}
-  />
-</div>
+                <div className="mb-3">
+                  <img
+                    src={Filter}
+                    className="w-4 h-4 cursor-pointer"
+                    onClick={() => setShowFilterDrawer(true)}
+                  />
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
@@ -1068,8 +1068,8 @@ const handleBulkGenerate = async () => {
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Recurring Status</th>
                         {/* <th className="py-3 w-[150px] whitespace-nowrap text-left">Actions</th> */}
                         <th className="sticky right-0 bg-light-blue z-50 py-3 px-4 w-[150px] whitespace-nowrap text-left">
-  Actions
-</th>
+                          Actions
+                        </th>
                       </tr>
                     </thead>
 
@@ -1126,49 +1126,32 @@ const handleBulkGenerate = async () => {
                                   {(page - 1) * size + index + 1}
                                 </td>
 
-                                <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] text-[12px]">
+                                <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] min-w-[260px] max-w-[260px] text-[12px]">
                                   <div className="flex items-center gap-2">
+                                    <div
+                                      className={`relative w-[220px] ${isTableView ? "cursor-pointer" : "cursor-not-allowed"
+                                        }`}
+                                      onClick={() => {
+                                        if (!isTableView) return;
 
-                                    {/* 🔽 dropdown trigger */}
-                                    {/* {isTableView && (
-                                      <button className="cursor-pointer"
-                                     
-                                      >
-                                        <img src={ArrowDrop} className="w-5 h-5" />
-                                      </button>
-                                    )} */}
-
-      <div
-  className={`relative ${isTableView ? "cursor-pointer" : "cursor-not-allowed"}`}
-  onClick={() => {
-    if (!isTableView) return;
-
-    setSelectedHostel(item);
-    setDrawerSelectedIds([]);
-    setDrawerSearch("");
-    setDrawerFilterTab("THIS_WEEK");
-    setShowHostelDrawer(true);
-  }}
->
-
-                                      {/* <span className="font-semibold">
-                                        {item.hostelName}
-                                      </span> */}
+                                        setSelectedHostel(item);
+                                        setDrawerSelectedIds([]);
+                                        setDrawerSearch("");
+                                        setDrawerFilterTab("THIS_WEEK");
+                                        setShowHostelDrawer(true);
+                                      }}
+                                    >
                                       <span
-  className="
-    font-semibold
-    text-[#2563EB]
-    cursor-pointer
-    hover:underline
-  "
->
-  {item.hostelName}
-</span>
+                                        className="block w-full truncate font-semibold text-[#2563EB] hover:underline"
+                                        title={item?.hostelName || "N/A"}
+                                      >
+                                        {item?.hostelName || "N/A"}
+                                      </span>
 
-                                      {/* DROPDOWN */}
+
                                       {openCustomerDropdown && (
                                         <div
-                                         ref={customerDropdownRef}
+                                          ref={customerDropdownRef}
                                           className="fixed w-64 bg-white-common border rounded-lg shadow-lg z-[99999]"
                                           style={{
                                             top: dropdownPosition.top,
@@ -1227,16 +1210,19 @@ const handleBulkGenerate = async () => {
                                   </div>
                                 </td>
 
-                                <td className="text-left text-[12px]">{isTableView ? "--" : item.fullName}</td>
-
-                                {/* <td className="text-[12px]">
-                                  {isTableView
-                                    ? "--"
-                                    : item.recurringStatus ? "Generated" : "Blocked"}
-                                </td> */}
-                                                             <td className="text-[12px]">
-  {item.isSubscriptionActive ? "Active" : "Blocked"}
+                                {/* <td className="text-left text-[12px]">{isTableView ? "--" : item.fullName}</td> */}
+<td className="px-4 py-2 text-left text-[12px]">
+  <div
+    className="w-[180px] truncate"
+    title={isTableView ? "--" : item?.fullName || "N/A"}
+  >
+    {isTableView ? "--" : item?.fullName || "N/A"}
+  </div>
 </td>
+
+                                <td className="text-[12px]">
+                                  {item.isSubscriptionActive ? "Active" : "Blocked"}
+                                </td>
 
                                 <td className="text-left text-[12px]">
                                   {isTableView
@@ -1269,7 +1255,7 @@ const handleBulkGenerate = async () => {
                                     : item.recurringStatus ? "Generated" : "Not Generated"}
                                 </td>
 
-                               <td className="sticky right-0 bg-white-common z-40 px-4 py-2">
+                                <td className="sticky right-0 bg-white-common z-40 px-4 py-2">
                                   {!isTableView ? (
                                     !item.recurringStatus ? (
                                       <button
@@ -1577,67 +1563,65 @@ const handleBulkGenerate = async () => {
                 </select>
 
                 {/* Prev */}
-              <button
-  onClick={() =>
-    setPage(p => Math.max(p - 1, 1))
-  }
-  disabled={
-    page === 1 ||
-    data?.length === 0
-  }
-  className={`
+                <button
+                  onClick={() =>
+                    setPage(p => Math.max(p - 1, 1))
+                  }
+                  disabled={
+                    page === 1 ||
+                    data?.length === 0
+                  }
+                  className={`
     px-2
 
-    ${
-      page === 1 ||
-      data?.length === 0
-        ? "opacity-40 cursor-not-allowed"
-        : "cursor-pointer"
-    }
+    ${page === 1 ||
+                      data?.length === 0
+                      ? "opacity-40 cursor-not-allowed"
+                      : "cursor-pointer"
+                    }
   `}
->
-  <img
-    src={Arrow}
-    className="w-4 h-4"
-  />
-</button>
+                >
+                  <img
+                    src={Arrow}
+                    className="w-4 h-4"
+                  />
+                </button>
 
                 {/* Current Page */}
                 <span className="border px-2 py-1 rounded bg-gray-50">
                   {page}
                 </span>
 
-             <span className="text-textDark/60 text-cardTitle">
-  {page} - {totalPages}
-</span>
-             <button
-  onClick={() =>
-    setPage(p =>
-      Math.min(p + 1, totalPages)
-    )
-  }
-  disabled={
-    page >= totalPages ||
-    data?.length === 0
-  }
-  className={`
+                <span className="text-textDark/60 text-cardTitle">
+                  {page} - {totalPages}
+                </span>
+                <button
+                  onClick={() =>
+                    setPage(p =>
+                      Math.min(p + 1, totalPages)
+                    )
+                  }
+                  disabled={
+                    page >= totalPages ||
+                    data?.length === 0
+                  }
+                  className={`
     px-2
 
-    ${
-      page >= totalPages ||
-      data?.length === 0
-        ? "opacity-40 cursor-not-allowed"
-        : "cursor-pointer"
-    }
+    ${page >= totalPages ||
+                      data?.length === 0
+                      ? "opacity-40 cursor-not-allowed"
+                      : "cursor-pointer"
+                    }
   `}
->
-  <img
-    src={Arrow}
-    className="w-4 h-4 rotate-180"
-  />
-</button>
+                >
+                  <img
+                    src={Arrow}
+                    className="w-4 h-4 rotate-180"
+                  />
+                </button>
 
-               
+
 
               </div>
 
@@ -1919,7 +1903,7 @@ const handleBulkGenerate = async () => {
                         </table>
 
                       </div>
-                    
+
                     </div>
 
                   </div>
@@ -1981,20 +1965,19 @@ const handleBulkGenerate = async () => {
   Generate Recurring
 </button> */}
 
-<button
-  disabled={isGenerating}
-  onClick={() =>
-    handleGenerate([selectedItem.customerId])
-  }
-  className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 ${
-    isGenerating
-      ? "bg-gray-400 cursor-not-allowed text-white"
-      : "bg-primary-hover cursor-pointer text-white"
-  }`}
->
-  <img src={refreshWhite} className="w-4 h-4" />
-  {isGenerating ? "Generating..." : "Generate Recurring"}
-</button>
+                      <button
+                        disabled={isGenerating}
+                        onClick={() =>
+                          handleGenerate([selectedItem.customerId])
+                        }
+                        className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 ${isGenerating
+                            ? "bg-gray-400 cursor-not-allowed text-white"
+                            : "bg-primary-hover cursor-pointer text-white"
+                          }`}
+                      >
+                        <img src={refreshWhite} className="w-4 h-4" />
+                        {isGenerating ? "Generating..." : "Generate Recurring"}
+                      </button>
 
 
                     </div>
@@ -2266,17 +2249,16 @@ setSelectedCustomers(prev =>
                   Generate
                 </button> */}
                 <button
-  disabled={isBulkGenerating}
-  onClick={handleBulkGenerate}
-  className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 ${
-    isBulkGenerating
-      ? "bg-gray-300 cursor-not-allowed"
-      : "bg-blue-700 cursor-pointer"
-  }`}
->
-  <img src={refreshWhite} className="w-4 h-4" />
-  {isBulkGenerating ? "Generating..." : "Generate"}
-</button>
+                  disabled={isBulkGenerating}
+                  onClick={handleBulkGenerate}
+                  className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 ${isBulkGenerating
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : "bg-blue-700 cursor-pointer"
+                    }`}
+                >
+                  <img src={refreshWhite} className="w-4 h-4" />
+                  {isBulkGenerating ? "Generating..." : "Generate"}
+                </button>
               </div>
 
             </div>
@@ -2403,89 +2385,89 @@ setSelectedCustomers(prev =>
           </div>
         </div>
       )}
-{showHostelDrawer && selectedHostel && (
-  <div className="fixed inset-0 z-[9999] flex justify-end">
+      {showHostelDrawer && selectedHostel && (
+        <div className="fixed inset-0 z-[9999] flex justify-end">
 
-    {/* Overlay */}
-    <div
-      className="fixed inset-0 bg-black/20"
-      onClick={() => setShowHostelDrawer(false)}
-    ></div>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black/20"
+            onClick={() => setShowHostelDrawer(false)}
+          ></div>
 
-    {/* Drawer */}
-    <div className="relative z-[10000] flex items-center">
-      <div className="w-[480px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
+          {/* Drawer */}
+          <div className="relative z-[10000] flex items-center">
+            <div className="w-[480px] h-[calc(100%-40px)] my-5 mr-5 bg-white-common rounded-xl shadow-xl border border-gray-200 flex flex-col animate-slideIn">
 
-        {/* HEADER */}
-        <div className="flex justify-between items-start p-5 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-sm">
-              {selectedHostel.initials || selectedHostel.hostelName?.slice(0, 2)?.toUpperCase()}
-            </div>
-            <div className="text-left">
-              <p className="font-semibold text-sm">{selectedHostel.hostelName}</p>
-              <p className="text-xs text-gray-400">{selectedHostel.hostelId?.slice(0, 8)}</p>
-            </div>
-          </div>
-          <button className="cursor-pointer" onClick={() => setShowHostelDrawer(false)}>✕</button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-5 text-xs">
-
-          {/* PROPERTY INFO */}
-          <div className="mb-4">
-            <p className="font-semibold text-gray-400 text-[11px] mb-3 text-left">PROPERTY INFO</p>
-            <div className="space-y-3 text-[13px]">
-              <div className="flex items-center gap-3">
-                <img src={location} className="w-4 h-4 opacity-60" />
-                <span className="text-gray-500 w-24 text-left">Location</span>
-                <span className="font-medium text-gray-800 text-left">
-                  {selectedHostel.city}{selectedHostel.state ? `, ${selectedHostel.state}` : ""}
-                </span>
+              {/* HEADER */}
+              <div className="flex justify-between items-start p-5 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-sm">
+                    {selectedHostel.initials || selectedHostel.hostelName?.slice(0, 2)?.toUpperCase()}
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-sm">{selectedHostel.hostelName}</p>
+                    <p className="text-xs text-gray-400">{selectedHostel.hostelId?.slice(0, 8)}</p>
+                  </div>
+                </div>
+                <button className="cursor-pointer" onClick={() => setShowHostelDrawer(false)}>✕</button>
               </div>
-              <div className="flex items-center gap-3">
-                <img src={call} className="w-4 h-4 opacity-60" />
-                <span className="text-gray-500 w-24 text-left">Mobile</span>
-                <span className="font-medium text-gray-800 text-left">
-                  {selectedHostel.HostelMobile || selectedHostel.mobile || "--"}
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <img src={OwnerImg} className="w-4 h-4 opacity-60" />
-                <span className="text-gray-500 w-24 text-left">Owner</span>
-                <span className="font-medium text-gray-800 text-left">
-                  {selectedHostel.ownerInfo?.fullName || "--"}
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <img src={team} className="w-4 h-4 opacity-60" />
-                <span className="text-gray-500 w-24 text-left">Active Tenants</span>
-                <span className="font-medium text-gray-800 text-left">
-                  {selectedHostel.activeTenantCount ?? "--"}
-                </span>
-              </div>
-            </div>
-          </div>
 
-          {/* BILLING RULE */}
-          <div className="bg-[#F7F8FA] border border-gray-200 rounded-xl p-4 mb-4">
-            <p className="text-gray-400 text-[11px] font-semibold mb-3 text-left">BILLING RULE</p>
-            <div className="grid grid-cols-2 gap-y-3 gap-x-6 text-[13px] text-left">
-              <div>
-                <p className="text-gray-400 mb-1">Billing Method</p>
-                <p className="font-medium text-gray-800">{selectedHostel.billingType || "--"}</p>
-              </div>
-              {/* <div>
+              <div className="flex-1 overflow-y-auto p-5 text-xs">
+
+                {/* PROPERTY INFO */}
+                <div className="mb-4">
+                  <p className="font-semibold text-gray-400 text-[11px] mb-3 text-left">PROPERTY INFO</p>
+                  <div className="space-y-3 text-[13px]">
+                    <div className="flex items-center gap-3">
+                      <img src={location} className="w-4 h-4 opacity-60" />
+                      <span className="text-gray-500 w-24 text-left">Location</span>
+                      <span className="font-medium text-gray-800 text-left">
+                        {selectedHostel.city}{selectedHostel.state ? `, ${selectedHostel.state}` : ""}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <img src={call} className="w-4 h-4 opacity-60" />
+                      <span className="text-gray-500 w-24 text-left">Mobile</span>
+                      <span className="font-medium text-gray-800 text-left">
+                        {selectedHostel.HostelMobile || selectedHostel.mobile || "--"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <img src={OwnerImg} className="w-4 h-4 opacity-60" />
+                      <span className="text-gray-500 w-24 text-left">Owner</span>
+                      <span className="font-medium text-gray-800 text-left">
+                        {selectedHostel.ownerInfo?.fullName || "--"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <img src={team} className="w-4 h-4 opacity-60" />
+                      <span className="text-gray-500 w-24 text-left">Active Tenants</span>
+                      <span className="font-medium text-gray-800 text-left">
+                        {selectedHostel.activeTenantCount ?? "--"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* BILLING RULE */}
+                <div className="bg-[#F7F8FA] border border-gray-200 rounded-xl p-4 mb-4">
+                  <p className="text-gray-400 text-[11px] font-semibold mb-3 text-left">BILLING RULE</p>
+                  <div className="grid grid-cols-2 gap-y-3 gap-x-6 text-[13px] text-left">
+                    <div>
+                      <p className="text-gray-400 mb-1">Billing Method</p>
+                      <p className="font-medium text-gray-800">{selectedHostel.billingType || "--"}</p>
+                    </div>
+                    {/* <div>
                 <p className="text-gray-400 mb-1">Billing Cycle</p>
                 <p className="font-medium text-gray-800">
                   {selectedHostel.billingStartDay} → {selectedHostel.billingEndDay}
                 </p>
               </div> */}
-            </div>
-          </div>
+                  </div>
+                </div>
 
-          {/* STATUS BADGES */}
-          {/* <div className="flex gap-2 mb-1">
+                {/* STATUS BADGES */}
+                {/* <div className="flex gap-2 mb-1">
             <span className={`px-2 py-1 text-xs rounded-full ${selectedHostel.isSubscriptionActive ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}>
               {selectedHostel.isSubscriptionActive ? "Active" : "Expired"}
             </span>
@@ -2494,30 +2476,30 @@ setSelectedCustomers(prev =>
             </span>
           </div> */}
 
-          {/* {!selectedHostel.recurringStatus && (
+                {/* {!selectedHostel.recurringStatus && (
             <div className="bg-orange-100 text-orange-600 text-xs p-3 rounded-lg my-3 text-left">
               Recurring invoices were not generated for this property. Subscription is expired.
             </div>
           )} */}
 
-          {/* TENANT BILLING STATUS */}
-          <div className="mt-2">
-            <div className="flex justify-between items-center mb-3">
-              <p className="font-semibold text-sm">Tenant Billing Status</p>
-              <div className="relative">
-                <img src={Search} className="absolute left-3 top-2.5 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search tenants..."
-                  value={drawerSearch}
-                  onChange={(e) => setDrawerSearch(e.target.value)}
-                  className="pl-9 pr-3 py-1.5 border border-gray-300 rounded-lg text-xs w-44"
-                />
-              </div>
-            </div>
+                {/* TENANT BILLING STATUS */}
+                <div className="mt-2">
+                  <div className="flex justify-between items-center mb-3">
+                    <p className="font-semibold text-sm">Tenant Billing Status</p>
+                    <div className="relative">
+                      <img src={Search} className="absolute left-3 top-2.5 w-4 h-4" />
+                      <input
+                        type="text"
+                        placeholder="Search tenants..."
+                        value={drawerSearch}
+                        onChange={(e) => setDrawerSearch(e.target.value)}
+                        className="pl-9 pr-3 py-1.5 border border-gray-300 rounded-lg text-xs w-44"
+                      />
+                    </div>
+                  </div>
 
-            {/* FILTER TABS */}
-            {/* <div className="flex items-center bg-gray-100 p-1 rounded-lg mb-3 w-fit text-xs">
+                  {/* FILTER TABS */}
+                  {/* <div className="flex items-center bg-gray-100 p-1 rounded-lg mb-3 w-fit text-xs">
               {[
                 { key: "THIS_WEEK", label: "This Week" },
                 { key: "THIS_MONTH", label: "This Month" },
@@ -2537,113 +2519,112 @@ setSelectedCustomers(prev =>
               ))}
             </div> */}
 
-            {/* TENANT TABLE */}
-            <div className="border border-gray-200 rounded-xl overflow-auto">
-              <table className="w-full text-xs">
-                <thead className="bg-gray-50 text-gray-500">
-                  <tr>
-                    <th className="p-2"></th>
-                    <th className="p-2 text-left whitespace-nowrap">Tenant Name</th>
-                    <th className="p-2 text-left whitespace-nowrap">Join Date</th>
-                    <th className="p-2 text-left whitespace-nowrap">Billing Cycle</th>
-                    {/* <th className="p-2 text-left whitespace-nowrap">Next Invoice</th> */}
-                    <th className="p-2 text-left whitespace-nowrap">Status</th>
-                    <th className="p-2 text-left whitespace-nowrap">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(selectedHostel.customerList || [])
-                    .filter(c => c.fullName?.toLowerCase().includes(drawerSearch.toLowerCase()))
-                    .map((cust) => (
-                      <tr key={cust.customerId} className="border-t border-gray-100">
-                        <td className="p-2">
-                          <input
-                            type="checkbox"
-                            checked={drawerSelectedIds.includes(cust.customerId)}
-                            disabled={cust.recurringStatus}
-                            className={`cursor-pointer ${cust.recurringStatus ? "opacity-50 cursor-not-allowed" : ""}`}
-                            onChange={() => {
-                              setDrawerSelectedIds(prev =>
-                                prev.includes(cust.customerId)
-                                  ? prev.filter(id => id !== cust.customerId)
-                                  : [...prev, cust.customerId]
-                              );
-                            }}
-                          />
-                        </td>
-                        <td className="p-2 text-left whitespace-nowrap">{cust.fullName}</td>
-                        <td className="p-2 text-left whitespace-nowrap">{cust.joiningDate || "--"}</td>
-                        <td className="p-2 text-left whitespace-nowrap">{cust.billingStartDay} → {cust.billingEndDay}</td>
-                        {/* <td className="p-2 text-left whitespace-nowrap">{formatDate(cust.nextRecurringDate) || "--"}</td> */}
-                        <td className="p-2 text-left">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px]  whitespace-nowrap ${cust.recurringStatus ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"}`}>
-                            {cust.recurringStatus ? "Generated" : "Pending"}
-                          </span>
-                        </td>
-                        
-   <td className="p-2 text-left">
-  {cust.recurringStatus ? (
-    <button
-      onClick={() => {
-        setCameFromHostelDrawer(true);
-        setShowHostelDrawer(false);
-        handleOpenDetails(cust);
-      }}
-      className="px-2 py-1 rounded text-[10px] border text-blue-600 cursor-pointer whitespace-nowrap"
-    >
-      View
-    </button>
-  ) : (
-//    <button
-//   disabled={drawerSelectedIds.includes(cust.customerId)}
-//   onClick={() => handleGenerate([cust.customerId])}
-//   className={`px-2 py-1 rounded text-[10px] text-white whitespace-nowrap ${
-//     drawerSelectedIds.includes(cust.customerId)
-//       ? "bg-gray-300 cursor-not-allowed"
-//       : "bg-blue-600 cursor-pointer"
-//   }`}
-// >
-//   Generate
-// </button>
-<button
-  disabled={
-    cust.recurringStatus ||
-    isGenerating
-  }
-  onClick={() => handleGenerate([cust.customerId])}
-  className={`px-2 py-1 rounded text-[10px] text-white whitespace-nowrap ${
-    cust.recurringStatus || isGenerating
-      ? "bg-gray-300 cursor-not-allowed"
-      : "bg-primary cursor-pointer"
-  }`}
->
-  {isGenerating ? "Generating..." : "Generate"}
-</button>
+                  {/* TENANT TABLE */}
+                  <div className="border border-gray-200 rounded-xl overflow-auto">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 text-gray-500">
+                        <tr>
+                          <th className="p-2"></th>
+                          <th className="p-2 text-left whitespace-nowrap">Tenant Name</th>
+                          <th className="p-2 text-left whitespace-nowrap">Join Date</th>
+                          <th className="p-2 text-left whitespace-nowrap">Billing Cycle</th>
+                          {/* <th className="p-2 text-left whitespace-nowrap">Next Invoice</th> */}
+                          <th className="p-2 text-left whitespace-nowrap">Status</th>
+                          <th className="p-2 text-left whitespace-nowrap">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(selectedHostel.customerList || [])
+                          .filter(c => c.fullName?.toLowerCase().includes(drawerSearch.toLowerCase()))
+                          .map((cust) => (
+                            <tr key={cust.customerId} className="border-t border-gray-100">
+                              <td className="p-2">
+                                <input
+                                  type="checkbox"
+                                  checked={drawerSelectedIds.includes(cust.customerId)}
+                                  disabled={cust.recurringStatus}
+                                  className={`cursor-pointer ${cust.recurringStatus ? "opacity-50 cursor-not-allowed" : ""}`}
+                                  onChange={() => {
+                                    setDrawerSelectedIds(prev =>
+                                      prev.includes(cust.customerId)
+                                        ? prev.filter(id => id !== cust.customerId)
+                                        : [...prev, cust.customerId]
+                                    );
+                                  }}
+                                />
+                              </td>
+                              <td className="p-2 text-left whitespace-nowrap">{cust.fullName}</td>
+                              <td className="p-2 text-left whitespace-nowrap">{cust.joiningDate || "--"}</td>
+                              <td className="p-2 text-left whitespace-nowrap">{cust.billingStartDay} → {cust.billingEndDay}</td>
+                              {/* <td className="p-2 text-left whitespace-nowrap">{formatDate(cust.nextRecurringDate) || "--"}</td> */}
+                              <td className="p-2 text-left">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px]  whitespace-nowrap ${cust.recurringStatus ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"}`}>
+                                  {cust.recurringStatus ? "Generated" : "Pending"}
+                                </span>
+                              </td>
 
-  )}
-</td>
-                        
-                      </tr>
-                    ))}
-                  {(!selectedHostel.customerList || selectedHostel.customerList.length === 0) && (
-                    <tr><td colSpan="7" className="text-center py-4 text-gray-400">No Tenants Found</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                              <td className="p-2 text-left">
+                                {cust.recurringStatus ? (
+                                  <button
+                                    onClick={() => {
+                                      setCameFromHostelDrawer(true);
+                                      setShowHostelDrawer(false);
+                                      handleOpenDetails(cust);
+                                    }}
+                                    className="px-2 py-1 rounded text-[10px] border text-blue-600 cursor-pointer whitespace-nowrap"
+                                  >
+                                    View
+                                  </button>
+                                ) : (
+                                  //    <button
+                                  //   disabled={drawerSelectedIds.includes(cust.customerId)}
+                                  //   onClick={() => handleGenerate([cust.customerId])}
+                                  //   className={`px-2 py-1 rounded text-[10px] text-white whitespace-nowrap ${
+                                  //     drawerSelectedIds.includes(cust.customerId)
+                                  //       ? "bg-gray-300 cursor-not-allowed"
+                                  //       : "bg-blue-600 cursor-pointer"
+                                  //   }`}
+                                  // >
+                                  //   Generate
+                                  // </button>
+                                  <button
+                                    disabled={
+                                      cust.recurringStatus ||
+                                      isGenerating
+                                    }
+                                    onClick={() => handleGenerate([cust.customerId])}
+                                    className={`px-2 py-1 rounded text-[10px] text-white whitespace-nowrap ${cust.recurringStatus || isGenerating
+                                        ? "bg-gray-300 cursor-not-allowed"
+                                        : "bg-primary cursor-pointer"
+                                      }`}
+                                  >
+                                    {isGenerating ? "Generating..." : "Generate"}
+                                  </button>
 
-        </div>
+                                )}
+                              </td>
 
-        {/* FOOTER */}
-        <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
-          <button
-            onClick={() => setShowHostelDrawer(false)}
-            className="px-4 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer"
-          >
-            Close
-          </button>
-          {/* <button
+                            </tr>
+                          ))}
+                        {(!selectedHostel.customerList || selectedHostel.customerList.length === 0) && (
+                          <tr><td colSpan="7" className="text-center py-4 text-gray-400">No Tenants Found</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* FOOTER */}
+              <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
+                <button
+                  onClick={() => setShowHostelDrawer(false)}
+                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer"
+                >
+                  Close
+                </button>
+                {/* <button
   disabled={drawerSelectedIds.length === 0}
   onClick={() => handleGenerate(drawerSelectedIds)}
   className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 text-white ${
@@ -2655,27 +2636,26 @@ setSelectedCustomers(prev =>
   <img src={refreshWhite} className="w-4 h-4" />
   Generate Recurring
 </button> */}
-<button
-  disabled={
-    drawerSelectedIds.length === 0 ||
-    isGenerating
-  }
-  onClick={() => handleGenerate(drawerSelectedIds)}
-  className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 text-white ${
-    drawerSelectedIds.length === 0 || isGenerating
-      ? "bg-gray-300 cursor-not-allowed"
-      : "bg-primary cursor-pointer"
-  }`}
->
-  <img src={refreshWhite} className="w-4 h-4" />
-  {isGenerating ? "Generating..." : "Generate Recurring"}
-</button>
-        </div>
+                <button
+                  disabled={
+                    drawerSelectedIds.length === 0 ||
+                    isGenerating
+                  }
+                  onClick={() => handleGenerate(drawerSelectedIds)}
+                  className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 text-white ${drawerSelectedIds.length === 0 || isGenerating
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : "bg-primary cursor-pointer"
+                    }`}
+                >
+                  <img src={refreshWhite} className="w-4 h-4" />
+                  {isGenerating ? "Generating..." : "Generate Recurring"}
+                </button>
+              </div>
 
-      </div>
-    </div>
-  </div>
-)}
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };

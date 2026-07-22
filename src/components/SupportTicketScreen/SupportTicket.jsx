@@ -1268,11 +1268,19 @@ const handleOpenComments =
 
 </td>
 
-          <td className="px-5 py-2 text-xs text-[#111827] min-w-[230px] text-left">
+          {/* <td className="px-5 py-2 text-xs text-[#111827] min-w-[230px] text-left">
             <div className="truncate max-w-[250px]">
               {item.subject}
             </div>
-          </td>
+          </td> */}
+          <td className="px-5 py-2 text-xs text-[#111827] min-w-[230px] text-left">
+  <div
+    className="max-w-[250px] truncate"
+    title={item?.subject || "N/A"}
+  >
+    {item?.subject || "N/A"}
+  </div>
+</td>
 
           <td className="px-5 py-2 text-xs text-[#4b5563] whitespace-nowrap text-left">
             {item.queryType}
@@ -1284,7 +1292,7 @@ const handleOpenComments =
  <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
             {item.ticketStatus}
           </td>
-        <td
+        {/* <td
   className="
     px-5 py-2
     text-xs
@@ -1314,7 +1322,43 @@ const handleOpenComments =
 </td>
           <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
             {item.hostelName}
-          </td>
+          </td> */}
+          <td
+  className="
+    px-5 py-2
+    text-xs
+    font-medium
+    text-[#374151]
+    text-left
+  "
+>
+  <div
+    className="
+      w-[180px]
+      truncate
+      cursor-pointer
+      hover:text-[#315CEC]
+      hover:underline
+    "
+    title={item?.assignedTo || "N/A"}
+    onClick={() => {
+      if (item?.assignedToId) {
+        navigate(`/iam-user/${item.assignedToId}`);
+      }
+    }}
+  >
+    {item?.assignedTo || "N/A"}
+  </div>
+</td>
+
+<td className="px-5 py-2 text-xs font-medium text-[#374151] text-left">
+  <div
+    className="w-[220px] truncate"
+    title={item?.hostelName || "N/A"}
+  >
+    {item?.hostelName || "N/A"}
+  </div>
+</td>
 
           <td className="px-5 py-2 whitespace-nowrap text-left">
 

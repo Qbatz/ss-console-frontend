@@ -299,11 +299,11 @@ useEffect(() => {
   ID
 </th>
 
-<th className="sticky left-[70px] min-w-[140px] bg-gray-100 z-30 text-[12px] font-semibold">
+<th className="sticky left-[70px] min-w-[140px] bg-gray-100 z-30 text-[12px] font-semibold text-left">
   DATE
 </th>
 
-<th className="sticky left-[210px] min-w-[180px] bg-gray-100 z-30 text-[12px] font-semibold">
+<th className="sticky left-[210px] min-w-[180px] bg-gray-100 z-30 text-[12px] font-semibold text-left">
   CUSTOMER
 </th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left">PROPERTY</th>
@@ -340,101 +340,65 @@ useEffect(() => {
   {index + 1}
 </td>
 
-<td className="sticky left-[70px] min-w-[140px] bg-white-common z-20">
+<td className="sticky left-[70px] min-w-[140px] bg-white-common z-20 text-[12px]">
   {item.createdAtDate}
 </td>
 
-<td className="sticky left-[210px] min-w-[180px] bg-white-common z-20">
+{/* <td className="sticky left-[210px] min-w-[180px] bg-white-common z-20">
   {item.paidBy}
-</td>
-
-                       {/* <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-
-  <span
-    onClick={() =>
-    navigate(`/property-overview/${item.hostelId}`, {
-  state: {
-    from: "transactions",
-
-    currentPage: page,
-    currentSearch: search,
-    currentDateRange: dateRange,
-  },
-})
-    }
-    className="text-blue-600 cursor-pointer hover:underline"
-  >
-    {item.hostelName}
-  </span>
-
 </td> */}
-{item?.isHostelDeleted === true ? (
 
-  <td
-  colSpan={2}
-  className="
-    px-4
-    py-2
-    text-[12px]
-    whitespace-nowrap
-    text-center
-    align-middle
-  "
->
-
-    <span
-    className="
-      text-red-500
-      font-medium
-      inline-block
-      mx-auto
-    "
+   <td className="sticky left-[210px] min-w-[180px] max-w-[180px] bg-white-common z-20 px-4 py-2 text-left text-[12px]">
+  <div
+    className="w-[180px] truncate"
+    title={item.paidBy || "N/A"}
   >
+    {item.paidBy || "N/A"}
+  </div>
+</td>              
+{item?.isHostelDeleted === true ? (
+  <td
+    colSpan={2}
+    className="px-4 py-2 text-[12px] text-center align-middle"
+  >
+    <span className="text-red-500 font-medium">
       Hostel Deleted
     </span>
-
   </td>
-
 ) : (
-
   <>
-  
-    <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-
-      <span
-        onClick={() =>
-          navigate(
-            `/property-overview/${item.hostelId}`,
-            {
+    <td className="px-4 py-2 text-left text-[12px]">
+      <div
+        className="w-[180px] truncate"
+        title={item.hostelName || "N/A"}
+      >
+        <span
+          onClick={() =>
+            navigate(`/property-overview/${item.hostelId}`, {
               state: {
                 from: "transactions",
-
                 currentPage: page,
                 currentSearch: search,
                 currentDateRange: dateRange,
               },
-            }
-          )
-        }
-        className="
-          text-blue-600
-          cursor-pointer
-          hover:underline
-        "
+            })
+          }
+          className="text-blue-600 cursor-pointer hover:underline"
+        >
+          {item.hostelName || "N/A"}
+        </span>
+      </div>
+    </td>
+
+    <td className="px-4 py-2 text-left">
+      <div
+        className="w-[180px] truncate text-[12px]"
+        title={`${item.city || "N/A"}, ${item.state || "N/A"}`}
       >
-        {item.hostelName}
-      </span>
-
+        {item.city || "N/A"}, {item.state || "N/A"}
+      </div>
     </td>
-
-    <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-
-      {item.city}, {item.state}
-
-    </td>
-
   </>
-
 )}
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
@@ -676,10 +640,10 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Footer */}
+         
           <div className="flex justify-between items-center px-4 py-3 text-sm">
 
-            {/* Total Count */}
+           
             <span>
               Total Record Count :
               <span className="text-blue-600 ml-1">{data.length || 0}</span>
@@ -687,7 +651,7 @@ useEffect(() => {
 
             <div className="flex items-center gap-4">
 
-              {/* Page Size */}
+              
               <select
                 value={size}
                 onChange={(e) => {
@@ -721,14 +685,14 @@ useEffect(() => {
   &#8249;
 </button>
 
-              {/* Current Page */}
+              
               <span className="border px-3 py-1 rounded bg-gray-50">
                 {page}
               </span>
    <span className="text-textDark/60 text-cardTitle">
   {page} - {resData?.totalPages}
 </span>
-              {/* Next */}
+              
              <button
   disabled={
     page >= resData?.totalPages ||
@@ -747,10 +711,7 @@ useEffect(() => {
   &#8250;
 </button>
 
-              {/* Range */}
-              {/* <span className="text-gray-400">
-                {start} - {end}
-              </span> */}
+             
 
             </div>
           </div>
@@ -758,56 +719,71 @@ useEffect(() => {
         </div>
       )}
 
-      {showModal && selectedTxn && (
-        <>
-          {/* BACKDROP */}
-          <div
-            className="fixed inset-0 bg-black/40 z-40"
+     {showModal && selectedTxn && (
+  <>
+    {/* Overlay */}
+    <div
+      className="fixed inset-0 bg-transparent z-[60]"
+      onClick={() => setShowModal(false)}
+    />
+
+    {/* Drawer */}
+    <div className="fixed top-6 bottom-6 right-6 w-[400px] bg-white-common rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.25)] z-[70] flex flex-col">
+
+      {/* Fixed Header */}
+      <div className="shrink-0 px-5 py-4 border-b border-gray-300 bg-white-common rounded-t-xl">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="font-semibold text-sm">
+              TXN{selectedTxn.historyId}
+            </h2>
+
+            <p
+              className={`text-xs font-medium ${
+                selectedTxn?.orderStatus?.toUpperCase() === "PAID"
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              ●{" "}
+              {selectedTxn?.orderStatus?.toUpperCase() === "PAID"
+                ? "Success"
+                : "Failed"}
+            </p>
+          </div>
+
+          <button
             onClick={() => setShowModal(false)}
-          />
+            className="cursor-pointer text-xl"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
 
-          {/* DRAWER WITH SPACE */}
-          <div className="fixed top-6 bottom-6 right-6 w-[400px] bg-white-common rounded-xl shadow-lg z-50 transform transition-transform duration-300 translate-x-0">
+      {/* Scrollable Content */}
+      <div
+        className="
+          flex-1
+          overflow-y-auto
+          p-5
+ [&::-webkit-scrollbar]:w-[8px]
+          [&::-webkit-scrollbar-track]:bg-transparent
+          [&::-webkit-scrollbar-track]:rounded-full
 
-            <div className="h-full overflow-y-auto p-5">
+          [&::-webkit-scrollbar-thumb]:bg-[#bfd3ff]
+          [&::-webkit-scrollbar-thumb]:rounded-full
+          [&::-webkit-scrollbar-thumb]:border-[2px]
+          [&::-webkit-scrollbar-thumb]:border-transparent
+          [&::-webkit-scrollbar-thumb]:bg-clip-content
 
-              {/* HEADER */}
-              <div className="flex justify-between items-center mb-4 border-b border-gray-300">
-                <div>
-                  <h2 className="font-semibold text-sm text-start">
-                    TXN{selectedTxn.historyId}
-                  </h2>
-                 <p
-  className={`
-    text-xs font-medium
-    ${
-      selectedTxn?.orderStatus?.toUpperCase() === "PAID"
-        ? "text-green-600"
-        : "text-red-600"
-    }
-  `}
->
-  ●
-  {
-    selectedTxn?.orderStatus?.toUpperCase() === "PAID"
-      ? " Success"
-      : " Failed"
-  }
-</p>
-                </div>
+          [&::-webkit-scrollbar-thumb:hover]:bg-[#9dbdff]
 
-                <button onClick={() => setShowModal(false)} className="cursor-pointer">✕</button>
-              </div>
-
-              {/* PROPERTY INFO */}
-              {/* <div className="text-sm space-y-2 mb-4 text-left">
-                <p><b>Owner:</b> {selectedTxn.createdBy}</p>
-                <p><b>Location:</b> {selectedTxn.city}, {selectedTxn.state}</p>
-                <p><b>Mobile:</b> {selectedTxn.mobile || "-"}</p>
-                <p><b>Active Tenants:</b> 42</p>
-              </div> */}
-
-              <div className="text-sm text-left">
+          [scrollbar-width:thin]
+          [scrollbar-color:#bfd3ff_transparent]
+        "
+      >
+           <div className="text-sm text-left">
                 <p className="text-[13px] font-semibold tracking-[1px] text-gray-500 uppercase mb-4">
                   Property Info
                 </p>
@@ -1020,19 +996,11 @@ useEffect(() => {
   </div>
 
 </div>
+      </div>
 
-              
-              {/* <div className="rounded-lg overflow-hidden border border-gray-300">
-                <img
-                  src={selectedTxn.paymentProof}
-                  className="w-full h-auto object-contain"
-                />
-              </div> */}
-
-            </div>
-          </div>
-        </>
-      )}
+    </div>
+  </>
+)}
       {hoveredProof && (
         <div
           className="fixed z-[9999] pointer-events-none bg-white-common border-soft rounded-lg shadow-lg p-2"
@@ -1052,14 +1020,28 @@ useEffect(() => {
 
   <>
 
-    {/* Backdrop */}
-    <div
-      className="fixed inset-0 bg-black/30 z-40"
-      onClick={() => setShowVerifyDrawer(false)}
-    />
+   
+ <div
+  className="fixed inset-0 bg-black/10 z-[60]"
+  onClick={() => setShowVerifyDrawer(false)}
+/>
 
-    {/* Compact Drawer */}
-    <div className="fixed top-10 right-6 w-[380px] bg-[#FAFBFC] rounded-3xl shadow-2xl z-50 overflow-hidden animate-in slide-in-from-right duration-300">
+  
+    <div  className="
+    fixed
+    top-10
+    right-6
+    w-[380px]
+    bg-[#FAFBFC]
+    rounded-3xl
+    shadow-[0_20px_60px_rgba(0,0,0,0.25)]
+    z-50
+    overflow-hidden
+    animate-in
+    slide-in-from-right
+    duration-300
+    z-[70]
+  ">
 
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-5 border-b border-[#E6E8F0] bg-white-common">

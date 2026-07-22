@@ -162,7 +162,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                 "
               >
 
-                <td
+                {/* <td
                   className="
                     px-4
                     py-3
@@ -173,7 +173,27 @@ const OverviewSubscriptions = ({ hostelData }) => {
                   "
                 >
                   {currentSub.planName || "N/A"}
-                </td>
+                </td> */}
+                <td
+  className="
+    px-4
+    py-3
+    text-left
+  "
+>
+  <div
+    className="
+      w-[150px]
+      truncate
+      text-tableCell
+      font-medium
+      text-textDark
+    "
+    title={currentSub.planName || "N/A"}
+  >
+    {currentSub.planName || "N/A"}
+  </div>
+</td>
 
                 <td
                   className="
@@ -419,7 +439,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                     "
                   >
 
-                    <td
+                    {/* <td
                       className="
                         px-4
                         py-3
@@ -430,7 +450,27 @@ const OverviewSubscriptions = ({ hostelData }) => {
                       "
                     >
                       {sub.planName || "N/A"}
-                    </td>
+                    </td> */}
+                    <td
+  className="
+    px-4
+    py-3
+    text-left
+  "
+>
+  <div
+    className="
+      w-[180px]
+      truncate
+      text-tableCell
+      font-medium
+      text-textDark
+    "
+    title={sub.planName || "N/A"}
+  >
+    {sub.planName || "N/A"}
+  </div>
+</td>
 
                     <td
                       className="

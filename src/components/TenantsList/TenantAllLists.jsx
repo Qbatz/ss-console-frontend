@@ -306,7 +306,7 @@ const TenantsList = () => {
                           {(page - 1) * size + index + 1}
                         </td>
 
-                        <td className="px-6 py-1 flex items-center gap-3 text-left">
+                        {/* <td className="px-6 py-1 flex items-center gap-3 text-left">
 
                           {item.profilePic ? (
                             <img
@@ -322,15 +322,45 @@ const TenantsList = () => {
 
                           {item.fullName}
 
-                        </td>
+                        </td> */}
+                        <td className="px-6 py-1 text-left">
+  <div className="flex items-center gap-3">
+    {item.profilePic ? (
+      <img
+        src={item.profilePic}
+        alt={item.fullName}
+        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+      />
+    ) : (
+      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs flex-shrink-0">
+        {item.initials}
+      </div>
+    )}
+
+    <div
+      className="w-[180px] truncate"
+      title={item?.fullName || "N/A"}
+    >
+      {item?.fullName || "N/A"}
+    </div>
+  </div>
+</td>
 
                         <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
                           {item.mobile}
                         </td>
 
-                        <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
+                        {/* <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
                           {item.hostelName}
-                        </td>
+                        </td> */}
+                        <td className="px-4 py-2 text-[12px] text-left">
+  <div
+    className="w-[220px] truncate"
+    title={item?.hostelName || "N/A"}
+  >
+    {item?.hostelName || "N/A"}
+  </div>
+</td>
 
 
                         <td className="px-4 py-2 text-left whitespace-nowrap">

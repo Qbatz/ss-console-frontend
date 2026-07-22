@@ -435,7 +435,7 @@ console.log("filteredAgents", filteredAgents);
 >
 
 
-                              <td
+                              {/* <td
                                 onClick={() => navigate(`/iam-user/${user.agentId}`)}
                                 className="px-4 py-2 text-left font-semibold text-xs whitespace-nowrap text-blue-700 cursor-pointer hover:underline"
                               >
@@ -444,7 +444,27 @@ console.log("filteredAgents", filteredAgents);
 
                               <td className="px-2 py-2 text-left font-semibold text-xs whitespace-nowrap">
                                 {user?.email}
-                              </td>
+                              </td> */}
+                              <td
+  onClick={() => navigate(`/iam-user/${user.agentId}`)}
+  className="px-4 py-2 text-left font-semibold text-xs text-blue-700 cursor-pointer hover:underline"
+>
+  <div
+    className="w-[180px] truncate"
+    title={user?.fullName || "N/A"}
+  >
+    {user?.fullName || "N/A"}
+  </div>
+</td>
+
+<td className="px-2 py-2 text-left font-semibold text-xs">
+  <div
+    className="w-[180px] truncate"
+    title={user?.email || "N/A"}
+  >
+    {user?.email || "N/A"}
+  </div>
+</td>
 
                               <td className="px-2 py-2 text-left font-semibold text-xs whitespace-nowrap">
                                 {user?.roleName || "N/A"}
@@ -728,7 +748,7 @@ console.log("filteredAgents", filteredAgents);
               </div>
             )}
 
-            {showDetailsModal && (
+            {/* {showDetailsModal && (
               <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
 
@@ -858,7 +878,191 @@ console.log("filteredAgents", filteredAgents);
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
+            {showDetailsModal && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+
+   
+    <div
+      className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+      onClick={() => setShowDetailsModal(false)}
+    />
+
+   
+    <div
+      className="relative bg-white-common rounded-2xl shadow-2xl w-[520px] max-h-[90vh] flex flex-col z-[10000]"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      
+      <div className="shrink-0 flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-2xl">
+        <h2 className="text-lg font-semibold">Agent Details</h2>
+
+        <button
+          onClick={() => setShowDetailsModal(false)}
+          className="hover:text-gray-200 cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+
+      
+      <div
+        className="
+          flex-1
+          overflow-y-auto
+          p-6
+
+           [&::-webkit-scrollbar]:w-[8px]
+          [&::-webkit-scrollbar-track]:bg-transparent
+          [&::-webkit-scrollbar-track]:rounded-full
+
+          [&::-webkit-scrollbar-thumb]:bg-[#bfd3ff]
+          [&::-webkit-scrollbar-thumb]:rounded-full
+          [&::-webkit-scrollbar-thumb]:border-[2px]
+          [&::-webkit-scrollbar-thumb]:border-transparent
+          [&::-webkit-scrollbar-thumb]:bg-clip-content
+
+          [&::-webkit-scrollbar-thumb:hover]:bg-[#9dbdff]
+
+          [scrollbar-width:thin]
+          [scrollbar-color:#bfd3ff_transparent]
+        "
+      >
+
+        
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+            {agentDetails?.initials || "NA"}
+          </div>
+
+          <div>
+            <p className="font-semibold text-lg text-gray-900 text-left">
+              {agentDetails?.fullName}
+            </p>
+
+            <p className="text-xs text-gray-500 text-left">
+              {agentDetails?.roleName}
+            </p>
+          </div>
+        </div>
+
+        
+        <div className="grid grid-cols-2 gap-4 text-sm mb-6">
+
+          {/* <div className="bg-blue-50 rounded-xl p-3">
+            <p className="text-blue-400 text-xs mb-1 text-left">Email</p>
+            <p className="font-medium text-gray-800 text-left">
+              {agentDetails?.email || "-"}
+            </p>
+          </div> */}
+          <div className="bg-blue-50 rounded-xl p-3">
+  <p className="text-blue-400 text-xs mb-1 text-left">
+    Email
+  </p>
+
+  <p
+    className="w-[180px] truncate font-medium text-gray-800 text-left"
+    title={agentDetails?.email || "-"}
+  >
+    {agentDetails?.email || "-"}
+  </p>
+</div>
+
+          <div className="bg-purple-50 rounded-xl p-3">
+            <p className="text-purple-400 text-xs mb-1 text-left">Mobile</p>
+            <p className="font-medium text-gray-800 text-left">
+              {agentDetails?.mobile || "-"}
+            </p>
+          </div>
+
+          <div className="bg-green-50 rounded-xl p-3">
+            <p className="text-green-500 text-xs mb-1 text-left">Created By</p>
+            <p className="font-medium text-gray-800 text-left">
+              {agentDetails?.createdBy || "-"}
+            </p>
+          </div>
+
+          <div className="bg-orange-50 rounded-xl p-3">
+            <p className="text-orange-400 text-xs mb-1 text-left">Created Date</p>
+            <p className="font-medium text-gray-800 text-left">
+              {agentDetails?.createdAtDate}
+              <span className="text-gray-400 text-xs ml-1">
+                {agentDetails?.createdAtTime}
+              </span>
+            </p>
+          </div>
+
+        </div>
+
+        
+        <div>
+          <h3 className="font-semibold mb-3 text-gray-800 text-left">
+            Recent Activities
+          </h3>
+
+         <div
+  className="
+    h-[280px]
+    overflow-y-auto
+    space-y-3
+    pr-2
+
+    [&::-webkit-scrollbar]:w-[6px]
+    [&::-webkit-scrollbar-track]:bg-transparent
+    [&::-webkit-scrollbar-thumb]:bg-[#cbd5e1]
+    [&::-webkit-scrollbar-thumb]:rounded-full
+    [&::-webkit-scrollbar-thumb:hover]:bg-[#94a3b8]
+  "
+>
+  {agentDetails?.agentActivities?.length > 0 ? (
+    agentDetails.agentActivities.map((activity, index) => (
+      <div
+        key={index}
+        className="bg-gray-50 border-l-4 border-blue-500 rounded-lg p-3 flex justify-between items-center hover:shadow-sm transition"
+      >
+        <div>
+          <p className="font-medium text-sm text-gray-800">
+            {activity.activityType}
+          </p>
+
+          <p className="text-xs text-gray-500">
+            {activity.description}
+          </p>
+        </div>
+
+        <div className="text-xs text-gray-400 text-right">
+          <p>{activity.createdAtDate}</p>
+          <p>{activity.createdAtTime}</p>
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-gray-400 text-sm text-center py-6">
+      No activities found
+    </p>
+  )}
+</div>
+        </div>
+
+      </div>
+
+     
+
+      <div className="shrink-0 px-6 py-4 border-t bg-white-common rounded-b-2xl">
+        <div className="text-right">
+          <button
+            onClick={() => setShowDetailsModal(false)}
+            className="px-5 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-sm"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+)}
           </div>
           <AddAdmin isOpen={open} onClose={() => setOpen(false)} refreshList={() =>
             getAllAgents({

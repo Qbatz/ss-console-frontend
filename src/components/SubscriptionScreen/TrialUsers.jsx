@@ -295,7 +295,15 @@ useEffect(() => {
                                 {(currentPage - 1) * pageSize + index + 1}
                               </td>
                     
-                    <td className="px-4 py-2 text-[12px] text-left">{item.hostelName}</td>
+                    {/* <td className="px-4 py-2 text-[12px] text-left">{item.hostelName}</td> */}
+                    <td className="px-4 py-2 text-left">
+  <div
+    className="w-[180px] truncate text-[12px]"
+    title={item.hostelName || "N/A"}
+  >
+    {item.hostelName || "N/A"}
+  </div>
+</td>
                     <td className="px-4 py-2 text-[12px] text-left">{item.planName}</td>
                      <td className="px-4 py-2 text-left">
                                 <span

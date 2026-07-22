@@ -355,13 +355,30 @@ setPinError(res.message)
                 ) : (
                   mastersList.map((item, i) => (
                     <tr key={i} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+                      {/* <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.fullName || item.firstName}
                       </td>
 
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.email || "N/A"}
-                      </td>
+                      </td> */}
+                      <td className="px-4 py-2 text-left">
+  <div
+    className="w-[180px] truncate font-medium text-[12px]"
+    title={item.fullName || item.firstName}
+  >
+    {item.fullName || item.firstName}
+  </div>
+</td>
+
+<td className="px-4 py-2 text-left">
+  <div
+    className="w-[220px] truncate font-medium text-[12px]"
+    title={item.email || "N/A"}
+  >
+    {item.email || "N/A"}
+  </div>
+</td>
 
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.mobileNo || "N/A"}
@@ -540,17 +557,31 @@ marginLeft: "-8px",
                   staffs.map((item, i) => (
                     <tr key={i} className="hover:bg-gray-50">
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+                      {/* <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.fullName || item.firstName}
                       </td>
 
-                      {/* <td className="px-4 py-2 text-left font-medium text-[12px]">
-                        {item.role || "—"}
-                      </td> */}
-
+                     
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.emailId || "N/A"}
-                      </td>
+                      </td> */}
+                      <td className="px-4 py-2 text-left">
+  <div
+    className="w-[180px] truncate font-medium text-[12px]"
+    title={item.fullName || item.firstName}
+  >
+    {item.fullName || item.firstName}
+  </div>
+</td>
+
+<td className="px-4 py-2 text-left">
+  <div
+    className="w-[180px] truncate font-medium text-[12px]"
+    title={item.emailId || "N/A"}
+  >
+    {item.emailId || "N/A"}
+  </div>
+</td>
 
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.mobileNo || "N/A"}

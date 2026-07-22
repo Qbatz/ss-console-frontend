@@ -1808,7 +1808,7 @@ const handleAddNote = async () => {
                               {(hostels?.currentPage - 1) * hostels?.sizePerPage + index + 1}
                             </td>
 
-                            {/* Sticky Name */}
+                           
                             <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] group-hover:!bg-gray-50">
 
                               <div
@@ -1850,9 +1850,12 @@ const handleAddNote = async () => {
                                   className="flex flex-col truncate"
                                   onClick={() => handlePropertyClick(item)}
                                 >
-                                  <span className="text-gray-900 font-semibold truncate">
-                                    {item.hostelName}
-                                  </span>
+                                  <span
+  className="text-gray-900 font-semibold truncate w-[180px] block"
+  title={item.hostelName}
+>
+  {item.hostelName}
+</span>
                                   <span className="text-gray-500 text-xs truncate">
                                     {item.ownerInfo?.fullName}
                                   </span>
@@ -1918,7 +1921,7 @@ const handleAddNote = async () => {
                             <td className="px-4 py-2 text-center">
                               {item.platform || "----"}
                             </td>
-                             <td
+                             {/* <td
   className="
     px-4
     py-2
@@ -1952,6 +1955,27 @@ const handleAddNote = async () => {
 
   )}
 
+</td> */}
+<td
+  className="
+    px-4
+    py-2
+    text-left
+  "
+>
+  {item?.relationalAgents?.[0]?.agentId ? (
+    <div
+      className="w-[180px] truncate text-blue-600 cursor-pointer hover:underline font-medium"
+      title={item?.relationalAgents?.[0]?.agentName || "N/A"}
+      onClick={() =>
+        navigate(`/iam-user/${item.relationalAgents[0].agentId}`)
+      }
+    >
+      {item?.relationalAgents?.[0]?.agentName || "N/A"}
+    </div>
+  ) : (
+    "----"
+  )}
 </td>
                            
 

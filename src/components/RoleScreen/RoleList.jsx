@@ -182,7 +182,7 @@ const handleEditClick = async (role) => {
                   <thead className="bg-gray-50 text-xs text-gray-500 uppercase sticky top-0 z-10">
                     <tr>
                       <th className="px-4 py-3 text-left w-[30%]">Role Name</th>
-                      <th className="px-4 py-3 w-[25%]">Description</th>
+                      <th className="px-4 py-3 w-[25%] text-left">Description</th>
                       <th className="px-4 py-3 w-[15%]">Users Count</th>
                       <th className="px-4 py-3 w-[20%]">Created On</th>
                       <th className="px-4 py-3 w-[20%]">Updated On</th>
@@ -204,9 +204,17 @@ const handleEditClick = async (role) => {
                             {role.name}
                           </td>
 
-                          <td className="px-4 py-3 text-gray-600">
+                          {/* <td className="px-4 py-3 text-gray-600">
                             {role.description || "N/A"}
-                          </td>
+                          </td> */}
+                          <td className="px-4 py-3 text-gray-600 text-left">
+  <div
+    className="w-[250px] truncate"
+    title={role?.description || "N/A"}
+  >
+    {role?.description || "N/A"}
+  </div>
+</td>
 
                           {/* <td className="px-4 py-3 text-center">
                             <span className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-xs">
