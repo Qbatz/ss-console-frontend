@@ -11,6 +11,8 @@ import Menucircle from "../../assets/menucircle.png";
 import Arrow from "../../assets/direction-down 01.png";
 import AssignStaffModal from "../PropertiesScreen/AssignStaffDesign";
 import CommentBox from "../../assets/message-2.png";
+import Eye from "../../assets/eye.png";
+import hideEye from "../../assets/EyeIcon.png";
 
 
 const Proprietors = () => {
@@ -1593,13 +1595,24 @@ closeNotesModal()
   className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
 />
 
-          <button
+          {/* <button
             type="button"
             onClick={() => setShowNewPassword(!showNewPassword)}
             className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400"
           >
             👁
-          </button>
+          </button> */}
+          <button
+  type="button"
+  onClick={() => setShowNewPassword(!showNewPassword)}
+  className="absolute right-5 top-1/2 -translate-y-1/2"
+>
+  <img
+    src={showNewPassword ? Eye : hideEye}
+    alt={showNewPassword ? "Hide Password" : "Show Password"}
+    className="w-5 h-5"
+  />
+</button>
 
         </div>
  {newPasswordError && (
@@ -1629,7 +1642,7 @@ closeNotesModal()
   className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
 />
 
-          <button
+          {/* <button
             type="button"
             onClick={() =>
               setShowConfirmPassword(!showConfirmPassword)
@@ -1637,7 +1650,20 @@ closeNotesModal()
             className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400"
           >
             👁
-          </button>
+          </button> */}
+          <button
+  type="button"
+  onClick={() =>
+    setShowConfirmPassword(!showConfirmPassword)
+  }
+  className="absolute right-5 top-1/2 -translate-y-1/2"
+>
+  <img
+    src={showConfirmPassword ? Eye : hideEye}
+    alt={showConfirmPassword ? "Hide Password" : "Show Password"}
+    className="w-5 h-5"
+  />
+</button>
 
         </div>
 {confirmPasswordError && (

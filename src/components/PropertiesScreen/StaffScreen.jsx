@@ -697,6 +697,7 @@ marginLeft: "-8px",
                 <input
                   type={showNew ? "text" : "password"}
                   value={newPassword}
+                   autoComplete="new-password"
                   onChange={(e) => {
                     setNewPassword(e.target.value);
                     setNewPasswordError("");
@@ -738,6 +739,7 @@ marginLeft: "-8px",
                 <input
                   type={showCurrent ? "text" : "password"}
                   value={currentPassword}
+                   autoComplete="new-password"
                   // onChange={(e) => setCurrentPassword(e.target.value)}
                   onChange={(e) => {
                     setCurrentPassword(e.target.value);

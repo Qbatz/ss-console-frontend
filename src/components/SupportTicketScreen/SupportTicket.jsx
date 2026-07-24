@@ -1286,9 +1286,20 @@ const handleOpenComments =
             {item.queryType}
           </td>
 
-          <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
-            {item.raisedBy}
-          </td>
+          {/* <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
+            {item.raisedBy || "N/A"}
+          </td> */}
+         <td className="px-5 py-2 text-xs font-medium whitespace-nowrap text-left">
+  {item.isRaisedByDeleted ? (
+    <span className="text-red-600 font-semibold">
+      User Deleted
+    </span>
+  ) : (
+    <span className="text-[#374151]">
+      {item.raisedBy || "N/A"}
+    </span>
+  )}
+</td>
  <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
             {item.ticketStatus}
           </td>

@@ -268,16 +268,38 @@ const handleGenerateSettlement = async () => {
                       </div>
 
                       <div>
+                       
                         {/* <div className="flex items-center gap-2 text-left">
-                          <h2 className="text-[18px] font-semibold whitespace-nowrap">
-                            {custometInfoList?.fullName}
-                          </h2>
-
-                          <img src={Verify} className="w-4 h-4" />
-                        </div> */}
-                        <div className="flex items-center gap-2 text-left">
   <h2
     className="w-[180px] text-[18px] font-semibold truncate"
+    title={custometInfoList?.fullName || "N/A"}
+  >
+    {custometInfoList?.fullName || "N/A"}
+  </h2>
+
+  <img
+    src={Verify}
+    alt="Verified"
+    className="w-4 h-4 flex-shrink-0"
+  />
+</div> */}
+{/* <div className="inline-flex items-center gap-2 text-left">
+  <h2
+    className="max-w-[180px] text-[18px] font-semibold truncate"
+    title={custometInfoList?.fullName || "N/A"}
+  >
+    {custometInfoList?.fullName || "N/A"}
+  </h2>
+
+  <img
+    src={Verify}
+    alt="Verified"
+    className="w-4 h-4 flex-shrink-0"
+  />
+</div> */}
+<div className="flex items-center justify-start gap-2 w-full text-left">
+  <h2
+    className="max-w-[180px] text-[18px] font-semibold truncate"
     title={custometInfoList?.fullName || "N/A"}
   >
     {custometInfoList?.fullName || "N/A"}
@@ -359,19 +381,40 @@ const handleGenerateSettlement = async () => {
                             </button>
                           </div>
                         ) : (
+                          // <DatePicker
+                          //   value={checkoutDate}
+                          //   format="DD-MM-YYYY"
+                          //   allowClear={false}
+                          //   onChange={(value) => {
+                          //     if (value) {
+                          //       setCheckoutDate(value);
+                          //       // Formatted API custom format conversion parameter triggers standard validation flow
+                          //       handleSettlement(value.format("DD-MM-YYYY"));
+                          //       setEditDate(false);
+                          //     }
+                          //   }}
+                          // />
                           <DatePicker
-                            value={checkoutDate}
-                            format="DD-MM-YYYY"
-                            allowClear={false}
-                            onChange={(value) => {
-                              if (value) {
-                                setCheckoutDate(value);
-                                // Formatted API custom format conversion parameter triggers standard validation flow
-                                handleSettlement(value.format("DD-MM-YYYY"));
-                                setEditDate(false);
-                              }
-                            }}
-                          />
+  value={checkoutDate}
+  format="DD-MM-YYYY"
+  allowClear={false}
+  disabledDate={(current) => {
+    return (
+      current &&
+      (
+        current.isAfter(dayjs(), "day") || 
+        current.isBefore(dayjs(stayList?.noticeDate, "DD/MM/YYYY"), "day") 
+      )
+    );
+  }}
+  onChange={(value) => {
+    if (value) {
+      setCheckoutDate(value);
+      handleSettlement(value.format("DD-MM-YYYY"));
+      setEditDate(false);
+    }
+  }}
+/>
                         )}
                       </div>
 
@@ -1368,7 +1411,7 @@ const handleGenerateSettlement = async () => {
 
                       <div className="flex gap-4">
 
-                        <button className="h-[40px] px-8 rounded-xl border border-[#D0D5DD] bg-white text-[13px]">
+                        <button className="h-[40px] px-8 rounded-xl border border-[#D0D5DD] bg-white text-[13px]" onClick={() => navigate(-1)}>
                           Cancel
                         </button>
 
