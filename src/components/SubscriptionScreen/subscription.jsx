@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import { useRole } from "../../Context/RoleContext";
 import DemoRequests from "./DemoRequest";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import { usePermission } from "../../Utils/permissionHelper";
 import Arrow from "../../assets/direction-down 01.png";
 import ArrowRight from "../../assets/arrow-right.png";
@@ -121,44 +121,17 @@ const Subscription = () => {
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-10">
 
-              {/* Title */}
+              
               <h1 className="text-lg font-semibold font-inter">
                 Subscriptions
               </h1>
 
-              {/* Tabs */}
-              {/* <div className="flex gap-6 text-sm font-medium font-inter">
-                 <button
-                  onClick={() => setActiveTab("demo")}
-                  className={`text-[13px] pb-2 ${activeTab === "demo"
-                      ? "text-blue-600 border-b-2 border-blue-600"
-                      : "text-gray-500"
-                    }`}
-                >
-                  Demo Requests
-                </button>
-                <button
-                  onClick={() => setActiveTab("subscriptions")}
-                  className={`text-[13px] pb-2 ${activeTab === "subscriptions"
-                      ? "text-blue-600 border-b-2 border-blue-600"
-                      : "text-gray-500"
-                    }`}
-                >
-                  Subscriptions
-                </button>
-
-               
-              </div> */}
+             
 
             </div>
 
 
-            {/* <button
-              onClick={() => navigate(`/manage-plans/${adminDetails?.roleId}`)}
-              className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit cursor-pointer"
-            >
-              Manage Plans
-            </button> */}
+           
             <button
               onClick={() => navigate(`/manage-plans/${adminDetails?.roleId}`)}
 
@@ -179,15 +152,19 @@ const Subscription = () => {
 
               <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
-                <img
-                  src={LoginImg}
-                  alt="Access Restricted"
-                  className="w-64 object-contain"
-                />
-
-                <p className="text-red-600 text-lg font-medium">
-                  {accessError}
-                </p>
+                 <img
+                                     src={LoginImg}
+                                     alt="Access Restricted"
+                                        className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                                   />
+               
+                         <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+                         Permission Restricted !
+                       </h1>
+               
+                       <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+                         Your permission is restricted for this module
+                       </p>
 
               </div>
 

@@ -7,14 +7,17 @@ import Eye from "../../assets/eye.png";
 import EyeClose from "../../assets/EyeIcon.png";
 import Arrow from "../../assets/direction-down 01.png";
 import { useHostel } from "../../Context/HostelListContext";
-import Circle from "../../assets/menucircle.png"
+import Circle from "../../assets/menucircle.png";
+import { usePermission } from "../../Utils/permissionHelper";
+import LoginImg from "../../assets/permission.svg";
 
 
 const StaffScreen = ({ hostelData, refreshHostel, }) => {
   const masters = hostelData?.masters || [];
   const staffs = hostelData?.staffs || [];
   const owner = hostelData?.owner;
-
+ const { canRead, canWrite, canUpdate, canDelete } =
+    usePermission("Owners");
   // const mastersList = [
   //   {
   //     fullName: owner?.fullName,
@@ -419,7 +422,7 @@ setPinError(res.message)
 marginLeft: "-8px",
                             }}
                           >
-                            <button
+                            {/* <button
                               className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
                               onClick={() => {
                                 setShowResetModal(true);
@@ -429,7 +432,24 @@ marginLeft: "-8px",
                               }}
                             >
                               Reset Password
-                            </button>
+                            </button> */}
+                            <button
+  disabled={!canWrite}
+  onClick={() => {
+    if (!canWrite) return;
+
+    setShowResetModal(true);
+    setOpenMenuIndex(null);
+    setCurrentPassword("");
+  }}
+  className={`w-full text-left px-3 py-2 text-sm ${
+    canWrite
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Reset Password
+</button>
                             <button
                               className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
                               onClick={() => {
@@ -463,7 +483,7 @@ marginLeft: "-8px",
 >
   Reset Pin
 </button> */}
-<button
+{/* <button
   className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
   onClick={() => {
 
@@ -472,6 +492,22 @@ marginLeft: "-8px",
     setOpenMenuIndex(null);
 
   }}
+>
+  Reset Pin
+</button> */}
+<button
+  disabled={!canWrite}
+  onClick={() => {
+    if (!canWrite) return;
+
+    setShowResetPinModal(true);
+    setOpenMenuIndex(null);
+  }}
+  className={`block w-full text-left px-3 py-2 text-sm ${
+    canWrite
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
 >
   Reset Pin
 </button>

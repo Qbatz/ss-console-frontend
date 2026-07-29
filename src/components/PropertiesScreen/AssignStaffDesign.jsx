@@ -3,7 +3,8 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import { useHostel } from "../../Context/HostelListContext";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import Message from "../../assets/message-2.png";
-import Arrow from "../../assets/direction-down 01.png"
+import Arrow from "../../assets/direction-down 01.png";
+import { usePermission } from "../../Utils/permissionHelper";
 
 
 const AssignStaffModal = ({

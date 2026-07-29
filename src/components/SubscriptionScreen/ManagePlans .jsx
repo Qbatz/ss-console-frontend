@@ -11,7 +11,7 @@ import Dots from "../../assets/menucircle.png";
 import Toast from "../../components/SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import { usePermission } from "../../Utils/permissionHelper";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 
 
 // const plans = [
@@ -160,15 +160,19 @@ const ManagePlans = () => {
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
-          <img
-            src={LoginImg}
-            alt="Access Restricted"
-            className="w-64 object-contain"
-          />
-
-          <p className="text-red-600 text-lg font-medium">
-            {accessError}
-          </p>
+           <img
+                                src={LoginImg}
+                                alt="Access Restricted"
+                                   className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                              />
+          
+                    <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+                    Permission Restricted !
+                  </h1>
+          
+                  <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+                    Your permission is restricted for this module
+                  </p>
 
         </div>
 
@@ -515,16 +519,33 @@ const ManagePlans = () => {
                                 </button>
                               )}
                               {activeTab === "inactive" && (
+                                // <button
+                                //   onClick={() => {
+                                //     setSelectedPlanId(plan.planId);
+                                //     setShowReactivateModal(true);
+                                //     setOpenMenuId(null);
+                                //   }}
+                                //   className="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-gray-100 cursor-pointer"
+                                // >
+                                //   Reactivate
+                                // </button>
                                 <button
-                                  onClick={() => {
-                                    setSelectedPlanId(plan.planId);
-                                    setShowReactivateModal(true);
-                                    setOpenMenuId(null);
-                                  }}
-                                  className="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-gray-100 cursor-pointer"
-                                >
-                                  Reactivate
-                                </button>
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    setSelectedPlanId(plan.planId);
+    setShowReactivateModal(true);
+    setOpenMenuId(null);
+  }}
+  className={`w-full text-left px-3 py-2 text-sm ${
+    canUpdate
+      ? "text-green-600 hover:bg-gray-100 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Reactivate
+</button>
                               )}
 
                             </div>

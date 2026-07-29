@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 import Filter from "../../assets/Filter.png";
 import Refresh from "../../assets/RefreshButton.png";
 import { usePermission } from "../../Utils/permissionHelper";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import Single from "../../assets/single.png";
 import Location from "../../assets/locationGrey.png"
 import Call from "../../assets/call.png";
@@ -25,7 +25,7 @@ const { roleId } = useParams();
   const { getOrderHistory, loading, accessError,verifyPayment } = useSubscription();
    const { sharePaymentLink} = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
-    usePermission("Hostel Transactions");
+    usePermission("Plans");
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
@@ -192,15 +192,19 @@ useEffect(() => {
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
-          <img
-            src={LoginImg}
-            alt="Access Restricted"
-            className="w-64 object-contain"
-          />
-
-          <p className="text-red-600 text-lg font-medium">
-            {accessError}
-          </p>
+         <img
+                                                   src={LoginImg}
+                                                   alt="Access Restricted"
+                                                      className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                                                 />
+                             
+                                       <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+                                       Permission Restricted !
+                                     </h1>
+                             
+                                     <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+                                       Your permission is restricted for this module
+                                     </p>
 
         </div>
 

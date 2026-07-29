@@ -15,6 +15,8 @@ import TenantDeductions from "./TenantDeductions";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import LoginImg from "../../assets/permission.svg";
+import { usePermission } from "../../Utils/permissionHelper";
 
 // const invoices = [
 //   {
@@ -74,6 +76,28 @@ const TenantOverview = () => {
   // const tenantData = location.state?.tenantData;
   const hostelData = location.state?.hostelData;
   const { customerId } = useParams();
+  //  const { canRead, canWrite, canUpdate, canDelete } =
+  //     usePermission("Tenants");
+  const {
+  canRead: canReadTenant,
+  canWrite: canWriteTenant,
+  canUpdate: canUpdateTenant,
+  canDelete: canDeleteTenant,
+} = usePermission("Tenants");
+
+const {
+  canRead: canReadInvoice,
+  canWrite: canWriteInvoice,
+  canUpdate: canUpdateInvoice,
+  canDelete: canDeleteInvoice,
+} = usePermission("Invoices");
+
+const {
+  canRead: canReadPlan,
+  canWrite: canWritePlan,
+  canUpdate: canUpdatePlan,
+  canDelete: canDeletePlan,
+} = usePermission("Plans");
   const [activeTab, setActiveTab] = useState("invoice");
   const [showInvoiceDrawer, setShowInvoiceDrawer] = useState(false);
   const menuRef = useRef(null);
@@ -752,7 +776,7 @@ const TenantOverview = () => {
                                 </button>
                               )}
 
-                              <button
+                              {/* <button
                                 className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer"
                                 onClick={() => {
                                   setSelectedInvoice(item);
@@ -763,8 +787,27 @@ const TenantOverview = () => {
                                 }}
                               >
                                 Delete
-                              </button>
-                              {item?.canUpdateAmount === true && (
+                              </button> */}
+                              <button
+  disabled={!canDeleteInvoice}
+  onClick={() => {
+    if (!canDeleteInvoice) return;
+
+    setSelectedInvoice(item);
+    setShowDeleteModal(true);
+    setDeletePhone("");
+    setAmountError("");
+    setOpenInvoiceMenu(null);
+  }}
+  className={`w-full text-left px-4 py-2 ${
+    canDeleteInvoice
+      ? "text-red-600 hover:bg-gray-100 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Delete
+</button>
+                              {/* {item?.canUpdateAmount === true && (
                                 <button
                                   className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                   onClick={() => {
@@ -775,7 +818,26 @@ const TenantOverview = () => {
                                 >
                                   Update Amount
                                 </button>
-                              )}
+                              )} */}
+                              {item?.canUpdateAmount === true && (
+  <button
+    disabled={!canUpdateInvoice}
+    onClick={() => {
+      if (!canUpdateInvoice) return;
+
+      setSelectedInvoice(item);
+      setShowAmountModal(true);
+      setOpenInvoiceMenu(null);
+    }}
+    className={`w-full text-left px-4 py-2 ${
+      canUpdateInvoice
+        ? "hover:bg-gray-100 cursor-pointer"
+        : "text-gray-400 cursor-not-allowed"
+    }`}
+  >
+    Update Amount
+  </button>
+)}
 
                             </div>
                           )}

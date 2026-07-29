@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { useOwners } from "../../Context/OwnersContext";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import { usePermission } from "../../Utils/permissionHelper";
 import Search from "../../assets/Search.png";
 import Arrow from "../../assets/arrow-right.png";
@@ -159,11 +159,15 @@ const TenantsList = () => {
           <img
             src={LoginImg}
             alt="Access Restricted"
-            className="w-64 object-contain"
+            className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
           />
 
-          <p className="text-red-600 text-lg font-medium">
-            Access Restricted
+          <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+            Permission Restricted !
+          </h1>
+
+          <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+            Your permission is restricted for this module
           </p>
 
         </div>
@@ -324,27 +328,27 @@ const TenantsList = () => {
 
                         </td> */}
                         <td className="px-6 py-1 text-left">
-  <div className="flex items-center gap-3">
-    {item.profilePic ? (
-      <img
-        src={item.profilePic}
-        alt={item.fullName}
-        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-      />
-    ) : (
-      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs flex-shrink-0">
-        {item.initials}
-      </div>
-    )}
+                          <div className="flex items-center gap-3">
+                            {item.profilePic ? (
+                              <img
+                                src={item.profilePic}
+                                alt={item.fullName}
+                                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs flex-shrink-0">
+                                {item.initials}
+                              </div>
+                            )}
 
-    <div
-      className="w-[180px] truncate"
-      title={item?.fullName || "N/A"}
-    >
-      {item?.fullName || "N/A"}
-    </div>
-  </div>
-</td>
+                            <div
+                              className="w-[180px] truncate"
+                              title={item?.fullName || "N/A"}
+                            >
+                              {item?.fullName || "N/A"}
+                            </div>
+                          </div>
+                        </td>
 
                         <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
                           {item.mobile}
@@ -354,13 +358,13 @@ const TenantsList = () => {
                           {item.hostelName}
                         </td> */}
                         <td className="px-4 py-2 text-[12px] text-left">
-  <div
-    className="w-[220px] truncate"
-    title={item?.hostelName || "N/A"}
-  >
-    {item?.hostelName || "N/A"}
-  </div>
-</td>
+                          <div
+                            className="w-[220px] truncate"
+                            title={item?.hostelName || "N/A"}
+                          >
+                            {item?.hostelName || "N/A"}
+                          </div>
+                        </td>
 
 
                         <td className="px-4 py-2 text-left whitespace-nowrap">

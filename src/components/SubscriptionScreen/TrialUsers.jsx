@@ -10,9 +10,13 @@ import ArrowRight from "../../assets/arrow-right.png";
 import { useRole } from "../../Context/RoleContext";
 import { useNavigate } from "react-router-dom";
 import Arrow from "../../assets/direction-down 01.png";
+import { usePermission } from "../../Utils/permissionHelper";
+import LoginImg from "../../assets/permission.svg";
 
 const TrailPage = () => {
-  const { adminDetails} = useRole();
+  const { adminDetails,errorMsg} = useRole();
+   const { canRead, canWrite, canUpdate, canDelete } =
+      usePermission("Subscriptions");
   const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(null);
   const [activeAction, setActiveAction] = useState(null);
@@ -98,16 +102,7 @@ useEffect(() => {
 
   return (
     <DashboardLayout>
-      <div className="p-6 min-h-screen">
-
-        {/* Header */}
-        {/* <div className="flex justify-between items-center mb-6 border-b border-gray-300">
-        <h2 className="text-lg font-semibold">Transactions</h2>
-        <button className="text-blue-600 text-sm font-medium">
-          Manage Plans
-        </button>
-      </div> */}
-        <div className="border-b border-gray-200 mb-3 pb-2">
+ <div className="border-b border-gray-200 mb-3 pb-2">
 
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
@@ -130,6 +125,31 @@ useEffect(() => {
           </div>
 
         </div>
+        {(canRead === false || errorMsg === "Access Restricted") ? (
+      
+                    <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+      
+                       <img
+                                           src={LoginImg}
+                                           alt="Access Restricted"
+                                              className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                                         />
+                     
+                               <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+                               Permission Restricted !
+                             </h1>
+                     
+                             <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+                               Your permission is restricted for this module
+                             </p>
+      
+                    </div>
+      
+                  ) : (
+      <div className="p-6 min-h-screen">
+
+      
+       
         {/* Cards */}
         <div className="flex gap-4 mb-4">
           <div className="bg-white-common border border-gray-300 rounded-lg p-4 w-64">
@@ -361,7 +381,7 @@ useEffect(() => {
                           }}
                         />
 
-                        {openMenu === index && (
+                        {/* {openMenu === index && (
                           <div
                             className={`absolute right-0 w-36 bg-white-common border border-gray-200 rounded-lg shadow-lg z-50 text-[13px] text-justify 
           ${index >= trialList.length - 2 ? "bottom-full mb-2" : "top-full mt-2"}`}
@@ -424,7 +444,7 @@ useEffect(() => {
                               Delete
                             </p>
                           </div>
-                        )}
+                        )} */}
                       </div>
                     </td>
                   </tr>
@@ -652,6 +672,7 @@ useEffect(() => {
         </div>
 
       </div>
+                  )}
     </DashboardLayout>
   );
 };

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import swap from "../../assets/arrowswap.png";
 import { useOwners } from "../../Context/OwnersContext";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import { useNavigate, useLocation } from "react-router-dom";
 import { usePermission } from "../../Utils/permissionHelper";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
@@ -555,15 +555,19 @@ closeNotesModal()
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
-          <img
-            src={LoginImg}
-            alt="Access Restricted"
-            className="w-64 object-contain"
-          />
+         <img
+                      src={LoginImg}
+                      alt="Access Restricted"
+                         className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                    />
 
-          <p className="text-red-600 text-lg font-medium">
-            {accessError}
-          </p>
+          <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+          Permission Restricted !
+        </h1>
+
+        <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+          Your permission is restricted for this module
+        </p>
 
         </div>
 
@@ -575,9 +579,9 @@ closeNotesModal()
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold">Proprietors</h2>
 
-            <button className="text-blue-600 flex items-center gap-1 text-sm font-medium">
+            {/* <button className="text-blue-600 flex items-center gap-1 text-sm font-medium">
               ➕ Add Proprietor
-            </button>
+            </button> */}
           </div>
 
 

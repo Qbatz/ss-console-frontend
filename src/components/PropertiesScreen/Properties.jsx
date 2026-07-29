@@ -10,7 +10,7 @@ import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import noteAdd from "../../assets/noteadd.png";
 import { useNavigate, useLocation } from "react-router-dom";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import { usePermission } from "../../Utils/permissionHelper";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
@@ -99,6 +99,12 @@ useEffect(() => {
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Hostels");
   console.log("canRead", canRead)
+  const {
+  canRead: canReadExpenses,
+  canWrite: canWriteExpenses,
+  canUpdate: canUpdateExpenses,
+  canDelete: canDeleteExpenses,
+} = usePermission("Expenses");
   // const [page, setPage] = useState(1);
   // const [searchText, setSearchText] = useState("");
   const [pageSize, setPageSize] = useState(10);
@@ -809,12 +815,16 @@ const handleAddNote = async () => {
             <img
               src={LoginImg}
               alt="Access Restricted"
-              className="w-64 object-contain"
+                 className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
             />
 
-           <p className="error-title">
-              {accessError}
-            </p>
+           <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+          Permission Restricted !
+        </h1>
+
+        <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+          Your permission is restricted for this module
+        </p>
 
           </div>
 
@@ -2083,7 +2093,7 @@ const handleAddNote = async () => {
       zIndex: 999999,
     }}
   >
-    <button
+    {/* <button
   onClick={async () => {
 
     setSelectedHostelId(
@@ -2102,8 +2112,27 @@ const handleAddNote = async () => {
   className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
 >
   Add Notes
+</button> */}
+<button
+  disabled={!canWrite}
+  onClick={async () => {
+    setSelectedHostelId(item.hostelId);
+
+    await fetchHostelNotes(item.hostelId);
+
+    setShowNoteModal(true);
+
+    setOpenMenu(null);
+  }}
+  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+    canWrite
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "opacity-50 cursor-not-allowed"
+  }`}
+>
+  Add Notes
 </button>
-    <button
+    {/* <button disabled={!canWriteExpenses}
       onClick={() => {
         setSelectedHostelId(item.hostelId);
         setShowResetModal(true);
@@ -2112,9 +2141,25 @@ const handleAddNote = async () => {
       className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
     >
       Reset Expense
-    </button>
-
+    </button> */}
     <button
+  disabled={!canWriteExpenses}
+  onClick={() => {
+    setSelectedHostelId(item.hostelId);
+    setShowResetModal(true);
+    setOpenMenu(null);
+  }}
+  className={`w-full text-left px-4 py-2.5 text-sm transition-colors
+    ${
+      canWriteExpenses
+        ? "hover:bg-gray-50 cursor-pointer"
+        : "opacity-50 cursor-not-allowed"
+    }`}
+>
+  Reset Expense
+</button>
+
+    {/* <button
       onClick={() => {
         setDeleteHostelId(item.hostelId);
         setShowDeleteModal(true);
@@ -2123,7 +2168,22 @@ const handleAddNote = async () => {
       className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-600 transition-colors cursor-pointer"
     >
       Delete
-    </button>
+    </button> */}
+    <button
+  disabled={!canDelete}
+  onClick={() => {
+    setDeleteHostelId(item.hostelId);
+    setShowDeleteModal(true);
+    setOpenMenu(null);
+  }}
+  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+    canDelete
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "opacity-50 cursor-not-allowed"
+  }`}
+>
+  Delete
+</button>
   </div>,
   document.body
 )}

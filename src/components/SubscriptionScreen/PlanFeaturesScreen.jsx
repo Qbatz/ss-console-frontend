@@ -4,11 +4,14 @@ import { usePlan } from "../../Context/PlanContexts";
 import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Edit from "../../assets/editIcon.png";
-import Trash from "../../assets/trash.png"
+import Trash from "../../assets/trash.png";
+import { usePermission } from "../../Utils/permissionHelper";
+import LoginImg from "../../assets/permission.svg";
 
 const PlanFeatures = () => {
-  const { getSmartstayFeatures,createSmartstayFeature,updateSmartstayFeature,deleteSmartstayFeature } = usePlan();
-
+  const { getSmartstayFeatures,createSmartstayFeature,updateSmartstayFeature,deleteSmartstayFeature,errorMsg } = usePlan();
+  const { canRead, canWrite, canUpdate, canDelete } =
+    usePermission("Plans");
   const [smartstayFeatures, setSmartstayFeatures] = useState([]);
 const [planName, setPlanName] = useState("");
 const [price, setPrice] = useState("");
@@ -193,6 +196,27 @@ const confirmDelete = async () => {
         message={message}
         type={modalType}
       />
+       {(canRead === false || errorMsg === "Access Restricted") ? (
+      
+              <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+      
+                 <img
+                                      src={LoginImg}
+                                      alt="Access Restricted"
+                                         className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                                    />
+                
+                          <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+                          Permission Restricted !
+                        </h1>
+                
+                        <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+                          Your permission is restricted for this module
+                        </p>
+      
+              </div>
+      
+            ) : (
  <div className="min-h-screen bg-gray-50 p-6 text-left">
   <h2 className="text-2xl font-semibold mb-2">
     Smartstay PlanFeatures
@@ -224,9 +248,24 @@ const confirmDelete = async () => {
       </p>
     </div>
 
-   <button
+   {/* <button
   onClick={() => setShowModal(true)}
   className="bg-blue-600 text-white px-4 py-2 rounded-lg  cursor-pointer"
+>
+  + Add Feature
+</button> */}
+<button
+  disabled={!canWrite}
+  onClick={() => {
+    if (canWrite) {
+      setShowModal(true);
+    }
+  }}
+  className={`px-4 py-2 rounded-lg ${
+    canWrite
+      ? "bg-blue-600 text-white cursor-pointer"
+      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+  }`}
 >
   + Add Feature
 </button>
@@ -268,10 +307,25 @@ const confirmDelete = async () => {
       </div>
 
       <div className="col-span-4 flex justify-center gap-4">
-        <button className="text-blue-600 hover:text-blue-800  cursor-pointer" onClick={() => handleEdit(item)}>
+        {/* <button className="text-blue-600 hover:text-blue-800  cursor-pointer" onClick={() => handleEdit(item)}>
           <img src={Edit} className="w-5 h-5"/>
-        </button>
-
+        </button> */}
+        <button
+  disabled={!canUpdate}
+  onClick={() => {
+    if (canUpdate) {
+      handleEdit(item);
+    }
+  }}
+  className={`${
+    canUpdate
+      ? "text-blue-600 hover:text-blue-800 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed opacity-40"
+  }`}
+>
+  <img src={Edit} className="w-5 h-5" alt="Edit" />
+</button>
+{/* 
        <button
   className="text-red-600 hover:text-red-800 cursor-pointer"
   onClick={() => {
@@ -280,6 +334,22 @@ const confirmDelete = async () => {
   }}
 >
   <img src={Trash} className="w-5 h-5"/>
+</button> */}
+<button
+  disabled={!canDelete}
+  onClick={() => {
+    if (canDelete) {
+      setDeleteId(item.smartstayFeatureId);
+      setShowDeleteModal(true);
+    }
+  }}
+  className={`${
+    canDelete
+      ? "cursor-pointer"
+      : "cursor-not-allowed opacity-40"
+  }`}
+>
+  <img src={Trash} className="w-5 h-5" alt="Delete" />
 </button>
       </div>
     </div>
@@ -293,6 +363,7 @@ const confirmDelete = async () => {
 
   </div>
 </div>
+            )}
 {showModal && (
   <div
     className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"

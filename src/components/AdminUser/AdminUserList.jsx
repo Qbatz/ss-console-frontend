@@ -5,20 +5,21 @@ import AddAdmin from "./AddAdmin";
 import { useRole } from "../../Context/RoleContext";
 import { useNavigate, useParams } from "react-router-dom";
 import swap from "../../assets/arrowswap.png";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import Add from "../../assets/add_admin.png";
 import Frame from "../../assets/Frame.png";
 import DownArrow from "../../assets/dropdownImg.png";
 import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
-
+import { usePermission } from "../../Utils/permissionHelper";
 
 
 
 const IamAdminUser = () => {
   const navigate = useNavigate();
   const { getAdminDetails, loading, agents, getAllAgents, accessError, deactivateAgent, reactivateAgent, getAgentDetails, getAgentRoles, agentRoles, updateAdminRole, getAgentRoleDropdown } = useRole();
-
+const { canRead, canWrite, canUpdate, canDelete } =
+        usePermission("Admin");
   const [admin, setAdmin] = useState(null);
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(null);
@@ -249,19 +250,23 @@ console.log("filteredAgents", filteredAgents);
         type={modalType}
 
       />
-      {accessError === "Access Restricted" ? (
+      {(canRead === false || accessError === "Access Restricted") ? (
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
           <img
-            src={LoginImg}
-            alt="Access Restricted"
-            className="w-64 object-contain"
-          />
-
-          <p className="text-red-600 text-lg font-medium">
-            {accessError}
-          </p>
+                                                                       src={LoginImg}
+                                                                       alt="Access Restricted"
+                                                                          className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                                                                     />
+                                                 
+                                                           <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+                                                           Permission Restricted !
+                                                         </h1>
+                                                 
+                                                         <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+                                                           Your permission is restricted for this module
+                                                         </p>
 
         </div>
 
@@ -285,14 +290,34 @@ console.log("filteredAgents", filteredAgents);
                   Recent Activity
                 </button> */}
 
-                <button className="flex items-center gap-2 text-blue-600 text-sm px-4 py-2 rounded-lg  transition w-full sm:w-auto justify-center cursor-pointer"
+                {/* <button className="flex items-center gap-2 text-blue-600 text-sm px-4 py-2 rounded-lg  transition w-full sm:w-auto justify-center cursor-pointer"
                   onClick={() => setOpen(true)}>
                   <img
                     src={Add}
                     alt="Add"
                     className="w-6 h-6 object-contain"
                   /> Add Admin User
-                </button>
+                </button> */}
+                <button
+  disabled={!canWrite}
+  onClick={() => {
+    if (!canWrite) return;
+
+    setOpen(true);
+  }}
+  className={`flex items-center gap-2 text-sm px-4 py-2 rounded-lg transition w-full sm:w-auto justify-center ${
+    canWrite
+      ? "text-blue-600 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  <img
+    src={Add}
+    alt="Add"
+    className={`w-6 h-6 object-contain ${!canWrite ? "opacity-40" : ""}`}
+  />
+  Add Admin User
+</button>
               </div>
 
             </div>
@@ -519,29 +544,63 @@ console.log("filteredAgents", filteredAgents);
 
 
                                     {status !== "INACTIVE" ? (
+                                      // <button
+                                      //   onClick={() => {
+                                      //     setSelectedUser(user);
+                                      //     setConfirmOpen(true);
+                                      //     setMenuOpen(null);
+                                      //   }}
+                                      //   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                      // >
+                                      //   Deactivate
+                                      // </button>
                                       <button
-                                        onClick={() => {
-                                          setSelectedUser(user);
-                                          setConfirmOpen(true);
-                                          setMenuOpen(null);
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                      >
-                                        Deactivate
-                                      </button>
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    setSelectedUser(user);
+    setConfirmOpen(true);
+    setMenuOpen(null);
+  }}
+  className={`w-full text-left px-4 py-2 text-sm ${
+    canUpdate
+      ? "hover:bg-gray-100 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Deactivate
+</button>
                                     ) : (
 
 
+                                      // <button
+                                      //   onClick={() => {
+                                      //     setSelectedUser(user);
+                                      //     setShowReactivateModal(true);
+                                      //     setMenuOpen(null);
+                                      //   }}
+                                      //   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
+                                      // >
+                                      //   Reactivate
+                                      // </button>
                                       <button
-                                        onClick={() => {
-                                          setSelectedUser(user);
-                                          setShowReactivateModal(true);
-                                          setMenuOpen(null);
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
-                                      >
-                                        Reactivate
-                                      </button>
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    setSelectedUser(user);
+    setShowReactivateModal(true);
+    setMenuOpen(null);
+  }}
+  className={`w-full text-left px-4 py-2 text-sm ${
+    canUpdate
+      ? "text-green-600 hover:bg-gray-100 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Reactivate
+</button>
                                     )}
                                     <button
                                       onClick={() => handleOpenDetails(user)}
@@ -549,7 +608,7 @@ console.log("filteredAgents", filteredAgents);
                                     >
                                       View Details
                                     </button>
-                                    <button
+                                    {/* <button
                                       onClick={() => {
                                         setSelectedUser(user);
                                         setSelectedRoleId(user.roleId);
@@ -559,7 +618,25 @@ console.log("filteredAgents", filteredAgents);
                                       className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                                     >
                                       Edit
-                                    </button>
+                                    </button> */}
+                                    <button
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    setSelectedUser(user);
+    setSelectedRoleId(user.roleId);
+    setShowEditModal(true);
+    setMenuOpen(null);
+  }}
+  className={`w-full text-left px-4 py-2 text-sm ${
+    canUpdate
+      ? "hover:bg-gray-100 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Edit
+</button>
 
 
                                   </div>

@@ -21,7 +21,7 @@ import { useHostel } from "../../Context/HostelListContext";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import { usePermission } from "../../Utils/permissionHelper";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import ReccuringBill from "./ReccuringBill";
 import { useOwners } from "../../Context/OwnersContext";
 import { useRole } from "../../Context/RoleContext";
@@ -1369,7 +1369,7 @@ const handleApproveKYC = async (customerId) => {
                       </button>
 
 
-                      {/* BUY PLAN */}
+                     
                       <button
                         disabled={!canSubscriptionWrite}
                         onClick={() => {
@@ -1756,7 +1756,7 @@ const handleApproveKYC = async (customerId) => {
 
             </div>
 
-            {/* STATUS */}
+         
             <div className="flex items-start gap-3">
 
               <div>
@@ -1814,7 +1814,7 @@ const handleApproveKYC = async (customerId) => {
 
             </div>
 
-            {/* RESET */}
+            
             <div className="flex items-start gap-3">
 
               <button
@@ -2811,7 +2811,7 @@ const handleApproveKYC = async (customerId) => {
                                     </button>
 
 
-{
+{/* {
   item?.canGenerateSettlement === true &&(
      <button onClick={() =>
   navigate(
@@ -2835,10 +2835,31 @@ const handleApproveKYC = async (customerId) => {
                                       Generate
                                     </button>
   )
-}
+} */}
+{item?.canGenerateSettlement === true && (
+  <button
+    disabled={!canWrite}
+    onClick={() => {
+      if (!canWrite) return;
+
+      navigate(`/settlement-summary/${item.customerId}`, {
+        state: {
+          tenantData: item,
+        },
+      });
+    }}
+    className={`text-left px-4 py-2 ${
+      canWrite
+        ? "text-cardTitle hover:bg-cardBg cursor-pointer"
+        : "text-gray-400 cursor-not-allowed"
+    }`}
+  >
+    Generate
+  </button>
+)}
                                    
  
-{item?.canApproveKyc === true && (
+{/* {item?.canApproveKyc === true && (
   <button
     onClick={() => {
       setSelectedCustomerId(
@@ -2856,6 +2877,26 @@ const handleApproveKYC = async (customerId) => {
       hover:bg-cardBg
       cursor-pointer
     "
+  >
+    Approve KYC
+  </button>
+)} */}
+{item?.canApproveKyc === true && (
+  <button
+    disabled={!canWrite}
+    onClick={() => {
+      if (!canWrite) return;
+
+      setSelectedCustomerId(item.customerId);
+      setShowApproveModal(true);
+      setOpenMenu(null);
+      setSelectedTenant(item);
+    }}
+    className={`text-left px-4 py-2 ${
+      canWrite
+        ? "text-cardTitle hover:bg-cardBg cursor-pointer"
+        : "text-gray-400 cursor-not-allowed"
+    }`}
   >
     Approve KYC
   </button>

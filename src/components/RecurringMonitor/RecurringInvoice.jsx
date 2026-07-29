@@ -5,7 +5,7 @@ import { useHostel } from "../../Context/HostelListContext";
 import Toast from "../SuccessModal/ToastDesign";
 import Search from "../../assets/Search.png";
 import { usePermission } from "../../Utils/permissionHelper";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import Circle from "../../assets/menucircle.png";
 import OwnerImg from "../../assets/ownerimg.png";
 import call from "../../assets/call.png";
@@ -424,14 +424,18 @@ const handleBulkGenerate = async () => {
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
           <img
-            src={LoginImg}
-            alt="Access Restricted"
-            className="w-64 object-contain"
-          />
-
-          <p className="text-red-600 text-lg font-medium">
-            {errorMsg}
-          </p>
+                                                    src={LoginImg}
+                                                    alt="Access Restricted"
+                                                       className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                                                  />
+                              
+                                        <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+                                        Permission Restricted !
+                                      </h1>
+                              
+                                      <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+                                        Your permission is restricted for this module
+                                      </p>
 
         </div>
 

@@ -6,14 +6,17 @@ import Circle from "../../assets/menucircle.png";
 import Team from "../../assets/Team.png";
 import Edit from "../../assets/editicon.png";
 import Trash from "../../assets/trash.png";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
+import { usePermission } from "../../Utils/permissionHelper";
 
 const Roles = () => {
   const { agentRoles, getAgentRoles, getAgentRoleById, loading, deleteAgentRole, errorMsg, accessError, adminDetails } = useRole();
   console.log("agentRoles", agentRoles)
+    const { canRead, canWrite, canUpdate, canDelete } =
+        usePermission("Admin");
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
@@ -137,19 +140,24 @@ const handleEditClick = async (role) => {
         type={modalType}
 
       />
-      {accessError === "Access Restricted" ? (
+      {/* {accessError === "Access Restricted" ? ( */}
+      {(canRead === false || accessError === "Access Restricted") ? (
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
-          <img
-            src={LoginImg}
-            alt="Access Restricted"
-            className="w-64 object-contain"
-          />
-
-          <p className="text-red-600 text-lg font-medium">
-            {accessError}
-          </p>
+         <img
+                                                                                src={LoginImg}
+                                                                                alt="Access Restricted"
+                                                                                   className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                                                                              />
+                                                          
+                                                                    <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+                                                                    Permission Restricted !
+                                                                  </h1>
+                                                          
+                                                                  <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+                                                                    Your permission is restricted for this module
+                                                                  </p>
 
         </div>
 
@@ -158,12 +166,36 @@ const handleEditClick = async (role) => {
           <div className="flex items-center justify-between pb-3 border-b border-gray-200 mb-6 p-3 ">
             <h2 className="text-lg font-semibold text-gray-800 font-sans">Roles</h2>
 
-            <button className="flex items-center gap-2 text-blue-600 font-medium text-sm cursor-pointer" onClick={() => setOpen(true)}>
+            {/* <button className="flex items-center gap-2 text-blue-600 font-medium text-sm cursor-pointer" onClick={() => setOpen(true)}>
               <span className="bg-blue-600 text-white w-5 h-5 flex items-center justify-center rounded-md text-xs font-sans">
                 +
               </span>
               Create Role
-            </button>
+            </button> */}
+            <button
+  disabled={!canWrite}
+  onClick={() => {
+    if (!canWrite) return;
+
+    setOpen(true);
+  }}
+  className={`flex items-center gap-2 text-sm font-medium ${
+    canWrite
+      ? "text-blue-600 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  <span
+    className={`w-5 h-5 flex items-center justify-center rounded-md text-xs font-sans ${
+      canWrite
+        ? "bg-blue-600 text-white"
+        : "bg-gray-300 text-gray-500"
+    }`}
+  >
+    +
+  </span>
+  Create Role
+</button>
           </div>
 
 
@@ -334,15 +366,35 @@ const handleEditClick = async (role) => {
     left: dropdownPosition.left,
   }}
                               >
-                                <button
+                                {/* <button
                                   className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-sky-100 cursor-pointer"
                                   onClick={() => handleEditClick(role)}
                                 >
                                   <img src={Edit} alt="Edit" className="w-4 h-4" />
                                   Edit
-                                </button>
-
+                                </button> */}
                                 <button
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    handleEditClick(role);
+  }}
+  className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm ${
+    canUpdate
+      ? "hover:bg-sky-100 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  <img
+    src={Edit}
+    alt="Edit"
+    className={`w-4 h-4 ${!canUpdate ? "opacity-40" : ""}`}
+  />
+  Edit
+</button>
+
+                                {/* <button
                                   className="flex item-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 cursor-pointer"
                                   onClick={() => {
                                     setDeleteRole(role);
@@ -351,7 +403,28 @@ const handleEditClick = async (role) => {
                                 >
                                   <img src={Trash} alt="Trash" className="w-4 h-4" />
                                   Delete
-                                </button>
+                                </button> */}
+                                <button
+  disabled={!canDelete}
+  onClick={() => {
+    if (!canDelete) return;
+
+    setDeleteRole(role);
+    setOpenMenu(null);
+  }}
+  className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm ${
+    canDelete
+      ? "text-red-600 hover:bg-red-100 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  <img
+    src={Trash}
+    alt="Trash"
+    className={`w-4 h-4 ${!canDelete ? "opacity-40" : ""}`}
+  />
+  Delete
+</button>
 
                               </div>
                             )}
