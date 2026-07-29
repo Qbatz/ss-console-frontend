@@ -1969,7 +1969,7 @@ const TenantRecurring = () => {
   Generate Recurring
 </button> */}
 
-                      <button
+                      {/* <button
                         disabled={isGenerating}
                         onClick={() =>
                           handleGenerate([selectedItem.customerId])
@@ -1981,7 +1981,22 @@ const TenantRecurring = () => {
                       >
                         <img src={refreshWhite} className="w-4 h-4" />
                         {isGenerating ? "Generating..." : "Generate Recurring"}
-                      </button>
+                      </button> */}
+                      <button
+  disabled={!canWrite || isGenerating}
+  onClick={() => {
+    if (!canWrite) return;
+    handleGenerate([selectedItem.customerId]);
+  }}
+  className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 ${
+    !canWrite || isGenerating
+      ? "bg-gray-400 cursor-not-allowed text-white"
+      : "bg-primary-hover cursor-pointer text-white"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  {isGenerating ? "Generating..." : "Generate Recurring"}
+</button>
 
 
                     </div>
@@ -2252,7 +2267,7 @@ setSelectedCustomers(prev =>
                   <img src={refreshWhite} className="w-4 h-4" />
                   Generate
                 </button> */}
-                <button
+                {/* <button
                   disabled={isBulkGenerating}
                   onClick={handleBulkGenerate}
                   className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 ${isBulkGenerating
@@ -2262,7 +2277,22 @@ setSelectedCustomers(prev =>
                 >
                   <img src={refreshWhite} className="w-4 h-4" />
                   {isBulkGenerating ? "Generating..." : "Generate"}
-                </button>
+                </button> */}
+                <button
+  disabled={!canWrite || isBulkGenerating}
+  onClick={() => {
+    if (!canWrite) return;
+    handleBulkGenerate();
+  }}
+  className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 ${
+    !canWrite || isBulkGenerating
+      ? "bg-gray-300 cursor-not-allowed"
+      : "bg-blue-700 cursor-pointer"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  {isBulkGenerating ? "Generating..." : "Generate"}
+</button>
               </div>
 
             </div>
@@ -2591,19 +2621,39 @@ setSelectedCustomers(prev =>
                                   // >
                                   //   Generate
                                   // </button>
+                                  // <button
+                                  //   disabled={
+                                  //     cust.recurringStatus ||
+                                  //     isGenerating
+                                  //   }
+                                  //   onClick={() => handleGenerate([cust.customerId])}
+                                  //   className={`px-2 py-1 rounded text-[10px] text-white whitespace-nowrap ${cust.recurringStatus || isGenerating
+                                  //       ? "bg-gray-300 cursor-not-allowed"
+                                  //       : "bg-primary cursor-pointer"
+                                  //     }`}
+                                  // >
+                                  //   {isGenerating ? "Generating..." : "Generate"}
+                                  // </button>
                                   <button
-                                    disabled={
-                                      cust.recurringStatus ||
-                                      isGenerating
-                                    }
-                                    onClick={() => handleGenerate([cust.customerId])}
-                                    className={`px-2 py-1 rounded text-[10px] text-white whitespace-nowrap ${cust.recurringStatus || isGenerating
-                                        ? "bg-gray-300 cursor-not-allowed"
-                                        : "bg-primary cursor-pointer"
-                                      }`}
-                                  >
-                                    {isGenerating ? "Generating..." : "Generate"}
-                                  </button>
+  disabled={
+    !canWrite ||
+    cust.recurringStatus ||
+    isGenerating
+  }
+  onClick={() => {
+    if (!canWrite) return;
+    handleGenerate([cust.customerId]);
+  }}
+  className={`px-2 py-1 rounded text-[10px] text-white whitespace-nowrap ${
+    !canWrite ||
+    cust.recurringStatus ||
+    isGenerating
+      ? "bg-gray-300 cursor-not-allowed"
+      : "bg-primary cursor-pointer"
+  }`}
+>
+  {isGenerating ? "Generating..." : "Generate"}
+</button>
 
                                 )}
                               </td>
@@ -2640,7 +2690,7 @@ setSelectedCustomers(prev =>
   <img src={refreshWhite} className="w-4 h-4" />
   Generate Recurring
 </button> */}
-                <button
+                {/* <button
                   disabled={
                     drawerSelectedIds.length === 0 ||
                     isGenerating
@@ -2653,7 +2703,28 @@ setSelectedCustomers(prev =>
                 >
                   <img src={refreshWhite} className="w-4 h-4" />
                   {isGenerating ? "Generating..." : "Generate Recurring"}
-                </button>
+                </button> */}
+                <button
+  disabled={
+    !canWrite ||
+    drawerSelectedIds.length === 0 ||
+    isGenerating
+  }
+  onClick={() => {
+    if (!canWrite) return;
+    handleGenerate(drawerSelectedIds);
+  }}
+  className={`px-6 py-2 rounded-lg text-[12px] flex items-center gap-2 text-white ${
+    !canWrite ||
+    drawerSelectedIds.length === 0 ||
+    isGenerating
+      ? "bg-gray-300 cursor-not-allowed"
+      : "bg-primary cursor-pointer"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  {isGenerating ? "Generating..." : "Generate Recurring"}
+</button>
               </div>
 
             </div>

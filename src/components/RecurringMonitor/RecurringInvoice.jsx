@@ -24,18 +24,18 @@ const RecurringInvoice = () => {
   const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId, bulkGenerateRecurring, getRecurringMonth } = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Recurring");
-  console.log("errorMsg", errorMsg)
+  
   const [search, setSearch] = useState("");
   const dropdownRef = useRef(null);
   const statusDropdownRef = useRef(null);
   const generateRef = useRef(false);
 const [isGenerating, setIsGenerating] = useState(false);
   const [data, setData] = useState([]);
-  console.log("data", data)
+ 
   const [filterOptions, setFilterOptions] = useState([]);
   const [filter, setFilter] = useState("TODAY");
   const [billingModelFilterBy, setBillingModelFilterBy] = useState("ALL");
-  console.log("filter", filter)
+  
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
@@ -62,7 +62,7 @@ const [isGenerating, setIsGenerating] = useState(false);
   const [appliedFilterType, setAppliedFilterType] = useState("");
   const [appliedSystemFilter, setAppliedSystemFilter] = useState("");
   const [billingModelOptions, setBillingModelOptions] = useState([]);
-  console.log("billingModelOptions", billingModelOptions)
+  
   const [errorTable, setErrorTable] = useState("")
   const [viewType, setViewType] = useState("table");
   const [generateError, setGenrateError] = useState("")
@@ -87,6 +87,7 @@ const [isGenerating, setIsGenerating] = useState(false);
       setCalendarData(res.data || []);
     }
   };
+  
   useEffect(() => {
     if (viewType === "calendar") {
       fetchCalendar();
@@ -109,7 +110,7 @@ const [isGenerating, setIsGenerating] = useState(false);
       setCurrentMonth(prev => prev + 1);
     }
   };
-  console.log("selectedItem", selectedItem)
+
   const handleSelect = (id) => {
     setSelectedIds((prev) =>
       prev.includes(id)
@@ -141,7 +142,7 @@ const [totalProperty,setTotalProperty] = useState("")
     if (res?.success) {
       setErrorTable("")
       const response = res.data;
-      console.log("statusfilter", response.statusFilterOptions);
+     
 
       setData(response.hostelList || []);
       setTotalItems(response.totalItems);
@@ -157,7 +158,7 @@ const [totalProperty,setTotalProperty] = useState("")
       });
     }
     else {
-      console.log("res.message", res.message)
+     
       setData([]);
       setErrorTable(res.message)
     }
@@ -205,7 +206,7 @@ const [totalProperty,setTotalProperty] = useState("")
   }, [showFilterDrawer]);
   const handleOpenDetails = async (item, page = 0) => {
     setSelectedItem(item);
-    console.log("setSelectedItem", selectedItem)
+   
     setShowDetailsModal(true);
 
     const res = await getRecurringByHostelId(
@@ -220,7 +221,7 @@ const [totalProperty,setTotalProperty] = useState("")
       setHistoryPage(page);
     }
   };
-  console.log("selectedItem?.currentPeriodStartDate", selectedItem?.activeTenantCount);
+ 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
 
@@ -1546,7 +1547,7 @@ const handleBulkGenerate = async () => {
 
   Generate Recurring
 </button> */}
-<button
+{/* <button
   onClick={() =>
     handleGenerate([
       selectedItem.hostelId
@@ -1566,6 +1567,43 @@ const handleBulkGenerate = async () => {
     gap-2
 
     ${
+      selectedItem?.canGenerateRecurring === false ||
+      isGenerating
+        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+        : "bg-blue-600 text-white cursor-pointer"
+    }
+  `}
+>
+  <img
+    src={refreshWhite}
+    className="w-4 h-4"
+  />
+
+  {isGenerating
+    ? "Generating..."
+    : "Generate Recurring"}
+</button> */}
+
+<button
+  onClick={() => {
+    if (!canWrite) return;
+    handleGenerate([selectedItem.hostelId]);
+  }}
+  disabled={
+    !canWrite ||
+    selectedItem?.canGenerateRecurring === false ||
+    isGenerating
+  }
+  className={`
+    px-6
+    py-2
+    rounded-lg
+    text-[12px]
+    flex
+    items-center
+    gap-2
+    ${
+      !canWrite ||
       selectedItem?.canGenerateRecurring === false ||
       isGenerating
         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -1783,11 +1821,26 @@ const handleBulkGenerate = async () => {
                   Cancel
                 </button>
 
-              <button
+              {/* <button
   disabled={isGenerating}
   onClick={handleBulkGenerate}
   className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 ${
     isGenerating
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-blue-700 cursor-pointer"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  {isGenerating ? "Generating..." : "Generate"}
+</button> */}
+<button
+  disabled={!canWrite || isGenerating}
+  onClick={() => {
+    if (!canWrite) return;
+    handleBulkGenerate();
+  }}
+  className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 ${
+    !canWrite || isGenerating
       ? "bg-gray-400 cursor-not-allowed"
       : "bg-blue-700 cursor-pointer"
   }`}

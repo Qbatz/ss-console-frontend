@@ -17,8 +17,8 @@ const SettlementSummary = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const tenantData = location.state?.tenantData;
-  console.log("tenantData", tenantData)
-  const { getTenantSettlement,generateTenantSettlement } = useHostel();
+  
+  const { getTenantSettlement, generateTenantSettlement } = useHostel();
   const { customerId } = useParams();
   const [showUnpaid, setShowUnpaid] = useState(false);
   const [showRent, setShowRent] = useState(false);
@@ -60,7 +60,7 @@ const SettlementSummary = () => {
   const [isGenerating, setIsGenerating] = useState(false);
 
 
-  console.log("customerFinalSettlement", customerFinalSettlement);
+  
   const sections = [
     { title: "Unpaid Invoices", amount: `₹${unPaidInvoice?.unpaidAmount || 0}` },
     // { title: "Refundable Rent", amount: `₹${customerRentInfo?.currentPayableRent || 0}` },
@@ -116,14 +116,14 @@ const SettlementSummary = () => {
   // Math.abs(Number(customerFinalSettlement?.walletAmount || 0)) -
   // Number(customerFinalSettlement?.refundableAdvance || 0);
   const outstandingAmount =
-  totalRent -
-  Number(customerFinalSettlement?.discountAmount || 0) +
-  Number(customerFinalSettlement?.ebAmount || 0) +
-  Number(unPaidInvoice?.unpaidAmount || 0) +
-  Number(customerRentInfo?.otherItemAmount || 0) +
-  totalDeductions +
-  Number(customerFinalSettlement?.walletAmount || 0) -
-  Number(customerFinalSettlement?.refundableAdvance || 0);
+    totalRent -
+    Number(customerFinalSettlement?.discountAmount || 0) +
+    Number(customerFinalSettlement?.ebAmount || 0) +
+    Number(unPaidInvoice?.unpaidAmount || 0) +
+    Number(customerRentInfo?.otherItemAmount || 0) +
+    totalDeductions +
+    Number(customerFinalSettlement?.walletAmount || 0) -
+    Number(customerFinalSettlement?.refundableAdvance || 0);
   const handleSettlement = async (selectedDate) => {
     if (!customerId) return;
 
@@ -173,47 +173,48 @@ const SettlementSummary = () => {
       handleSettlement(checkoutDate.format("DD-MM-YYYY"));
     }
   }, [customerId]);
-const handleGenerateSettlement = async () => {
-  if (isGenerating) return;
+  const handleGenerateSettlement = async () => {
+    if (isGenerating) return;
 
-  setIsGenerating(true);
+    setIsGenerating(true);
 
-  try {
-    const payload = {
-      isCustomRent: collectFullRent,
-      customRentAmount: collectFullRent
-        ? Number(fullRentAmount || 0)
-        : 0,
-      newDeductions: deductionRows.map((row) => ({
-        type: row.type,
-        amount: Number(row.amount || 0),
-      })),
-    };
+    try {
+      const payload = {
+        leavingDate: checkoutDate.format("DD-MM-YYYY"),
+        isCustomRent: collectFullRent,
+        customRentAmount: collectFullRent
+          ? Number(fullRentAmount || 0)
+          : 0,
+        newDeductions: deductionRows.map((row) => ({
+          type: row.type,
+          amount: Number(row.amount || 0),
+        })),
+      };
 
-    const res = await generateTenantSettlement(customerId, payload);
+      const res = await generateTenantSettlement(customerId, payload);
 
-    if (res.success) {
-      setModalType("success");
-      setMessage("Settlement generated successfully");
-      setShowSuccess(true);
+      if (res.success) {
+        setModalType("success");
+        setMessage("Settlement generated successfully");
+        setShowSuccess(true);
 
-      setTimeout(() => {
-        navigate(-1);
-      }, 1000);
-    } else {
-      setModalType("error");
-      setMessage(res.message);
-      setShowSuccess(true);
+        setTimeout(() => {
+          navigate(-1);
+        }, 1000);
+      } else {
+        setModalType("error");
+        setMessage(res.message);
+        setShowSuccess(true);
 
-      setTimeout(() => {
-        setShowSuccess(false);
-        setIsGenerating(false);
-      }, 2000);
+        setTimeout(() => {
+          setShowSuccess(false);
+          setIsGenerating(false);
+        }, 2000);
+      }
+    } catch (error) {
+      setIsGenerating(false);
     }
-  } catch (error) {
-    setIsGenerating(false);
-  }
-};
+  };
   return (
 
     <DashboardLayout>
@@ -268,7 +269,7 @@ const handleGenerateSettlement = async () => {
                       </div>
 
                       <div>
-                       
+
                         {/* <div className="flex items-center gap-2 text-left">
   <h2
     className="w-[180px] text-[18px] font-semibold truncate"
@@ -283,7 +284,7 @@ const handleGenerateSettlement = async () => {
     className="w-4 h-4 flex-shrink-0"
   />
 </div> */}
-{/* <div className="inline-flex items-center gap-2 text-left">
+                        {/* <div className="inline-flex items-center gap-2 text-left">
   <h2
     className="max-w-[180px] text-[18px] font-semibold truncate"
     title={custometInfoList?.fullName || "N/A"}
@@ -297,20 +298,20 @@ const handleGenerateSettlement = async () => {
     className="w-4 h-4 flex-shrink-0"
   />
 </div> */}
-<div className="flex items-center justify-start gap-2 w-full text-left">
-  <h2
-    className="max-w-[180px] text-[18px] font-semibold truncate"
-    title={custometInfoList?.fullName || "N/A"}
-  >
-    {custometInfoList?.fullName || "N/A"}
-  </h2>
+                        <div className="flex items-center justify-start gap-2 w-full text-left">
+                          <h2
+                            className="max-w-[180px] text-[18px] font-semibold truncate"
+                            title={custometInfoList?.fullName || "N/A"}
+                          >
+                            {custometInfoList?.fullName || "N/A"}
+                          </h2>
 
-  <img
-    src={Verify}
-    alt="Verified"
-    className="w-4 h-4 flex-shrink-0"
-  />
-</div>
+                          <img
+                            src={Verify}
+                            alt="Verified"
+                            className="w-4 h-4 flex-shrink-0"
+                          />
+                        </div>
 
                         <p className="mt-1 text-[14px] text-[#475467] text-left">
                           Mobile : +91 {custometInfoList?.mobile}
@@ -395,26 +396,26 @@ const handleGenerateSettlement = async () => {
                           //   }}
                           // />
                           <DatePicker
-  value={checkoutDate}
-  format="DD-MM-YYYY"
-  allowClear={false}
-  disabledDate={(current) => {
-    return (
-      current &&
-      (
-        current.isAfter(dayjs(), "day") || 
-        current.isBefore(dayjs(stayList?.noticeDate, "DD/MM/YYYY"), "day") 
-      )
-    );
-  }}
-  onChange={(value) => {
-    if (value) {
-      setCheckoutDate(value);
-      handleSettlement(value.format("DD-MM-YYYY"));
-      setEditDate(false);
-    }
-  }}
-/>
+                            value={checkoutDate}
+                            format="DD-MM-YYYY"
+                            allowClear={false}
+                            disabledDate={(current) => {
+                              return (
+                                current &&
+                                (
+                                  current.isAfter(dayjs(), "day") ||
+                                  current.isBefore(dayjs(stayList?.noticeDate, "DD/MM/YYYY"), "day")
+                                )
+                              );
+                            }}
+                            onChange={(value) => {
+                              if (value) {
+                                setCheckoutDate(value);
+                                handleSettlement(value.format("DD-MM-YYYY"));
+                                setEditDate(false);
+                              }
+                            }}
+                          />
                         )}
                       </div>
 
@@ -438,7 +439,7 @@ const handleGenerateSettlement = async () => {
                 {/* RIGHT SIDE */}
                 <div className="flex-1 bg-white rounded border border-[#EAECF0] flex flex-col overflow-hidden">
 
-                
+
                   <div className="flex-1 overflow-y-auto p-4   [&::-webkit-scrollbar]:w-[10px]
 
     [&::-webkit-scrollbar-track]:bg-transparent
@@ -462,7 +463,7 @@ const handleGenerateSettlement = async () => {
                       >
                         <div
                           className="flex items-center justify-between px-3 py-3 cursor-pointer "
-                          
+
                           onClick={() => {
                             if (item.title === "Unpaid Invoices") {
                               setShowUnpaid(!showUnpaid);
@@ -553,7 +554,7 @@ const handleGenerateSettlement = async () => {
                                 </div>
                               ) : (
                                 <div className="flex items-center border border-[#D0D5DD] rounded-xl overflow-hidden">
-            
+
                                   <input
                                     type="text"
                                     value={fullRentAmount}
@@ -585,7 +586,7 @@ const handleGenerateSettlement = async () => {
                           </span>
                         </div>
 
-                       
+
                         {item.title === "Unpaid Invoices" && showUnpaid && (
                           <div className="px-4 pb-4">
                             <div className="overflow-hidden rounded border border-[#EAECF0] text-left">
@@ -1401,8 +1402,8 @@ const handleGenerateSettlement = async () => {
                         </h2> */}
                         <h2
                           className={`mt-1 text-[17px] text-left font-bold ${outstandingAmount < 0
-                              ? "text-[#DC2626]"
-                              : "text-[#16A34A]"
+                            ? "text-[#DC2626]"
+                            : "text-[#16A34A]"
                             }`}
                         >
                           ₹ {Math.round(outstandingAmount)}
@@ -1415,13 +1416,13 @@ const handleGenerateSettlement = async () => {
                           Cancel
                         </button>
 
-                     <button
-  className="h-[40px] px-5 rounded-xl bg-[#3158F5] text-white text-[13px] disabled:opacity-50 disabled:cursor-not-allowed"
-  onClick={handleGenerateSettlement}
-  disabled={isGenerating}
->
-  {isGenerating ? "Generating..." : "Generate"}
-</button>
+                        <button
+                          className="h-[40px] px-5 rounded-xl bg-[#3158F5] text-white text-[13px] disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={handleGenerateSettlement}
+                          disabled={isGenerating}
+                        >
+                          {isGenerating ? "Generating..." : "Generate"}
+                        </button>
 
                       </div>
 
