@@ -1260,7 +1260,7 @@ closeNotesModal()
   }}
 >
 
-  <button
+  {/* <button
   onClick={async () => {
 
     setSelectedOwner(item);
@@ -1277,9 +1277,30 @@ closeNotesModal()
   className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
 >
   Add Notes
+</button> */}
+<button
+  disabled={!canWrite}
+  onClick={async () => {
+    if (!canWrite) return;
+
+    setSelectedOwner(item);
+
+    await fetchOwnerNotes(item.ownerId);
+
+    setShowNotesModal(true);
+
+    setOpenMenuId(null);
+  }}
+  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+    canWrite
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Add Notes
 </button>
 
-                              <button
+                              {/* <button
                                 onClick={() => {
                                   setSelectedOwner(item);
                                   setMobile(item.mobileNo);
@@ -1289,8 +1310,26 @@ closeNotesModal()
                                 className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                               >
                                 Edit
-                              </button>
+                              </button> */}
                               <button
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    setSelectedOwner(item);
+    setMobile(item.mobileNo);
+    setShowModal(true);
+    setOpenMenuId(null);
+  }}
+  className={`block w-full text-left px-3 py-2 text-sm ${
+    canUpdate
+      ? "hover:bg-gray-100 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Edit
+</button>
+                              {/* <button
   onClick={() => {
     setSelectedOwner(item);
     setShowAssignModal(true);
@@ -1299,8 +1338,25 @@ closeNotesModal()
   className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
 >
   Assign Staff
+</button> */}
+<button
+  disabled={!canWrite}
+  onClick={() => {
+    if (!canWrite) return;
+
+    setSelectedOwner(item);
+    setShowAssignModal(true);
+    setOpenMenuId(null);
+  }}
+  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+    canWrite
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Assign Staff
 </button>
-                              <button
+                              {/* <button
                                 onClick={() => {
                                   setSelectedOwner(item);
                                   setShowDeleteModal(true);
@@ -1309,8 +1365,25 @@ closeNotesModal()
                                 className="block w-full text-left px-3 py-2 text-sm hover:bg-red-50 text-red-600 cursor-pointer"
                               >
                                 Delete
-                              </button>
-        <button
+                              </button> */}
+                              <button
+  disabled={!canDelete}
+  onClick={() => {
+    if (!canDelete) return;
+
+    setSelectedOwner(item);
+    setShowDeleteModal(true);
+    setOpenMenuId(null);
+  }}
+  className={`block w-full text-left px-3 py-2 text-sm ${
+    canDelete
+      ? "text-red-600 hover:bg-red-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Delete
+</button>
+        {/* <button
   onClick={() => {
   setSelectedOwner(item);
 
@@ -1320,6 +1393,24 @@ closeNotesModal()
   setOpenMenuId(null);
 }}
   className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
+>
+  Reset Password
+</button> */}
+<button
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    setSelectedOwner(item);
+    setSearch("");
+    setShowResetPasswordModal(true);
+    setOpenMenuId(null);
+  }}
+  className={`block w-full text-left px-3 py-2 text-sm ${
+    canUpdate
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
 >
   Reset Password
 </button>
