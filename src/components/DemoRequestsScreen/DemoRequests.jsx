@@ -969,7 +969,7 @@ if (lettersCount < 5) {
             ID
           </th>
 
-          <th
+          {/* <th
             className="
               sticky
               left-[70px]
@@ -983,7 +983,17 @@ if (lettersCount < 5) {
             "
           >
             NAME
-          </th>
+          </th> */}
+          <th
+  className="
+    sticky left-[70px] z-30 bg-gray-100
+    px-4 py-3
+    w-[120px] min-w-[120px] max-w-[120px]
+    text-left
+  "
+>
+  NAME
+</th>
 
           <th className="px-4 py-3 text-left whitespace-nowrap">
             MOBILE NO
@@ -1127,7 +1137,13 @@ if (lettersCount < 5) {
     {item.name || "----"}
   </button>
 </td> */}
-<td className="sticky left-[70px] z-20 bg-white-common group-hover:!bg-gray-50 px-4 py-2 w-[100px] min-w-[100px] max-w-[100px] text-left">
+<td  className="
+    sticky left-[70px] z-20 bg-white-common
+    group-hover:!bg-gray-50
+    px-4 py-2
+    w-[120px] min-w-[120px] max-w-[120px]
+    text-left
+  ">
   <button
     onClick={() => {
       setSelectedItem(item);

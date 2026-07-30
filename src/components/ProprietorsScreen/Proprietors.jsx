@@ -975,13 +975,22 @@ closeNotesModal()
                       </div>
                     </th>
 
-                    <th className="px-4 py-3 text-left text-[12px] font-semibold">
+                    {/* <th className="px-4 py-3 text-left text-[12px] font-semibold">
                       <div className="flex items-center gap-1 cursor-pointer"
                         onClick={() => handleSort("OWNER_NAME")}>
                         Name
                         <img src={swap} className="w-3 h-3" />
                       </div>
-                    </th>
+                    </th> */}
+                    <th className="w-[150px] min-w-[150px] max-w-[150px] px-4 py-3 text-left text-[12px] font-semibold">
+  <div
+    className="flex items-center gap-1 cursor-pointer"
+    onClick={() => handleSort("OWNER_NAME")}
+  >
+    Name
+    <img src={swap} className="w-3 h-3" />
+  </div>
+</th>
 
                     <th className="px-4 py-3 text-left text-[12px] font-semibold">
                       <div className="flex items-center gap-1">
@@ -1101,9 +1110,18 @@ closeNotesModal()
                         >
                           {item.fullName}
                         </td> */}
-                        <td className="px-4 py-1 text-left">
+                        {/* <td className="px-4 py-1 text-left">
   <div
     className="w-[180px] truncate text-[12px] text-blue-600 cursor-pointer hover:underline"
+    title={item.fullName}
+    onClick={() => handleOwnerClick(item)}
+  >
+    {item.fullName}
+  </div>
+</td> */}
+<td className="w-[150px] min-w-[150px] max-w-[150px] px-4 py-1 text-left">
+  <div
+    className="truncate text-[12px] text-blue-600 cursor-pointer hover:underline"
     title={item.fullName}
     onClick={() => handleOwnerClick(item)}
   >
@@ -1171,7 +1189,7 @@ closeNotesModal()
 >
   {item?.relationalAgents?.[0]?.agentId ? (
     <div
-      className="w-[150px] truncate"
+      className="w-[120px] truncate"
       title={item.relationalAgents[0].agentName}
     >
       <span
