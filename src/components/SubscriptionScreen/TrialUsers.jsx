@@ -264,7 +264,10 @@ useEffect(() => {
                 <tr>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left">ID</th>
                  
-                  <th className="px-4 py-3 text-[12px] font-semibold text-left">PROPERTY NAME</th>
+                  {/* <th className="px-4 py-3 text-[12px] font-semibold text-left">PROPERTY NAME</th> */}
+                                            <th className="px-4 py-3 text-[12px] font-semibold text-left w-[120px] min-w-[120px]">
+  PROPERTY NAME
+</th>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left">PLAN NAME</th>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left">Status</th>
                   <th className="px-4 py-3 text-[12px] font-semibold text-left">START DATE</th>
@@ -316,9 +319,17 @@ useEffect(() => {
                               </td>
                     
                     {/* <td className="px-4 py-2 text-[12px] text-left">{item.hostelName}</td> */}
-                    <td className="px-4 py-2 text-left">
+                    {/* <td className="px-4 py-2 text-left">
   <div
     className="w-[180px] truncate text-[12px]"
+    title={item.hostelName || "N/A"}
+  >
+    {item.hostelName || "N/A"}
+  </div>
+</td> */}
+<td className="px-4 py-2 text-left w-[120px] min-w-[120px]">
+  <div
+    className="w-[120px] truncate text-blue-600"
     title={item.hostelName || "N/A"}
   >
     {item.hostelName || "N/A"}

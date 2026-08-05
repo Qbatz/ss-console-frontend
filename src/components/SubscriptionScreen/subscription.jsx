@@ -376,7 +376,10 @@ const Subscription = () => {
                       <thead className="bg-gray-100 text-gray-600 uppercase text-xs sticky top-0 z-10 font-Inter">
                         <tr>
                           <th className="px-4 py-3 text-left">ID</th>
-                          <th className="px-4 py-3 text-left">Property Name</th>
+                          {/* <th className="px-4 py-3 text-left">Property Name</th> */}
+                          <th className="px-4 py-3 text-left w-[120px] min-w-[120px]">
+  Property Name
+</th>
 
                           <th className="px-4 py-3 text-left">Status</th>
                           <th className="px-4 py-3 text-left">Plan Name</th>
@@ -441,9 +444,17 @@ const Subscription = () => {
                               {/* <td className="px-4 py-2 text-blue-600 text-left">
                                 {item.hostelName}
                               </td> */}
-                              <td className="px-4 py-2 text-left">
+                              {/* <td className="px-4 py-2 text-left">
   <div
     className="w-[180px] truncate text-blue-600"
+    title={item.hostelName || "N/A"}
+  >
+    {item.hostelName || "N/A"}
+  </div>
+</td> */}
+<td className="px-4 py-2 text-left w-[120px] min-w-[120px]">
+  <div
+    className="w-[120px] truncate text-blue-600"
     title={item.hostelName || "N/A"}
   >
     {item.hostelName || "N/A"}

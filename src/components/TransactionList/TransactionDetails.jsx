@@ -307,10 +307,16 @@ useEffect(() => {
   DATE
 </th>
 
-<th className="sticky left-[210px] min-w-[180px] bg-gray-100 z-30 text-[12px] font-semibold text-left">
+{/* <th className="sticky left-[210px] min-w-[180px] bg-gray-100 z-30 text-[12px] font-semibold text-left">
+  CUSTOMER
+</th> */}
+<th className="sticky left-[210px] w-[180px] min-w-[180px] max-w-[180px] bg-gray-100 z-30 text-[12px] font-semibold text-left">
   CUSTOMER
 </th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-left">PROPERTY</th>
+                    {/* <th className="px-4 py-3 text-[12px] font-semibold text-left">PROPERTY</th> */}
+                    <th className="px-4 py-3 w-[200px] min-w-[200px] max-w-[200px] text-[12px] font-semibold text-left">
+  PROPERTY
+</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">REGION / CITY</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">PLAN TYPE</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Amount</th>
@@ -318,7 +324,10 @@ useEffect(() => {
                     {/* <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Transaction Ref no</th> */}
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Payment proof</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">status</th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Collected By</th>
+                    {/* <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Collected By</th> */}
+                    <th className="px-4 py-3 w-[160px] min-w-[160px] max-w-[160px] text-[12px] font-semibold text-left">
+  Collected By
+</th>
                  <th className="sticky right-0 min-w-[100px] bg-gray-100 z-30 text-[12px] font-semibold">
   ACTION
 </th>
@@ -344,7 +353,7 @@ useEffect(() => {
   {index + 1}
 </td>
 
-<td className="sticky left-[70px] min-w-[140px] bg-white-common z-20 text-[12px]">
+<td className="sticky left-[70px] min-w-[140px] bg-white-common z-20 text-[12px] text-left">
   {item.createdAtDate}
 </td>
 
@@ -352,14 +361,14 @@ useEffect(() => {
   {item.paidBy}
 </td> */}
 
-   <td className="sticky left-[210px] min-w-[180px] max-w-[180px] bg-white-common z-20 px-4 py-2 text-left text-[12px]">
+  <td className="sticky left-[210px] w-[180px] min-w-[180px] max-w-[180px] bg-white-common z-20 px-4 py-2 text-left text-[12px]">
   <div
-    className="w-[180px] truncate"
+    className="w-full truncate text-left"
     title={item.paidBy || "N/A"}
   >
     {item.paidBy || "N/A"}
   </div>
-</td>              
+</td>             
 {item?.isHostelDeleted === true ? (
   <td
     colSpan={2}
@@ -371,9 +380,9 @@ useEffect(() => {
   </td>
 ) : (
   <>
-    <td className="px-4 py-2 text-left text-[12px]">
+    <td className="px-4 py-2 w-[200px] min-w-[200px] max-w-[200px] text-left text-[12px]">
       <div
-        className="w-[180px] truncate"
+        className="w-full truncate"
         title={item.hostelName || "N/A"}
       >
         <span
@@ -394,9 +403,9 @@ useEffect(() => {
       </div>
     </td>
 
-    <td className="px-4 py-2 text-left">
+    <td className="px-4 py-2 w-[180px] min-w-[180px] max-w-[180px] text-left">
       <div
-        className="w-[180px] truncate text-[12px]"
+        className="w-full truncate text-[12px]"
         title={`${item.city || "N/A"}, ${item.state || "N/A"}`}
       >
         {item.city || "N/A"}, {item.state || "N/A"}
@@ -449,9 +458,14 @@ useEffect(() => {
                           {item.orderStatus}
                         </td>
 
-                        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-                          {item.collectedBy || "__"}
-                        </td>
+                       <td className="px-4 py-2 w-[160px] min-w-[160px] max-w-[160px] text-left text-[12px]">
+  <div
+    className="w-full truncate"
+    title={item.collectedBy || "__"}
+  >
+    {item.collectedBy || "__"}
+  </div>
+</td>
 
                         {/* <td className="px-4 py-2 relative">
                           <img

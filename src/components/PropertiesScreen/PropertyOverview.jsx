@@ -16,6 +16,7 @@ import PropertyActive from "./ActiveScreen";
 import swap from "../../assets/arrowswap.png";
 import Star from "../../assets/star.png"
 import dayjs from "dayjs";
+import { DatePicker,TimePicker} from "antd";
 import PropertyAmenities from "./PropertyAmenities";
 import { useHostel } from "../../Context/HostelListContext";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
@@ -86,7 +87,10 @@ const [showViewMenu, setShowViewMenu] = useState(false);
 const [selectedType, setSelectedType] = useState("All");
 const [selectedStatus, setSelectedStatus] = useState("All");
 const [selectedView, setSelectedView] = useState("Select");
-
+const [paidAtDate, setPaidAtDate] = useState(null);
+const [paidAtTime, setPaidAtTime] = useState(null);
+const [paidAtDateError, setPaidAtDateError] = useState("");
+const [paidAtTimeError, setPaidAtTimeError] = useState("");
  console.log("selectedCustomerId",selectedCustomerId)
 const [approveLoading, setApproveLoading] =
   useState(false);
@@ -535,6 +539,10 @@ else{
     setPaidBy("")
     setPaidByError("")
     setPaidAmountError("")
+    setPaidAtDate(null)
+    setPaidAtTime(null)
+    setPaidAtDateError("")
+    setPaidAtTimeError("")
 
   };
   const selectedPlanothers = dropdownPlans?.otherPlans?.find(
@@ -582,6 +590,15 @@ else{
       setPaidByError("Please select Paid By");
       hasError = true;
     }
+    if (!paidAtDate) {
+  setPaidAtDateError("Please select date");
+  hasError = true;
+}
+
+if (!paidAtTime) {
+  setPaidAtTimeError("Please select time");
+  hasError = true;
+}
 
     if (hasError) return;
 
@@ -594,7 +611,15 @@ else{
         planCode,
         paidAmount: Number(paidAmount),
         discountAmount: Number(discountAmount || 0),
-        paidBy
+        paidBy,
+         paidAtDate: paidAtDate
+    ? paidAtDate.format("DD-MM-YYYY")
+    : "",
+
+  paidAtTime: paidAtTime
+    ? paidAtTime.format("HH:mm")
+    : "",
+        
       };
 
       const res = await createSubscription(
@@ -760,7 +785,7 @@ const handleApproveKYC = async (customerId) => {
     if (res?.success) {
       setModalType("success");
       setMessage(
-        res?.message ||
+        res?.data ||
           "KYC approved successfully"
       );
 
@@ -1445,7 +1470,7 @@ const handleApproveKYC = async (customerId) => {
 
 
                     {/* VIEW */}
-                    <button
+                    {/* <button
                       className="
               w-8
               h-8
@@ -1466,10 +1491,92 @@ const handleApproveKYC = async (customerId) => {
                         alt="view"
                         className="object-contain"
                       />
-                    </button>
+                    </button> */}
+  <div className="relative inline-block group">
+  {/* View Icon */}
+  <button
+    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+  >
+    <img
+      src={ViewImg}
+      alt="view"
+      className="w-[18px] h-[18px] cursor-pointer"
+    />
+  </button>
+
+  {/* Hover Card */}
+  <div
+    className="
+      absolute
+      top-10
+      right-0
+      w-[250px]
+      bg-white
+      rounded-lg
+      border
+      border-[#E8EAF3]
+      shadow-[0_6px_20px_rgba(0,0,0,0.08)]
+      p-4
+      z-50
+
+      opacity-0
+      invisible
+      group-hover:opacity-100
+      group-hover:visible
+      transition-all
+      duration-200
+    "
+  >
+    {/* Arrow */}
+    <div
+      className="
+        absolute
+        -top-2
+        right-4
+        w-4
+        h-4
+        bg-white
+        border-l
+        border-t
+        border-[#E8EAF3]
+        rotate-45
+      "
+    />
+
+    {/* Mail */}
+    <p className="text-[10px] text-[#9CA3AF] font-medium uppercase text-left">
+      MAIL ID
+    </p>
+
+    <div className="flex items-center justify-between mt-1">
+      <p className="text-[14px] text-[#374151] truncate">
+        {hostelData?.emailId || "N/A"}
+      </p>
+
+      <img
+        src={CopyImg}
+        className="w-4 h-4 cursor-pointer"
+        onClick={() =>
+          navigator.clipboard.writeText(hostelData?.emailId || "")
+        }
+      />
+    </div>
+
+    <div className="border-t border-[#F1F3F9] my-3"></div>
+
+    {/* Created */}
+    <p className="text-[10px] text-[#9CA3AF] font-medium uppercase text-left">
+      CREATED ON
+    </p>
+
+    <p className="text-[14px] text-[#374151] mt-1 text-left">
+      {hostelData?.createdAtDate}
+    </p>
+  </div>
+</div>
 
 
-                    {/* MENU */}
+                    
                     <button
                       className="
               w-8
@@ -4842,7 +4949,78 @@ const handleApproveKYC = async (customerId) => {
               />
 
             </div>
+{/* PAID DATE & TIME */}
+<div className="grid grid-cols-2 gap-4 mt-4">
 
+  {/* Paid Date */}
+  <div>
+    <label
+      className="
+        block
+        text-cardTitle
+        text-textDark/70
+        mb-1
+        font-medium
+        text-left
+      "
+    >
+      Paid Date
+    </label>
+
+    <DatePicker
+      className="w-full h-[44px]"
+      format="DD-MM-YYYY"
+      placeholder="Select Paid Date"
+      
+      value={paidAtDate}
+       onChange={(date) => {
+    setPaidAtDate(date);
+    setPaidAtDateError("");
+  }}
+      
+    />
+    {paidAtDateError && (
+              <ErrorMessage
+                message={paidAtDateError}
+                type="error"
+              />
+            )}
+  </div>
+
+  {/* Paid Time */}
+  <div>
+    <label
+      className="
+        block
+        text-cardTitle
+        text-textDark/70
+        mb-1
+        font-medium
+        text-left
+      "
+    >
+      Paid Time
+    </label>
+
+   <TimePicker
+  className="w-full h-[44px]"
+  placeholder="Select Time"
+  format="HH:mm"
+  value={paidAtTime}
+  onChange={(time) => {
+    setPaidAtTime(time);
+    setPaidAtTimeError("");
+  }}
+/>
+{paidAtTimeError && (
+              <ErrorMessage
+                message={paidAtTimeError}
+                type="error"
+              />
+            )}
+  </div>
+
+</div>
             {/* FILE UPLOAD */}
             <div className="w-full mt-5">
 

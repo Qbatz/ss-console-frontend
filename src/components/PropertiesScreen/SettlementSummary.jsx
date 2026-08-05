@@ -1212,7 +1212,7 @@ const SettlementSummary = () => {
                       </button>
                     </div>
                     {showBreakdown && (
-                      <div className="mt-6 rounded-2xl  p-6">
+                      <div className="mt-1 rounded-2xl  p-6">
                         <h3 className="text-[18px] font-semibold text-[#101828] mb-6 text-left">
                           Final Settlement
                         </h3>

@@ -1778,6 +1778,150 @@ const generateTenantSettlement = async (
   }
 };
 
+const verifyTenantMobile = async (customerId, payload) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      `/v2/tenants/verify-mobile/${customerId}`,
+      payload
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const updateJoiningDate = async (payload) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.put(
+      "/v2/tenants/joining-date",
+      payload
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg =
+      error.response?.status === 500
+        ? "Internal Server Error"
+        : getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+// const updateJoiningDate = async (payload) => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+   
+//     if (!payload?.tenantMobile) {
+//       return {
+//         success: false,
+//         message: "Mobile number is required",
+//       };
+//     }
+
+//     if (!/^\d{10}$/.test(payload.tenantMobile.toString())) {
+//       return {
+//         success: false,
+//         message: "Please enter a valid 10-digit mobile number",
+//       };
+//     }
+
+//     const res = await axiosInstance.put(
+//       "/v2/tenants/joining-date",
+//       payload
+//     );
+
+//     if (res.status === 200) {
+//       return {
+//         success: true,
+//         data: res.data,
+//       };
+//     }
+
+//     return { success: false };
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+
+//     setErrorMsg(msg);
+
+//     return {
+//       success: false,
+//       message: msg,
+//     };
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+
+const getJoiningDateImpact = async (payload) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      "/v2/tenants/joining-date-impact",
+      payload
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <HostelContext.Provider
       value={{
@@ -1790,7 +1934,7 @@ const generateTenantSettlement = async (
         resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,
         deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,
         generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions,getInvoiceReceipt,updateInvoiceBalance,
-        getTenantById,updateAdvanceAmount, createHostelNote,getHostelNotes,getTenantSettlement,generateTenantSettlement
+        getTenantById,updateAdvanceAmount, createHostelNote,getHostelNotes,getTenantSettlement,generateTenantSettlement,updateJoiningDate,verifyTenantMobile,getJoiningDateImpact
       }}
     >
       {children}
