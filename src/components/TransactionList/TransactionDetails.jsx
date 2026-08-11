@@ -478,7 +478,7 @@ const handleExportInvoicePdf = async () => {
           </div> */}
           <div className="flex justify-between items-center mb-3">
 
-            {/* Left Side - Tabs */}
+          
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setActiveTab("paid")}
@@ -501,7 +501,7 @@ const handleExportInvoicePdf = async () => {
               </button>
             </div>
 
-            {/* Right Side */}
+          
             <div className="flex items-center gap-3">
 
               <RangePicker

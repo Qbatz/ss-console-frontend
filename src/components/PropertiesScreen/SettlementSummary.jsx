@@ -65,7 +65,7 @@ const SettlementSummary = () => {
   
   const sections = [
     { title: "Unpaid Invoices", amount: `₹${unPaidInvoice?.unpaidAmount || 0}` },
-    // { title: "Refundable Rent", amount: `₹${customerRentInfo?.currentPayableRent || 0}` },
+  
     {
       title:
         Number(customerRentInfo?.currentMonthPendingAmount || 0) >= 0
@@ -92,9 +92,7 @@ const SettlementSummary = () => {
     0
   );
 
-  // const totalRent =
-  // Number(customerRentInfo?.currentPayableRent || 0) -
-  // Number(customerRentInfo?.currentRentPaid || 0);
+ 
 
   const payableRentAmount =
     collectFullRent && isRentSet
@@ -109,15 +107,7 @@ const SettlementSummary = () => {
     Number(customerDeductions?.pendingAmount || 0) +
     Number(additionalDeductionAmount || 0);
 
-  // const outstandingAmount =
-  // totalRent -
-  // Number(customerFinalSettlement?.discountAmount || 0) +
-  // Number(customerFinalSettlement?.ebAmount || 0) +
-  // Number(unPaidInvoice?.unpaidAmount || 0) +
-  // Number(customerRentInfo?.otherItemAmount || 0) +
-  // totalDeductions +
-  // Math.abs(Number(customerFinalSettlement?.walletAmount || 0)) -
-  // Number(customerFinalSettlement?.refundableAdvance || 0);
+ 
   const outstandingAmount =
     totalRent -
     Number(customerFinalSettlement?.discountAmount || 0) +
@@ -275,34 +265,7 @@ const SettlementSummary = () => {
 
                       <div>
 
-                        {/* <div className="flex items-center gap-2 text-left">
-  <h2
-    className="w-[180px] text-[18px] font-semibold truncate"
-    title={custometInfoList?.fullName || "N/A"}
-  >
-    {custometInfoList?.fullName || "N/A"}
-  </h2>
-
-  <img
-    src={Verify}
-    alt="Verified"
-    className="w-4 h-4 flex-shrink-0"
-  />
-</div> */}
-                        {/* <div className="inline-flex items-center gap-2 text-left">
-  <h2
-    className="max-w-[180px] text-[18px] font-semibold truncate"
-    title={custometInfoList?.fullName || "N/A"}
-  >
-    {custometInfoList?.fullName || "N/A"}
-  </h2>
-
-  <img
-    src={Verify}
-    alt="Verified"
-    className="w-4 h-4 flex-shrink-0"
-  />
-</div> */}
+   
                         <div className="flex items-center justify-start gap-2 w-full text-left">
                           <h2
                             className="max-w-[180px] text-[18px] font-semibold truncate"
@@ -426,9 +389,7 @@ const SettlementSummary = () => {
 
                     </div>
 
-                    {/* <div className="mt-8 rounded-xl bg-[#FFF1F3] py-3 text-center text-red-500 text-[14px]">
-                  Pending
-                </div> */}
+                   
                     <div
                       className={`mt-2 rounded-xl py-2 text-center text-[14px] ${outstandingAmount >= 0
                         ? "bg-[#FFF1F3] text-red-500"
@@ -1335,15 +1296,7 @@ const SettlementSummary = () => {
                               ₹{customerFinalSettlement?.refundableAdvance || 0}
                             </span>
                           </div>
-                          {/* <div className="flex justify-between">
-                            <span className=" font-inter font-normal">
-                              Refundable Booking
-                            </span>
-
-                            <span className="font-medium font-inter">
-                              ₹{customerBooking?.availableBalance || 0}
-                            </span>
-                          </div> */}
+                          
                           <div className="flex justify-between">
                             <span className=" font-inter font-normal">
                               Wallet
@@ -1354,15 +1307,7 @@ const SettlementSummary = () => {
                             </span>
                           </div>
 
-                          {/* <div className="flex justify-between">
-                            <span className="font-normal font-inter">
-                              Total Deductions
-                            </span>
-
-                            <span className="text-red-500 font-medium font-inter">
-                              ₹{customerDeductions?.pendingAmount || 0}
-                            </span>
-                          </div> */}
+                          
                           <div className="flex justify-between">
                             <span className="font-normal font-inter">
                               Total Deductions
