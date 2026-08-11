@@ -75,7 +75,7 @@ const getStatusColor = (status) => {
 const TenantOverview = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { getTenantById, deleteInvoice, updateInvoiceRedemption, deleteInvoiceRedemption, updateAdvanceAmount,updateJoiningDate,verifyTenantMobile,getJoiningDateImpact  } = useHostel();
+  const { getTenantById, deleteInvoice, updateInvoiceRedemption, deleteInvoiceRedemption, updateAdvanceAmount,updateJoiningDate,verifyTenantMobile,getJoiningDateImpact,deleteReceiptUrl,deleteInvoiceUrl  } = useHostel();
   const { getKYCList, approveKYC } = useKyc();
   const { deleteTransaction } = useSubscription();
   const [showMenu, setShowMenu] = useState(false);
@@ -90,6 +90,10 @@ const [approveLoading, setApproveLoading] = useState(false);
 const [impactBills, setImpactBills] = useState([]);
 const [impactLoading, setImpactLoading] = useState(false);
   // const tenantData = location.state?.tenantData;
+  const [showDeleteInvoiceUrlModal, setShowDeleteInvoiceUrlModal] =
+  useState(false);
+const [deleteInvoiceUrlLoading, setDeleteInvoiceUrlLoading] =
+  useState(false);
   const hostelData = location.state?.hostelData;
   const { customerId } = useParams();
 
@@ -203,6 +207,9 @@ const handleContinue = async () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [showAmountModal, setShowAmountModal] = useState(false);
+  const [showDeleteUrlModal, setShowDeleteUrlModal] = useState(false);
+const [selectedTransaction, setSelectedTransaction] = useState(null);
+const [deleteUrlLoading, setDeleteUrlLoading] = useState(false);
   console.log("selectedRedemption", selectedRedemption)
   const fetchTenant = async () => {
     const res = await getTenantById(customerId);
@@ -345,6 +352,66 @@ const handleContinue = async () => {
       }, 1500);
     }
   };
+  const handleDeleteReceipt = async () => {
+  if (!selectedTransaction) return;
+
+  setDeleteUrlLoading(true);
+
+  const res = await deleteReceiptUrl(
+    selectedTransaction.transactionId
+  );
+
+  if (res.success) {
+    fetchTenant();
+
+    setModalType("success");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    setShowDeleteUrlModal(false);
+    setSelectedTransaction(null);
+  } else {
+    setModalType("error");
+    setMessage(res.message);
+    setShowSuccess(true);
+  }
+
+  setDeleteUrlLoading(false);
+
+  setTimeout(() => {
+    setShowSuccess(false);
+  }, 1500);
+};
+
+const handleDeleteInvoiceUrl = async () => {
+  if (!selectedInvoice) return;
+
+  setDeleteInvoiceUrlLoading(true);
+
+  const res = await deleteInvoiceUrl(selectedInvoice.invoiceId);
+
+  if (res.success) {
+    setModalType("success");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    setShowDeleteInvoiceUrlModal(false);
+    setSelectedInvoice(null);
+
+    // Refresh invoice list
+    fetchTenant();
+  } else {
+    setModalType("error");
+    setMessage(res.message);
+    setShowSuccess(true);
+  }
+
+  setDeleteInvoiceUrlLoading(false);
+
+  setTimeout(() => {
+    setShowSuccess(false);
+  }, 1500);
+};
   // const handleDelete = async (transactionId) => {
   //   const res = await deleteTransaction(transactionId);
 
@@ -1137,6 +1204,20 @@ const handleApproveKYC = async (customerId) => {
                               >
                                 Delete
                               </button>
+
+
+                              {item?.canDeleteInvoiceUrl === true && (
+  <button
+    className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer"
+    onClick={() => {
+      setSelectedInvoice(item);
+      setShowDeleteInvoiceUrlModal(true);
+      setOpenInvoiceMenu(null);
+    }}
+  >
+    Delete Invoice URL
+  </button>
+)}
                               {/* {item?.canUpdateAmount === true && (
                                 <button
                                   className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1277,7 +1358,7 @@ const handleApproveKYC = async (customerId) => {
 
                         <td className="px-4 py-4 text-left relative overflow-visible ">
                           <div ref={transactionMenuRef}>
-                            <button
+                            {/* <button
                               onClick={() =>
                                 setOpenMenu(
                                   openMenu === item.transactionId
@@ -1287,26 +1368,77 @@ const handleApproveKYC = async (customerId) => {
                               }
                             >
                               <FiMoreVertical className="cursor-pointer" />
-                            </button>
+                            </button> */}
+                            <button
+  onClick={(e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
 
-                            {openMenu === item.transactionId && (
-                              <div ref={transactionMenuRef}
-                                className="
-        absolute right-0 bottom-full mb-2
-        w-32 bg-white-common border rounded-lg shadow-lg z-[9999]
-      "
-                              >
-                                <button
-                                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer"
-                                  onClick={() => {
-                                    setDeleteItem(item);
-                                    setOpenMenu(null);
-                                  }}
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            )}
+    const menuWidth = 160;
+    const menuHeight = 90;
+
+    const spaceBelow = window.innerHeight - rect.bottom;
+
+    setMenuPosition({
+      top:
+        spaceBelow > menuHeight
+          ? rect.bottom + 5
+          : rect.top - menuHeight,
+      left: rect.right - menuWidth,
+    });
+
+    setOpenMenu(
+      openMenu === item.transactionId
+        ? null
+        : item.transactionId
+    );
+  }}
+>
+  <FiMoreVertical className="cursor-pointer" />
+</button>
+
+                           {openMenu === item.transactionId && (
+  <div
+    ref={transactionMenuRef}
+    className="fixed w-40 bg-white rounded-lg shadow-lg border z-[99999]"
+    style={{
+      top: menuPosition.top,
+      left: menuPosition.left,
+    }}
+  >
+    <button
+      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+      onClick={() => {
+        setDeleteItem(item);
+        setOpenMenu(null);
+      }}
+    >
+      Delete
+    </button>
+
+    {/* <button
+  className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 border-t"
+  onClick={() => {
+    setSelectedTransaction(item);
+    setShowDeleteUrlModal(true);
+    setOpenMenu(null);
+  }}
+>
+  Delete URL
+</button> */}
+{item?.canDeleteReceiptUrl === true && (
+  <button
+    className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100  cursor-pointer"
+    onClick={() => {
+      setSelectedTransaction(item);
+      setShowDeleteUrlModal(true);
+      setOpenMenu(null);
+    }}
+  >
+    Delete URL
+  </button>
+)}
+  </div>
+)}
                           </div>
                         </td>
                       </tr>
@@ -2293,6 +2425,98 @@ const handleApproveKYC = async (customerId) => {
   {approveLoading ? "Approving..." : "Confirm"}
 </button>
 
+      </div>
+    </div>
+  </div>
+)}
+{showDeleteUrlModal && (
+  <div
+    className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]"
+    onClick={() => {
+      setShowDeleteUrlModal(false);
+      setSelectedTransaction(null);
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="bg-white rounded-2xl w-[420px] p-6 shadow-xl"
+    >
+      <h2 className="text-lg font-semibold text-left">
+        Delete Receipt URL
+      </h2>
+
+      <p className="mt-3 text-sm text-gray-500 text-left">
+        Are you sure you want to delete this receipt URL?
+      </p>
+
+      <div className="flex justify-end gap-3 mt-8">
+        <button
+          onClick={() => {
+            setShowDeleteUrlModal(false);
+            setSelectedTransaction(null);
+          }}
+          className="px-6 py-2 border rounded-lg cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleDeleteReceipt}
+          disabled={deleteUrlLoading}
+          className={`px-6 py-2 rounded-lg text-white ${
+            deleteUrlLoading
+              ? "bg-red-300 cursor-not-allowed"
+              : "bg-red-600 hover:bg-red-700 cursor-pointer"
+          }`}
+        >
+          {deleteUrlLoading ? "Deleting..." : "Delete"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+{showDeleteInvoiceUrlModal && (
+  <div
+    className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]"
+    onClick={() => {
+      setShowDeleteInvoiceUrlModal(false);
+      setSelectedInvoice(null);
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="bg-white rounded-2xl w-[420px] p-6 shadow-xl"
+    >
+      <h2 className="text-lg font-semibold text-left">
+        Delete Invoice URL
+      </h2>
+
+      <p className="mt-3 text-sm text-gray-500 text-left">
+        Are you sure you want to delete this invoice URL?
+      </p>
+
+      <div className="flex justify-end gap-3 mt-8">
+        <button
+          onClick={() => {
+            setShowDeleteInvoiceUrlModal(false);
+            setSelectedInvoice(null);
+          }}
+          className="px-6 py-2 border rounded-lg cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleDeleteInvoiceUrl}
+          disabled={deleteInvoiceUrlLoading}
+          className={`px-6 py-2 rounded-lg text-white ${
+            deleteInvoiceUrlLoading
+              ? "bg-red-300 cursor-not-allowed"
+              : "bg-red-600 hover:bg-red-700 cursor-pointer"
+          }`}
+        >
+          {deleteInvoiceUrlLoading ? "Deleting..." : "Delete"}
+        </button>
       </div>
     </div>
   </div>

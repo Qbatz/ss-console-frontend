@@ -1922,6 +1922,78 @@ const getJoiningDateImpact = async (payload) => {
     setLoading(false);
   }
 };
+
+
+const deleteReceiptUrl = async (transactionId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.delete(
+      `/v2/receipt/receiptUrl/${transactionId}`
+    );
+
+    if (res.status === 200 || res.status === 204) {
+      return {
+        success: true,
+        data: res.data,
+        message: "Receipt URL deleted successfully",
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg =
+      error?.response?.status === 500
+        ? "Internal Server Error"
+        : getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+
+const deleteInvoiceUrl = async (invoiceId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.delete(
+      `/v2/invoice/invoiceUrl/${invoiceId}`
+    );
+
+    if (res.status === 200 || res.status === 204) {
+      return {
+        success: true,
+        data: res.data,
+        message: "Invoice URL deleted successfully",
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg =
+      error?.response?.status === 500
+        ? "Internal Server Error"
+        : getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
     <HostelContext.Provider
       value={{
@@ -1934,7 +2006,7 @@ const getJoiningDateImpact = async (payload) => {
         resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,
         deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,
         generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions,getInvoiceReceipt,updateInvoiceBalance,
-        getTenantById,updateAdvanceAmount, createHostelNote,getHostelNotes,getTenantSettlement,generateTenantSettlement,updateJoiningDate,verifyTenantMobile,getJoiningDateImpact
+        getTenantById,updateAdvanceAmount, createHostelNote,getHostelNotes,getTenantSettlement,generateTenantSettlement,updateJoiningDate,verifyTenantMobile,getJoiningDateImpact,deleteReceiptUrl,deleteInvoiceUrl,
       }}
     >
       {children}
