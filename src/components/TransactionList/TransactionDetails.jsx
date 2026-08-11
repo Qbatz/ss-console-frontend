@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef  } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import MenuCircle from "../../assets/menucircle.png"
 import { useSubscription } from "../../Context/SubscriptionContext";
@@ -8,24 +8,25 @@ import dayjs from "dayjs";
 import Filter from "../../assets/Filter.png";
 import Refresh from "../../assets/RefreshButton.png";
 import { usePermission } from "../../Utils/permissionHelper";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import Single from "../../assets/single.png";
 import Location from "../../assets/locationGrey.png"
 import Call from "../../assets/call.png";
 import Team from "../../assets/Team.png";
-import { useNavigate,useParams  } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useHostel } from "../../Context/HostelListContext";
 import Toast from "../SuccessModal/ToastDesign";
 import { createPortal } from "react-dom";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 
 const TransactionsPage = () => {
-const { roleId } = useParams();
+  const { roleId } = useParams();
   const [totalItems, setTotalItems] = useState(0);
-  const { getOrderHistory, loading, accessError,verifyPayment } = useSubscription();
-   const { sharePaymentLink} = useHostel();
+  const { getOrderHistory, loading, accessError, verifyPayment, uploadInvoice,downloadInvoice,exportInvoicePdf } = useSubscription();
+  const { sharePaymentLink } = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
-    usePermission("Hostel Transactions");
+    usePermission("Plans");
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
@@ -47,70 +48,76 @@ const { roleId } = useParams();
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [showVerifyDrawer, setShowVerifyDrawer] = useState(false);
   const navigate = useNavigate();
-
-const [selectedVerifyItem, setSelectedVerifyItem] = useState(null);
-const [verifyResponse, setVerifyResponse] = useState(null);
-const menuRef = useRef(null);
+  console.log("selectedTxn", selectedTxn)
+  const [selectedVerifyItem, setSelectedVerifyItem] = useState(null);
+  const [verifyResponse, setVerifyResponse] = useState(null);
+  const menuRef = useRef(null);
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
-const handleSharePayment = async () => {
+  const [activeTab, setActiveTab] = useState("paid");
+  const [showPreview, setShowPreview] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [invoiceFile, setInvoiceFile] = useState(null);
+  const [isManual, setIsManual] = useState(false);
+  const [invoiceFileError, setInvoiceFileError] = useState("");
+  const handleSharePayment = async () => {
 
-  if (!selectedTxn?.paymentUrl) {
-    return;
-  }
+    if (!selectedTxn?.paymentUrl) {
+      return;
+    }
 
-  const res = await sharePaymentLink(
-    selectedTxn.hostelId,
-    selectedTxn.paymentUrl
-  );
+    const res = await sharePaymentLink(
+      selectedTxn.hostelId,
+      selectedTxn.paymentUrl
+    );
 
-  if (res?.success) {
+    if (res?.success) {
 
-    setModalType("success");
-    setMessage("Payment link shared successfully");
-    setShowSuccess(true);
+      setModalType("success");
+      setMessage("Payment link shared successfully");
+      setShowSuccess(true);
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
 
-  }
-  else{
+    }
+    else {
       setModalType("error");
-    setMessage(res.message);
-    setShowSuccess(true);
+      setMessage(res.message);
+      setShowSuccess(true);
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
-
-  }
-
-};
-useEffect(() => {
-
-  const handleClickOutside = (event) => {
-
-    if (
-      menuRef.current &&
-      !menuRef.current.contains(event.target)
-    ) {
-
-      setOpenMenu(null);
-      setShowVerifyDrawer(false);
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
 
     }
 
   };
+  useEffect(() => {
 
-  document.addEventListener("mousedown", handleClickOutside);
+    const handleClickOutside = (event) => {
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ) {
 
-}, []);
+        setOpenMenu(null);
+        setShowVerifyDrawer(false);
+
+      }
+
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+
+  }, []);
   const { RangePicker } = DatePicker;
   const formatDate = (date) => {
     if (!date) return "";
@@ -139,7 +146,6 @@ useEffect(() => {
   }, [page, size, search, dateRange]);
 
   const fetchData = async () => {
-
     let start = "";
     let end = "";
 
@@ -157,31 +163,214 @@ useEffect(() => {
     );
 
     if (res.success) {
-      setData(res.data?.orderHistories || []);
-      setTotalItems(res.data?.totalItems || 0);
-      setTotalRevenue(res?.data?.totalRevenue || 0);
       setResData(res.data);
+      setTotalItems(res.data?.totalItems || 0);
+      setTotalRevenue(res.data?.totalRevenue || 0);
     }
   };
+  const currentData =
+    activeTab === "paid"
+      ? resData?.paidHistories || []
+      : resData?.createdHistories || [];
+
+  // const fetchData = async () => {
+
+  //   let start = "";
+  //   let end = "";
+
+  //   if (dateRange && dateRange.length === 2) {
+  //     start = dateRange[0].format("DD-MM-YYYY");
+  //     end = dateRange[1].format("DD-MM-YYYY");
+  //   }
+
+  //   const res = await getOrderHistory(
+  //     page,
+  //     size,
+  //     search,
+  //     start,
+  //     end
+  //   );
+
+  //   if (res.success) {
+  //     setData(res.data?.paidHistories || []);
+  //     setTotalItems(res.data?.totalItems || 0);
+  //     setTotalRevenue(res?.data?.totalRevenue || 0);
+  //     setResData(res.data);
+  //   }
+  // };
 
   const start = totalItems === 0 ? 0 : (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
 
- const handleVerifyPayment = async (item) => {
+  const handleVerifyPayment = async (item) => {
 
-  const res = await verifyPayment(item.historyId);
+    const res = await verifyPayment(item.historyId);
 
-  if (res) {
+    if (res) {
 
-    setVerifyResponse(res.data || res);
-    setSelectedVerifyItem(item);
-    setShowVerifyDrawer(true);
+      setVerifyResponse(res.data || res);
+      setSelectedVerifyItem(item);
+      setShowVerifyDrawer(true);
 
+    }
+
+  };
+const handleCloseUploadModal = () => {
+  setShowUploadModal(false);
+  setInvoiceFile(null);
+  setIsManual(false);
+};
+  const handleUploadInvoice = async () => {
+    if (!invoiceFile) {
+    setInvoiceFileError("Please upload invoice");
+    return;
   }
 
+  setInvoiceFileError("");
+
+    const res = await uploadInvoice(
+      selectedTxn.historyId,
+      invoiceFile,
+      isManual
+    );
+
+    if (res.success) {
+    
+      setModalType("success");
+      setMessage(res.data);
+      setShowSuccess(true);
+      getOrderHistory();
+      setTimeout(() => {
+       
+        setShowSuccess(false);
+        handleCloseUploadModal()
+      }, 1500);
+
+    }
+    else {
+      setModalType("error");
+      setMessage(res.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+    }
+  };
+
+
+
+  const getFileType = (url) => {
+  if (!url) return "";
+
+  const cleanUrl = url.split("?")[0].toLowerCase();
+
+  if (cleanUrl.endsWith(".pdf")) {
+    return "pdf";
+  }
+
+  if (
+    cleanUrl.endsWith(".png") ||
+    cleanUrl.endsWith(".jpg") ||
+    cleanUrl.endsWith(".jpeg") ||
+    cleanUrl.endsWith(".webp") ||
+    cleanUrl.endsWith(".gif")
+  ) {
+    return "image";
+  }
+
+  return "unknown";
 };
+const invoiceUrl = selectedTxn?.subscriptionInvoiceUrl;
+const fileType = getFileType(invoiceUrl);
+  const handleDownloadInvoice = async () => {
+  const res = await downloadInvoice(selectedTxn.historyId);
+
+  if (res.success) {
+    const url = window.URL.createObjectURL(res.data);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "invoice";
+    document.body.appendChild(a);
+    a.click();
+
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
+  else{
+      setModalType("error");
+      setMessage(res.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+  }
+};
+
+const handleExportInvoicePdf = async () => {
+  if (!selectedTxn?.historyId) return;
+
+  const res = await exportInvoicePdf(selectedTxn.historyId);
+
+  if (res.success) {
+    const blob = new Blob([res.data], {
+      type: "application/pdf",
+    });
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Invoice-${selectedTxn.historyId}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+  } else {
+      setModalType("error");
+      setMessage(res.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+  }
+};
+
+// const handleExportInvoicePdf = async () => {
+//   if (!selectedTxn?.historyId) return;
+
+//   const res = await exportInvoicePdf(
+//     selectedTxn.historyId
+//   );
+
+//   if (res.success) {
+//     const blob = new Blob([res.data], {
+//       type: "application/pdf",
+//     });
+
+//     const url = window.URL.createObjectURL(blob);
+
+//     const link = document.createElement("a");
+//     link.href = url;
+//     link.download = `Invoice-${selectedTxn.historyId}.pdf`;
+
+//     document.body.appendChild(link);
+//     link.click();
+
+//     link.remove();
+
+//     window.URL.revokeObjectURL(url);
+//   } else {
+//     console.log(res.message);
+//   }
+// };
   return (
-    <DashboardLayout>  
+    <DashboardLayout>
       <Toast
         show={showSuccess}
         message={message}
@@ -195,11 +384,15 @@ useEffect(() => {
           <img
             src={LoginImg}
             alt="Access Restricted"
-            className="w-64 object-contain"
+            className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
           />
 
-          <p className="text-red-600 text-lg font-medium">
-            {accessError}
+          <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+            Permission Restricted !
+          </h1>
+
+          <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+            Your permission is restricted for this module
           </p>
 
         </div>
@@ -228,11 +421,11 @@ useEffect(() => {
                 Manage Plans
               </button> */}
               <button
-  onClick={() => navigate(`/manage-plans/${roleId}`)}
-  className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit cursor-pointer"
->
-  Manage Plans
-</button>
+                onClick={() => navigate(`/manage-plans/${roleId}`)}
+                className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium font-inter w-full sm:w-fit cursor-pointer"
+              >
+                Manage Plans
+              </button>
 
             </div>
 
@@ -251,7 +444,7 @@ useEffect(() => {
           </div>
 
 
-          <div className="flex justify-between items-center mb-3">
+          {/* <div className="flex justify-between items-center mb-3">
 
             <div className="flex items-center gap-3">
 
@@ -282,8 +475,60 @@ useEffect(() => {
                 className="border px-3 py-1 rounded"
               />
             </div>
-          </div>
+          </div> */}
+          <div className="flex justify-between items-center mb-3">
 
+          
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveTab("paid")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${activeTab === "paid"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer"
+                  }`}
+              >
+                Paid Histories
+              </button>
+
+              <button
+                onClick={() => setActiveTab("created")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${activeTab === "created"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer"
+                  }`}
+              >
+                Created Histories
+              </button>
+            </div>
+
+          
+            <div className="flex items-center gap-3">
+
+              <RangePicker
+                value={dateRange}
+                onChange={(dates) => {
+                  setDateRange(dates);
+                  setPage(1);
+                }}
+                format="DD-MM-YYYY"
+                className="h-[36px] rounded-lg"
+              />
+
+              <img
+                src={Refresh}
+                className="w-6 h-6 cursor-pointer"
+              />
+
+              <input
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="border px-3 py-1 rounded"
+              />
+
+            </div>
+
+          </div>
 
           <div className="bg-white-common border-soft rounded-lg overflow-visible">
 
@@ -293,20 +538,26 @@ useEffect(() => {
               <table className="w-full text-sm">
 
 
-              <thead className="sticky top-0 z-50 bg-gray-100 uppercase">
+                <thead className="sticky top-0 z-50 bg-gray-100 uppercase">
                   <tr>
-<th className="sticky left-0 min-w-[70px] bg-gray-100 z-30 text-[12px] font-semibold">
-  ID
-</th>
+                    <th className="sticky left-0 min-w-[70px] bg-gray-100 z-30 text-[12px] font-semibold">
+                      ID
+                    </th>
 
-<th className="sticky left-[70px] min-w-[140px] bg-gray-100 z-30 text-[12px] font-semibold">
-  DATE
-</th>
+                    <th className="sticky left-[70px] min-w-[140px] bg-gray-100 z-30 text-[12px] font-semibold text-left">
+                      DATE
+                    </th>
 
-<th className="sticky left-[210px] min-w-[180px] bg-gray-100 z-30 text-[12px] font-semibold">
+                    {/* <th className="sticky left-[210px] min-w-[180px] bg-gray-100 z-30 text-[12px] font-semibold text-left">
   CUSTOMER
-</th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-left">PROPERTY</th>
+</th> */}
+                    <th className="sticky left-[210px] w-[180px] min-w-[180px] max-w-[180px] bg-gray-100 z-30 text-[12px] font-semibold text-left">
+                      CUSTOMER
+                    </th>
+                    {/* <th className="px-4 py-3 text-[12px] font-semibold text-left">PROPERTY</th> */}
+                    <th className="px-4 py-3 w-[200px] min-w-[200px] max-w-[200px] text-[12px] font-semibold text-left">
+                      PROPERTY
+                    </th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">REGION / CITY</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">PLAN TYPE</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Amount</th>
@@ -314,10 +565,13 @@ useEffect(() => {
                     {/* <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Transaction Ref no</th> */}
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Payment proof</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">status</th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Collected By</th>
-                 <th className="sticky right-0 min-w-[100px] bg-gray-100 z-30 text-[12px] font-semibold">
-  ACTION
-</th>
+                    {/* <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Collected By</th> */}
+                    <th className="px-4 py-3 w-[160px] min-w-[160px] max-w-[160px] text-[12px] font-semibold text-left">
+                      Collected By
+                    </th>
+                    <th className="sticky right-0 min-w-[100px] bg-gray-100 z-30 text-[12px] font-semibold">
+                      ACTION
+                    </th>
                   </tr>
                 </thead>
 
@@ -332,110 +586,80 @@ useEffect(() => {
                         ))}
                       </tr>
                     ))
-                  ) : data.length > 0 ? (
-                    data.map((item, index) => (
+                  ) : currentData?.orderHistories?.length > 0 ? (
+                    currentData?.orderHistories?.map((item, index) => (
                       <tr key={index} className="border-t border-gray-300">
 
-   <td className="sticky left-0 min-w-[70px] bg-white-common z-20">
-  {index + 1}
-</td>
+                        <td className="sticky left-0 min-w-[70px] bg-white-common z-20">
+                          {index + 1}
+                        </td>
 
-<td className="sticky left-[70px] min-w-[140px] bg-white-common z-20">
+                        {/* <td className="sticky left-[70px] min-w-[140px] bg-white-common z-20 text-[12px] text-left">
   {item.createdAtDate}
-</td>
-
-<td className="sticky left-[210px] min-w-[180px] bg-white-common z-20">
-  {item.paidBy}
-</td>
-
-                       {/* <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-
-  <span
-    onClick={() =>
-    navigate(`/property-overview/${item.hostelId}`, {
-  state: {
-    from: "transactions",
-
-    currentPage: page,
-    currentSearch: search,
-    currentDateRange: dateRange,
-  },
-})
-    }
-    className="text-blue-600 cursor-pointer hover:underline"
-  >
-    {item.hostelName}
-  </span>
-
 </td> */}
-{item?.isHostelDeleted === true ? (
+                        <td className="sticky left-[70px] min-w-[140px] bg-white-common z-20 text-[12px] text-left">
+                          {item?.isPaidAtDateAvailable
+                            ? item?.paidAtDate
+                            : item?.createdAtDate
+                            || "___"}
+                        </td>
 
-  <td
-  colSpan={2}
-  className="
-    px-4
-    py-2
-    text-[12px]
-    whitespace-nowrap
-    text-center
-    align-middle
-  "
->
+                        {/* <td className="sticky left-[210px] min-w-[180px] bg-white-common z-20">
+  {item.paidBy}
+</td> */}
 
-    <span
-    className="
-      text-red-500
-      font-medium
-      inline-block
-      mx-auto
-    "
-  >
-      Hostel Deleted
-    </span>
+                        <td className="sticky left-[210px] w-[180px] min-w-[180px] max-w-[180px] bg-white-common z-20 px-4 py-2 text-left text-[12px]">
+                          <div
+                            className="w-full truncate text-left"
+                            title={item.paidBy || "N/A"}
+                          >
+                            {item.paidBy || "N/A"}
+                          </div>
+                        </td>
+                        {item?.isHostelDeleted === true ? (
+                          <td
+                            colSpan={2}
+                            className="px-4 py-2 text-[12px] text-center align-middle"
+                          >
+                            <span className="text-red-500 font-medium">
+                              Hostel Deleted
+                            </span>
+                          </td>
+                        ) : (
+                          <>
+                            <td className="px-4 py-2 w-[200px] min-w-[200px] max-w-[200px] text-left text-[12px]">
+                              <div
+                                className="w-full truncate"
+                                title={item.hostelName || "N/A"}
+                              >
+                                <span
+                                  onClick={() =>
+                                    navigate(`/property-overview/${item.hostelId}`, {
+                                      state: {
+                                        from: "transactions",
+                                        currentPage: page,
+                                        currentSearch: search,
+                                        currentDateRange: dateRange,
+                                      },
+                                    })
+                                  }
+                                  className="text-blue-600 cursor-pointer hover:underline"
+                                >
+                                  {item.hostelName || "N/A"}
+                                </span>
+                              </div>
+                            </td>
 
-  </td>
-
-) : (
-
-  <>
-  
-    <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-
-      <span
-        onClick={() =>
-          navigate(
-            `/property-overview/${item.hostelId}`,
-            {
-              state: {
-                from: "transactions",
-
-                currentPage: page,
-                currentSearch: search,
-                currentDateRange: dateRange,
-              },
-            }
-          )
-        }
-        className="
-          text-blue-600
-          cursor-pointer
-          hover:underline
-        "
-      >
-        {item.hostelName}
-      </span>
-
-    </td>
-
-    <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-
-      {item.city}, {item.state}
-
-    </td>
-
-  </>
-
-)}
+                            <td className="px-4 py-2 w-[180px] min-w-[180px] max-w-[180px] text-left">
+                              <div
+                                className="w-full truncate text-[12px]"
+                                title={`${item.city || "N/A"}, ${item.state || "N/A"}`}
+                              >
+                                {item.city || "N/A"}, {item.state || "N/A"}
+                              </div>
+                            </td>
+                          </>
+                        )}
 
                         <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
                           {item.planType || item.planName || "-"}
@@ -481,8 +705,13 @@ useEffect(() => {
                           {item.orderStatus}
                         </td>
 
-                        <td className="px-4 py-2 text-[12px] whitespace-nowrap text-left">
-                          {item.collectedBy || "__"}
+                        <td className="px-4 py-2 w-[160px] min-w-[160px] max-w-[160px] text-left text-[12px]">
+                          <div
+                            className="w-full truncate"
+                            title={item.collectedBy || "__"}
+                          >
+                            {item.collectedBy || "__"}
+                          </div>
                         </td>
 
                         {/* <td className="px-4 py-2 relative">
@@ -547,7 +776,7 @@ useEffect(() => {
 
                         </td> */}
 
-<td className="
+                        <td className="
     sticky
     right-0
     z-40
@@ -557,109 +786,107 @@ useEffect(() => {
     relative
   ">
 
-  <button
-    onClick={(e) => {
+                          <button
+                            onClick={(e) => {
 
-      e.stopPropagation();
+                              e.stopPropagation();
 
-      const rect =
-        e.currentTarget.getBoundingClientRect();
+                              const rect =
+                                e.currentTarget.getBoundingClientRect();
 
-      const viewportHeight =
-        window.innerHeight;
+                              const viewportHeight =
+                                window.innerHeight;
 
-      const menuHeight = 100;
+                              const menuHeight = 100;
 
-      const spaceBelow =
-        viewportHeight - rect.bottom;
+                              const spaceBelow =
+                                viewportHeight - rect.bottom;
 
-      setMenuPos({
+                              setMenuPos({
 
-        top:
-          spaceBelow < menuHeight
-            ? rect.top - menuHeight + 40
-            : rect.bottom + 8,
+                                top:
+                                  spaceBelow < menuHeight
+                                    ? rect.top - menuHeight + 40
+                                    : rect.bottom + 8,
 
-        left: rect.left - 100,
+                                left: rect.left - 100,
 
-      });
+                              });
 
-      setOpenMenu(
-        openMenu === item.historyId
-          ? null
-          : item.historyId
-      );
+                              setOpenMenu(
+                                openMenu === item.historyId
+                                  ? null
+                                  : item.historyId
+                              );
 
-    }}
-    className={`
+                            }}
+                            className={`
       p-2 rounded-full
       transition-all duration-200
 
-      ${
-        openMenu === item.historyId
-          ? "bg-[#EEF2FF] scale-110"
-          : "hover:bg-gray-100"
-      }
+      ${openMenu === item.historyId
+                                ? "bg-[#EEF2FF] scale-110"
+                                : "hover:bg-gray-100"
+                              }
     `}
-  >
+                          >
 
-    <img
-      src={MenuCircle}
-      className={`
+                            <img
+                              src={MenuCircle}
+                              className={`
         w-4 h-4 transition-all duration-200 cursor-pointer
 
-        ${
-          openMenu === item.historyId
-            ? "animate-pulse"
-            : ""
-        }
+        ${openMenu === item.historyId
+                                  ? "animate-pulse"
+                                  : ""
+                                }
       `}
-    />
+                            />
 
-  </button>
+                          </button>
 
- {openMenu === item.historyId && createPortal(
-  <div
-    ref={menuRef}
-    style={{
-      position: "fixed",
-      top: menuPos.top,
-      left: menuPos.left,
-      width: "160px",
-    }}
-    className="
+                          {openMenu === item.historyId && createPortal(
+                            <div
+                              ref={menuRef}
+                              style={{
+                                position: "fixed",
+                                top: menuPos.top,
+                                left: menuPos.left,
+                                width: "160px",
+                              }}
+                              className="
       bg-white-common
       rounded-xl
       border
       shadow-xl
       z-[99999]
     "
-  >
-    <button
-      onClick={() => {
-        setSelectedTxn(item);
-        setShowModal(true);
-        setOpenMenu(null);
-      }}
-      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-    >
-      View Details
-    </button>
+                            >
+                              <button
+                                onClick={() => {
+                                  setSelectedTxn(item);
+                                  setShowModal(true);
+                                  setOpenMenu(null);
+                                }}
+                                className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                              >
+                                View Details
+                              </button>
 
-    <button
-      onClick={() => {
-        handleVerifyPayment(item);
-        setOpenMenu(null);
-      }}
-      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-    >
-      Verify Payment
-    </button>
-  </div>,
-  document.body
-)}
+                              <button
+                                onClick={() => {
+                                  handleVerifyPayment(item);
+                                  setOpenMenu(null);
+                                }}
+                                className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                              >
+                                Verify Payment
+                              </button>
+                            </div>,
+                            document.body
+                          )}
 
-</td>
+                        </td>
                       </tr>
                     ))
                   ) : (
@@ -676,18 +903,18 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Footer */}
+
           <div className="flex justify-between items-center px-4 py-3 text-sm">
 
-            {/* Total Count */}
             <span>
               Total Record Count :
-              <span className="text-blue-600 ml-1">{data.length || 0}</span>
+              <span className="text-blue-600 ml-1">
+                {currentData?.totalItems || 0}
+              </span>
             </span>
 
             <div className="flex items-center gap-4">
 
-              {/* Page Size */}
               <select
                 value={size}
                 onChange={(e) => {
@@ -702,57 +929,50 @@ useEffect(() => {
                 <option value={100}>100</option>
               </select>
 
-              {/* Prev */}
-             <button
-  disabled={
-    page === 1 ||
-    data.length === 0
-  }
-  onClick={() => setPage((p) => p - 1)}
-  className={`
-    ${
-      page === 1 ||
-      data.length === 0
-        ? "opacity-40 cursor-not-allowed"
-        : "cursor-pointer"
-    }
-  `}
->
-  &#8249;
-</button>
+              {/* Previous */}
+              <button
+                disabled={
+                  currentData?.currentPage <= 1 ||
+                  currentData?.totalItems === 0
+                }
+                onClick={() => setPage((prev) => prev - 1)}
+                className={`${currentData?.currentPage <= 1 ||
+                    currentData?.totalItems === 0
+                    ? "opacity-40 cursor-not-allowed"
+                    : "cursor-pointer"
+                  }`}
+              >
+                &#8249;
+              </button>
 
               {/* Current Page */}
               <span className="border px-3 py-1 rounded bg-gray-50">
-                {page}
+                {currentData?.currentPage || 1}
               </span>
-   <span className="text-textDark/60 text-cardTitle">
-  {page} - {resData?.totalPages}
-</span>
-              {/* Next */}
-             <button
-  disabled={
-    page >= resData?.totalPages ||
-    data.length === 0
-  }
-  onClick={() => setPage((p) => p + 1)}
-  className={`
-    ${
-      page >= resData?.totalPages ||
-      data.length === 0
-        ? "opacity-40 cursor-not-allowed"
-        : "cursor-pointer"
-    }
-  `}
->
-  &#8250;
-</button>
 
-              {/* Range */}
-              {/* <span className="text-gray-400">
-                {start} - {end}
-              </span> */}
+              {/* Total Pages */}
+              <span className="text-textDark/60 text-cardTitle">
+                {currentData?.currentPage || 1} - {currentData?.totalPages || 1}
+              </span>
+
+              {/* Next */}
+              <button
+                disabled={
+                  currentData?.currentPage >= currentData?.totalPages ||
+                  currentData?.totalItems === 0
+                }
+                onClick={() => setPage((prev) => prev + 1)}
+                className={`${currentData?.currentPage >= currentData?.totalPages ||
+                    currentData?.totalItems === 0
+                    ? "opacity-40 cursor-not-allowed"
+                    : "cursor-pointer"
+                  }`}
+              >
+                &#8250;
+              </button>
 
             </div>
+
           </div>
 
         </div>
@@ -760,53 +980,131 @@ useEffect(() => {
 
       {showModal && selectedTxn && (
         <>
-          {/* BACKDROP */}
+          {/* Overlay */}
           <div
-            className="fixed inset-0 bg-black/40 z-40"
+            className="fixed inset-0 bg-transparent z-[60]"
             onClick={() => setShowModal(false)}
           />
 
-          {/* DRAWER WITH SPACE */}
-          <div className="fixed top-6 bottom-6 right-6 w-[400px] bg-white-common rounded-xl shadow-lg z-50 transform transition-transform duration-300 translate-x-0">
+          {/* Drawer */}
+          <div className="fixed top-6 bottom-6 right-6 w-[400px] bg-white-common rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.25)] z-[70] flex flex-col">
 
-            <div className="h-full overflow-y-auto p-5">
+            {/* Fixed Header */}
+            {/* <div className="shrink-0 px-5 py-4 border-b border-gray-300 bg-white-common rounded-t-xl">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="font-semibold text-sm">
+              TXN{selectedTxn.historyId}
+            </h2>
 
-              {/* HEADER */}
-              <div className="flex justify-between items-center mb-4 border-b border-gray-300">
+            <p
+              className={`text-xs font-medium ${
+                selectedTxn?.orderStatus?.toUpperCase() === "PAID"
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              ●{" "}
+              {selectedTxn?.orderStatus?.toUpperCase() === "PAID"
+                ? "Success"
+                : "Failed"}
+            </p>
+          </div>
+
+          <button
+            onClick={() => setShowModal(false)}
+            className="cursor-pointer text-xl"
+          >
+            ✕
+          </button>
+        </div>
+      </div> */}
+            <div className="shrink-0 px-6 py-4 border-b border-gray-200 bg-white rounded-t-2xl">
+              <div className="flex items-start justify-between">
+                {/* Left */}
                 <div>
-                  <h2 className="font-semibold text-sm text-start">
-                    TXN{selectedTxn.historyId}
+                  <h2 className="text-[16px] font-semibold text-gray-900">
+                    TXN{selectedTxn?.historyId}
                   </h2>
-                 <p
-  className={`
-    text-xs font-medium
-    ${
-      selectedTxn?.orderStatus?.toUpperCase() === "PAID"
-        ? "text-green-600"
-        : "text-red-600"
-    }
-  `}
->
-  ●
-  {
-    selectedTxn?.orderStatus?.toUpperCase() === "PAID"
-      ? " Success"
-      : " Failed"
-  }
-</p>
+
+                  <div className="flex items-center gap-2 mt-2">
+                    <span
+                      className={`w-2 h-2 rounded-full ${selectedTxn?.orderStatus?.toUpperCase() === "PAID"
+                          ? "bg-green-500"
+                          : "bg-red-500"
+                        }`}
+                    ></span>
+
+                    <span
+                      className={`text-[13px] font-medium ${selectedTxn?.orderStatus?.toUpperCase() === "PAID"
+                          ? "text-green-600"
+                          : "text-red-600"
+                        }`}
+                    >
+                      {selectedTxn?.orderStatus?.toUpperCase() === "PAID"
+                        ? "Success"
+                        : "Failed"}
+                    </span>
+                  </div>
                 </div>
 
-                <button onClick={() => setShowModal(false)} className="cursor-pointer">✕</button>
+                {/* Right */}
+                <div className="flex items-center gap-3">
+                  {selectedTxn?.canUploadSubscriptionInvoice === true && (
+                    <button
+                      onClick={() => setShowUploadModal(true)}
+                      className="flex items-center gap-2 px-5 py-2 bg-[#2F54EB] hover:bg-[#2345d8] text-white rounded-lg text-sm font-medium cursor-pointer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+                        />
+                      </svg>
+
+                      Upload Invoice
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="text-red-500 hover:text-red-600 text-2xl leading-none cursor-pointer"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
+            </div>
 
-              {/* PROPERTY INFO */}
-              {/* <div className="text-sm space-y-2 mb-4 text-left">
-                <p><b>Owner:</b> {selectedTxn.createdBy}</p>
-                <p><b>Location:</b> {selectedTxn.city}, {selectedTxn.state}</p>
-                <p><b>Mobile:</b> {selectedTxn.mobile || "-"}</p>
-                <p><b>Active Tenants:</b> 42</p>
-              </div> */}
+            {/* Scrollable Content */}
+            <div
+              className="
+          flex-1
+          overflow-y-auto
+          p-5
+ [&::-webkit-scrollbar]:w-[8px]
+          [&::-webkit-scrollbar-track]:bg-transparent
+          [&::-webkit-scrollbar-track]:rounded-full
 
+          [&::-webkit-scrollbar-thumb]:bg-[#bfd3ff]
+          [&::-webkit-scrollbar-thumb]:rounded-full
+          [&::-webkit-scrollbar-thumb]:border-[2px]
+          [&::-webkit-scrollbar-thumb]:border-transparent
+          [&::-webkit-scrollbar-thumb]:bg-clip-content
+
+          [&::-webkit-scrollbar-thumb:hover]:bg-[#9dbdff]
+
+          [scrollbar-width:thin]
+          [scrollbar-color:#bfd3ff_transparent]
+        "
+            >
               <div className="text-sm text-left">
                 <p className="text-[13px] font-semibold tracking-[1px] text-gray-500 uppercase mb-4">
                   Property Info
@@ -843,7 +1141,7 @@ useEffect(() => {
                 </div>
               </div>
 
-             
+
               <div className="bg-gray-100 rounded-xl p-4 text-sm mt-3 mb-4 border border-gray-200">
 
                 {/* TITLE */}
@@ -894,22 +1192,70 @@ useEffect(() => {
                       {selectedTxn.collectedBy || "-"}
                     </p>
                   </div>
+                  {/* Buttons */}
+                  {selectedTxn?.subscriptionInvoiceUrl && (
+                  <div className="mt-4 flex gap-2">
 
+                    {/* Preview */}
+                    <button
+                      onClick={() => setShowPreview(true)}
+                      className="
+    flex-1
+    h-10
+    border
+    border-gray-300
+    rounded-lg
+    bg-white
+    flex
+    items-center
+    justify-center
+    gap-2
+    hover:bg-gray-50
+  "
+                    >
+                      {/* <img src={ViewImg} className="w-4 h-4" /> */}
+                      Preview
+                    </button>
+
+                    {/* Download */}
+                    <button
+                       onClick={handleDownloadInvoice}
+                      className="
+      flex-1
+      h-10
+      rounded-lg
+      bg-[#2952F3]
+      hover:bg-[#1E40D0]
+      text-white
+      flex
+      items-center
+      justify-center
+      gap-2
+      text-[13px]
+      cursor-pointer
+    "
+                    >
+                      {/* <img src={DownloadIcon} className="w-4 h-4" alt="download" /> */}
+                      Download Invoice
+                    </button>
+
+                  </div>
+                  )}
                 </div>
               </div>
-<div className="mt-4">
+              <div className="mt-4">
 
-  
-  {selectedTxn.paymentUrl && (
 
-  <div className="mb-4 text-left">
+                {selectedTxn.paymentUrl && (
 
-    <p className="text-[11px] text-gray-500 uppercase font-semibold mb-2">
-      Payment Link
-    </p>
+                  <div className="mb-4 text-left">
 
-    <div
-      className="
+                    <p className="text-[11px] text-gray-500 uppercase font-semibold mb-2">
+                      Payment Link
+                    </p>
+
+                    <div
+                      className="
         relative
         border
         border-gray-300
@@ -918,27 +1264,27 @@ useEffect(() => {
         p-3
         pr-24
       "
-    >
+                    >
 
-      {/* LINK */}
-      <a
-        href={selectedTxn.paymentUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="
+                      {/* LINK */}
+                      <a
+                        href={selectedTxn.paymentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="
           text-blue-600
           text-sm
           underline
           break-all
           hover:text-blue-800
         "
-      >
-        {selectedTxn.paymentUrl}
-      </a>
+                      >
+                        {selectedTxn.paymentUrl}
+                      </a>
 
-      {/* RIGHT ACTIONS */}
-      <div
-        className="
+                      {/* RIGHT ACTIONS */}
+                      <div
+                        className="
           absolute
           top-2
           right-2
@@ -946,16 +1292,16 @@ useEffect(() => {
           items-center
           gap-2
         "
-      >
+                      >
 
-        {/* COPY */}
-        <button
-          onClick={() => {
-            navigator.clipboard.writeText(
-              selectedTxn.paymentUrl
-            );
-          }}
-          className="
+                        {/* COPY */}
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              selectedTxn.paymentUrl
+                            );
+                          }}
+                          className="
             w-8
             h-8
             rounded-full
@@ -967,15 +1313,15 @@ useEffect(() => {
             text-[14px]
             cursor-pointer
           "
-          title="Copy Link"
-        >
-          📋
-        </button>
+                          title="Copy Link"
+                        >
+                          📋
+                        </button>
 
-      
-        <button
-  onClick={handleSharePayment}
-  className="
+
+                        <button
+                          onClick={handleSharePayment}
+                          className="
     w-8
     h-8
     rounded-full
@@ -988,48 +1334,40 @@ useEffect(() => {
     text-[14px]
     cursor-pointer
   "
-  title="Share on WhatsApp"
->
-   <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 32 32"
-      className="w-5 h-5 fill-current"
-    >
+                          title="Share on WhatsApp"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 32 32"
+                            className="w-5 h-5 fill-current"
+                          >
 
-      <path d="M16 .396C7.164.396 0 7.56 0 16.396c0 2.82.737 5.57 2.137 7.992L0 32l7.828-2.053a15.93 15.93 0 0 0 8.172 2.242c8.836 0 16-7.164 16-16S24.836.396 16 .396zm0 29.09a13.1 13.1 0 0 1-6.672-1.832l-.477-.281-4.645 1.219 1.238-4.527-.312-.492a13.045 13.045 0 0 1-2.012-7.016c0-7.223 5.879-13.102 13.102-13.102 3.5 0 6.793 1.363 9.266 3.836a13.02 13.02 0 0 1 3.836 9.266c0 7.223-5.879 13.102-13.102 13.102zm7.188-9.844c-.394-.199-2.332-1.152-2.695-1.285-.363-.133-.629-.199-.895.199-.266.394-1.027 1.285-1.258 1.551-.23.266-.465.297-.859.098-.394-.199-1.664-.613-3.172-1.953-1.172-1.043-1.965-2.332-2.195-2.727-.23-.394-.024-.609.172-.808.176-.176.394-.465.594-.695.199-.23.266-.394.398-.66.133-.266.066-.496-.031-.695-.098-.199-.895-2.156-1.227-2.953-.324-.777-.652-.672-.895-.684l-.762-.012c-.266 0-.695.098-1.059.496-.363.394-1.391 1.359-1.391 3.312 0 1.953 1.426 3.84 1.625 4.105.199.266 2.809 4.289 6.805 6.016.949.41 1.688.656 2.266.84.953.305 1.82.262 2.504.159.764-.114 2.332-.953 2.66-1.875.328-.922.328-1.711.23-1.875-.098-.164-.363-.262-.758-.461z" />
+                            <path d="M16 .396C7.164.396 0 7.56 0 16.396c0 2.82.737 5.57 2.137 7.992L0 32l7.828-2.053a15.93 15.93 0 0 0 8.172 2.242c8.836 0 16-7.164 16-16S24.836.396 16 .396zm0 29.09a13.1 13.1 0 0 1-6.672-1.832l-.477-.281-4.645 1.219 1.238-4.527-.312-.492a13.045 13.045 0 0 1-2.012-7.016c0-7.223 5.879-13.102 13.102-13.102 3.5 0 6.793 1.363 9.266 3.836a13.02 13.02 0 0 1 3.836 9.266c0 7.223-5.879 13.102-13.102 13.102zm7.188-9.844c-.394-.199-2.332-1.152-2.695-1.285-.363-.133-.629-.199-.895.199-.266.394-1.027 1.285-1.258 1.551-.23.266-.465.297-.859.098-.394-.199-1.664-.613-3.172-1.953-1.172-1.043-1.965-2.332-2.195-2.727-.23-.394-.024-.609.172-.808.176-.176.394-.465.594-.695.199-.23.266-.394.398-.66.133-.266.066-.496-.031-.695-.098-.199-.895-2.156-1.227-2.953-.324-.777-.652-.672-.895-.684l-.762-.012c-.266 0-.695.098-1.059.496-.363.394-1.391 1.359-1.391 3.312 0 1.953 1.426 3.84 1.625 4.105.199.266 2.809 4.289 6.805 6.016.949.41 1.688.656 2.266.84.953.305 1.82.262 2.504.159.764-.114 2.332-.953 2.66-1.875.328-.922.328-1.711.23-1.875-.098-.164-.363-.262-.758-.461z" />
 
-    </svg>
-</button>
+                          </svg>
+                        </button>
 
-      </div>
+                      </div>
 
-    </div>
+                    </div>
 
-  </div>
+                  </div>
 
-)}
+                )}
 
-  
-  <div className="rounded-lg overflow-hidden border-soft">
 
-    <img
-      src={selectedTxn.paymentProof}
-      className="w-full h-auto object-contain"
-    />
+                <div className="rounded-lg overflow-hidden border-soft">
 
-  </div>
+                  <img
+                    src={selectedTxn.paymentProof}
+                    className="w-full h-auto object-contain"
+                  />
 
-</div>
+                </div>
 
-              
-              {/* <div className="rounded-lg overflow-hidden border border-gray-300">
-                <img
-                  src={selectedTxn.paymentProof}
-                  className="w-full h-auto object-contain"
-                />
-              </div> */}
-
+              </div>
             </div>
+
           </div>
         </>
       )}
@@ -1048,92 +1386,405 @@ useEffect(() => {
           />
         </div>
       )}
-{showVerifyDrawer && (
+      {showVerifyDrawer && (
 
+        <>
+
+
+          <div
+            className="fixed inset-0 bg-black/10 z-[60]"
+            onClick={() => setShowVerifyDrawer(false)}
+          />
+
+
+          <div className="
+    fixed
+    top-10
+    right-6
+    w-[380px]
+    bg-[#FAFBFC]
+    rounded-3xl
+    shadow-[0_20px_60px_rgba(0,0,0,0.25)]
+    z-50
+    overflow-hidden
+    animate-in
+    slide-in-from-right
+    duration-300
+    z-[70]
+  ">
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-[#E6E8F0] bg-white-common">
+
+              <h2 className="text-[20px] font-semibold text-gray-800">
+                Payment Verification
+              </h2>
+
+              <button
+                onClick={() => setShowVerifyDrawer(false)}
+                className="w-9 h-9 rounded-full hover:bg-gray-100 text-gray-500 hover:text-black flex items-center justify-center text-2xl transition"
+              >
+                ×
+              </button>
+
+            </div>
+
+            {/* Content */}
+            {/* Content */}
+            <div className="p-6 bg-[#FAFBFC]">
+
+              {verifyResponse?.isPaid ? (
+
+                <>
+                  <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+                    <span className="text-green-600 text-5xl">✓</span>
+                  </div>
+
+                  <h3 className="mt-6 text-[20px] font-semibold text-[#1F2937]">
+                    Payment Success
+                  </h3>
+
+                  <p className="mt-3 text-[15px] text-gray-500 leading-7">
+                    This payment has been made successfully.
+                  </p>
+                </>
+
+              ) : (
+
+                <>
+                  <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+                    <span className="text-red-600 text-5xl">✕</span>
+                  </div>
+
+                  <h3 className="mt-6 text-[20px] font-semibold text-[#1F2937]">
+                    Payment Failed
+                  </h3>
+
+                  <p className="mt-3 text-[15px] text-gray-500 leading-7">
+                    Payment verification failed.
+                  </p>
+                </>
+
+              )}
+
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 pb-6 pt-2 bg-[#FAFBFC]">
+
+              <button
+                onClick={() => setShowVerifyDrawer(false)}
+                className="w-full bg-[#2563EB] hover:bg-[#1E4FD8] text-white py-3 rounded-2xl text-sm font-semibold transition"
+              >
+                Close
+              </button>
+
+            </div>
+
+          </div>
+
+        </>
+
+      )}
+     {showPreview && (
   <>
-
-    {/* Backdrop */}
+    {/* Overlay */}
     <div
-      className="fixed inset-0 bg-black/30 z-40"
-      onClick={() => setShowVerifyDrawer(false)}
+      className="fixed inset-0 bg-black/40 z-[90]"
+      onClick={() => setShowPreview(false)}
     />
 
-    {/* Compact Drawer */}
-    <div className="fixed top-10 right-6 w-[380px] bg-[#FAFBFC] rounded-3xl shadow-2xl z-50 overflow-hidden animate-in slide-in-from-right duration-300">
-
+    {/* Drawer */}
+    <div
+      className="
+        fixed
+        top-4
+        right-4
+        bottom-4
+        w-[480px]
+        bg-white
+        rounded-2xl
+        shadow-2xl
+        z-[100]
+        flex
+        flex-col
+        overflow-hidden
+      "
+    >
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-[#E6E8F0] bg-white-common">
+      <div className="flex items-center justify-between px-5 py-4 border-b shrink-0">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowPreview(false)}
+            className="text-xl cursor-pointer"
+          >
+            ←
+          </button>
 
-        <h2 className="text-[20px] font-semibold text-gray-800">
-          Payment Verification
-        </h2>
+          <h2 className="font-semibold text-lg">
+            Preview
+          </h2>
+        </div>
 
         <button
-          onClick={() => setShowVerifyDrawer(false)}
-          className="w-9 h-9 rounded-full hover:bg-gray-100 text-gray-500 hover:text-black flex items-center justify-center text-2xl transition"
+          onClick={handleExportInvoicePdf}
+          className="
+            bg-[#2952F3]
+            text-white
+            px-4
+            py-2
+            rounded-lg
+            text-sm
+            flex
+            items-center
+            gap-2
+            cursor-pointer
+          "
         >
-          ×
+          ⬆ Export as PDF
         </button>
-
       </div>
 
-      {/* Content */}
-      {/* Content */}
-<div className="p-6 bg-[#FAFBFC]">
+      {/* Invoice Preview */}
+    {/* Invoice Preview */}
+<div className="flex-1 bg-gray-100 p-4 overflow-auto">
 
-  {verifyResponse?.isPaid ? (
+  <div className="w-full h-full bg-white rounded-xl overflow-hidden flex items-center justify-center">
 
-  <>
-    <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-      <span className="text-green-600 text-5xl">✓</span>
-    </div>
+    {!invoiceUrl ? (
+      <p className="text-gray-500 text-sm">
+        Invoice preview not available
+      </p>
+    ) : fileType === "pdf" ? (
 
-    <h3 className="mt-6 text-[20px] font-semibold text-[#1F2937]">
-      Payment Success
-    </h3>
+      // PDF
+      <iframe
+        src={invoiceUrl}
+        title="Invoice Preview"
+        className="w-full h-full min-h-[700px] border-0"
+      />
 
-    <p className="mt-3 text-[15px] text-gray-500 leading-7">
-      This payment has been made successfully.
-    </p>
-  </>
+    ) : fileType === "image" ? (
 
-) : (
+      // Image
+      <img
+        src={invoiceUrl}
+        alt="Invoice Preview"
+        className="
+          max-w-full
+          max-h-full
+          object-contain
+          rounded-lg
+        "
+      />
 
-  <>
-    <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto">
-      <span className="text-red-600 text-5xl">✕</span>
-    </div>
+    ) : (
 
-    <h3 className="mt-6 text-[20px] font-semibold text-[#1F2937]">
-      Payment Failed
-    </h3>
-
-    <p className="mt-3 text-[15px] text-gray-500 leading-7">
-      Payment verification failed.
-    </p>
-  </>
-
-)}
-
+      
+    <div
+  className="
+    w-full
+    h-full
+    bg-[#F3F4F6]
+    rounded-xl
+    overflow-hidden
+    flex
+    justify-center
+    items-start
+  "
+>
+  <iframe
+    src={selectedTxn?.subscriptionInvoiceUrl}
+    className="w-full h-full border-0"
+    title="Invoice Preview"
+  />
 </div>
 
-      {/* Footer */}
-      <div className="px-6 pb-6 pt-2 bg-[#FAFBFC]">
+    )}
 
-        <button
-          onClick={() => setShowVerifyDrawer(false)}
-          className="w-full bg-[#2563EB] hover:bg-[#1E4FD8] text-white py-3 rounded-2xl text-sm font-semibold transition"
-        >
-          Close
-        </button>
+  </div>
 
-      </div>
-
+</div>
     </div>
-
   </>
-
 )}
+
+      {showUploadModal && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]"
+          onClick={handleCloseUploadModal}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl w-[500px] overflow-hidden shadow-2xl"
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center px-6 py-5 border-b">
+              <div>
+                <h2 className="text-[18px] font-semibold text-left">
+                  Upload Invoice
+                </h2>
+
+                <p className="text-sm text-gray-500 mt-1">
+                  Upload invoice for this transaction.
+                </p>
+              </div>
+
+              <button
+                onClick={handleCloseUploadModal}
+                className="text-red-500 text-3xl cursor-pointer leading-none"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6">
+
+              {/* File Upload */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-left">
+                  Invoice
+                  <span className="text-red-500">*</span>
+                </label>
+
+                <label
+                  htmlFor="invoiceUpload"
+                  className="
+              w-full
+              h-[120px]
+              border-2
+              border-dashed
+              border-gray-300
+              rounded-xl
+              flex
+              flex-col
+              items-center
+              justify-center
+              cursor-pointer
+              hover:border-[#2952F3]
+              transition-all
+            "
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-10 h-10 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M7 16V8m0 0l5-5m-5 5l5 5M17 16V8"
+                    />
+                  </svg>
+
+                  <p className="mt-2 text-sm text-gray-500">
+                    Click to upload invoice
+                  </p>
+
+                  {invoiceFile && (
+                    <p className="text-xs text-[#2952F3] mt-2">
+                      {invoiceFile.name}
+                    </p>
+                  )}
+                </label>
+
+                <input
+                  id="invoiceUpload"
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  hidden
+                 onChange={(e) => {
+    setInvoiceFile(e.target.files?.[0] || null);
+    setInvoiceFileError("");
+  }}
+                />
+              </div>
+  {invoiceFileError && (
+                <ErrorMessage
+                  message={invoiceFileError}
+                  type="error"
+                />
+              )}
+              {/* Checkbox */}
+              {/* Manual Checkbox */}
+              <div className="mt-6">
+                <div className="flex items-center gap-3">
+                  <input
+                    id="manual"
+                    type="checkbox"
+                    checked={isManual}
+                    onChange={(e) => setIsManual(e.target.checked)}
+                    className="w-5 h-5 accent-[#2952F3] cursor-pointer"
+                  />
+
+                  <label
+                    htmlFor="manual"
+                    className="text-sm font-medium text-gray-700 cursor-pointer"
+                  >
+                    Upload as Manual Invoice
+                  </label>
+                </div>
+
+                {/* Warning */}
+                <div className="mt-3 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5 text-amber-500 mt-0.5 shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+                    />
+                  </svg>
+
+                  <div>
+
+
+                    <p className="text-xs text-amber-700 mt-1">
+                      Manual invoices cannot be deleted once uploaded.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Footer */}
+            <div className="border-t px-6 py-4 flex justify-end gap-3">
+              <button
+                 onClick={handleCloseUploadModal}
+                className="px-6 py-2 border rounded-lg cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleUploadInvoice}
+                className="
+            px-6
+            py-2
+            bg-[#2952F3]
+            text-white
+            rounded-lg
+            hover:bg-[#1f46e5]
+            cursor-pointer
+          "
+              >
+                Upload
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };

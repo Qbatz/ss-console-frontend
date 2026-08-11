@@ -10,7 +10,7 @@ import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import noteAdd from "../../assets/noteadd.png";
 import { useNavigate, useLocation } from "react-router-dom";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import { usePermission } from "../../Utils/permissionHelper";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
@@ -99,6 +99,12 @@ useEffect(() => {
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Hostels");
   console.log("canRead", canRead)
+  const {
+  canRead: canReadExpenses,
+  canWrite: canWriteExpenses,
+  canUpdate: canUpdateExpenses,
+  canDelete: canDeleteExpenses,
+} = usePermission("Expenses");
   // const [page, setPage] = useState(1);
   // const [searchText, setSearchText] = useState("");
   const [pageSize, setPageSize] = useState(10);
@@ -809,12 +815,16 @@ const handleAddNote = async () => {
             <img
               src={LoginImg}
               alt="Access Restricted"
-              className="w-64 object-contain"
+                 className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
             />
 
-           <p className="error-title">
-              {accessError}
-            </p>
+           <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+          Permission Restricted !
+        </h1>
+
+        <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+          Your permission is restricted for this module
+        </p>
 
           </div>
 
@@ -1671,7 +1681,7 @@ const handleAddNote = async () => {
                         </th>
 
                         {/* Sticky Name */}
-                        <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-80 w-[100px]">
+                       <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-80 w-[180px] min-w-[180px]">
                           Name
                         </th>
                         <th className="px-4 py-3 w-[120px] text-left">
@@ -1808,8 +1818,8 @@ const handleAddNote = async () => {
                               {(hostels?.currentPage - 1) * hostels?.sizePerPage + index + 1}
                             </td>
 
-                            {/* Sticky Name */}
-                            <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] group-hover:!bg-gray-50">
+                           
+                            {/* <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] group-hover:!bg-gray-50">
 
                               <div
                                 className="flex items-center gap-3 cursor-pointer"
@@ -1850,9 +1860,12 @@ const handleAddNote = async () => {
                                   className="flex flex-col truncate"
                                   onClick={() => handlePropertyClick(item)}
                                 >
-                                  <span className="text-gray-900 font-semibold truncate">
-                                    {item.hostelName}
-                                  </span>
+                                  <span
+  className="text-gray-900 font-semibold truncate w-[180px] block"
+  title={item.hostelName}
+>
+  {item.hostelName}
+</span>
                                   <span className="text-gray-500 text-xs truncate">
                                     {item.ownerInfo?.fullName}
                                   </span>
@@ -1860,7 +1873,63 @@ const handleAddNote = async () => {
 
                               </div>
 
-                            </td>
+                            </td> */}
+                           <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[180px] min-w-[180px] max-w-[180px] group-hover:!bg-gray-50">
+  <div
+    className="flex items-center gap-3 cursor-pointer w-full overflow-hidden"
+    onMouseEnter={(e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setTooltip({
+        visible: true,
+        text: item.fullAddress || "No Address",
+        x: rect.left,
+        y: rect.bottom + 6,
+      });
+    }}
+    onMouseLeave={() =>
+      setTooltip((prev) => ({ ...prev, visible: false }))
+    }
+  >
+    {item?.isTrial !== false && (
+      <div className="flex border rounded-full w-5 h-5 items-center justify-center text-[9px] font-medium text-gray-600 shrink-0">
+        T
+      </div>
+    )}
+
+    <div className="w-7 h-7 shrink-0 flex items-center justify-center rounded-full bg-gray-200">
+      {item.hostelImage ? (
+        <img
+          src={item.hostelImage}
+          alt="hostel"
+          className="w-7 h-7 rounded-full object-cover"
+        />
+      ) : (
+        <div className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 text-xs font-semibold uppercase">
+          {item.initials || "NA"}
+        </div>
+      )}
+    </div>
+
+    <div
+      className="flex flex-col flex-1 min-w-0"
+      onClick={() => handlePropertyClick(item)}
+    >
+      <span
+        className="font-semibold text-gray-900 truncate"
+        title={item.hostelName}
+      >
+        {item.hostelName}
+      </span>
+
+      <span
+        className="text-gray-500 text-xs truncate"
+        title={item.ownerInfo?.fullName}
+      >
+        {item.ownerInfo?.fullName}
+      </span>
+    </div>
+  </div>
+</td>
  <td className="px-4 py-2 text-center">
                               <span
                                 className={`flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap w-fit mx-auto ${item.subscriptionIsActive
@@ -1887,9 +1956,17 @@ const handleAddNote = async () => {
                             <td className="px-4 py-2 whitespace-nowrap">
                               {item.ownerInfo?.mobile}
                             </td>
-                            <td className="px-4 py-2 whitespace-nowrap">
+                            {/* <td className="px-4 py-2 whitespace-nowrap">
                               {item.ownerInfo?.emailId}
-                            </td>
+                            </td> */}
+                            <td className="px-4 py-2 w-[100px] min-w-[100px] max-w-[100px]">
+  <div
+    className="truncate"
+    title={item.ownerInfo?.emailId}
+  >
+    {item.ownerInfo?.emailId || "----"}
+  </div>
+</td>
                             <td className="px-4 py-2 whitespace-nowrap">
                               {item?.joinedOn}
                             </td>
@@ -1918,7 +1995,7 @@ const handleAddNote = async () => {
                             <td className="px-4 py-2 text-center">
                               {item.platform || "----"}
                             </td>
-                             <td
+                             {/* <td
   className="
     px-4
     py-2
@@ -1952,6 +2029,27 @@ const handleAddNote = async () => {
 
   )}
 
+</td> */}
+<td
+  className="
+    px-4
+    py-2
+    text-left
+  "
+>
+  {item?.relationalAgents?.[0]?.agentId ? (
+    <div
+      className="w-[120px] truncate text-blue-600 cursor-pointer hover:underline font-medium"
+      title={item?.relationalAgents?.[0]?.agentName || "N/A"}
+      onClick={() =>
+        navigate(`/iam-user/${item.relationalAgents[0].agentId}`)
+      }
+    >
+      {item?.relationalAgents?.[0]?.agentName || "N/A"}
+    </div>
+  ) : (
+    "----"
+  )}
 </td>
                            
 
@@ -2059,7 +2157,7 @@ const handleAddNote = async () => {
       zIndex: 999999,
     }}
   >
-    <button
+    {/* <button
   onClick={async () => {
 
     setSelectedHostelId(
@@ -2078,8 +2176,27 @@ const handleAddNote = async () => {
   className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
 >
   Add Notes
+</button> */}
+<button
+  disabled={!canWrite}
+  onClick={async () => {
+    setSelectedHostelId(item.hostelId);
+
+    await fetchHostelNotes(item.hostelId);
+
+    setShowNoteModal(true);
+
+    setOpenMenu(null);
+  }}
+  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+    canWrite
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "opacity-50 cursor-not-allowed"
+  }`}
+>
+  Add Notes
 </button>
-    <button
+    {/* <button disabled={!canWriteExpenses}
       onClick={() => {
         setSelectedHostelId(item.hostelId);
         setShowResetModal(true);
@@ -2088,9 +2205,25 @@ const handleAddNote = async () => {
       className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
     >
       Reset Expense
-    </button>
-
+    </button> */}
     <button
+  disabled={!canWriteExpenses}
+  onClick={() => {
+    setSelectedHostelId(item.hostelId);
+    setShowResetModal(true);
+    setOpenMenu(null);
+  }}
+  className={`w-full text-left px-4 py-2.5 text-sm transition-colors
+    ${
+      canWriteExpenses
+        ? "hover:bg-gray-50 cursor-pointer"
+        : "opacity-50 cursor-not-allowed"
+    }`}
+>
+  Reset Expense
+</button>
+
+    {/* <button
       onClick={() => {
         setDeleteHostelId(item.hostelId);
         setShowDeleteModal(true);
@@ -2099,7 +2232,22 @@ const handleAddNote = async () => {
       className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 text-red-600 transition-colors cursor-pointer"
     >
       Delete
-    </button>
+    </button> */}
+    <button
+  disabled={!canDelete}
+  onClick={() => {
+    setDeleteHostelId(item.hostelId);
+    setShowDeleteModal(true);
+    setOpenMenu(null);
+  }}
+  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+    canDelete
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "opacity-50 cursor-not-allowed"
+  }`}
+>
+  Delete
+</button>
   </div>,
   document.body
 )}

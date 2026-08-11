@@ -5,20 +5,21 @@ import AddAdmin from "./AddAdmin";
 import { useRole } from "../../Context/RoleContext";
 import { useNavigate, useParams } from "react-router-dom";
 import swap from "../../assets/arrowswap.png";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import Add from "../../assets/add_admin.png";
 import Frame from "../../assets/Frame.png";
 import DownArrow from "../../assets/dropdownImg.png";
 import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
-
+import { usePermission } from "../../Utils/permissionHelper";
 
 
 
 const IamAdminUser = () => {
   const navigate = useNavigate();
   const { getAdminDetails, loading, agents, getAllAgents, accessError, deactivateAgent, reactivateAgent, getAgentDetails, getAgentRoles, agentRoles, updateAdminRole, getAgentRoleDropdown } = useRole();
-
+const { canRead, canWrite, canUpdate, canDelete } =
+        usePermission("Admin");
   const [admin, setAdmin] = useState(null);
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(null);
@@ -249,19 +250,23 @@ console.log("filteredAgents", filteredAgents);
         type={modalType}
 
       />
-      {accessError === "Access Restricted" ? (
+      {(canRead === false || accessError === "Access Restricted") ? (
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
           <img
-            src={LoginImg}
-            alt="Access Restricted"
-            className="w-64 object-contain"
-          />
-
-          <p className="text-red-600 text-lg font-medium">
-            {accessError}
-          </p>
+                                                                       src={LoginImg}
+                                                                       alt="Access Restricted"
+                                                                          className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                                                                     />
+                                                 
+                                                           <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+                                                           Permission Restricted !
+                                                         </h1>
+                                                 
+                                                         <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+                                                           Your permission is restricted for this module
+                                                         </p>
 
         </div>
 
@@ -285,14 +290,34 @@ console.log("filteredAgents", filteredAgents);
                   Recent Activity
                 </button> */}
 
-                <button className="flex items-center gap-2 text-blue-600 text-sm px-4 py-2 rounded-lg  transition w-full sm:w-auto justify-center cursor-pointer"
+                {/* <button className="flex items-center gap-2 text-blue-600 text-sm px-4 py-2 rounded-lg  transition w-full sm:w-auto justify-center cursor-pointer"
                   onClick={() => setOpen(true)}>
                   <img
                     src={Add}
                     alt="Add"
                     className="w-6 h-6 object-contain"
                   /> Add Admin User
-                </button>
+                </button> */}
+                <button
+  disabled={!canWrite}
+  onClick={() => {
+    if (!canWrite) return;
+
+    setOpen(true);
+  }}
+  className={`flex items-center gap-2 text-sm px-4 py-2 rounded-lg transition w-full sm:w-auto justify-center ${
+    canWrite
+      ? "text-blue-600 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  <img
+    src={Add}
+    alt="Add"
+    className={`w-6 h-6 object-contain ${!canWrite ? "opacity-40" : ""}`}
+  />
+  Add Admin User
+</button>
               </div>
 
             </div>
@@ -435,7 +460,7 @@ console.log("filteredAgents", filteredAgents);
 >
 
 
-                              <td
+                              {/* <td
                                 onClick={() => navigate(`/iam-user/${user.agentId}`)}
                                 className="px-4 py-2 text-left font-semibold text-xs whitespace-nowrap text-blue-700 cursor-pointer hover:underline"
                               >
@@ -444,7 +469,27 @@ console.log("filteredAgents", filteredAgents);
 
                               <td className="px-2 py-2 text-left font-semibold text-xs whitespace-nowrap">
                                 {user?.email}
-                              </td>
+                              </td> */}
+                              <td
+  onClick={() => navigate(`/iam-user/${user.agentId}`)}
+  className="px-4 py-2 text-left font-semibold text-xs text-blue-700 cursor-pointer hover:underline"
+>
+  <div
+    className="w-[180px] truncate"
+    title={user?.fullName || "N/A"}
+  >
+    {user?.fullName || "N/A"}
+  </div>
+</td>
+
+<td className="px-2 py-2 text-left font-semibold text-xs">
+  <div
+    className="w-[180px] truncate"
+    title={user?.email || "N/A"}
+  >
+    {user?.email || "N/A"}
+  </div>
+</td>
 
                               <td className="px-2 py-2 text-left font-semibold text-xs whitespace-nowrap">
                                 {user?.roleName || "N/A"}
@@ -499,29 +544,63 @@ console.log("filteredAgents", filteredAgents);
 
 
                                     {status !== "INACTIVE" ? (
+                                      // <button
+                                      //   onClick={() => {
+                                      //     setSelectedUser(user);
+                                      //     setConfirmOpen(true);
+                                      //     setMenuOpen(null);
+                                      //   }}
+                                      //   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                      // >
+                                      //   Deactivate
+                                      // </button>
                                       <button
-                                        onClick={() => {
-                                          setSelectedUser(user);
-                                          setConfirmOpen(true);
-                                          setMenuOpen(null);
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                      >
-                                        Deactivate
-                                      </button>
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    setSelectedUser(user);
+    setConfirmOpen(true);
+    setMenuOpen(null);
+  }}
+  className={`w-full text-left px-4 py-2 text-sm ${
+    canUpdate
+      ? "hover:bg-gray-100 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Deactivate
+</button>
                                     ) : (
 
 
+                                      // <button
+                                      //   onClick={() => {
+                                      //     setSelectedUser(user);
+                                      //     setShowReactivateModal(true);
+                                      //     setMenuOpen(null);
+                                      //   }}
+                                      //   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
+                                      // >
+                                      //   Reactivate
+                                      // </button>
                                       <button
-                                        onClick={() => {
-                                          setSelectedUser(user);
-                                          setShowReactivateModal(true);
-                                          setMenuOpen(null);
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
-                                      >
-                                        Reactivate
-                                      </button>
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    setSelectedUser(user);
+    setShowReactivateModal(true);
+    setMenuOpen(null);
+  }}
+  className={`w-full text-left px-4 py-2 text-sm ${
+    canUpdate
+      ? "text-green-600 hover:bg-gray-100 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Reactivate
+</button>
                                     )}
                                     <button
                                       onClick={() => handleOpenDetails(user)}
@@ -529,7 +608,7 @@ console.log("filteredAgents", filteredAgents);
                                     >
                                       View Details
                                     </button>
-                                    <button
+                                    {/* <button
                                       onClick={() => {
                                         setSelectedUser(user);
                                         setSelectedRoleId(user.roleId);
@@ -539,7 +618,25 @@ console.log("filteredAgents", filteredAgents);
                                       className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                                     >
                                       Edit
-                                    </button>
+                                    </button> */}
+                                    <button
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    setSelectedUser(user);
+    setSelectedRoleId(user.roleId);
+    setShowEditModal(true);
+    setMenuOpen(null);
+  }}
+  className={`w-full text-left px-4 py-2 text-sm ${
+    canUpdate
+      ? "hover:bg-gray-100 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Edit
+</button>
 
 
                                   </div>
@@ -728,7 +825,7 @@ console.log("filteredAgents", filteredAgents);
               </div>
             )}
 
-            {showDetailsModal && (
+            {/* {showDetailsModal && (
               <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
 
@@ -858,7 +955,191 @@ console.log("filteredAgents", filteredAgents);
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
+            {showDetailsModal && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+
+   
+    <div
+      className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+      onClick={() => setShowDetailsModal(false)}
+    />
+
+   
+    <div
+      className="relative bg-white-common rounded-2xl shadow-2xl w-[520px] max-h-[90vh] flex flex-col z-[10000]"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      
+      <div className="shrink-0 flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-2xl">
+        <h2 className="text-lg font-semibold">Agent Details</h2>
+
+        <button
+          onClick={() => setShowDetailsModal(false)}
+          className="hover:text-gray-200 cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+
+      
+      <div
+        className="
+          flex-1
+          overflow-y-auto
+          p-6
+
+           [&::-webkit-scrollbar]:w-[8px]
+          [&::-webkit-scrollbar-track]:bg-transparent
+          [&::-webkit-scrollbar-track]:rounded-full
+
+          [&::-webkit-scrollbar-thumb]:bg-[#bfd3ff]
+          [&::-webkit-scrollbar-thumb]:rounded-full
+          [&::-webkit-scrollbar-thumb]:border-[2px]
+          [&::-webkit-scrollbar-thumb]:border-transparent
+          [&::-webkit-scrollbar-thumb]:bg-clip-content
+
+          [&::-webkit-scrollbar-thumb:hover]:bg-[#9dbdff]
+
+          [scrollbar-width:thin]
+          [scrollbar-color:#bfd3ff_transparent]
+        "
+      >
+
+        
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+            {agentDetails?.initials || "NA"}
+          </div>
+
+          <div>
+            <p className="font-semibold text-lg text-gray-900 text-left">
+              {agentDetails?.fullName}
+            </p>
+
+            <p className="text-xs text-gray-500 text-left">
+              {agentDetails?.roleName}
+            </p>
+          </div>
+        </div>
+
+        
+        <div className="grid grid-cols-2 gap-4 text-sm mb-6">
+
+          {/* <div className="bg-blue-50 rounded-xl p-3">
+            <p className="text-blue-400 text-xs mb-1 text-left">Email</p>
+            <p className="font-medium text-gray-800 text-left">
+              {agentDetails?.email || "-"}
+            </p>
+          </div> */}
+          <div className="bg-blue-50 rounded-xl p-3">
+  <p className="text-blue-400 text-xs mb-1 text-left">
+    Email
+  </p>
+
+  <p
+    className="w-[180px] truncate font-medium text-gray-800 text-left"
+    title={agentDetails?.email || "-"}
+  >
+    {agentDetails?.email || "-"}
+  </p>
+</div>
+
+          <div className="bg-purple-50 rounded-xl p-3">
+            <p className="text-purple-400 text-xs mb-1 text-left">Mobile</p>
+            <p className="font-medium text-gray-800 text-left">
+              {agentDetails?.mobile || "-"}
+            </p>
+          </div>
+
+          <div className="bg-green-50 rounded-xl p-3">
+            <p className="text-green-500 text-xs mb-1 text-left">Created By</p>
+            <p className="font-medium text-gray-800 text-left">
+              {agentDetails?.createdBy || "-"}
+            </p>
+          </div>
+
+          <div className="bg-orange-50 rounded-xl p-3">
+            <p className="text-orange-400 text-xs mb-1 text-left">Created Date</p>
+            <p className="font-medium text-gray-800 text-left">
+              {agentDetails?.createdAtDate}
+              <span className="text-gray-400 text-xs ml-1">
+                {agentDetails?.createdAtTime}
+              </span>
+            </p>
+          </div>
+
+        </div>
+
+        
+        <div>
+          <h3 className="font-semibold mb-3 text-gray-800 text-left">
+            Recent Activities
+          </h3>
+
+         <div
+  className="
+    h-[280px]
+    overflow-y-auto
+    space-y-3
+    pr-2
+
+    [&::-webkit-scrollbar]:w-[6px]
+    [&::-webkit-scrollbar-track]:bg-transparent
+    [&::-webkit-scrollbar-thumb]:bg-[#cbd5e1]
+    [&::-webkit-scrollbar-thumb]:rounded-full
+    [&::-webkit-scrollbar-thumb:hover]:bg-[#94a3b8]
+  "
+>
+  {agentDetails?.agentActivities?.length > 0 ? (
+    agentDetails.agentActivities.map((activity, index) => (
+      <div
+        key={index}
+        className="bg-gray-50 border-l-4 border-blue-500 rounded-lg p-3 flex justify-between items-center hover:shadow-sm transition"
+      >
+        <div>
+          <p className="font-medium text-sm text-gray-800">
+            {activity.activityType}
+          </p>
+
+          <p className="text-xs text-gray-500">
+            {activity.description}
+          </p>
+        </div>
+
+        <div className="text-xs text-gray-400 text-right">
+          <p>{activity.createdAtDate}</p>
+          <p>{activity.createdAtTime}</p>
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-gray-400 text-sm text-center py-6">
+      No activities found
+    </p>
+  )}
+</div>
+        </div>
+
+      </div>
+
+     
+
+      <div className="shrink-0 px-6 py-4 border-t bg-white-common rounded-b-2xl">
+        <div className="text-right">
+          <button
+            onClick={() => setShowDetailsModal(false)}
+            className="px-5 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-sm"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+)}
           </div>
           <AddAdmin isOpen={open} onClose={() => setOpen(false)} refreshList={() =>
             getAllAgents({

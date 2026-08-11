@@ -7,14 +7,17 @@ import Eye from "../../assets/eye.png";
 import EyeClose from "../../assets/EyeIcon.png";
 import Arrow from "../../assets/direction-down 01.png";
 import { useHostel } from "../../Context/HostelListContext";
-import Circle from "../../assets/menucircle.png"
+import Circle from "../../assets/menucircle.png";
+import { usePermission } from "../../Utils/permissionHelper";
+import LoginImg from "../../assets/permission.svg";
 
 
 const StaffScreen = ({ hostelData, refreshHostel, }) => {
   const masters = hostelData?.masters || [];
   const staffs = hostelData?.staffs || [];
   const owner = hostelData?.owner;
-
+ const { canRead, canWrite, canUpdate, canDelete } =
+    usePermission("Owners");
   // const mastersList = [
   //   {
   //     fullName: owner?.fullName,
@@ -355,13 +358,30 @@ setPinError(res.message)
                 ) : (
                   mastersList.map((item, i) => (
                     <tr key={i} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+                      {/* <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.fullName || item.firstName}
                       </td>
 
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.email || "N/A"}
-                      </td>
+                      </td> */}
+                      <td className="px-4 py-2 text-left">
+  <div
+    className="w-[180px] truncate font-medium text-[12px]"
+    title={item.fullName || item.firstName}
+  >
+    {item.fullName || item.firstName}
+  </div>
+</td>
+
+<td className="px-4 py-2 text-left">
+  <div
+    className="w-[220px] truncate font-medium text-[12px]"
+    title={item.email || "N/A"}
+  >
+    {item.email || "N/A"}
+  </div>
+</td>
 
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.mobileNo || "N/A"}
@@ -402,7 +422,7 @@ setPinError(res.message)
 marginLeft: "-8px",
                             }}
                           >
-                            <button
+                            {/* <button
                               className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
                               onClick={() => {
                                 setShowResetModal(true);
@@ -412,7 +432,24 @@ marginLeft: "-8px",
                               }}
                             >
                               Reset Password
-                            </button>
+                            </button> */}
+                            <button
+  disabled={!canWrite}
+  onClick={() => {
+    if (!canWrite) return;
+
+    setShowResetModal(true);
+    setOpenMenuIndex(null);
+    setCurrentPassword("");
+  }}
+  className={`w-full text-left px-3 py-2 text-sm ${
+    canWrite
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Reset Password
+</button>
                             <button
                               className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
                               onClick={() => {
@@ -446,7 +483,7 @@ marginLeft: "-8px",
 >
   Reset Pin
 </button> */}
-<button
+{/* <button
   className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
   onClick={() => {
 
@@ -455,6 +492,22 @@ marginLeft: "-8px",
     setOpenMenuIndex(null);
 
   }}
+>
+  Reset Pin
+</button> */}
+<button
+  disabled={!canWrite}
+  onClick={() => {
+    if (!canWrite) return;
+
+    setShowResetPinModal(true);
+    setOpenMenuIndex(null);
+  }}
+  className={`block w-full text-left px-3 py-2 text-sm ${
+    canWrite
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
 >
   Reset Pin
 </button>
@@ -540,17 +593,31 @@ marginLeft: "-8px",
                   staffs.map((item, i) => (
                     <tr key={i} className="hover:bg-gray-50">
 
-                      <td className="px-4 py-2 text-left font-medium text-[12px]">
+                      {/* <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.fullName || item.firstName}
                       </td>
 
-                      {/* <td className="px-4 py-2 text-left font-medium text-[12px]">
-                        {item.role || "—"}
-                      </td> */}
-
+                     
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.emailId || "N/A"}
-                      </td>
+                      </td> */}
+                      <td className="px-4 py-2 text-left">
+  <div
+    className="w-[180px] truncate font-medium text-[12px]"
+    title={item.fullName || item.firstName}
+  >
+    {item.fullName || item.firstName}
+  </div>
+</td>
+
+<td className="px-4 py-2 text-left">
+  <div
+    className="w-[180px] truncate font-medium text-[12px]"
+    title={item.emailId || "N/A"}
+  >
+    {item.emailId || "N/A"}
+  </div>
+</td>
 
                       <td className="px-4 py-2 text-left font-medium text-[12px]">
                         {item.mobileNo || "N/A"}
@@ -666,6 +733,7 @@ marginLeft: "-8px",
                 <input
                   type={showNew ? "text" : "password"}
                   value={newPassword}
+                   autoComplete="new-password"
                   onChange={(e) => {
                     setNewPassword(e.target.value);
                     setNewPasswordError("");
@@ -707,6 +775,7 @@ marginLeft: "-8px",
                 <input
                   type={showCurrent ? "text" : "password"}
                   value={currentPassword}
+                   autoComplete="new-password"
                   // onChange={(e) => setCurrentPassword(e.target.value)}
                   onChange={(e) => {
                     setCurrentPassword(e.target.value);

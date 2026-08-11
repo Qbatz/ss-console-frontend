@@ -16,12 +16,13 @@ import PropertyActive from "./ActiveScreen";
 import swap from "../../assets/arrowswap.png";
 import Star from "../../assets/star.png"
 import dayjs from "dayjs";
+import { DatePicker,TimePicker} from "antd";
 import PropertyAmenities from "./PropertyAmenities";
 import { useHostel } from "../../Context/HostelListContext";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import { usePermission } from "../../Utils/permissionHelper";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import ReccuringBill from "./ReccuringBill";
 import { useOwners } from "../../Context/OwnersContext";
 import { useRole } from "../../Context/RoleContext";
@@ -38,11 +39,13 @@ import Call from "../../assets/call.png";
 import { useKyc } from "../../Context/KYCContext";
 import User from "../../assets/userblack.png";
 import RoomView from "./RoomView";
+import Share from "../../assets/share.png";
+import Maxmize from "../../assets/maximize.png"
 
 const PropertyOverview = () => {
   const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory, sharePaymentLink, getTenantDeductions } = useHostel();
-  const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
-  const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
+  const {owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
+  const {adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription, getTrialDaysExtReason } = useSubscription();
   const [hostelData, setHostelData] = useState(null);
   const [dropdownPlans, setDropdownPlans] = useState([]);
@@ -84,7 +87,10 @@ const [showViewMenu, setShowViewMenu] = useState(false);
 const [selectedType, setSelectedType] = useState("All");
 const [selectedStatus, setSelectedStatus] = useState("All");
 const [selectedView, setSelectedView] = useState("Select");
-
+const [paidAtDate, setPaidAtDate] = useState(null);
+const [paidAtTime, setPaidAtTime] = useState(null);
+const [paidAtDateError, setPaidAtDateError] = useState("");
+const [paidAtTimeError, setPaidAtTimeError] = useState("");
  console.log("selectedCustomerId",selectedCustomerId)
 const [approveLoading, setApproveLoading] =
   useState(false);
@@ -533,6 +539,10 @@ else{
     setPaidBy("")
     setPaidByError("")
     setPaidAmountError("")
+    setPaidAtDate(null)
+    setPaidAtTime(null)
+    setPaidAtDateError("")
+    setPaidAtTimeError("")
 
   };
   const selectedPlanothers = dropdownPlans?.otherPlans?.find(
@@ -580,6 +590,15 @@ else{
       setPaidByError("Please select Paid By");
       hasError = true;
     }
+    if (!paidAtDate) {
+  setPaidAtDateError("Please select date");
+  hasError = true;
+}
+
+if (!paidAtTime) {
+  setPaidAtTimeError("Please select time");
+  hasError = true;
+}
 
     if (hasError) return;
 
@@ -592,7 +611,15 @@ else{
         planCode,
         paidAmount: Number(paidAmount),
         discountAmount: Number(discountAmount || 0),
-        paidBy
+        paidBy,
+         paidAtDate: paidAtDate
+    ? paidAtDate.format("DD-MM-YYYY")
+    : "",
+
+  paidAtTime: paidAtTime
+    ? paidAtTime.format("HH:mm")
+    : "",
+        
       };
 
       const res = await createSubscription(
@@ -758,7 +785,7 @@ const handleApproveKYC = async (customerId) => {
     if (res?.success) {
       setModalType("success");
       setMessage(
-        res?.message ||
+        res?.data ||
           "KYC approved successfully"
       );
 
@@ -1367,7 +1394,7 @@ const handleApproveKYC = async (customerId) => {
                       </button>
 
 
-                      {/* BUY PLAN */}
+                     
                       <button
                         disabled={!canSubscriptionWrite}
                         onClick={() => {
@@ -1443,7 +1470,7 @@ const handleApproveKYC = async (customerId) => {
 
 
                     {/* VIEW */}
-                    <button
+                    {/* <button
                       className="
               w-8
               h-8
@@ -1464,10 +1491,92 @@ const handleApproveKYC = async (customerId) => {
                         alt="view"
                         className="object-contain"
                       />
-                    </button>
+                    </button> */}
+  <div className="relative inline-block group">
+  {/* View Icon */}
+  <button
+    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+  >
+    <img
+      src={ViewImg}
+      alt="view"
+      className="w-[18px] h-[18px] cursor-pointer"
+    />
+  </button>
+
+  {/* Hover Card */}
+  <div
+    className="
+      absolute
+      top-10
+      right-0
+      w-[250px]
+      bg-white
+      rounded-lg
+      border
+      border-[#E8EAF3]
+      shadow-[0_6px_20px_rgba(0,0,0,0.08)]
+      p-4
+      z-50
+
+      opacity-0
+      invisible
+      group-hover:opacity-100
+      group-hover:visible
+      transition-all
+      duration-200
+    "
+  >
+    {/* Arrow */}
+    <div
+      className="
+        absolute
+        -top-2
+        right-4
+        w-4
+        h-4
+        bg-white
+        border-l
+        border-t
+        border-[#E8EAF3]
+        rotate-45
+      "
+    />
+
+    {/* Mail */}
+    <p className="text-[10px] text-[#9CA3AF] font-medium uppercase text-left">
+      MAIL ID
+    </p>
+
+    <div className="flex items-center justify-between mt-1">
+      <p className="text-[14px] text-[#374151] truncate">
+        {hostelData?.emailId || "N/A"}
+      </p>
+
+      <img
+        src={CopyImg}
+        className="w-4 h-4 cursor-pointer"
+        onClick={() =>
+          navigator.clipboard.writeText(hostelData?.emailId || "")
+        }
+      />
+    </div>
+
+    <div className="border-t border-[#F1F3F9] my-3"></div>
+
+    {/* Created */}
+    <p className="text-[10px] text-[#9CA3AF] font-medium uppercase text-left">
+      CREATED ON
+    </p>
+
+    <p className="text-[14px] text-[#374151] mt-1 text-left">
+      {hostelData?.createdAtDate}
+    </p>
+  </div>
+</div>
 
 
-                    {/* MENU */}
+                    
                     <button
                       className="
               w-8
@@ -1754,7 +1863,7 @@ const handleApproveKYC = async (customerId) => {
 
             </div>
 
-            {/* STATUS */}
+         
             <div className="flex items-start gap-3">
 
               <div>
@@ -1812,7 +1921,7 @@ const handleApproveKYC = async (customerId) => {
 
             </div>
 
-            {/* RESET */}
+            
             <div className="flex items-start gap-3">
 
               <button
@@ -2415,7 +2524,7 @@ const handleApproveKYC = async (customerId) => {
               "
                     >
 
-                      <tr>
+                      <tr className="whitespace-nowrap">
 
                         {[
                           "ID",
@@ -2514,7 +2623,7 @@ const handleApproveKYC = async (customerId) => {
                     >
                       {item.fullName || item.firstName || "N/A"}
                     </td> */}
-                            <td
+                            {/* <td
                               className="
     px-4
     py-3
@@ -2532,10 +2641,35 @@ const handleApproveKYC = async (customerId) => {
                               }
                             >
                               {item.fullName || item.firstName || "N/A"}
-                            </td>
+                            </td> */}
+                            <td
+  className="
+    px-4
+    py-3
+    text-left
+  "
+>
+  <div
+    className="
+      w-[120px]
+      truncate
+      text-primaryBlue
+      font-medium
+      text-tableCell
+      cursor-pointer
+      hover:underline
+    "
+    title={item.fullName || item.firstName || "N/A"}
+    onClick={() =>
+      navigate(`/tenant-overview/${item.customerId}`)
+    }
+  >
+    {item.fullName || item.firstName || "N/A"}
+  </div>
+</td>
 
                             {/* MAIL */}
-                            <td
+                            {/* <td
                               className="
                         px-4
                         py-3
@@ -2546,7 +2680,27 @@ const handleApproveKYC = async (customerId) => {
                       "
                             >
                               {item.emailId || "N/A"}
-                            </td>
+                            </td> */}
+                            <td
+  className="
+    px-4
+    py-3
+    text-left
+  "
+>
+  <div
+    className="
+      w-[130px]
+      truncate
+      font-medium
+      text-tableCell
+      text-textDark
+    "
+    title={item.emailId || "N/A"}
+  >
+    {item.emailId || "N/A"}
+  </div>
+</td>
 
                             {/* MOBILE */}
                             <td
@@ -2764,10 +2918,18 @@ const handleApproveKYC = async (customerId) => {
                                     </button>
 
 
-
-                                    <button  onClick={() =>
-    navigate(`/settlement-summary/${item.customerId}`)
-  }
+{/* {
+  item?.canGenerateSettlement === true &&(
+     <button onClick={() =>
+  navigate(
+    `/settlement-summary/${item.customerId}`,
+    {
+      state: {
+        tenantData: item
+      }
+    }
+  )
+}
                                      
                                      
                                       className="
@@ -2775,23 +2937,36 @@ const handleApproveKYC = async (customerId) => {
         text-left
         px-4
         py-2
-        text-cardTitle"
+        text-cardTitle cursor-pointer"
                                     >
                                       Generate
                                     </button>
-  {/* <button
- onClick={() => {
-    setSelectedCustomerId(item.customerId);
-    setShowApproveModal(true);
-    setOpenMenu(null);
-   setSelectedTenant(item)
+  )
+} */}
+{item?.canGenerateSettlement === true && (
+  <button
+    disabled={!canWrite}
+    onClick={() => {
+      if (!canWrite) return;
 
-  }}
-  className="text-left px-4 py-2 text-cardTitle hover:bg-cardBg  cursor-pointer"
->
-  Approve KYC
-</button> */}
-{item?.canApproveKyc === true && (
+      navigate(`/settlement-summary/${item.customerId}`, {
+        state: {
+          tenantData: item,
+        },
+      });
+    }}
+    className={`text-left px-4 py-2 ${
+      canWrite
+        ? "text-cardTitle hover:bg-cardBg cursor-pointer"
+        : "text-gray-400 cursor-not-allowed"
+    }`}
+  >
+    Generate
+  </button>
+)}
+                                   
+ 
+{/* {item?.canApproveKyc === true && (
   <button
     onClick={() => {
       setSelectedCustomerId(
@@ -2809,6 +2984,26 @@ const handleApproveKYC = async (customerId) => {
       hover:bg-cardBg
       cursor-pointer
     "
+  >
+    Approve KYC
+  </button>
+)} */}
+{item?.canApproveKyc === true && (
+  <button
+    disabled={!canWrite}
+    onClick={() => {
+      if (!canWrite) return;
+
+      setSelectedCustomerId(item.customerId);
+      setShowApproveModal(true);
+      setOpenMenu(null);
+      setSelectedTenant(item);
+    }}
+    className={`text-left px-4 py-2 ${
+      canWrite
+        ? "text-cardTitle hover:bg-cardBg cursor-pointer"
+        : "text-gray-400 cursor-not-allowed"
+    }`}
   >
     Approve KYC
   </button>
@@ -4281,10 +4476,9 @@ const handleApproveKYC = async (customerId) => {
         </div>
 
       )}
-      {showPlanModal && (
-
-        <div
-          className="
+     {showPlanModal && (
+  <div
+    className="
       fixed
       inset-0
       bg-black/40
@@ -4294,44 +4488,57 @@ const handleApproveKYC = async (customerId) => {
       z-50
       px-4
     "
-          onClick={() => {
-
-            setShowPlanModal(false);
-            resetPlanForm();
-
-          }}
-        >
-
-          <div
-            className="
+    onClick={() => {
+      setShowPlanModal(false);
+      resetPlanForm();
+    }}
+  >
+    <div
+      className="
         bg-white-common
         rounded-modal
         shadow-modal
         w-full
         max-w-[400px]
         max-h-[90vh]
-        overflow-y-auto
-        p-6
+        flex
+        flex-col
+        overflow-hidden
         animate-fadeIn
       "
-            onClick={(e) => e.stopPropagation()}
-          >
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* HEADER */}
+      <div className="shrink-0 p-6 pb-4 border-b border-[#EAECF0]">
+        <h2 className="text-cardTitle font-semibold text-headingDark text-left">
+          Buy Subscription Plan
+        </h2>
+      </div>
 
-            {/* TITLE */}
-            <h2
-              className="
-          text-cardTitle
-          font-semibold
-          text-headingDark
-          mb-5
-          text-left
+      {/* SCROLLABLE CONTENT */}
+      <div
+        className="
+          flex-1
+          overflow-y-auto
+          p-6
+
+          [&::-webkit-scrollbar]:w-[8px]
+          [&::-webkit-scrollbar-track]:bg-transparent
+          [&::-webkit-scrollbar-track]:rounded-full
+
+          [&::-webkit-scrollbar-thumb]:bg-[#bfd3ff]
+          [&::-webkit-scrollbar-thumb]:rounded-full
+          [&::-webkit-scrollbar-thumb]:border-[2px]
+          [&::-webkit-scrollbar-thumb]:border-transparent
+          [&::-webkit-scrollbar-thumb]:bg-clip-content
+
+          [&::-webkit-scrollbar-thumb:hover]:bg-[#9dbdff]
+
+          [scrollbar-width:thin]
+          [scrollbar-color:#bfd3ff_transparent]
         "
-            >
-              Buy Subscription Plan
-            </h2>
-
-            {/* PLAN NAME */}
-            <div
+      >
+  <div
               className="
           relative
           w-full
@@ -4742,7 +4949,78 @@ const handleApproveKYC = async (customerId) => {
               />
 
             </div>
+{/* PAID DATE & TIME */}
+<div className="grid grid-cols-2 gap-4 mt-4">
 
+  {/* Paid Date */}
+  <div>
+    <label
+      className="
+        block
+        text-cardTitle
+        text-textDark/70
+        mb-1
+        font-medium
+        text-left
+      "
+    >
+      Paid Date
+    </label>
+
+    <DatePicker
+      className="w-full h-[44px]"
+      format="DD-MM-YYYY"
+      placeholder="Select Paid Date"
+      
+      value={paidAtDate}
+       onChange={(date) => {
+    setPaidAtDate(date);
+    setPaidAtDateError("");
+  }}
+      
+    />
+    {paidAtDateError && (
+              <ErrorMessage
+                message={paidAtDateError}
+                type="error"
+              />
+            )}
+  </div>
+
+  {/* Paid Time */}
+  <div>
+    <label
+      className="
+        block
+        text-cardTitle
+        text-textDark/70
+        mb-1
+        font-medium
+        text-left
+      "
+    >
+      Paid Time
+    </label>
+
+   <TimePicker
+  className="w-full h-[44px]"
+  placeholder="Select Time"
+  format="HH:mm"
+  value={paidAtTime}
+  onChange={(time) => {
+    setPaidAtTime(time);
+    setPaidAtTimeError("");
+  }}
+/>
+{paidAtTimeError && (
+              <ErrorMessage
+                message={paidAtTimeError}
+                type="error"
+              />
+            )}
+  </div>
+
+</div>
             {/* FILE UPLOAD */}
             <div className="w-full mt-5">
 
@@ -4848,72 +5126,59 @@ const handleApproveKYC = async (customerId) => {
 
             </div>
 
-            {/* PROOF ERROR */}
+        
             {proofError && (
               <ErrorMessage
                 message={proofError}
                 type="error"
               />
             )}
+      </div>
 
-            {/* BUTTONS */}
-            <div
-              className="
-          flex
-          justify-end
-          gap-3
-          mt-5
-        "
-            >
+     
+      <div className="shrink-0 border-t border-[#EAECF0] p-6">
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={() => {
+              setShowPlanModal(false);
+              resetPlanForm();
+            }}
+            className="
+              px-4
+              py-2
+              border
+              border-borderSoft
+              rounded-card
+              text-textDark/70
+              hover:bg-cardBg
+              cursor-pointer
+            "
+          >
+            Cancel
+          </button>
 
-              <button
-                onClick={() => {
-
-                  setShowPlanModal(false);
-                  resetPlanForm();
-
-                }}
-                className="
-            px-4
-            py-2
-            border
-            border-borderSoft
-            rounded-card
-            text-textDark/70
-            hover:bg-cardBg
-            cursor-pointer
-          "
-              >
-                Cancel
-              </button>
-
-              <button
-                disabled={subscriptionLoading}
-                onClick={handleSubscription}
-                className={`
-            px-4
-            py-2
-            rounded-card
-            text-white
-
-            ${subscriptionLoading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-primaryBlue cursor-pointer hover:bg-blue-700"
-                  }
-          `}
-              >
-                {subscriptionLoading
-                  ? "Submit..."
-                  : "Submit"}
-              </button>
-
-            </div>
-
-          </div>
-
+          <button
+            disabled={subscriptionLoading}
+            onClick={handleSubscription}
+            className={`
+              px-4
+              py-2
+              rounded-card
+              text-white
+              ${
+                subscriptionLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-primaryBlue cursor-pointer hover:bg-blue-700"
+              }
+            `}
+          >
+            {subscriptionLoading ? "Submit..." : "Submit"}
+          </button>
         </div>
-
-      )}
+      </div>
+    </div>
+  </div>
+)}
       {/* {showTrialConfirm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
@@ -6471,9 +6736,7 @@ const handleApproveKYC = async (customerId) => {
                       {selectedTenant?.fullName}
                     </h3>
   
-                    <button className="text-blue-600">
-                      ↗
-                    </button>
+                    <img src={Maxmize} className="w-4 h-4"/>
                   </div>
   
                   <p className="text-sm text-gray-500 mt-1">
@@ -6511,7 +6774,7 @@ const handleApproveKYC = async (customerId) => {
     }
   `}
 >
-  <span>✈</span>
+  <img src={Share} className="w-4 h-4"/>
 
   {approveLoading
     ? "Approving..."

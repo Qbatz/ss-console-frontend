@@ -923,6 +923,124 @@ const getTrialSubscriptions = async (
     setLoading(false);
   }
 };
+
+
+const uploadInvoice = async (orderHistoryId, invoiceFile, isManual) => {
+  try {
+    const formData = new FormData();
+
+    formData.append("invoice", invoiceFile);
+
+    formData.append(
+      "isManual",
+      new Blob([JSON.stringify(isManual)], {
+        type: "application/json",
+      })
+    );
+
+    const res = await axiosInstance.post(
+      `/v2/order-history/upload-invoice/${orderHistoryId}`,
+      formData
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+  }
+};
+
+
+const downloadInvoice = async (orderHistoryId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      `/v2/order-history/download-invoice/${orderHistoryId}`,
+      {
+        responseType: "blob",
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+  } catch (error) {
+    const msg =
+      error?.response?.status === 500
+        ? "Internal Server Error"
+        : getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+
+const exportInvoicePdf = async (orderHistoryId) => {
+  try {
+    const res = await axiosInstance.get(
+      `/v2/order-history/export-invoice-pdf/${orderHistoryId}`,
+      {
+        responseType: "blob",
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+  }
+};
+
+// const exportInvoicePdf = async (orderHistoryId) => {
+//   try {
+//     const res = await axiosInstance.get(
+//       `/v2/order-history/export-invoice-pdf/${orderHistoryId}`,
+//       {
+//         responseType: "blob",
+//       }
+//     );
+
+//     const url = window.URL.createObjectURL(new Blob([res.data]));
+//     const link = document.createElement("a");
+
+//     link.href = url;
+//     link.setAttribute("download", `invoice-${orderHistoryId}.pdf`);
+
+//     document.body.appendChild(link);
+//     link.click();
+
+//     link.remove();
+//     window.URL.revokeObjectURL(url);
+
+//     return { success: true };
+//   } catch (error) {
+//     console.log(error.response);
+//     return {
+//       success: false,
+//       message: getErrorMessage(error),
+//     };
+//   }
+// };
+
   return (
     <SubscriptionContext.Provider
       value={{
@@ -930,7 +1048,7 @@ const getTrialSubscriptions = async (
         errorMsg,
         createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, 
         getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment,deleteDemoRequest,getDemoType,getDropReasons,getDemoRequestComments,
-        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes,getTrialDaysExtReason,deleteTransaction,getTrialSubscriptions
+        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes,getTrialDaysExtReason,deleteTransaction,getTrialSubscriptions,uploadInvoice,downloadInvoice,exportInvoicePdf
       }}
     >
       {children}

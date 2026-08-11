@@ -1,6 +1,6 @@
 import React from "react";
 import { usePermission } from "../../Utils/permissionHelper";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import swap from "../../assets/arrowswap.png";
 const OverviewSubscriptions = ({ hostelData }) => {
   const { canRead, canWrite, canUpdate, canDelete } =
@@ -22,25 +22,19 @@ const OverviewSubscriptions = ({ hostelData }) => {
     "
   >
 
-    <img
-      src={LoginImg}
-      alt="Access Restricted"
-      className="
-        w-64
-        object-contain
-      "
-    />
-
-    <p
-      className="
-        text-dangerRed
-        text-cardTitle
-        font-medium
-        font-inter
-      "
-    >
-      Access Restricted
-    </p>
+   <img
+                                                                                   src={LoginImg}
+                                                                                   alt="Access Restricted"
+                                                                                      className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                                                                                 />
+                                                             
+                                                                       <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+                                                                       Permission Restricted !
+                                                                     </h1>
+                                                             
+                                                                     <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+                                                                       Your permission is restricted for this module
+                                                                     </p>
 
   </div>
 
@@ -162,7 +156,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                 "
               >
 
-                <td
+                {/* <td
                   className="
                     px-4
                     py-3
@@ -173,7 +167,27 @@ const OverviewSubscriptions = ({ hostelData }) => {
                   "
                 >
                   {currentSub.planName || "N/A"}
-                </td>
+                </td> */}
+                <td
+  className="
+    px-4
+    py-3
+    text-left
+  "
+>
+  <div
+    className="
+      w-[150px]
+      truncate
+      text-tableCell
+      font-medium
+      text-textDark
+    "
+    title={currentSub.planName || "N/A"}
+  >
+    {currentSub.planName || "N/A"}
+  </div>
+</td>
 
                 <td
                   className="
@@ -419,7 +433,7 @@ const OverviewSubscriptions = ({ hostelData }) => {
                     "
                   >
 
-                    <td
+                    {/* <td
                       className="
                         px-4
                         py-3
@@ -430,7 +444,27 @@ const OverviewSubscriptions = ({ hostelData }) => {
                       "
                     >
                       {sub.planName || "N/A"}
-                    </td>
+                    </td> */}
+                    <td
+  className="
+    px-4
+    py-3
+    text-left
+  "
+>
+  <div
+    className="
+      w-[180px]
+      truncate
+      text-tableCell
+      font-medium
+      text-textDark
+    "
+    title={sub.planName || "N/A"}
+  >
+    {sub.planName || "N/A"}
+  </div>
+</td>
 
                     <td
                       className="

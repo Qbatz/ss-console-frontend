@@ -14,6 +14,7 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import Arrow from "../../assets/arrow-right.png";
 import { useNavigate } from "react-router-dom";
+import { usePermission } from "../../Utils/permissionHelper";
 
 
 const InvoiceView = ({ hostelData, refreshHostel }) => {
@@ -22,7 +23,8 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
     const defaultInvoices = hostelData?.invoices || [];
     const [expandedInvoice, setExpandedInvoice] = useState(null);
     const [invoiceData, setInvoiceData] = useState([]);
-
+ const { canRead, canWrite, canUpdate, canDelete } =
+      usePermission("Invoices");
     const [isMore, setIsMore] = useState(false);
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(10);
@@ -630,7 +632,7 @@ const [activeFilter, setActiveFilter] = useState("All");
                                                         >
                                                             Invoice Receipt
                                                         </button> */}
-                                                        <button
+                                                        {/* <button
                                                             className="
           w-full text-left
           px-3 py-2 text-sm
@@ -648,7 +650,24 @@ const [activeFilter, setActiveFilter] = useState("All");
                                                             }}
                                                         >
                                                             Delete
-                                                        </button>
+                                                        </button> */}
+                                                        <button
+  disabled={!canDelete}
+  onClick={() => {
+    if (!canDelete) return;
+
+    setSelectedInvoice(item);
+    setShowDeleteModal(true);
+    setOpenMenu(null);
+  }}
+  className={`w-full text-left px-3 py-2 text-sm ${
+    canDelete
+      ? "text-red-600 hover:bg-red-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Delete
+</button>
 
 
 
@@ -664,16 +683,33 @@ const [activeFilter, setActiveFilter] = useState("All");
                                                             Update Amount
                                                         </button> */}
                                                         {item?.canUpdateAmount === true && (
+                                                            // <button
+                                                            //     className="w-full text-left px-3 py-2 text-sm cursor-pointer whitespace-nowrap"
+                                                            //     onClick={() => {
+                                                            //         setSelectedInvoice(item);
+                                                            //         setShowAmountModal(true);
+                                                            //         setOpenMenu(null);
+                                                            //     }}
+                                                            // >
+                                                            //     Update Amount
+                                                            // </button>
                                                             <button
-                                                                className="w-full text-left px-3 py-2 text-sm cursor-pointer whitespace-nowrap"
-                                                                onClick={() => {
-                                                                    setSelectedInvoice(item);
-                                                                    setShowAmountModal(true);
-                                                                    setOpenMenu(null);
-                                                                }}
-                                                            >
-                                                                Update Amount
-                                                            </button>
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    setSelectedInvoice(item);
+    setShowAmountModal(true);
+    setOpenMenu(null);
+  }}
+  className={`w-full text-left px-3 py-2 text-sm whitespace-nowrap ${
+    canUpdate
+      ? "cursor-pointer hover:bg-gray-100"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Update Amount
+</button>
                                                         )}
                                                     </div>
 

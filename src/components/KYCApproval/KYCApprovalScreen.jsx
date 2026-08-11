@@ -3,6 +3,8 @@ import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { useKyc } from "../../Context/KYCContext";
 import User from "../../assets/userblack.png";
 import Toast from "../SuccessModal/ToastDesign";
+import Share from "../../assets/share.png";
+import Maxmize from "../../assets/maximize.png"
 
 const KycApproval = () => {
   const { getKYCList, loading, approveKYC } = useKyc();
@@ -129,6 +131,7 @@ const KycApproval = () => {
           <div className="flex gap-2">
             <button
               onClick={fetchKycList}
+
               className="bg-blue-600 text-white px-3 py-2 rounded-md"
             >
               ↻
@@ -200,8 +203,16 @@ const KycApproval = () => {
                       {index + 1}
                     </td>
 
-                    <td className="px-4 py-4 text-sm text-blue-600 text-xs text-left">
+                    {/* <td className="px-4 py-4 text-sm text-blue-600 text-xs text-left">
                       {item.fullName}
+                    </td> */}
+                    <td className="px-4 py-4 text-sm text-blue-600 text-xs text-left">
+                      <div
+                        className="w-[180px] truncate"
+                        title={item?.fullName || "N/A"}
+                      >
+                        {item?.fullName || "N/A"}
+                      </div>
                     </td>
 
                     <td className="px-4 py-4 text-xs text-left">
@@ -212,9 +223,17 @@ const KycApproval = () => {
                       {item.kycStatus}
                     </td>
 
-                    <td className="px-4 py-4 text-xs text-left">
+                    {/* <td className="px-4 py-4 text-xs text-left">
                       {item.hostelName}
-                    </td>
+                    </td> */}
+                    <td className="px-4 py-4 text-xs text-left">
+  <div
+    className="w-[220px] truncate"
+    title={item?.hostelName || "N/A"}
+  >
+    {item?.hostelName || "N/A"}
+  </div>
+</td>
                     <td className="px-4 py-4 text-xs text-left">
                       {item.createdAtDate}
                     </td>
@@ -276,8 +295,8 @@ const KycApproval = () => {
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((prev) => prev - 1)}
               className={`text-xl ${currentPage === 1
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-500"
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-500"
                 }`}
             >
               ‹
@@ -295,8 +314,8 @@ const KycApproval = () => {
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((prev) => prev + 1)}
               className={`text-xl ${currentPage === totalPages
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-500"
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-500"
                 }`}
             >
               ›
@@ -331,9 +350,7 @@ const KycApproval = () => {
                     {selectedTenant?.fullName}
                   </h3>
 
-                  <button className="text-blue-600">
-                    ↗
-                  </button>
+                  <img src={Maxmize} className="w-4 h-4" />
                 </div>
 
                 <p className="text-sm text-gray-500 mt-1">
@@ -367,7 +384,7 @@ const KycApproval = () => {
                   }
   `}
               >
-                <span>✈</span>
+                <img src={Share} className="w-4 h-4" />
 
                 {approveLoading
                   ? "Approving..."

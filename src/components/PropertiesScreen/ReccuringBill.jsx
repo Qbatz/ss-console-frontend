@@ -12,12 +12,16 @@ import { useHostel } from "../../Context/HostelListContext";
 import Circle from "../../assets/menucircle.png";
 import Toast from "../SuccessModal/ToastDesign";
 import Item from "antd/es/list/Item";
-import Change from "../../assets/change.png"
+import Change from "../../assets/change.png";
+import { usePermission } from "../../Utils/permissionHelper";
+
 
 
 const RecurringBill = ({ hostelData,refreshHostel  }) => {
   const { getRecurringHostels, generateRecurringInvoice, updateBillingRule,getHostelById } = useHostel();
   const [reccuringData, setReccuringData] = useState([])
+   const { canRead, canWrite, canUpdate, canDelete } =
+      usePermission("Tenants");
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [showBillingModal, setShowBillingModal] = useState(false);
@@ -306,7 +310,7 @@ const RecurringStatus =
   className="w-3 h-3 cursor-pointer"
   onClick={() => setShowScheduleModal(true)}
 /> */}
-                <img
+                {/* <img
                   src={Change}
                   className="w-3 h-3 cursor-pointer"
                   onClick={() => {
@@ -314,7 +318,20 @@ const RecurringStatus =
 
                     setShowScheduleModal(true);
                   }}
-                />
+                /> */}
+                <img
+  src={Change}
+  onClick={() => {
+    if (!canWrite) return;
+
+    setShowScheduleModal(true);
+  }}
+  className={`w-3 h-3 ${
+    canWrite
+      ? "cursor-pointer"
+      : "opacity-40 cursor-not-allowed"
+  }`}
+/>
 
 
                 <div className="absolute left-1/2 -translate-x-1/2 top-[-30px] 

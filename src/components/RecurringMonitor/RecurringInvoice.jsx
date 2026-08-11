@@ -5,7 +5,7 @@ import { useHostel } from "../../Context/HostelListContext";
 import Toast from "../SuccessModal/ToastDesign";
 import Search from "../../assets/Search.png";
 import { usePermission } from "../../Utils/permissionHelper";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import Circle from "../../assets/menucircle.png";
 import OwnerImg from "../../assets/ownerimg.png";
 import call from "../../assets/call.png";
@@ -24,18 +24,18 @@ const RecurringInvoice = () => {
   const { getRecurringHostels, generateRecurringInvoice, loading, errorMsg, getRecurringByHostelId, bulkGenerateRecurring, getRecurringMonth } = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Recurring");
-  console.log("errorMsg", errorMsg)
+  
   const [search, setSearch] = useState("");
   const dropdownRef = useRef(null);
   const statusDropdownRef = useRef(null);
   const generateRef = useRef(false);
 const [isGenerating, setIsGenerating] = useState(false);
   const [data, setData] = useState([]);
-  console.log("data", data)
+ 
   const [filterOptions, setFilterOptions] = useState([]);
   const [filter, setFilter] = useState("TODAY");
   const [billingModelFilterBy, setBillingModelFilterBy] = useState("ALL");
-  console.log("filter", filter)
+  
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
@@ -62,7 +62,7 @@ const [isGenerating, setIsGenerating] = useState(false);
   const [appliedFilterType, setAppliedFilterType] = useState("");
   const [appliedSystemFilter, setAppliedSystemFilter] = useState("");
   const [billingModelOptions, setBillingModelOptions] = useState([]);
-  console.log("billingModelOptions", billingModelOptions)
+  
   const [errorTable, setErrorTable] = useState("")
   const [viewType, setViewType] = useState("table");
   const [generateError, setGenrateError] = useState("")
@@ -87,6 +87,7 @@ const [isGenerating, setIsGenerating] = useState(false);
       setCalendarData(res.data || []);
     }
   };
+  
   useEffect(() => {
     if (viewType === "calendar") {
       fetchCalendar();
@@ -109,7 +110,7 @@ const [isGenerating, setIsGenerating] = useState(false);
       setCurrentMonth(prev => prev + 1);
     }
   };
-  console.log("selectedItem", selectedItem)
+
   const handleSelect = (id) => {
     setSelectedIds((prev) =>
       prev.includes(id)
@@ -141,7 +142,7 @@ const [totalProperty,setTotalProperty] = useState("")
     if (res?.success) {
       setErrorTable("")
       const response = res.data;
-      console.log("statusfilter", response.statusFilterOptions);
+     
 
       setData(response.hostelList || []);
       setTotalItems(response.totalItems);
@@ -157,7 +158,7 @@ const [totalProperty,setTotalProperty] = useState("")
       });
     }
     else {
-      console.log("res.message", res.message)
+     
       setData([]);
       setErrorTable(res.message)
     }
@@ -205,7 +206,7 @@ const [totalProperty,setTotalProperty] = useState("")
   }, [showFilterDrawer]);
   const handleOpenDetails = async (item, page = 0) => {
     setSelectedItem(item);
-    console.log("setSelectedItem", selectedItem)
+   
     setShowDetailsModal(true);
 
     const res = await getRecurringByHostelId(
@@ -220,7 +221,7 @@ const [totalProperty,setTotalProperty] = useState("")
       setHistoryPage(page);
     }
   };
-  console.log("selectedItem?.currentPeriodStartDate", selectedItem?.activeTenantCount);
+ 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
 
@@ -424,14 +425,18 @@ const handleBulkGenerate = async () => {
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
           <img
-            src={LoginImg}
-            alt="Access Restricted"
-            className="w-64 object-contain"
-          />
-
-          <p className="text-red-600 text-lg font-medium">
-            {errorMsg}
-          </p>
+                                                    src={LoginImg}
+                                                    alt="Access Restricted"
+                                                       className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                                                  />
+                              
+                                        <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+                                        Permission Restricted !
+                                      </h1>
+                              
+                                      <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+                                        Your permission is restricted for this module
+                                      </p>
 
         </div>
 
@@ -845,15 +850,30 @@ const handleBulkGenerate = async () => {
                                   </div>
                                 )}
 
-                                {/* Text */}
-                                <div className="flex flex-col">
+                               
+                                {/* <div className="flex flex-col">
                                   <span className="text-[13px] font-semibold text-gray-900 text-left">
-                                    {item.hostelName}
+                                    {item?.hostelName}
                                   </span>
                                   <span className="text-[11px] text-gray-500 text-left">
-                                    {item.ownerInfo?.fullName || "----"}
+                                    {item?.ownerInfo?.fullName || "----"}
                                   </span>
-                                </div>
+                                </div> */}
+                                <div className="flex flex-col w-[180px]">
+  <span
+    className="text-[13px] font-semibold text-gray-900 text-left truncate"
+    title={item?.hostelName || "N/A"}
+  >
+    {item?.hostelName || "N/A"}
+  </span>
+
+  <span
+    className="text-[11px] text-gray-500 text-left truncate"
+    title={item?.ownerInfo?.fullName || "----"}
+  >
+    {item?.ownerInfo?.fullName || "----"}
+  </span>
+</div>
 
                               </div>
                             </td>
@@ -1527,7 +1547,7 @@ const handleBulkGenerate = async () => {
 
   Generate Recurring
 </button> */}
-<button
+{/* <button
   onClick={() =>
     handleGenerate([
       selectedItem.hostelId
@@ -1547,6 +1567,43 @@ const handleBulkGenerate = async () => {
     gap-2
 
     ${
+      selectedItem?.canGenerateRecurring === false ||
+      isGenerating
+        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+        : "bg-blue-600 text-white cursor-pointer"
+    }
+  `}
+>
+  <img
+    src={refreshWhite}
+    className="w-4 h-4"
+  />
+
+  {isGenerating
+    ? "Generating..."
+    : "Generate Recurring"}
+</button> */}
+
+<button
+  onClick={() => {
+    if (!canWrite) return;
+    handleGenerate([selectedItem.hostelId]);
+  }}
+  disabled={
+    !canWrite ||
+    selectedItem?.canGenerateRecurring === false ||
+    isGenerating
+  }
+  className={`
+    px-6
+    py-2
+    rounded-lg
+    text-[12px]
+    flex
+    items-center
+    gap-2
+    ${
+      !canWrite ||
       selectedItem?.canGenerateRecurring === false ||
       isGenerating
         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -1764,11 +1821,26 @@ const handleBulkGenerate = async () => {
                   Cancel
                 </button>
 
-              <button
+              {/* <button
   disabled={isGenerating}
   onClick={handleBulkGenerate}
   className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 ${
     isGenerating
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-blue-700 cursor-pointer"
+  }`}
+>
+  <img src={refreshWhite} className="w-4 h-4" />
+  {isGenerating ? "Generating..." : "Generate"}
+</button> */}
+<button
+  disabled={!canWrite || isGenerating}
+  onClick={() => {
+    if (!canWrite) return;
+    handleBulkGenerate();
+  }}
+  className={`px-4 py-2 rounded-lg text-sm text-white flex items-center justify-center gap-2 ${
+    !canWrite || isGenerating
       ? "bg-gray-400 cursor-not-allowed"
       : "bg-blue-700 cursor-pointer"
   }`}

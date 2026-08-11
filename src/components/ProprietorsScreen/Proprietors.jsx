@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import swap from "../../assets/arrowswap.png";
 import { useOwners } from "../../Context/OwnersContext";
-import LoginImg from "../../assets/LoginImg.png";
+import LoginImg from "../../assets/permission.svg";
 import { useNavigate, useLocation } from "react-router-dom";
 import { usePermission } from "../../Utils/permissionHelper";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
@@ -11,6 +11,8 @@ import Menucircle from "../../assets/menucircle.png";
 import Arrow from "../../assets/direction-down 01.png";
 import AssignStaffModal from "../PropertiesScreen/AssignStaffDesign";
 import CommentBox from "../../assets/message-2.png";
+import Eye from "../../assets/eye.png";
+import hideEye from "../../assets/EyeIcon.png";
 
 
 const Proprietors = () => {
@@ -553,15 +555,19 @@ closeNotesModal()
 
         <div className="flex flex-col items-center justify-center h-[400px] gap-4">
 
-          <img
-            src={LoginImg}
-            alt="Access Restricted"
-            className="w-64 object-contain"
-          />
+         <img
+                      src={LoginImg}
+                      alt="Access Restricted"
+                         className="w-[170px] sm:w-[140px] md:w-[150px] object-contain"
+                    />
 
-          <p className="text-red-600 text-lg font-medium">
-            {accessError}
-          </p>
+          <h1 className="mt-1 text-[24px]  font-semibold text-[#101828]">
+          Permission Restricted !
+        </h1>
+
+        <p className="mt-1 text-sm md:text-base text-[#4A5565] max-w-md">
+          Your permission is restricted for this module
+        </p>
 
         </div>
 
@@ -573,9 +579,9 @@ closeNotesModal()
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold">Proprietors</h2>
 
-            <button className="text-blue-600 flex items-center gap-1 text-sm font-medium">
+            {/* <button className="text-blue-600 flex items-center gap-1 text-sm font-medium">
               ➕ Add Proprietor
-            </button>
+            </button> */}
           </div>
 
 
@@ -969,13 +975,22 @@ closeNotesModal()
                       </div>
                     </th>
 
-                    <th className="px-4 py-3 text-left text-[12px] font-semibold">
+                    {/* <th className="px-4 py-3 text-left text-[12px] font-semibold">
                       <div className="flex items-center gap-1 cursor-pointer"
                         onClick={() => handleSort("OWNER_NAME")}>
                         Name
                         <img src={swap} className="w-3 h-3" />
                       </div>
-                    </th>
+                    </th> */}
+                    <th className="w-[150px] min-w-[150px] max-w-[150px] px-4 py-3 text-left text-[12px] font-semibold">
+  <div
+    className="flex items-center gap-1 cursor-pointer"
+    onClick={() => handleSort("OWNER_NAME")}
+  >
+    Name
+    <img src={swap} className="w-3 h-3" />
+  </div>
+</th>
 
                     <th className="px-4 py-3 text-left text-[12px] font-semibold">
                       <div className="flex items-center gap-1">
@@ -1089,12 +1104,30 @@ closeNotesModal()
                         {/* <td className="px-4 py-1 text-blue-600 text-[12px] text-left">
           {item.fullName}
         </td> */}
-                        <td
+                        {/* <td
                           className="px-4 py-1 text-blue-600 text-[12px] text-left cursor-pointer hover:underline"
                           onClick={() => handleOwnerClick(item)}
                         >
                           {item.fullName}
-                        </td>
+                        </td> */}
+                        {/* <td className="px-4 py-1 text-left">
+  <div
+    className="w-[180px] truncate text-[12px] text-blue-600 cursor-pointer hover:underline"
+    title={item.fullName}
+    onClick={() => handleOwnerClick(item)}
+  >
+    {item.fullName}
+  </div>
+</td> */}
+<td className="w-[150px] min-w-[150px] max-w-[150px] px-4 py-1 text-left">
+  <div
+    className="truncate text-[12px] text-blue-600 cursor-pointer hover:underline"
+    title={item.fullName}
+    onClick={() => handleOwnerClick(item)}
+  >
+    {item.fullName}
+  </div>
+</td>
 
                         <td className="px-4 py-1 text-[12px] text-left">
                           {item.emailId}
@@ -1111,7 +1144,7 @@ closeNotesModal()
                          {/* <td className="px-4 py-2 text-center text-[12px] text-left whitespace-nowrap">
   {item?.relationalAgents?.[0]?.agentName || "----"}
 </td> */}
-<td
+{/* <td
   className="
     px-4
     py-2
@@ -1145,6 +1178,37 @@ closeNotesModal()
 
   )}
 
+</td> */}
+<td
+  className="
+    px-4
+    py-2
+    text-[12px]
+    text-left
+  "
+>
+  {item?.relationalAgents?.[0]?.agentId ? (
+    <div
+      className="w-[120px] truncate"
+      title={item.relationalAgents[0].agentName}
+    >
+      <span
+        onClick={() =>
+          navigate(`/iam-user/${item.relationalAgents[0].agentId}`)
+        }
+        className="
+          text-blue-600
+          cursor-pointer
+          hover:underline
+          font-medium
+        "
+      >
+        {item.relationalAgents[0].agentName}
+      </span>
+    </div>
+  ) : (
+    "----"
+  )}
 </td>
 
                         <td className="px-4 py-1 text-[12px] text-left">
@@ -1214,7 +1278,7 @@ closeNotesModal()
   }}
 >
 
-  <button
+  {/* <button
   onClick={async () => {
 
     setSelectedOwner(item);
@@ -1231,9 +1295,30 @@ closeNotesModal()
   className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
 >
   Add Notes
+</button> */}
+<button
+  disabled={!canWrite}
+  onClick={async () => {
+    if (!canWrite) return;
+
+    setSelectedOwner(item);
+
+    await fetchOwnerNotes(item.ownerId);
+
+    setShowNotesModal(true);
+
+    setOpenMenuId(null);
+  }}
+  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+    canWrite
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Add Notes
 </button>
 
-                              <button
+                              {/* <button
                                 onClick={() => {
                                   setSelectedOwner(item);
                                   setMobile(item.mobileNo);
@@ -1243,8 +1328,26 @@ closeNotesModal()
                                 className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                               >
                                 Edit
-                              </button>
+                              </button> */}
                               <button
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    setSelectedOwner(item);
+    setMobile(item.mobileNo);
+    setShowModal(true);
+    setOpenMenuId(null);
+  }}
+  className={`block w-full text-left px-3 py-2 text-sm ${
+    canUpdate
+      ? "hover:bg-gray-100 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Edit
+</button>
+                              {/* <button
   onClick={() => {
     setSelectedOwner(item);
     setShowAssignModal(true);
@@ -1253,8 +1356,25 @@ closeNotesModal()
   className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
 >
   Assign Staff
+</button> */}
+<button
+  disabled={!canWrite}
+  onClick={() => {
+    if (!canWrite) return;
+
+    setSelectedOwner(item);
+    setShowAssignModal(true);
+    setOpenMenuId(null);
+  }}
+  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+    canWrite
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Assign Staff
 </button>
-                              <button
+                              {/* <button
                                 onClick={() => {
                                   setSelectedOwner(item);
                                   setShowDeleteModal(true);
@@ -1263,8 +1383,25 @@ closeNotesModal()
                                 className="block w-full text-left px-3 py-2 text-sm hover:bg-red-50 text-red-600 cursor-pointer"
                               >
                                 Delete
-                              </button>
-        <button
+                              </button> */}
+                              <button
+  disabled={!canDelete}
+  onClick={() => {
+    if (!canDelete) return;
+
+    setSelectedOwner(item);
+    setShowDeleteModal(true);
+    setOpenMenuId(null);
+  }}
+  className={`block w-full text-left px-3 py-2 text-sm ${
+    canDelete
+      ? "text-red-600 hover:bg-red-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Delete
+</button>
+        {/* <button
   onClick={() => {
   setSelectedOwner(item);
 
@@ -1274,6 +1411,24 @@ closeNotesModal()
   setOpenMenuId(null);
 }}
   className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
+>
+  Reset Password
+</button> */}
+<button
+  disabled={!canUpdate}
+  onClick={() => {
+    if (!canUpdate) return;
+
+    setSelectedOwner(item);
+    setSearch("");
+    setShowResetPasswordModal(true);
+    setOpenMenuId(null);
+  }}
+  className={`block w-full text-left px-3 py-2 text-sm ${
+    canUpdate
+      ? "hover:bg-gray-50 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
 >
   Reset Password
 </button>
@@ -1553,13 +1708,24 @@ closeNotesModal()
   className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
 />
 
-          <button
+          {/* <button
             type="button"
             onClick={() => setShowNewPassword(!showNewPassword)}
             className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400"
           >
             👁
-          </button>
+          </button> */}
+          <button
+  type="button"
+  onClick={() => setShowNewPassword(!showNewPassword)}
+  className="absolute right-5 top-1/2 -translate-y-1/2"
+>
+  <img
+    src={showNewPassword ? Eye : hideEye}
+    alt={showNewPassword ? "Hide Password" : "Show Password"}
+    className="w-5 h-5"
+  />
+</button>
 
         </div>
  {newPasswordError && (
@@ -1589,7 +1755,7 @@ closeNotesModal()
   className="w-full border border-gray-300 rounded-2xl px-5 py-4 text-[16px] outline-none focus:ring-2 focus:ring-blue-200"
 />
 
-          <button
+          {/* <button
             type="button"
             onClick={() =>
               setShowConfirmPassword(!showConfirmPassword)
@@ -1597,7 +1763,20 @@ closeNotesModal()
             className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400"
           >
             👁
-          </button>
+          </button> */}
+          <button
+  type="button"
+  onClick={() =>
+    setShowConfirmPassword(!showConfirmPassword)
+  }
+  className="absolute right-5 top-1/2 -translate-y-1/2"
+>
+  <img
+    src={showConfirmPassword ? Eye : hideEye}
+    alt={showConfirmPassword ? "Hide Password" : "Show Password"}
+    className="w-5 h-5"
+  />
+</button>
 
         </div>
 {confirmPasswordError && (

@@ -15,6 +15,12 @@ import TenantDeductions from "./TenantDeductions";
 import { useSubscription } from "../../Context/SubscriptionContext";
 import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import LoginImg from "../../assets/permission.svg";
+import { usePermission } from "../../Utils/permissionHelper";
+import { DatePicker } from "antd";
+import dayjs from "dayjs";
+import Share from "../../assets/share.png";
+import { useKyc } from "../../Context/KYCContext";
 
 // const invoices = [
 //   {
@@ -69,11 +75,101 @@ const getStatusColor = (status) => {
 const TenantOverview = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { getTenantById, deleteInvoice, updateInvoiceRedemption, deleteInvoiceRedemption, updateAdvanceAmount } = useHostel();
+  const { getTenantById, deleteInvoice, updateInvoiceRedemption, deleteInvoiceRedemption, updateAdvanceAmount,updateJoiningDate,verifyTenantMobile,getJoiningDateImpact,deleteReceiptUrl,deleteInvoiceUrl  } = useHostel();
+  const { getKYCList, approveKYC } = useKyc();
   const { deleteTransaction } = useSubscription();
+  const [showMenu, setShowMenu] = useState(false);
+  const [showMobileModal, setShowMobileModal] = useState(false);
+  const [showJoiningModal, setShowJoiningModal] = useState(false);
+  const [mobileNo, setMobileNo] = useState("");
+  const [error, setError] = useState("");
+  const [joiningDate, setJoiningDate] = useState(null);
+const [showApproveModal, setShowApproveModal] = useState(false);
+const [selectedTenant, setSelectedTenant] = useState(null);
+const [approveLoading, setApproveLoading] = useState(false);
+const [impactBills, setImpactBills] = useState([]);
+const [impactLoading, setImpactLoading] = useState(false);
   // const tenantData = location.state?.tenantData;
+  const [showDeleteInvoiceUrlModal, setShowDeleteInvoiceUrlModal] =
+  useState(false);
+const [deleteInvoiceUrlLoading, setDeleteInvoiceUrlLoading] =
+  useState(false);
   const hostelData = location.state?.hostelData;
   const { customerId } = useParams();
+
+  //  const { canRead, canWrite, canUpdate, canDelete } =
+  //     usePermission("Tenants");
+  const {
+    canRead: canReadTenant,
+    canWrite: canWriteTenant,
+    canUpdate: canUpdateTenant,
+    canDelete: canDeleteTenant,
+  } = usePermission("Tenants");
+
+  const {
+    canRead: canReadInvoice,
+    canWrite: canWriteInvoice,
+    canUpdate: canUpdateInvoice,
+    canDelete: canDeleteInvoice,
+  } = usePermission("Invoices");
+
+  const {
+    canRead: canReadPlan,
+    canWrite: canWritePlan,
+    canUpdate: canUpdatePlan,
+    canDelete: canDeletePlan,
+  } = usePermission("Plans");
+
+const handleContinue = async () => {
+  if (!mobileNo) {
+    setError("Please enter mobile number");
+    return;
+  }
+
+  if (mobileNo.length !== 10) {
+    setError("Please enter a valid 10-digit mobile number");
+    return;
+  }
+
+  const payload = {
+    tenantMobile: mobileNo,
+  };
+
+  const res = await verifyTenantMobile(customerId, payload);
+
+  if (res.success) {
+    setError("");
+    setShowMobileModal(false);
+    setShowJoiningModal(true);
+    setJoiningDate(null);
+  } else {
+    setError(res.message);
+  }
+};
+
+
+
+//  const handleContinue = async () => {
+//   if (!mobileNo) {
+//     setError("Please enter mobile number");
+//     return;
+//   }
+
+//   const payload = {
+//     tenantMobile: mobileNo,
+//   };
+
+//   const res = await verifyTenantMobile(customerId, payload);
+
+//   if (res.success) {
+//     setError("");
+//     setShowMobileModal(false);
+//     setShowJoiningModal(true);
+//     setJoiningDate(null)
+//   } else {
+//     setError(res.message);
+//   }
+// };
   const [activeTab, setActiveTab] = useState("invoice");
   const [showInvoiceDrawer, setShowInvoiceDrawer] = useState(false);
   const menuRef = useRef(null);
@@ -111,6 +207,9 @@ const TenantOverview = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [showAmountModal, setShowAmountModal] = useState(false);
+  const [showDeleteUrlModal, setShowDeleteUrlModal] = useState(false);
+const [selectedTransaction, setSelectedTransaction] = useState(null);
+const [deleteUrlLoading, setDeleteUrlLoading] = useState(false);
   console.log("selectedRedemption", selectedRedemption)
   const fetchTenant = async () => {
     const res = await getTenantById(customerId);
@@ -174,64 +273,144 @@ const TenantOverview = () => {
         handleClickOutside
       );
   }, []);
+
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      menuRef.current &&
+      !menuRef.current.contains(event.target)
+    ) {
+      setShowMenu(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+  };
+}, []);
   const handleDelete = async (
-  transactionId,
-  tenantMobile
-) => {
-
-  if (!tenantMobile) {
-    setModalType("error");
-    setMessage("Mobile number is required");
-    setShowSuccess(true);
-
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
-
-    return;
-  }
-
-  if (tenantMobile.length !== 10) {
-    setModalType("error");
-    setMessage("Mobile number must be 10 digits");
-    setShowSuccess(true);
-
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
-
-    return;
-  }
-
-  const res = await deleteTransaction(
     transactionId,
     tenantMobile
+  ) => {
+
+    if (!tenantMobile) {
+      setModalType("error");
+      setMessage("Mobile number is required");
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
+      return;
+    }
+
+    if (tenantMobile.length !== 10) {
+      setModalType("error");
+      setMessage("Mobile number must be 10 digits");
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
+      return;
+    }
+
+    const res = await deleteTransaction(
+      transactionId,
+      tenantMobile
+    );
+
+    if (res?.success) {
+      setModalType("success");
+      setMessage(res?.data);
+
+      setShowSuccess(true);
+      setDeleteItem(null);
+      setDeletePhone("");
+
+      fetchTenant();
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
+    } else {
+      setModalType("error");
+      setMessage(res?.message);
+
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+    }
+  };
+  const handleDeleteReceipt = async () => {
+  if (!selectedTransaction) return;
+
+  setDeleteUrlLoading(true);
+
+  const res = await deleteReceiptUrl(
+    selectedTransaction.transactionId
   );
 
-  if (res?.success) {
-    setModalType("success");
-    setMessage(res?.data);
-
-    setShowSuccess(true);
-    setDeleteItem(null);
-    setDeletePhone("");
-
+  if (res.success) {
     fetchTenant();
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
-
-  } else {
-    setModalType("error");
-    setMessage(res?.message);
-
+    setModalType("success");
+    setMessage(res.message);
     setShowSuccess(true);
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
+    setShowDeleteUrlModal(false);
+    setSelectedTransaction(null);
+  } else {
+    setModalType("error");
+    setMessage(res.message);
+    setShowSuccess(true);
   }
+
+  setDeleteUrlLoading(false);
+
+  setTimeout(() => {
+    setShowSuccess(false);
+  }, 1500);
+};
+
+const handleDeleteInvoiceUrl = async () => {
+  if (!selectedInvoice) return;
+
+  setDeleteInvoiceUrlLoading(true);
+
+  const res = await deleteInvoiceUrl(selectedInvoice.invoiceId);
+
+  if (res.success) {
+    setModalType("success");
+    setMessage(res.message);
+    setShowSuccess(true);
+
+    setShowDeleteInvoiceUrlModal(false);
+    setSelectedInvoice(null);
+
+    // Refresh invoice list
+    fetchTenant();
+  } else {
+    setModalType("error");
+    setMessage(res.message);
+    setShowSuccess(true);
+  }
+
+  setDeleteInvoiceUrlLoading(false);
+
+  setTimeout(() => {
+    setShowSuccess(false);
+  }, 1500);
 };
   // const handleDelete = async (transactionId) => {
   //   const res = await deleteTransaction(transactionId);
@@ -309,30 +488,30 @@ const TenantOverview = () => {
   };
 
   const handleUpdateInvoiceRedemption = async () => {
-     if (!editAmount) {
-    setAmountError("Amount is required");
-    return;
-  }
+    if (!editAmount) {
+      setAmountError("Amount is required");
+      return;
+    }
 
-  if (
-    Number(editAmount) ===
-    Number(selectedRedemption?.redemptionAmount)
-  ) {
-    setModalType("error");
-    setMessage("No changes detected");
-    setShowSuccess(true);
+    if (
+      Number(editAmount) ===
+      Number(selectedRedemption?.redemptionAmount)
+    ) {
+      setModalType("error");
+      setMessage("No changes detected");
+      setShowSuccess(true);
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
 
-    return;
-  }
+      return;
+    }
 
-  const res = await updateInvoiceRedemption(
-    selectedRedemption?.id,
-    Number(editAmount)
-  );
+    const res = await updateInvoiceRedemption(
+      selectedRedemption?.id,
+      Number(editAmount)
+    );
 
 
     if (res.success) {
@@ -407,7 +586,83 @@ const TenantOverview = () => {
     }
 
   };
+const handleJoiningDateChange = async (date) => {
+  setJoiningDate(date);
 
+  if (!date) {
+    setImpactBills([]);
+    return;
+  }
+
+  setImpactLoading(true);
+
+  const payload = {
+    customerId,
+    tenantMobile: mobileNo,
+    newJoiningDate: date.format("DD-MM-YYYY"),
+  };
+
+  try {
+    const res = await getJoiningDateImpact(payload);
+
+    if (res.success) {
+      setImpactBills(res.data.invoices || []);
+    } else {
+      setImpactBills([]);
+    }
+  } finally {
+    setImpactLoading(false);
+  }
+};
+
+
+// const handleJoiningDateChange = async (date) => {
+//   setJoiningDate(date);
+
+//   // Date removed
+//   if (!date) {
+//     setImpactBills([]);
+//     return;
+//   }
+
+//   const payload = {
+//     customerId,
+//     tenantMobile: mobileNo,
+//     newJoiningDate: date.format("DD-MM-YYYY"),
+//   };
+
+//   const res = await getJoiningDateImpact(payload);
+
+//   if (res.success) {
+//     setImpactBills(res.data.invoices || []);
+//   } else {
+//     setImpactBills([]);
+//   }
+// };
+const handleCloseJoiningModal = () => {
+  setShowJoiningModal(false);
+  setJoiningDate(null);
+  setImpactBills([]);
+};
+//   const handleJoiningDateChange = async (date) => {
+//   setJoiningDate(date);
+
+//   if (!date) return;
+
+//   const payload = {
+//     customerId,
+//     tenantMobile: mobileNo,
+//     newJoiningDate: date.format("DD-MM-YYYY"),
+//   };
+
+//   const res = await getJoiningDateImpact(payload);
+
+//   if (res.success) {
+//     setImpactBills(res.data.invoices || []);
+//     console.log("res.data",res.data.invoices)
+//   }
+// };
+console.log("tenantData?.hostelDetails",tenantData)
   const handleUpdateAmount = async () => {
     const res = await updateAdvanceAmount(
       tenantData?.hostelDetails?.hostelId,
@@ -435,6 +690,62 @@ const TenantOverview = () => {
       }, 800);
     }
   };
+
+
+  const handleUpdateJoiningDate = async () => {
+ 
+
+  const payload = {
+    newJoiningDate: joiningDate.format("DD-MM-YYYY"),
+    tenantMobile: mobileNo,
+    customerId: customerId,
+  };
+console.log("payload",payload)
+  const res = await updateJoiningDate(payload);
+
+  if (res.success) {
+    fetchTenant();
+    setShowJoiningModal(false);
+    setModalType("success");
+    setMessage(res.data);
+    setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 800);
+  } else {
+    setModalType("error");
+    setMessage(res.message);
+    setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 800);
+  }
+};
+const handleApproveKYC = async (customerId) => {
+  console.log("customerId",customerId)
+  setApproveLoading(true);
+
+  const res = await approveKYC(customerId);
+
+  if (res?.success) {
+    fetchTenant();
+    setShowApproveModal(false);
+
+    setModalType("success");
+    setMessage(res.data);
+    setShowSuccess(true);
+  } else {
+    setModalType("error");
+    setMessage(res.message);
+    setShowSuccess(true);
+  }
+
+  setApproveLoading(false);
+
+  setTimeout(() => {
+    setShowSuccess(false);
+  }, 1500);
+};
   return (
     <DashboardLayout>
       <Toast
@@ -519,9 +830,120 @@ const TenantOverview = () => {
 
             </div>
 
-            <button>
+            {/* <button>
               <FiMoreVertical size={20} />
-            </button>
+            </button> */}
+            <div className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="p-2 rounded-full hover:bg-gray-100 transition cursor-pointer"
+              >
+                <FiMoreVertical size={20} />
+              </button>
+
+              {showMenu && (
+                <div ref={menuRef}
+                  className="
+        absolute
+        right-0
+        top-10
+        w-56
+        bg-white
+        rounded-xl
+        shadow-[0_8px_30px_rgba(0,0,0,0.12)]
+        border
+        border-gray-100
+        overflow-hidden
+        z-50
+      "
+                >
+                  
+                    {/* {tenantData?.canApproveKyc === true && (
+                  
+                 <button
+  onClick={() => {
+    setShowMenu(false);
+    setSelectedTenant(tenantData);
+    setShowApproveModal(true);
+  }}
+  className="
+    w-full
+    flex
+    items-center
+    px-4
+    py-3
+    text-sm
+    font-medium
+    text-gray-700
+    bg-gray-50
+    border-l-4
+    border-blue-600
+    cursor-pointer
+  "
+>
+  Approve KYC
+</button>
+                    )}
+
+                  <button onClick={() => {
+  setShowMenu(false);
+  setShowMobileModal(true);
+  setMobileNo("")
+}}
+                    className="
+          w-full
+          text-left
+          px-4
+          py-3
+          text-sm
+          text-gray-700
+          hover:bg-gray-50 cursor-pointer
+        "
+                  >
+                    Edit Joining Date
+                  </button> */}
+                  {tenantData?.canApproveKyc === true && (
+  <button
+    disabled={!canWriteTenant}
+    onClick={() => {
+      if (!canWriteTenant) return;
+
+      setShowMenu(false);
+      setSelectedTenant(tenantData);
+      setShowApproveModal(true);
+    }}
+    className={`w-full flex items-center px-4 py-3 text-sm font-medium border-l-4
+      ${
+        canWriteTenant
+          ? "text-gray-700 bg-gray-50 border-blue-600 cursor-pointer"
+          : "text-gray-400 bg-gray-100 border-gray-300 cursor-not-allowed"
+      }`}
+  >
+    Approve KYC
+  </button>
+)}
+
+<button
+  disabled={!canWriteTenant}
+  onClick={() => {
+    if (!canWriteTenant) return;
+
+    setShowMenu(false);
+    setShowMobileModal(true);
+    setMobileNo("");
+  }}
+  className={`w-full text-left px-4 py-3 text-sm
+    ${
+      canWriteTenant
+        ? "text-gray-700 hover:bg-gray-50 cursor-pointer"
+        : "text-gray-400 bg-gray-100 cursor-not-allowed"
+    }`}
+>
+  Edit Joining Date
+</button>
+                </div>
+              )}
+            </div>
 
           </div>
 
@@ -752,7 +1174,7 @@ const TenantOverview = () => {
                                 </button>
                               )}
 
-                              <button
+                              {/* <button
                                 className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer"
                                 onClick={() => {
                                   setSelectedInvoice(item);
@@ -763,8 +1185,40 @@ const TenantOverview = () => {
                                 }}
                               >
                                 Delete
+                              </button> */}
+                              <button
+                                disabled={!canDeleteInvoice}
+                                onClick={() => {
+                                  if (!canDeleteInvoice) return;
+
+                                  setSelectedInvoice(item);
+                                  setShowDeleteModal(true);
+                                  setDeletePhone("");
+                                  setAmountError("");
+                                  setOpenInvoiceMenu(null);
+                                }}
+                                className={`w-full text-left px-4 py-2 ${canDeleteInvoice
+                                    ? "text-red-600 hover:bg-gray-100 cursor-pointer"
+                                    : "text-gray-400 cursor-not-allowed"
+                                  }`}
+                              >
+                                Delete
                               </button>
-                              {item?.canUpdateAmount === true && (
+
+
+                              {item?.canDeleteInvoiceUrl === true && (
+  <button
+    className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer"
+    onClick={() => {
+      setSelectedInvoice(item);
+      setShowDeleteInvoiceUrlModal(true);
+      setOpenInvoiceMenu(null);
+    }}
+  >
+    Delete Invoice URL
+  </button>
+)}
+                              {/* {item?.canUpdateAmount === true && (
                                 <button
                                   className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                   onClick={() => {
@@ -772,6 +1226,24 @@ const TenantOverview = () => {
                                     setShowAmountModal(true);
                                     setOpenInvoiceMenu(null);
                                   }}
+                                >
+                                  Update Amount
+                                </button>
+                              )} */}
+                              {item?.canUpdateAmount === true && (
+                                <button
+                                  disabled={!canUpdateInvoice}
+                                  onClick={() => {
+                                    if (!canUpdateInvoice) return;
+
+                                    setSelectedInvoice(item);
+                                    setShowAmountModal(true);
+                                    setOpenInvoiceMenu(null);
+                                  }}
+                                  className={`w-full text-left px-4 py-2 ${canUpdateInvoice
+                                      ? "hover:bg-gray-100 cursor-pointer"
+                                      : "text-gray-400 cursor-not-allowed"
+                                    }`}
                                 >
                                   Update Amount
                                 </button>
@@ -886,7 +1358,7 @@ const TenantOverview = () => {
 
                         <td className="px-4 py-4 text-left relative overflow-visible ">
                           <div ref={transactionMenuRef}>
-                            <button
+                            {/* <button
                               onClick={() =>
                                 setOpenMenu(
                                   openMenu === item.transactionId
@@ -896,26 +1368,77 @@ const TenantOverview = () => {
                               }
                             >
                               <FiMoreVertical className="cursor-pointer" />
-                            </button>
+                            </button> */}
+                            <button
+  onClick={(e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
 
-                            {openMenu === item.transactionId && (
-                              <div ref={transactionMenuRef}
-                                className="
-        absolute right-0 bottom-full mb-2
-        w-32 bg-white-common border rounded-lg shadow-lg z-[9999]
-      "
-                              >
-                                <button
-                                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer"
-                                  onClick={() => {
-                                    setDeleteItem(item);
-                                    setOpenMenu(null);
-                                  }}
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            )}
+    const menuWidth = 160;
+    const menuHeight = 90;
+
+    const spaceBelow = window.innerHeight - rect.bottom;
+
+    setMenuPosition({
+      top:
+        spaceBelow > menuHeight
+          ? rect.bottom + 5
+          : rect.top - menuHeight,
+      left: rect.right - menuWidth,
+    });
+
+    setOpenMenu(
+      openMenu === item.transactionId
+        ? null
+        : item.transactionId
+    );
+  }}
+>
+  <FiMoreVertical className="cursor-pointer" />
+</button>
+
+                           {openMenu === item.transactionId && (
+  <div
+    ref={transactionMenuRef}
+    className="fixed w-40 bg-white rounded-lg shadow-lg border z-[99999]"
+    style={{
+      top: menuPosition.top,
+      left: menuPosition.left,
+    }}
+  >
+    <button
+      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+      onClick={() => {
+        setDeleteItem(item);
+        setOpenMenu(null);
+      }}
+    >
+      Delete
+    </button>
+
+    {/* <button
+  className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 border-t"
+  onClick={() => {
+    setSelectedTransaction(item);
+    setShowDeleteUrlModal(true);
+    setOpenMenu(null);
+  }}
+>
+  Delete URL
+</button> */}
+{item?.canDeleteReceiptUrl === true && (
+  <button
+    className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100  cursor-pointer"
+    onClick={() => {
+      setSelectedTransaction(item);
+      setShowDeleteUrlModal(true);
+      setOpenMenu(null);
+    }}
+  >
+    Delete URL
+  </button>
+)}
+  </div>
+)}
                           </div>
                         </td>
                       </tr>
@@ -1142,38 +1665,38 @@ const TenantOverview = () => {
           </div>
         )} */}
         {deleteItem && (
-  <div
-    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-    onClick={() => {
-      setDeleteItem(null);
-      setDeletePhone("");
-    }}
-  >
-    <div
-      className="bg-white-common rounded-lg p-6 w-[400px]"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <h3 className="text-lg font-semibold mb-3 text-left">
-        Delete Transaction
-      </h3>
+          <div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            onClick={() => {
+              setDeleteItem(null);
+              setDeletePhone("");
+            }}
+          >
+            <div
+              className="bg-white-common rounded-lg p-6 w-[400px]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-semibold mb-3 text-left">
+                Delete Transaction
+              </h3>
 
-      <p className="text-sm text-gray-600 mb-4 text-left">
-        Enter tenant mobile number to confirm transaction deletion.
-      </p>
+              <p className="text-sm text-gray-600 mb-4 text-left">
+                Enter tenant mobile number to confirm transaction deletion.
+              </p>
 
-      <input
-        type="text"
-        value={deletePhone}
-        maxLength={10}
-        placeholder="Enter mobile number"
-        onChange={(e) => {
-          const value = e.target.value;
+              <input
+                type="text"
+                value={deletePhone}
+                maxLength={10}
+                placeholder="Enter mobile number"
+                onChange={(e) => {
+                  const value = e.target.value;
 
-          if (/^\d*$/.test(value)) {
-            setDeletePhone(value);
-          }
-        }}
-        className="
+                  if (/^\d*$/.test(value)) {
+                    setDeletePhone(value);
+                  }
+                }}
+                className="
           w-full
           border
           border-gray-300
@@ -1184,34 +1707,34 @@ const TenantOverview = () => {
           outline-none
           focus:border-blue-500
         "
-      />
+              />
 
-      <div className="flex justify-end gap-3">
-        <button
-          className="px-4 py-2 border rounded cursor-pointer"
-          onClick={() => {
-            setDeleteItem(null);
-            setDeletePhone("");
-          }}
-        >
-          Cancel
-        </button>
+              <div className="flex justify-end gap-3">
+                <button
+                  className="px-4 py-2 border rounded cursor-pointer"
+                  onClick={() => {
+                    setDeleteItem(null);
+                    setDeletePhone("");
+                  }}
+                >
+                  Cancel
+                </button>
 
-        <button
-          className="px-4 py-2 bg-red-600 text-white rounded cursor-pointer"
-          onClick={() => {
-            handleDelete(
-              deleteItem.transactionId,
-              deletePhone
-            );
-          }}
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+                <button
+                  className="px-4 py-2 bg-red-600 text-white rounded cursor-pointer"
+                  onClick={() => {
+                    handleDelete(
+                      deleteItem.transactionId,
+                      deletePhone
+                    );
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <InvoiceOverviewDrawer
         show={showInvoiceDrawer}
@@ -1471,14 +1994,14 @@ const TenantOverview = () => {
 
             <div className="flex justify-end gap-3 mt-6">
               <button
-                className="px-4 py-2 border rounded-lg"
+                className="px-4 py-2 border rounded-lg cursor-pointer"
                 onClick={() => setShowAmountModal(false)}
               >
                 Cancel
               </button>
 
               <button
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
                 onClick={handleUpdateAmount}
               >
                 Update
@@ -1487,6 +2010,517 @@ const TenantOverview = () => {
           </div>
         </div>
       )}
+    {showJoiningModal && (
+  <div
+    className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]"
+   onClick={handleCloseJoiningModal}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="bg-white rounded-2xl w-[550px] max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
+    >
+      {/* Header */}
+      <div className="flex justify-between items-start px-8 py-6 border-b flex-shrink-0">
+        <div className="flex gap-4">
+          <div className="text-orange-500 text-4xl">⚠️</div>
+
+          <div>
+            <h2 className="text-sm font-bold text-gray-800 text-left">
+              Edit Joining Date
+            </h2>
+
+            <p className="text-gray-500 mt-2 text-left text-xs">
+              This action will change the tenant's joining records and
+              invoices created earlier in SmartStay records.
+            </p>
+          </div>
+        </div>
+
+        <button
+           onClick={handleCloseJoiningModal}
+          className="text-red-400 text-3xl cursor-pointer"
+        >
+          ×
+        </button>
+      </div>
+
+      {/* Scrollable Body */}
+      <div className="flex-1 overflow-y-auto p-8">
+
+        <div className="bg-[#F8F9FD] rounded-2xl p-5 flex justify-between items-center">
+
+          <div className="flex gap-4 items-center">
+            <div className="w-13 h-13 rounded-2xl bg-white shadow flex items-center justify-center">
+              <FaUserCircle size={32} className="text-gray-500" />
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-left">
+                {tenantData?.fullName}
+              </h3>
+
+              <p className="text-gray-500 mt-1 text-sm">
+                {tenantData?.hostelDetails?.floorName} |
+                {tenantData?.hostelDetails?.roomName} |
+                {tenantData?.hostelDetails?.bedName}
+              </p>
+            </div>
+          </div>
+
+          <div className="text-right text-sm">
+            <p className="text-gray-500">
+              Current Joining Date
+            </p>
+
+            <h3 className="text-sm font-semibold mt-2">
+              {tenantData?.joiningDate}
+            </h3>
+          </div>
+
+        </div>
+
+        <div className="mt-8 text-left">
+          <label className="font-medium">
+            New Joining Date
+            <span className="text-red-500">*</span>
+          </label>
+
+          <div className="mt-3">
+            <DatePicker
+              className="w-full h-[58px]"
+              placeholder="Enter the Date want to change"
+              format="DD-MM-YYYY"
+              value={joiningDate}
+              onChange={handleJoiningDateChange}
+            />
+          </div>
+        </div>
+
+        {/* Bills */}
+        <div className="mt-6">
+          <h4 className="text-[13px] font-semibold text-gray-600 mb-3 text-left">
+            Bills Going to affect when Change the New Joining Date
+          </h4>
+
+        <div className="border border-gray-200 rounded-xl overflow-hidden">
+  <div className="max-h-[220px] overflow-y-auto">
+    <table className="w-full text-sm">
+      <thead className="bg-[#F8F9FD] sticky top-0 z-10">
+        <tr className="text-gray-500 text-[11px]">
+          <th className="px-4 py-3 text-left whitespace-nowrap">INV NO</th>
+          <th className="px-4 py-3 text-left whitespace-nowrap">STATUS</th>
+          <th className="px-4 py-3 text-left whitespace-nowrap">TYPE</th>
+          <th className="px-4 py-3 text-left whitespace-nowrap">DATE</th>
+          <th className="px-4 py-3 text-left whitespace-nowrap">BY</th>
+          <th className="px-4 py-3 text-right whitespace-nowrap">AMOUNT</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {impactLoading ? (
+    [...Array(5)].map((_, index) => (
+      <tr key={index} className="border-b">
+        {[...Array(6)].map((_, i) => (
+          <td key={i} className="px-4 py-3">
+            <div className="h-4 w-full rounded bg-gray-200 animate-pulse"></div>
+          </td>
+        ))}
+      </tr>
+    ))
+  ) : impactBills.length > 0 ? (
+          impactBills.map((bill) => (
+            <tr
+              key={bill.invoiceId}
+              className="border-t border-gray-200 text-[10px]"
+            >
+              <td className="px-4 py-3 whitespace-nowrap">
+                {bill.invoiceNumber}
+              </td>
+
+              <td className="px-4 py-3 whitespace-nowrap">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      bill.paymentStatus === "PAID"
+                        ? "bg-green-500"
+                        : bill.paymentStatus === "PENDING"
+                        ? "bg-yellow-500"
+                        : "bg-red-500"
+                    }`}
+                  />
+                  <span className="capitalize">
+                    {bill.paymentStatus}
+                  </span>
+                </div>
+              </td>
+
+              <td className="px-4 py-3 whitespace-nowrap">
+                {bill.invoiceType}
+              </td>
+
+              <td className="px-4 py-3 whitespace-nowrap">
+                {bill.invoiceStartDate}
+              </td>
+
+              <td className="px-4 py-3 whitespace-nowrap">
+                {bill.action}
+              </td>
+
+              <td className="px-4 py-3 font-medium whitespace-nowrap text-left">
+                ₹ {bill.paidAmount ?? bill.totalAmount}
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td
+              colSpan={6}
+              className="py-6 text-center text-gray-500"
+            >
+              No Bills Found
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
+        </div>
+
+      </div>
+
+      {/* Footer */}
+      <div className="border-t px-8 py-5 flex justify-end gap-4 flex-shrink-0">
+
+        <button
+ onClick={handleCloseJoiningModal}
+          className="px-8 py-3 border rounded-xl cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleUpdateJoiningDate}
+          className="px-10 py-3 bg-[#2F54EB] text-white rounded-xl cursor-pointer"
+        >
+          Proceed
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
+{showMobileModal && (
+  <div
+    className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]"
+    onClick={() => {
+      setShowMobileModal(false);
+      setMobileNo("");
+      setError("");
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="bg-white rounded-2xl w-[550px] overflow-hidden shadow-2xl"
+    >
+      {/* Header */}
+      <div className="flex justify-between items-start px-8 py-6 border-b">
+        <div className="flex gap-4">
+          <div className="text-orange-500 text-4xl">⚠️</div>
+
+          <div>
+            <h2 className="text-sm font-bold text-left">
+              Edit Joining Date
+            </h2>
+
+            <p className="text-gray-500 mt-2 text-left text-[12px]">
+              This action will change the tenant's joining records and their
+              invoices created earlier in SmartStay record
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => {
+            setShowMobileModal(false);
+            setMobileNo("");
+            setError("");
+          }}
+          className="text-red-400 text-3xl cursor-pointer"
+        >
+          ×
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="p-8">
+
+        <label className="block text-left text-[14px] font-medium mb-3">
+          Add Tenant Mobile No
+          <span className="text-red-500">*</span>
+        </label>
+
+        <div className="flex items-center border border-gray-300 rounded-xl h-[58px] px-5">
+          <span className="text-[15px] font-medium mr-3">+91</span>
+
+          <input
+            type="text"
+            value={mobileNo}
+            maxLength={10}
+            placeholder="Enter Mobile Number"
+            onChange={(e) => {
+              const value = e.target.value;
+
+              if (/^\d*$/.test(value)) {
+                setMobileNo(value);
+                setError("");
+              }
+            }}
+            className="w-full outline-none text-[15px] border-gray-300"
+          />
+        </div>
+
+        {/* {error && (
+          <p className="text-red-500 text-sm mt-2 text-left">
+            {error}
+          </p>
+        )} */}
+        {error && (
+                <ErrorMessage
+                  message={error}
+                  type="error"
+                />
+              )}
+
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
+          <div className="text-blue-600 text-xl">ℹ️</div>
+
+          <p className="text-blue-700 text-left text-xs">
+            This verification is for changing the tenant's identity and to
+            avoid conflicts. Get the tenant's mobile number from the
+            proprietor.
+          </p>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="border-t px-8 py-5 flex justify-end gap-4">
+
+        <button
+          onClick={() => {
+            setShowMobileModal(false);
+            setMobileNo("");
+            setError("");
+          }}
+          className="px-8 py-3 border rounded-xl cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleContinue}
+          className="px-10 py-3 bg-[#2F54EB] text-white rounded-xl cursor-pointer"
+        >
+          Continue
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
+
+
+{showApproveModal && (
+  <div
+    className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]"
+    onClick={() => setShowApproveModal(false)}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="bg-white rounded-2xl w-[500px] overflow-hidden shadow-2xl"
+    >
+      {/* Header */}
+      <div className="px-8 py-6 border-b">
+        <h2 className="text-[20px] font-semibold text-left">
+          Do you wanna approve KYC for this Tenant?
+        </h2>
+
+        <p className="text-sm text-gray-500 mt-2 text-left">
+          Upon your approval, the KYC process will be completed.
+        </p>
+      </div>
+
+      {/* Body */}
+      <div className="p-8">
+        <div className="bg-[#F8F9FD] rounded-2xl p-5 flex items-center gap-4">
+
+          <div className="w-14 h-14 rounded-2xl bg-white shadow flex items-center justify-center">
+            {selectedTenant?.profileImage ? (
+              <img
+                src={selectedTenant.profileImage}
+                className="w-full h-full rounded-2xl object-cover"
+              />
+            ) : (
+              <FaUserCircle
+                size={36}
+                className="text-gray-500"
+              />
+            )}
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-[18px] text-left">
+              {selectedTenant?.fullName}
+            </h3>
+
+            <p className="text-gray-500 text-sm mt-1">
+              SM{selectedTenant?.kycDetailsId} |
+              {" "}
+              +91 {selectedTenant?.mobile}
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="border-t px-8 py-5 flex justify-end gap-4">
+
+        <button
+          onClick={() => setShowApproveModal(false)}
+          className="px-8 py-3 border rounded-xl cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        {/* <button
+          onClick={() => handleApproveKYC(customerId)}
+          disabled={approveLoading}
+          className={`px-8 py-3 rounded-xl text-white cursor-pointer ${
+            approveLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-[#2952F3] hover:bg-[#1f46e5]"
+          }`}
+        >
+          <img src={Share} className="w-4 h-4"/>
+          {approveLoading ? "Approving..." : "Confirm"}
+        </button> */}
+        <button
+  onClick={() => handleApproveKYC(customerId)}
+  disabled={approveLoading}
+  className={`
+    px-8 py-3
+    rounded-xl
+    text-white
+    flex items-center justify-center gap-2
+    ${
+      approveLoading
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-[#2952F3] hover:bg-[#1f46e5] cursor-pointer"
+    }
+  `}
+>
+  <img src={Share} alt="Share" className="w-4 h-4" />
+
+  {approveLoading ? "Approving..." : "Confirm"}
+</button>
+
+      </div>
+    </div>
+  </div>
+)}
+{showDeleteUrlModal && (
+  <div
+    className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]"
+    onClick={() => {
+      setShowDeleteUrlModal(false);
+      setSelectedTransaction(null);
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="bg-white rounded-2xl w-[420px] p-6 shadow-xl"
+    >
+      <h2 className="text-lg font-semibold text-left">
+        Delete Receipt URL
+      </h2>
+
+      <p className="mt-3 text-sm text-gray-500 text-left">
+        Are you sure you want to delete this receipt URL?
+      </p>
+
+      <div className="flex justify-end gap-3 mt-8">
+        <button
+          onClick={() => {
+            setShowDeleteUrlModal(false);
+            setSelectedTransaction(null);
+          }}
+          className="px-6 py-2 border rounded-lg cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleDeleteReceipt}
+          disabled={deleteUrlLoading}
+          className={`px-6 py-2 rounded-lg text-white ${
+            deleteUrlLoading
+              ? "bg-red-300 cursor-not-allowed"
+              : "bg-red-600 hover:bg-red-700 cursor-pointer"
+          }`}
+        >
+          {deleteUrlLoading ? "Deleting..." : "Delete"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+{showDeleteInvoiceUrlModal && (
+  <div
+    className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]"
+    onClick={() => {
+      setShowDeleteInvoiceUrlModal(false);
+      setSelectedInvoice(null);
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="bg-white rounded-2xl w-[420px] p-6 shadow-xl"
+    >
+      <h2 className="text-lg font-semibold text-left">
+        Delete Invoice URL
+      </h2>
+
+      <p className="mt-3 text-sm text-gray-500 text-left">
+        Are you sure you want to delete this invoice URL?
+      </p>
+
+      <div className="flex justify-end gap-3 mt-8">
+        <button
+          onClick={() => {
+            setShowDeleteInvoiceUrlModal(false);
+            setSelectedInvoice(null);
+          }}
+          className="px-6 py-2 border rounded-lg cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleDeleteInvoiceUrl}
+          disabled={deleteInvoiceUrlLoading}
+          className={`px-6 py-2 rounded-lg text-white ${
+            deleteInvoiceUrlLoading
+              ? "bg-red-300 cursor-not-allowed"
+              : "bg-red-600 hover:bg-red-700 cursor-pointer"
+          }`}
+        >
+          {deleteInvoiceUrlLoading ? "Deleting..." : "Delete"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };
