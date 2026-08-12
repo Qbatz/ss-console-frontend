@@ -1040,7 +1040,23 @@ const exportInvoicePdf = async (orderHistoryId) => {
 //     };
 //   }
 // };
+const deleteInvoice = async (orderHistoryId) => {
+  try {
+    const res = await axiosInstance.delete(
+      `/v2/order-history/invoice/${orderHistoryId}`
+    );
 
+    return {
+      success: true,
+      data: res.data,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+  }
+};
   return (
     <SubscriptionContext.Provider
       value={{
@@ -1048,7 +1064,7 @@ const exportInvoicePdf = async (orderHistoryId) => {
         errorMsg,
         createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, 
         getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment,deleteDemoRequest,getDemoType,getDropReasons,getDemoRequestComments,
-        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes,getTrialDaysExtReason,deleteTransaction,getTrialSubscriptions,uploadInvoice,downloadInvoice,exportInvoicePdf
+        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes,getTrialDaysExtReason,deleteTransaction,getTrialSubscriptions,uploadInvoice,downloadInvoice,exportInvoicePdf,deleteInvoice
       }}
     >
       {children}

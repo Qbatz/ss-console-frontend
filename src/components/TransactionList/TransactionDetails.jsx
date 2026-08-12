@@ -18,12 +18,15 @@ import { useHostel } from "../../Context/HostelListContext";
 import Toast from "../SuccessModal/ToastDesign";
 import { createPortal } from "react-dom";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import View from "../../assets/view (1).png";
+import Trash from "../../assets/trash.png";
+import Download from "../../assets/download-arrow (1).png";
 
 
 const TransactionsPage = () => {
   const { roleId } = useParams();
   const [totalItems, setTotalItems] = useState(0);
-  const { getOrderHistory, loading, accessError, verifyPayment, uploadInvoice,downloadInvoice,exportInvoicePdf } = useSubscription();
+  const { getOrderHistory, loading, accessError, verifyPayment, uploadInvoice, downloadInvoice, exportInvoicePdf, deleteInvoice } = useSubscription();
   const { sharePaymentLink } = useHostel();
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Plans");
@@ -61,6 +64,7 @@ const TransactionsPage = () => {
   const [invoiceFile, setInvoiceFile] = useState(null);
   const [isManual, setIsManual] = useState(false);
   const [invoiceFileError, setInvoiceFileError] = useState("");
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
   const handleSharePayment = async () => {
 
     if (!selectedTxn?.paymentUrl) {
@@ -145,6 +149,29 @@ const TransactionsPage = () => {
     fetchData();
   }, [page, size, search, dateRange]);
 
+  // const fetchData = async () => {
+  //   let start = "";
+  //   let end = "";
+
+  //   if (dateRange && dateRange.length === 2) {
+  //     start = dateRange[0].format("DD-MM-YYYY");
+  //     end = dateRange[1].format("DD-MM-YYYY");
+  //   }
+
+  //   const res = await getOrderHistory(
+  //     page,
+  //     size,
+  //     search,
+  //     start,
+  //     end
+  //   );
+
+  //   if (res.success) {
+  //     setResData(res.data);
+  //     setTotalItems(res.data?.totalItems || 0);
+  //     setTotalRevenue(res.data?.totalRevenue || 0);
+  //   }
+  // };
   const fetchData = async () => {
     let start = "";
     let end = "";
@@ -166,7 +193,12 @@ const TransactionsPage = () => {
       setResData(res.data);
       setTotalItems(res.data?.totalItems || 0);
       setTotalRevenue(res.data?.totalRevenue || 0);
+
+      // IMPORTANT
+      return res.data;
     }
+
+    return null;
   };
   const currentData =
     activeTab === "paid"
@@ -215,18 +247,18 @@ const TransactionsPage = () => {
     }
 
   };
-const handleCloseUploadModal = () => {
-  setShowUploadModal(false);
-  setInvoiceFile(null);
-  setIsManual(false);
-};
+  const handleCloseUploadModal = () => {
+    setShowUploadModal(false);
+    setInvoiceFile(null);
+    setIsManual(false);
+  };
   const handleUploadInvoice = async () => {
     if (!invoiceFile) {
-    setInvoiceFileError("Please upload invoice");
-    return;
-  }
+      setInvoiceFileError("Please upload invoice");
+      return;
+    }
 
-  setInvoiceFileError("");
+    setInvoiceFileError("");
 
     const res = await uploadInvoice(
       selectedTxn.historyId,
@@ -235,17 +267,119 @@ const handleCloseUploadModal = () => {
     );
 
     if (res.success) {
-    
+
+
+      const updatedData = await fetchData();
+
+
+      const updatedItem = [
+        ...(updatedData?.paidHistories?.orderHistories || []),
+        ...(updatedData?.createdHistories?.orderHistories || [])
+      ].find(
+        (item) => item.historyId === selectedTxn.historyId
+      );
+
+      if (updatedItem) {
+        setSelectedTxn(updatedItem);
+      }
+
       setModalType("success");
       setMessage(res.data);
       setShowSuccess(true);
-      getOrderHistory();
+
       setTimeout(() => {
-       
         setShowSuccess(false);
-        handleCloseUploadModal()
+        handleCloseUploadModal();
       }, 1500);
 
+    } else {
+
+      setModalType("error");
+      setMessage(res.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+    }
+  };
+  // const handleUploadInvoice = async () => {
+  //   if (!invoiceFile) {
+  //   setInvoiceFileError("Please upload invoice");
+  //   return;
+  // }
+
+  // setInvoiceFileError("");
+
+  //   const res = await uploadInvoice(
+  //     selectedTxn.historyId,
+  //     invoiceFile,
+  //     isManual
+  //   );
+
+  //   if (res.success) {
+
+  //     setModalType("success");
+  //     setMessage(res.data);
+  //     setShowSuccess(true);
+  //     getOrderHistory();
+  //     setTimeout(() => {
+
+  //       setShowSuccess(false);
+  //       handleCloseUploadModal()
+  //     }, 1500);
+
+  //   }
+  //   else {
+  //     setModalType("error");
+  //     setMessage(res.message);
+  //     setShowSuccess(true);
+
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1500);
+  //   }
+  // };
+
+
+
+  const getFileType = (url) => {
+    if (!url) return "";
+
+    const cleanUrl = url.split("?")[0].toLowerCase();
+
+    if (cleanUrl.endsWith(".pdf")) {
+      return "pdf";
+    }
+
+    if (
+      cleanUrl.endsWith(".png") ||
+      cleanUrl.endsWith(".jpg") ||
+      cleanUrl.endsWith(".jpeg") ||
+      cleanUrl.endsWith(".webp") ||
+      cleanUrl.endsWith(".gif")
+    ) {
+      return "image";
+    }
+
+    return "unknown";
+  };
+  const invoiceUrl = selectedTxn?.subscriptionInvoiceUrl;
+  const fileType = getFileType(invoiceUrl);
+  const handleDownloadInvoice = async () => {
+    const res = await downloadInvoice(selectedTxn.historyId);
+
+    if (res.success) {
+      const url = window.URL.createObjectURL(res.data);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "invoice";
+      document.body.appendChild(a);
+      a.click();
+
+      a.remove();
+      window.URL.revokeObjectURL(url);
     }
     else {
       setModalType("error");
@@ -258,47 +392,28 @@ const handleCloseUploadModal = () => {
     }
   };
 
+  const handleExportInvoicePdf = async () => {
+    if (!selectedTxn?.historyId) return;
 
+    const res = await exportInvoicePdf(selectedTxn.historyId);
 
-  const getFileType = (url) => {
-  if (!url) return "";
+    if (res.success) {
+      const blob = new Blob([res.data], {
+        type: "application/pdf",
+      });
 
-  const cleanUrl = url.split("?")[0].toLowerCase();
+      const url = window.URL.createObjectURL(blob);
 
-  if (cleanUrl.endsWith(".pdf")) {
-    return "pdf";
-  }
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Invoice-${selectedTxn.historyId}.pdf`;
 
-  if (
-    cleanUrl.endsWith(".png") ||
-    cleanUrl.endsWith(".jpg") ||
-    cleanUrl.endsWith(".jpeg") ||
-    cleanUrl.endsWith(".webp") ||
-    cleanUrl.endsWith(".gif")
-  ) {
-    return "image";
-  }
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
 
-  return "unknown";
-};
-const invoiceUrl = selectedTxn?.subscriptionInvoiceUrl;
-const fileType = getFileType(invoiceUrl);
-  const handleDownloadInvoice = async () => {
-  const res = await downloadInvoice(selectedTxn.historyId);
-
-  if (res.success) {
-    const url = window.URL.createObjectURL(res.data);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "invoice";
-    document.body.appendChild(a);
-    a.click();
-
-    a.remove();
-    window.URL.revokeObjectURL(url);
-  }
-  else{
+      window.URL.revokeObjectURL(url);
+    } else {
       setModalType("error");
       setMessage(res.message);
       setShowSuccess(true);
@@ -306,31 +421,82 @@ const fileType = getFileType(invoiceUrl);
       setTimeout(() => {
         setShowSuccess(false);
       }, 1500);
-  }
-};
+    }
+  };
+  const updateInvoiceInResData = (historyId, invoiceUrl = null) => {
+    setResData((prev) => {
+      const paidHistories = Array.isArray(prev?.paidHistories)
+        ? prev.paidHistories
+        : [];
 
-const handleExportInvoicePdf = async () => {
-  if (!selectedTxn?.historyId) return;
+      const createdHistories = Array.isArray(prev?.createdHistories)
+        ? prev.createdHistories
+        : [];
 
-  const res = await exportInvoicePdf(selectedTxn.historyId);
+      return {
+        ...prev,
 
-  if (res.success) {
-    const blob = new Blob([res.data], {
-      type: "application/pdf",
+        paidHistories: paidHistories.map((item) =>
+          Number(item.historyId) === Number(historyId)
+            ? {
+              ...item,
+              subscriptionInvoiceUrl: invoiceUrl,
+            }
+            : item
+        ),
+
+        createdHistories: createdHistories.map((item) =>
+          Number(item.historyId) === Number(historyId)
+            ? {
+              ...item,
+              subscriptionInvoiceUrl: invoiceUrl,
+            }
+            : item
+        ),
+      };
     });
 
-    const url = window.URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `Invoice-${selectedTxn.historyId}.pdf`;
+    setSelectedTxn((prev) =>
+      prev && Number(prev.historyId) === Number(historyId)
+        ? {
+          ...prev,
+          subscriptionInvoiceUrl: invoiceUrl,
+        }
+        : prev
+    );
+  };
+  const handleDeleteInvoice = async () => {
+    if (!selectedTxn?.historyId) return;
 
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    const historyId = selectedTxn.historyId;
 
-    window.URL.revokeObjectURL(url);
-  } else {
+    const res = await deleteInvoice(historyId);
+
+    if (res.success) {
+      const updatedData = await fetchData();
+      setShowDeletePopup(false)
+      const updatedItem = [
+        ...(updatedData?.paidHistories?.orderHistories || []),
+        ...(updatedData?.createdHistories?.orderHistories || [])
+      ].find(
+        (item) => item.historyId === selectedTxn.historyId
+      );
+
+      if (updatedItem) {
+        setSelectedTxn(updatedItem);
+      }
+
+      setModalType("success");
+      setMessage(res.data);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+        handleCloseUploadModal();
+      }, 1500);
+    }
+    else {
       setModalType("error");
       setMessage(res.message);
       setShowSuccess(true);
@@ -338,37 +504,74 @@ const handleExportInvoicePdf = async () => {
       setTimeout(() => {
         setShowSuccess(false);
       }, 1500);
-  }
-};
+    }
+  };
 
-// const handleExportInvoicePdf = async () => {
-//   if (!selectedTxn?.historyId) return;
+  // const handleDeleteInvoice = async () => {
+  //   if (!selectedTxn?.historyId) return;
 
-//   const res = await exportInvoicePdf(
-//     selectedTxn.historyId
-//   );
+  //   const res = await deleteInvoice(selectedTxn.historyId);
 
-//   if (res.success) {
-//     const blob = new Blob([res.data], {
-//       type: "application/pdf",
-//     });
+  //   if (res.success) {
+  //     // Backend data refresh
+  //     await getOrderHistory();
 
-//     const url = window.URL.createObjectURL(blob);
+  //     // Drawer data-வில் invoice உடனே remove ஆக
+  //     setSelectedTxn((prev) => ({
+  //       ...prev,
+  //       subscriptionInvoiceUrl: null,
+  //       invoiceFile: null,
+  //     }));
 
-//     const link = document.createElement("a");
-//     link.href = url;
-//     link.download = `Invoice-${selectedTxn.historyId}.pdf`;
+  //     // Confirmation popup close
+  //     setShowDeleteConfirm(false);
 
-//     document.body.appendChild(link);
-//     link.click();
+  //     // Success message
+  //     setModalType("success");
+  //     setMessage(res.data || "Invoice deleted successfully");
+  //     setShowSuccess(true);
 
-//     link.remove();
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1500);
+  //   } else {
+  //     setModalType("error");
+  //     setMessage(res.message);
+  //     setShowSuccess(true);
 
-//     window.URL.revokeObjectURL(url);
-//   } else {
-//     console.log(res.message);
-//   }
-// };
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1500);
+  //   }
+  // };
+  // const handleExportInvoicePdf = async () => {
+  //   if (!selectedTxn?.historyId) return;
+
+  //   const res = await exportInvoicePdf(
+  //     selectedTxn.historyId
+  //   );
+
+  //   if (res.success) {
+  //     const blob = new Blob([res.data], {
+  //       type: "application/pdf",
+  //     });
+
+  //     const url = window.URL.createObjectURL(blob);
+
+  //     const link = document.createElement("a");
+  //     link.href = url;
+  //     link.download = `Invoice-${selectedTxn.historyId}.pdf`;
+
+  //     document.body.appendChild(link);
+  //     link.click();
+
+  //     link.remove();
+
+  //     window.URL.revokeObjectURL(url);
+  //   } else {
+  //     console.log(res.message);
+  //   }
+  // };
   return (
     <DashboardLayout>
       <Toast
@@ -478,13 +681,13 @@ const handleExportInvoicePdf = async () => {
           </div> */}
           <div className="flex justify-between items-center mb-3">
 
-          
+
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setActiveTab("paid")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${activeTab === "paid"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer"
                   }`}
               >
                 Paid Histories
@@ -493,15 +696,15 @@ const handleExportInvoicePdf = async () => {
               <button
                 onClick={() => setActiveTab("created")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${activeTab === "created"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer"
                   }`}
               >
                 Created Histories
               </button>
             </div>
 
-          
+
             <div className="flex items-center gap-3">
 
               <RangePicker
@@ -937,9 +1140,9 @@ const handleExportInvoicePdf = async () => {
                 }
                 onClick={() => setPage((prev) => prev - 1)}
                 className={`${currentData?.currentPage <= 1 ||
-                    currentData?.totalItems === 0
-                    ? "opacity-40 cursor-not-allowed"
-                    : "cursor-pointer"
+                  currentData?.totalItems === 0
+                  ? "opacity-40 cursor-not-allowed"
+                  : "cursor-pointer"
                   }`}
               >
                 &#8249;
@@ -963,9 +1166,9 @@ const handleExportInvoicePdf = async () => {
                 }
                 onClick={() => setPage((prev) => prev + 1)}
                 className={`${currentData?.currentPage >= currentData?.totalPages ||
-                    currentData?.totalItems === 0
-                    ? "opacity-40 cursor-not-allowed"
-                    : "cursor-pointer"
+                  currentData?.totalItems === 0
+                  ? "opacity-40 cursor-not-allowed"
+                  : "cursor-pointer"
                   }`}
               >
                 &#8250;
@@ -1030,15 +1233,15 @@ const handleExportInvoicePdf = async () => {
                   <div className="flex items-center gap-2 mt-2">
                     <span
                       className={`w-2 h-2 rounded-full ${selectedTxn?.orderStatus?.toUpperCase() === "PAID"
-                          ? "bg-green-500"
-                          : "bg-red-500"
+                        ? "bg-green-500"
+                        : "bg-red-500"
                         }`}
                     ></span>
 
                     <span
                       className={`text-[13px] font-medium ${selectedTxn?.orderStatus?.toUpperCase() === "PAID"
-                          ? "text-green-600"
-                          : "text-red-600"
+                        ? "text-green-600"
+                        : "text-red-600"
                         }`}
                     >
                       {selectedTxn?.orderStatus?.toUpperCase() === "PAID"
@@ -1148,7 +1351,7 @@ const handleExportInvoicePdf = async () => {
                 <p className="text-[11px] text-gray-400 pb-2 mb-4 font-semibold tracking-wider border-b border-gray-300 text-left">
                   PAYMENT INFO
                 </p>
-                {/* ROWS */}
+              
                 <div className="space-y-3">
 
                   <div className="flex justify-between">
@@ -1192,55 +1395,45 @@ const handleExportInvoicePdf = async () => {
                       {selectedTxn.collectedBy || "-"}
                     </p>
                   </div>
-                  {/* Buttons */}
-                  {selectedTxn?.subscriptionInvoiceUrl && (
-                  <div className="mt-4 flex gap-2">
+  <div className="flex items-center justify-between w-full">
+  
+  <p className="text-[11px] text-gray-400 font-semibold tracking-wider text-left">
+  SUBSCRIPTION INVOICE
+  {selectedTxn?.subscriptionInvoiceGenerationType
+    ? ` (${selectedTxn.subscriptionInvoiceGenerationType})`
+    : ""}
+</p>
 
-                    {/* Preview */}
-                    <button
-                      onClick={() => setShowPreview(true)}
-                      className="
-    flex-1
-    h-10
-    border
-    border-gray-300
-    rounded-lg
-    bg-white
-    flex
-    items-center
-    justify-center
-    gap-2
-    hover:bg-gray-50
-  "
-                    >
-                      {/* <img src={ViewImg} className="w-4 h-4" /> */}
-                      Preview
-                    </button>
+  {selectedTxn?.subscriptionInvoiceUrl ? (
+    <div className="flex items-center gap-4 ml-auto">
+      <img
+        src={View}
+        alt="Preview"
+        className="w-5 h-5 cursor-pointer"
+        onClick={() => setShowPreview(true)}
+      />
 
-                    {/* Download */}
-                    <button
-                       onClick={handleDownloadInvoice}
-                      className="
-      flex-1
-      h-10
-      rounded-lg
-      bg-[#2952F3]
-      hover:bg-[#1E40D0]
-      text-white
-      flex
-      items-center
-      justify-center
-      gap-2
-      text-[13px]
-      cursor-pointer
-    "
-                    >
-                      {/* <img src={DownloadIcon} className="w-4 h-4" alt="download" /> */}
-                      Download Invoice
-                    </button>
+      <img
+        src={Download}
+        alt="Download"
+        className="w-5 h-5 cursor-pointer"
+        onClick={handleDownloadInvoice}
+      />
 
-                  </div>
-                  )}
+      <img
+        src={Trash}
+        alt="Delete"
+        className="w-5 h-5 cursor-pointer"
+        onClick={() => setShowDeletePopup(true)}
+      />
+    </div>
+  ) : (
+    <span className="text-sm text-gray-500 ml-auto">
+      N/A
+    </span>
+  )}
+
+</div>
                 </div>
               </div>
               <div className="mt-4">
@@ -1486,17 +1679,17 @@ const handleExportInvoicePdf = async () => {
         </>
 
       )}
-     {showPreview && (
-  <>
-    {/* Overlay */}
-    <div
-      className="fixed inset-0 bg-black/40 z-[90]"
-      onClick={() => setShowPreview(false)}
-    />
+      {showPreview && (
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black/40 z-[90]"
+            onClick={() => setShowPreview(false)}
+          />
 
-    {/* Drawer */}
-    <div
-      className="
+          {/* Drawer */}
+          <div
+            className="
         fixed
         top-4
         right-4
@@ -1510,25 +1703,25 @@ const handleExportInvoicePdf = async () => {
         flex-col
         overflow-hidden
       "
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b shrink-0">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowPreview(false)}
-            className="text-xl cursor-pointer"
           >
-            ←
-          </button>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b shrink-0">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="text-xl cursor-pointer"
+                >
+                  ←
+                </button>
 
-          <h2 className="font-semibold text-lg">
-            Preview
-          </h2>
-        </div>
+                <h2 className="font-semibold text-lg">
+                  Preview
+                </h2>
+              </div>
 
-        <button
-          onClick={handleExportInvoicePdf}
-          className="
+              <button
+                onClick={handleExportInvoicePdf}
+                className="
             bg-[#2952F3]
             text-white
             px-4
@@ -1540,49 +1733,49 @@ const handleExportInvoicePdf = async () => {
             gap-2
             cursor-pointer
           "
-        >
-          ⬆ Export as PDF
-        </button>
-      </div>
+              >
+                ⬆ Export as PDF
+              </button>
+            </div>
 
-      {/* Invoice Preview */}
-    {/* Invoice Preview */}
-<div className="flex-1 bg-gray-100 p-4 overflow-auto">
+            {/* Invoice Preview */}
+            {/* Invoice Preview */}
+            <div className="flex-1 bg-gray-100 p-4 overflow-auto">
 
-  <div className="w-full h-full bg-white rounded-xl overflow-hidden flex items-center justify-center">
+              <div className="w-full h-full bg-white rounded-xl overflow-hidden flex items-center justify-center">
 
-    {!invoiceUrl ? (
-      <p className="text-gray-500 text-sm">
-        Invoice preview not available
-      </p>
-    ) : fileType === "pdf" ? (
+                {!invoiceUrl ? (
+                  <p className="text-gray-500 text-sm">
+                    Invoice preview not available
+                  </p>
+                ) : fileType === "pdf" ? (
 
-      // PDF
-      <iframe
-        src={invoiceUrl}
-        title="Invoice Preview"
-        className="w-full h-full min-h-[700px] border-0"
-      />
+                  // PDF
+                  <iframe
+                    src={invoiceUrl}
+                    title="Invoice Preview"
+                    className="w-full h-full min-h-[700px] border-0"
+                  />
 
-    ) : fileType === "image" ? (
+                ) : fileType === "image" ? (
 
-      // Image
-      <img
-        src={invoiceUrl}
-        alt="Invoice Preview"
-        className="
+                  // Image
+                  <img
+                    src={invoiceUrl}
+                    alt="Invoice Preview"
+                    className="
           max-w-full
           max-h-full
           object-contain
           rounded-lg
         "
-      />
+                  />
 
-    ) : (
+                ) : (
 
-      
-    <div
-  className="
+
+                  <div
+                    className="
     w-full
     h-full
     bg-[#F3F4F6]
@@ -1592,22 +1785,22 @@ const handleExportInvoicePdf = async () => {
     justify-center
     items-start
   "
->
-  <iframe
-    src={selectedTxn?.subscriptionInvoiceUrl}
-    className="w-full h-full border-0"
-    title="Invoice Preview"
-  />
-</div>
+                  >
+                    <iframe
+                      src={selectedTxn?.subscriptionInvoiceUrl}
+                      className="w-full h-full border-0"
+                      title="Invoice Preview"
+                    />
+                  </div>
 
-    )}
+                )}
 
-  </div>
+              </div>
 
-</div>
-    </div>
-  </>
-)}
+            </div>
+          </div>
+        </>
+      )}
 
       {showUploadModal && (
         <div
@@ -1697,13 +1890,13 @@ const handleExportInvoicePdf = async () => {
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
                   hidden
-                 onChange={(e) => {
-    setInvoiceFile(e.target.files?.[0] || null);
-    setInvoiceFileError("");
-  }}
+                  onChange={(e) => {
+                    setInvoiceFile(e.target.files?.[0] || null);
+                    setInvoiceFileError("");
+                  }}
                 />
               </div>
-  {invoiceFileError && (
+              {invoiceFileError && (
                 <ErrorMessage
                   message={invoiceFileError}
                   type="error"
@@ -1761,7 +1954,7 @@ const handleExportInvoicePdf = async () => {
             {/* Footer */}
             <div className="border-t px-6 py-4 flex justify-end gap-3">
               <button
-                 onClick={handleCloseUploadModal}
+                onClick={handleCloseUploadModal}
                 className="px-6 py-2 border rounded-lg cursor-pointer"
               >
                 Cancel
@@ -1785,6 +1978,41 @@ const handleExportInvoicePdf = async () => {
           </div>
         </div>
       )}
+{showDeletePopup && (
+  <div
+    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40"
+    onClick={() => setShowDeletePopup(false)}
+  >
+    <div
+      className="bg-white rounded-xl w-[380px] p-6 shadow-2xl"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-semibold text-[#101828]">
+        Are you sure?
+      </h2>
+
+      <p className="text-sm text-gray-500 mt-2">
+        Do you want to delete this invoice?
+      </p>
+
+      <div className="flex justify-end gap-3 mt-6">
+        <button
+          onClick={() => setShowDeletePopup(false)}
+          className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleDeleteInvoice}
+          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm cursor-pointer"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };

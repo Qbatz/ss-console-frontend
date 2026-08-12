@@ -217,7 +217,7 @@ const handleEditClick = async (role) => {
                       <th className="px-4 py-3 w-[25%] text-left">Description</th>
                       <th className="px-4 py-3 w-[15%]">Users Count</th>
                       <th className="px-4 py-3 w-[20%]">Created On</th>
-                      <th className="px-4 py-3 w-[20%]">Updated On</th>
+                      <th className="px-4 py-3 w-[20%] whitespace-nowrap">Updated On</th>
                       <th className="px-4 py-3 w-[10%]">Actions</th>
                     </tr>
                   </thead>
@@ -241,7 +241,7 @@ const handleEditClick = async (role) => {
                           </td> */}
                           <td className="px-4 py-3 text-gray-600 text-left">
   <div
-    className="w-[250px] truncate"
+    className="w-[130px] truncate"
     title={role?.description || "N/A"}
   >
     {role?.description || "N/A"}

@@ -1160,29 +1160,50 @@ const handleOpenComments =
 </th>
 
     {[
-      "SUBJECT",
-      "QUERY TYPE",
-      "RAISED BY",
-      "TICKET STATUS",
-      "ASSIGNED TO",
-      "PROPERTY NAME",
-      "PRIORITY",
-    ].map((head, i) => (
-      <th
-        key={i}
-        className="
-          sticky top-0 z-30
-          bg-cardBg
-          px-5 py-4
-          text-left text-[12px]
-          font-semibold text-[#6b7280]
-          whitespace-nowrap
-          
-        "
-      >
-        {head}
-      </th>
-    ))}
+  {
+    title: "SUBJECT",
+    width: "w-[230px] min-w-[230px] max-w-[230px]",
+  },
+  {
+    title: "QUERY TYPE",
+    width: "w-[150px] min-w-[150px] max-w-[150px]",
+  },
+  {
+    title: "RAISED BY",
+    width: "w-[100px] min-w-[100px] max-w-[100px]",
+  },
+  {
+    title: "TICKET STATUS",
+    width: "w-[150px] min-w-[150px] max-w-[150px]",
+  },
+  {
+    title: "ASSIGNED TO",
+    width: "w-[180px] min-w-[180px] max-w-[180px]",
+  },
+  {
+    title: "PROPERTY NAME",
+    width: "w-[150px] min-w-[150px] max-w-[150px]",
+  },
+  {
+    title: "PRIORITY",
+    width: "w-[150px] min-w-[150px] max-w-[150px]",
+  },
+].map((head, i) => (
+  <th
+    key={i}
+    className={`
+      ${head.width}
+      sticky top-0 z-30
+      bg-cardBg
+      px-5 py-4
+      text-left text-[12px]
+      font-semibold text-[#6b7280]
+      whitespace-nowrap
+    `}
+  >
+    {head.title}
+  </th>
+))}
 
     <th
       className="
@@ -1273,9 +1294,9 @@ const handleOpenComments =
               {item.subject}
             </div>
           </td> */}
-          <td className="px-5 py-2 text-xs text-[#111827] min-w-[230px] text-left">
+          <td className="px-5 py-2 text-xs text-[#111827] min-w-[100px] text-left">
   <div
-    className="max-w-[250px] truncate"
+    className="max-w-[100px] truncate"
     title={item?.subject || "N/A"}
   >
     {item?.subject || "N/A"}
@@ -1289,13 +1310,19 @@ const handleOpenComments =
           {/* <td className="px-5 py-2 text-xs font-medium text-[#374151] whitespace-nowrap text-left">
             {item.raisedBy || "N/A"}
           </td> */}
-         <td className="px-5 py-2 text-xs font-medium whitespace-nowrap text-left">
+  <td className="px-5 py-2 text-xs font-medium whitespace-nowrap text-left w-[100px] min-w-[100px] max-w-[100px]">
   {item.isRaisedByDeleted ? (
-    <span className="text-red-600 font-semibold">
+    <span
+      className="text-red-500 cursor-pointer"
+      title="User Deleted"
+    >
       User Deleted
     </span>
   ) : (
-    <span className="text-[#374151]">
+    <span
+      className="block truncate cursor-pointer"
+      title={item.raisedBy || "N/A"}
+    >
       {item.raisedBy || "N/A"}
     </span>
   )}
@@ -1345,7 +1372,7 @@ const handleOpenComments =
 >
   <div
     className="
-      w-[180px]
+      w-[110px]
       truncate
       cursor-pointer
       hover:text-[#315CEC]
@@ -1364,45 +1391,60 @@ const handleOpenComments =
 
 <td className="px-5 py-2 text-xs font-medium text-[#374151] text-left">
   <div
-    className="w-[220px] truncate"
+    className="w-[100px] truncate"
     title={item?.hostelName || "N/A"}
   >
     {item?.hostelName || "N/A"}
   </div>
 </td>
 
-          <td className="px-5 py-2 whitespace-nowrap text-left">
+          <td
+  className="
+    px-5 py-2
+    text-xs
+    font-medium
+    text-left
+    w-[100px]
+    min-w-[100px]
+    max-w-[100px]
+  "
+>
+  <div
+    className="
+      inline-flex
+      items-center
+      gap-2
+      px-3
+      py-1
+      rounded-full
+      text-xs
+      font-medium
+      bg-[#f9fafb]
+      max-w-full
+      cursor-pointer
+    "
+    title={item.priority || "Priority Not Set"}
+  >
+    <div
+      className={`
+        w-2 h-2
+        min-w-2
+        rounded-full
+        ${
+          item.priority === "HIGH"
+            ? "bg-red-500"
+            : item.priority === "MEDIUM"
+            ? "bg-blue-500"
+            : "bg-green-500"
+        }
+      `}
+    />
 
-            <div
-              className="
-                inline-flex items-center gap-2
-                px-3 py-1 rounded-full
-                text-xs font-medium
-                bg-[#f9fafb]
-              "
-            >
-
-              <div
-                className={`
-                  w-2 h-2 rounded-full
-
-                  ${
-                    item.priority ===
-                    "HIGH"
-                      ? "bg-red-500"
-                      : item.priority ===
-                        "MEDIUM"
-                      ? "bg-blue-500"
-                      : "bg-green-500"
-                  }
-                `}
-              />
-
-             {item.priority || "Priority Not Set"}
-
-            </div>
-
-          </td>
+    <span className="truncate">
+      {item.priority || "Priority Not Set"}
+    </span>
+  </div>
+</td>
 
              <td className="sticky right-0 z-20 bg-white-common group-hover:!bg-[#fafbff] px-5 py-2 relative overflow-visible">
                       <button
