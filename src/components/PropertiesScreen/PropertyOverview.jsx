@@ -2651,7 +2651,7 @@ const handleApproveKYC = async (customerId) => {
 >
   <div
     className="
-      w-[120px]
+      w-[80px]
       truncate
       text-primaryBlue
       font-medium
@@ -2690,7 +2690,7 @@ const handleApproveKYC = async (customerId) => {
 >
   <div
     className="
-      w-[130px]
+      w-[80px]
       truncate
       font-medium
       text-tableCell

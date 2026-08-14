@@ -1060,8 +1060,8 @@ const TenantRecurring = () => {
                     <thead className="bg-light-blue text-gray-600 text-xs uppercase sticky  top-0 z-[100]">
                       <tr>
                         <th className="px-4 py-3 sticky left-0 bg-light-blue z-50 w-[80px]">ID</th>
-                        <th className="px-4 py-3 sticky left-[80px] bg-light-blue z-50 w-[100px]">Property</th>
-                        <th className=" py-3 w-[150px] whitespace-nowrap text-left">Tenant Name</th>
+                        <th className="px-4 py-3 sticky left-[80px] bg-light-blue z-50 w-[130px]">Property</th>
+                        <th className=" py-3 w-[150px]  whitespace-nowrap text-left">Tenant Name</th>
                         {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Sub Status</th> */}
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Sub Status</th>
                         <th className="py-3 w-[150px] whitespace-nowrap text-left">Region / City</th>
@@ -1130,10 +1130,10 @@ const TenantRecurring = () => {
                                   {(page - 1) * size + index + 1}
                                 </td>
 
-                                <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] min-w-[260px] max-w-[260px] text-[12px]">
+                                <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[100px] min-w-[100px] max-w-[120px] text-[12px]">
                                   <div className="flex items-center gap-2">
                                     <div
-                                      className={`relative w-[220px] ${isTableView ? "cursor-pointer" : "cursor-not-allowed"
+                                      className={`relative w-[100px] ${isTableView ? "cursor-pointer" : "cursor-not-allowed"
                                         }`}
                                       onClick={() => {
                                         if (!isTableView) return;
@@ -1217,7 +1217,7 @@ const TenantRecurring = () => {
                                 {/* <td className="text-left text-[12px]">{isTableView ? "--" : item.fullName}</td> */}
 <td className="px-4 py-2 text-left text-[12px]">
   <div
-    className="w-[180px] truncate"
+    className="w-[150px] truncate"
     title={isTableView ? "--" : item?.fullName || "N/A"}
   >
     {isTableView ? "--" : item?.fullName || "N/A"}
@@ -1228,11 +1228,26 @@ const TenantRecurring = () => {
                                   {item.isSubscriptionActive ? "Active" : "Blocked"}
                                 </td>
 
-                                <td className="text-left text-[12px]">
+                                {/* <td className="text-left text-[12px]">
                                   {isTableView
                                     ? item.city
                                     : `${item.HostelCity}, ${item.HostelState}`}
-                                </td>
+                                </td> */}
+                                 <td
+  className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap"
+  onMouseEnter={(e) => {
+    setTooltip({
+      text: item.HostelFullAddress,
+      x: e.clientX,
+      y: e.clientY,
+    });
+  }}
+  onMouseLeave={() => setTooltip(null)}
+>
+  <div className="w-[100px] min-w-[100px] max-w-[100px] truncate">
+    {item.HostelCity || "N/A"} , {item.HostelState || "N/A"}
+  </div>
+</td>
 
                                 <td className="text-left ml-3 text-[12px]">
                                   {isTableView
@@ -1440,25 +1455,15 @@ const TenantRecurring = () => {
                           <tr key={cust.customerId} className="border-t border-gray-200">
 
                             <td className="p-2">
-                              {/* <input
-                  type="checkbox"
-                  checked={selectedIds.includes(cust.customerId)}
-                  onChange={() => {
-                    setSelectedIds(prev =>
-                      prev.includes(cust.customerId)
-                        ? prev.filter(id => id !== cust.customerId)
-                        : [...prev, cust.customerId]
-                    );
-                  }}
-                /> */}
+                          
                               <input
                                 type="checkbox"
                                 checked={selectedIds.includes(cust.customerId)}
-                                disabled={cust.recurringStatus}   // ✅ disable condition
+                                disabled={cust.recurringStatus}   
                                 className={`cursor-pointer ${cust.recurringStatus ? "opacity-50 cursor-not-allowed" : ""
                                   }`}
                                 onChange={() => {
-                                  if (cust.recurringStatus) return; // safety
+                                  if (cust.recurringStatus) return; 
 
                                   setSelectedIds(prev =>
                                     prev.includes(cust.customerId)
@@ -1470,9 +1475,7 @@ const TenantRecurring = () => {
                             </td>
                             <td>{cust.hostelName}</td>
                             <td>{cust.fullName}</td>
-                            {/* <td>
-                              {cust.recurringStatus ? "Generated" : "Pending"}
-                            </td> */}
+                           
                             <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                               {cust.isSubscriptionActive ? (
                                 <span className="text-green-600 bg-green-100 px-2 py-1 rounded-full text-xs">

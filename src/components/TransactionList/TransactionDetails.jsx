@@ -758,11 +758,11 @@ const TransactionsPage = () => {
                       CUSTOMER
                     </th>
                     {/* <th className="px-4 py-3 text-[12px] font-semibold text-left">PROPERTY</th> */}
-                    <th className="px-4 py-3 w-[200px] min-w-[200px] max-w-[200px] text-[12px] font-semibold text-left">
+                    <th className="px-4 py-3 w-[120px] min-w-[120px] max-w-[120px] text-[12px] font-semibold text-left">
                       PROPERTY
                     </th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">REGION / CITY</th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">PLAN TYPE</th>
+                    <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap w-[150px]">REGION / CITY</th>
+                    <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap w-[150px]">PLAN TYPE</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Amount</th>
                     <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">PaymentMode</th>
                     {/* <th className="px-4 py-3 text-[12px] font-semibold text-left whitespace-nowrap">Transaction Ref no</th> */}
@@ -811,7 +811,7 @@ const TransactionsPage = () => {
   {item.paidBy}
 </td> */}
 
-                        <td className="sticky left-[210px] w-[180px] min-w-[180px] max-w-[180px] bg-white-common z-20 px-4 py-2 text-left text-[12px]">
+                        <td className="sticky left-[210px] w-[180px] min-w-[180px] max-w-[180px] bg-white-common z-20  py-2 text-left text-[12px]">
                           <div
                             className="w-full truncate text-left"
                             title={item.paidBy || "N/A"}
@@ -830,7 +830,7 @@ const TransactionsPage = () => {
                           </td>
                         ) : (
                           <>
-                            <td className="px-4 py-2 w-[200px] min-w-[200px] max-w-[200px] text-left text-[12px]">
+                            <td className="px-4 py-2 w-[120px] min-w-[120px] max-w-[120px] text-left text-[12px]">
                               <div
                                 className="w-full truncate"
                                 title={item.hostelName || "N/A"}
@@ -853,7 +853,7 @@ const TransactionsPage = () => {
                               </div>
                             </td>
 
-                            <td className="px-4 py-2 w-[180px] min-w-[180px] max-w-[180px] text-left">
+                            <td className="px-4 py-2 w-[120px] min-w-[120px] max-w-[120px] text-left">
                               <div
                                 className="w-full truncate text-[12px]"
                                 title={`${item.city || "N/A"}, ${item.state || "N/A"}`}

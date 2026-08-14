@@ -736,7 +736,7 @@ const handleBulkGenerate = async () => {
                     <thead className="bg-[#F8F9FF] text-gray-600 text-xs uppercase sticky top-0 z-[100]">
                       <tr>
                        <th className="px-4 py-3 sticky left-0 bg-[#F8F9FF] z-[110] w-[80px]">ID</th>
-                        <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-[110] w-[260px]">Property</th>
+                        <th className="px-4 py-3 sticky left-[80px] bg-[#F8F9FF] z-[110] w-[200px]">Property</th>
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Mobile No</th>
                         {/* <th className="px-4 py-3 text-left font-semibold text-[12px] uppercase text-[#6B7280] font-sans whitespace-nowrap">Sub Status</th> */}
                         <th className="px-4 py-3 w-[150px] whitespace-nowrap">Sub Status</th>
@@ -834,7 +834,7 @@ const handleBulkGenerate = async () => {
 </td>
 
 
-                            <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[260px] group-hover:bg-gray-50">
+                            <td className="px-4 py-2 sticky left-[80px] bg-white-common z-30 w-[100px] group-hover:bg-gray-50">
                               <div className="flex items-center gap-3">
 
                                 {/* Avatar */}
@@ -859,7 +859,7 @@ const handleBulkGenerate = async () => {
                                     {item?.ownerInfo?.fullName || "----"}
                                   </span>
                                 </div> */}
-                                <div className="flex flex-col w-[180px]">
+                                <div className="flex flex-col w-[100px]">
   <span
     className="text-[13px] font-semibold text-gray-900 text-left truncate"
     title={item?.hostelName || "N/A"}
@@ -895,19 +895,21 @@ const handleBulkGenerate = async () => {
                               </span>
                             </td>
 
-                            <td
-                              className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap"
-                              onMouseEnter={(e) => {
-                                setTooltip({
-                                  text: item.fullAddress,
-                                  x: e.clientX,
-                                  y: e.clientY
-                                });
-                              }}
-                              onMouseLeave={() => setTooltip(null)}
-                            >
-                              {item.city} , {item.state}
-                            </td>
+                           <td
+  className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap"
+  onMouseEnter={(e) => {
+    setTooltip({
+      text: item.fullAddress,
+      x: e.clientX,
+      y: e.clientY,
+    });
+  }}
+  onMouseLeave={() => setTooltip(null)}
+>
+  <div className="w-[100px] min-w-[100px] max-w-[100px] truncate">
+    {item.city || "N/A"} , {item.state || "N/A"}
+  </div>
+</td>
                             <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">
                               {item.billingStartDay}to{item.billingEndDay} of Month
                             </td>

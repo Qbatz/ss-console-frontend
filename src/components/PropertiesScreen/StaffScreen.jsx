@@ -367,7 +367,7 @@ setPinError(res.message)
                       </td> */}
                       <td className="px-4 py-2 text-left">
   <div
-    className="w-[180px] truncate font-medium text-[12px]"
+    className="w-[120px] truncate font-medium text-[12px]"
     title={item.fullName || item.firstName}
   >
     {item.fullName || item.firstName}
@@ -376,7 +376,7 @@ setPinError(res.message)
 
 <td className="px-4 py-2 text-left">
   <div
-    className="w-[220px] truncate font-medium text-[12px]"
+    className="w-[120px] truncate font-medium text-[12px]"
     title={item.email || "N/A"}
   >
     {item.email || "N/A"}
@@ -566,7 +566,7 @@ marginLeft: "-8px",
                   </th>
                   <th className="px-4 py-3 text-left">
                     <div className="flex items-center gap-1 font-semibold text-[12px] uppercase text-[#6B7280] font-inter">
-                      Mobile number
+                      Mobile No
                       <img src={swap} alt="sort" className="w-3 h-3 opacity-70" />
                     </div>
                   </th>
@@ -603,7 +603,7 @@ marginLeft: "-8px",
                       </td> */}
                       <td className="px-4 py-2 text-left">
   <div
-    className="w-[180px] truncate font-medium text-[12px]"
+    className="w-[120px] truncate font-medium text-[12px]"
     title={item.fullName || item.firstName}
   >
     {item.fullName || item.firstName}
@@ -612,7 +612,7 @@ marginLeft: "-8px",
 
 <td className="px-4 py-2 text-left">
   <div
-    className="w-[180px] truncate font-medium text-[12px]"
+    className="w-[100px] truncate font-medium text-[12px]"
     title={item.emailId || "N/A"}
   >
     {item.emailId || "N/A"}

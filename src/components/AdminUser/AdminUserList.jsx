@@ -435,7 +435,7 @@ console.log("filteredAgents", filteredAgents);
                         </th>
 
 
-                        <th className="px-2 py-3  font-semibold text-xs uppercase text-[#6B7280] font-inter">ACTIONS</th>
+                        <th className="px-2 py-3 text-left font-semibold text-xs uppercase text-[#6B7280] font-inter">ACTIONS</th>
                       </tr>
                     </thead>
 
@@ -475,7 +475,7 @@ console.log("filteredAgents", filteredAgents);
   className="px-4 py-2 text-left font-semibold text-xs text-blue-700 cursor-pointer hover:underline"
 >
   <div
-    className="w-[100px] truncate"
+    className="w-[180px] truncate"
     title={user?.fullName || "N/A"}
   >
     {user?.fullName || "N/A"}
@@ -484,39 +484,22 @@ console.log("filteredAgents", filteredAgents);
 
 <td className="px-2 py-2 text-left font-semibold text-xs">
   <div
-    className="w-[100px] truncate"
+    className="w-[180px] truncate"
     title={user?.email || "N/A"}
   >
     {user?.email || "N/A"}
   </div>
 </td>
 
-                             <td className="px-4 py-2 text-[12px] text-left">
-  <div
-    className="
-      w-[120px]
-      min-w-[120px]
-      max-w-[120px]
-      truncate
-      whitespace-nowrap
-    "
-    title={user?.roleName || "N/A"}
-  >
-    {user?.roleName || "N/A"}
-  </div>
-</td>
+                              <td className="px-2 py-2 text-left font-semibold text-xs whitespace-nowrap">
+                                {user?.roleName || "N/A"}
+                              </td>
 
                               <td className="px-2 py-1 text-left font-semibold text-xs whitespace-nowrap">
-  <div className="flex flex-col">
-    <span>
-      {user?.lastActiveDate || "N/A"}
-    </span>
-
-    <span className="text-gray-500 font-normal">
-      {user?.lastActiveTime || ""}
-    </span>
-  </div>
-</td>
+                                {user?.lastActiveDate && user?.lastActiveTime
+                                  ? `${user.lastActiveDate} ${user.lastActiveTime}`
+                                  : "N/A"}
+                              </td>
 
 
 
@@ -561,7 +544,16 @@ console.log("filteredAgents", filteredAgents);
 
 
                                     {status !== "INACTIVE" ? (
-                                      
+                                      // <button
+                                      //   onClick={() => {
+                                      //     setSelectedUser(user);
+                                      //     setConfirmOpen(true);
+                                      //     setMenuOpen(null);
+                                      //   }}
+                                      //   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                      // >
+                                      //   Deactivate
+                                      // </button>
                                       <button
   disabled={!canUpdate}
   onClick={() => {
@@ -582,7 +574,16 @@ console.log("filteredAgents", filteredAgents);
                                     ) : (
 
 
-                                      
+                                      // <button
+                                      //   onClick={() => {
+                                      //     setSelectedUser(user);
+                                      //     setShowReactivateModal(true);
+                                      //     setMenuOpen(null);
+                                      //   }}
+                                      //   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-green-600"
+                                      // >
+                                      //   Reactivate
+                                      // </button>
                                       <button
   disabled={!canUpdate}
   onClick={() => {
@@ -607,7 +608,17 @@ console.log("filteredAgents", filteredAgents);
                                     >
                                       View Details
                                     </button>
-                                    
+                                    {/* <button
+                                      onClick={() => {
+                                        setSelectedUser(user);
+                                        setSelectedRoleId(user.roleId);
+                                        setShowEditModal(true);
+                                        setMenuOpen(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                                    >
+                                      Edit
+                                    </button> */}
                                     <button
   disabled={!canUpdate}
   onClick={() => {
