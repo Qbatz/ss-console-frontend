@@ -40,6 +40,7 @@ import PlanFeatures from "../components/SubscriptionScreen/PlanFeaturesScreen";
 import KycApproval from "../components/KYCApproval/KYCApprovalScreen";
 import { KYCProvider } from "../Context/KYCContext";
 import SettlementSummary from "../components/PropertiesScreen/SettlementSummary";
+import ExportRetention from "../components/ExportRetention/ExportRetentionScreen"
 
 const PrivateRoute = ({ children }) => {
   const token =
@@ -130,6 +131,8 @@ const PrivateRoutesScreen = () => {
 element={<SettlementSummary />}
 />
 
+
+ <Route path="/exportretention/:roleId" element={< ExportRetention/>} />
                     </Routes>
                     </KYCProvider>
                   </SupportTicketsProvider>

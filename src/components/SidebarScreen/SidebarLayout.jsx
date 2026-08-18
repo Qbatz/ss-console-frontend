@@ -342,6 +342,8 @@ useEffect(() => {
 </div>
             {/* <SidebarItem title="Billings" to={`/billing/${adminDetails?.roleId}`} activeIcon={Billings}
               inactiveIcon={Billings} /> */}
+              <SidebarItem title="Export Retention" to={`/exportretention/${adminDetails?.roleId}`} activeIcon={Billings}
+              inactiveIcon={Billings} />
               <SidebarItem title="Invoice-Redemption" to={`/invoice-redemption/${adminDetails?.roleId}`} activeIcon={Billings}
               inactiveIcon={Billings} />
 
