@@ -347,6 +347,11 @@ useEffect(() => {
               <SidebarItem title="Invoice-Redemption" to={`/invoice-redemption/${adminDetails?.roleId}`} activeIcon={Billings}
               inactiveIcon={Billings} />
 
+               <SidebarItem title="Stay Info" to={`/stayinfo/${adminDetails?.roleId}`} activeIcon={Billings}
+              inactiveIcon={Billings} />
+               <SidebarItem title="Product Update" to={`/product-update/${adminDetails?.roleId}`} activeIcon={Billings}
+              inactiveIcon={Billings} />
+
             {/* <SidebarItem title="Monthly Recurring" count="0" to={`/Recurring-Bill/${adminDetails?.roleId}`} /> */}
 
 

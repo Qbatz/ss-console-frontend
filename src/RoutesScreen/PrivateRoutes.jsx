@@ -40,7 +40,10 @@ import PlanFeatures from "../components/SubscriptionScreen/PlanFeaturesScreen";
 import KycApproval from "../components/KYCApproval/KYCApprovalScreen";
 import { KYCProvider } from "../Context/KYCContext";
 import SettlementSummary from "../components/PropertiesScreen/SettlementSummary";
-import ExportRetention from "../components/ExportRetention/ExportRetentionScreen"
+import ExportRetention from "../components/ExportRetention/ExportRetentionScreen";
+import ProductUpdate from "../components/ProductUpdate/ProductUpdatesScreen";
+import CreateProductUpdate from "../components/ProductUpdate/CreateProductUpdate";
+import StayInfoScreen from "../components/StayInfo/StayInfoScreen";
 
 const PrivateRoute = ({ children }) => {
   const token =
@@ -80,13 +83,13 @@ const PrivateRoutesScreen = () => {
   return (
     <PrivateRoute>
       <PlanProvider>
-       
-          <HostelProvider>
-            <SubscriptionProvider>
-              <OwnersProvider>
-                <DashboardProvider>
-                  <SupportTicketsProvider>
-                    <KYCProvider>
+
+        <HostelProvider>
+          <SubscriptionProvider>
+            <OwnersProvider>
+              <DashboardProvider>
+                <SupportTicketsProvider>
+                  <KYCProvider>
                     <Routes>
                       <Route path="/home/:roleId" element={<Home />} />
                       <Route path="/proprietors/:roleId" element={<Proprietors />} />
@@ -118,29 +121,24 @@ const PrivateRoutesScreen = () => {
                       <Route path="/iam-user/:agentId" element={<UserInfo />} />
                       <Route path="/tableCustomize/:agentId" element={<TableCustomization />} />
                       <Route path="/invoice-redemption/:agentId" element={<InvoiceRedemption />} />
-                      <Route path="/tenant-deductions/:customerId"element={<TenantDeductions />}/>
-<Route path="/tenant-overview/:customerId" element={<TenantOverview />}/>
-<Route
-  path="/invoice-receipt/:hostelId/:invoiceId"
-  element={<InvoiceReceipt />}
-/>
-<Route path="/Kyc-approve/:agentId" element={<KycApproval />} />
+                      <Route path="/tenant-deductions/:customerId" element={<TenantDeductions />} />
+                      <Route path="/tenant-overview/:customerId" element={<TenantOverview />} />
+                      <Route path="/invoice-receipt/:hostelId/:invoiceId" element={<InvoiceReceipt />} />
+                      <Route path="/Kyc-approve/:agentId" element={<KycApproval />} />
+                      <Route path="/settlement-summary/:customerId" element={<SettlementSummary />} />
+                      <Route path="/product-update/:roleId" element={< ProductUpdate />} />
 
-<Route
-  path="/settlement-summary/:customerId"
-element={<SettlementSummary />}
-/>
-
-
- <Route path="/exportretention/:roleId" element={< ExportRetention/>} />
+                      <Route path="/exportretention/:roleId" element={< ExportRetention />} />
+                      <Route path="/product-update-create/:roleId" element={< CreateProductUpdate />} />
+                      <Route path="/stayinfo/:roleId" element={<StayInfoScreen />} />
                     </Routes>
-                    </KYCProvider>
-                  </SupportTicketsProvider>
-                </DashboardProvider>
-              </OwnersProvider>
-            </SubscriptionProvider>
-          </HostelProvider>
-      
+                  </KYCProvider>
+                </SupportTicketsProvider>
+              </DashboardProvider>
+            </OwnersProvider>
+          </SubscriptionProvider>
+        </HostelProvider>
+
       </PlanProvider>
     </PrivateRoute>
   );

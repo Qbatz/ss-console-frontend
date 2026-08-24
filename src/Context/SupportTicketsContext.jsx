@@ -63,9 +63,6 @@ export const SupportTicketsProvider = ({
 
   };
 
-  /* =========================
-      SEARCH OWNERS
-  ========================= */
 
   const searchOwners = async (
     name = ""
@@ -119,9 +116,7 @@ export const SupportTicketsProvider = ({
     }
 
   };
-  /* =========================
-    QUERY TYPE
-========================= */
+  
 
 const getQueryTypes =
   async () => {

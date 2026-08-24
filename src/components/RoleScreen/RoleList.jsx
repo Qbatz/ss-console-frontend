@@ -255,9 +255,9 @@ const handleEditClick = async (role) => {
                           </td> */}
                           <td className="px-4 py-3 text-center">
                             <span
-                              onClick={() =>
-                                navigate(`/iam-admin-user/${adminDetails?.roleId}/${role.id}`)
-                              }
+                            onClick={() =>
+    navigate(`/product-update-create/${adminDetails?.roleId}`)
+  }
                               className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-xs cursor-pointer hover:bg-blue-100"
                             >
                               <img src={Team} alt="Team" className="w-4 h-4" />
