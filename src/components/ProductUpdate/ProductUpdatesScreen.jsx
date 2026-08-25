@@ -3,6 +3,11 @@ import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { useNavigate } from "react-router-dom";
 import { useRole } from "../../Context/RoleContext";
 import { usePlan } from "../../Context/PlanContexts";
+import Toast from "../SuccessModal/ToastDesign";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import Circle from "../../assets/menucircle.png";
+import Eye from "../../assets/eye.png";
+import Edit from "../../assets/editIcon.png";
 
 const ProductUpdate = () => {
   const [activeTab, setActiveTab] = useState("ALL");
@@ -25,11 +30,21 @@ const [pageSize, setPageSize] = useState(10);
 const [totalCount, setTotalCount] = useState(0);
 const [totalPages, setTotalPages] = useState(1);
 const [hoveredRow, setHoveredRow] = useState(null);
-
+const [openActionId, setOpenActionId] = useState(null);
+const [actionMenuPosition, setActionMenuPosition] = useState({
+  top: 0,
+  left: 0,
+});
+const [showArchiveModal, setShowArchiveModal] = useState(false);
+const [selectedUpdate, setSelectedUpdate] = useState(null);
+const [archiveLoading, setArchiveLoading] = useState(false);
+ const [modalType, setModalType] = useState("success");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   const { adminDetails } = useRole();
-  const { getProductUpdates } = usePlan();
+  const { getProductUpdates,archiveProductUpdate,getProductUpdateById } = usePlan();
 
  useEffect(() => {
   fetchProductUpdates();
@@ -125,10 +140,56 @@ const filteredUpdates = updates.filter((item) => {
 
   return searchMatch && typeMatch && statusMatch;
 });
+const handleArchive = async (productUpdateId) => {
+  if (!productUpdateId) return;
 
+  try {
+    setArchiveLoading(true);
+
+    const result = await archiveProductUpdate(productUpdateId);
+
+    if (result.success) {
+
+      setModalType("success");
+     setMessage(result?.data);
+     setShowSuccess(true);
+
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1200);
+      setShowArchiveModal(false);
+      setSelectedUpdate(null);
+
+    
+      fetchProductUpdates();
+   
+
+    } else {
+       setModalType("error");
+     setMessage(result?.message);
+     setShowSuccess(true);
+
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1200);
+     
+    }
+
+  } catch (error) {
+    toast.error("Failed to archive product update");
+  } finally {
+    setArchiveLoading(false);
+  }
+};
 
   return (
     <DashboardLayout>
+       <Toast
+                    show={showSuccess}
+                    message={message}
+                    type={modalType} />
       <div className="min-h-screen bg-[#F8F9FB] px-5 py-5">
 
         {/* Header */}
@@ -395,35 +456,35 @@ const filteredUpdates = updates.filter((item) => {
 
        
     
-<div className="w-full max-h-[400px] overflow-auto">
+<div className="w-full max-h-[400px] overflow-auto relative">
 
   <table className="w-full min-w-[1100px] table-fixed">
 
-    <colgroup>
-      <col className="w-[5%]" />
-      <col className="w-[20%]" />
-      <col className="w-[8%]" />
-      <col className="w-[11%]" />
-      <col className="w-[10%]" />
-      <col className="w-[13%]" />
-      <col className="w-[10%]" />
-      <col className="w-[10%]" />
-      <col className="w-[8%]" />
-      <col className="w-[5%]" />
-    </colgroup>
+   <colgroup>
+  <col className="w-[5%]" />
+  <col className="w-[20%]" />
+  <col className="w-[8%]" />
+  <col className="w-[10%]" />
+  <col className="w-[10%]" />
+  <col className="w-[13%]" />
+  <col className="w-[10%]" />
+  <col className="w-[10%]" />
+  <col className="w-[9%]" />
+  <col className="w-[5%]" />
+</colgroup>
 
-   
+    {/* ================= HEADER ================= */}
 
     <thead>
       <tr className="border-y border-gray-100">
 
-      
+        {/* ID */}
         <th
           className="
             sticky
             left-0
             top-0
-            z-30
+            z-40
             bg-[#FCFCFD]
             px-3
             py-2.5
@@ -432,17 +493,18 @@ const filteredUpdates = updates.filter((item) => {
             font-medium
             text-gray-400
             uppercase
+            shadow-[2px_0_4px_rgba(0,0,0,0.03)]
           "
         >
           ID
         </th>
 
-       
+        {/* UPDATE */}
         <th
           className="
             sticky
             top-0
-            z-20
+            z-30
             bg-[#FCFCFD]
             px-3
             py-2.5
@@ -456,12 +518,12 @@ const filteredUpdates = updates.filter((item) => {
           Update
         </th>
 
-       
+        {/* VERSION */}
         <th
           className="
             sticky
             top-0
-            z-20
+            z-30
             bg-[#FCFCFD]
             px-2
             py-2.5
@@ -475,12 +537,12 @@ const filteredUpdates = updates.filter((item) => {
           Version
         </th>
 
-       
+        {/* TYPE */}
         <th
           className="
             sticky
             top-0
-            z-20
+            z-30
             bg-[#FCFCFD]
             px-2
             py-2.5
@@ -494,12 +556,12 @@ const filteredUpdates = updates.filter((item) => {
           Type
         </th>
 
-      
+        {/* PLATFORM */}
         <th
           className="
             sticky
             top-0
-            z-20
+            z-30
             bg-[#FCFCFD]
             px-2
             py-2.5
@@ -513,12 +575,12 @@ const filteredUpdates = updates.filter((item) => {
           Platform
         </th>
 
-       
+        {/* AUDIENCE */}
         <th
           className="
             sticky
             top-0
-            z-20
+            z-30
             bg-[#FCFCFD]
             px-2
             py-2.5
@@ -532,12 +594,12 @@ const filteredUpdates = updates.filter((item) => {
           Audience
         </th>
 
-       
+        {/* STATUS */}
         <th
           className="
             sticky
             top-0
-            z-20
+            z-30
             bg-[#FCFCFD]
             px-2
             py-2.5
@@ -551,12 +613,12 @@ const filteredUpdates = updates.filter((item) => {
           Status
         </th>
 
-        
+        {/* PUBLISHED DATE */}
         <th
           className="
             sticky
             top-0
-            z-20
+            z-30
             bg-[#FCFCFD]
             px-2
             py-2.5
@@ -576,7 +638,7 @@ const filteredUpdates = updates.filter((item) => {
           className="
             sticky
             top-0
-            z-20
+            z-30
             bg-[#FCFCFD]
             px-2
             py-2.5
@@ -590,301 +652,433 @@ const filteredUpdates = updates.filter((item) => {
           Created By
         </th>
 
-   
-        <th
-          className="
-            sticky
-            right-0
-            top-0
-            z-30
-            bg-[#FCFCFD]
-            px-2
-            py-2.5
-            text-center
-            text-[10px]
-            font-medium
-            text-gray-400
-            uppercase
-          "
-        >
-          Actions
-        </th>
+      
+       <th
+  className="
+    sticky
+    right-0
+    top-0
+    z-50
+    w-[120px]
+    min-w-[120px]
+    bg-[#FCFCFD]
+    px-3
+    py-2.5
+    text-center
+    text-[10px]
+    font-medium
+    text-gray-400
+    uppercase
+    whitespace-nowrap
+    shadow-[-2px_0_4px_rgba(0,0,0,0.05)]
+  "
+>
+  Actions
+</th>
 
       </tr>
     </thead>
 
-
-   
+    {/* ================= BODY ================= */}
 
     <tbody>
 
       {updates?.length > 0 ? (
 
-        updates.map((item, index) => (
+        updates.map((item, index) => {
 
-       <tr
-  key={item.productUpdateId || index}
-  onMouseEnter={() => setHoveredRow(index)}
-  onMouseLeave={() => setHoveredRow(null)}
-  className="border-b border-gray-100 transition text-[10px]"
-  style={{
-    backgroundColor:
-      hoveredRow === index ? "#FAFBFF" : "white",
-  }}
->
+          const isHovered = hoveredRow === index;
+
+          return (
+            <tr
+              key={item.productUpdateId || index}
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
+              className="
+                border-b
+                border-gray-100
+                transition
+                text-[10px]
+              "
+              style={{
+                backgroundColor: isHovered
+                  ? "#FAFBFF"
+                  : "#FFFFFF",
+              }}
+            >
+
+              {/* ================= ID ================= */}
+
+              <td
+                className="
+                  sticky
+                  left-0
+                  z-20
+                  px-3
+                  py-3
+                  text-left
+                  text-gray-600
+                  whitespace-nowrap
+                  shadow-[2px_0_4px_rgba(0,0,0,0.03)]
+                "
+                style={{
+                  backgroundColor: isHovered
+                    ? "#FAFBFF"
+                    : "#FFFFFF",
+                }}
+              >
+                {(currentPage - 1) * pageSize + index + 1}
+              </td>
+
+              {/* ================= UPDATE ================= */}
+
+              <td className="px-3 py-3 text-left">
+                <div
+                  className="truncate"
+                  title={item.title}
+                >
+                  {item.title || "----"}
+                </div>
+              </td>
+
+              {/* ================= VERSION ================= */}
+
+              <td className="px-2 py-3 text-left">
+                {item.version || "----"}
+              </td>
+
+              {/* ================= TYPE ================= */}
+
+              <td className="px-2 py-3 text-left">
+
+                {(() => {
+
+                  const type = item.updateType;
+
+                  let badgeClass =
+                    "bg-gray-100 text-gray-500";
+
+                  if (type === "NEW_FEATURE") {
+                    badgeClass =
+                      "bg-[#EEF3FF] text-[#2952F3]";
+                  }
+
+                  if (type === "BUG_FIX") {
+                    badgeClass =
+                      "bg-[#FFF0F0] text-[#F04444]";
+                  }
+
+                  if (type === "IMPROVEMENT") {
+                    badgeClass =
+                      "bg-[#F3EEFF] text-[#7C3AED]";
+                  }
+
+                  if (type === "IMPORTANT_UPDATE") {
+                    badgeClass =
+                      "bg-[#FFF5E6] text-[#D97706]";
+                  }
+
+                  const label =
+                    type === "NEW_FEATURE"
+                      ? "New Feature"
+                      : type === "BUG_FIX"
+                      ? "Bug Fix"
+                      : type === "IMPROVEMENT"
+                      ? "Improvement"
+                      : type === "IMPORTANT_UPDATE"
+                      ? "Important Update"
+                      : type || "----";
+
+                  return (
+                    <span
+                      className={`
+                        inline-flex
+                        items-center
+                        rounded-full
+                        px-2
+                        py-1
+                        text-[8px]
+                        font-medium
+                        whitespace-nowrap
+                        ${badgeClass}
+                      `}
+                    >
+                      {label}
+                    </span>
+                  );
+
+                })()}
+
+              </td>
+
+              {/* ================= PLATFORM ================= */}
+
+              <td className="px-2 py-3 text-left">
+                {item.platform || "----"}
+              </td>
+
+              {/* ================= AUDIENCE ================= */}
+
+              <td className="px-2 py-3 text-left">
+
+                <div
+                  className="truncate"
+                  title={item.audience}
+                >
+                  {item.audience || "----"}
+                </div>
+
+              </td>
+
+              {/* ================= STATUS ================= */}
+
+              <td className="px-2 py-3 text-left">
+
+                {(() => {
+
+                  const status = item.publishStatus;
+
+                  let badgeClass =
+                    "bg-gray-100 text-gray-500";
+
+                  if (status === "PUBLISHED") {
+                    badgeClass =
+                      "bg-[#E8F8F0] text-[#16A34A]";
+                  }
+
+                  if (status === "SCHEDULED") {
+                    badgeClass =
+                      "bg-[#FFF5E6] text-[#D97706]";
+                  }
+
+                  if (status === "DRAFT") {
+                    badgeClass =
+                      "bg-[#F1F3F5] text-[#6B7280]";
+                  }
+
+                  if (status === "ARCHIVED") {
+                    badgeClass =
+                      "bg-[#F3F4F6] text-[#6B7280]";
+                  }
+
+                  const label =
+                    status === "PUBLISHED"
+                      ? "Published"
+                      : status === "SCHEDULED"
+                      ? "Scheduled"
+                      : status === "DRAFT"
+                      ? "Draft"
+                      : status === "ARCHIVED"
+                      ? "Archived"
+                      : status || "----";
+
+                  return (
+                    <span
+                      className={`
+                        inline-flex
+                        items-center
+                        rounded-full
+                        px-2
+                        py-1
+                        text-[8px]
+                        font-medium
+                        whitespace-nowrap
+                        ${badgeClass}
+                      `}
+                    >
+                      {label}
+                    </span>
+                  );
+
+                })()}
+
+              </td>
+
+              {/* ================= PUBLISHED DATE ================= */}
+
+              <td
+                className="
+                  px-2
+                  py-3
+                  text-left
+                  whitespace-nowrap
+                "
+              >
+                {item.publishDate ||
+                  item.releaseDate ||
+                  "-"}
+              </td>
+
+              {/* ================= CREATED BY ================= */}
+
+              <td className="px-2 py-3 text-left">
+
+                <div
+                  className="truncate"
+                  title={item.createdBy}
+                >
+                  {item.createdBy || "----"}
+                </div>
+
+              </td>
 
             
 
-   <td
-  className="
-    sticky
-    left-0
-    z-20
-    px-3
-    py-3
-    text-left
-    text-gray-600
-    whitespace-nowrap
-  "
-  style={{
-    backgroundColor:
-      hoveredRow === index ? "#FAFBFF" : "white",
-  }}
->
-  {(currentPage - 1) * pageSize + index + 1}
-</td>
-
-
-           
-
-            <td className="px-3 py-3 text-left">
-
-              <div
-                className="truncate"
-                title={item.title}
-              >
-                {item.title || "----"}
-              </div>
-
-            </td>
-
-
-          
-
-            <td className="px-2 py-3 text-left">
-
-              {item.version || "----"}
-
-            </td>
-
-
-            {/* ================= TYPE ================= */}
-
-            <td className="px-2 py-3 text-left">
-
-              {(() => {
-
-                const type = item.updateType;
-
-                let badgeClass =
-                  "bg-gray-100 text-gray-500";
-
-                if (type === "NEW_FEATURE") {
-                  badgeClass =
-                    "bg-[#EEF3FF] text-[#2952F3]";
-                }
-
-                if (type === "BUG_FIX") {
-                  badgeClass =
-                    "bg-[#FFF0F0] text-[#F04444]";
-                }
-
-                if (type === "IMPROVEMENT") {
-                  badgeClass =
-                    "bg-[#F3EEFF] text-[#7C3AED]";
-                }
-
-                if (type === "IMPORTANT_UPDATE") {
-                  badgeClass =
-                    "bg-[#FFF5E6] text-[#D97706]";
-                }
-
-                const label =
-                  type === "NEW_FEATURE"
-                    ? "New Feature"
-                    : type === "BUG_FIX"
-                    ? "Bug Fix"
-                    : type === "IMPROVEMENT"
-                    ? "Improvement"
-                    : type === "IMPORTANT_UPDATE"
-                    ? "Important Update"
-                    : type || "----";
-
-                return (
-                  <span
-                    className={`
-                      inline-flex
-                      items-center
-                      rounded-full
-                      px-2
-                      py-1
-                      text-[8px]
-                      font-medium
-                      whitespace-nowrap
-                      ${badgeClass}
-                    `}
-                  >
-                    {label}
-                  </span>
-                );
-
-              })()}
-
-            </td>
-
-
-            {/* ================= PLATFORM ================= */}
-
-            <td className="px-2 py-3 text-left">
-
-              {item.platform || "----"}
-
-            </td>
-
-
-            {/* ================= AUDIENCE ================= */}
-
-            <td className="px-2 py-3 text-left">
-
-              <div
-                className="truncate"
-                title={item.audience}
-              >
-                {item.audience || "----"}
-              </div>
-
-            </td>
-
-
-            {/* ================= STATUS ================= */}
-
-            <td className="px-2 py-3 text-left">
-
-              {(() => {
-
-                const status = item.publishStatus;
-
-                let badgeClass =
-                  "bg-gray-100 text-gray-500";
-
-                if (status === "PUBLISHED") {
-                  badgeClass =
-                    "bg-[#E8F8F0] text-[#16A34A]";
-                }
-
-                if (status === "SCHEDULED") {
-                  badgeClass =
-                    "bg-[#FFF5E6] text-[#D97706]";
-                }
-
-                if (status === "DRAFT") {
-                  badgeClass =
-                    "bg-[#F1F3F5] text-[#6B7280]";
-                }
-
-                if (status === "ARCHIVED") {
-                  badgeClass =
-                    "bg-[#F3F4F6] text-[#6B7280]";
-                }
-
-                const label =
-                  status === "PUBLISHED"
-                    ? "Published"
-                    : status === "SCHEDULED"
-                    ? "Scheduled"
-                    : status === "DRAFT"
-                    ? "Draft"
-                    : status === "ARCHIVED"
-                    ? "Archived"
-                    : status || "----";
-
-                return (
-                  <span
-                    className={`
-                      inline-flex
-                      items-center
-                      rounded-full
-                      px-2
-                      py-1
-                      text-[8px]
-                      font-medium
-                      whitespace-nowrap
-                      ${badgeClass}
-                    `}
-                  >
-                    {label}
-                  </span>
-                );
-
-              })()}
-
-            </td>
-
-
-            {/* ================= PUBLISHED DATE ================= */}
-
-            <td
-              className="
-                px-2
-                py-3
-                text-left
-                whitespace-nowrap
-              "
-            >
-              {item.publishDate ||
-                item.releaseDate ||
-                "-"}
-            </td>
-
-
-            {/* ================= CREATED BY ================= */}
-
-            <td className="px-2 py-3 text-left">
-
-              <div
-                className="truncate"
-                title={item.createdBy}
-              >
-                {item.createdBy || "----"}
-              </div>
-
-            </td>
-
-
-           
-
-    <td
+  <td
   className="
     sticky
     right-0
-    z-20
-    px-2
+    z-40
+    w-[120px]
+    min-w-[120px]
+    px-3
     py-3
     text-center
+    whitespace-nowrap
+    shadow-[-2px_0_4px_rgba(0,0,0,0.05)]
   "
   style={{
-    backgroundColor:
-      hoveredRow === index ? "#FAFBFF" : "white",
+    backgroundColor: isHovered
+      ? "#FAFBFF"
+      : "#FFFFFF",
   }}
 >
-  <div className="flex items-center justify-center gap-2">
-    ...
+  <div className="flex items-center justify-center gap-1">
+
+  
+    <button
+      type="button"
+      title="View"
+      className="
+        w-7 h-7
+        shrink-0
+        flex items-center justify-center
+        rounded-md
+        text-gray-500
+        hover:bg-gray-100
+        hover:text-gray-700
+        transition
+        cursor-pointer
+      "
+    >
+      <img
+        src={Eye}
+        alt="View"
+        className="w-4 h-4 object-contain"
+      />
+    </button>
+
+    {/* EDIT */}
+  {/* EDIT */}
+<button
+  type="button"
+  title="Edit"
+  onClick={() =>
+    navigate(
+      `/product-update-create/${adminDetails?.roleId}`,
+      {
+        state: {
+          mode: "edit",
+          productUpdateId: item.productUpdateId,
+        },
+      }
+    )
+  }
+  className="
+    w-7 h-7
+    shrink-0
+    flex items-center justify-center
+    rounded-md
+    text-gray-500
+    hover:bg-gray-100
+    hover:text-gray-700
+    transition
+    cursor-pointer
+  "
+>
+  <img
+    src={Edit}
+    alt="Edit"
+    className="w-4 h-4 object-contain"
+  />
+</button>
+
+    {/* MORE */}
+    <button
+      type="button"
+      title="More"
+      onClick={(e) => {
+
+        const rect =
+          e.currentTarget.getBoundingClientRect();
+
+        const menuWidth = 120;
+        const menuHeight = 40;
+
+        let top = rect.bottom + 4;
+        let left = rect.right - menuWidth;
+
+        if (
+          top + menuHeight >
+          window.innerHeight
+        ) {
+          top =
+            rect.top -
+            menuHeight -
+            4;
+        }
+
+        if (left < 8) {
+          left = 8;
+        }
+
+        if (
+          left + menuWidth >
+          window.innerWidth - 8
+        ) {
+          left =
+            window.innerWidth -
+            menuWidth -
+            8;
+        }
+
+        setActionMenuPosition({
+          top,
+          left,
+        });
+
+        setOpenActionId(
+          openActionId === item.productUpdateId
+            ? null
+            : item.productUpdateId
+        );
+      }}
+      className="
+        w-7 h-7
+        shrink-0
+        flex items-center justify-center
+        rounded-md
+        text-gray-500
+        hover:bg-gray-100
+        hover:text-gray-700
+        transition
+        cursor-pointer
+      "
+    >
+      <img
+        src={Circle}
+        alt="More"
+        className="w-4 h-4 object-contain"
+      />
+    </button>
+
   </div>
 </td>
 
-          </tr>
+            </tr>
+          );
 
-        ))
+        })
 
       ) : (
 
@@ -910,6 +1104,81 @@ const filteredUpdates = updates.filter((item) => {
     </tbody>
 
   </table>
+
+
+
+
+  {openActionId && (
+    <>
+
+      <div
+        className="fixed inset-0 z-[90]"
+        onClick={() => setOpenActionId(null)}
+      />
+
+      <div
+        className="
+          fixed
+          z-[9999]
+          w-[120px]
+          bg-white
+          border
+          border-gray-200
+          rounded-md
+          shadow-lg
+          overflow-hidden
+        "
+        style={{
+          top: `${actionMenuPosition.top}px`,
+          left: `${actionMenuPosition.left}px`,
+        }}
+      >
+
+        {updates
+          .filter(
+            (item) =>
+              item.productUpdateId ===
+              openActionId
+          )
+          .map((item) => (
+
+            <React.Fragment
+              key={item.productUpdateId}
+            >
+
+              {item.canArchive === true && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedUpdate(item);
+                    setShowArchiveModal(true);
+                    setOpenActionId(null);
+                  }}
+                  className="
+                    w-full
+                    px-3
+                    py-2
+                    text-left
+                    text-[10px]
+                    text-gray-700
+                    hover:bg-gray-50
+                    hover:text-red-600
+                    transition
+                    cursor-pointer
+                  "
+                >
+                  Archive
+                </button>
+              )}
+
+            </React.Fragment>
+
+          ))}
+
+      </div>
+
+    </>
+  )}
 
 </div>
 
@@ -1009,6 +1278,139 @@ const filteredUpdates = updates.filter((item) => {
 </div>
         </div>
       </div>
+      {showArchiveModal && (
+  <div
+    className="
+      fixed inset-0
+      z-[9999]
+      bg-black/40
+      flex
+      items-center
+      justify-center
+      p-4
+    "
+  >
+
+    <div
+      className="
+        w-[380px]
+        max-w-full
+        bg-white
+        rounded-xl
+        shadow-xl
+        overflow-hidden
+      "
+    >
+
+      {/* HEADER */}
+      <div
+        className="
+          px-5 py-4
+          border-b
+          border-gray-100
+        "
+      >
+        <h3 className="text-[13px] font-semibold text-gray-800">
+          Archive Product Update
+        </h3>
+      </div>
+
+
+      {/* CONTENT */}
+      <div className="px-5 py-5">
+
+        <p className="text-[11px] text-gray-500 leading-5">
+          Are you sure you want to archive this product update?
+        </p>
+
+        {selectedUpdate?.title && (
+          <p className="mt-2 text-[11px] font-medium text-gray-700 truncate">
+            "{selectedUpdate.title}"
+          </p>
+        )}
+
+      </div>
+
+
+      {/* FOOTER */}
+      <div
+        className="
+          px-5 py-3
+          border-t
+          border-gray-100
+          flex
+          justify-end
+          gap-2
+        "
+      >
+
+        {/* CANCEL */}
+        <button
+          type="button"
+          disabled={archiveLoading}
+          onClick={() => {
+            setShowArchiveModal(false);
+            setSelectedUpdate(null);
+          }}
+          className="
+            px-4 py-2
+            rounded-md
+            border
+            border-gray-200
+            text-[10px]
+            text-gray-600
+            hover:bg-gray-50
+            disabled:opacity-50
+          "
+        >
+          Cancel
+        </button>
+
+
+        {/* ARCHIVE */}
+        <button
+          type="button"
+          disabled={archiveLoading}
+          onClick={() =>
+            handleArchive(selectedUpdate?.productUpdateId)
+          }
+          className="
+            px-4 py-2
+            rounded-md
+            bg-red-500
+            text-white
+            text-[10px]
+            hover:bg-red-600
+            disabled:opacity-50
+            flex
+            items-center
+            gap-2
+          "
+        >
+
+          {archiveLoading && (
+            <span
+              className="
+                w-3 h-3
+                border-2
+                border-white/40
+                border-t-white
+                rounded-full
+                animate-spin
+              "
+            />
+          )}
+
+          {archiveLoading ? "Archiving..." : "Archive"}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
     </DashboardLayout>
   );
 };

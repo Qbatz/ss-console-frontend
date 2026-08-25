@@ -8,14 +8,24 @@ import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
+import { useLocation } from "react-router-dom";
 
 
 
 const CreateProductUpdate = () => {
   const navigate = useNavigate();
   const { searchOwners, loading } = useSupportTickets();
-  const { getPlansDropdown, getProductUpdateTypes, getProductUpdatePlatforms, getProductUpdateModules, getProductUpdateCtas, getProductUpdatePublishStatuses, getProductUpdateAudiences, createProductUpdate, searchHostels } = usePlan();
+  const { getPlansDropdown, getProductUpdateTypes, getProductUpdatePlatforms, getProductUpdateModules, getProductUpdateCtas, getProductUpdatePublishStatuses, 
+    getProductUpdateAudiences, createProductUpdate, searchHostels,getProductUpdateById,updateProductUpdate,updateProductUpdateItem,createProductUpdateItem } = usePlan();
   const [updateTitle, setUpdateTitle] = useState("");
+  const location = useLocation();
+
+const {
+  mode,
+  productUpdateId,
+} = location.state || {};
+
+const isEditMode = mode === "edit";
   const [shortDescription, setShortDescription] = useState("");
   const [version, setVersion] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
@@ -77,9 +87,30 @@ const [publishTimeError, setPublishTimeError] = useState("");
 const [expiryDateError, setExpiryDateError] = useState("");
 const [isSubmitting, setIsSubmitting] = useState(false);
 const isSubmittingRef = useRef(false);
+const [isEditLoading, setIsEditLoading] = useState(false);
+const [unsavedItemIds, setUnsavedItemIds] = useState([]);
+const [initialFormData, setInitialFormData] = useState(null);
   console.log("ownersList", ownersList)
 
+const markItemAsUnsaved = (itemId) => {
+  if (!itemId) return;
 
+  setUnsavedItemIds((prev) => {
+    if (prev.includes(itemId)) {
+      return prev;
+    }
+
+    return [...prev, itemId];
+  });
+};
+
+const markItemAsSaved = (itemId) => {
+  if (!itemId) return;
+
+  setUnsavedItemIds((prev) =>
+    prev.filter((id) => id !== itemId)
+  );
+};
   const handleOwnerSearch = async (value) => {
     const searchValue = value.trim();
 
@@ -110,7 +141,260 @@ const isSubmittingRef = useRef(false);
       setOwnerLoading(false);
     }
   };
+useEffect(() => {
+  if (isEditMode && productUpdateId) {
+    loadProductUpdate();
+  }
+}, [isEditMode, productUpdateId]);
+const normalizeDate = (value) => {
+  if (!value) return "";
 
+  if (value.includes("/")) {
+    const [day, month, year] = value.split("/");
+    return `${day}-${month}-${year}`;
+  }
+
+  return value;
+};
+
+const normalizeTime = (value) => {
+  if (!value) return "";
+
+  // 05:57:00 PM -> 17:57
+  if (value.includes("AM") || value.includes("PM")) {
+    const [time, period] = value.trim().split(" ");
+    let [hours, minutes] = time.split(":");
+
+    hours = Number(hours);
+
+    if (period === "PM" && hours !== 12) {
+      hours += 12;
+    }
+
+    if (period === "AM" && hours === 12) {
+      hours = 0;
+    }
+
+    return `${String(hours).padStart(2, "0")}:${minutes}`;
+  }
+
+ 
+  return value.slice(0, 5);
+};
+const loadProductUpdate = async () => {
+  
+
+  try {
+    setIsEditLoading(true);
+    const result =
+      await getProductUpdateById(productUpdateId);
+
+    if (!result?.success) {
+      return;
+    }
+
+    const data = result.data;
+
+    console.log(
+      "EDIT PRODUCT UPDATE:",
+      data
+    );
+
+    // =========================
+    // BASIC INFORMATION
+    // =========================
+
+    setUpdateTitle(
+      data?.title || ""
+    );
+
+    setShortDescription(
+      data?.description || ""
+    );
+
+    setVersion(
+      data?.version || ""
+    );
+
+    setReleaseDate(
+      normalizeDate(data?.releaseDate)
+    );
+
+    setUpdateType(
+      data?.updateType || ""
+    );
+
+    setPlatform(
+      data?.platform || ""
+    );
+
+    // =========================
+    // PUBLISHING
+    // =========================
+
+   setPublishDate(
+  normalizeDate(data?.publishDate)
+);
+
+setExpiryDate(
+  normalizeDate(data?.expiryDate)
+);
+setPublishTime(
+  normalizeTime(data?.publishTime)
+);
+   
+    setPublishing(
+      data?.publishStatus || ""
+    );
+
+    // =========================
+    // AUDIENCE
+    // =========================
+
+    setAudience(
+      data?.audience || ""
+    );
+
+    // =========================
+    // PLANS
+    // =========================
+
+    if (
+      data?.audience === "SELECTED_PLANS" ||
+      data?.audience === "PLANS"
+    ) {
+      setSelectedPlans(
+        (data?.audiences?.planAudiences || [])
+          .map((plan) => plan.planId)
+      );
+    } else {
+      setSelectedPlans([]);
+    }
+
+    // =========================
+// SELECTED PROPERTIES / HOSTELS
+// =========================
+
+if (
+  data?.audience === "SELECTED_PROPERTIES" ||
+  data?.audience === "PROPERTIES" ||
+  data?.audience === "SELECTED_HOSTELS" ||
+  data?.audience === "HOSTELS"
+) {
+  const selectedHostels =
+    data?.audiences?.hostelAudiences || [];
+
+  console.log(
+    "EDIT SELECTED HOSTELS:",
+    selectedHostels
+  );
+
+  setSelectedProperties(selectedHostels);
+} else {
+  setSelectedProperties([]);
+}
+
+if (
+  data?.audience === "SELECTED_OWNERS" ||
+  data?.audience === "OWNERS" ||
+  data?.audience === "CUSTOMERS"
+) {
+  const ownerIds = (data?.audienceIds || []).map(String);
+
+  console.log("EDIT OWNER IDS:", ownerIds);
+
+  try {
+    const res = await searchOwners("");
+
+    console.log("OWNER LIST FOR EDIT:", res);
+
+    if (res?.success) {
+      const owners = res.data || [];
+
+      const matchedOwners = owners.filter(
+        (owner) =>
+          owner?.parentId &&
+          ownerIds.includes(
+            String(owner.parentId)
+          )
+      );
+
+      console.log(
+        "MATCHED EDIT OWNERS:",
+        matchedOwners
+      );
+
+      setSelectedOwners(
+        matchedOwners
+      );
+    } else {
+      setSelectedOwners([]);
+    }
+
+  } catch (error) {
+    console.error(
+      "Edit Owner Fetch Error:",
+      error
+    );
+
+    setSelectedOwners([]);
+  }
+
+} else {
+  setSelectedOwners([]);
+}
+
+   
+
+    setUpdateItems(
+  (data?.productUpdateItems || []).map((item) => ({
+    id: item?.productUpdateItemId || Date.now(),
+
+    productUpdateItemId:
+      item?.productUpdateItemId || null,
+
+    clientId:
+      `existing-${item?.productUpdateItemId}`,
+
+    itemType:
+      item?.updateType || "",
+
+    title:
+      item?.title || "",
+
+    description:
+      item?.description || "",
+
+    relatedModule:
+      item?.module || "",
+
+    cta:
+      item?.cta || "",
+
+    ctaLink:
+      item?.ctaLink || "",
+
+    showCtaButton:
+      item?.showCtaButton ?? false,
+
+    itemImages:
+      item?.itemImages || [],
+
+    attachment:
+      null,
+
+    // IMPORTANT
+    isDirty: false,
+  }))
+);
+
+  }
+     catch (error) {
+    console.error("Get Product Update By ID Error:", error);
+  } finally {
+    setIsEditLoading(false);
+  }
+};
   useEffect(() => {
 
     const fetchPlans = async () => {
@@ -285,24 +569,36 @@ const isSubmittingRef = useRef(false);
       img.src = URL.createObjectURL(file);
     });
   };
-  const handleAddUpdateItem = () => {
-    setUpdateItems((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        clientId: `item-${prev.length + 1}`,
+ const handleAddUpdateItem = () => {
+  const newItem = {
+    id: Date.now(),
 
-        itemType: "",
-        title: "",
-        description: "",
-        relatedModule: "",
-        cta: "",
-        ctaLink: "",
+    clientId:
+      `item-${updateItems.length + 1}-${Date.now()}`,
 
-        attachment: null,
-      },
-    ]);
+    
+    productUpdateItemId: null,
+
+    itemType: "",
+    title: "",
+    description: "",
+    relatedModule: "",
+    cta: "",
+    ctaLink: "",
+
+    showCtaButton: true,
+
+    attachment: null,
+
+    // IMPORTANT
+    isDirty: true,
   };
+
+  setUpdateItems((prev) => [
+    ...prev,
+    newItem,
+  ]);
+};
   const isScheduleSelected = publishStatuses?.some(
   (status) =>
     status?.key === publishing &&
@@ -440,7 +736,8 @@ setExpiryDateError("");
         valid = false;
       }
 
-    } else if (
+    } 
+    else if (
 
       audience === "SELECTED_PROPERTIES" ||
       audience === "PROPERTIES" ||
@@ -460,7 +757,8 @@ setExpiryDateError("");
         valid = false;
       }
 
-    } else if (
+    } 
+    else if (
 
       audience === "SELECTED_OWNERS" ||
       audience === "OWNERS" ||
@@ -687,84 +985,115 @@ setPublishTimeError("");
 setExpiryDateError("");
 };
 const handleCreateProductUpdate = async () => {
-   // Prevent multiple clicks / duplicate API calls
+if (
+  isEditMode &&
+  unsavedItemIds.length > 0
+) {
+  setItemsError(
+    "Please save all item changes before publishing."
+  );
+
+  return;
+}
   if (isSubmittingRef.current) {
     return;
   }
 
   isSubmittingRef.current = true;
   setIsSubmitting(true);
+
   try {
+    // =========================
+    // VALIDATION
+    // =========================
 
-   const isValid = validateForm();
+    const isValid = validateForm();
 
-if (!isValid) {
-  isSubmittingRef.current = false;
-  setIsSubmitting(false);
-  return;
-}
+    if (!isValid) {
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
+      return;
+    }
+
+    // =========================
+    // MAIN PRODUCT UPDATE PAYLOAD
+    // =========================
 
     const payload = {
-      title: updateTitle,
-      description: shortDescription,
-      version: version,
-      releaseDate: releaseDate,
+      title: updateTitle || "",
+      description: shortDescription || "",
+      version: version || "",
+      releaseDate: releaseDate || null,
 
-     
-      updateType: updateType,
+      updateType: updateType || "",
+      platform: platform || "",
 
-     
-      platform: platform,
+      publishDate: publishDate || null,
+      publishTime: publishTime || null,
+      expiryDate: expiryDate || null,
 
-   
-      publishDate: publishDate,
-      publishTime: publishTime,
-      expiryDate: expiryDate,
+      audience: audience || "",
 
-   
-      audience: audience,
+      audienceIds:
+        audience === "SELECTED_PLANS" ||
+        audience === "PLANS"
+          ? selectedPlans
+              .filter(Boolean)
+              .map(String)
 
-     audienceIds:
-  audience === "SELECTED_PLANS" ||
-  audience === "PLANS"
-    ? selectedPlans.map(String)
+          : audience === "SELECTED_PROPERTIES" ||
+            audience === "PROPERTIES" ||
+            audience === "SELECTED_HOSTELS" ||
+            audience === "HOSTELS"
+          ? selectedProperties
+              .map(
+                (property) =>
+                  property?.propertyId ||
+                  property?.hostelId ||
+                  property?.id
+              )
+              .filter(Boolean)
+              .map(String)
 
-    : audience === "SELECTED_PROPERTIES" ||
-      audience === "PROPERTIES" ||
-      audience === "SELECTED_HOSTELS" ||
-      audience === "HOSTELS"
-    ? selectedProperties
-        .map(
-          (property) =>
-            property?.propertyId ||
-            property?.hostelId ||
-            property?.id
-        )
-        .filter(Boolean)
-        .map(String)
+          : audience === "SELECTED_OWNERS" ||
+            audience === "OWNERS" ||
+            audience === "CUSTOMERS"
+          ? selectedOwners
+              .map((owner) => owner?.parentId)
+              .filter(Boolean)
+              .map(String)
 
-    : audience === "SELECTED_OWNERS" ||
-      audience === "OWNERS" ||
-      audience === "CUSTOMERS"
-    ? selectedOwners
-        .map((owner) => owner?.parentId)
-        .filter(Boolean)
-        .map(String)
+          : [],
 
-    : [],
+      publishStatus: publishing || "",
 
-  
-      publishStatus: publishing,
+      // =========================
+      // ITEMS
+      // =========================
+      // Main Product Update API expects
+      // the current items also.
 
-      
       productUpdateItems: updateItems.map((item) => ({
+        ...(item.productUpdateItemId
+          ? {
+              productUpdateItemId:
+                item.productUpdateItemId,
+            }
+          : {}),
+
         clientId: item.clientId,
-        title: item.title,
-        description: item.description,
-        updateType: item.itemType,
-        module: item.relatedModule,
-        cta: item.cta,
-        ctaLink: item.ctaLink,
+
+        title: item.title || "",
+        description: item.description || "",
+
+        updateType: item.itemType || "",
+        module: item.relatedModule || "",
+
+        cta: item.cta || "",
+        ctaLink: item.ctaLink || "",
+
+        showCtaButton:
+          item.showCtaButton ?? true,
       })),
     };
 
@@ -773,57 +1102,73 @@ if (!isValid) {
       payload
     );
 
-    const result = await createProductUpdate(
-      payload,
-      updateItems
-    );
+    // =========================
+    // API CALL
+    // =========================
+
+    let result;
+
+    if (isEditMode && productUpdateId) {
+      // EDIT
+      result = await updateProductUpdate(
+        productUpdateId,
+        payload
+      );
+    } else {
+      // CREATE
+      result = await createProductUpdate(
+        payload,
+        updateItems
+      );
+    }
 
     console.log(
-      "CREATE PRODUCT UPDATE RESULT:",
+      "PRODUCT UPDATE RESULT:",
       result
     );
 
-
-  
+    // =========================
+    // SUCCESS
+    // =========================
 
     if (result?.success) {
-
       setModalType("success");
 
-      
       setMessage(
         result?.message ||
-        "Product update created successfully"
+          (
+            isEditMode
+              ? "Product update updated successfully"
+              : "Product update created successfully"
+          )
       );
 
       setShowSuccess(true);
 
-
-   
+      // Reset only after successful API
       resetProductUpdateForm();
 
-
-      
       setTimeout(() => {
-
         setShowSuccess(false);
-
         navigate(-1);
-
       }, 1200);
-
 
       return;
     }
 
-
-  
+    // =========================
+    // API ERROR
+    // =========================
 
     setModalType("error");
 
     setMessage(
       result?.message ||
-      "Failed to create product update"
+        (
+          isEditMode
+            ? "Failed to update product update"
+            : "Failed to create product update"
+        )
     );
 
     setShowSuccess(true);
@@ -832,31 +1177,237 @@ if (!isValid) {
       setShowSuccess(false);
     }, 2000);
 
+  } catch (error) {
+    console.error(
+      "Product Update Error:",
+      error
+    );
+
+    setModalType("error");
+
+    setMessage(
+      error?.message ||
+        "Something went wrong"
+    );
+
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 2000);
+
+  } finally {
+    
+    isSubmittingRef.current = false;
+    setIsSubmitting(false);
+  }
+};
+
+const handleSaveItem = async (item) => {
+  try {
+    if (!item?.productUpdateItemId) {
+      console.error(
+        "Missing productUpdateItemId"
+      );
+      return;
+    }
+
+    const payload = {
+      productUpdateItemId:
+        item.productUpdateItemId,
+
+      productUpdateId:
+        productUpdateId,
+
+      title:
+        item.title || "",
+
+      description:
+        item.description || "",
+
+      updateType:
+        item.itemType || "",
+
+      module:
+        item.relatedModule || "",
+
+      cta:
+        item.cta || "",
+
+      ctaLink:
+        item.ctaLink || "",
+
+      showCtaButton:
+        item.showCtaButton ?? false,
+
+      clientId:
+        item.clientId,
+
+      // Existing images still kept
+      existingImageUrls:
+        item.itemImages || [],
+    };
+
+    console.log(
+      "UPDATE ITEM PAYLOAD:",
+      payload
+    );
+
+    const result =
+      await updateProductUpdateItem(
+        [payload],
+        [item]
+      );
+
+    if (result?.success) {
+
+      console.log(
+        "Image / item updated successfully",
+        result.data
+      );
+
+      // =========================
+      // MARK ITEM AS SAVED
+      // =========================
+
+      setUpdateItems((prev) =>
+        prev.map((updateItem) =>
+          updateItem.id === item.id
+            ? {
+                ...updateItem,
+                isDirty: false,
+              }
+            : updateItem
+        )
+      );
+
+      // VERY IMPORTANT
+      // Remove item from unsaved list
+      markItemAsSaved(item.id);
+
+      // Clear error
+      setItemsError("");
+    }
 
   } catch (error) {
+    console.error(
+      "Update Product Item Error:",
+      error
+    );
+  }
+};
+const handleCreateItem = async (item) => {
+  try {
+    const formData = new FormData();
 
-  console.error(
-    "Create Product Update Error:",
-    error
+    const payload = {
+      productUpdateId: productUpdateId,
+
+      title: item.title || "",
+      description: item.description || "",
+
+      updateType: item.itemType || "",
+      module: item.relatedModule || "",
+
+      cta: item.cta || "",
+      ctaLink: item.ctaLink || "",
+
+      showCtaButton:
+        item.showCtaButton ?? false,
+
+      clientId: item.clientId,
+
+      // New item doesn't have old images
+      existingImageUrls: [],
+    };
+
+    // =========================
+    // JSON PAYLOAD
+    // =========================
+
+    formData.append(
+      "payloads",
+      new Blob(
+        [JSON.stringify([payload])],
+        {
+          type: "application/json",
+        }
+      )
+    );
+
+    // =========================
+    // FILES
+    // =========================
+
+    const files = {};
+
+    if (item.attachment instanceof File) {
+      formData.append(
+        item.clientId,
+        item.attachment,
+        item.attachment.name
+      );
+
+      files[item.clientId] =
+        item.attachment.name;
+    }
+
+    console.log(
+      "CREATE ITEM PAYLOAD:",
+      payload
+    );
+
+    console.log(
+      "CREATE ITEM FILES:",
+      files
+    );
+
+    // =========================
+    // API
+    // =========================
+
+    const result =
+      await createProductUpdateItem(
+        formData,
+        files
+      );
+
+    // =========================
+    // SUCCESS
+    // =========================
+
+    if (result?.success) {
+  console.log(
+    "New item created:",
+    result.data
   );
 
-  setModalType("error");
-
-  setMessage(
-    error?.message ||
-    "Something went wrong"
+  setUpdateItems((prev) =>
+    prev.map((updateItem) =>
+      updateItem.id === item.id
+        ? {
+            ...updateItem,
+            isDirty: false,
+            productUpdateItemId:
+              result.data?.productUpdateItemId ??
+              updateItem.productUpdateItemId,
+          }
+        : updateItem
+    )
   );
 
-  setShowSuccess(true);
+  // IMPORTANT
+  markItemAsSaved(item.id);
 
-  setTimeout(() => {
-    setShowSuccess(false);
-  }, 2000);
-
-  // Allow submit again after API error
-  isSubmittingRef.current = false;
-  setIsSubmitting(false);
+  setItemsError("");
 }
+
+  } catch (error) {
+    console.error(
+      "Create Product Item Error:",
+      error
+    );
+  }
 };
   const handlePropertySearch = async (value) => {
     const searchValue = value.trim();
@@ -890,6 +1441,17 @@ if (!isValid) {
   };
   return (
     <DashboardLayout>
+      {isEditLoading && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/60 backdrop-blur-[1px]">
+    <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-lg shadow-sm border border-gray-100">
+      <div className="w-4 h-4 border-2 border-gray-200 border-t-[#2952F3] rounded-full animate-spin" />
+
+      <span className="text-[10px] text-gray-600">
+        Loading...
+      </span>
+    </div>
+  </div>
+)}
        <Toast
               show={showSuccess}
               message={message}
@@ -1263,19 +1825,50 @@ if (!isValid) {
                             
                             <button
                               type="button"
-                              onClick={() => {
-                                const duplicate = {
-                                  ...item,
-                                  id: Date.now() + Math.random(),
-                                  clientId: `item-${updateItems.length + 1}-${Date.now()}`,
-                                };
+                              // onClick={() => {
+                              //   const duplicate = {
+                              //     ...item,
+                              //     id: Date.now() + Math.random(),
+                              //     clientId: `item-${updateItems.length + 1}-${Date.now()}`,
+                              //   };
 
-                                setUpdateItems((prev) => {
-                                  const newItems = [...prev];
-                                  newItems.splice(index + 1, 0, duplicate);
-                                  return newItems;
-                                });
-                              }}
+                              //   setUpdateItems((prev) => {
+                              //     const newItems = [...prev];
+                              //     newItems.splice(index + 1, 0, duplicate);
+                              //     return newItems;
+                              //   });
+                              // }}
+                              onClick={() => {
+  const newItemId =
+    Date.now() + Math.random();
+
+  const duplicate = {
+    ...item,
+
+    // New item must be saved
+    productUpdateItemId: null,
+
+    id: newItemId,
+
+    clientId:
+      `item-${updateItems.length + 1}-${Date.now()}`,
+  };
+
+  setUpdateItems((prev) => {
+    const newItems = [...prev];
+
+    newItems.splice(
+      index + 1,
+      0,
+      duplicate
+    );
+
+    return newItems;
+  });
+
+ 
+  markItemAsUnsaved(newItemId);
+}}
                               className="
                   text-gray-400
                   hover:text-[#2952F3]
@@ -1290,11 +1883,20 @@ if (!isValid) {
                            
                             <button
                               type="button"
-                              onClick={() => {
-                                setUpdateItems((prev) =>
-                                  prev.filter((_, i) => i !== index)
-                                );
-                              }}
+                             onClick={() => {
+  const deletedItemId = item.id;
+
+  setUpdateItems((prev) =>
+    prev.filter((_, i) => i !== index)
+  );
+
+  // Remove from unsaved tracking
+  setUnsavedItemIds((prev) =>
+    prev.filter(
+      (id) => id !== deletedItemId
+    )
+  );
+}}
                               className="
                   text-red-400
                   hover:text-red-600
@@ -1306,6 +1908,32 @@ if (!isValid) {
                               🗑
                             </button>
 
+{isEditMode && (
+  <button
+    type="button"
+    onClick={() => {
+      if (item.productUpdateItemId) {
+        handleSaveItem(item);
+      } else {
+        handleCreateItem(item);
+      }
+    }}
+    className="
+      px-2
+      py-1
+      rounded-md
+      bg-[#EEF3FF]
+      text-[#2952F3]
+      text-[8px]
+      font-medium
+      hover:bg-[#E2E9FF]
+      transition
+      cursor-pointer
+    "
+  >
+    Save
+  </button>
+)}
                           </div>
 
                         </div>
@@ -1321,26 +1949,31 @@ if (!isValid) {
 
                             <select
                               value={item.itemType}
-                              onChange={(e) => {
-                                const value = e.target.value;
+                             onChange={(e) => {
+  const value = e.target.value;
 
-                                setUpdateItems((prev) =>
-                                  prev.map((updateItem, i) =>
-                                    i === index
-                                      ? {
-                                        ...updateItem,
-                                        itemType: value,
-                                      }
-                                      : updateItem
-                                  )
-                                );
-                                setItemTypeErrors((prev) => {
-                                  const newErrors = { ...prev };
-                                  delete newErrors[index];
-                                  return newErrors;
-                                });
-                                setItemsError("");
-                              }}
+setUpdateItems((prev) =>
+  prev.map((updateItem, i) =>
+    i === index
+      ? {
+          ...updateItem,
+          itemType: value,
+          isDirty: true,
+        }
+      : updateItem
+  )
+);
+
+  markItemAsUnsaved(item.id);
+
+  setItemTypeErrors((prev) => {
+    const newErrors = { ...prev };
+    delete newErrors[index];
+    return newErrors;
+  });
+
+  setItemsError("");
+}}
                               className="
     w-full
     h-7
@@ -1384,27 +2017,52 @@ if (!isValid) {
                             <input
                               type="text"
                               value={item.title}
+                              // onChange={(e) => {
+                              //   const value = e.target.value;
+
+                              //   setUpdateItems((prev) =>
+                              //     prev.map((updateItem, i) =>
+                              //       i === index
+                              //         ? {
+                              //           ...updateItem,
+                              //           title: value,
+                              //         }
+                              //         : updateItem
+                              //     )
+                              //   );
+                              //   setItemTitleErrors((prev) => {
+                              //     const newErrors = { ...prev };
+                              //     delete newErrors[index];
+                              //     return newErrors;
+                              //   });
+                              //   setItemsError("");
+
+                              // }}
                               onChange={(e) => {
-                                const value = e.target.value;
+  const value = e.target.value;
 
-                                setUpdateItems((prev) =>
-                                  prev.map((updateItem, i) =>
-                                    i === index
-                                      ? {
-                                        ...updateItem,
-                                        title: value,
-                                      }
-                                      : updateItem
-                                  )
-                                );
-                                setItemTitleErrors((prev) => {
-                                  const newErrors = { ...prev };
-                                  delete newErrors[index];
-                                  return newErrors;
-                                });
-                                setItemsError("");
+ setUpdateItems((prev) =>
+  prev.map((updateItem, i) =>
+    i === index
+      ? {
+          ...updateItem,
+          title: value,
+          isDirty: true,
+        }
+      : updateItem
+  )
+);
 
-                              }}
+  markItemAsUnsaved(item.id);
+
+  setItemTitleErrors((prev) => {
+    const newErrors = { ...prev };
+    delete newErrors[index];
+    return newErrors;
+  });
+
+  setItemsError("");
+}}
                               placeholder="e.g. Expense Management"
                               className="
                   w-full
@@ -1437,28 +2095,31 @@ if (!isValid) {
 
                           <textarea
                             value={item.description}
-                            onChange={(e) => {
-                              const value = e.target.value;
+                          onChange={(e) => {
+  const value = e.target.value;
 
-                              setUpdateItems((prev) =>
-                                prev.map((updateItem, i) =>
-                                  i === index
-                                    ? {
-                                      ...updateItem,
-                                      description: value,
-                                    }
-                                    : updateItem
-                                )
-                              );
+  setUpdateItems((prev) =>
+  prev.map((updateItem, i) =>
+    i === index
+      ? {
+          ...updateItem,
+          description: value,
+          isDirty: true,
+        }
+      : updateItem
+  )
+);
 
-                              // Clear only this item's description error
-                              setItemDescriptionErrors((prev) => {
-                                const newErrors = { ...prev };
-                                delete newErrors[index];
-                                return newErrors;
-                              });
-                              setItemsError("");
-                            }}
+  markItemAsUnsaved(item.id);
+
+  setItemDescriptionErrors((prev) => {
+    const newErrors = { ...prev };
+    delete newErrors[index];
+    return newErrors;
+  });
+
+  setItemsError("");
+}}
                             placeholder="Describe the feature, improvement or fix..."
                             rows={2}
                             className="
@@ -1494,28 +2155,31 @@ if (!isValid) {
 
                             <select
                               value={item.relatedModule}
-                              onChange={(e) => {
-                                const value = e.target.value;
+                             onChange={(e) => {
+  const value = e.target.value;
 
-                                setUpdateItems((prev) =>
-                                  prev.map((updateItem, i) =>
-                                    i === index
-                                      ? {
-                                        ...updateItem,
-                                        relatedModule: value,
-                                      }
-                                      : updateItem
-                                  )
-                                );
+ setUpdateItems((prev) =>
+  prev.map((updateItem, i) =>
+    i === index
+      ? {
+          ...updateItem,
+          relatedModule: value,
+          isDirty: true,
+        }
+      : updateItem
+  )
+);
 
-                                
-                                setItemModuleErrors((prev) => {
-                                  const newErrors = { ...prev };
-                                  delete newErrors[index];
-                                  return newErrors;
-                                });
-                                setItemsError("");
-                              }}
+  markItemAsUnsaved(item.id);
+
+  setItemModuleErrors((prev) => {
+    const newErrors = { ...prev };
+    delete newErrors[index];
+    return newErrors;
+  });
+
+  setItemsError("");
+}}
                               className={`
       w-full
       h-7
@@ -1562,28 +2226,31 @@ if (!isValid) {
 
                             <select
                               value={item.cta}
-                              onChange={(e) => {
-                                const value = e.target.value;
+                             onChange={(e) => {
+  const value = e.target.value;
 
-                                setUpdateItems((prev) =>
-                                  prev.map((updateItem, i) =>
-                                    i === index
-                                      ? {
-                                        ...updateItem,
-                                        cta: value,
-                                      }
-                                      : updateItem
-                                  )
-                                );
+ setUpdateItems((prev) =>
+  prev.map((updateItem, i) =>
+    i === index
+      ? {
+          ...updateItem,
+          cta: value,
+          isDirty: true,
+        }
+      : updateItem
+  )
+);
 
-                                // Clear only this item's CTA error
-                                setItemCtaErrors((prev) => {
-                                  const newErrors = { ...prev };
-                                  delete newErrors[index];
-                                  return newErrors;
-                                });
-                                setItemsError("");
-                              }}
+  markItemAsUnsaved(item.id);
+
+  setItemCtaErrors((prev) => {
+    const newErrors = { ...prev };
+    delete newErrors[index];
+    return newErrors;
+  });
+
+  setItemsError("");
+}}
                               className={`
       w-full
       h-7
@@ -1633,28 +2300,31 @@ if (!isValid) {
                             <input
                               type="text"
                               value={item.ctaLink}
-                              onChange={(e) => {
-                                const value = e.target.value;
+                             onChange={(e) => {
+  const value = e.target.value;
 
-                                setUpdateItems((prev) =>
-                                  prev.map((updateItem, i) =>
-                                    i === index
-                                      ? {
-                                        ...updateItem,
-                                        ctaLink: value,
-                                      }
-                                      : updateItem
-                                  )
-                                );
+setUpdateItems((prev) =>
+  prev.map((updateItem, i) =>
+    i === index
+      ? {
+          ...updateItem,
+          ctaLink: value,
+          isDirty: true,
+        }
+      : updateItem
+  )
+);
 
-                                // Clear only this item's CTA Link error
-                                setItemCtaLinkErrors((prev) => {
-                                  const newErrors = { ...prev };
-                                  delete newErrors[index];
-                                  return newErrors;
-                                });
-                                setItemsError("");
-                              }}
+  markItemAsUnsaved(item.id);
+
+  setItemCtaLinkErrors((prev) => {
+    const newErrors = { ...prev };
+    delete newErrors[index];
+    return newErrors;
+  });
+
+  setItemsError("");
+}}
                               placeholder="/path or URL"
                               className={`
       w-full
@@ -1722,37 +2392,58 @@ if (!isValid) {
 
                             </div>
 
-                            <input
-                              type="file"
-                              accept="image/jpeg,image/jpg"
-                              className="hidden"
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
+                          <input
+  type="file"
+  accept="image/jpeg,image/jpg"
+  className="hidden"
+  onChange={async (e) => {
+    const file = e.target.files?.[0];
 
-                                if (!file) return;
+    if (!file) return;
 
-                                try {
-                                  const compressedFile = await compressImage(file);
+    try {
+      const compressedFile =
+        await compressImage(file);
 
-                                  setUpdateItems((prev) =>
-                                    prev.map((updateItem, i) =>
-                                      i === index
-                                        ? {
-                                          ...updateItem,
-                                          attachment: compressedFile,
-                                        }
-                                        : updateItem
-                                    )
-                                  );
+     const updatedItem = {
+  ...item,
+  attachment: compressedFile,
+};
 
-                                  console.log("Original size:", file.size);
-                                  console.log("Compressed size:", compressedFile.size);
+setUpdateItems((prev) =>
+  prev.map((updateItem, i) =>
+    i === index
+      ? updatedItem
+      : updateItem
+  )
+);
 
-                                } catch (error) {
-                                  console.error("Image compression error:", error);
-                                }
-                              }}
-                            />
+markItemAsUnsaved(item.id);
+
+      console.log(
+        "IMAGE SELECTED:",
+        compressedFile
+      );
+
+    
+
+      if (
+        isEditMode &&
+        item.productUpdateItemId
+      ) {
+        await handleSaveItem(
+          updatedItem
+        );
+      }
+
+    } catch (error) {
+      console.error(
+        "Image upload error:",
+        error
+      );
+    }
+  }}
+/>
 
                           </label>
 

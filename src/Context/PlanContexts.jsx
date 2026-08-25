@@ -956,6 +956,244 @@ const searchHostels = async (name) => {
     };
   }
 };
+const archiveProductUpdate = async (productUpdateId) => {
+  try {
+    const res = await axiosInstance.put(
+      `/v2/product-update/archive/${productUpdateId}`
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  }
+};
+const getProductUpdateById = async (productUpdateId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      `/v2/product-update/${productUpdateId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return {
+      success: false,
+      data: null,
+    };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      data: null,
+      message: msg,
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const updateProductUpdate = async (
+  productUpdateId,
+  payload
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.put(
+      `/v2/product-update/${productUpdateId}`,
+      payload
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+        message:
+          res.data?.message ||
+          "Product update updated successfully",
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const updateProductUpdateItem = async (
+  payloads,
+  updateItems
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const formData = new FormData();
+
+    // =========================
+    // JSON PAYLOAD
+    // =========================
+
+    formData.append(
+      "payloads",
+      new Blob(
+        [JSON.stringify(payloads)],
+        {
+          type: "application/json",
+        }
+      )
+    );
+
+    // =========================
+    // FILES
+    // =========================
+
+    const files = {};
+
+    updateItems.forEach((item) => {
+      if (!item?.clientId) {
+        console.error(
+          "Missing clientId:",
+          item
+        );
+        return;
+      }
+
+      // Single new image
+      if (item.attachment instanceof File) {
+        formData.append(
+          item.clientId,
+          item.attachment,
+          item.attachment.name
+        );
+
+        files[item.clientId] =
+          item.attachment.name;
+      }
+
+      // Multiple new images
+      if (Array.isArray(item.attachment)) {
+        item.attachment.forEach((file) => {
+          if (file instanceof File) {
+            formData.append(
+              item.clientId,
+              file,
+              file.name
+            );
+
+            files[item.clientId] =
+              file.name;
+          }
+        });
+      }
+    });
+
+    console.log("PAYLOADS:", payloads);
+    console.log("FILES:", files);
+
+    const res = await axiosInstance.put(
+      "/v2/product-update-item",
+      formData,
+      {
+        params: {
+          files,
+        },
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data,
+      message:
+        res.data?.message ||
+        "Product Update Item Updated Successfully",
+    };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const createProductUpdateItem = async (
+  formData,
+  files
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      "/v2/product-update-item",
+      formData,
+      {
+        params: {
+          files,
+        },
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data,
+      message:
+        res.data?.message ||
+        "Product update item created successfully",
+    };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <PlanContext.Provider
       value={{
@@ -965,7 +1203,7 @@ const searchHostels = async (name) => {
         getPlans,createPlan,updatePlan,deactivatePlan,deactivatePlanFeature,addPlanFeature,accessError,
         getPlansDropdown,reactivatePlan,getSmartstayFeatures,createSmartstayFeature,updateSmartstayFeature,
         deleteSmartstayFeature,getPlanById,getProductUpdateTypes,getProductUpdatePlatforms,getProductUpdateModules,getProductUpdateCtas,getProductUpdatePublishStatuses,
-        getProductUpdateAudiences,createProductUpdate,getProductUpdates,searchHostels
+        getProductUpdateAudiences,createProductUpdate,getProductUpdates,searchHostels,archiveProductUpdate,getProductUpdateById,updateProductUpdate,updateProductUpdateItem,createProductUpdateItem
       }}
     >
       {children}
