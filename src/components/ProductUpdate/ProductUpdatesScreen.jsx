@@ -243,7 +243,7 @@ const filteredUpdates = updates.filter((item) => {
   >
     All Updates
 
-    <span
+    {/* <span
       className={`
         ml-1.5
         px-1.5
@@ -258,7 +258,7 @@ const filteredUpdates = updates.filter((item) => {
       `}
     >
       {summary.totalItems}
-    </span>
+    </span> */}
   </button>
 
 
@@ -307,7 +307,7 @@ const filteredUpdates = updates.filter((item) => {
       >
         {label}
 
-        <span
+        {/* <span
           className={`
             ml-1.5
             px-1.5
@@ -322,7 +322,7 @@ const filteredUpdates = updates.filter((item) => {
           `}
         >
           {count}
-        </span>
+        </span> */}
       </button>
     );
   })}

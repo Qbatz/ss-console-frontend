@@ -2329,16 +2329,14 @@ if (!isValid) {
                       <button
                         type="button"
                         onClick={() => setShowPreviewModal(true)}
-                        className="text-[5px] text-gray-400"
+                        className="text-[5px] text-gray-400 cursor-pointer"
                       >
                         See All
                       </button>
                     </div>
 
 
-                    {/* =========================
-        SCROLLABLE CONTENT
-    ========================= */}
+                 
 
                     <div
                       className="
@@ -2363,7 +2361,7 @@ if (!isValid) {
                           <button
                             type="button"
                             onClick={() => setShowPreviewModal(true)}
-                            className="text-[5px] text-[#2952F3]"
+                            className="text-[5px] text-[#2952F3] cursor-pointer"
                           >
                             See All
                           </button>
@@ -3914,7 +3912,7 @@ if (!isValid) {
             Back to Edit
           </button>
 
-          <button
+          {/* <button
             type="button"
             className="
               px-4
@@ -3926,7 +3924,7 @@ if (!isValid) {
             "
           >
             Publish Update
-          </button>
+          </button> */}
 
         </div>
 
