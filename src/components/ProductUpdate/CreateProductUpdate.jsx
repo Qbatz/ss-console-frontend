@@ -200,9 +200,46 @@ const loadProductUpdate = async () => {
       data
     );
 
-    // =========================
-    // BASIC INFORMATION
-    // =========================
+    const initialSnapshot = {
+  title: data?.title || "",
+  description: data?.description || "",
+  version: data?.version || "",
+  releaseDate: normalizeDate(data?.releaseDate),
+
+  updateType: data?.updateType || "",
+  platform: data?.platform || "",
+
+  publishDate: normalizeDate(data?.publishDate),
+  publishTime: normalizeTime(data?.publishTime),
+  expiryDate: normalizeDate(data?.expiryDate),
+
+  audience: data?.audience || "",
+  audienceIds: (data?.audienceIds || [])
+    .map(String)
+    .sort(),
+
+  publishStatus: data?.publishStatus || "",
+
+  productUpdateItems:
+    (data?.productUpdateItems || []).map((item) => ({
+      productUpdateItemId:
+        item?.productUpdateItemId || null,
+
+      title: item?.title || "",
+      description: item?.description || "",
+      updateType: item?.updateType || "",
+      module: item?.module || "",
+      cta: item?.cta || "",
+      ctaLink: item?.ctaLink || "",
+      showCtaButton:
+        item?.showCtaButton ?? false,
+
+      itemImages:
+        item?.itemImages || [],
+    })),
+};
+
+setInitialFormData(initialSnapshot);
 
     setUpdateTitle(
       data?.title || ""
@@ -228,9 +265,7 @@ const loadProductUpdate = async () => {
       data?.platform || ""
     );
 
-    // =========================
-    // PUBLISHING
-    // =========================
+
 
    setPublishDate(
   normalizeDate(data?.publishDate)
@@ -247,17 +282,13 @@ setPublishTime(
       data?.publishStatus || ""
     );
 
-    // =========================
-    // AUDIENCE
-    // =========================
+    
 
     setAudience(
       data?.audience || ""
     );
 
-    // =========================
-    // PLANS
-    // =========================
+   
 
     if (
       data?.audience === "SELECTED_PLANS" ||
@@ -271,9 +302,7 @@ setPublishTime(
       setSelectedPlans([]);
     }
 
-    // =========================
-// SELECTED PROPERTIES / HOSTELS
-// =========================
+   
 
 if (
   data?.audience === "SELECTED_PROPERTIES" ||
@@ -604,6 +633,117 @@ if (
     status?.key === publishing &&
     status?.value?.trim()?.toLowerCase() === "schedule"
 );
+const getItemSnapshot = (item) => ({
+  productUpdateItemId:
+    item?.productUpdateItemId || null,
+
+  title:
+    item?.title || "",
+
+  description:
+    item?.description || "",
+
+  updateType:
+    item?.itemType || "",
+
+  module:
+    item?.relatedModule || "",
+
+  cta:
+    item?.cta || "",
+
+  ctaLink:
+    item?.ctaLink || "",
+
+  showCtaButton:
+    item?.showCtaButton ?? false,
+
+  itemImages:
+    item?.itemImages || [],
+});
+const hasFormChanges = () => {
+  if (!isEditMode || !initialFormData) {
+    return true;
+  }
+
+  const currentData = {
+    title: updateTitle || "",
+    description: shortDescription || "",
+    version: version || "",
+    releaseDate: releaseDate || "",
+
+    updateType: updateType || "",
+    platform: platform || "",
+
+    publishDate: publishDate || "",
+    publishTime: publishTime || "",
+    expiryDate: expiryDate || "",
+
+    audience: audience || "",
+
+    audienceIds:
+      audience === "SELECTED_PLANS" ||
+      audience === "PLANS"
+        ? selectedPlans
+            .filter(Boolean)
+            .map(String)
+            .sort()
+
+        : audience === "SELECTED_PROPERTIES" ||
+          audience === "PROPERTIES" ||
+          audience === "SELECTED_HOSTELS" ||
+          audience === "HOSTELS"
+        ? selectedProperties
+            .map(
+              (property) =>
+                property?.propertyId ||
+                property?.hostelId ||
+                property?.id
+            )
+            .filter(Boolean)
+            .map(String)
+            .sort()
+
+        : audience === "SELECTED_OWNERS" ||
+          audience === "OWNERS" ||
+          audience === "CUSTOMERS"
+        ? selectedOwners
+            .map((owner) => owner?.parentId)
+            .filter(Boolean)
+            .map(String)
+            .sort()
+
+        : [],
+
+    publishStatus: publishing || "",
+
+    productUpdateItems:
+      updateItems.map((item) => ({
+        productUpdateItemId:
+          item?.productUpdateItemId || null,
+
+        title: item?.title || "",
+        description: item?.description || "",
+
+        updateType: item?.itemType || "",
+        module: item?.relatedModule || "",
+
+        cta: item?.cta || "",
+        ctaLink: item?.ctaLink || "",
+
+        showCtaButton:
+          item?.showCtaButton ?? false,
+
+        itemImages:
+          item?.itemImages || [],
+      })),
+  };
+
+  return (
+    JSON.stringify(currentData) !==
+    JSON.stringify(initialFormData)
+  );
+};
   const validateForm = () => {
     let valid = true;
 
@@ -828,97 +968,7 @@ if (isScheduleSelected) {
 
     return valid;
   };
-  // const handleCreateProductUpdate = async () => {
-  //   try {
-  //     const isValid = validateForm();
-
-  //     if (!isValid) {
-  //       return;
-  //     }
-  //     const payload = {
-  //       title: updateTitle,
-  //       description: shortDescription,
-  //       version: version,
-  //       releaseDate: releaseDate,
-
-       
-  //       updateType: updateType,
-
-        
-  //       platform: platform,
-
-        
-  //       publishDate: publishDate,
-  //       publishTime: publishTime,
-  //       expiryDate: expiryDate,
-
-        
-  //       audience: audience,
-
-  //       audienceIds:
-  //         audience === "SELECTED_PLANS"
-  //           ? selectedPlans.map(String)
-  //           : (
-  //             audience === "SELECTED_OWNERS" ||
-  //             audience === "OWNERS" ||
-  //             audience === "CUSTOMERS"
-  //           )
-  //             ? selectedOwners.map((owner) =>
-  //               String(owner?.parentId)
-  //             )
-  //             : [],
-
-      
-  //       publishStatus: publishing,
-
-        
-  //       productUpdateItems: updateItems.map((item) => ({
-  //         clientId: item.clientId,
-  //         title: item.title,
-  //         description: item.description,
-  //         updateType: item.itemType,
-  //         module: item.relatedModule,
-  //         cta: item.cta,
-  //         ctaLink: item.ctaLink,
-  //       })),
-  //     };
-
-     
-
-  //     const result = await createProductUpdate(
-  //       payload,
-  //       updateItems
-  //     );
-
-  //     if (result.success) {
-
-
-  //       setModalType("success");
-  //       setMessage(res?.message);
-  //       setShowSuccess(true);
-
-  //       setTimeout(() => {
-  //         setShowSuccess(false);
-
-
-  //       }, 800);
-  //     } else {
-
-  //       setModalType("error");
-  //       setMessage(res?.message);
-  //       setShowSuccess(true);
-
-  //       setTimeout(() => {
-  //         setShowSuccess(false);
-
-
-  //       }, 800);
-  //     }
-
-  //   } catch (error) {
-  //     console.error("Create Product Update Error:", error);
-  //   }
-  // };
+ 
   const resetProductUpdateForm = () => {
   // Basic Information
   setUpdateTitle("");
@@ -984,17 +1034,66 @@ if (isScheduleSelected) {
 setPublishTimeError("");
 setExpiryDateError("");
 };
-const handleCreateProductUpdate = async () => {
-if (
-  isEditMode &&
-  unsavedItemIds.length > 0
-) {
-  setItemsError(
-    "Please save all item changes before publishing."
-  );
+const hasUnsavedItems = () => {
+  if (!isEditMode) {
+    return false;
+  }
 
-  return;
-}
+  return updateItems.some(
+    (item) =>
+      item?.isDirty === true ||
+      unsavedItemIds.includes(item?.id)
+  );
+};
+const handleCreateProductUpdate = async () => {
+ 
+  if (isEditMode && hasUnsavedItems()) {
+
+    setItemsError(
+      "Please save all item changes before publishing."
+    );
+
+    // Also show visible Toast
+    setModalType("error");
+
+    setMessage(
+      "Please save all item changes before publishing."
+    );
+
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 2500);
+
+    return;
+  }
+
+
+  // ==========================================
+  // 2. CHECK MAIN FORM CHANGES
+  // ==========================================
+
+  if (
+    isEditMode &&
+    !hasFormChanges()
+  ) {
+
+    setModalType("error");
+
+    setMessage(
+      "No changes detected"
+    );
+
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 2000);
+
+    return;
+  }
+
   if (isSubmittingRef.current) {
     return;
   }
@@ -1003,9 +1102,7 @@ if (
   setIsSubmitting(true);
 
   try {
-    // =========================
-    // VALIDATION
-    // =========================
+  
 
     const isValid = validateForm();
 
@@ -1015,9 +1112,7 @@ if (
       return;
     }
 
-    // =========================
-    // MAIN PRODUCT UPDATE PAYLOAD
-    // =========================
+   
 
     const payload = {
       title: updateTitle || "",
@@ -1067,11 +1162,7 @@ if (
 
       publishStatus: publishing || "",
 
-      // =========================
-      // ITEMS
-      // =========================
-      // Main Product Update API expects
-      // the current items also.
+    
 
       productUpdateItems: updateItems.map((item) => ({
         ...(item.productUpdateItemId
@@ -1102,9 +1193,7 @@ if (
       payload
     );
 
-    // =========================
-    // API CALL
-    // =========================
+    
 
     let result;
 
@@ -1127,9 +1216,7 @@ if (
       result
     );
 
-    // =========================
-    // SUCCESS
-    // =========================
+    
 
     if (result?.success) {
       setModalType("success");
@@ -1156,9 +1243,7 @@ if (
       return;
     }
 
-    // =========================
-    // API ERROR
-    // =========================
+   
 
     setModalType("error");
 
@@ -1842,17 +1927,18 @@ const handleCreateItem = async (item) => {
   const newItemId =
     Date.now() + Math.random();
 
-  const duplicate = {
-    ...item,
+const duplicate = {
+  ...item,
 
-    // New item must be saved
-    productUpdateItemId: null,
+  productUpdateItemId: null,
 
-    id: newItemId,
+  id: newItemId,
 
-    clientId:
-      `item-${updateItems.length + 1}-${Date.now()}`,
-  };
+  clientId:
+    `item-${updateItems.length + 1}-${Date.now()}`,
+
+  isDirty: true,
+};
 
   setUpdateItems((prev) => {
     const newItems = [...prev];
@@ -2405,9 +2491,10 @@ setUpdateItems((prev) =>
       const compressedFile =
         await compressImage(file);
 
-     const updatedItem = {
+  const updatedItem = {
   ...item,
   attachment: compressedFile,
+  isDirty: true,
 };
 
 setUpdateItems((prev) =>
