@@ -44,6 +44,8 @@ import ExportRetention from "../components/ExportRetention/ExportRetentionScreen
 import ProductUpdate from "../components/ProductUpdate/ProductUpdatesScreen";
 import CreateProductUpdate from "../components/ProductUpdate/CreateProductUpdate";
 import StayInfoScreen from "../components/StayInfo/StayInfoScreen";
+import PropertiesUsingKYC from "../components/PropertiesUsingKYC/PropertiesUsingKYC";
+
 
 const PrivateRoute = ({ children }) => {
   const token =
@@ -131,6 +133,7 @@ const PrivateRoutesScreen = () => {
                       <Route path="/exportretention/:roleId" element={< ExportRetention />} />
                       <Route path="/product-update-create/:roleId" element={< CreateProductUpdate />} />
                       <Route path="/stayinfo/:roleId" element={<StayInfoScreen />} />
+                       <Route path="/PropertyusingKyc/:roleId" element={<PropertiesUsingKYC />} />
                     </Routes>
                   </KYCProvider>
                 </SupportTicketsProvider>

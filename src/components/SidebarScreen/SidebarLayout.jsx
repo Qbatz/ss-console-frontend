@@ -406,6 +406,8 @@ useEffect(() => {
 
             <SidebarItem title="Support Tickets" count="0" to={`/supportTicket/${adminDetails?.roleId}`} activeIcon={Support}
               inactiveIcon={Support} />
+              <SidebarItem title="Properties Using KYC" count="0" to={`/PropertyusingKyc/${adminDetails?.roleId}`} activeIcon={Support}
+              inactiveIcon={Support} />
  <SidebarItem title="KYC Pending Approval" to={`/Kyc-approve/${adminDetails?.roleId}`} activeIcon={VerifyImg}
               inactiveIcon={VerifyImg} />
             {/* <SidebarItem title="CRM Dashboard" count="0" to={`/crmDashboard/${adminDetails?.roleId}`} activeIcon={Dashbord}

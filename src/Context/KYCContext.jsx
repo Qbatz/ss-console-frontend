@@ -88,13 +88,127 @@ const approveKYC = async (
 
   }
 };
+const getHostelKYCList = async (
+  page = 1,
+  size = 10,
+  name = "",
+  isEnabled,
+  dateFilter = "THIS_MONTH",
+  startDate,
+  endDate
+) => {
+  setLoading(true);
 
+  try {
+    const params = {
+      page,
+      size,
+      name,
+      dateFilter,
+    };
+
+    if (isEnabled !== undefined) {
+      params.isEnabled = isEnabled;
+    }
+
+    if (startDate) {
+      params.startDate = startDate;
+    }
+
+    if (endDate) {
+      params.endDate = endDate;
+    }
+
+    console.log("KYC API PARAMS:", params);
+
+    const res = await axiosInstance.get(
+      "/v2/kyc/hostels",
+      {
+        params,
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+
+  } catch (error) {
+    console.error(
+      "Get Hostel KYC Error:",
+      error
+    );
+
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+
+const getHostelKYCDetails = async (
+  hostelId,
+  page = 0,
+  size = 10,
+  name = "",
+  kycStatus = "",
+  dateFilter = "THIS_MONTH",
+  startDate = "",
+  endDate = ""
+) => {
+  try {
+    const params = {
+      page,
+      size,
+      name,
+      kycStatus,
+      dateFilter,
+    };
+
+    // CUSTOM date filter என்றால் மட்டும் அனுப்பும்
+    if (startDate) {
+      params.startDate = startDate;
+    }
+
+    if (endDate) {
+      params.endDate = endDate;
+    }
+
+    console.log("HOSTEL KYC DETAILS PARAMS:", params);
+
+    const res = await axiosInstance.get(
+      `/v2/kyc/${hostelId}`,
+      {
+        params,
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+
+  } catch (error) {
+    console.error(
+      "Get Hostel KYC Details Error:",
+      error
+    );
+
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+  }
+};
   return (
     <KYCContext.Provider
       value={{
         loading,
         accessError,
-        getKYCList,approveKYC
+        getKYCList,approveKYC,getHostelKYCList,getHostelKYCDetails
       }}
     >
       {children}
