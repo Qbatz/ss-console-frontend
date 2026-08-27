@@ -203,12 +203,41 @@ const getHostelKYCDetails = async (
     };
   }
 };
+
+const sendKYCReminder = async (customerId) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.post(
+      `/v2/kyc/reminder/${customerId}`
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+
+  } catch (error) {
+    console.error(
+      "Send KYC Reminder Error:",
+      error
+    );
+
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <KYCContext.Provider
       value={{
         loading,
         accessError,
-        getKYCList,approveKYC,getHostelKYCList,getHostelKYCDetails
+        getKYCList,approveKYC,getHostelKYCList,getHostelKYCDetails,sendKYCReminder
       }}
     >
       {children}

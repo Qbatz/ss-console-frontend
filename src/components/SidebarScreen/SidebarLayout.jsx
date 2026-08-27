@@ -32,6 +32,7 @@ const DashboardLayout = ({ children }) => {
   const [openPlans, setOpenPlans] = useState(false);
   const menuRef = useRef(null);
   const [plansOpen, setPlansOpen] = useState(false);
+  const [kycOpen, setKycOpen] = useState(false);
 useEffect(() => {
   const handleClickOutside = (event) => {
     if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -45,7 +46,14 @@ useEffect(() => {
     document.removeEventListener("mousedown", handleClickOutside);
   };
 }, []);
-
+useEffect(() => {
+  if (
+    location.pathname.includes("/PropertyusingKyc") ||
+    location.pathname.includes("/Kyc-approve")
+  ) {
+    setKycOpen(true);
+  }
+}, [location.pathname]);
   useEffect(() => {
     if (
       location.pathname.includes("/demo-requests") ||
@@ -406,10 +414,70 @@ useEffect(() => {
 
             <SidebarItem title="Support Tickets" count="0" to={`/supportTicket/${adminDetails?.roleId}`} activeIcon={Support}
               inactiveIcon={Support} />
-              <SidebarItem title="Properties Using KYC" count="0" to={`/PropertyusingKyc/${adminDetails?.roleId}`} activeIcon={Support}
-              inactiveIcon={Support} />
- <SidebarItem title="KYC Pending Approval" to={`/Kyc-approve/${adminDetails?.roleId}`} activeIcon={VerifyImg}
-              inactiveIcon={VerifyImg} />
+              <div>
+  {/* KYC Parent */}
+  <div
+    onClick={() => {
+      setKycOpen(!kycOpen);
+      setOpenSales(false);
+      setPlansOpen(false);
+      setRecurringOpen(false);
+    }}
+    className="
+      flex
+      items-center
+      justify-between
+      px-1
+      py-2
+      cursor-pointer
+      hover:bg-gray-100
+      rounded-lg
+      text-[12px]
+    "
+  >
+    <div className="flex items-center gap-3">
+      <img
+        src={VerifyImg}
+        className="w-5 h-5"
+      />
+
+      <span>KYC</span>
+    </div>
+
+    <span
+      className={`transform transition ${
+        kycOpen ? "rotate-180" : ""
+      }`}
+    >
+      <img
+        src={Drop}
+        className="w-5 h-5"
+      />
+    </span>
+  </div>
+
+  {/* KYC Children */}
+  {kycOpen && (
+    <div className="ml-8 mt-1 space-y-1 text-[11px]">
+
+      <SidebarItem
+        title="Properties Using KYC"
+        count="0"
+        to={`/PropertyusingKyc/${adminDetails?.roleId}`}
+        // activeIcon={Support}
+        // inactiveIcon={Support}
+      />
+
+      <SidebarItem
+        title="KYC Pending Approval"
+        to={`/Kyc-approve/${adminDetails?.roleId}`}
+        // activeIcon={VerifyImg}
+        // inactiveIcon={VerifyImg}
+      />
+
+    </div>
+  )}
+</div>
             {/* <SidebarItem title="CRM Dashboard" count="0" to={`/crmDashboard/${adminDetails?.roleId}`} activeIcon={Dashbord}
               inactiveIcon={Dashbord} /> */}
 
