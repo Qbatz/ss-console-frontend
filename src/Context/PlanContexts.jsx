@@ -1194,6 +1194,85 @@ const createProductUpdateItem = async (
     setLoading(false);
   }
 };
+
+const deleteProductUpdate = async (productUpdateId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.delete(
+      `/v2/product-update/${productUpdateId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+        message:
+          res.data?.message ||
+          "Product update deleted successfully",
+      };
+    }
+
+    return {
+      success: false,
+      message: "Failed to delete product update",
+    };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};const deleteProductUpdateItem = async (payload) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.delete(
+      "/v2/product-update-item",
+      {
+        data: payload,
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+        message:
+          res.data?.message ||
+          "Product update item deleted successfully",
+      };
+    }
+
+    return {
+      success: false,
+      message: "Failed to delete product update item",
+    };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <PlanContext.Provider
       value={{
@@ -1203,7 +1282,8 @@ const createProductUpdateItem = async (
         getPlans,createPlan,updatePlan,deactivatePlan,deactivatePlanFeature,addPlanFeature,accessError,
         getPlansDropdown,reactivatePlan,getSmartstayFeatures,createSmartstayFeature,updateSmartstayFeature,
         deleteSmartstayFeature,getPlanById,getProductUpdateTypes,getProductUpdatePlatforms,getProductUpdateModules,getProductUpdateCtas,getProductUpdatePublishStatuses,
-        getProductUpdateAudiences,createProductUpdate,getProductUpdates,searchHostels,archiveProductUpdate,getProductUpdateById,updateProductUpdate,updateProductUpdateItem,createProductUpdateItem
+        getProductUpdateAudiences,createProductUpdate,getProductUpdates,searchHostels,archiveProductUpdate,getProductUpdateById,updateProductUpdate,
+        updateProductUpdateItem,createProductUpdateItem,deleteProductUpdate,deleteProductUpdateItem
       }}
     >
       {children}

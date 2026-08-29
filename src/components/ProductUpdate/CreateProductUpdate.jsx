@@ -9,6 +9,7 @@ import dayjs from "dayjs";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import { useLocation } from "react-router-dom";
+import Trash from "../../assets/trash.png"
 
 
 
@@ -16,7 +17,7 @@ const CreateProductUpdate = () => {
   const navigate = useNavigate();
   const { searchOwners, loading } = useSupportTickets();
   const { getPlansDropdown, getProductUpdateTypes, getProductUpdatePlatforms, getProductUpdateModules, getProductUpdateCtas, getProductUpdatePublishStatuses, 
-    getProductUpdateAudiences, createProductUpdate, searchHostels,getProductUpdateById,updateProductUpdate,updateProductUpdateItem,createProductUpdateItem } = usePlan();
+    getProductUpdateAudiences, createProductUpdate, searchHostels,getProductUpdateById,updateProductUpdate,updateProductUpdateItem,createProductUpdateItem,deleteProductUpdateItem } = usePlan();
   const [updateTitle, setUpdateTitle] = useState("");
   const location = useLocation();
 
@@ -91,7 +92,7 @@ const [isEditLoading, setIsEditLoading] = useState(false);
 const [unsavedItemIds, setUnsavedItemIds] = useState([]);
 const [initialFormData, setInitialFormData] = useState(null);
   console.log("ownersList", ownersList)
-
+const [hasSavedItemChanges, setHasSavedItemChanges] = useState(false);
 const markItemAsUnsaved = (itemId) => {
   if (!itemId) return;
 
@@ -1053,7 +1054,7 @@ const handleCreateProductUpdate = async () => {
       "Please save all item changes before publishing."
     );
 
-    // Also show visible Toast
+  
     setModalType("error");
 
     setMessage(
@@ -1076,7 +1077,8 @@ const handleCreateProductUpdate = async () => {
 
   if (
     isEditMode &&
-    !hasFormChanges()
+    !hasFormChanges() &&
+    !!hasSavedItemChanges
   ) {
 
     setModalType("error");
@@ -1381,6 +1383,135 @@ const handleSaveItem = async (item) => {
     );
   }
 };
+// const handleCreateItem = async (item) => {
+//   try {
+//     const formData = new FormData();
+
+//     const payload = {
+//       productUpdateId: productUpdateId,
+
+//       title: item.title || "",
+//       description: item.description || "",
+
+//       updateType: item.itemType || "",
+//       module: item.relatedModule || "",
+
+//       cta: item.cta || "",
+//       ctaLink: item.ctaLink || "",
+
+//       showCtaButton:
+//         item.showCtaButton ?? false,
+
+//       clientId: item.clientId,
+
+//       // New item has no existing images
+//       existingImageUrls: [],
+//     };
+
+//     // =========================
+//     // JSON PAYLOAD
+//     // =========================
+
+//     formData.append(
+//       "payloads",
+//       new Blob(
+//         [JSON.stringify([payload])],
+//         {
+//           type: "application/json",
+//         }
+//       )
+//     );
+
+//     // =========================
+//     // MULTIPLE FILES
+//     // =========================
+
+//     const files = {};
+
+//     const attachments = Array.isArray(item.attachment)
+//       ? item.attachment
+//       : item.attachment
+//         ? [item.attachment]
+//         : [];
+
+//     attachments.forEach((file) => {
+//       if (file instanceof File) {
+//         formData.append(
+//           item.clientId,
+//           file,
+//           file.name
+//         );
+
+//         if (!files[item.clientId]) {
+//           files[item.clientId] = [];
+//         }
+
+//         files[item.clientId].push(file.name);
+//       }
+//     });
+
+//     console.log(
+//       "CREATE ITEM PAYLOAD:",
+//       payload
+//     );
+
+//     console.log(
+//       "CREATE ITEM FILES:",
+//       files
+//     );
+
+//     // =========================
+//     // API
+//     // =========================
+
+//     const result =
+//       await createProductUpdateItem(
+//         formData,
+//         files
+//       );
+
+//     // =========================
+//     // SUCCESS
+//     // =========================
+
+//     if (result?.success) {
+
+//       console.log(
+//         "New item created:",
+//         result.data
+//       );
+
+//       setUpdateItems((prev) =>
+//         prev.map((updateItem) =>
+//           updateItem.id === item.id
+//             ? {
+//                 ...updateItem,
+//                 isDirty: false,
+//                 productUpdateItemId:
+//                   result.data?.productUpdateItemId ??
+//                   updateItem.productUpdateItemId,
+
+//                 // Keep uploaded images in UI
+//                 attachment: [],
+//               }
+//             : updateItem
+//         )
+//       );
+
+//       markItemAsSaved(item.id);
+
+//       setItemsError("");
+//     }
+
+//   } catch (error) {
+
+//     console.error(
+//       "Create Product Item Error:",
+//       error
+//     );
+
+//   }
+// };
 const handleCreateItem = async (item) => {
   try {
     const formData = new FormData();
@@ -1402,7 +1533,7 @@ const handleCreateItem = async (item) => {
 
       clientId: item.clientId,
 
-      // New item doesn't have old images
+      // New item has no existing images
       existingImageUrls: [],
     };
 
@@ -1421,21 +1552,32 @@ const handleCreateItem = async (item) => {
     );
 
     // =========================
-    // FILES
+    // MULTIPLE FILES
     // =========================
 
     const files = {};
 
-    if (item.attachment instanceof File) {
-      formData.append(
-        item.clientId,
-        item.attachment,
-        item.attachment.name
-      );
+    const attachments = Array.isArray(item.attachment)
+      ? item.attachment
+      : item.attachment
+        ? [item.attachment]
+        : [];
 
-      files[item.clientId] =
-        item.attachment.name;
-    }
+    attachments.forEach((file) => {
+      if (file instanceof File) {
+        formData.append(
+          item.clientId,
+          file,
+          file.name
+        );
+
+        if (!files[item.clientId]) {
+          files[item.clientId] = [];
+        }
+
+        files[item.clientId].push(file.name);
+      }
+    });
 
     console.log(
       "CREATE ITEM PAYLOAD:",
@@ -1462,36 +1604,41 @@ const handleCreateItem = async (item) => {
     // =========================
 
     if (result?.success) {
-  console.log(
-    "New item created:",
-    result.data
-  );
 
-  setUpdateItems((prev) =>
-    prev.map((updateItem) =>
-      updateItem.id === item.id
-        ? {
-            ...updateItem,
-            isDirty: false,
-            productUpdateItemId:
-              result.data?.productUpdateItemId ??
-              updateItem.productUpdateItemId,
-          }
-        : updateItem
-    )
-  );
+      console.log(
+        "New item created:",
+        result.data
+      );
 
-  // IMPORTANT
-  markItemAsSaved(item.id);
+      setUpdateItems((prev) =>
+        prev.map((updateItem) =>
+          updateItem.id === item.id
+            ? {
+                ...updateItem,
+                isDirty: false,
+                productUpdateItemId:
+                  result.data?.productUpdateItemId ??
+                  updateItem.productUpdateItemId,
 
-  setItemsError("");
-}
+                // Keep uploaded images in UI
+                attachment: [],
+              }
+            : updateItem
+        )
+      );
+
+      markItemAsSaved(item.id);
+
+      setItemsError("");
+    }
 
   } catch (error) {
+
     console.error(
       "Create Product Item Error:",
       error
     );
+
   }
 };
   const handlePropertySearch = async (value) => {
@@ -1524,6 +1671,104 @@ const handleCreateItem = async (item) => {
       setPropertyLoading(false);
     }
   };
+  const handleDeleteItem = async (item, index) => {
+  try {
+   
+    if (!item?.productUpdateItemId) {
+      const deletedItemId = item.productUpdateItemId;
+
+      setUpdateItems((prev) =>
+        prev.filter((_, i) => i !== index)
+      );
+
+      setUnsavedItemIds((prev) =>
+        prev.filter((id) => id !== deletedItemId)
+      );
+
+      return;
+    }
+
+    // ==========================================
+    // EXISTING ITEM - DELETE API
+    // ==========================================
+
+    const payload = [
+      {
+        productUpdateItemId:
+          item.productUpdateItemId,
+      },
+    ];
+
+    console.log(
+      "DELETE PRODUCT UPDATE ITEM PAYLOAD:",
+      payload
+    );
+
+    const result =
+      await deleteProductUpdateItem(payload);
+
+    console.log(
+      "DELETE PRODUCT UPDATE ITEM RESULT:",
+      result
+    );
+
+    if (result?.success) {
+      
+      setUpdateItems((prev) =>
+        prev.filter((_, i) => i !== index)
+      );
+
+      setUnsavedItemIds((prev) =>
+        prev.filter((id) => id !== item.id)
+      );
+
+      setItemsError("");
+
+      setModalType("success");
+      setMessage(
+        result?.message ||
+          "Product update item deleted successfully"
+      );
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
+      return;
+    }
+
+
+
+    setModalType("error");
+    setMessage(
+      result?.message ||
+        "Failed to delete product update item"
+    );
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 2000);
+
+  } catch (error) {
+    console.error(
+      "Delete Product Update Item Error:",
+      error
+    );
+
+    setModalType("error");
+    setMessage(
+      error?.message ||
+        "Failed to delete product update item"
+    );
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 2000);
+  }
+};
   return (
     <DashboardLayout>
       {isEditLoading && (
@@ -1571,7 +1816,7 @@ const handleCreateItem = async (item) => {
 
             <div className="flex items-center gap-2">
 
-              <button
+              {/* <button
                 type="button"
                 className="
                   px-3 py-1.5
@@ -1584,9 +1829,10 @@ const handleCreateItem = async (item) => {
                 "
               >
                 Save as Draft
-              </button>
+              </button> */}
 
               <button
+               onClick={() => setShowPreviewModal(true)}
                 type="button"
                 className="
                   px-3 py-1.5
@@ -1899,7 +2145,7 @@ const handleCreateItem = async (item) => {
                               ⋮⋮
                             </span>
 
-                            <span className="text-[8px] text-gray-500">
+                            <span className="text-[12px] text-gray-500">
                               Item {index + 1}
                             </span>
 
@@ -1923,66 +2169,7 @@ const handleCreateItem = async (item) => {
                               //     return newItems;
                               //   });
                               // }}
-                              onClick={() => {
-  const newItemId =
-    Date.now() + Math.random();
-
-const duplicate = {
-  ...item,
-
-  productUpdateItemId: null,
-
-  id: newItemId,
-
-  clientId:
-    `item-${updateItems.length + 1}-${Date.now()}`,
-
-  isDirty: true,
-};
-
-  setUpdateItems((prev) => {
-    const newItems = [...prev];
-
-    newItems.splice(
-      index + 1,
-      0,
-      duplicate
-    );
-
-    return newItems;
-  });
-
- 
-  markItemAsUnsaved(newItemId);
-}}
-                              className="
-                  text-gray-400
-                  hover:text-[#2952F3]
-                  cursor-pointer
-                  text-[10px]
-                "
-                              title="Duplicate"
-                            >
-                              ⧉
-                            </button>
-
-                           
-                            <button
-                              type="button"
-                             onClick={() => {
-  const deletedItemId = item.id;
-
-  setUpdateItems((prev) =>
-    prev.filter((_, i) => i !== index)
-  );
-
-  // Remove from unsaved tracking
-  setUnsavedItemIds((prev) =>
-    prev.filter(
-      (id) => id !== deletedItemId
-    )
-  );
-}}
+                 onClick={() => handleDeleteItem(item, index)}
                               className="
                   text-red-400
                   hover:text-red-600
@@ -1991,7 +2178,7 @@ const duplicate = {
                 "
                               title="Delete"
                             >
-                              🗑
+                              <img src={Trash} className="w-5 h-5"/>
                             </button>
 
 {isEditMode && (
@@ -2029,7 +2216,7 @@ const duplicate = {
 
                           <div>
 
-                            <label className="block text-[7px] text-gray-500 mb-1 text-left">
+                            <label className="block text-[12px] text-gray-500 mb-1 text-left">
                               Item Type
                             </label>
 
@@ -2095,7 +2282,7 @@ setUpdateItems((prev) =>
 
                           <div>
 
-                            <label className="block text-[7px] text-gray-500 mb-1 text-left">
+                            <label className="block text-[12px] text-gray-500 mb-1 text-left">
                               Title
                               <span className="text-red-500"> *</span>
                             </label>
@@ -2103,27 +2290,7 @@ setUpdateItems((prev) =>
                             <input
                               type="text"
                               value={item.title}
-                              // onChange={(e) => {
-                              //   const value = e.target.value;
-
-                              //   setUpdateItems((prev) =>
-                              //     prev.map((updateItem, i) =>
-                              //       i === index
-                              //         ? {
-                              //           ...updateItem,
-                              //           title: value,
-                              //         }
-                              //         : updateItem
-                              //     )
-                              //   );
-                              //   setItemTitleErrors((prev) => {
-                              //     const newErrors = { ...prev };
-                              //     delete newErrors[index];
-                              //     return newErrors;
-                              //   });
-                              //   setItemsError("");
-
-                              // }}
+                             
                               onChange={(e) => {
   const value = e.target.value;
 
@@ -2156,7 +2323,7 @@ setUpdateItems((prev) =>
                   border border-gray-200
                   rounded-md
                   px-2
-                  text-[8px]
+                  text-[11px]
                   outline-none
                   focus:border-[#2952F3]
                 "
@@ -2213,7 +2380,7 @@ setUpdateItems((prev) =>
       border border-gray-200
       rounded-md
       px-2 py-1.5
-      text-[8px]
+      text-[11px]
       outline-none
       resize-none
       focus:border-[#2952F3]
@@ -2234,7 +2401,7 @@ setUpdateItems((prev) =>
 
                           <div>
 
-                            <label className="block text-[7px] text-gray-500 mb-1 text-left">
+                            <label className="block text-[12px] text-gray-500 mb-1 text-left">
                               Related Module
                               <span className="text-red-500"> *</span>
                             </label>
@@ -2272,7 +2439,7 @@ setUpdateItems((prev) =>
       border
       rounded-md
       px-2
-      text-[8px]
+      text-[11px]
       text-gray-600
       outline-none
       cursor-pointer
@@ -2305,7 +2472,7 @@ setUpdateItems((prev) =>
 
                           <div>
 
-                            <label className="block text-[7px] text-gray-500 mb-1 text-left">
+                            <label className="block text-[12px] text-gray-500 mb-1 text-left">
                               CTA
                               <span className="text-red-500"> *</span>
                             </label>
@@ -2343,7 +2510,7 @@ setUpdateItems((prev) =>
       border
       rounded-md
       px-2
-      text-[8px]
+      text-[11px]
       text-gray-600
       outline-none
       cursor-pointer
@@ -2378,7 +2545,7 @@ setUpdateItems((prev) =>
 
                           <div>
 
-                            <label className="block text-[7px] text-gray-500 mb-1 text-left">
+                            <label className="block text-[12px] text-gray-500 mb-1 text-left">
                               CTA Link
                               <span className="text-red-500"> *</span>
                             </label>
@@ -2418,7 +2585,7 @@ setUpdateItems((prev) =>
       border
       rounded-md
       px-2
-      text-[8px]
+      text-[11px]
       outline-none
       focus:border-[#2952F3]
       ${itemCtaLinkErrors[index]
@@ -2439,102 +2606,254 @@ setUpdateItems((prev) =>
 
                         </div>
 
-                        <div className="mt-2">
+                      <div className="mt-2">
 
-                          <label className="block text-[7px] text-gray-500 mb-1">
-                            Attachments - relevant to the update
-                          </label>
+  <label className="block text-[12px] text-gray-500 mb-1 text-left">
+    Attachments - relevant to the update
+  </label>
 
-                          <label
-                            className="
-                w-full
-                h-11
-                border border-gray-200
-                rounded-md
-                bg-gray-50
-                flex
-                items-center
-                justify-center
-                gap-2
-                cursor-pointer
-                hover:bg-gray-100
-              "
-                          >
+  {/* Upload Box */}
+  <label
+    className="
+      w-full
+      h-11
+      border border-gray-200
+      rounded-md
+      bg-gray-50
+      flex
+      items-center
+      justify-center
+      gap-2
+      cursor-pointer
+      hover:bg-gray-100
+    "
+  >
+    <Upload
+      size={13}
+      className="text-[#2952F3]"
+    />
 
-                            <Upload
-                              size={13}
-                              className="text-[#2952F3]"
-                            />
+    <div className="text-center">
+      <p className="text-[11px] text-[#2952F3]">
+        Choose Images to Upload
+      </p>
 
-                            <div className="text-center">
+      <p className="text-[10px] text-gray-400 mt-0.5">
+        JPG/JPEG Format • Multiple images allowed
+      </p>
+    </div>
 
-                              <p className="text-[7px] text-[#2952F3]">
-                                Choose Image to Upload
-                              </p>
+    <input
+      type="file"
+      accept="image/jpeg,image/jpg"
+      multiple
+      className="hidden"
+      onChange={async (e) => {
+        const files = Array.from(e.target.files || []);
 
-                              <p className="text-[6px] text-gray-400 mt-0.5">
-                                JPG/JPEG Format
-                              </p>
+        if (!files.length) return;
 
-                            </div>
+        try {
+          const compressedFiles = await Promise.all(
+            files.map((file) => compressImage(file))
+          );
 
-                          <input
-  type="file"
-  accept="image/jpeg,image/jpg"
-  className="hidden"
-  onChange={async (e) => {
-    const file = e.target.files?.[0];
+          setUpdateItems((prev) =>
+            prev.map((updateItem, i) =>
+              i === index
+                ? {
+                    ...updateItem,
 
-    if (!file) return;
+                    attachment: [
+                      ...(updateItem.attachment || []),
+                      ...compressedFiles,
+                    ],
 
-    try {
-      const compressedFile =
-        await compressImage(file);
+                    isDirty: true,
+                  }
+                : updateItem
+            )
+          );
 
-  const updatedItem = {
-  ...item,
-  attachment: compressedFile,
-  isDirty: true,
-};
+          markItemAsUnsaved(item.id);
 
-setUpdateItems((prev) =>
-  prev.map((updateItem, i) =>
-    i === index
-      ? updatedItem
-      : updateItem
-  )
-);
+          // Allow selecting same image again
+          e.target.value = "";
 
-markItemAsUnsaved(item.id);
+        } catch (error) {
+          console.error("Image upload error:", error);
+        }
+      }}
+    />
+  </label>
 
-      console.log(
-        "IMAGE SELECTED:",
-        compressedFile
-      );
 
-    
+  {/* ============================= */}
+  {/* IMAGE PREVIEW */}
+  {/* ============================= */}
 
-      if (
-        isEditMode &&
-        item.productUpdateItemId
-      ) {
-        await handleSaveItem(
-          updatedItem
-        );
-      }
+  {(
+    (item.itemImages && item.itemImages.length > 0) ||
+    (item.attachment && item.attachment.length > 0)
+  ) && (
 
-    } catch (error) {
-      console.error(
-        "Image upload error:",
-        error
-      );
-    }
-  }}
-/>
+    <div className="flex flex-wrap gap-2 mt-2">
 
-                          </label>
+      {/* ============================= */}
+      {/* EXISTING IMAGES */}
+      {/* ============================= */}
 
-                        </div>
+      {(item.itemImages || []).map((image, imageIndex) => (
+
+        <div
+          key={`existing-${imageIndex}`}
+          className="
+            relative
+            w-[70px]
+            h-[70px]
+            rounded-md
+            overflow-hidden
+            border
+            border-gray-200
+            bg-gray-100
+          "
+        >
+
+          <img
+            src={image}
+            alt={`Attachment ${imageIndex + 1}`}
+            className="w-full h-full object-cover"
+          />
+
+          {/* Remove */}
+          <button
+            type="button"
+            onClick={() => {
+
+              const updatedImages =
+                (item.itemImages || []).filter(
+                  (_, i) => i !== imageIndex
+                );
+
+              setUpdateItems((prev) =>
+                prev.map((updateItem, i) =>
+                  i === index
+                    ? {
+                        ...updateItem,
+                        itemImages: updatedImages,
+                        isDirty: true,
+                      }
+                    : updateItem
+                )
+              );
+
+              markItemAsUnsaved(item.id);
+            }}
+            className="
+              absolute
+              top-1
+              right-1
+              w-4
+              h-4
+              rounded-full
+              bg-black/60
+              text-white
+              flex
+              items-center
+              justify-center
+              text-[11px]
+              leading-none
+              hover:bg-red-500
+              cursor-pointer
+            "
+          >
+            ×
+          </button>
+
+        </div>
+
+      ))}
+
+
+      {/* ============================= */}
+      {/* NEWLY UPLOADED IMAGES */}
+      {/* ============================= */}
+
+      {(item.attachment || []).map((file, fileIndex) => (
+
+        <div
+          key={`new-${fileIndex}`}
+          className="
+            relative
+            w-[70px]
+            h-[70px]
+            rounded-md
+            overflow-hidden
+            border
+            border-gray-200
+            bg-gray-100
+          "
+        >
+
+          <img
+            src={URL.createObjectURL(file)}
+            alt={`New attachment ${fileIndex + 1}`}
+            className="w-full h-full object-cover"
+          />
+
+          {/* Remove */}
+          <button
+            type="button"
+            onClick={() => {
+
+              const updatedFiles =
+                (item.attachment || []).filter(
+                  (_, i) => i !== fileIndex
+                );
+
+              setUpdateItems((prev) =>
+                prev.map((updateItem, i) =>
+                  i === index
+                    ? {
+                        ...updateItem,
+                        attachment: updatedFiles,
+                        isDirty: true,
+                      }
+                    : updateItem
+                )
+              );
+
+              markItemAsUnsaved(item.id);
+            }}
+            className="
+              absolute
+              top-1
+              right-1
+              w-4
+              h-4
+              rounded-full
+              bg-black/60
+              text-white
+              flex
+              items-center
+              justify-center
+              text-[11px]
+              leading-none
+              hover:bg-red-500
+              cursor-pointer
+            "
+          >
+            ×
+          </button>
+
+        </div>
+
+      ))}
+
+    </div>
+  )}
+
+</div>
 
                       </div>
 
@@ -2561,7 +2880,7 @@ markItemAsUnsaved(item.id);
       border-dashed
       border-[#B8C8FF]
       rounded-md
-      text-[8px]
+      text-[11px]
       text-[#2952F3]
       hover:bg-[#F5F7FF]
       cursor-pointer
@@ -2575,7 +2894,7 @@ markItemAsUnsaved(item.id);
 
               <div className="bg-white border border-gray-200 rounded-lg p-4">
 
-                <h2 className="text-[11px] font-semibold text-gray-800 mb-3 text-left">
+                <h2 className="text-[12px] font-semibold text-gray-800 mb-3 text-left">
                   Who should see this update?
                 </h2>
 
@@ -2590,7 +2909,7 @@ markItemAsUnsaved(item.id);
                       onChange={(value) => {
                         setAudience(value);
 
-                        // Clear audience error
+                       
                         setAudienceError("");
 
                         if (
@@ -2673,7 +2992,7 @@ markItemAsUnsaved(item.id);
 
 <div className="bg-white border border-gray-200 rounded-lg p-4">
 
-  <h2 className="text-[11px] font-semibold text-gray-800 mb-3 text-left">
+  <h2 className="text-[12px] font-semibold text-gray-800 mb-3 text-left">
     Publishing
   </h2>
 
@@ -2684,13 +3003,10 @@ markItemAsUnsaved(item.id);
       selected={publishing}
       onChange={(value) => {
 
-        // Set selected publishing status
         setPublishing(value);
 
-        // Clear publishing error
         setPublishingError("");
 
-        // Find selected status from API
         const selectedStatus = publishStatuses?.find(
           (item) => item?.key === value
         );
@@ -3050,7 +3366,7 @@ markItemAsUnsaved(item.id);
                     ▣
                   </div>
 
-                  <h2 className="text-[8px] font-semibold text-gray-700">
+                  <h2 className="text-[12px] font-semibold text-gray-700">
                     Owner App Preview
                   </h2>
 
@@ -3100,17 +3416,11 @@ markItemAsUnsaved(item.id);
         z-10
       "
                     >
-                      <span className="text-[6px] font-semibold text-[#2952F3]">
+                      <span className="text-[9px] font-semibold text-[#2952F3]">
                         ◉ Smartstay
                       </span>
 
-                      <button
-                        type="button"
-                        onClick={() => setShowPreviewModal(true)}
-                        className="text-[5px] text-gray-400 cursor-pointer"
-                      >
-                        See All
-                      </button>
+                     
                     </div>
 
 
@@ -3166,7 +3476,7 @@ markItemAsUnsaved(item.id);
                 justify-center
               "
                             >
-                              <p className="text-[5px] text-gray-300 text-center">
+                              <p className="text-[9px] text-gray-300 text-center">
                                 Add items to see preview
                               </p>
                             </div>
@@ -4346,6 +4656,7 @@ markItemAsUnsaved(item.id);
       )}
       {showPreviewModal && (
   <div
+  onMouseDown={() => setShowPreviewModal(false)}
     className="
       fixed inset-0
       z-[9999]
@@ -4357,7 +4668,7 @@ markItemAsUnsaved(item.id);
     "
   >
 
-    {/* MODAL */}
+  
     <div
       className="
         w-[450px]
@@ -4369,7 +4680,7 @@ markItemAsUnsaved(item.id);
       "
     >
 
-      {/* ================= HEADER ================= */}
+      
       <div
         className="
           h-[55px]
@@ -4493,14 +4804,12 @@ markItemAsUnsaved(item.id);
 
               </div>
 
-              <span className="text-[6px] text-gray-400">
-                See All
-              </span>
+           
 
             </div>
 
 
-            {/* ================= WHAT'S NEW ================= */}
+            
             <div className="px-3 pt-3 pb-5">
 
               <div className="flex items-center justify-between">
@@ -4509,10 +4818,7 @@ markItemAsUnsaved(item.id);
                   What's New
                 </p>
 
-                <span className="text-[6px] text-[#2952F3]">
-                  See All
-                </span>
-
+                
               </div>
 
 
@@ -4775,11 +5081,11 @@ const AudienceOption = ({
         </span>
 
         <div>
-          <p className="text-[8px] font-medium text-gray-700">
+          <p className="text-[12px] font-medium text-gray-700">
             {title}
           </p>
 
-          <p className="text-[7px] text-gray-400 mt-0.5">
+          <p className="text-[11px] text-gray-400 mt-0.5">
             {description}
           </p>
         </div>
@@ -4869,11 +5175,11 @@ const PublishOption = ({
       </span>
 
       <div>
-        <p className="text-[8px] font-medium text-gray-700">
+        <p className="text-[12px] font-medium text-gray-700">
           {title}
         </p>
 
-        <p className="text-[7px] text-gray-400 mt-0.5">
+        <p className="text-[11px] text-gray-400 mt-0.5">
           {description}
         </p>
       </div>

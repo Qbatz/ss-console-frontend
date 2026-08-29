@@ -8,6 +8,8 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Circle from "../../assets/menucircle.png";
 import Eye from "../../assets/eye.png";
 import Edit from "../../assets/editIcon.png";
+import Search from "../../assets/Search.png";
+import { Trash2 } from "lucide-react";
 
 const ProductUpdate = () => {
   const [activeTab, setActiveTab] = useState("ALL");
@@ -38,13 +40,15 @@ const [actionMenuPosition, setActionMenuPosition] = useState({
 const [showArchiveModal, setShowArchiveModal] = useState(false);
 const [selectedUpdate, setSelectedUpdate] = useState(null);
 const [archiveLoading, setArchiveLoading] = useState(false);
+const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [deleteLoading, setDeleteLoading] = useState(false);
  const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   const { adminDetails } = useRole();
-  const { getProductUpdates,archiveProductUpdate,getProductUpdateById } = usePlan();
+  const { getProductUpdates,archiveProductUpdate,getProductUpdateById,deleteProductUpdate } = usePlan();
 
  useEffect(() => {
   fetchProductUpdates();
@@ -183,6 +187,58 @@ const handleArchive = async (productUpdateId) => {
     setArchiveLoading(false);
   }
 };
+const handleDelete = async (productUpdateId) => {
+  if (!productUpdateId) return;
+
+  try {
+    setDeleteLoading(true);
+
+    const result = await deleteProductUpdate(productUpdateId);
+
+    if (result?.success) {
+      setShowDeleteModal(false);
+      setSelectedUpdate(null);
+
+      setModalType("success");
+      setMessage(
+        result?.message || "Product update deleted successfully"
+      );
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1200);
+
+      // Refresh table
+      fetchProductUpdates();
+
+    } else {
+      setModalType("error");
+      setMessage(
+        result?.message || "Failed to delete product update"
+      );
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1200);
+    }
+
+  } catch (error) {
+    console.error("Delete Product Update Error:", error);
+
+    setModalType("error");
+    setMessage("Failed to delete product update");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1200);
+
+  } finally {
+    setDeleteLoading(false);
+  }
+};
 
   return (
     <DashboardLayout>
@@ -291,7 +347,7 @@ const handleArchive = async (productUpdateId) => {
     onClick={() => setActiveTab("ALL")}
     className={`
       pb-3
-      text-[10px]
+      text-[13px]
       font-medium
       cursor-pointer
       border-b-2
@@ -355,7 +411,7 @@ const handleArchive = async (productUpdateId) => {
         onClick={() => setActiveTab(status.key)}
         className={`
           pb-3
-          text-[10px]
+          text-[13px]
           font-medium
           cursor-pointer
           border-b-2
@@ -397,8 +453,8 @@ const handleArchive = async (productUpdateId) => {
             <div className="flex gap-2">
 
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[11px]">
-                  ⌕
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[13px]">
+                  <img src={Search} className="w-3 h-3"/>
                 </span>
 
                <input
@@ -412,7 +468,7 @@ const handleArchive = async (productUpdateId) => {
     border border-gray-200
     rounded-md
     pl-8 pr-3
-    text-[10px]
+    text-[12px]
     outline-none
     focus:border-[#2952F3]
   "
@@ -428,7 +484,7 @@ const handleArchive = async (productUpdateId) => {
     border border-gray-200
     rounded-md
     px-2
-    text-[10px]
+    text-[12px]
     text-gray-600
     outline-none
     cursor-pointer
@@ -448,7 +504,7 @@ const handleArchive = async (productUpdateId) => {
 
             </div>
 
-            <span className="text-[9px] text-gray-400">
+            <span className="text-[13px] text-gray-400">
               {filteredUpdates.length} updates
             </span>
 
@@ -456,13 +512,13 @@ const handleArchive = async (productUpdateId) => {
 
        
     
-<div className="w-full max-h-[400px] overflow-auto relative">
+<div className="w-full max-h-[400px] overflow-auto relative bg-white">
 
   <table className="w-full min-w-[1100px] table-fixed">
 
    <colgroup>
   <col className="w-[5%]" />
-  <col className="w-[20%]" />
+  <col className="w-[10%]" />
   <col className="w-[8%]" />
   <col className="w-[10%]" />
   <col className="w-[10%]" />
@@ -470,15 +526,15 @@ const handleArchive = async (productUpdateId) => {
   <col className="w-[10%]" />
   <col className="w-[10%]" />
   <col className="w-[9%]" />
-  <col className="w-[5%]" />
+  <col className="w-[11%]" />
 </colgroup>
 
-    {/* ================= HEADER ================= */}
+   
 
-    <thead>
+  <thead className="relative z-[100]">
       <tr className="border-y border-gray-100">
 
-        {/* ID */}
+    
         <th
           className="
             sticky
@@ -489,7 +545,7 @@ const handleArchive = async (productUpdateId) => {
             px-3
             py-2.5
             text-left
-            text-[10px]
+            text-[12px]
             font-medium
             text-gray-400
             uppercase
@@ -509,7 +565,7 @@ const handleArchive = async (productUpdateId) => {
             px-3
             py-2.5
             text-left
-            text-[10px]
+            text-[12px]
             font-medium
             text-gray-400
             uppercase
@@ -528,7 +584,7 @@ const handleArchive = async (productUpdateId) => {
             px-2
             py-2.5
             text-left
-            text-[10px]
+            text-[12px]
             font-medium
             text-gray-400
             uppercase
@@ -547,7 +603,7 @@ const handleArchive = async (productUpdateId) => {
             px-2
             py-2.5
             text-left
-            text-[10px]
+            text-[12px]
             font-medium
             text-gray-400
             uppercase
@@ -566,7 +622,7 @@ const handleArchive = async (productUpdateId) => {
             px-2
             py-2.5
             text-left
-            text-[10px]
+            text-[12px]
             font-medium
             text-gray-400
             uppercase
@@ -585,7 +641,7 @@ const handleArchive = async (productUpdateId) => {
             px-2
             py-2.5
             text-left
-            text-[10px]
+            text-[12px]
             font-medium
             text-gray-400
             uppercase
@@ -604,7 +660,7 @@ const handleArchive = async (productUpdateId) => {
             px-2
             py-2.5
             text-left
-            text-[10px]
+            text-[12px]
             font-medium
             text-gray-400
             uppercase
@@ -623,7 +679,7 @@ const handleArchive = async (productUpdateId) => {
             px-2
             py-2.5
             text-left
-            text-[10px]
+            text-[12px]
             font-medium
             text-gray-400
             uppercase
@@ -643,7 +699,7 @@ const handleArchive = async (productUpdateId) => {
             px-2
             py-2.5
             text-left
-            text-[10px]
+            text-[12px]
             font-medium
             text-gray-400
             uppercase
@@ -653,19 +709,19 @@ const handleArchive = async (productUpdateId) => {
         </th>
 
       
-       <th
+   <th
   className="
     sticky
     right-0
     top-0
-    z-50
+    z-[110]
     w-[120px]
     min-w-[120px]
     bg-[#FCFCFD]
     px-3
     py-2.5
     text-center
-    text-[10px]
+    text-[12px]
     font-medium
     text-gray-400
     uppercase
@@ -679,7 +735,7 @@ const handleArchive = async (productUpdateId) => {
       </tr>
     </thead>
 
-    {/* ================= BODY ================= */}
+   
 
     <tbody>
 
@@ -698,7 +754,7 @@ const handleArchive = async (productUpdateId) => {
                 border-b
                 border-gray-100
                 transition
-                text-[10px]
+                text-[12px]
               "
               style={{
                 backgroundColor: isHovered
@@ -707,7 +763,6 @@ const handleArchive = async (productUpdateId) => {
               }}
             >
 
-              {/* ================= ID ================= */}
 
               <td
                 className="
@@ -730,7 +785,7 @@ const handleArchive = async (productUpdateId) => {
                 {(currentPage - 1) * pageSize + index + 1}
               </td>
 
-              {/* ================= UPDATE ================= */}
+           
 
               <td className="px-3 py-3 text-left">
                 <div
@@ -741,13 +796,13 @@ const handleArchive = async (productUpdateId) => {
                 </div>
               </td>
 
-              {/* ================= VERSION ================= */}
+             
 
               <td className="px-2 py-3 text-left">
                 {item.version || "----"}
               </td>
 
-              {/* ================= TYPE ================= */}
+              
 
               <td className="px-2 py-3 text-left">
 
@@ -797,7 +852,7 @@ const handleArchive = async (productUpdateId) => {
                         rounded-full
                         px-2
                         py-1
-                        text-[8px]
+                        text-[10px]
                         font-medium
                         whitespace-nowrap
                         ${badgeClass}
@@ -811,13 +866,13 @@ const handleArchive = async (productUpdateId) => {
 
               </td>
 
-              {/* ================= PLATFORM ================= */}
+             
 
               <td className="px-2 py-3 text-left">
                 {item.platform || "----"}
               </td>
 
-              {/* ================= AUDIENCE ================= */}
+              
 
               <td className="px-2 py-3 text-left">
 
@@ -830,7 +885,7 @@ const handleArchive = async (productUpdateId) => {
 
               </td>
 
-              {/* ================= STATUS ================= */}
+            
 
               <td className="px-2 py-3 text-left">
 
@@ -880,7 +935,7 @@ const handleArchive = async (productUpdateId) => {
                         rounded-full
                         px-2
                         py-1
-                        text-[8px]
+                        text-[10px]
                         font-medium
                         whitespace-nowrap
                         ${badgeClass}
@@ -894,7 +949,7 @@ const handleArchive = async (productUpdateId) => {
 
               </td>
 
-              {/* ================= PUBLISHED DATE ================= */}
+              
 
               <td
                 className="
@@ -909,7 +964,7 @@ const handleArchive = async (productUpdateId) => {
                   "-"}
               </td>
 
-              {/* ================= CREATED BY ================= */}
+            
 
               <td className="px-2 py-3 text-left">
 
@@ -925,10 +980,10 @@ const handleArchive = async (productUpdateId) => {
             
 
   <td
-  className="
+   className="
     sticky
     right-0
-    z-40
+    z-[50]
     w-[120px]
     min-w-[120px]
     px-3
@@ -968,8 +1023,7 @@ const handleArchive = async (productUpdateId) => {
       />
     </button>
 
-    {/* EDIT */}
-  {/* EDIT */}
+  
 <button
   type="button"
   title="Edit"
@@ -1002,7 +1056,31 @@ const handleArchive = async (productUpdateId) => {
     className="w-4 h-4 object-contain"
   />
 </button>
-
+<button
+  type="button"
+  title="Delete"
+  onClick={() => {
+    setSelectedUpdate(item);
+    setShowDeleteModal(true);
+    setOpenActionId(null);
+  }}
+  className="
+    w-7 h-7
+    shrink-0
+    flex items-center justify-center
+    rounded-md
+    text-red-500
+    hover:bg-red-50
+    hover:text-red-600
+    transition
+    cursor-pointer
+  "
+>
+  <Trash2
+    size={16}
+    strokeWidth={1.8}
+  />
+</button>
     {/* MORE */}
     <button
       type="button"
@@ -1195,7 +1273,7 @@ const handleArchive = async (productUpdateId) => {
   "
 >
 
-  <div className="text-[12px] text-gray-700">
+  <div className="text-[13px] text-gray-700">
     Total Record Count :
     <span className="text-[#2952F3] ml-1 font-medium">
       {updates?.length}
@@ -1411,6 +1489,166 @@ const handleArchive = async (productUpdateId) => {
 
   </div>
 )}
+{showDeleteModal && (
+  <div
+    className="
+      fixed inset-0
+      z-[9999]
+      bg-black/40
+      flex
+      items-center
+      justify-center
+      p-4
+    "
+    onMouseDown={() => {
+      if (!deleteLoading) {
+        setShowDeleteModal(false);
+        setSelectedUpdate(null);
+      }
+    }}
+  >
+    <div
+      className="
+        w-[380px]
+        max-w-full
+        bg-white
+        rounded-xl
+        shadow-xl
+        overflow-hidden
+      "
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+
+      {/* HEADER */}
+      <div
+        className="
+          px-5 py-4
+          border-b
+          border-gray-100
+        "
+      >
+        <div className="flex items-center gap-2">
+
+          <div
+            className="
+              w-7 h-7
+              rounded-md
+              bg-red-50
+              flex items-center justify-center
+            "
+          >
+            <Trash2
+              size={15}
+              className="text-red-500"
+            />
+          </div>
+
+          <h3 className="text-[13px] font-semibold text-gray-800">
+            Delete Product Update
+          </h3>
+
+        </div>
+      </div>
+
+
+      {/* CONTENT */}
+      <div className="px-5 py-5">
+
+        <p className="text-[11px] text-gray-500 leading-5">
+          Are you sure you want to delete this product update?
+        </p>
+
+        {selectedUpdate?.title && (
+          <p className="mt-2 text-[11px] font-medium text-gray-700 truncate">
+            "{selectedUpdate.title}"
+          </p>
+        )}
+
+        <p className="mt-2 text-[10px] text-red-500">
+          This action cannot be undone.
+        </p>
+
+      </div>
+
+
+      {/* FOOTER */}
+      <div
+        className="
+          px-5 py-3
+          border-t
+          border-gray-100
+          flex
+          justify-end
+          gap-2
+        "
+      >
+
+        {/* CANCEL */}
+        <button
+          type="button"
+          disabled={deleteLoading}
+          onClick={() => {
+            setShowDeleteModal(false);
+            setSelectedUpdate(null);
+          }}
+          className="
+            px-4 py-2
+            rounded-md
+            border
+            border-gray-200
+            text-[10px]
+            text-gray-600
+            hover:bg-gray-50
+            disabled:opacity-50
+          "
+        >
+          Cancel
+        </button>
+
+
+        {/* DELETE */}
+        <button
+          type="button"
+          disabled={deleteLoading}
+          onClick={() =>
+            handleDelete(selectedUpdate?.productUpdateId)
+          }
+          className="
+            px-4 py-2
+            rounded-md
+            bg-red-500
+            text-white
+            text-[10px]
+            hover:bg-red-600
+            disabled:opacity-50
+            flex
+            items-center
+            gap-2
+          "
+        >
+
+          {deleteLoading && (
+            <span
+              className="
+                w-3 h-3
+                border-2
+                border-white/40
+                border-t-white
+                rounded-full
+                animate-spin
+              "
+            />
+          )}
+
+          {deleteLoading ? "Deleting..." : "Delete"}
+
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };
@@ -1437,7 +1675,7 @@ const SummaryCard = ({
 
       <div className="flex items-center justify-between">
 
-        <p className="text-[9px] text-gray-500">
+        <p className="text-[9px] text-gray-500 text-[13px]">
           {title}
         </p>
 

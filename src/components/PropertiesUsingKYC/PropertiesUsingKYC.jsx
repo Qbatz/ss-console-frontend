@@ -46,6 +46,8 @@ const PropertiesUsingKYC = () => {
   const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
+  const [showKycConfirm, setShowKycConfirm] = useState(false);
+  const [kycEnableStatus, setKycEnableStatus] = useState(false);
   const approveLock = useRef(false);
   const handleReminder = (tenant) => {
     setReminderTenant(tenant);
@@ -278,7 +280,51 @@ const PropertiesUsingKYC = () => {
   };
 
 
+const handleKycEnableDisable = async () => {
+  try {
+    const hostelId =
+      selectedProperty?.hostelId ||
+      selectedProperty?.id;
 
+    if (!hostelId) {
+      console.error("Missing hostelId");
+      return;
+    }
+
+    setLoading(true);
+
+    // Current state true → disable
+    // Current state false → enable
+    const newStatus = !kycEnableStatus;
+
+    const result = await updateHostelKYCStatus(
+      hostelId,
+      newStatus
+    );
+
+    if (!result?.success) {
+      console.error(
+        "KYC Enable/Disable failed:",
+        result?.message
+      );
+      return;
+    }
+
+    // Update UI only after API success
+    setKycEnableStatus(newStatus);
+
+    // Close confirmation modal
+    setShowKycConfirm(false);
+
+  } catch (error) {
+    console.error(
+      "KYC Enable/Disable Error:",
+      error
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   useEffect(() => {
@@ -379,42 +425,35 @@ const PropertiesUsingKYC = () => {
       const tenants =
         data?.hostel?.tenants || [];
 
-      const formattedTenants = tenants.map(
-        (tenant) => ({
-          tenantId:
-            tenant?.customerId || "",
+     const formattedTenants = tenants.map((tenant) => ({
+  ...tenant,
 
-          tenantName:
-            tenant?.fullName || "-",
+  tenantId: tenant?.customerId || "",
 
-          joinDate:
-            tenant?.joiningDate || "-",
+  tenantName: tenant?.fullName?.trim() || "N/A",
 
-          billingCycle:
-            tenant?.billingCycleStart &&
-              tenant?.billingCycleEnd
-              ? `${tenant.billingCycleStart} - ${tenant.billingCycleEnd}`
-              : "-",
+  joinDate: tenant?.joiningDate || "",
 
-          submittedDate:
-            tenant?.kycCompletedDate || "",
+  billingCycle:
+    tenant?.billingCycleStart &&
+    tenant?.billingCycleEnd
+      ? `${tenant.billingCycleStart} - ${tenant.billingCycleEnd}`
+      : "N/A",
 
-          submittedTime:
-            tenant?.kycCompletedTime || "",
+  submittedDate: tenant?.kycCompletedDate || "",
+  submittedTime: tenant?.kycCompletedTime || "",
 
-          kycStatus:
-            tenant?.kycDetailsStatus ||
-            "NOT_AVAILABLE",
+  kycStatus:
+    tenant?.kycDetailsStatus?.trim()
+      ? tenant.kycDetailsStatus
+      : "NOT_AVAILABLE",
 
-          canSendReminder:
-            tenant?.canSendReminder ?? false,
+  canSendReminder:
+    tenant?.canSendReminder ?? false,
 
-          canApproveKyc:
-            tenant?.canApproveKyc ?? false,
-
-          ...tenant,
-        })
-      );
+  canApproveKyc:
+    tenant?.canApproveKyc ?? false,
+}));
 
       setTenantList(formattedTenants);
 
@@ -997,7 +1036,7 @@ const PropertiesUsingKYC = () => {
                       </td>
 
 
-                      {/* VERIFIED */}
+                    
                       <td className="w-[11%] px-[8px] text-center flex-shrink-0 text-left">
                         <span className="text-[11px] text-[#333]">
                           {item.verified}
@@ -1005,7 +1044,7 @@ const PropertiesUsingKYC = () => {
                       </td>
 
 
-                      {/* KYC STATUS */}
+                     
                       <td className="w-[14%] px-[8px] flex-shrink-0 text-left">
                         <span
                           className={`
@@ -1307,59 +1346,61 @@ const PropertiesUsingKYC = () => {
                   KYC Enable / Disable
                 </div>
 
-                <div
-                  className="
-        h-[32px]
-        bg-[#F5F7FC]
-        rounded-[5px]
-        px-[9px]
-        flex
-        items-center
-        justify-between
-      "
-                >
-                  <span className="text-[9px] text-[#222]">
-                    {selectedProperty?.kycEnableStatus
-                      ? "Enabled"
-                      : "Disabled"}
-                  </span>
+               <div
+  className="
+    h-[38px]
+    bg-[#F5F7FC]
+    rounded-[6px]
+    px-[12px]
+    flex
+    items-center
+    justify-between
+  "
+>
+  <span className="text-[10px] text-[#222]">
+    {kycEnableStatus ? "Enabled" : "Disabled"}
+  </span>
 
-                  <div className="flex items-center gap-[5px]">
-                    <span className="text-[8px] text-[#777]">
-                      {selectedProperty?.kycEnableStatus
-                        ? "On"
-                        : "Off"}
-                    </span>
+  <div className="flex items-center gap-[6px]">
 
-                    <div
-                      className={`
-            w-[22px]
-            h-[13px]
-            rounded-full
-            relative
-            ${selectedProperty?.kycEnableStatus
-                          ? "bg-[#159947]"
-                          : "bg-[#B8B8B8]"
-                        }
-          `}
-                    >
-                      <div
-                        className={`
-              absolute
-              top-[2px]
-              w-[9px]
-              h-[9px]
-              rounded-full
-              bg-white
-              ${selectedProperty?.kycEnableStatus
-                            ? "right-[2px]"
-                            : "left-[2px]"
-                          }
-            `}
-                      />
-                    </div>
-                  </div>
-                </div>
+    <span className="text-[9px] text-[#777]">
+      {kycEnableStatus ? "On" : "Off"}
+    </span>
+
+    <button
+      type="button"
+      onClick={() => setShowKycConfirm(true)}
+      className={`
+        w-[32px]
+        h-[18px]
+        rounded-full
+        relative
+        cursor-pointer
+        ${kycEnableStatus
+          ? "bg-[#159947]"
+          : "bg-[#B9BCC1]"
+        }
+      `}
+    >
+      <div
+        className={`
+          absolute
+          top-[3px]
+          w-[12px]
+          h-[12px]
+          rounded-full
+          bg-white
+          transition-all
+          ${kycEnableStatus
+            ? "right-[3px]"
+            : "left-[3px]"
+          }
+        `}
+      />
+    </button>
+
+  </div>
+</div>
               </div>
 
 
@@ -1812,19 +1853,23 @@ const PropertiesUsingKYC = () => {
                       setShowApproveModal(true);
                     }}
 
-                    onPageChange={(page) => {
-                      setTenantPage(page);
+                   onPageChange={(page, newSize) => {
+  const size = newSize ?? tenantPageSize;
 
-                      loadTenantKYC(
-                        selectedProperty?.hostelId ||
-                        selectedProperty?.id,
-                        page,
-                        tenantPageSize,
-                        tenantSearch,
-                        tenantKycStatus,
-                        tenantDateFilter
-                      );
-                    }}
+  setTenantPage(page);
+  setTenantPageSize(size);
+
+  loadTenantKYC(
+    selectedProperty?.hostelId ||
+      selectedProperty?.id,
+    page,
+    size,
+    tenantSearch,
+    tenantKycStatus,
+    tenantDateFilter,
+    tenantDateRange
+  );
+}}
                   />
 
 
@@ -2135,6 +2180,141 @@ const PropertiesUsingKYC = () => {
           </div>
         </div>
       )}
+
+      {showKycConfirm && (
+  <div
+    className="
+      fixed
+      inset-0
+      z-[2000]
+      bg-black/30
+      flex
+      items-center
+      justify-center
+    "
+  >
+    <div
+      className="
+        w-[560px]
+        bg-white
+        rounded-[8px]
+        shadow-xl
+        px-[14px]
+        py-[12px]
+      "
+    >
+
+      {/* TITLE */}
+      <div
+        className="
+          flex
+          items-center
+          gap-[8px]
+          text-[16px]
+          font-medium
+          text-[#182230]
+        "
+      >
+
+        <span className="text-[#F5A623] text-[20px]">
+          !
+        </span>
+
+        {kycEnableStatus
+          ? `Disable KYC for “${selectedProperty?.name}” ?`
+          : `Enable KYC for “${selectedProperty?.name}” ?`
+        }
+
+      </div>
+
+
+      {/* DESCRIPTION */}
+      <div
+        className="
+          mt-[8px]
+          text-[13px]
+          text-[#475467]
+          leading-[18px]
+        "
+      >
+
+        {kycEnableStatus ? (
+          <>
+            New tenants will no longer be asked to submit KYC
+            for this property.
+            <br />
+            Existing KYC records will be retained.
+          </>
+        ) : (
+          <>
+            New tenants will be asked to submit KYC
+            for this property.
+            <br />
+            Existing KYC records will be retained.
+          </>
+        )}
+
+      </div>
+
+
+      {/* BUTTONS */}
+      <div
+        className="
+          flex
+          justify-end
+          items-center
+          gap-[12px]
+          mt-[14px]
+        "
+      >
+
+        {/* CANCEL */}
+        <button
+          type="button"
+          onClick={() => setShowKycConfirm(false)}
+          className="
+            h-[46px]
+            min-w-[102px]
+            px-[18px]
+            rounded-[7px]
+            border
+            border-[#D0D5DD]
+            bg-white
+            text-[#101828]
+            text-[14px]
+            cursor-pointer
+          "
+        >
+          Cancel
+        </button>
+
+
+        {/* ENABLE / DISABLE */}
+        <button
+          type="button"
+          onClick={handleKycEnableDisable}
+          className="
+            h-[46px]
+            min-w-[132px]
+            px-[18px]
+            rounded-[7px]
+            bg-[#2952F3]
+            text-white
+            text-[14px]
+            cursor-pointer
+          "
+        >
+          {kycEnableStatus
+            ? "Disable KYC"
+            : "Enable KYC"
+          }
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };
@@ -2211,372 +2391,610 @@ const TenantKycTable = ({
   );
   return (
     <>
-    <div className="w-full overflow-x-auto">
-  <div className="min-w-[542px]">
+{/* ================= TENANT TABLE ================= */}
 
-   
- <div
-      className={`
-        grid
-        ${hasAction
-          ? "grid-cols-[105px_75px_105px_100px_85px_72px]"
-          : "grid-cols-[105px_75px_105px_100px_85px]"
-        }
-        items-center
-        h-[24px]
-        border-b
-        border-[#E5E7EB]
-        px-[2px]
-        bg-white
-      `}
-    >
-      <div className="px-[6px] text-left">
-        <TableHeader text="Tenant Name" />
-      </div>
+<div className="w-full">
 
-      <div className="px-[4px] text-left">
-        <TableHeader text="Join Date" />
-      </div>
+  {/*
+    SINGLE VERTICAL SCROLL
+    Header + rows together scroll ஆகும்
+  */}
+  <div
+    className="
+      max-h-[174px]
+      overflow-y-auto
+      overflow-x-hidden
+      scrollbar-thin
+    "
+  >
 
-      <div className="px-[4px] text-left">
-        <TableHeader text="Billing Cycle" />
-      </div>
+    <div className="flex w-full">
 
-      <div className="px-[4px] text-left">
-        <TableHeader text="Submitted on" />
-      </div>
-
-      <div className="px-[4px] text-left">
-        <TableHeader text="KYC Status" />
-      </div>
-
-      {hasAction && (
-        <div className="px-[2px] text-left">
-          <TableHeader text="Action" />
-        </div>
-      )}
-    </div>
-
-
-    {/* LOADER */}
-    {loading ? (
-      <div className="h-[55px] flex items-center justify-center">
-        <div
-          className="
-            w-[18px]
-            h-[18px]
-            border-[2px]
-            border-[#E5E7EB]
-            border-t-[#2952F3]
-            rounded-full
-            animate-spin
-          "
-        />
-      </div>
-    ) : tenants.length > 0 ? (
-
-      tenants.map((tenant, index) => {
-
-        const hasAction =
-          tenants.some(
-            (item) =>
-              item.canSendReminder === true ||
-              item.canApproveKyc === true
-          );
-
-        return (
- <div
-  key={tenant.tenantId || index}
-  className="
-    grid
-    grid-cols-[105px_75px_105px_100px_85px_72px]
-    items-center
-    h-[30px]
-    border-b
-    border-[#F0F0F0]
-    px-[2px]
-    min-w-[542px]
-    bg-white
-  "
->
-  {/* Tenant Name */}
-  <div className="px-[6px] min-w-0 text-left">
-    <TableText
-      text={tenant.tenantName || "-"}
-    />
-  </div>
-
-  {/* Join Date */}
-  <div className="px-[4px] min-w-0 text-left">
-    <TableText
-      text={
-        tenant.joinDate
-          ? dayjs(
-              tenant.joinDate,
-              "DD/MM/YYYY"
-            ).format("MMM D")
-          : "-"
-      }
-    />
-  </div>
-
-  {/* Billing Cycle */}
-  <div className="px-[4px] min-w-0 text-left">
-    <TableText
-      text={tenant.billingCycle || "-"}
-    />
-  </div>
-
-  {/* Submitted On */}
-  <div className="px-[4px] min-w-0 text-left">
-    {tenant.submittedDate ||
-    tenant.submittedTime ? (
-      <div className="flex flex-col justify-center">
-
-        {tenant.submittedDate && (
-          <div
-            className="
-              text-[8px]
-              text-[#333]
-              truncate
-              leading-[9px]
-            "
-          >
-            {tenant.submittedDate}
-          </div>
-        )}
-
-        {tenant.submittedTime && (
-          <div
-            className="
-              text-[7px]
-              text-[#777]
-              truncate
-              leading-[8px]
-            "
-          >
-            {tenant.submittedTime}
-          </div>
-        )}
-
-      </div>
-    ) : (
-      <span className="text-[8px] text-[#777]">
-        N/A
-      </span>
-    )}
-  </div>
-
-  {/* KYC Status */}
-  <div className="px-[4px] min-w-0 text-left">
-    <span
-      className="
-        block
-        text-[8px]
-        text-[#333]
-        truncate
-      "
-    >
-      {tenant.kycStatus || "-"}
-    </span>
-  </div>
-
-  {/* Action */}
-  {hasAction && (
-    <div className="px-[2px] flex items-center">
-      {tenant.canSendReminder === true && (
-        <button
-          type="button"
-          onClick={() => onReminder(tenant)}
-          className="
-            h-[18px]
-            min-w-[42px]
-            px-[4px]
-            rounded-[4px]
-            bg-[#2952F3]
-            text-white
-            text-[7px]
-            cursor-pointer
-            whitespace-nowrap
-          "
-        >
-          Reminder
-        </button>
-      )}
-
-      {tenant.canApproveKyc === true && (
-        <button
-          type="button"
-          onClick={() => onApprove(tenant)}
-          className="
-            h-[18px]
-            min-w-[42px]
-            px-[4px]
-            rounded-[4px]
-            bg-[#159947]
-            text-white
-            text-[7px]
-            cursor-pointer
-            whitespace-nowrap
-          "
-        >
-          Approve
-        </button>
-      )}
-    </div>
-  )}
-</div>
-        );
-      })
-
-    ) : (
+      
 
       <div
         className="
-          h-[45px]
-          flex
-          items-center
-          justify-center
-          text-[7px]
-          text-[#999]
+          w-[105px]
+          flex-shrink-0
+          bg-white
+          sticky
+          left-0
+          z-[20]
         "
       >
-        No tenants found
-      </div>
 
-    )}
-
-  </div>
-</div>
-      {/* PAGINATION */}
-      {!loading && totalItems > 0 && (
         <div
           className="
-    flex
-    items-center
-    justify-between
-    w-full
-    mt-[8px]
-    pt-[6px]
-  "
+            h-[24px]
+            flex
+            items-center
+            border-b
+            border-[#E5E7EB]
+            px-[6px]
+            bg-white text-left
+          "
         >
+          <TableHeader text="Tenant Name" />
+        </div>
 
-          <div className="text-[7px] text-[#475467]">
-            Total Record Count:
-            <span className="ml-[3px] text-[#2952F3] font-medium">
-              {totalItems}
-            </span>
+
+        {/* LOADING */}
+        {loading ? (
+
+          <div className="h-[40px]" />
+
+        ) : tenants.length > 0 ? (
+
+          tenants.map((tenant, index) => (
+
+            <div
+              key={tenant.tenantId || index}
+              className="
+                h-[30px]
+                flex
+                items-center
+                border-b
+                border-[#F0F0F0]
+                px-[6px]
+                bg-white
+              "
+            >
+
+              <div className="min-w-0 w-full text-left">
+
+                <TableText
+                  text={tenant.tenantName || "N/A"}
+                />
+
+              </div>
+
+            </div>
+
+          ))
+
+        ) : (
+
+          <div className="h-[40px]" />
+
+        )}
+
+      </div>
+
+
+   
+      <div
+        className="
+          flex-1
+          min-w-0
+          overflow-x-auto
+          bg-white
+        "
+      >
+
+        <div className="w-[365px]">
+
+       
+
+          <div
+            className="
+              grid
+              grid-cols-[75px_105px_100px_85px]
+              h-[24px]
+              items-center
+              border-b
+              border-[#E5E7EB]
+              bg-white
+            "
+          >
+
+            {/* JOIN DATE */}
+            <div className="px-[4px] min-w-0 text-left">
+              <TableHeader text="Join Date" />
+            </div>
+
+
+            {/* BILLING */}
+            <div className="px-[4px] min-w-0 text-left">
+              <TableHeader text="Billing Cycle" />
+            </div>
+
+
+            {/* SUBMITTED */}
+            <div className="px-[4px] min-w-0 text-left">
+              <TableHeader text="Submitted on" />
+            </div>
+
+
+            {/* KYC STATUS */}
+            <div className="px-[4px] min-w-0 text-left">
+              <TableHeader text="KYC Status" />
+            </div>
+
           </div>
 
 
-          <div className="flex items-center gap-[8px]">
 
-
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                const newSize = Number(e.target.value);
-                onPageChange(1, newSize);
-              }}
-              className="
-        w-[52px]
-        h-[20px]
-        rounded-[8px]
-        border
-        border-[#D0D5DD]
-        bg-white
-        px-[8px]
-        text-[7px]
-        text-[#333]
-        outline-none
-        cursor-pointer
-      "
-            >
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
-
-            {/* PREVIOUS */}
-            <button
-              type="button"
-              disabled={currentPage === 1}
-              onClick={() =>
-                onPageChange(currentPage - 1, pageSize)
-              }
-              className="
-        w-[16px]
-        h-[30px]
-        flex
-        items-center
-        justify-center
-        text-[16px]
-        text-[#B5B5B5]
-        disabled:opacity-40
-        cursor-pointer
-      "
-            >
-              ‹
-            </button>
-
+          {loading ? (
 
             <div
               className="
-        w-[28px]
-        h-[28px]
-        rounded-full
-        bg-[#F5F7FC]
-        flex
-        items-center
-        justify-center
-        text-[8px]
-        text-[#333]
-      "
+                h-[40px]
+                flex
+                items-center
+                justify-center
+              "
             >
-              {currentPage}
+
+              <div
+                className="
+                  w-[18px]
+                  h-[18px]
+                  border-[2px]
+                  border-[#E5E7EB]
+                  border-t-[#2952F3]
+                  rounded-full
+                  animate-spin
+                "
+              />
+
             </div>
 
-            {/* RANGE */}
-            <span
-              className="
-        text-[7px]
-        text-[#333]
-        whitespace-nowrap
-      "
-            >
-              {totalItems === 0
-                ? "0 - 0"
-                : `${(currentPage - 1) * pageSize + 1} - ${Math.min(
-                  currentPage * pageSize,
-                  totalItems
-                )}`}
-            </span>
+          ) : tenants.length > 0 ? (
 
-            {/* NEXT */}
-            <button
-              type="button"
-              disabled={currentPage >= totalPages}
-              onClick={() =>
-                onPageChange(currentPage + 1, pageSize)
-              }
-              className="
-        w-[16px]
-        h-[30px]
-        flex
-        items-center
-        justify-center
-        text-[16px]
-        text-[#777]
-        disabled:opacity-40
-        cursor-pointer
-      "
-            >
-              ›
-            </button>
+            tenants.map((tenant, index) => (
 
-          </div>
+              <div
+                key={tenant.tenantId || index}
+                className="
+                  grid
+                  grid-cols-[75px_105px_100px_85px]
+                  h-[30px]
+                  items-center
+                  border-b
+                  border-[#F0F0F0]
+                  bg-white
+                "
+              >
+
+
+                <div className="px-[4px] min-w-0 text-left">
+
+                  <TableText
+                    text={
+                      tenant.joinDate &&
+                      typeof tenant.joinDate === "string" &&
+                      tenant.joinDate.trim() &&
+                      dayjs(
+                        tenant.joinDate,
+                        "DD/MM/YYYY",
+                        true
+                      ).isValid()
+                        ? dayjs(
+                            tenant.joinDate,
+                            "DD/MM/YYYY"
+                          ).format("MMM D")
+                        : "N/A"
+                    }
+                  />
+
+                </div>
+
+
+               
+
+                <div className="px-[4px] min-w-0 text-left">
+
+                  <TableText
+                    text={
+                      tenant.billingCycle || "N/A"
+                    }
+                  />
+
+                </div>
+
+
+              
+
+                <div className="px-[4px] min-w-0 text-left">
+
+                  {tenant.submittedDate ||
+                  tenant.submittedTime ? (
+
+                    <div className="flex flex-col justify-center">
+
+                      {tenant.submittedDate && (
+
+                        <div
+                          className="
+                            text-[8px]
+                            text-[#333]
+                            truncate
+                            leading-[9px]
+                          "
+                        >
+                          {tenant.submittedDate}
+                        </div>
+
+                      )}
+
+                      {tenant.submittedTime && (
+
+                        <div
+                          className="
+                            text-[7px]
+                            text-[#777]
+                            truncate
+                            leading-[8px]
+                          "
+                        >
+                          {tenant.submittedTime}
+                        </div>
+
+                      )}
+
+                    </div>
+
+                  ) : (
+
+                    <span
+                      className="
+                        text-[8px]
+                        text-[#777]
+                      "
+                    >
+                      N/A
+                    </span>
+
+                  )}
+
+                </div>
+
+
+                
+
+                <div className="px-[4px] min-w-0 text-left">
+
+                  <span
+                    className="
+                      block
+                      text-[8px]
+                      text-[#333]
+                      truncate
+                    "
+                  >
+                    {tenant?.kycDetailsStatus?.trim()
+                      ? tenant.kycDetailsStatus
+                      : "NOT_AVAILABLE"}
+                  </span>
+
+                </div>
+
+              </div>
+
+            ))
+
+          ) : (
+
+            <div
+              className="
+                h-[40px]
+                flex
+                items-center
+                justify-center
+                text-[7px]
+                text-[#999]
+              "
+            >
+              No tenants found
+            </div>
+
+          )}
+
         </div>
+
+      </div>
+
+
+     
+
+      {hasAction && (
+
+        <div
+          className="
+            w-[72px]
+            flex-shrink-0
+            bg-white
+            sticky
+            right-0
+            z-[20]
+          "
+        >
+
+          {/* HEADER */}
+          <div
+            className="
+              h-[24px]
+              flex
+              items-center
+              border-b
+              border-[#E5E7EB]
+              px-[2px]
+              bg-white
+            "
+          >
+            <TableHeader text="Action" />
+          </div>
+
+
+          {/* LOADING */}
+          {loading ? (
+
+            <div className="h-[40px]" />
+
+          ) : tenants.length > 0 ? (
+
+            tenants.map((tenant, index) => (
+
+              <div
+                key={tenant.tenantId || index}
+                className="
+                  h-[30px]
+                  flex
+                  items-center
+                  px-[2px]
+                  border-b
+                  border-[#F0F0F0]
+                  bg-white
+                "
+              >
+
+                <div
+                  className="
+                    flex
+                    items-center
+                    gap-[3px]
+                  "
+                >
+
+                  {/* REMINDER */}
+                  {tenant.canSendReminder === true && (
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onReminder(tenant)
+                      }
+                      className="
+                        h-[18px]
+                        min-w-[42px]
+                        px-[4px]
+                        rounded-[4px]
+                        bg-[#2952F3]
+                        text-white
+                        text-[7px]
+                        cursor-pointer
+                        whitespace-nowrap
+                      "
+                    >
+                      Reminder
+                    </button>
+
+                  )}
+
+
+                  {/* APPROVE */}
+                  {tenant.canApproveKyc === true && (
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onApprove(tenant)
+                      }
+                      className="
+                        h-[18px]
+                        min-w-[42px]
+                        px-[4px]
+                        rounded-[4px]
+                        bg-[#159947]
+                        text-white
+                        text-[7px]
+                        cursor-pointer
+                        whitespace-nowrap
+                      "
+                    >
+                      Approve
+                    </button>
+
+                  )}
+
+                </div>
+
+              </div>
+
+            ))
+
+          ) : (
+
+            <div className="h-[40px]" />
+
+          )}
+
+        </div>
+
       )}
+
+    </div>
+
+  </div>
+
+</div>
+      {/* PAGINATION */}
+   {!loading && totalItems > 0 && (
+  <div
+    className="
+      flex
+      items-center
+      justify-between
+      w-full
+      mt-[8px]
+      pt-[6px]
+    "
+  >
+
+   
+    <div className="text-[9px] text-[#475467]">
+      Total Record Count:
+      <span className="ml-[3px] text-[#2952F3] font-medium">
+        {totalItems}
+      </span>
+    </div>
+
+
+    {/* PAGINATION */}
+    <div className="flex items-center gap-[6px]">
+
+      {/* PAGE SIZE */}
+   <select
+  value={pageSize}
+  onChange={(e) => {
+    const newSize = Number(e.target.value);
+
+    onPageChange(1, newSize);
+  }}
+  className="
+    w-[52px]
+    h-[28px]
+    rounded-[8px]
+    border
+    border-[#D0D5DD]
+    bg-white
+    px-[7px]
+    text-[7px]
+    text-[#333]
+    outline-none
+    cursor-pointer
+  "
+>
+  <option value={10}>10</option>
+  <option value={20}>20</option>
+  <option value={50}>50</option>
+  <option value={100}>100</option>
+</select>
+
+
+      {/* PREVIOUS */}
+      <button
+        type="button"
+        disabled={currentPage <= 1}
+        onClick={() =>
+          onPageChange(
+            currentPage - 1,
+            pageSize
+          )
+        }
+        className="
+          w-[18px]
+          h-[28px]
+          flex
+          items-center
+          justify-center
+          text-[15px]
+          text-[#B5B5B5]
+          disabled:opacity-40
+          disabled:cursor-not-allowed
+          cursor-pointer
+        "
+      >
+        ‹
+      </button>
+
+
+      {/* CURRENT PAGE */}
+      <div
+        className="
+          w-[36px]
+          h-[36px]
+          rounded-full
+          bg-[#F5F7FC]
+          flex
+          items-center
+          justify-center
+          text-[8px]
+          text-[#333]
+          flex-shrink-0
+        "
+      >
+        {currentPage}
+      </div>
+
+
+      {/* RANGE */}
+      <span
+        className="
+          text-[7px]
+          text-[#333]
+          whitespace-nowrap
+          min-w-[28px]
+          text-center
+        "
+      >
+        {`${(currentPage - 1) * pageSize + 1} - ${Math.min(
+          currentPage * pageSize,
+          totalItems
+        )}`}
+      </span>
+
+
+      {/* NEXT */}
+      <button
+        type="button"
+        disabled={currentPage >= totalPages}
+        onClick={() =>
+          onPageChange(
+            currentPage + 1,
+            pageSize
+          )
+        }
+        className="
+          w-[18px]
+          h-[28px]
+          flex
+          items-center
+          justify-center
+          text-[15px]
+          text-[#777]
+          disabled:opacity-40
+          disabled:cursor-not-allowed
+          cursor-pointer
+        "
+      >
+        ›
+      </button>
+
+    </div>
+
+  </div>
+)}
     </>
   );
 };
