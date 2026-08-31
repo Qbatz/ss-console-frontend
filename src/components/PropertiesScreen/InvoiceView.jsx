@@ -236,9 +236,9 @@ const [activeFilter, setActiveFilter] = useState("All");
                                         Invoice
                                     </th>
 
-                                    <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                        Tenant
-                                    </th>
+                                  <th className="px-5 py-3 text-left text-xs font-semibold w-[120px] min-w-[120px] max-w-[120px] text-gray-500">
+  TENANT
+</th>
 
                                     <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                                         Type
@@ -252,14 +252,14 @@ const [activeFilter, setActiveFilter] = useState("All");
                                         Due Date
                                     </th>
 
-                                    <th className="px-3 py-4 w-[140px] text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                                        Status
-                                    </th>
+                                   <th className="px-5 py-4 text-left text-[12px] font-semibold text-[#6b7280] w-[150px] min-w-[150px] max-w-[150px]">
+  STATUS
+</th>
                                     <th
                                         className="
     px-1 py-4
-    w-[50px]
-    text-center
+    w-[100px]
+    text-left
     text-[11px]
     font-semibold
     uppercase
@@ -372,9 +372,14 @@ const [activeFilter, setActiveFilter] = useState("All");
                                             </td>
 
                                             {/* TENANT */}
-                                            <td className="px-5 py-2 text-xs text-start">
-                                                {item.tenantName}
-                                            </td>
+                                           <td className="px-5 py-2 text-left text-sm w-[120px] min-w-[120px] max-w-[120px]">
+  <div
+    className="w-full truncate"
+    title={item?.tenantName || "N/A"}
+  >
+    {item?.tenantName || "N/A"}
+  </div>
+</td>
 
                                             {/* TYPE */}
                                             <td className="px-5 py-2 text-xs text-start">
@@ -471,7 +476,7 @@ const [activeFilter, setActiveFilter] = useState("All");
 
   </div>
 </td> */}
-                                            <td className="w-[270px] py-1 px-2 whitespace-nowrap overflow-hidden text-[11px] font-medium text-start">
+                                            <td className="w-[150px] py-1 px-2 whitespace-nowrap overflow-hidden text-[11px] font-medium text-start">
 
                                                 {item?.paymentStatus === "PAID" && (
                                                     <span className="bg-[#B3E5BB4D] text-green-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
@@ -525,7 +530,7 @@ const [activeFilter, setActiveFilter] = useState("All");
                                             <td
                                                 className="
     px-1 py-3
-    w-[50px]
+   w-[100px] min-w-[100px] max-w-[100px]
     text-center
     relative
   "

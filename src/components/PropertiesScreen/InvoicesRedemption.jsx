@@ -417,13 +417,17 @@ const [deleteId, setDeleteId] = useState(null);
                 <tr>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Source Invoice</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Target Invoice</th>
-                  <th className="px-3 py-2 text-left whitespace-nowrap">Tenant Name</th>
+                   <th className="px-3 py-2 text-left whitespace-nowrap w-[100px] min-w-[100px] max-w-[100px]">
+        Tenant Name
+      </th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Amount</th>
                   {/* <th className="px-3 py-2 text-left whitespace-nowrap">Reference</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Reason</th> */}
                   <th className="px-3 py-2 text-left whitespace-nowrap">Redeemed At</th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Created At</th>
-                  <th className="px-3 py-2 text-left whitespace-nowrap">Created By</th>
+                 <th className="px-3 py-2 text-left whitespace-nowrap w-[100px] min-w-[100px] max-w-[100px]">
+        Created By
+      </th>
                   <th className="px-3 py-2 text-left whitespace-nowrap">Action</th>
                 </tr>
               </thead>
@@ -451,17 +455,43 @@ const [deleteId, setDeleteId] = useState(null);
 
                       <td className="px-4 py-2 text-left font-medium text-[11px] whitespace-nowrap">{item.sourceInvoiceNumber || "N/A"}</td>
                       <td className="px-4 py-2 text-left font-medium text-[11px] whitespace-nowrap">{item.targetInvoiceNumber || "N/A"}</td>
-                      <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.tenantName || "N/A"}</td>
+                      <td className="px-4 py-2 text-left font-medium text-[12px]
+  w-[120px] min-w-[120px] max-w-[120px]">
+  <div
+    className="w-[180px] truncate"
+    title={item.tenantName || "N/A"}
+  >
+    {item.tenantName || "N/A"}
+  </div>
+</td>
                       <td className="px-4 py-2 text-left font-medium text-[11px] whitespace-nowrap">{item.redemptionAmount}</td>
                       {/* <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.referenceNumber}</td>
                       <td className="px-4 py-2 text-left font-medium text-[12px] whitespace-nowrap">{item.reason}</td> */}
-                      <td className="px-4 py-2 text-left font-medium text-[11px] whitespace-nowrap">
-                        {item.redeemedAtDate} {item.redeemedAtTime}
-                      </td>
-                      <td className="px-4 py-2 text-left font-medium text-[11px] whitespace-nowrap">
-                        {item.createdAtDate} {item.createdAtTime}
-                      </td>
-                      <td className="px-4 py-2 text-left font-medium text-[11px] whitespace-nowrap">{item.createdBy}</td>
+                     <td className="px-4 py-2 text-left font-medium text-[11px] whitespace-nowrap">
+  <div className="flex flex-col">
+    <span>{item.redeemedAtDate || "N/A"}</span>
+    <span className="text-gray-500">
+      {item.redeemedAtTime || ""}
+    </span>
+  </div>
+</td>
+                     <td className="px-4 py-2 text-left font-medium text-[11px] whitespace-nowrap">
+  <div className="flex flex-col">
+    <span>{item.createdAtDate || "N/A"}</span>
+    <span className="text-gray-500">
+      {item.createdAtTime || ""}
+    </span>
+  </div>
+</td>
+                     <td className="px-4 py-2 text-left font-medium text-[11px]
+  w-[150px] min-w-[100px] max-w-[150px]">
+  <div
+    className="w-[100px] truncate"
+    title={item.createdBy || "N/A"}
+  >
+    {item.createdBy || "N/A"}
+  </div>
+</td>
                      <td className="px-4 py-2">
 
   <div className="relative flex justify-center">

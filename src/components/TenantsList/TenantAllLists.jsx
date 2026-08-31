@@ -231,17 +231,34 @@ const TenantsList = () => {
               <table className="min-w-full text-sm">
 
                 {/* <thead className="bg-gray-50 sticky top-0 z-10"> */}
-                <thead className="bg-[#F5F7FB] text-black-500 text-xs sticky top-0">
+                <thead className="sticky top-0 z-[30] bg-[#F5F7FB] text-black-500 text-xs uppercase">
                   <tr>
                     <th className="px-4 py-3 text-left">ID</th>
-                    <th className="px-4 py-3 text-left">Name</th>
+                    <th className="px-3 py-3 text-left w-[100px] min-w-[100px] max-w-[100px]">
+  NAME
+</th>
                     <th className="px-4 py-3 text-left">Mobile</th>
-                    <th className="px-4 py-3 text-left">Hostel</th>
+                    {/* <th className="px-4 py-3 text-left">Hostel</th> */}
+                   <th className="px-3 py-3 text-left w-[70px] min-w-[70px] max-w-[70px]">
+  HOSTEL
+</th>
                     <th className="px-4 py-3 text-left">Status</th>
                     <th className="px-4 py-3 text-left">Payable</th>
                     <th className="px-4 py-3 text-left">Paid</th>
                     <th className="px-4 py-3 text-left">Due</th>
-                    <th className="px-4 py-3 text-left">Action</th>
+                 <th
+  className="
+    sticky top-0 right-0
+    z-[100]
+    bg-[#F5F7FB]
+    px-5 py-4
+    text-left text-[12px]
+    font-semibold text-[#6b7280]
+    whitespace-nowrap
+  "
+>
+  ACTION
+</th>
                   </tr>
                 </thead>
 
@@ -327,28 +344,70 @@ const TenantsList = () => {
                           {item.fullName}
 
                         </td> */}
-                        <td className="px-6 py-1 text-left">
-                          <div className="flex items-center gap-3">
-                            {item.profilePic ? (
-                              <img
-                                src={item.profilePic}
-                                alt={item.fullName}
-                                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                              />
-                            ) : (
-                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs flex-shrink-0">
-                                {item.initials}
-                              </div>
-                            )}
+<td className="px-6 py-1 text-left text-[12px]">
+  <div
+    className="
+      w-[100px]
+      min-w-[100px]
+      max-w-[100px]
+      flex
+      items-center
+      gap-3
+      overflow-hidden
+      shrink-0
+    "
+  >
+    {/* Profile Image / Initial */}
+    {item.profilePic ? (
+      <img
+        src={item.profilePic}
+        alt={item.fullName || "Profile"}
+        className="
+          w-8
+          h-8
+          min-w-[32px]
+          max-w-[32px]
+          rounded-full
+          object-cover
+          shrink-0
+        "
+      />
+    ) : (
+      <div
+        className="
+          w-8
+          h-8
+          min-w-[32px]
+          max-w-[32px]
+          rounded-full
+          bg-gray-200
+          flex
+          items-center
+          justify-center
+          text-xs
+          shrink-0
+        "
+      >
+        {item.initials || "N/A"}
+      </div>
+    )}
 
-                            <div
-                              className="w-[180px] truncate"
-                              title={item?.fullName || "N/A"}
-                            >
-                              {item?.fullName || "N/A"}
-                            </div>
-                          </div>
-                        </td>
+    {/* Name */}
+    <div
+      className="
+        min-w-0
+        flex-1
+        truncate
+        text-xs
+        font-medium
+        text-[#374151]
+      "
+      title={item?.fullName || "N/A"}
+    >
+      {item?.fullName || "N/A"}
+    </div>
+  </div>
+</td>
 
                         <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
                           {item.mobile}
@@ -357,14 +416,19 @@ const TenantsList = () => {
                         {/* <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap">
                           {item.hostelName}
                         </td> */}
-                        <td className="px-4 py-2 text-[12px] text-left">
-                          <div
-                            className="w-[220px] truncate"
-                            title={item?.hostelName || "N/A"}
-                          >
-                            {item?.hostelName || "N/A"}
-                          </div>
-                        </td>
+                      <td className="px-4 py-2 text-[12px] text-left">
+  <div
+    className="
+      w-[90px]
+      min-w-[90px]
+      max-w-[90px]
+      truncate
+    "
+    title={item?.hostelName || "N/A"}
+  >
+    {item?.hostelName || "N/A"}
+  </div>
+</td>
 
 
                         <td className="px-4 py-2 text-left whitespace-nowrap">
@@ -386,40 +450,36 @@ const TenantsList = () => {
                         </td>
 
 
-                        <td className="px-4 py-2 text-[12px] text-left whitespace-nowrap relative">
-                          <div className="flex items-center gap-3" >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenMenu(openMenu === index ? null : index);
-                              }}
-                              className="text-gray-500 hover:text-gray-700 cursor-pointer"
-                            >
-                              <img src={Circle} alt="circle" className="w-5 h-5" />
-                            </button>
-
-                            {/* {openMenu === index && (
-                              <div
-                                ref={menuRef}
-                                onClick={(e) => e.stopPropagation()}
-                                className="absolute right-19 mt-2 w-28 bg-white border rounded-lg border-gray-300 shadow-lg z-20"
-                              >
-
-                                <button
-                                  disabled={canDelete === false}
-                                  onClick={() => canDelete === true && handleEdit(item)}
-                                  className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm 
-      ${canDelete ? "hover:bg-sky-100 cursor-pointer" : "text-gray-400 cursor-not-allowed"}`}
-                                >
-                                  <img src={Edit} alt="Edit" className="w-4 h-4" />
-                                  Delete
-                                </button>
-
-                              </div>
-                            )} */}
-                          </div>
-
-                        </td>
+   <td
+  className="
+    sticky right-0
+    z-[20]
+    bg-inherit
+    group-hover:bg-[#fafbff]
+    px-5 py-2
+    relative
+    overflow-visible
+  "
+>
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      handleMenuToggle(e, index);
+    }}
+    className="
+      h-8 w-8
+      rounded-lg
+      hover:bg-[#f3f4f6]
+      flex items-center justify-center
+    "
+  >
+     <img
+        src={Circle}
+        alt="action"
+        className="w-5 h-5"
+      />
+  </button>
+</td>
 
                       </tr>
                     ))

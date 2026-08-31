@@ -540,7 +540,41 @@ const getAgentRoleDropdown = async () => {
     setLoading(false);
   }
 };
+const getUnAssignedOwners = async (name = "") => {
+  try {
+    setLoading(true);
 
+    const res = await api.get(
+      "/v2/relational-agent/un-assigned-owners",
+      {
+        params: {
+          name,
+        },
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data || [],
+      };
+    }
+
+    return { success: false, data: [] };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    return {
+      success: false,
+      message: msg,
+      data: [],
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <RoleContext.Provider
       value={{
@@ -552,7 +586,7 @@ const getAgentRoleDropdown = async () => {
         fetchModules,
         getAgentRoles,createAgentRole,createAdmin,
         updateAgentRole,getAgentRoleById,deleteAgentRole,getAdminDetails,getAllAgents,agents,accessError,deactivateAgent, adminPermissions,
-        assignStaff,reactivateAgent,getAgentDetails,updateAdminRole,getAgentRoleDropdown
+        assignStaff,reactivateAgent,getAgentDetails,updateAdminRole,getAgentRoleDropdown,getUnAssignedOwners
       }}
     >
       {children}

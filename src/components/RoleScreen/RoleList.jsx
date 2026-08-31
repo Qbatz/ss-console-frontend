@@ -217,7 +217,7 @@ const handleEditClick = async (role) => {
                       <th className="px-4 py-3 w-[25%] text-left">Description</th>
                       <th className="px-4 py-3 w-[15%]">Users Count</th>
                       <th className="px-4 py-3 w-[20%]">Created On</th>
-                      <th className="px-4 py-3 w-[20%]">Updated On</th>
+                      <th className="px-4 py-3 w-[20%] whitespace-nowrap">Updated On</th>
                       <th className="px-4 py-3 w-[10%]">Actions</th>
                     </tr>
                   </thead>
@@ -241,7 +241,7 @@ const handleEditClick = async (role) => {
                           </td> */}
                           <td className="px-4 py-3 text-gray-600 text-left">
   <div
-    className="w-[250px] truncate"
+    className="w-[130px] truncate"
     title={role?.description || "N/A"}
   >
     {role?.description || "N/A"}
@@ -255,9 +255,9 @@ const handleEditClick = async (role) => {
                           </td> */}
                           <td className="px-4 py-3 text-center">
                             <span
-                              onClick={() =>
-                                navigate(`/iam-admin-user/${adminDetails?.roleId}/${role.id}`)
-                              }
+                            onClick={() =>
+    navigate(`/product-update-create/${adminDetails?.roleId}`)
+  }
                               className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-xs cursor-pointer hover:bg-blue-100"
                             >
                               <img src={Team} alt="Team" className="w-4 h-4" />
