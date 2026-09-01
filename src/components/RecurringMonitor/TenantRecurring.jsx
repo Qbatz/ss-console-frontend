@@ -218,17 +218,17 @@ const TenantRecurring = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  useEffect(() => {
-    if (showFilterDrawer) {
-      // reset filters
-      setFilter("TODAY");          // default
-      setStatusFilter("ALL");      // default
+  // useEffect(() => {
+  //   if (showFilterDrawer) {
+     
+  //     setFilter("TODAY");          
+  //     setStatusFilter("ALL");      
 
-      // close dropdowns
-      setOpenFilter(false);
-      setOpenStatusFilter(false);
-    }
-  }, [showFilterDrawer]);
+     
+  //     setOpenFilter(false);
+  //     setOpenStatusFilter(false);
+  //   }
+  // }, [showFilterDrawer]);
   useEffect(() => {
     const handleScroll = () => setOpenCustomerDropdown(null);
     window.addEventListener("scroll", handleScroll);
@@ -2158,7 +2158,7 @@ const TenantRecurring = () => {
                   </select>
                 </div>
 
-                {/* DESCRIPTION */}
+               
                 <div className="mb-3 text-left">
                   <p className="text-sm mb-1">Description</p>
                   <textarea
@@ -2370,10 +2370,20 @@ setSelectedCustomers(prev =>
                       {Array.from({ length: 31 }, (_, i) => (
                         <div
                           key={i + 1}
+                          // onClick={() => {
+                          //   setSystemFilter(i + 1);
+                          //   setOpenSystemDropdown(false);
+                          // }}
                           onClick={() => {
-                            setSystemFilter(i + 1);
-                            setOpenSystemDropdown(false);
-                          }}
+  setSystemFilter(i + 1);
+
+  setFilter("");
+  setStatusFilter("ALL");
+  setBillingModelFilterBy("ALL");
+
+  setPage(1);
+  setOpenSystemDropdown(false);
+}}
                           className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
             ${systemFilter === i + 1 ? "bg-primary text-white" : ""}
           `}

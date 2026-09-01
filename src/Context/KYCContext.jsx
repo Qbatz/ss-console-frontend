@@ -93,7 +93,7 @@ const getHostelKYCList = async (
   size = 10,
   name = "",
   isEnabled,
-  dateFilter = "THIS_MONTH",
+  dateFilter = "ALL",
   startDate,
   endDate
 ) => {
@@ -151,11 +151,11 @@ const getHostelKYCList = async (
 
 const getHostelKYCDetails = async (
   hostelId,
-  page = 0,
+  page = 1,
   size = 10,
   name = "",
   kycStatus = "",
-  dateFilter = "THIS_MONTH",
+  dateFilter = "ALL",
   startDate = "",
   endDate = ""
 ) => {
@@ -168,7 +168,7 @@ const getHostelKYCDetails = async (
       dateFilter,
     };
 
-    // CUSTOM date filter என்றால் மட்டும் அனுப்பும்
+   
     if (startDate) {
       params.startDate = startDate;
     }

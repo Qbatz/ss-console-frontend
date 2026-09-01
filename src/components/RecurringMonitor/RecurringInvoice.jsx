@@ -193,17 +193,17 @@ const [totalProperty,setTotalProperty] = useState("")
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  useEffect(() => {
-    if (showFilterDrawer) {
+  // useEffect(() => {
+  //   if (showFilterDrawer) {
 
-      setFilter("TODAY");
-      setStatusFilter("ALL");
+  //     setFilter("TODAY");
+  //     setStatusFilter("ALL");
 
 
-      setOpenFilter(false);
-      setOpenStatusFilter(false);
-    }
-  }, [showFilterDrawer]);
+  //     setOpenFilter(false);
+  //     setOpenStatusFilter(false);
+  //   }
+  // }, [showFilterDrawer]);
   const handleOpenDetails = async (item, page = 0) => {
     setSelectedItem(item);
    
@@ -1925,9 +1925,19 @@ const handleBulkGenerate = async () => {
                         <div
                           key={i + 1}
                           onClick={() => {
-                            setSystemFilter(i + 1);
-                            setOpenSystemDropdown(false);
-                          }}
+      setSystemFilter(i + 1);
+
+      // Clear Day Filter
+      setFilter("");
+
+      // Clear Status Filter
+      setStatusFilter("ALL");
+
+      // Clear Billing Mode
+      setBillingModelFilterBy("ALL");
+
+      setOpenSystemDropdown(false);
+    }}
                           className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100
             ${systemFilter === i + 1 ? "bg-blue-600 text-white" : ""}
           `}

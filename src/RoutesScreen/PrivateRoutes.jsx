@@ -131,7 +131,10 @@ const PrivateRoutesScreen = () => {
                       <Route path="/product-update/:roleId" element={< ProductUpdate />} />
 
                       <Route path="/exportretention/:roleId" element={< ExportRetention />} />
-                      <Route path="/product-update-create/:roleId" element={< CreateProductUpdate />} />
+                      <Route
+  path="/product-update-create/:roleId/:productUpdateId?"
+  element={<CreateProductUpdate />}
+/>
                       <Route path="/stayinfo/:roleId" element={<StayInfoScreen />} />
                        <Route path="/PropertyusingKyc/:roleId" element={<PropertiesUsingKYC />} />
                     </Routes>
