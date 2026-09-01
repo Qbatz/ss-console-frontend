@@ -45,6 +45,9 @@ const [deleteLoading, setDeleteLoading] = useState(false);
  const [modalType, setModalType] = useState("success");
   const [showSuccess, setShowSuccess] = useState(false);
   const [message, setMessage] = useState("");
+  const [showViewDrawer, setShowViewDrawer] = useState(false);
+const [viewProductUpdate, setViewProductUpdate] = useState(null);
+const [viewLoading, setViewLoading] = useState(false);
   const navigate = useNavigate();
 
   const { adminDetails } = useRole();
@@ -123,7 +126,37 @@ const fetchProductUpdates = async () => {
   }
 };
 
+const handleViewProductUpdate = async (productUpdateId) => {
+  if (!productUpdateId) return;
 
+  try {
+    setViewLoading(true);
+    setShowViewDrawer(true);
+    setViewProductUpdate(null);
+
+    const result = await getProductUpdateById(productUpdateId);
+
+    console.log("GET PRODUCT UPDATE BY ID RESPONSE:", result);
+
+    if (result?.success) {
+      setViewProductUpdate(result?.data);
+    } else {
+      setShowViewDrawer(false);
+      setModalType("error");
+      setMessage(result?.message || "Failed to fetch product update details");
+      setShowSuccess(true);
+    }
+  } catch (error) {
+    console.error("Get Product Update By Id Error:", error);
+
+    setShowViewDrawer(false);
+    setModalType("error");
+    setMessage("Failed to fetch product update details");
+    setShowSuccess(true);
+  } finally {
+    setViewLoading(false);
+  }
+};
 
 const filteredUpdates = updates.filter((item) => {
   const searchMatch =
@@ -209,7 +242,7 @@ const handleDelete = async (productUpdateId) => {
         setShowSuccess(false);
       }, 1200);
 
-      // Refresh table
+    
       fetchProductUpdates();
 
     } else {
@@ -261,7 +294,7 @@ const handleDelete = async (productUpdateId) => {
           </div>
 
           <button
-          onClick={() => navigate("/product-update-create/${adminDetails?.roleId}")}
+          onClick={() => navigate(`/product-update-create/${adminDetails?.roleId}`)}
             type="button"
             className="
               bg-[#2952F3]
@@ -1002,6 +1035,7 @@ const handleDelete = async (productUpdateId) => {
 
   
     <button
+     onClick={() => handleViewProductUpdate(item.productUpdateId)}
       type="button"
       title="View"
       className="
@@ -1028,16 +1062,15 @@ const handleDelete = async (productUpdateId) => {
   type="button"
   title="Edit"
   onClick={() =>
-    navigate(
-      `/product-update-create/${adminDetails?.roleId}`,
-      {
-        state: {
-          mode: "edit",
-          productUpdateId: item.productUpdateId,
-        },
-      }
-    )
-  }
+  navigate(
+    `/product-update-create/${adminDetails?.roleId}/${item.productUpdateId}`,
+    {
+      state: {
+        mode: "edit",
+      },
+    }
+  )
+}
   className="
     w-7 h-7
     shrink-0
@@ -1649,12 +1682,433 @@ const handleDelete = async (productUpdateId) => {
     </div>
   </div>
 )}
+{showViewDrawer && (
+  <>
+    
+    <div
+      className="fixed inset-0 z-[9998] bg-black/30"
+      onClick={() => {
+        if (!viewLoading) {
+          setShowViewDrawer(false);
+          setViewProductUpdate(null);
+        }
+      }}
+    />
+
+  
+   <div
+  className="
+    fixed
+    top-4
+    right-4
+    bottom-4
+    z-[9999]
+    w-[520px]
+    max-w-[90vw]
+    bg-white
+    rounded-xl
+    shadow-2xl
+    flex
+    flex-col
+    overflow-hidden
+  "
+>
+      
+      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div>
+          <h2 className="text-[15px] font-semibold text-gray-800">
+            Product Update Details
+          </h2>
+
+          {viewProductUpdate?.productUpdateId && (
+            <p className="text-[10px] text-gray-400 mt-1">
+              ID: {viewProductUpdate.productUpdateId}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            setShowViewDrawer(false);
+            setViewProductUpdate(null);
+          }}
+          className="
+            w-7 h-7
+            rounded-md
+            flex items-center justify-center
+            text-gray-500
+            hover:bg-gray-100
+            cursor-pointer
+          "
+        >
+          ✕
+        </button>
+      </div>
+
+     
+      <div className="flex-1 overflow-y-auto px-5 py-5">
+
+        {viewLoading ? (
+          <div className="h-full flex flex-col items-center justify-center gap-3">
+            <div
+              className="
+                w-10 h-10
+                border-[3px]
+                border-[#dbe2ff]
+                border-t-[#2952F3]
+                rounded-full
+                animate-spin
+              "
+            />
+
+            <p className="text-[12px] text-[#2952F3]">
+              Loading details...
+            </p>
+          </div>
+        ) : viewProductUpdate ? (
+          <div className="space-y-5">
+
+          
+            <div>
+              <h3 className="text-[12px] font-semibold text-gray-800 mb-3 text-left">
+                Basic Details
+              </h3>
+
+              <div className="grid grid-cols-2 gap-3">
+
+                <DetailItem
+                  label="Title"
+                  value={viewProductUpdate.title}
+                />
+
+                <DetailItem
+                  label="Version"
+                  value={viewProductUpdate.version}
+                />
+
+                <DetailItem
+                  label="Update Type"
+                  value={viewProductUpdate.updateType}
+                />
+
+                <DetailItem
+                  label="Platform"
+                  value={viewProductUpdate.platform}
+                />
+
+                <DetailItem
+                  label="Audience"
+                  value={viewProductUpdate.audience}
+                />
+
+                <DetailItem
+                  label="Publish Status"
+                  value={viewProductUpdate.publishStatus}
+                />
+
+                <DetailItem
+                  label="Release Date"
+                  value={viewProductUpdate.releaseDate}
+                />
+
+                <DetailItem
+                  label="Publish Date"
+                  value={viewProductUpdate.publishDate}
+                />
+
+                <DetailItem
+                  label="Publish Time"
+                  value={viewProductUpdate.publishTime}
+                />
+
+                <DetailItem
+                  label="Expiry Date"
+                  value={viewProductUpdate.expiryDate}
+                />
+
+              </div>
+            </div>
+
+            
+            <div>
+              <h3 className="text-[12px] font-semibold text-gray-800 mb-2 text-left">
+                Description
+              </h3>
+
+              <div className="border border-gray-200 rounded-lg p-3">
+                <p className="text-[11px] text-gray-600 leading-5 whitespace-pre-wrap">
+                  {viewProductUpdate.description || "----"}
+                </p>
+              </div>
+            </div>
+
+           
+         {/* Audience */}
+<div>
+  <h3 className="text-[12px] font-semibold text-gray-800 mb-3 text-left">
+    Audience
+  </h3>
+
+  <div className="border border-gray-100 rounded-lg px-3 py-3 bg-[#FCFCFD]">
+
+    
+    <div className="mb-3">
+      <p className="text-[13px]  mb-1 text-left">
+        Audience Type : {viewProductUpdate.audience || "----"}
+      </p>
+
+      {/* <p className="text-[11px] font-medium text-gray-700">
+        {viewProductUpdate.audience || "----"}
+      </p> */}
+    </div>
+
+    {/* Hostels */}
+    {viewProductUpdate.audiences?.hostelAudiences?.length > 0 && (
+      <div className="mb-3">
+        <p className="text-[9px] text-gray-400 mb-2">
+          Hostels
+        </p>
+
+        <div className="flex flex-wrap gap-2">
+          {viewProductUpdate.audiences.hostelAudiences.map(
+            (hostel, index) => (
+              <span
+                key={hostel.hostelId || index}
+                className="
+                  px-2.5
+                  py-1.5
+                  rounded-md
+                  bg-[#EEF3FF]
+                  text-[#2952F3]
+                  text-[10px]
+                  font-medium
+                "
+              >
+                {hostel.hostelName || "----"}
+              </span>
+            )
+          )}
+        </div>
+      </div>
+    )}
+
+    {/* Plans */}
+    {viewProductUpdate.audiences?.planAudiences?.length > 0 && (
+      <div className="mb-3">
+        <p className="text-[12px] text-gray-400 mb-2 text-left">
+          Plans
+        </p>
+
+        <div className="flex flex-wrap gap-2">
+          {viewProductUpdate.audiences.planAudiences.map(
+            (plan, index) => (
+              <span
+                key={plan.planId || index}
+                className="
+                  px-2.5
+                  py-1.5
+                  rounded-md
+                  bg-[#EEF3FF]
+                  text-[#2952F3]
+                  text-[10px]
+                  font-medium
+                "
+              >
+                {plan.planName || "----"}
+              </span>
+            )
+          )}
+        </div>
+      </div>
+    )}
+
+    {/* Owners */}
+    {viewProductUpdate.audiences?.ownerAudiences?.length > 0 && (
+      <div>
+        <p className="text-[9px] text-gray-400 mb-2">
+          Owners
+        </p>
+
+        <div className="flex flex-wrap gap-2">
+          {viewProductUpdate.audiences.ownerAudiences.map(
+            (owner, index) => (
+              <span
+                key={owner.ownerId || index}
+                className="
+                  px-2.5
+                  py-1.5
+                  rounded-md
+                  bg-[#EEF3FF]
+                  text-[#2952F3]
+                  text-[10px]
+                  font-medium
+                "
+              >
+                {owner.ownerName || "----"}
+              </span>
+            )
+          )}
+        </div>
+      </div>
+    )}
+
+  </div>
+</div>
+
+            {/* Product Update Items */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-[12px] font-semibold text-gray-800">
+                  Update Items
+                </h3>
+
+                <span className="text-[10px] text-gray-400">
+                  {viewProductUpdate.productUpdateItems?.length || 0} items
+                </span>
+              </div>
+
+              <div className="space-y-4">
+
+                {viewProductUpdate.productUpdateItems?.length > 0 ? (
+                  viewProductUpdate.productUpdateItems.map((item, index) => (
+                    <div
+                      key={item.productUpdateItemId || index}
+                      className="border border-gray-200 rounded-xl p-4"
+                    >
+
+                      <div className="flex items-start justify-between gap-3">
+
+                        <div>
+                          <p className="text-[12px] font-semibold text-gray-800">
+                            {item.title || "----"}
+                          </p>
+
+                          <p className="text-[10px] text-gray-400 mt-1">
+                            Item #{index + 1}
+                          </p>
+                        </div>
+
+                        <span className="px-2 py-1 rounded-full bg-[#EEF3FF] text-[#2952F3] text-[9px] font-medium">
+                          {item.updateType || "----"}
+                        </span>
+
+                      </div>
+
+                      {/* Item details */}
+                      <div className="grid grid-cols-2 gap-3 mt-4">
+
+                        <DetailItem
+                          label="Module"
+                          value={item.module}
+                        />
+
+                        <DetailItem
+                          label="CTA"
+                          value={item.cta}
+                        />
+
+                        <DetailItem
+                          label="CTA Link"
+                          value={item.ctaLink}
+                        />
+
+                        <DetailItem
+                          label="Show CTA Button"
+                          value={item.showCtaButton ? "Yes" : "No"}
+                        />
+
+                      </div>
+
+                      {/* Item Description */}
+                      <div className="mt-4">
+                        <p className="text-[9px] font-medium text-gray-400 mb-1">
+                          Description
+                        </p>
+
+                        <p className="text-[11px] text-gray-600 leading-5 whitespace-pre-wrap">
+                          {item.description || "----"}
+                        </p>
+                      </div>
+
+                      {/* Images */}
+                      {item.itemImages?.length > 0 && (
+                        <div className="mt-4">
+                          <p className="text-[9px] font-medium text-gray-400 mb-2">
+                            Images
+                          </p>
+
+                          <div className="grid grid-cols-3 gap-2">
+                            {item.itemImages.map((image, imageIndex) => (
+                              <div
+                                key={imageIndex}
+                                className="
+                                  h-[100px]
+                                  rounded-lg
+                                  border
+                                  border-gray-200
+                                  overflow-hidden
+                                  bg-gray-50
+                                "
+                              >
+                                <img
+                                  src={image}
+                                  alt={`Product update ${imageIndex + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                    </div>
+                  ))
+                ) : (
+                  <div className="border border-dashed border-gray-200 rounded-lg p-5 text-center">
+                    <p className="text-[10px] text-gray-400">
+                      No update items found
+                    </p>
+                  </div>
+                )}
+
+              </div>
+            </div>
+
+          </div>
+        ) : (
+          <div className="h-full flex items-center justify-center">
+            <p className="text-[11px] text-gray-400">
+              No details found
+            </p>
+          </div>
+        )}
+
+      </div>
+    </div>
+  </>
+)}
     </DashboardLayout>
   );
 };
 
 
-/* Summary Card */
+const DetailItem = ({ label, value }) => {
+  return (
+    <div className="border border-gray-100 rounded-lg px-3 py-2.5 bg-[#FCFCFD]">
+      <p className="text-[9px] text-gray-400 mb-1">
+        {label}
+      </p>
+
+      <p
+        className="text-[11px] font-medium text-gray-700 truncate"
+        title={value || ""}
+      >
+        {value || "----"}
+      </p>
+    </div>
+  );
+};
 
 const SummaryCard = ({
   title,

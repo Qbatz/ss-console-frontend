@@ -388,7 +388,7 @@ const [activeFilter, setActiveFilter] = useState("All");
 
                                             {/* GENERATED */}
                                             <td className="px-5 py-2 text-xs text-start">
-                                                {item.invoiceGeneratedDate}
+                                                {item.invoiceStartDate}
                                             </td>
 
                                             {/* DUE */}
@@ -1063,7 +1063,7 @@ const [activeFilter, setActiveFilter] = useState("All");
                             onChange={(e) => {
                                 const value = e.target.value;
 
-                                // numbers மட்டும் allow
+                                
                                 if (/^\d*$/.test(value)) {
                                     setDeletePhone(value);
                                     setAmountError("");

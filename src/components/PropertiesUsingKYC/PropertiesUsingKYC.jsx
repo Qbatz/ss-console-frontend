@@ -11,7 +11,7 @@ const PropertiesUsingKYC = () => {
   const { loading, getHostelKYCList, getHostelKYCDetails, approveKYC,sendKYCReminder } = useKyc();
   const { RangePicker } = DatePicker;
   const [status, setStatus] = useState("Status");
-  const [period, setPeriod] = useState("THIS_MONTH");
+  const [period, setPeriod] = useState("ALL");
   const [search, setSearch] = useState("");
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,7 +31,7 @@ const PropertiesUsingKYC = () => {
   const [tenantPageSize, setTenantPageSize] = useState(10);
   const [tenantTotalPages, setTenantTotalPages] = useState(1);
   const [tenantTotalItems, setTenantTotalItems] = useState(0);
-  const [tenantDateFilter, setTenantDateFilter] = useState("THIS_MONTH");
+  const [tenantDateFilter, setTenantDateFilter] = useState("ALL");
   const [tenantDateRange, setTenantDateRange] = useState([]);
   const [tenantKycStatus, setTenantKycStatus] = useState("");
   const [tenantDateFilters, setTenantDateFilters] = useState([]);
@@ -129,7 +129,7 @@ const PropertiesUsingKYC = () => {
         setShowSuccess(false);
       }, 1500);
 
-      // List refresh
+     
       await loadTenantKYC(
         selectedProperty?.hostelId ||
           selectedProperty?.id,
@@ -171,7 +171,7 @@ const PropertiesUsingKYC = () => {
         isEnabled = false;
       }
 
-      // Dropdown value itself is API key
+     
       const dateFilter = period;
 
       let startDate;
@@ -231,7 +231,7 @@ const PropertiesUsingKYC = () => {
 
       const data = result?.data;
 
-      // API response date filters
+      
       setDateFilters(data?.dateFilters || []);
 
       const hostelList = data?.hostelList || [];
@@ -293,8 +293,7 @@ const handleKycEnableDisable = async () => {
 
     setLoading(true);
 
-    // Current state true → disable
-    // Current state false → enable
+    
     const newStatus = !kycEnableStatus;
 
     const result = await updateHostelKYCStatus(
@@ -394,7 +393,7 @@ const handleKycEnableDisable = async () => {
 
       const result = await getHostelKYCDetails(
         hostelId,
-        page - 1,
+        page,
         size,
         searchValue,
         kycStatus,
@@ -421,9 +420,23 @@ const handleKycEnableDisable = async () => {
       setTenantKycStatuses(
         data?.kycStatus || []
       );
+const hostel = data?.hostel;
 
+if (hostel) {
+  setSelectedProperty((prev) => ({
+    ...prev,
+    ...hostel,
+
+    totalTenants: hostel?.totalTenants ?? 0,
+    totalRequested: hostel?.totalRequested ?? 0,
+    totalVerified: hostel?.totalVerified ?? 0,
+    totalWaitingForApproval:
+      hostel?.totalWaitingForApproval ?? 0,
+  }));
+}
       const tenants =
         data?.hostel?.tenants || [];
+
 
      const formattedTenants = tenants.map((tenant) => ({
   ...tenant,
@@ -479,6 +492,22 @@ const handleKycEnableDisable = async () => {
       setTenantLoading(false);
     }
   };
+  useEffect(() => {
+  if (!isDrawerOpen || !selectedProperty) return;
+
+  loadTenantKYC(
+    selectedProperty?.hostelId || selectedProperty?.id,
+    tenantPage,
+    tenantPageSize,
+    tenantSearch,
+    tenantKycStatus,
+    tenantDateFilter,
+    tenantDateRange
+  );
+}, [
+  tenantPage,
+  tenantPageSize,
+]);
   const handleView = async (property) => {
     console.log("VIEW CLICKED:", property);
     console.log("HOSTEL ID:", property?.hostelId);
@@ -504,113 +533,24 @@ const handleKycEnableDisable = async () => {
   };
 
 
-  const closeDrawer = () => {
-    setIsDrawerOpen(false);
-    setSelectedProperty(null);
-  };
+ const closeDrawer = () => {
+  setIsDrawerOpen(false);
+  setSelectedProperty(null);
 
-  //   const properties = [
-  //     {
-  //       id: "SM7626",
-  //       name: "Laksha Ladies Hostel",
-  //       phone: "+91 98654 87475",
-  //       avatar: "LH",
-  //       tenants: 80,
-  //       verified: 79,
-  //       kycStatus: "Enabled",
-  //       updated: "14 May 2026, 10:46 AM",
-  //     },
-  //     {
-  //       id: "SM3574",
-  //       name: "Sunrise PG",
-  //       phone: "+91 98654 87475",
-  //       avatar: "SP",
-  //       tenants: 87,
-  //       verified: 50,
-  //       kycStatus: "Enabled",
-  //       updated: "14 May 2026, 10:46 AM",
-  //     },
-  //     {
-  //       id: "SM7004",
-  //       name: "Moksha Ladies Hostel",
-  //       phone: "+91 98654 87475",
-  //       avatar: "MH",
-  //       tenants: 78,
-  //       verified: 64,
-  //       kycStatus: "Disabled",
-  //       updated: "14 May 2026, 10:46 AM",
-  //     },
-  //     {
-  //       id: "SM5764",
-  //       name: "SRK Coliving",
-  //       phone: "+91 98654 87475",
-  //       avatar: "SC",
-  //       tenants: 80,
-  //       verified: 74,
-  //       kycStatus: "Enabled",
-  //       updated: "14 May 2026, 10:46 AM",
-  //     },
-  //     {
-  //       id: "SM7643",
-  //       name: "roomsearch.in",
-  //       phone: "+91 98654 87475",
-  //       avatar: "RS",
-  //       tenants: 91,
-  //       verified: 91,
-  //       kycStatus: "Enabled",
-  //       updated: "14 May 2026, 10:46 AM",
-  //     },
-  //     {
-  //       id: "SM7564",
-  //       name: "LakeView Hostel",
-  //       phone: "+91 98654 87475",
-  //       avatar: "LH",
-  //       tenants: 80,
-  //       verified: 66,
-  //       kycStatus: "Enabled",
-  //       updated: "14 May 2026, 10:46 AM",
-  //     },
-  //     {
-  //       id: "SM7665",
-  //       name: "BlueMoon Inn",
-  //       phone: "+91 98654 87475",
-  //       avatar: "BI",
-  //       tenants: 78,
-  //       verified: 49,
-  //       kycStatus: "Enabled",
-  //       updated: "14 May 2026, 10:46 AM",
-  //     },
-  //     {
-  //       id: "SM7994",
-  //       name: "Sunrise PG",
-  //       phone: "+91 98654 87475",
-  //       avatar: "SP",
-  //       tenants: 80,
-  //       verified: 80,
-  //       kycStatus: "Disabled",
-  //       updated: "14 May 2026, 10:46 AM",
-  //     },
-  //     {
-  //       id: "SM7699",
-  //       name: "SRK Gent’s Hostel",
-  //       phone: "+91 98654 87475",
-  //       avatar: "SH",
-  //       tenants: 80,
-  //       verified: 62,
-  //       kycStatus: "Enabled",
-  //       updated: "14 May 2026, 10:46 AM",
-  //     },
-  //     {
-  //       id: "SM7888",
-  //       name: "Ganesh Men's Hostel",
-  //       phone: "+91 98654 87475",
-  //       avatar: "GH",
-  //       tenants: 102,
-  //       verified: 100,
-  //       kycStatus: "Enabled",
-  //       updated: "14 May 2026, 10:46 AM",
-  //     },
-  //   ];
+  // Close dropdowns
+  setIsTenantDateOpen(false);
+  setIsTenantStatusOpen(false);
+
+  // Reset tenant filters
+  setTenantDateFilter("ALL");
+  setTenantDateRange([]);
+  setTenantKycStatus("");
+
+  
+  setTenantSearch("");
+  setTenantPage(1);
+};
+  
 
   const filteredProperties = properties;
 
@@ -741,7 +681,7 @@ const handleKycEnableDisable = async () => {
                 <RangePicker
                   value={dateRange}
                   onChange={(dates) => {
-                    // Date clear pannina
+                    
                     if (!dates || dates.length === 0) {
                       setDateRange([]);
                       setPeriod("THIS_MONTH");
@@ -957,9 +897,9 @@ const handleKycEnableDisable = async () => {
           "
                     >
 
-                      {/* ID */}
+                   
                       <td className="w-[68px] px-[10px]">
-                        <span className="text-[11px] text-[#222]">
+                        <span className="text-[12px] text-[#222]">
                           {(currentPage - 1) * pageSize + index + 1}
                         </span>
                       </td>
@@ -971,8 +911,8 @@ const handleKycEnableDisable = async () => {
 
                           <div
                             className="
-    w-[24px]
-    h-[24px]
+    w-[30px]
+    h-[30px]
     rounded-full
     bg-[#E9EDF3]
     flex
@@ -989,7 +929,7 @@ const handleKycEnableDisable = async () => {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <span className="text-[7px] font-medium text-[#667085]">
+                              <span className="text-[9px] font-medium text-[#667085]">
                                 {item.avatar}
                               </span>
                             )}
@@ -999,7 +939,7 @@ const handleKycEnableDisable = async () => {
 
                             <div
                               className="
-                    text-[11px]
+                    text-[12px]
                     font-semibold
                     text-[#222]
                     leading-[12px]
@@ -1012,7 +952,7 @@ const handleKycEnableDisable = async () => {
 
                             <div
                               className="
-                    text-[10px]
+                    text-[11px]
                     text-[#777]
                     pt-1
                     leading-[10px]
@@ -1030,7 +970,7 @@ const handleKycEnableDisable = async () => {
 
 
                       <td className="w-[14%] px-[8px] text-center flex-shrink-0 text-left">
-                        <span className="text-[11px] text-[#333]">
+                        <span className="text-[12px] text-[#333]">
                           {item.tenants}
                         </span>
                       </td>
@@ -1038,7 +978,7 @@ const handleKycEnableDisable = async () => {
 
                     
                       <td className="w-[11%] px-[8px] text-center flex-shrink-0 text-left">
-                        <span className="text-[11px] text-[#333]">
+                        <span className="text-[12px] text-[#333]">
                           {item.verified}
                         </span>
                       </td>
@@ -1048,7 +988,7 @@ const handleKycEnableDisable = async () => {
                       <td className="w-[14%] px-[8px] flex-shrink-0 text-left">
                         <span
                           className={`
-                text-[11px]
+                text-[12px]
                 font-medium
                 ${item.kycStatus === "Enabled"
                               ? "text-[#17B65B]"
@@ -1061,15 +1001,15 @@ const handleKycEnableDisable = async () => {
                       </td>
 
 
-                      {/* LAST UPDATED */}
+                      
                       <td className="w-[21%] px-[8px] flex-shrink-0 text-left">
-                        <span className="text-[11px] text-[#333]">
+                        <span className="text-[12px] text-[#333]">
                           {item.updated}
                         </span>
                       </td>
 
 
-                      {/* ACTIONS */}
+                      
                       <td className="w-[14%] px-[8px] text-center flex-shrink-0">
 
                         <button
@@ -1121,7 +1061,7 @@ const handleKycEnableDisable = async () => {
 
               <div className="flex items-center gap-5">
 
-                {/* Page Size */}
+               
                 <select
                   value={pageSize}
                   onChange={(e) => {
@@ -1297,35 +1237,31 @@ const handleKycEnableDisable = async () => {
 
             <div className="px-[18px] grid grid-cols-3 gap-[7px]">
 
-              <StatCard
-                title="Total Tenants"
-                value={selectedProperty.totalTenants}
-                subtitle="Invoices to create"
-              />
+             <StatCard
+  title="Total Tenants"
+  value={selectedProperty?.totalTenants ?? 0}
+  subtitle="Invoices to create"
+/>
 
-              <StatCard
-                title="Total Requested"
-                value={selectedProperty.totalRequests}
-                subtitle="Selected"
-              />
+<StatCard
+  title="Total Requested"
+  value={selectedProperty?.totalRequested ?? 0}
+  subtitle="Selected"
+/>
 
-              <StatCard
-                title="total Verified"
-                value={selectedProperty.totalVerifiedTenants}
-                subtitle="Selected"
-              />
+<StatCard
+  title="Total Verified"
+  value={selectedProperty?.totalVerified ?? 0}
+  subtitle="Selected"
+/>
 
-              <StatCard
-                title="Total Completed"
-                value={selectedProperty.totalCompleted}
-                subtitle="Selected"
-              />
+<StatCard
+  title="Waiting For Approval"
+  value={selectedProperty?.totalWaitingForApproval ?? 0}
+  subtitle="Selected"
+/>
 
-              {/* <StatCard
-          title="KYC Not Submitted"
-          value="0"
-          subtitle=""
-        /> */}
+             
 
             </div>
 
@@ -1488,9 +1424,10 @@ const handleKycEnableDisable = async () => {
                  
                     <button
                       type="button"
-                      onClick={() =>
-                        setIsTenantDateOpen((prev) => !prev)
-                      }
+                     onClick={() => {
+  setIsTenantDateOpen((prev) => !prev);
+  setIsTenantStatusOpen(false);
+}}
                       className="
       h-[18px]
       min-w-[95px]
@@ -1672,12 +1609,13 @@ const handleKycEnableDisable = async () => {
 
 
                   <div className="relative">
-                    {/* STATUS BUTTON */}
+                   
                     <button
                       type="button"
-                      onClick={() =>
-                        setIsTenantStatusOpen((prev) => !prev)
-                      }
+                     onClick={() => {
+  setIsTenantStatusOpen((prev) => !prev);
+  setIsTenantDateOpen(false);
+}}
                       className="
       h-[18px]
       min-w-[90px]
@@ -1716,7 +1654,7 @@ const handleKycEnableDisable = async () => {
                       />
                     </button>
 
-                    {/* STATUS DROPDOWN */}
+               
                     {isTenantStatusOpen && (
                       <div
                         className="
@@ -1814,29 +1752,7 @@ const handleKycEnableDisable = async () => {
                 <div className="relative min-h-[100px]">
 
 
-                  {/* <TenantKycTable
-    tenants={tenantList}
-    loading={tenantLoading}
-    currentPage={tenantPage}
-    pageSize={tenantPageSize}
-    totalPages={tenantTotalPages}
-    totalItems={tenantTotalItems}
-    search={tenantSearch}
-    setSearch={setTenantSearch}
-    onPageChange={(page) => {
-      setTenantPage(page);
-
-      loadTenantKYC(
-        selectedProperty?.hostelId ||
-          selectedProperty?.id,
-        page,
-        tenantPageSize,
-        tenantSearch,
-        tenantKycStatus,
-        tenantDateFilter
-      );
-    }} */}
-                  {/* /> */}
+              
                   <TenantKycTable
                     tenants={tenantList}
                     loading={tenantLoading}
@@ -1853,22 +1769,11 @@ const handleKycEnableDisable = async () => {
                       setShowApproveModal(true);
                     }}
 
-                   onPageChange={(page, newSize) => {
+onPageChange={(page, newSize) => {
   const size = newSize ?? tenantPageSize;
 
   setTenantPage(page);
   setTenantPageSize(size);
-
-  loadTenantKYC(
-    selectedProperty?.hostelId ||
-      selectedProperty?.id,
-    page,
-    size,
-    tenantSearch,
-    tenantKycStatus,
-    tenantDateFilter,
-    tenantDateRange
-  );
 }}
                   />
 
@@ -2391,464 +2296,491 @@ const TenantKycTable = ({
   );
   return (
     <>
-{/* ================= TENANT TABLE ================= */}
+
 
 <div className="w-full">
 
-  {/*
-    SINGLE VERTICAL SCROLL
-    Header + rows together scroll ஆகும்
-  */}
-  <div
-    className="
-      max-h-[174px]
-      overflow-y-auto
-      overflow-x-hidden
-      scrollbar-thin
-    "
-  >
+  {/* ========================================================= */}
+  {/* TABLE */}
+  {/* ========================================================= */}
+  <div className="relative w-full">
 
-    <div className="flex w-full">
+    <div
+      className="
+        max-h-[174px]
+        overflow-y-auto
+        scrollbar-thin
+      "
+    >
 
-      
+      <div className="flex w-full relative">
 
-      <div
-        className="
-          w-[105px]
-          flex-shrink-0
-          bg-white
-          sticky
-          left-0
-          z-[20]
-        "
-      >
-
+        {/* ===================================================== */}
+        {/* LEFT FIXED : ID + TENANT NAME */}
+        {/* ===================================================== */}
         <div
           className="
-            h-[24px]
-            flex
-            items-center
-            border-b
-            border-[#E5E7EB]
-            px-[6px]
-            bg-white text-left
+            flex-shrink-0
+            w-[127px]
+            bg-white
+            z-[30]
           "
         >
-          <TableHeader text="Tenant Name" />
+
+          {/* LEFT HEADER */}
+          <div
+            className="
+              h-[30px]
+              grid
+              grid-cols-[32px_95px]
+              items-center
+              bg-white
+              border-b
+              border-[#E5E7EB]
+              sticky
+              top-0
+              z-[50]
+            "
+          >
+
+            {/* ID */}
+            <div
+              className="
+                h-full
+                flex
+                items-center
+                px-[4px]
+                bg-white
+              "
+            >
+              <TableHeader text="ID" />
+            </div>
+
+            {/* TENANT NAME */}
+            <div
+              className="
+                h-full
+                flex
+                items-center
+                px-[4px]
+                bg-white
+              "
+            >
+              <TableHeader text="Tenant Name" />
+            </div>
+
+          </div>
+
+
+          {/* LEFT DATA */}
+          {loading ? (
+
+            <div className="h-[50px]" />
+
+          ) : tenants.length > 0 ? (
+
+            tenants.map((tenant, index) => (
+
+              <div
+                key={tenant.tenantId || index}
+                className="
+                  h-[30px]
+                  grid
+                  grid-cols-[32px_95px]
+                  items-center
+                  bg-white
+                  border-b
+                  border-[#F0F0F0]
+                "
+              >
+
+                {/* ID */}
+                <div className="px-[4px] min-w-0 text-left">
+
+                  <TableText
+                    text={
+                      (currentPage - 1) *
+                        pageSize +
+                      index +
+                      1
+                    }
+                  />
+
+                </div>
+
+
+                {/* TENANT NAME */}
+                <div className="px-[4px] min-w-0 text-left">
+
+                  <TableText
+                    text={
+                      tenant.tenantName ||
+                      "N/A"
+                    }
+                  />
+
+                </div>
+
+              </div>
+
+            ))
+
+          ) : (
+
+            <div className="h-[50px]" />
+
+          )}
+
         </div>
 
 
-        {/* LOADING */}
-        {loading ? (
+        {/* ===================================================== */}
+        {/* MIDDLE SCROLL : ONLY DATA COLUMNS */}
+        {/* ===================================================== */}
+        <div
+          className="
+            flex-1
+            min-w-0
+            overflow-x-auto
+            scrollbar-thin
+          "
+        >
 
-          <div className="h-[40px]" />
+          <div className="min-w-[430px]">
 
-        ) : tenants.length > 0 ? (
-
-          tenants.map((tenant, index) => (
-
+            {/* MIDDLE HEADER */}
             <div
-              key={tenant.tenantId || index}
+              className="
+                h-[30px]
+                grid
+                grid-cols-[75px_110px_120px_100px]
+                items-center
+                bg-white
+                border-b
+                border-[#E5E7EB]
+                sticky
+                top-0
+                z-[40]
+              "
+            >
+
+              {/* JOIN DATE */}
+              <div className="px-[5px] text-left">
+                <TableHeader text="Join Date" />
+              </div>
+
+              {/* BILLING */}
+              <div className="px-[5px] text-left">
+                <TableHeader text="Billing Cycle" />
+              </div>
+
+              {/* SUBMITTED */}
+              <div className="px-[5px] text-left">
+                <TableHeader text="Submitted on" />
+              </div>
+
+              {/* KYC */}
+              <div className="px-[5px] text-left">
+                <TableHeader text="KYC Status" />
+              </div>
+
+            </div>
+
+
+            {/* MIDDLE DATA */}
+            {loading ? (
+
+              <div className="h-[50px]" />
+
+            ) : tenants.length > 0 ? (
+
+              tenants.map((tenant, index) => (
+
+                <div
+                  key={tenant.tenantId || index}
+                  className="
+                    h-[30px]
+                    grid
+                    grid-cols-[75px_110px_120px_100px]
+                    items-center
+                    bg-white
+                    border-b
+                    border-[#F0F0F0]
+                  "
+                >
+
+                 
+                  <div className="px-[5px] min-w-0">
+
+                    <TableText
+                      text={
+                        tenant.joinDate &&
+                        typeof tenant.joinDate ===
+                          "string" &&
+                        tenant.joinDate.trim() &&
+                        dayjs(
+                          tenant.joinDate,
+                          "DD/MM/YYYY",
+                          true
+                        ).isValid()
+                          ? dayjs(
+                              tenant.joinDate,
+                              "DD/MM/YYYY"
+                            ).format("MMM D")
+                          : "N/A"
+                      }
+                    />
+
+                  </div>
+
+
+                  {/* BILLING */}
+                  <div className="px-[5px] min-w-0">
+
+                    <TableText
+                      text={
+                        tenant.billingCycle ||
+                        "N/A"
+                      }
+                    />
+
+                  </div>
+
+
+                
+                  <div className="px-[5px] min-w-0">
+
+                    {tenant.submittedDate ||
+                    tenant.submittedTime ? (
+
+                      <div className="flex flex-col">
+
+                        {tenant.submittedDate && (
+                          <span
+                            className="
+                              text-[7px]
+                              text-[#333]
+                              truncate
+                              leading-[9px]
+                            "
+                          >
+                            {tenant.submittedDate}
+                          </span>
+                        )}
+
+                        {tenant.submittedTime && (
+                          <span
+                            className="
+                              text-[7px]
+                              text-[#777]
+                              truncate
+                              leading-[8px]
+                            "
+                          >
+                            {tenant.submittedTime}
+                          </span>
+                        )}
+
+                      </div>
+
+                    ) : (
+
+                      <span
+                        className="
+                          text-[8px]
+                          text-[#777]
+                        "
+                      >
+                        N/A
+                      </span>
+
+                    )}
+
+                  </div>
+
+
+                  {/* KYC STATUS */}
+                  <div className="px-[5px] min-w-0">
+
+                    <span
+                      className="
+                        block
+                        text-[8px]
+                        text-[#333]
+                        truncate
+                      "
+                    >
+                      {tenant?.kycDetailsStatus?.trim()
+                        ? tenant.kycDetailsStatus
+                        : "NOT_AVAILABLE"}
+                    </span>
+
+                  </div>
+
+                </div>
+
+              ))
+
+            ) : (
+
+              <div
+                className="
+                  h-[50px]
+                  flex
+                  items-center
+                  justify-center
+                  text-[8px]
+                  text-[#999]
+                "
+              >
+                No tenants found
+              </div>
+
+            )}
+
+          </div>
+
+        </div>
+
+
+    
+        {hasAction && (
+
+          <div
+            className="
+              flex-shrink-0
+              w-[72px]
+              bg-white
+              z-[30]
+            "
+          >
+
+           
+            <div
               className="
                 h-[30px]
                 flex
                 items-center
-                border-b
-                border-[#F0F0F0]
-                px-[6px]
+                px-[4px]
                 bg-white
+                border-b
+                border-[#E5E7EB]
+                sticky
+                top-0
+                z-[50]
               "
             >
 
-              <div className="min-w-0 w-full text-left">
-
-                <TableText
-                  text={tenant.tenantName || "N/A"}
-                />
-
-              </div>
+              <TableHeader text="Action" />
 
             </div>
 
-          ))
 
-        ) : (
+          
+            {loading ? (
 
-          <div className="h-[40px]" />
+              <div className="h-[50px]" />
+
+            ) : tenants.length > 0 ? (
+
+              tenants.map((tenant, index) => (
+
+                <div
+                  key={tenant.tenantId || index}
+                  className="
+                    h-[30px]
+                    flex
+                    items-center
+                    px-[2px]
+                    bg-white
+                    border-b
+                    border-[#F0F0F0]
+                  "
+                >
+
+                  <div
+                    className="
+                      flex
+                      items-center
+                      gap-[3px]
+                    "
+                  >
+
+                    
+                    {tenant.canSendReminder === true && (
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onReminder(tenant)
+                        }
+                        className="
+                          h-[18px]
+                          min-w-[42px]
+                          px-[4px]
+                          rounded-[4px]
+                          bg-[#2952F3]
+                          text-white
+                          text-[7px]
+                          cursor-pointer
+                          whitespace-nowrap
+                        "
+                      >
+                        Reminder
+                      </button>
+
+                    )}
+
+
+                    
+                    {tenant.canApproveKyc === true && (
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onApprove(tenant)
+                        }
+                        className="
+                          h-[18px]
+                          min-w-[42px]
+                          px-[4px]
+                          rounded-[4px]
+                          bg-[#159947]
+                          text-white
+                          text-[7px]
+                          cursor-pointer
+                          whitespace-nowrap
+                        "
+                      >
+                        Approve
+                      </button>
+
+                    )}
+
+                  </div>
+
+                </div>
+
+              ))
+
+            ) : (
+
+              <div className="h-[50px]" />
+
+            )}
+
+          </div>
 
         )}
 
       </div>
-
-
-   
-      <div
-        className="
-          flex-1
-          min-w-0
-          overflow-x-auto
-          bg-white
-        "
-      >
-
-        <div className="w-[365px]">
-
-       
-
-          <div
-            className="
-              grid
-              grid-cols-[75px_105px_100px_85px]
-              h-[24px]
-              items-center
-              border-b
-              border-[#E5E7EB]
-              bg-white
-            "
-          >
-
-            {/* JOIN DATE */}
-            <div className="px-[4px] min-w-0 text-left">
-              <TableHeader text="Join Date" />
-            </div>
-
-
-            {/* BILLING */}
-            <div className="px-[4px] min-w-0 text-left">
-              <TableHeader text="Billing Cycle" />
-            </div>
-
-
-            {/* SUBMITTED */}
-            <div className="px-[4px] min-w-0 text-left">
-              <TableHeader text="Submitted on" />
-            </div>
-
-
-            {/* KYC STATUS */}
-            <div className="px-[4px] min-w-0 text-left">
-              <TableHeader text="KYC Status" />
-            </div>
-
-          </div>
-
-
-
-          {loading ? (
-
-            <div
-              className="
-                h-[40px]
-                flex
-                items-center
-                justify-center
-              "
-            >
-
-              <div
-                className="
-                  w-[18px]
-                  h-[18px]
-                  border-[2px]
-                  border-[#E5E7EB]
-                  border-t-[#2952F3]
-                  rounded-full
-                  animate-spin
-                "
-              />
-
-            </div>
-
-          ) : tenants.length > 0 ? (
-
-            tenants.map((tenant, index) => (
-
-              <div
-                key={tenant.tenantId || index}
-                className="
-                  grid
-                  grid-cols-[75px_105px_100px_85px]
-                  h-[30px]
-                  items-center
-                  border-b
-                  border-[#F0F0F0]
-                  bg-white
-                "
-              >
-
-
-                <div className="px-[4px] min-w-0 text-left">
-
-                  <TableText
-                    text={
-                      tenant.joinDate &&
-                      typeof tenant.joinDate === "string" &&
-                      tenant.joinDate.trim() &&
-                      dayjs(
-                        tenant.joinDate,
-                        "DD/MM/YYYY",
-                        true
-                      ).isValid()
-                        ? dayjs(
-                            tenant.joinDate,
-                            "DD/MM/YYYY"
-                          ).format("MMM D")
-                        : "N/A"
-                    }
-                  />
-
-                </div>
-
-
-               
-
-                <div className="px-[4px] min-w-0 text-left">
-
-                  <TableText
-                    text={
-                      tenant.billingCycle || "N/A"
-                    }
-                  />
-
-                </div>
-
-
-              
-
-                <div className="px-[4px] min-w-0 text-left">
-
-                  {tenant.submittedDate ||
-                  tenant.submittedTime ? (
-
-                    <div className="flex flex-col justify-center">
-
-                      {tenant.submittedDate && (
-
-                        <div
-                          className="
-                            text-[8px]
-                            text-[#333]
-                            truncate
-                            leading-[9px]
-                          "
-                        >
-                          {tenant.submittedDate}
-                        </div>
-
-                      )}
-
-                      {tenant.submittedTime && (
-
-                        <div
-                          className="
-                            text-[7px]
-                            text-[#777]
-                            truncate
-                            leading-[8px]
-                          "
-                        >
-                          {tenant.submittedTime}
-                        </div>
-
-                      )}
-
-                    </div>
-
-                  ) : (
-
-                    <span
-                      className="
-                        text-[8px]
-                        text-[#777]
-                      "
-                    >
-                      N/A
-                    </span>
-
-                  )}
-
-                </div>
-
-
-                
-
-                <div className="px-[4px] min-w-0 text-left">
-
-                  <span
-                    className="
-                      block
-                      text-[8px]
-                      text-[#333]
-                      truncate
-                    "
-                  >
-                    {tenant?.kycDetailsStatus?.trim()
-                      ? tenant.kycDetailsStatus
-                      : "NOT_AVAILABLE"}
-                  </span>
-
-                </div>
-
-              </div>
-
-            ))
-
-          ) : (
-
-            <div
-              className="
-                h-[40px]
-                flex
-                items-center
-                justify-center
-                text-[7px]
-                text-[#999]
-              "
-            >
-              No tenants found
-            </div>
-
-          )}
-
-        </div>
-
-      </div>
-
-
-     
-
-      {hasAction && (
-
-        <div
-          className="
-            w-[72px]
-            flex-shrink-0
-            bg-white
-            sticky
-            right-0
-            z-[20]
-          "
-        >
-
-          {/* HEADER */}
-          <div
-            className="
-              h-[24px]
-              flex
-              items-center
-              border-b
-              border-[#E5E7EB]
-              px-[2px]
-              bg-white
-            "
-          >
-            <TableHeader text="Action" />
-          </div>
-
-
-          {/* LOADING */}
-          {loading ? (
-
-            <div className="h-[40px]" />
-
-          ) : tenants.length > 0 ? (
-
-            tenants.map((tenant, index) => (
-
-              <div
-                key={tenant.tenantId || index}
-                className="
-                  h-[30px]
-                  flex
-                  items-center
-                  px-[2px]
-                  border-b
-                  border-[#F0F0F0]
-                  bg-white
-                "
-              >
-
-                <div
-                  className="
-                    flex
-                    items-center
-                    gap-[3px]
-                  "
-                >
-
-                  {/* REMINDER */}
-                  {tenant.canSendReminder === true && (
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onReminder(tenant)
-                      }
-                      className="
-                        h-[18px]
-                        min-w-[42px]
-                        px-[4px]
-                        rounded-[4px]
-                        bg-[#2952F3]
-                        text-white
-                        text-[7px]
-                        cursor-pointer
-                        whitespace-nowrap
-                      "
-                    >
-                      Reminder
-                    </button>
-
-                  )}
-
-
-                  {/* APPROVE */}
-                  {tenant.canApproveKyc === true && (
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onApprove(tenant)
-                      }
-                      className="
-                        h-[18px]
-                        min-w-[42px]
-                        px-[4px]
-                        rounded-[4px]
-                        bg-[#159947]
-                        text-white
-                        text-[7px]
-                        cursor-pointer
-                        whitespace-nowrap
-                      "
-                    >
-                      Approve
-                    </button>
-
-                  )}
-
-                </div>
-
-              </div>
-
-            ))
-
-          ) : (
-
-            <div className="h-[40px]" />
-
-          )}
-
-        </div>
-
-      )}
 
     </div>
 
   </div>
 
 </div>
-      {/* PAGINATION */}
+      
    {!loading && totalItems > 0 && (
   <div
     className="
@@ -2865,15 +2797,15 @@ const TenantKycTable = ({
     <div className="text-[9px] text-[#475467]">
       Total Record Count:
       <span className="ml-[3px] text-[#2952F3] font-medium">
-        {totalItems}
+        {tenants.length}
       </span>
     </div>
 
 
-    {/* PAGINATION */}
+    
     <div className="flex items-center gap-[6px]">
 
-      {/* PAGE SIZE */}
+      
    <select
   value={pageSize}
   onChange={(e) => {
@@ -2929,7 +2861,7 @@ const TenantKycTable = ({
       </button>
 
 
-      {/* CURRENT PAGE */}
+      
       <div
         className="
           w-[36px]
@@ -2958,10 +2890,8 @@ const TenantKycTable = ({
           text-center
         "
       >
-        {`${(currentPage - 1) * pageSize + 1} - ${Math.min(
-          currentPage * pageSize,
-          totalItems
-        )}`}
+     
+        {currentPage} - {totalPages}
       </span>
 
 

@@ -126,9 +126,9 @@ const Index = () => {
     }
   }, []);
 
-  // ⭐ முக்கியம் — render block
+ 
   if (isChecking) {
-    return null; // or loader
+    return null; 
   }
 
   const loginAction = () => {

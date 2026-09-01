@@ -1,9 +1,9 @@
 import React, { useState, useEffect,useRef} from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useParams } from "react-router-dom";
 import DashboardLayout from "../SidebarScreen/SidebarLayout";
 import { usePlan } from "../../Context/PlanContexts";
 import { useSupportTickets } from "../../Context/SupportTicketsContext";
-import { X, ChevronDown, CalendarDays, Search, Upload, } from "lucide-react";
+import {Search, Upload, } from "lucide-react";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
@@ -16,6 +16,7 @@ import Trash from "../../assets/trash.png"
 const CreateProductUpdate = () => {
   const navigate = useNavigate();
   const { searchOwners, loading } = useSupportTickets();
+ 
   const { getPlansDropdown, getProductUpdateTypes, getProductUpdatePlatforms, getProductUpdateModules, getProductUpdateCtas, getProductUpdatePublishStatuses, 
     getProductUpdateAudiences, createProductUpdate, searchHostels,getProductUpdateById,updateProductUpdate,updateProductUpdateItem,createProductUpdateItem,deleteProductUpdateItem } = usePlan();
   const [updateTitle, setUpdateTitle] = useState("");
@@ -161,7 +162,7 @@ const normalizeDate = (value) => {
 const normalizeTime = (value) => {
   if (!value) return "";
 
-  // 05:57:00 PM -> 17:57
+  
   if (value.includes("AM") || value.includes("PM")) {
     const [time, period] = value.trim().split(" ");
     let [hours, minutes] = time.split(":");
@@ -343,9 +344,9 @@ if (
 
       const matchedOwners = owners.filter(
         (owner) =>
-          owner?.parentId &&
+          owner?.ownerId &&
           ownerIds.includes(
-            String(owner.parentId)
+            String(owner.ownerId)
           )
       );
 
@@ -413,7 +414,7 @@ if (
     attachment:
       null,
 
-    // IMPORTANT
+   
     isDirty: false,
   }))
 );
@@ -620,7 +621,7 @@ if (
 
     attachment: null,
 
-    // IMPORTANT
+   
     isDirty: true,
   };
 
@@ -709,7 +710,7 @@ const hasFormChanges = () => {
           audience === "OWNERS" ||
           audience === "CUSTOMERS"
         ? selectedOwners
-            .map((owner) => owner?.parentId)
+            .map((owner) => owner?.ownerId)
             .filter(Boolean)
             .map(String)
             .sort()
@@ -933,7 +934,7 @@ setExpiryDateError("");
 
 if (isScheduleSelected) {
 
-  // Publish Date
+
   if (!publishDate) {
 
     setPublishDateError(
@@ -944,7 +945,7 @@ if (isScheduleSelected) {
   }
 
 
-  // Publish Time
+ 
   if (!publishTime) {
 
     setPublishTimeError(
@@ -955,7 +956,7 @@ if (isScheduleSelected) {
   }
 
 
-  // Expiry Date
+ 
   if (!expiryDate) {
 
     setExpiryDateError(
@@ -971,7 +972,7 @@ if (isScheduleSelected) {
   };
  
   const resetProductUpdateForm = () => {
-  // Basic Information
+ 
   setUpdateTitle("");
   setShortDescription("");
   setVersion("");
@@ -979,32 +980,32 @@ if (isScheduleSelected) {
   setUpdateType("");
   setPlatform("");
 
-  // What's New
+
   setUpdateItems([]);
 
-  // Audience
+  
   setAudience("");
   setSelectedPlans([]);
   setSelectedProperties([]);
   setSelectedOwners([]);
 
-  // Publishing
+  
   setPublishing("");
   setPublishDate("");
   setPublishTime("");
   setExpiryDate("");
 
-  // Search states
+
   setSearch("");
   setCustomerSearch("");
   setOwnerSearch("");
   setPropertySearch("");
 
-  // Lists
+  
   setOwnersList([]);
   setPropertiesList([]);
 
-  // Dropdowns / Popups
+  
   setShowOwnerPopup(false);
   setShowOwnerDropdown(false);
 
@@ -1016,7 +1017,7 @@ if (isScheduleSelected) {
 
   setShowPreviewModal(false);
 
-  // Validation errors
+
   setTitleError("");
   setDescriptionError("");
   setTypeError("");
@@ -1071,9 +1072,7 @@ const handleCreateProductUpdate = async () => {
   }
 
 
-  // ==========================================
-  // 2. CHECK MAIN FORM CHANGES
-  // ==========================================
+ 
 
   if (
     isEditMode &&
@@ -1156,7 +1155,7 @@ const handleCreateProductUpdate = async () => {
             audience === "OWNERS" ||
             audience === "CUSTOMERS"
           ? selectedOwners
-              .map((owner) => owner?.parentId)
+              .map((owner) => owner?.ownerId)
               .filter(Boolean)
               .map(String)
 
@@ -1200,13 +1199,13 @@ const handleCreateProductUpdate = async () => {
     let result;
 
     if (isEditMode && productUpdateId) {
-      // EDIT
+     
       result = await updateProductUpdate(
         productUpdateId,
         payload
       );
     } else {
-      // CREATE
+     
       result = await createProductUpdate(
         payload,
         updateItems
@@ -1234,7 +1233,7 @@ const handleCreateProductUpdate = async () => {
 
       setShowSuccess(true);
 
-      // Reset only after successful API
+      
       resetProductUpdateForm();
 
       setTimeout(() => {
@@ -1330,7 +1329,7 @@ const handleSaveItem = async (item) => {
       clientId:
         item.clientId,
 
-      // Existing images still kept
+      
       existingImageUrls:
         item.itemImages || [],
     };
@@ -1353,9 +1352,7 @@ const handleSaveItem = async (item) => {
         result.data
       );
 
-      // =========================
-      // MARK ITEM AS SAVED
-      // =========================
+      
 
       setUpdateItems((prev) =>
         prev.map((updateItem) =>
@@ -1368,11 +1365,10 @@ const handleSaveItem = async (item) => {
         )
       );
 
-      // VERY IMPORTANT
-      // Remove item from unsaved list
+    
       markItemAsSaved(item.id);
 
-      // Clear error
+      
       setItemsError("");
     }
 
@@ -1383,135 +1379,7 @@ const handleSaveItem = async (item) => {
     );
   }
 };
-// const handleCreateItem = async (item) => {
-//   try {
-//     const formData = new FormData();
 
-//     const payload = {
-//       productUpdateId: productUpdateId,
-
-//       title: item.title || "",
-//       description: item.description || "",
-
-//       updateType: item.itemType || "",
-//       module: item.relatedModule || "",
-
-//       cta: item.cta || "",
-//       ctaLink: item.ctaLink || "",
-
-//       showCtaButton:
-//         item.showCtaButton ?? false,
-
-//       clientId: item.clientId,
-
-//       // New item has no existing images
-//       existingImageUrls: [],
-//     };
-
-//     // =========================
-//     // JSON PAYLOAD
-//     // =========================
-
-//     formData.append(
-//       "payloads",
-//       new Blob(
-//         [JSON.stringify([payload])],
-//         {
-//           type: "application/json",
-//         }
-//       )
-//     );
-
-//     // =========================
-//     // MULTIPLE FILES
-//     // =========================
-
-//     const files = {};
-
-//     const attachments = Array.isArray(item.attachment)
-//       ? item.attachment
-//       : item.attachment
-//         ? [item.attachment]
-//         : [];
-
-//     attachments.forEach((file) => {
-//       if (file instanceof File) {
-//         formData.append(
-//           item.clientId,
-//           file,
-//           file.name
-//         );
-
-//         if (!files[item.clientId]) {
-//           files[item.clientId] = [];
-//         }
-
-//         files[item.clientId].push(file.name);
-//       }
-//     });
-
-//     console.log(
-//       "CREATE ITEM PAYLOAD:",
-//       payload
-//     );
-
-//     console.log(
-//       "CREATE ITEM FILES:",
-//       files
-//     );
-
-//     // =========================
-//     // API
-//     // =========================
-
-//     const result =
-//       await createProductUpdateItem(
-//         formData,
-//         files
-//       );
-
-//     // =========================
-//     // SUCCESS
-//     // =========================
-
-//     if (result?.success) {
-
-//       console.log(
-//         "New item created:",
-//         result.data
-//       );
-
-//       setUpdateItems((prev) =>
-//         prev.map((updateItem) =>
-//           updateItem.id === item.id
-//             ? {
-//                 ...updateItem,
-//                 isDirty: false,
-//                 productUpdateItemId:
-//                   result.data?.productUpdateItemId ??
-//                   updateItem.productUpdateItemId,
-
-//                 // Keep uploaded images in UI
-//                 attachment: [],
-//               }
-//             : updateItem
-//         )
-//       );
-
-//       markItemAsSaved(item.id);
-
-//       setItemsError("");
-//     }
-
-//   } catch (error) {
-
-//     console.error(
-//       "Create Product Item Error:",
-//       error
-//     );
-
-//   }
-// };
 const handleCreateItem = async (item) => {
   try {
     const formData = new FormData();
@@ -1533,13 +1401,11 @@ const handleCreateItem = async (item) => {
 
       clientId: item.clientId,
 
-      // New item has no existing images
+     
       existingImageUrls: [],
     };
 
-    // =========================
-    // JSON PAYLOAD
-    // =========================
+  
 
     formData.append(
       "payloads",
@@ -1551,9 +1417,7 @@ const handleCreateItem = async (item) => {
       )
     );
 
-    // =========================
-    // MULTIPLE FILES
-    // =========================
+    
 
     const files = {};
 
@@ -1589,9 +1453,7 @@ const handleCreateItem = async (item) => {
       files
     );
 
-    // =========================
-    // API
-    // =========================
+    
 
     const result =
       await createProductUpdateItem(
@@ -1599,9 +1461,6 @@ const handleCreateItem = async (item) => {
         files
       );
 
-    // =========================
-    // SUCCESS
-    // =========================
 
     if (result?.success) {
 
@@ -1620,7 +1479,7 @@ const handleCreateItem = async (item) => {
                   result.data?.productUpdateItemId ??
                   updateItem.productUpdateItemId,
 
-                // Keep uploaded images in UI
+                
                 attachment: [],
               }
             : updateItem
@@ -1688,9 +1547,7 @@ const handleCreateItem = async (item) => {
       return;
     }
 
-    // ==========================================
-    // EXISTING ITEM - DELETE API
-    // ==========================================
+   
 
     const payload = [
       {
@@ -1816,20 +1673,7 @@ const handleCreateItem = async (item) => {
 
             <div className="flex items-center gap-2">
 
-              {/* <button
-                type="button"
-                className="
-                  px-3 py-1.5
-                  border border-gray-200
-                  rounded-md
-                  bg-white
-                  text-[9px]
-                  text-gray-600
-                  cursor-pointer
-                "
-              >
-                Save as Draft
-              </button> */}
+              
 
               <button
                onClick={() => setShowPreviewModal(true)}
@@ -2156,19 +2000,7 @@ const handleCreateItem = async (item) => {
                             
                             <button
                               type="button"
-                              // onClick={() => {
-                              //   const duplicate = {
-                              //     ...item,
-                              //     id: Date.now() + Math.random(),
-                              //     clientId: `item-${updateItems.length + 1}-${Date.now()}`,
-                              //   };
-
-                              //   setUpdateItems((prev) => {
-                              //     const newItems = [...prev];
-                              //     newItems.splice(index + 1, 0, duplicate);
-                              //     return newItems;
-                              //   });
-                              // }}
+                             
                  onClick={() => handleDeleteItem(item, index)}
                               className="
                   text-red-400
@@ -2612,7 +2444,7 @@ setUpdateItems((prev) =>
     Attachments - relevant to the update
   </label>
 
-  {/* Upload Box */}
+ 
   <label
     className="
       w-full
@@ -2677,7 +2509,7 @@ setUpdateItems((prev) =>
 
           markItemAsUnsaved(item.id);
 
-          // Allow selecting same image again
+         
           e.target.value = "";
 
         } catch (error) {
@@ -2688,9 +2520,7 @@ setUpdateItems((prev) =>
   </label>
 
 
-  {/* ============================= */}
-  {/* IMAGE PREVIEW */}
-  {/* ============================= */}
+
 
   {(
     (item.itemImages && item.itemImages.length > 0) ||
@@ -2699,9 +2529,7 @@ setUpdateItems((prev) =>
 
     <div className="flex flex-wrap gap-2 mt-2">
 
-      {/* ============================= */}
-      {/* EXISTING IMAGES */}
-      {/* ============================= */}
+    
 
       {(item.itemImages || []).map((image, imageIndex) => (
 
@@ -2725,7 +2553,7 @@ setUpdateItems((prev) =>
             className="w-full h-full object-cover"
           />
 
-          {/* Remove */}
+          
           <button
             type="button"
             onClick={() => {
@@ -2775,9 +2603,7 @@ setUpdateItems((prev) =>
       ))}
 
 
-      {/* ============================= */}
-      {/* NEWLY UPLOADED IMAGES */}
-      {/* ============================= */}
+    
 
       {(item.attachment || []).map((file, fileIndex) => (
 
@@ -2801,7 +2627,7 @@ setUpdateItems((prev) =>
             className="w-full h-full object-cover"
           />
 
-          {/* Remove */}
+          
           <button
             type="button"
             onClick={() => {
@@ -2898,86 +2724,172 @@ setUpdateItems((prev) =>
                   Who should see this update?
                 </h2>
 
-                {audiences?.map((item) => {
-                  const key = item?.key;
+               {audiences?.map((item) => {
+  const key = item?.key;
 
-                  return (
-                    <AudienceOption
-                      key={key}
-                      value={key}
-                      selected={audience}
-                      onChange={(value) => {
-                        setAudience(value);
+  const isPlanAudience =
+    key === "SELECTED_PLANS" || key === "PLANS";
 
-                       
-                        setAudienceError("");
+  const isPropertyAudience =
+    key === "SELECTED_PROPERTIES" ||
+    key === "PROPERTIES" ||
+    key === "SELECTED_HOSTELS" ||
+    key === "HOSTELS";
 
-                        if (
-                          value === "SELECTED_PLANS" ||
-                          value === "PLANS"
-                        ) {
-                          setShowPlanPopup(true);
-                          setShowPlanDropdown(false);
-                        }
+  const isOwnerAudience =
+    key === "SELECTED_OWNERS" ||
+    key === "OWNERS" ||
+    key === "CUSTOMERS";
 
-                        if (
-                          value === "SELECTED_PROPERTIES" ||
-                          value === "PROPERTIES" ||
-                          value === "SELECTED_HOSTELS" ||
-                          value === "HOSTELS"
-                        ) {
-                          setShowPropertyPopup(true);
-                          setShowPropertyDropdown(false);
-                        }
+  const selectedItems = isPlanAudience
+    ? selectedPlans
+    : isPropertyAudience
+    ? selectedProperties
+    : isOwnerAudience
+    ? selectedOwners
+    : [];
 
-                        if (
-                          value === "SELECTED_OWNERS" ||
-                          value === "OWNERS" ||
-                          value === "CUSTOMERS"
-                        ) {
-                          setShowOwnerPopup(true);
-                          setShowOwnerDropdown(false);
-                        }
-                      }}
-                      title={item?.value}
-                      description={item?.description}
-                      showView={
-                        (
-                          (key === "SELECTED_PLANS" || key === "PLANS") &&
-                          selectedPlans.length > 0
-                        ) ||
-                        (
-                          (
-                            key === "SELECTED_OWNERS" ||
-                            key === "OWNERS" ||
-                            key === "CUSTOMERS"
-                          ) &&
-                          selectedOwners.length > 0
-                        )
-                      }
-                      onView={() => {
+  return (
+    <div key={key} className="mb-2">
+      <AudienceOption
+        value={key}
+        selected={audience}
+onChange={(value) => {
+  
+ if (value !== audience) {
+  setShowPlanDropdown(false);
+  setShowPropertyDropdown(false);
+  setShowOwnerDropdown(false);
 
-                        if (
-                          key === "SELECTED_PLANS" ||
-                          key === "PLANS"
-                        ) {
-                          setShowPlanPopup(true);
-                          setShowPlanDropdown(false);
-                        }
+  setShowPlanPopup(false);
+  setShowPropertyPopup(false);
+  setShowOwnerPopup(false);
 
-                        if (
-                          key === "SELECTED_OWNERS" ||
-                          key === "OWNERS" ||
-                          key === "CUSTOMERS"
-                        ) {
-                          setShowOwnerPopup(true);
-                          setShowOwnerDropdown(false);
-                        }
+  setPropertySearch("");
+  setOwnerSearch("");
+  setCustomerSearch("");
+  setSearch("");
 
-                      }}
-                    />
-                  );
-                })}
+  setPropertiesList([]);
+  setOwnersList([]);
+}
+
+  setAudience(value);
+  setAudienceError("");
+
+  if (
+    value === "SELECTED_PLANS" ||
+    value === "PLANS"
+  ) {
+    setShowPlanPopup(true);
+    setShowPlanDropdown(false);
+  }
+
+  if (
+    value === "SELECTED_PROPERTIES" ||
+    value === "PROPERTIES" ||
+    value === "SELECTED_HOSTELS" ||
+    value === "HOSTELS"
+  ) {
+    setShowPropertyPopup(true);
+    setShowPropertyDropdown(false);
+  }
+
+  if (
+    value === "SELECTED_OWNERS" ||
+    value === "OWNERS" ||
+    value === "CUSTOMERS"
+  ) {
+    setShowOwnerPopup(true);
+    setShowOwnerDropdown(false);
+  }
+}}
+        title={item?.value}
+        description={item?.description}
+        showView={selectedItems.length > 0}
+        onView={() => {
+          if (isPlanAudience) {
+            setShowPlanPopup(true);
+            setShowPlanDropdown(false);
+          }
+
+          if (isPropertyAudience) {
+            setShowPropertyPopup(true);
+            setShowPropertyDropdown(false);
+          }
+
+          if (isOwnerAudience) {
+            setShowOwnerPopup(true);
+            setShowOwnerDropdown(false);
+          }
+        }}
+      />
+
+     
+      {audience === key && selectedItems.length > 0 && (
+        <div className="ml-3 mr-3 mt-2 p-2.5 bg-[#F8FAFF] border border-[#E3E9FF] rounded-md">
+
+          <p className="text-[9px] font-medium text-gray-500 mb-2">
+            Selected {isPlanAudience
+              ? "Plans"
+              : isPropertyAudience
+              ? "Hostels"
+              : "Owners"}
+          </p>
+
+          <div className="flex flex-wrap gap-1.5">
+            {selectedItems.map((item, index) => {
+
+  const name =
+  isPlanAudience
+    ? plans.find(
+        (plan) => String(plan?.planId) === String(item)
+      )?.planName || item
+    : isPropertyAudience
+    ? item?.hostelName ||
+      item?.propertyName ||
+      item?.name ||
+      item?.value
+    : item?.fullName ||
+      item?.ownerName ||
+      item?.name ||
+      item?.value ||
+      item?.parentName;
+
+              return (
+                <span
+                  key={
+                    item?.planId ||
+                    item?.hostelId ||
+                    item?.propertyId ||
+                    item?.ownerId ||
+                    item?.id ||
+                    index
+                  }
+                  className="
+                    inline-flex
+                    items-center
+                    px-2
+                    py-1
+                    rounded-md
+                    bg-white
+                    border
+                    border-[#D9E1FF]
+                    text-[9px]
+                    text-[#2952F3]
+                    font-medium
+                  "
+                >
+                  {name || "----"}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+})}
 
                 {audienceError && (
                   <ErrorMessage
@@ -3011,13 +2923,13 @@ setUpdateItems((prev) =>
           (item) => item?.key === value
         );
 
-        // Check whether selected option is Schedule
+        
         const isSchedule =
           selectedStatus?.value
             ?.trim()
             ?.toLowerCase() === "schedule";
 
-        // If NOT Schedule, clear schedule fields
+      
         if (!isSchedule) {
 
           setPublishDate("");
@@ -3034,7 +2946,7 @@ setUpdateItems((prev) =>
     />
   ))}
 
-  {/* Publishing Error */}
+ 
   {publishingError && (
     <ErrorMessage
       message={publishingError}
@@ -3045,9 +2957,7 @@ setUpdateItems((prev) =>
 </div>
 
 
-{/* ==============================
-    SCHEDULE DATE & TIME
-================================ */}
+
 
 {isScheduleSelected && (
 
@@ -3055,13 +2965,11 @@ setUpdateItems((prev) =>
 
     <div className="mt-3 bg-[#F8F9FB] rounded-xl p-3">
 
-      {/* =========================
-          PUBLISH DATE + TIME
-      ========================= */}
+    
 
       <div className="grid grid-cols-2 gap-2">
 
-        {/* PUBLISH DATE */}
+       
 
         <div>
 
@@ -3090,7 +2998,7 @@ setUpdateItems((prev) =>
 
               setPublishDate(value);
 
-              // Clear error
+              
               setPublishDateError("");
             }}
 
@@ -3114,7 +3022,7 @@ setUpdateItems((prev) =>
         </div>
 
 
-        {/* PUBLISH TIME */}
+    
 
         <div>
 
@@ -3134,7 +3042,7 @@ setUpdateItems((prev) =>
                 e.target.value
               );
 
-              // Clear error
+             
               setPublishTimeError("");
             }}
 
@@ -3165,18 +3073,14 @@ setUpdateItems((prev) =>
       </div>
 
 
-      {/* =========================
-          TIMEZONE
-      ========================= */}
+      
 
       <p className="text-[8px] text-gray-400 mt-2.5 text-left">
         Timezone: IST (UTC+5:30)
       </p>
 
 
-      {/* =========================
-          EXPIRY DATE
-      ========================= */}
+     
 
       <div className="mt-3">
 
@@ -3205,7 +3109,7 @@ setUpdateItems((prev) =>
 
             setExpiryDate(value);
 
-            // Clear error
+           
             setExpiryDateError("");
           }}
 
@@ -3233,16 +3137,16 @@ setUpdateItems((prev) =>
   </div>
 )}
 
-            {/* SCHEDULE DATE & TIME */}
+           
 {publishing === "SCHEDULE" && (
   <div className="bg-white border border-gray-200 rounded-lg p-4">
 
     <div className="mt-3 bg-[#F8F9FB] rounded-xl p-3">
 
-      {/* Publish Date + Publish Time */}
+    
       <div className="grid grid-cols-2 gap-2">
 
-        {/* Publish Date */}
+     
         <div>
           <label className="block text-[8px] font-medium text-gray-700 mb-1.5 text-left">
             Publish Date
@@ -3273,7 +3177,7 @@ setUpdateItems((prev) =>
           )}
         </div>
 
-        {/* Publish Time */}
+       
         <div>
           <label className="block text-[8px] font-medium text-gray-700 mb-1.5 text-left">
             Publish Time
@@ -3311,12 +3215,11 @@ setUpdateItems((prev) =>
 
       </div>
 
-      {/* Timezone */}
+     
       <p className="text-[8px] text-gray-400 mt-2.5 text-left">
         Timezone: IST (UTC+5:30)
       </p>
 
-      {/* Expiry Date */}
       <div className="mt-3">
 
         <label className="block text-[8px] font-medium text-gray-700 mb-1.5 text-left">
@@ -3372,8 +3275,7 @@ setUpdateItems((prev) =>
 
                 </div>
 
-                {/* Mobile */}
-                {/* Mobile Preview */}
+                
                 <div
                   className="
     mx-auto
@@ -3398,9 +3300,7 @@ setUpdateItems((prev) =>
     "
                   >
 
-                    {/* =========================
-        PHONE HEADER
-    ========================= */}
+               
 
                     <div
                       className="
@@ -3439,7 +3339,7 @@ setUpdateItems((prev) =>
 
                       <div className="px-2 pt-3 pb-5">
 
-                        {/* What's New Header */}
+                     
                         <div className="flex items-center justify-between">
 
                           <p className="text-[7px] font-semibold text-gray-700">
@@ -3457,9 +3357,7 @@ setUpdateItems((prev) =>
                         </div>
 
 
-                        {/* =========================
-            UPDATE ITEMS
-        ========================= */}
+                     
 
                         <div className="mt-2 space-y-2">
 
@@ -3517,7 +3415,7 @@ setUpdateItems((prev) =>
                   "
                                 >
 
-                                  {/* ITEM TYPE */}
+                                 
 
                                   {item.itemType && (
                                     <span
@@ -3537,7 +3435,7 @@ setUpdateItems((prev) =>
                                   )}
 
 
-                                  {/* TITLE */}
+                               
 
                                   <p
                                     className="
@@ -3552,7 +3450,7 @@ setUpdateItems((prev) =>
                                   </p>
 
 
-                                  {/* DESCRIPTION */}
+                                 
 
                                   <p
                                     className="
@@ -3568,7 +3466,7 @@ setUpdateItems((prev) =>
                                   </p>
 
 
-                                  {/* CTA */}
+                                  
 
                                   {item.cta && (
                                     <button
@@ -3600,9 +3498,7 @@ setUpdateItems((prev) =>
                     </div>
 
 
-                    {/* =========================
-        PHONE HOME INDICATOR
-    ========================= */}
+                  
 
                     <div
                       className="
@@ -3633,13 +3529,12 @@ setUpdateItems((prev) =>
       {showPlanPopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
 
-          {/* Overlay */}
+          
           <div
             className="absolute inset-0 bg-black/30"
             onClick={() => setShowPlanPopup(false)}
           />
 
-          {/* Popup */}
           <div className="
       relative
       w-[400px]
@@ -3650,7 +3545,7 @@ setUpdateItems((prev) =>
       z-[110]
     ">
 
-            {/* Header */}
+            
             <div className="flex items-center justify-between mb-4">
 
               <div>
@@ -3681,7 +3576,7 @@ setUpdateItems((prev) =>
             </div>
 
 
-            {/* Multi Select Dropdown */}
+           
             <div className="relative">
 
               <button
@@ -3718,75 +3613,96 @@ setUpdateItems((prev) =>
               </button>
 
 
-              {/* Dropdown */}
-              {showPlanDropdown && (
-                <div className="
-            absolute
-            left-0
-            right-0
-            mt-1
-            bg-white
-            border border-gray-200
-            rounded-lg
-            shadow-lg
-            z-[120]
-            max-h-[180px]
-            overflow-y-auto
-          ">
+             
+             {showPlanDropdown && (
+  <div
+    className="
+      absolute
+      left-0
+      right-0
+      mt-1
+      bg-white
+      border border-gray-200
+      rounded-lg
+      shadow-lg
+      z-[120]
+      overflow-hidden
+    "
+  >
+   
+    <div className="max-h-[180px] overflow-y-auto">
+      {plans.map((plan) => {
+        const checked = selectedPlans.includes(plan.planId);
 
-                  {plans.map((plan) => {
-
-                    const checked = selectedPlans.includes(plan.planId);
-
-                    return (
-                      <label
-                        key={plan.planId}
-                        className="
-                    flex
-                    items-center
-                    gap-2
-                    px-3
-                    py-2.5
-                    hover:bg-[#F7F9FF]
-                    cursor-pointer
-                  "
-                      >
-
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => {
-                            setSelectedPlans((prev) => {
-                              if (prev.includes(plan.planId)) {
-                                return prev.filter(
-                                  (planId) => planId !== plan.planId
-                                );
-                              }
-
-                              return [...prev, plan.planId];
-                            });
-
-                            setAudienceError("");
-                          }}
-                          className="accent-[#2952F3] cursor-pointer"
-                        />
-
-                        <span className="text-[10px] text-gray-700">
-                          {plan.planName}
-                        </span>
-
-                      </label>
+        return (
+          <label
+            key={plan.planId}
+            className="
+              flex
+              items-center
+              gap-2
+              px-3
+              py-2.5
+              hover:bg-[#F7F9FF]
+              cursor-pointer
+            "
+          >
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={() => {
+                setSelectedPlans((prev) => {
+                  if (prev.includes(plan.planId)) {
+                    return prev.filter(
+                      (planId) => planId !== plan.planId
                     );
+                  }
 
-                  })}
+                  return [...prev, plan.planId];
+                });
 
-                </div>
-              )}
+                setAudienceError("");
+              }}
+              className="accent-[#2952F3] cursor-pointer"
+            />
+
+            <span className="text-[10px] text-gray-700">
+              {plan.planName}
+            </span>
+          </label>
+        );
+      })}
+    </div>
+
+  
+    <div className="border-t border-gray-200 px-3 py-2 flex justify-end bg-white">
+      <button
+        type="button"
+        onClick={() => {
+          setShowPlanDropdown(false);
+        }}
+        className="
+          px-4
+          py-1.5
+          bg-[#2952F3]
+          hover:bg-[#1E40D0]
+          text-white
+          rounded-md
+          text-[10px]
+          font-medium
+          cursor-pointer
+        "
+      >
+        Done
+      </button>
+    </div>
+  </div>
+)}
 
             </div>
 
 
-            {/* Selected Plans */}
+            
             {selectedPlans.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-3">
 
@@ -3834,7 +3750,7 @@ setUpdateItems((prev) =>
             )}
 
 
-            {/* Footer */}
+           
             <div className="flex justify-end gap-2 mt-5">
 
               <button
@@ -3885,7 +3801,7 @@ setUpdateItems((prev) =>
       {showOwnerPopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
 
-          {/* Overlay */}
+          
           <div
             className="absolute inset-0 bg-black/30"
             onClick={() => {
@@ -3896,7 +3812,7 @@ setUpdateItems((prev) =>
             }}
           />
 
-          {/* Popup */}
+        
           <div
             className="
         relative
@@ -3909,7 +3825,7 @@ setUpdateItems((prev) =>
       "
           >
 
-            {/* Header */}
+            
             <div className="flex items-center justify-between mb-4">
 
               <div>
@@ -3948,7 +3864,7 @@ setUpdateItems((prev) =>
             </div>
 
 
-            {/* Owner Search */}
+            
             <div className="relative">
 
               <div
@@ -3994,7 +3910,7 @@ setUpdateItems((prev) =>
               </div>
 
 
-              {/* Owner Dropdown */}
+             
               {showOwnerDropdown && (
                 <div
                   className="
@@ -4012,7 +3928,7 @@ setUpdateItems((prev) =>
     "
                 >
 
-                  {/* Owner List */}
+                  
                   <div className="max-h-[220px] overflow-y-auto">
 
                     {ownerLoading ? (
@@ -4023,7 +3939,7 @@ setUpdateItems((prev) =>
 
                       ownersList.map((owner, index) => {
 
-                        const ownerId = owner?.parentId;
+                        const ownerId = owner?.ownerId;
 
                         const isSelected =
                           selectedOwners.includes(ownerId);
@@ -4047,17 +3963,17 @@ setUpdateItems((prev) =>
                             <input
                               type="checkbox"
                               checked={selectedOwners.some(
-                                (item) => item?.parentId === owner?.parentId
+                                (item) => item?.ownerId === owner?.ownerId
                               )}
                               onChange={() => {
                                 setSelectedOwners((prev) => {
                                   const exists = prev.some(
-                                    (item) => item?.parentId === owner?.parentId
+                                    (item) => item?.ownerId === owner?.ownerId
                                   );
 
                                   if (exists) {
                                     return prev.filter(
-                                      (item) => item?.parentId !== owner?.parentId
+                                      (item) => item?.ownerId !== owner?.ownerId
                                     );
                                   }
 
@@ -4108,13 +4024,13 @@ setUpdateItems((prev) =>
                       type="button"
                       onClick={() => {
 
-                        // Dropdown close
+                        
                         setShowOwnerDropdown(false);
 
-                        // Search clear
+                       
                         setOwnerSearch("");
 
-                        // List clear
+                       
                         setOwnersList([]);
 
                       }}
@@ -4141,13 +4057,13 @@ setUpdateItems((prev) =>
             </div>
 
 
-            {/* Selected Owners */}
+           
             {selectedOwners.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-3">
 
                 {selectedOwners.map((owner) => (
                   <span
-                    key={owner?.parentId}
+                    key={owner?.ownerId}
                     className="
           px-2
           py-1
@@ -4161,7 +4077,7 @@ setUpdateItems((prev) =>
         "
                   >
 
-                    {/* FULL NAME */}
+                 
                     {owner?.fullName}
 
                     <button
@@ -4170,7 +4086,7 @@ setUpdateItems((prev) =>
                         setSelectedOwners((prev) =>
                           prev.filter(
                             (item) =>
-                              item?.parentId !== owner?.parentId
+                              item?.ownerId !== owner?.ownerId
                           )
                         );
                       }}
@@ -4189,10 +4105,10 @@ setUpdateItems((prev) =>
             )}
 
 
-            {/* Footer */}
+           
             <div className="flex justify-end gap-2 mt-5">
 
-              {/* Cancel */}
+             
               <button
                 type="button"
                 onClick={() => {
@@ -4222,7 +4138,7 @@ setUpdateItems((prev) =>
               </button>
 
 
-              {/* Done */}
+             
               <button
                 type="button"
                 onClick={() => {
@@ -4232,8 +4148,7 @@ setUpdateItems((prev) =>
                     selectedOwners
                   );
 
-                  // IMPORTANT:
-                  // Selection clear panna koodathu
+                  
 
                   setShowOwnerDropdown(false);
                   setShowOwnerPopup(false);
@@ -4266,7 +4181,7 @@ setUpdateItems((prev) =>
       {showPropertyPopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
 
-          {/* Overlay */}
+         
           <div
             className="absolute inset-0 bg-black/30"
             onClick={() => {
@@ -4277,7 +4192,7 @@ setUpdateItems((prev) =>
             }}
           />
 
-          {/* Popup */}
+         
           <div
             className="
         relative
@@ -4290,7 +4205,7 @@ setUpdateItems((prev) =>
       "
           >
 
-            {/* Header */}
+           
             <div className="flex items-center justify-between mb-4">
 
               <div>
@@ -4325,7 +4240,7 @@ setUpdateItems((prev) =>
 
             </div>
 
-            {/* Search */}
+         
             <div className="relative">
 
               <div
@@ -4400,8 +4315,7 @@ setUpdateItems((prev) =>
 
                       propertiesList.map((property, index) => {
 
-                        // IMPORTANT:
-                        // API response field names based on your actual response
+                       
                         const propertyId =
                           property?.propertyId ||
                           property?.hostelId ||
@@ -4502,7 +4416,7 @@ setUpdateItems((prev) =>
 
                   </div>
 
-                  {/* Done */}
+                 
                   <div className="border-t border-gray-200 px-3 py-2 flex justify-end bg-white">
 
                     <button
@@ -4728,7 +4642,7 @@ setUpdateItems((prev) =>
       </div>
 
 
-      {/* ================= PREVIEW AREA ================= */}
+      
       <div
         className="
           h-[350px]
@@ -4740,7 +4654,7 @@ setUpdateItems((prev) =>
         "
       >
 
-        {/* PHONE */}
+       
         <div
           className="
             w-[180px]
@@ -4822,7 +4736,7 @@ setUpdateItems((prev) =>
               </div>
 
 
-              {/* ITEMS */}
+             
               <div className="mt-3 space-y-3">
 
                 {updateItems.length === 0 ? (
@@ -4869,7 +4783,7 @@ setUpdateItems((prev) =>
                         "
                       >
 
-                        {/* TYPE */}
+                       
                         <span
                           className="
                             inline-block
@@ -4886,7 +4800,7 @@ setUpdateItems((prev) =>
                         </span>
 
 
-                        {/* TITLE */}
+                     
                         <p
                           className="
                             mt-2
@@ -4952,7 +4866,7 @@ setUpdateItems((prev) =>
       </div>
 
 
-      {/* ================= FOOTER ================= */}
+      
       <div
         className="
           h-[55px]
@@ -4996,19 +4910,7 @@ setUpdateItems((prev) =>
             Back to Edit
           </button>
 
-          {/* <button
-            type="button"
-            className="
-              px-4
-              py-2
-              bg-[#2952F3]
-              text-white
-              rounded-md
-              text-[10px]
-            "
-          >
-            Publish Update
-          </button> */}
+          
 
         </div>
 
