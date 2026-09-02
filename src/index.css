@@ -659,9 +659,7 @@ input[type=number] {
   border-color: #315CEC !important;
 }
 
-.ant-picker-dropdown {
-  z-index: 999999 !important;
-}
+
 
 .custom-date-popup .ant-picker-panel {
   border-radius: 14px !important;
@@ -701,4 +699,28 @@ input[type=number] {
 .modal-scroll {
   scrollbar-width: thin;
   scrollbar-color: #315cec #f8fafc;
+}
+.ant-picker-dropdown {
+  z-index: 9999 !important;
+}
+/* Joining Date calendar - compact */
+.joining-date-picker .ant-picker-cell {
+  padding: 2px 0 !important;
+}
+
+.joining-date-picker .ant-picker-cell-inner {
+  height: 28px !important;
+  line-height: 28px !important;
+}
+
+.joining-date-picker .ant-picker-content {
+  height: auto !important;
+}
+
+.joining-date-picker .ant-picker-footer {
+  padding: 6px 0 !important;
+}
+
+.joining-date-picker .ant-picker-today-btn {
+  font-size: 13px !important;
 }

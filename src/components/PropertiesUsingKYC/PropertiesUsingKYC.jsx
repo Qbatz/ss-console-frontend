@@ -1371,7 +1371,7 @@ if (hostel) {
 
                 <div className="flex items-center justify-between mb-[9px]">
 
-                  <span className="text-[11px] font-medium text-[#222]">
+                  <span className="text-[13px] font-medium text-[#222]">
                     Tenant KYC List
                   </span>
 
@@ -1388,7 +1388,7 @@ if (hostel) {
   "
                   >
                     <Search
-                      size={9}
+                      size={10}
                       className="text-[#999]"
                     />
 
@@ -1415,7 +1415,7 @@ if (hostel) {
                       className="
       ml-[4px]
       w-full
-      text-[9px]
+      text-[11px]
       outline-none
       text-[#333]
       placeholder:text-[#AAA]
@@ -1428,7 +1428,7 @@ if (hostel) {
 
                 <div className="flex items-center gap-[5px] mb-[8px]">
 
-                  <span className="text-[9px] text-[#888]">
+                  <span className="text-[10px] text-[#888]">
                     Filter by:
                   </span>
 
@@ -1442,14 +1442,14 @@ if (hostel) {
   setIsTenantStatusOpen(false);
 }}
                       className="
-      h-[18px]
+      h-[20px]
       min-w-[95px]
       px-[8px]
       pr-[18px]
       rounded-[4px]
       bg-[#2952F3]
       text-white
-      text-[9px]
+      text-[12px]
       text-left
       relative
       cursor-pointer
@@ -1530,7 +1530,7 @@ if (hostel) {
             h-[20px]
             px-[8px]
             text-left
-            text-[9px]
+            text-[10px]
             cursor-pointer
             ${tenantDateFilter === filter.key
                                 ? "bg-[#F3F6FF] text-[#2952F3]"
@@ -1630,7 +1630,7 @@ if (hostel) {
   setIsTenantDateOpen(false);
 }}
                       className="
-      h-[18px]
+      h-[20px]
       min-w-[90px]
       px-[8px]
       pr-[18px]
@@ -1639,7 +1639,7 @@ if (hostel) {
       border-[#E1E4EA]
       bg-white
       text-[#333]
-      text-[9px]
+      text-[12px]
       text-left
       relative
       cursor-pointer
@@ -1708,7 +1708,7 @@ if (hostel) {
           h-[20px]
           px-[8px]
           text-left
-          text-[9px]
+          text-[11px]
           text-[#333]
           cursor-pointer
           hover:bg-[#F3F6FF]
@@ -1744,7 +1744,7 @@ if (hostel) {
             h-[20px]
             px-[8px]
             text-left
-            text-[9px]
+            text-[11px]
             cursor-pointer
             hover:bg-[#F3F6FF]
             ${tenantKycStatus === status.key
@@ -2332,9 +2332,7 @@ const TenantKycTable = ({
       "
     >
 
-      {/* ================================================= */}
-      {/* HEADER */}
-      {/* ================================================= */}
+    
 
       <div
         className="
@@ -2351,7 +2349,7 @@ const TenantKycTable = ({
         "
       >
 
-        {/* ID HEADER */}
+       
         <div
           className="
             h-[30px]
@@ -2430,9 +2428,7 @@ const TenantKycTable = ({
       </div>
 
 
-      {/* ================================================= */}
-      {/* LOADING */}
-      {/* ================================================= */}
+  
 
       {loading ? (
 
@@ -2477,9 +2473,7 @@ const TenantKycTable = ({
             "
           >
 
-            {/* ================================================= */}
-            {/* ID */}
-            {/* ================================================= */}
+           
 
             <div
               className="
@@ -2506,9 +2500,7 @@ const TenantKycTable = ({
             </div>
 
 
-            {/* ================================================= */}
-            {/* TENANT NAME */}
-            {/* ================================================= */}
+          
 
             <div
               className="
@@ -2534,9 +2526,7 @@ const TenantKycTable = ({
             </div>
 
 
-            {/* ================================================= */}
-            {/* JOIN DATE */}
-            {/* ================================================= */}
+            
 
             <div
               className="
@@ -2570,9 +2560,7 @@ const TenantKycTable = ({
             </div>
 
 
-            {/* ================================================= */}
-            {/* BILLING CYCLE */}
-            {/* ================================================= */}
+            
 
             <div
               className="
@@ -2594,9 +2582,7 @@ const TenantKycTable = ({
             </div>
 
 
-            {/* ================================================= */}
-            {/* SUBMITTED ON */}
-            {/* ================================================= */}
+            
 
             <div
               className="
@@ -2624,7 +2610,7 @@ const TenantKycTable = ({
 
                     <span
                       className="
-                        text-[7px]
+                        text-[11px]
                         text-[#333]
                         truncate
                         leading-[9px]
@@ -2639,7 +2625,7 @@ const TenantKycTable = ({
 
                     <span
                       className="
-                        text-[7px]
+                        text-[11px]
                         text-[#777]
                         truncate
                         leading-[8px]
@@ -2656,7 +2642,7 @@ const TenantKycTable = ({
 
                 <span
                   className="
-                    text-[8px]
+                    text-[11px]
                     text-[#777]
                   "
                 >
@@ -2668,9 +2654,7 @@ const TenantKycTable = ({
             </div>
 
 
-            {/* ================================================= */}
-            {/* KYC STATUS */}
-            {/* ================================================= */}
+          
 
             <div
               className="
@@ -2685,7 +2669,7 @@ const TenantKycTable = ({
               <span
                 className="
                   block
-                  text-[8px]
+                  text-[11px]
                   text-[#333]
                   truncate
                 "
@@ -2820,7 +2804,7 @@ const TenantKycTable = ({
   >
 
    
-    <div className="text-[9px] text-[#475467]">
+    <div className="text-[11px] text-[#475467]">
       Total Record Count:
       <span className="ml-[3px] text-[#2952F3] font-medium">
         {tenants.length}
@@ -2957,7 +2941,7 @@ const TenantKycTable = ({
 
 const TableHeader = ({ text }) => {
   return (
-    <div className="text-[9px] text-[#777] px-[2px] whitespace-nowrap">
+    <div className="text-[12px] text-[#777] px-[2px] whitespace-nowrap">
       {text}
     </div>
   );
@@ -2967,7 +2951,7 @@ const TableText = ({ text }) => {
   return (
     <div
       className="
-        text-[9px]
+        text-[11px]
         text-[#333]
         px-[2px]
         truncate
