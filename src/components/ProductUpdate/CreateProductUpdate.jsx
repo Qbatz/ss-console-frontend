@@ -51,6 +51,9 @@ const isEditMode = mode === "edit";
   const [showOwnerPopup, setShowOwnerPopup] = useState(false);
   const [showOwnerDropdown, setShowOwnerDropdown] = useState(false);
   const [selectedOwners, setSelectedOwners] = useState([]);
+  const [initialSelectedPlans, setInitialSelectedPlans] = useState([]);
+const [initialSelectedProperties, setInitialSelectedProperties] = useState([]);
+const [initialSelectedOwners, setInitialSelectedOwners] = useState([]);
   const [showPlanPopup, setShowPlanPopup] = useState(false);
   const [showPlanDropdown, setShowPlanDropdown] = useState(false);
   const [selectedPlans, setSelectedPlans] = useState([]);
@@ -292,17 +295,19 @@ setPublishTime(
 
    
 
-    if (
-      data?.audience === "SELECTED_PLANS" ||
-      data?.audience === "PLANS"
-    ) {
-      setSelectedPlans(
-        (data?.audiences?.planAudiences || [])
-          .map((plan) => plan.planId)
-      );
-    } else {
-      setSelectedPlans([]);
-    }
+  if (
+  data?.audience === "SELECTED_PLANS" ||
+  data?.audience === "PLANS"
+) {
+  const planIds = (data?.audiences?.planAudiences || [])
+    .map((plan) => plan.planId);
+
+  setSelectedPlans(planIds);
+  setInitialSelectedPlans(planIds); // 🔥
+} else {
+  setSelectedPlans([]);
+  setInitialSelectedPlans([]);
+}
 
    
 
@@ -315,14 +320,11 @@ if (
   const selectedHostels =
     data?.audiences?.hostelAudiences || [];
 
-  console.log(
-    "EDIT SELECTED HOSTELS:",
-    selectedHostels
-  );
-
   setSelectedProperties(selectedHostels);
+  setInitialSelectedProperties(selectedHostels); // 🔥
 } else {
   setSelectedProperties([]);
+  setInitialSelectedProperties([]);
 }
 
 if (
@@ -1661,9 +1663,9 @@ const handleCreateItem = async (item) => {
               </button>
 
               <div>
-                <h1 className="text-[14px] font-semibold text-gray-800">
-                  Create Product Update
-                </h1>
+              <h1 className="text-[14px] font-semibold text-gray-800">
+  {productUpdateId ? "Edit Product Update" : "Create Product Update"}
+</h1>
 
                 <p className="text-[9px] text-gray-400 text-left">
                   Product Updates
@@ -1934,7 +1936,7 @@ const handleCreateItem = async (item) => {
               <div className="bg-white border border-gray-200 rounded-lg p-4">
 
                 <h2 className="text-[12px] font-semibold text-gray-800 text-left">
-                  What's New
+                  What's New <span className="text-red-600">*</span>
                 </h2>
 
                 <p className="text-[11px] text-gray-400 mt-1 text-left">
@@ -2755,34 +2757,74 @@ setUpdateItems((prev) =>
         value={key}
         selected={audience}
 onChange={(value) => {
-  
- if (value !== audience) {
-  setShowPlanDropdown(false);
-  setShowPropertyDropdown(false);
-  setShowOwnerDropdown(false);
 
-  setShowPlanPopup(false);
-  setShowPropertyPopup(false);
-  setShowOwnerPopup(false);
+  if (value !== audience) {
 
-  setPropertySearch("");
-  setOwnerSearch("");
-  setCustomerSearch("");
-  setSearch("");
+    // Clear current selections
+    setSelectedPlans([]);
+    setSelectedProperties([]);
+    setSelectedOwners([]);
 
-  setPropertiesList([]);
-  setOwnersList([]);
-}
+    // Close dropdowns
+    setShowPlanDropdown(false);
+    setShowPropertyDropdown(false);
+    setShowOwnerDropdown(false);
+
+    // Close popups
+    setShowPlanPopup(false);
+    setShowPropertyPopup(false);
+    setShowOwnerPopup(false);
+
+    setPropertySearch("");
+    setOwnerSearch("");
+    setCustomerSearch("");
+    setSearch("");
+
+    setPropertiesList([]);
+    setOwnersList([]);
+  }
 
   setAudience(value);
   setAudienceError("");
 
+  // 🔥 When coming back to an existing EDIT audience,
+  // restore original API data
+  if (
+    isEditMode &&
+    (value === "SELECTED_PLANS" || value === "PLANS")
+  ) {
+    setSelectedPlans(initialSelectedPlans);
+  }
+
+  if (
+    isEditMode &&
+    (
+      value === "SELECTED_PROPERTIES" ||
+      value === "PROPERTIES" ||
+      value === "SELECTED_HOSTELS" ||
+      value === "HOSTELS"
+    )
+  ) {
+    setSelectedProperties(initialSelectedProperties);
+  }
+
+  if (
+    isEditMode &&
+    (
+      value === "SELECTED_OWNERS" ||
+      value === "OWNERS" ||
+      value === "CUSTOMERS"
+    )
+  ) {
+    setSelectedOwners(initialSelectedOwners);
+  }
+
+  // Open corresponding popup
   if (
     value === "SELECTED_PLANS" ||
     value === "PLANS"
   ) {
     setShowPlanPopup(true);
-    setShowPlanDropdown(false);
   }
 
   if (
@@ -2792,7 +2834,6 @@ onChange={(value) => {
     value === "HOSTELS"
   ) {
     setShowPropertyPopup(true);
-    setShowPropertyDropdown(false);
   }
 
   if (
@@ -2801,7 +2842,6 @@ onChange={(value) => {
     value === "CUSTOMERS"
   ) {
     setShowOwnerPopup(true);
-    setShowOwnerDropdown(false);
   }
 }}
         title={item?.value}
@@ -4416,7 +4456,7 @@ onChange={(value) => {
 
                   </div>
 
-                 
+                  {/* Done */}
                   <div className="border-t border-gray-200 px-3 py-2 flex justify-end bg-white">
 
                     <button

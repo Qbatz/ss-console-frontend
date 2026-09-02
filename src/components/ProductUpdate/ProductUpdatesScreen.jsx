@@ -294,7 +294,9 @@ const handleDelete = async (productUpdateId) => {
           </div>
 
           <button
-          onClick={() => navigate(`/product-update-create/${adminDetails?.roleId}`)}
+         onClick={() =>
+  navigate(`/product-update-create/${adminDetails?.roleId}`)
+}
             type="button"
             className="
               bg-[#2952F3]
@@ -992,9 +994,7 @@ const handleDelete = async (productUpdateId) => {
                   whitespace-nowrap
                 "
               >
-                {item.publishDate ||
-                  item.releaseDate ||
-                  "-"}
+                {item.publishDate || "N/A"}
               </td>
 
             
@@ -1062,15 +1062,16 @@ const handleDelete = async (productUpdateId) => {
   type="button"
   title="Edit"
   onClick={() =>
-  navigate(
-    `/product-update-create/${adminDetails?.roleId}/${item.productUpdateId}`,
-    {
-      state: {
-        mode: "edit",
-      },
-    }
-  )
-}
+    navigate(
+      `/product-update-create/${adminDetails?.roleId}`,
+      {
+        state: {
+          mode: "edit",
+          productUpdateId: item.productUpdateId,
+        },
+      }
+    )
+  }
   className="
     w-7 h-7
     shrink-0
@@ -1720,11 +1721,6 @@ const handleDelete = async (productUpdateId) => {
             Product Update Details
           </h2>
 
-          {viewProductUpdate?.productUpdateId && (
-            <p className="text-[10px] text-gray-400 mt-1">
-              ID: {viewProductUpdate.productUpdateId}
-            </p>
-          )}
         </div>
 
         <button
