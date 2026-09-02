@@ -564,7 +564,7 @@ if (hostel) {
             />
       <div className="w-full bg-white min-h-screen">
 
-        {/* ================= TITLE ================= */}
+      
         <div className="h-[40px] px-[15px] flex items-center border-b border-[#E5E7EB]">
           <h1 className="text-[14px] font-medium text-[#202124]">
             Properties Using KYC
@@ -1061,92 +1061,105 @@ if (hostel) {
 
               <div className="flex items-center gap-5">
 
-               
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    setPageSize(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="
-        w-[92px]
-        h-10
-        border
-        border-gray-300
-        rounded-lg
-        px-3
-        text-[12px]
-        outline-none
-        cursor-pointer
-      "
-                >
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
+ 
+  <select
+    value={pageSize}
+    onChange={(e) => {
+      setPageSize(Number(e.target.value));
+      setCurrentPage(1);
+    }}
+    className="
+      w-[92px]
+      h-10
+      border
+      border-gray-300
+      rounded-lg
+      px-3
+      text-[12px]
+      outline-none
+      cursor-pointer
+    "
+  >
+    <option value={10}>10</option>
+    <option value={20}>20</option>
+    <option value={50}>50</option>
+    <option value={100}>100</option>
+  </select>
 
 
-                <button
-                  type="button"
-                  disabled={currentPage === 1}
-                  onClick={() =>
-                    setCurrentPage((prev) =>
-                      Math.max(prev - 1, 1)
-                    )
-                  }
-                  className="
-        text-[20px]
-        disabled:opacity-40
-        cursor-pointer
-      "
-                >
-                  ‹
-                </button>
+  
+  <button
+    type="button"
+    disabled={
+      currentPage <= 1 ||
+      totalPages <= 1 ||
+      !totalItems ||
+      totalItems <= pageSize * (currentPage - 1)
+    }
+    onClick={() => {
+      if (currentPage > 1) {
+        setCurrentPage((prev) => prev - 1);
+      }
+    }}
+    className="
+      text-[20px]
+      disabled:opacity-40
+      disabled:cursor-not-allowed
+      cursor-pointer
+    "
+  >
+    ‹
+  </button>
 
 
-                <div
-                  className="
-        w-10
-        h-10
-        rounded-full
-        bg-[#F5F7FB]
-        flex
-        items-center
-        justify-center
-        text-[12px]
-      "
-                >
-                  {currentPage}
-                </div>
+  
+  <div
+    className="
+      w-10
+      h-10
+      rounded-full
+      bg-[#F5F7FB]
+      flex
+      items-center
+      justify-center
+      text-[12px]
+    "
+  >
+    {currentPage}
+  </div>
 
-                {/* Page Info */}
-                <span className="text-[12px]">
-                  {currentPage} - {totalPages}
-                </span>
 
-                {/* Next */}
-                <button
-                  type="button"
-                  disabled={currentPage >= totalPages}
-                  onClick={() =>
-                    setCurrentPage((prev) =>
-                      Math.min(
-                        prev + 1,
-                        totalPages
-                      )
-                    )
-                  }
-                  className="
-        text-[20px]
-        disabled:opacity-40
-        cursor-pointer
-      "
-                >
-                  ›
-                </button>
+  
+  <span className="text-[12px]">
+    {currentPage} - {totalPages}
+  </span>
 
-              </div>
+
+ 
+  <button
+    type="button"
+    disabled={
+      currentPage >= totalPages ||
+      totalPages <= 1 ||
+      !totalItems ||
+      totalItems <= pageSize * currentPage
+    }
+    onClick={() => {
+      if (currentPage < totalPages) {
+        setCurrentPage((prev) => prev + 1);
+      }
+    }}
+    className="
+      text-[20px]
+      disabled:opacity-40
+      disabled:cursor-not-allowed
+      cursor-pointer
+    "
+  >
+    ›
+  </button>
+
+</div>
             </div>
           </div>
         </div>
@@ -1358,7 +1371,7 @@ if (hostel) {
 
                 <div className="flex items-center justify-between mb-[9px]">
 
-                  <span className="text-[11px] font-medium text-[#222]">
+                  <span className="text-[13px] font-medium text-[#222]">
                     Tenant KYC List
                   </span>
 
@@ -1375,7 +1388,7 @@ if (hostel) {
   "
                   >
                     <Search
-                      size={9}
+                      size={10}
                       className="text-[#999]"
                     />
 
@@ -1402,7 +1415,7 @@ if (hostel) {
                       className="
       ml-[4px]
       w-full
-      text-[9px]
+      text-[11px]
       outline-none
       text-[#333]
       placeholder:text-[#AAA]
@@ -1415,7 +1428,7 @@ if (hostel) {
 
                 <div className="flex items-center gap-[5px] mb-[8px]">
 
-                  <span className="text-[9px] text-[#888]">
+                  <span className="text-[10px] text-[#888]">
                     Filter by:
                   </span>
 
@@ -1429,14 +1442,14 @@ if (hostel) {
   setIsTenantStatusOpen(false);
 }}
                       className="
-      h-[18px]
+      h-[20px]
       min-w-[95px]
       px-[8px]
       pr-[18px]
       rounded-[4px]
       bg-[#2952F3]
       text-white
-      text-[9px]
+      text-[12px]
       text-left
       relative
       cursor-pointer
@@ -1517,7 +1530,7 @@ if (hostel) {
             h-[20px]
             px-[8px]
             text-left
-            text-[9px]
+            text-[10px]
             cursor-pointer
             ${tenantDateFilter === filter.key
                                 ? "bg-[#F3F6FF] text-[#2952F3]"
@@ -1617,7 +1630,7 @@ if (hostel) {
   setIsTenantDateOpen(false);
 }}
                       className="
-      h-[18px]
+      h-[20px]
       min-w-[90px]
       px-[8px]
       pr-[18px]
@@ -1626,7 +1639,7 @@ if (hostel) {
       border-[#E1E4EA]
       bg-white
       text-[#333]
-      text-[9px]
+      text-[12px]
       text-left
       relative
       cursor-pointer
@@ -1672,7 +1685,7 @@ if (hostel) {
         shadow-md
       "
                       >
-                        {/* STATUS */}
+                       
                         <button
                           type="button"
                           onClick={() => {
@@ -1695,7 +1708,7 @@ if (hostel) {
           h-[20px]
           px-[8px]
           text-left
-          text-[9px]
+          text-[11px]
           text-[#333]
           cursor-pointer
           hover:bg-[#F3F6FF]
@@ -1704,7 +1717,7 @@ if (hostel) {
                           Status
                         </button>
 
-                        {/* API STATUS OPTIONS */}
+                        
                         {tenantKycStatuses.map((status) => (
                           <button
                             key={status.key}
@@ -1731,7 +1744,7 @@ if (hostel) {
             h-[20px]
             px-[8px]
             text-left
-            text-[9px]
+            text-[11px]
             cursor-pointer
             hover:bg-[#F3F6FF]
             ${tenantKycStatus === status.key
@@ -1840,7 +1853,7 @@ onPageChange={(page, newSize) => {
             onClick={(e) => e.stopPropagation()}
           >
 
-            {/* TITLE */}
+            
             <div className="text-[20px] font-medium text-[#101828]">
               Send KYC update reminder to
               <span className="ml-[4px]">
@@ -1849,7 +1862,7 @@ onPageChange={(page, newSize) => {
               ?
             </div>
 
-            {/* TENANT INFO */}
+            
             <div
               className="
           mt-[20px]
@@ -1862,7 +1875,7 @@ onPageChange={(page, newSize) => {
         "
             >
 
-              {/* PROFILE */}
+              
               <div
                 className="
             w-[44px]
@@ -1880,7 +1893,7 @@ onPageChange={(page, newSize) => {
                 </span>
               </div>
 
-              {/* DETAILS */}
+              
               <div className="ml-[14px]">
 
                 <div className="flex items-center gap-[8px]">
@@ -1900,7 +1913,7 @@ onPageChange={(page, newSize) => {
               </div>
             </div>
 
-            {/* BUTTONS */}
+            
             <div className="flex justify-end gap-[10px] mt-[24px]">
 
               <button
@@ -1970,9 +1983,9 @@ onPageChange={(page, newSize) => {
           </div>
         </div>
       )}
-      {showApproveModal && selectedApproveTenant && (
-        <div
-          className="
+     {showApproveModal && selectedApproveTenant && (
+  <div
+    className="
       fixed
       inset-0
       z-[3000]
@@ -1981,69 +1994,71 @@ onPageChange={(page, newSize) => {
       items-center
       justify-center
     "
-        >
-          <div
-            className="
+    onClick={() => {
+      if (approveLoading) return;
+
+      setShowApproveModal(false);
+      setSelectedApproveTenant(null);
+    }}
+  >
+    <div
+      className="
         bg-white
         rounded-2xl
         w-[500px]
         p-6
         shadow-xl
       "
-            onClick={(e) => e.stopPropagation()}
-          >
+      onClick={(e) => e.stopPropagation()}
+    >
 
-            <h2 className="text-[20px] font-medium text-[#1f2937] text-left">
-              Do you wanna approve KYC for this Tenant ?
-            </h2>
+      <h2 className="text-[20px] font-medium text-[#1f2937] text-left">
+        Do you wanna approve KYC for this Tenant ?
+      </h2>
 
-            <p className="text-gray-500 mt-2 text-sm text-left">
-              Upon your approval, the KYC process will be completed.
-            </p>
+      <p className="text-gray-500 mt-2 text-sm text-left">
+        Upon your approval, the KYC process will be completed.
+      </p>
 
-            {/* TENANT INFO */}
-            <div className="bg-[#f5f7fb] rounded-xl p-4 mt-6 flex items-center gap-4">
+      <div className="bg-[#f5f7fb] rounded-xl p-4 mt-6 flex items-center gap-4">
 
-              <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center">
-                <span className="text-[20px] text-[#344054]">
-                  {selectedApproveTenant?.tenantName
-                    ?.charAt(0)
-                    ?.toUpperCase()}
-                </span>
-              </div>
+        <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center">
+          <span className="text-[20px] text-[#344054]">
+            {selectedApproveTenant?.tenantName
+              ?.charAt(0)
+              ?.toUpperCase()}
+          </span>
+        </div>
 
-              <div>
-                <div className="flex items-center gap-2">
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-[20px]">
+              {selectedApproveTenant?.tenantName}
+            </h3>
 
-                  <h3 className="font-semibold text-[20px]">
-                    {selectedApproveTenant?.tenantName}
-                  </h3>
+            <span className="text-[#2952F3]">
+              ↗
+            </span>
+          </div>
 
-                  <span className="text-[#2952F3]">
-                    ↗
-                  </span>
+          <p className="text-sm text-gray-500 mt-1">
+            {selectedApproveTenant?.tenantId || "-"}
+          </p>
+        </div>
 
-                </div>
+      </div>
 
-                <p className="text-sm text-gray-500 mt-1">
-                  {selectedApproveTenant?.tenantId || "-"}
-                </p>
-              </div>
+      <div className="flex justify-end gap-3 mt-8">
 
-            </div>
+        <button
+          type="button"
+          onClick={() => {
+            if (approveLoading) return;
 
-            {/* BUTTONS */}
-            <div className="flex justify-end gap-3 mt-8">
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (approveLoading) return;
-
-                  setShowApproveModal(false);
-                  setSelectedApproveTenant(null);
-                }}
-                className="
+            setShowApproveModal(false);
+            setSelectedApproveTenant(null);
+          }}
+          className="
             border
             border-gray-300
             px-8
@@ -2051,17 +2066,17 @@ onPageChange={(page, newSize) => {
             rounded-xl
             text-gray-700
           "
-              >
-                Cancel
-              </button>
+        >
+          Cancel
+        </button>
 
-              <button
-                type="button"
-                onClick={() =>
-                  handleApproveKYC(selectedApproveTenant)
-                }
-                disabled={approveLoading}
-                className={`
+        <button
+          type="button"
+          onClick={() =>
+            handleApproveKYC(selectedApproveTenant)
+          }
+          disabled={approveLoading}
+          className={`
             px-8
             py-3
             rounded-xl
@@ -2069,22 +2084,23 @@ onPageChange={(page, newSize) => {
             items-center
             gap-2
             text-white
-            ${approveLoading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-[#2952F3] hover:bg-[#1f46e5]"
-                  }
+            ${
+              approveLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-[#2952F3] hover:bg-[#1f46e5]"
+            }
           `}
-              >
-                {approveLoading
-                  ? "Approving..."
-                  : "Confirm"}
-              </button>
+        >
+          {approveLoading
+            ? "Approving..."
+            : "Confirm"}
+        </button>
 
-            </div>
+      </div>
 
-          </div>
-        </div>
-      )}
+    </div>
+  </div>
+)}
 
       {showKycConfirm && (
   <div
@@ -2109,7 +2125,7 @@ onPageChange={(page, newSize) => {
       "
     >
 
-      {/* TITLE */}
+      
       <div
         className="
           flex
@@ -2133,7 +2149,7 @@ onPageChange={(page, newSize) => {
       </div>
 
 
-      {/* DESCRIPTION */}
+    
       <div
         className="
           mt-[8px]
@@ -2162,7 +2178,7 @@ onPageChange={(page, newSize) => {
       </div>
 
 
-      {/* BUTTONS */}
+      
       <div
         className="
           flex
@@ -2173,7 +2189,7 @@ onPageChange={(page, newSize) => {
         "
       >
 
-        {/* CANCEL */}
+        
         <button
           type="button"
           onClick={() => setShowKycConfirm(false)}
@@ -2194,7 +2210,7 @@ onPageChange={(page, newSize) => {
         </button>
 
 
-        {/* ENABLE / DISABLE */}
+        
         <button
           type="button"
           onClick={handleKycEnableDisable}
@@ -2300,362 +2316,165 @@ const TenantKycTable = ({
 
 <div className="w-full">
 
-  {/* ========================================================= */}
-  {/* TABLE */}
-  {/* ========================================================= */}
-  <div className="relative w-full">
+  <div
+    className="
+      max-h-[174px]
+      overflow-auto
+      scrollbar-thin
+      relative
+    "
+  >
 
     <div
       className="
-        max-h-[174px]
-        overflow-y-auto
-        scrollbar-thin
+        min-w-[579px]
+        w-full
       "
     >
 
-      <div className="flex w-full relative">
+    
 
-        {/* ===================================================== */}
-        {/* LEFT FIXED : ID + TENANT NAME */}
-        {/* ===================================================== */}
+      <div
+        className="
+          grid
+          grid-cols-[32px_95px_75px_110px_120px_100px_72px]
+          h-[30px]
+          items-center
+          bg-white
+          border-b
+          border-[#E5E7EB]
+          sticky
+          top-0
+          z-[100]
+        "
+      >
+
+       
         <div
           className="
-            flex-shrink-0
-            w-[127px]
+            h-[30px]
+            flex
+            items-center
+            px-[4px]
             bg-white
-            z-[30]
+            sticky
+            left-0
+            z-[110]
           "
         >
+          <TableHeader text="ID" />
+        </div>
 
-          {/* LEFT HEADER */}
+
+        {/* TENANT NAME HEADER */}
+        <div
+          className="
+            h-[30px]
+            flex
+            items-center
+            px-[4px]
+            bg-white
+            sticky
+            left-[32px]
+            z-[110]
+          "
+        >
+          <TableHeader text="Tenant Name" />
+        </div>
+
+
+        {/* JOIN DATE HEADER */}
+        <div className="h-[30px] flex items-center px-[5px]">
+          <TableHeader text="Join Date" />
+        </div>
+
+
+        {/* BILLING HEADER */}
+        <div className="h-[30px] flex items-center px-[5px]">
+          <TableHeader text="Billing Cycle" />
+        </div>
+
+
+        {/* SUBMITTED HEADER */}
+        <div className="h-[30px] flex items-center px-[5px]">
+          <TableHeader text="Submitted on" />
+        </div>
+
+
+        {/* KYC STATUS HEADER */}
+        <div className="h-[30px] flex items-center px-[5px]">
+          <TableHeader text="KYC Status" />
+        </div>
+
+
+        {/* ACTION HEADER */}
+        {hasAction && (
           <div
             className="
               h-[30px]
-              grid
-              grid-cols-[32px_95px]
+              flex
               items-center
+              px-[4px]
               bg-white
-              border-b
-              border-[#E5E7EB]
               sticky
-              top-0
-              z-[50]
+              right-0
+              z-[110]
             "
           >
-
-            {/* ID */}
-            <div
-              className="
-                h-full
-                flex
-                items-center
-                px-[4px]
-                bg-white
-              "
-            >
-              <TableHeader text="ID" />
-            </div>
-
-            {/* TENANT NAME */}
-            <div
-              className="
-                h-full
-                flex
-                items-center
-                px-[4px]
-                bg-white
-              "
-            >
-              <TableHeader text="Tenant Name" />
-            </div>
-
+            <TableHeader text="Action" />
           </div>
+        )}
+
+      </div>
 
 
-          {/* LEFT DATA */}
-          {loading ? (
+  
 
-            <div className="h-[50px]" />
+      {loading ? (
 
-          ) : tenants.length > 0 ? (
-
-            tenants.map((tenant, index) => (
-
-              <div
-                key={tenant.tenantId || index}
-                className="
-                  h-[30px]
-                  grid
-                  grid-cols-[32px_95px]
-                  items-center
-                  bg-white
-                  border-b
-                  border-[#F0F0F0]
-                "
-              >
-
-                {/* ID */}
-                <div className="px-[4px] min-w-0 text-left">
-
-                  <TableText
-                    text={
-                      (currentPage - 1) *
-                        pageSize +
-                      index +
-                      1
-                    }
-                  />
-
-                </div>
-
-
-                {/* TENANT NAME */}
-                <div className="px-[4px] min-w-0 text-left">
-
-                  <TableText
-                    text={
-                      tenant.tenantName ||
-                      "N/A"
-                    }
-                  />
-
-                </div>
-
-              </div>
-
-            ))
-
-          ) : (
-
-            <div className="h-[50px]" />
-
-          )}
-
-        </div>
-
-
-        {/* ===================================================== */}
-        {/* MIDDLE SCROLL : ONLY DATA COLUMNS */}
-        {/* ===================================================== */}
         <div
           className="
-            flex-1
-            min-w-0
-            overflow-x-auto
-            scrollbar-thin
+            h-[50px]
+            flex
+            items-center
+            justify-center
+            bg-white
           "
         >
 
-          <div className="min-w-[430px]">
-
-            {/* MIDDLE HEADER */}
-            <div
-              className="
-                h-[30px]
-                grid
-                grid-cols-[75px_110px_120px_100px]
-                items-center
-                bg-white
-                border-b
-                border-[#E5E7EB]
-                sticky
-                top-0
-                z-[40]
-              "
-            >
-
-              {/* JOIN DATE */}
-              <div className="px-[5px] text-left">
-                <TableHeader text="Join Date" />
-              </div>
-
-              {/* BILLING */}
-              <div className="px-[5px] text-left">
-                <TableHeader text="Billing Cycle" />
-              </div>
-
-              {/* SUBMITTED */}
-              <div className="px-[5px] text-left">
-                <TableHeader text="Submitted on" />
-              </div>
-
-              {/* KYC */}
-              <div className="px-[5px] text-left">
-                <TableHeader text="KYC Status" />
-              </div>
-
-            </div>
-
-
-            {/* MIDDLE DATA */}
-            {loading ? (
-
-              <div className="h-[50px]" />
-
-            ) : tenants.length > 0 ? (
-
-              tenants.map((tenant, index) => (
-
-                <div
-                  key={tenant.tenantId || index}
-                  className="
-                    h-[30px]
-                    grid
-                    grid-cols-[75px_110px_120px_100px]
-                    items-center
-                    bg-white
-                    border-b
-                    border-[#F0F0F0]
-                  "
-                >
-
-                 
-                  <div className="px-[5px] min-w-0">
-
-                    <TableText
-                      text={
-                        tenant.joinDate &&
-                        typeof tenant.joinDate ===
-                          "string" &&
-                        tenant.joinDate.trim() &&
-                        dayjs(
-                          tenant.joinDate,
-                          "DD/MM/YYYY",
-                          true
-                        ).isValid()
-                          ? dayjs(
-                              tenant.joinDate,
-                              "DD/MM/YYYY"
-                            ).format("MMM D")
-                          : "N/A"
-                      }
-                    />
-
-                  </div>
-
-
-                  {/* BILLING */}
-                  <div className="px-[5px] min-w-0">
-
-                    <TableText
-                      text={
-                        tenant.billingCycle ||
-                        "N/A"
-                      }
-                    />
-
-                  </div>
-
-
-                
-                  <div className="px-[5px] min-w-0">
-
-                    {tenant.submittedDate ||
-                    tenant.submittedTime ? (
-
-                      <div className="flex flex-col">
-
-                        {tenant.submittedDate && (
-                          <span
-                            className="
-                              text-[7px]
-                              text-[#333]
-                              truncate
-                              leading-[9px]
-                            "
-                          >
-                            {tenant.submittedDate}
-                          </span>
-                        )}
-
-                        {tenant.submittedTime && (
-                          <span
-                            className="
-                              text-[7px]
-                              text-[#777]
-                              truncate
-                              leading-[8px]
-                            "
-                          >
-                            {tenant.submittedTime}
-                          </span>
-                        )}
-
-                      </div>
-
-                    ) : (
-
-                      <span
-                        className="
-                          text-[8px]
-                          text-[#777]
-                        "
-                      >
-                        N/A
-                      </span>
-
-                    )}
-
-                  </div>
-
-
-                  {/* KYC STATUS */}
-                  <div className="px-[5px] min-w-0">
-
-                    <span
-                      className="
-                        block
-                        text-[8px]
-                        text-[#333]
-                        truncate
-                      "
-                    >
-                      {tenant?.kycDetailsStatus?.trim()
-                        ? tenant.kycDetailsStatus
-                        : "NOT_AVAILABLE"}
-                    </span>
-
-                  </div>
-
-                </div>
-
-              ))
-
-            ) : (
-
-              <div
-                className="
-                  h-[50px]
-                  flex
-                  items-center
-                  justify-center
-                  text-[8px]
-                  text-[#999]
-                "
-              >
-                No tenants found
-              </div>
-
-            )}
-
-          </div>
+          <div
+            className="
+              w-[18px]
+              h-[18px]
+              border-[2px]
+              border-[#E5E7EB]
+              border-t-[#2952F3]
+              rounded-full
+              animate-spin
+            "
+          />
 
         </div>
 
+      ) : tenants.length > 0 ? (
 
-    
-        {hasAction && (
+        tenants.map((tenant, index) => (
 
           <div
+            key={tenant.tenantId || index}
             className="
-              flex-shrink-0
-              w-[72px]
+              grid
+              grid-cols-[32px_95px_75px_110px_120px_100px_72px]
+              h-[30px]
+              items-center
+              border-b
+              border-[#F0F0F0]
               bg-white
-              z-[30]
             "
           >
 
            
+
             <div
               className="
                 h-[30px]
@@ -2663,117 +2482,308 @@ const TenantKycTable = ({
                 items-center
                 px-[4px]
                 bg-white
-                border-b
-                border-[#E5E7EB]
                 sticky
-                top-0
-                z-[50]
+                left-0
+                z-[20]
               "
             >
 
-              <TableHeader text="Action" />
+              <TableText
+                text={
+                  (currentPage - 1) *
+                    pageSize +
+                  index +
+                  1
+                }
+              />
 
             </div>
 
 
           
-            {loading ? (
 
-              <div className="h-[50px]" />
+            <div
+              className="
+                h-[30px]
+                flex
+                items-center
+                px-[4px]
+                min-w-0
+                bg-white
+                sticky
+                left-[32px]
+                z-[20]
+              "
+            >
 
-            ) : tenants.length > 0 ? (
+              <TableText
+                text={
+                  tenant.tenantName ||
+                  "N/A"
+                }
+              />
 
-              tenants.map((tenant, index) => (
+            </div>
+
+
+            
+
+            <div
+              className="
+                h-[30px]
+                flex
+                items-center
+                px-[5px]
+                min-w-0
+              "
+            >
+
+              <TableText
+                text={
+                  tenant.joinDate &&
+                  typeof tenant.joinDate ===
+                    "string" &&
+                  tenant.joinDate.trim() &&
+                  dayjs(
+                    tenant.joinDate,
+                    "DD/MM/YYYY",
+                    true
+                  ).isValid()
+                    ? dayjs(
+                        tenant.joinDate,
+                        "DD/MM/YYYY"
+                      ).format("MMM D")
+                    : "N/A"
+                }
+              />
+
+            </div>
+
+
+            
+
+            <div
+              className="
+                h-[30px]
+                flex
+                items-center
+                px-[5px]
+                min-w-0
+              "
+            >
+
+              <TableText
+                text={
+                  tenant.billingCycle ||
+                  "N/A"
+                }
+              />
+
+            </div>
+
+
+            
+
+            <div
+              className="
+                h-[30px]
+                flex
+                items-center
+                px-[5px]
+                min-w-0
+              "
+            >
+
+              {tenant.submittedDate ||
+              tenant.submittedTime ? (
 
                 <div
-                  key={tenant.tenantId || index}
                   className="
-                    h-[30px]
                     flex
-                    items-center
-                    px-[2px]
-                    bg-white
-                    border-b
-                    border-[#F0F0F0]
+                    flex-col
+                    justify-center
+                    min-w-0
                   "
                 >
 
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-[3px]
-                    "
-                  >
+                  {tenant.submittedDate && (
 
-                    
-                    {tenant.canSendReminder === true && (
+                    <span
+                      className="
+                        text-[11px]
+                        text-[#333]
+                        truncate
+                        leading-[9px]
+                      "
+                    >
+                      {tenant.submittedDate}
+                    </span>
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onReminder(tenant)
-                        }
-                        className="
-                          h-[18px]
-                          min-w-[42px]
-                          px-[4px]
-                          rounded-[4px]
-                          bg-[#2952F3]
-                          text-white
-                          text-[7px]
-                          cursor-pointer
-                          whitespace-nowrap
-                        "
-                      >
-                        Reminder
-                      </button>
+                  )}
 
-                    )}
+                  {tenant.submittedTime && (
 
+                    <span
+                      className="
+                        text-[11px]
+                        text-[#777]
+                        truncate
+                        leading-[8px]
+                      "
+                    >
+                      {tenant.submittedTime}
+                    </span>
 
-                    
-                    {tenant.canApproveKyc === true && (
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onApprove(tenant)
-                        }
-                        className="
-                          h-[18px]
-                          min-w-[42px]
-                          px-[4px]
-                          rounded-[4px]
-                          bg-[#159947]
-                          text-white
-                          text-[7px]
-                          cursor-pointer
-                          whitespace-nowrap
-                        "
-                      >
-                        Approve
-                      </button>
-
-                    )}
-
-                  </div>
+                  )}
 
                 </div>
 
-              ))
+              ) : (
 
-            ) : (
+                <span
+                  className="
+                    text-[11px]
+                    text-[#777]
+                  "
+                >
+                  N/A
+                </span>
 
-              <div className="h-[50px]" />
+              )}
 
-            )}
+            </div>
+
+
+          
+
+            <div
+              className="
+                h-[30px]
+                flex
+                items-center
+                px-[5px]
+                min-w-0
+              "
+            >
+
+              <span
+                className="
+                  block
+                  text-[11px]
+                  text-[#333]
+                  truncate
+                "
+              >
+                {tenant?.kycDetailsStatus?.trim()
+                  ? tenant.kycDetailsStatus
+                  : "NOT_AVAILABLE"}
+              </span>
+
+            </div>
+
+
+           
+
+           {hasAction && (
+
+  <div
+    className="
+      h-[30px]
+      flex
+      items-center
+      px-[2px]
+      bg-white
+      sticky
+      right-0
+      z-[20]
+    "
+  >
+
+    <div
+      className="
+        flex
+        items-center
+        gap-[3px]
+      "
+    >
+
+      {/* REMINDER */}
+      {tenant.canSendReminder === true && (
+        <button
+          type="button"
+          onClick={() => onReminder(tenant)}
+          className="
+            h-[18px]
+            min-w-[42px]
+            px-[4px]
+            rounded-[4px]
+            bg-[#2952F3]
+            text-white
+            text-[7px]
+            cursor-pointer
+            whitespace-nowrap
+          "
+        >
+          Reminder
+        </button>
+      )}
+
+      {/* APPROVE */}
+      {tenant.canApproveKyc === true && (
+        <button
+          type="button"
+          onClick={() => onApprove(tenant)}
+          className="
+            h-[18px]
+            min-w-[42px]
+            px-[4px]
+            rounded-[4px]
+            bg-[#159947]
+            text-white
+            text-[7px]
+            cursor-pointer
+            whitespace-nowrap
+          "
+        >
+          Approve
+        </button>
+      )}
+
+      {/* NO ACTION */}
+      {tenant.canSendReminder !== true &&
+        tenant.canApproveKyc !== true && (
+          <span className="text-[8px] text-[#777]">
+            N/A
+          </span>
+        )}
+
+    </div>
+
+  </div>
+
+)}
 
           </div>
 
-        )}
+        ))
 
-      </div>
+      ) : (
+
+        <div
+          className="
+            h-[50px]
+            flex
+            items-center
+            justify-center
+            text-[8px]
+            text-[#999]
+            bg-white
+          "
+        >
+          No tenants found
+        </div>
+
+      )}
 
     </div>
 
@@ -2794,7 +2804,7 @@ const TenantKycTable = ({
   >
 
    
-    <div className="text-[9px] text-[#475467]">
+    <div className="text-[11px] text-[#475467]">
       Total Record Count:
       <span className="ml-[3px] text-[#2952F3] font-medium">
         {tenants.length}
@@ -2834,7 +2844,7 @@ const TenantKycTable = ({
 </select>
 
 
-      {/* PREVIOUS */}
+      
       <button
         type="button"
         disabled={currentPage <= 1}
@@ -2880,7 +2890,7 @@ const TenantKycTable = ({
       </div>
 
 
-      {/* RANGE */}
+     
       <span
         className="
           text-[7px]
@@ -2895,7 +2905,7 @@ const TenantKycTable = ({
       </span>
 
 
-      {/* NEXT */}
+      
       <button
         type="button"
         disabled={currentPage >= totalPages}
@@ -2931,7 +2941,7 @@ const TenantKycTable = ({
 
 const TableHeader = ({ text }) => {
   return (
-    <div className="text-[9px] text-[#777] px-[2px] whitespace-nowrap">
+    <div className="text-[12px] text-[#777] px-[2px] whitespace-nowrap">
       {text}
     </div>
   );
@@ -2941,7 +2951,7 @@ const TableText = ({ text }) => {
   return (
     <div
       className="
-        text-[9px]
+        text-[11px]
         text-[#333]
         px-[2px]
         truncate

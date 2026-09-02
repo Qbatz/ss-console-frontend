@@ -205,6 +205,8 @@ const TransactionsPage = () => {
       ? resData?.paidHistories || []
       : resData?.createdHistories || [];
 
+console.log("currentData",currentData)
+
   // const fetchData = async () => {
 
   //   let start = "";
