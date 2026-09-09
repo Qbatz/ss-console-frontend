@@ -1993,7 +1993,116 @@ const deleteInvoiceUrl = async (invoiceId) => {
     setLoading(false);
   }
 };
+const getTableColumnFilterOptions = async (
+  page = 0,
+  size = 10,
+  name = ""
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
 
+    const res = await axiosInstance.get(
+      "/v2/table-columns/filter-options",
+      {
+        params: {
+          page,
+          size,
+          name,
+        },
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const updateTableColumnFilterOption = async (
+  filterOptionId,
+  payload
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.put(
+      `/v2/table-columns/filter-options/${filterOptionId}`,
+      payload
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+
+const recalculateTenant = async (customerId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.put(
+      `/v2/tenants/eb/recalculate/${customerId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+        message: res.data?.message || "Recalculated successfully",
+      };
+    }
+
+    return {
+      success: false,
+      message: "Failed to recalculate",
+    };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <HostelContext.Provider
       value={{
@@ -2006,7 +2115,8 @@ const deleteInvoiceUrl = async (invoiceId) => {
         resetTableColumns,getTableColumns,getInvoiceRedemption,getHostelInvoiceRedemption,updateInvoiceRedemption,
         deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,
         generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions,getInvoiceReceipt,updateInvoiceBalance,
-        getTenantById,updateAdvanceAmount, createHostelNote,getHostelNotes,getTenantSettlement,generateTenantSettlement,updateJoiningDate,verifyTenantMobile,getJoiningDateImpact,deleteReceiptUrl,deleteInvoiceUrl,
+        getTenantById,updateAdvanceAmount, createHostelNote,getHostelNotes,getTenantSettlement,generateTenantSettlement,updateJoiningDate,
+        verifyTenantMobile,getJoiningDateImpact,deleteReceiptUrl,deleteInvoiceUrl,getTableColumnFilterOptions,updateTableColumnFilterOption,recalculateTenant
       }}
     >
       {children}

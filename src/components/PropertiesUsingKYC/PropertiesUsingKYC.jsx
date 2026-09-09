@@ -8,7 +8,7 @@ import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 const PropertiesUsingKYC = () => {
-  const { loading, getHostelKYCList, getHostelKYCDetails, approveKYC,sendKYCReminder } = useKyc();
+  const { loading, getHostelKYCList, getHostelKYCDetails, approveKYC,sendKYCReminder,enableHostelKYC,disableHostelKYC,setKycMonthlyLimit } = useKyc();
   const { RangePicker } = DatePicker;
   const [status, setStatus] = useState("Status");
   const [period, setPeriod] = useState("ALL");
@@ -48,6 +48,16 @@ const PropertiesUsingKYC = () => {
   const [message, setMessage] = useState("");
   const [showKycConfirm, setShowKycConfirm] = useState(false);
   const [kycEnableStatus, setKycEnableStatus] = useState(false);
+  const [activationReason, setActivationReason] = useState("");
+  // const [disableEndDate, setDisableEndDate] = useState(dayjs());
+  // const [disableEndDate, setDisableEndDate] = useState(null);
+  const [disableEndDate, setDisableEndDate] = useState(dayjs());
+  const [showLimitModal, setShowLimitModal] = useState(false);
+const [monthlyLimit, setMonthlyLimit] = useState("");
+const [isUnlimited, setIsUnlimited] = useState(false);
+const [limitLoading, setLimitLoading] = useState(false);
+const [monthlyLimitError, setMonthlyLimitError] = useState("");
+
   const approveLock = useRef(false);
   const handleReminder = (tenant) => {
     setReminderTenant(tenant);
@@ -279,51 +289,176 @@ const PropertiesUsingKYC = () => {
     }
   };
 
-
 const handleKycEnableDisable = async () => {
   try {
     const hostelId =
       selectedProperty?.hostelId ||
       selectedProperty?.id;
 
+    console.log("KYC HOSTEL ID:", hostelId);
+
     if (!hostelId) {
       console.error("Missing hostelId");
       return;
     }
 
-    setLoading(true);
-
-    
-    const newStatus = !kycEnableStatus;
-
-    const result = await updateHostelKYCStatus(
-      hostelId,
-      newStatus
-    );
-
-    if (!result?.success) {
-      console.error(
-        "KYC Enable/Disable failed:",
-        result?.message
+    if (!kycEnableStatus) {
+      const result = await enableHostelKYC(
+        hostelId,
+        activationReason?.trim() || ""
       );
+
+      console.log("ENABLE KYC API RESULT:", result);
+
+      if (!result?.success) {
+        setModalType("error");
+        setMessage(
+          result?.message || "Failed to enable KYC"
+        );
+        setShowSuccess(true);
+        return;
+      }
+
+      
+      setKycEnableStatus(true);
+      setShowKycConfirm(false);
+      setActivationReason("");
+
+      
+      lastRequestRef.current = "";
+      await loadHostels();
+
+      setModalType("success");
+      setMessage(
+        result?.data || "KYC enabled successfully"
+      );
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
       return;
     }
 
-    // Update UI only after API success
-    setKycEnableStatus(newStatus);
+   
 
-    // Close confirmation modal
+   const endDate = disableEndDate
+  ? disableEndDate.format("DD-MM-YYYY")
+  : "";
+
+const result = await disableHostelKYC(
+  hostelId,
+  endDate,
+  false,
+  activationReason?.trim() || ""
+);
+
+    console.log("DISABLE KYC API RESULT:", result);
+
+    if (!result?.success) {
+      setModalType("error");
+      setMessage(
+        result?.message || "Failed to disable KYC"
+      );
+      setShowSuccess(true);
+      return;
+    }
+
+   
+    setKycEnableStatus(false);
     setShowKycConfirm(false);
+    setActivationReason("");
+
+    
+    lastRequestRef.current = "";
+    await loadHostels();
+
+    setModalType("success");
+    setMessage(
+      result?.data || "KYC disabled successfully"
+    );
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
 
   } catch (error) {
     console.error(
       "KYC Enable/Disable Error:",
       error
     );
-  } finally {
-    setLoading(false);
+
+    setModalType("error");
+    setMessage(
+      error?.message || "Something went wrong"
+    );
+    setShowSuccess(true);
   }
 };
+// const handleKycEnableDisable = async () => {
+//   try {
+//     const hostelId =
+//       selectedProperty?.hostelId ||
+//       selectedProperty?.id;
+
+//     console.log("ENABLE KYC HOSTEL ID:", hostelId);
+
+//     if (!hostelId) {
+//       console.error("Missing hostelId");
+//       return;
+//     }
+
+//     if (!kycEnableStatus) {
+
+//       const result = await enableHostelKYC(
+//         hostelId,
+//         activationReason?.trim() || ""
+//       );
+
+//       console.log("ENABLE KYC API RESULT:", result);
+
+//       if (!result?.success) {
+//         setModalType("error");
+//         setMessage(
+//           result?.message || "Failed to enable KYC"
+//         );
+//         setShowSuccess(true);
+//         return;
+//       }
+
+//       // API success
+//       setKycEnableStatus(true);
+//       setShowKycConfirm(false);
+//       setActivationReason("");
+
+//       // Refresh getHostelKYCList
+//       lastRequestRef.current = "";
+//       await loadHostels();
+
+//       setModalType("success");
+//       setMessage(
+//         result?.data || "KYC enabled successfully"
+//       );
+//       setShowSuccess(true);
+
+//       setTimeout(() => {
+//         setShowSuccess(false);
+//       }, 1500);
+
+//       return;
+//     }
+
+//     console.log("Disable KYC API not connected yet");
+
+//   } catch (error) {
+//     console.error(
+//       "KYC Enable Error:",
+//       error
+//     );
+//   }
+// };
 
 
   useEffect(() => {
@@ -508,29 +643,53 @@ if (hostel) {
   tenantPage,
   tenantPageSize,
 ]);
-  const handleView = async (property) => {
-    console.log("VIEW CLICKED:", property);
-    console.log("HOSTEL ID:", property?.hostelId);
-    console.log("HOSTEL ID FROM ID:", property?.id);
-    console.log(
-      "getHostelKYCDetails:",
-      getHostelKYCDetails
-    );
 
-    setSelectedProperty(property);
-    setIsDrawerOpen(true);
+const handleView = async (property) => {
+  console.log("VIEW CLICKED:", property);
 
-    setTenantPage(1);
-    setTenantSearch("");
-    setTenantList([]);
+  setSelectedProperty(property);
+  setKycEnableStatus(property?.kycEnableStatus === true);
 
-    await loadTenantKYC(
-      property?.hostelId || property?.id,
-      1,
-      tenantPageSize,
-      ""
-    );
-  };
+  // API kycHistoryEndDate -> DatePicker default value
+ if (property?.kycHistoryEndDate) {
+  setDisableEndDate(
+    dayjs(property.kycHistoryEndDate, "DD/MM/YYYY")
+  );
+} else {
+  setDisableEndDate(dayjs());
+}
+
+  setIsDrawerOpen(true);
+
+  setTenantPage(1);
+  setTenantSearch("");
+  setTenantList([]);
+
+  await loadTenantKYC(
+    property?.hostelId || property?.id,
+    1,
+    tenantPageSize,
+    ""
+  );
+};
+//  const handleView = async (property) => {
+//   console.log("VIEW CLICKED:", property);
+
+//   setSelectedProperty(property);
+//   setKycEnableStatus(property?.kycEnableStatus === true);
+//   setIsDrawerOpen(true);
+
+//   setTenantPage(1);
+//   setTenantSearch("");
+//   setTenantList([]);
+
+//   await loadTenantKYC(
+//     property?.hostelId || property?.id,
+//     1,
+//     tenantPageSize,
+//     ""
+//   );
+// };
 
 
  const closeDrawer = () => {
@@ -552,7 +711,74 @@ if (hostel) {
 };
   
 
+
   const filteredProperties = properties;
+
+const handleSetMonthlyLimit = async () => {
+  setMonthlyLimitError("");
+
+  if (!selectedProperty?.hostelId) {
+    setMonthlyLimitError("Hostel ID is missing");
+    return;
+  }
+
+  const limit = isUnlimited ? -1 : Number(monthlyLimit);
+
+  if (!isUnlimited && (!monthlyLimit || limit <= 0)) {
+    setMonthlyLimitError("Please enter a valid monthly limit");
+    return;
+  }
+
+  try {
+    setLimitLoading(true);
+
+    const result = await setKycMonthlyLimit(
+      selectedProperty.hostelId,
+      limit
+    );
+
+    if (!result?.success) {
+      setMonthlyLimitError(
+        result?.message || "Failed to set monthly limit"
+      );
+      return;
+    }
+
+    setSelectedProperty((prev) => ({
+      ...prev,
+      kycLimitPerMonth: limit,
+    }));
+
+    setShowLimitModal(false);
+    setMonthlyLimit("");
+    setIsUnlimited(false);
+    setMonthlyLimitError("");
+
+    setMessage(
+      isUnlimited
+        ? "Monthly limit set to Unlimited"
+        : "Monthly limit updated successfully"
+    );
+
+    setModalType("success");
+    setShowSuccess(true);
+
+    await loadHostels();
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1000);
+  } catch (error) {
+    setMonthlyLimitError(
+      error?.response?.data?.message ||
+      error?.message ||
+      "Failed to set monthly limit"
+    );
+  } finally {
+    setLimitLoading(false);
+  }
+};
+  
 
   return (
     <DashboardLayout>
@@ -811,7 +1037,7 @@ if (hostel) {
 
                   <th className="w-[14%] px-[8px] text-left flex-shrink-0">
                     <span className="text-[11px] font-medium text-[#555]">
-                      TOTAL TENANTS
+                      REQUESTS
                     </span>
                   </th>
 
@@ -971,7 +1197,7 @@ if (hostel) {
 
                       <td className="w-[14%] px-[8px] text-center flex-shrink-0 text-left">
                         <span className="text-[12px] text-[#333]">
-                          {item.tenants}
+                          {item.totalRequests}
                         </span>
                       </td>
 
@@ -1279,7 +1505,7 @@ if (hostel) {
             </div>
 
 
-
+{/* 
             <div className="px-[18px] mt-[10px]">
 
 
@@ -1317,45 +1543,202 @@ if (hostel) {
     </span>
 
     <button
-      type="button"
-      onClick={() => setShowKycConfirm(true)}
-      className={`
-        w-[32px]
-        h-[18px]
-        rounded-full
-        relative
-        cursor-pointer
-        ${kycEnableStatus
-          ? "bg-[#159947]"
-          : "bg-[#B9BCC1]"
-        }
-      `}
-    >
-      <div
-        className={`
-          absolute
-          top-[3px]
-          w-[12px]
-          h-[12px]
-          rounded-full
-          bg-white
-          transition-all
-          ${kycEnableStatus
-            ? "right-[3px]"
-            : "left-[3px]"
-          }
-        `}
-      />
-    </button>
+  type="button"
+  onClick={() => setShowKycConfirm(true)}
+  className={`
+    w-[32px]
+    h-[18px]
+    rounded-full
+    relative
+    cursor-pointer
+    ${
+      kycEnableStatus
+        ? "bg-[#159947]"
+        : "bg-[#B9BCC1]"
+    }
+  `}
+>
+  <div
+    className={`
+      absolute
+      top-[3px]
+      w-[12px]
+      h-[12px]
+      rounded-full
+      bg-white
+      transition-all
+      ${
+        kycEnableStatus
+          ? "right-[3px]"
+          : "left-[3px]"
+      }
+    `}
+  />
+</button>
 
   </div>
 </div>
               </div>
 
 
-            </div>
+            </div> */}
 
+<div className="px-[18px] mt-[10px]">
+  <div
+    className="
+      border
+      border-[#E5E7EB]
+      rounded-[7px]
+      p-[10px]
+    "
+  >
+    <div className="text-[11px] font-medium text-[#222] mb-[7px] text-left">
+      KYC Enable / Disable
+    </div>
 
+    {/* KYC Status */}
+    <div
+      className="
+        h-[38px]
+        bg-[#F5F7FC]
+        rounded-[6px]
+        px-[12px]
+        flex
+        items-center
+        justify-between
+      "
+    >
+      <span className="text-[10px] text-[#222]">
+        {kycEnableStatus ? "Enabled" : "Disabled"}
+      </span>
+
+      <div className="flex items-center gap-[6px]">
+        <span className="text-[9px] text-[#777]">
+          {kycEnableStatus ? "On" : "Off"}
+        </span>
+
+        <button
+          type="button"
+          onClick={() => setShowKycConfirm(true)}
+          className={`
+            w-[32px]
+            h-[18px]
+            rounded-full
+            relative
+            cursor-pointer
+            ${
+              kycEnableStatus
+                ? "bg-[#159947]"
+                : "bg-[#B9BCC1]"
+            }
+          `}
+        >
+          <div
+            className={`
+              absolute
+              top-[3px]
+              w-[12px]
+              h-[12px]
+              rounded-full
+              bg-white
+              transition-all
+              ${
+                kycEnableStatus
+                  ? "right-[3px]"
+                  : "left-[3px]"
+              }
+            `}
+          />
+        </button>
+      </div>
+    </div>
+
+    
+    <div className="grid grid-cols-3 gap-[7px] mt-[8px]">
+
+     
+      <div
+        className="
+          bg-[#F8F9FC]
+          rounded-[6px]
+          px-[8px]
+          py-[7px]
+        "
+      >
+        <div className="text-[9px] text-[#777] mb-[3px]">
+          Start Date
+        </div>
+
+        <div className="text-[11px] font-medium text-[#222]">
+          {selectedProperty?.kycHistoryStartDate || "N/A"}
+        </div>
+      </div>
+
+      {/* End Date */}
+      <div
+        className="
+          bg-[#F8F9FC]
+          rounded-[6px]
+          px-[8px]
+          py-[7px]
+        "
+      >
+        <div className="text-[9px] text-[#777] mb-[3px]">
+          End Date
+        </div>
+
+        <div className="text-[11px] font-medium text-[#222]">
+          {selectedProperty?.kycHistoryEndDate || "N/A"}
+        </div>
+      </div>
+
+     {/* Monthly Limit */}
+<div
+  className="
+    bg-[#F8F9FC]
+    rounded-[6px]
+    px-[8px]
+    py-[7px]
+  "
+>
+  <div className="text-[9px] text-[#777] mb-[3px]">
+    Monthly Limit
+  </div>
+
+  <div className="flex items-center justify-between gap-[5px]">
+    <div className="text-[11px] font-medium text-[#222]">
+      {selectedProperty?.kycLimitPerMonth ?? "N/A"}
+    </div>
+
+    <button
+      type="button"
+   onClick={() => {
+  setMonthlyLimit(
+    selectedProperty?.kycLimitPerMonth ?? ""
+  );
+  setMonthlyLimitError("");
+  setShowLimitModal(true);
+}}
+      className="
+        h-[24px]
+        px-[8px]
+        rounded-[4px]
+        bg-[#2952F3]
+        hover:bg-[#2146DD]
+        text-white
+        text-[9px]
+        font-medium
+        cursor-pointer
+      "
+    >
+      Set Limit
+    </button>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
 
             <div className="px-[18px] mt-[10px] pb-[20px]">
 
@@ -2103,30 +2486,17 @@ onPageChange={(page, newSize) => {
 )}
 
       {showKycConfirm && (
-  <div
-    className="
-      fixed
-      inset-0
-      z-[2000]
-      bg-black/30
-      flex
-      items-center
-      justify-center
-    "
+   <div
+    onClick={() => setShowKycConfirm(false)}
+    className="fixed inset-0 z-[2000] bg-black/30 flex items-center justify-center"
   >
     <div
-      className="
-        w-[560px]
-        bg-white
-        rounded-[8px]
-        shadow-xl
-        px-[14px]
-        py-[12px]
-      "
+      onClick={(e) => e.stopPropagation()}
+      className="w-[560px] bg-white rounded-[8px] shadow-xl px-[14px] py-[12px]"
     >
 
       
-      <div
+      <div onClick={(e) => e.stopPropagation()}
         className="
           flex
           items-center
@@ -2156,6 +2526,7 @@ onPageChange={(page, newSize) => {
           text-[13px]
           text-[#475467]
           leading-[18px]
+          text-left
         "
       >
 
@@ -2176,8 +2547,77 @@ onPageChange={(page, newSize) => {
         )}
 
       </div>
+{kycEnableStatus && (
+  <>
+    {/* End Date */}
+    <div className="mt-[14px]">
+      <label className="block text-[12px] text-[#344054] mb-[5px] text-left">
+        End Date
+      </label>
 
+      <DatePicker
+        value={disableEndDate}
+        onChange={(date) => setDisableEndDate(date)}
+        format="DD-MM-YYYY"
+        className="
+          !w-full
+          !h-[40px]
+          !rounded-[7px]
+          !text-[13px]
+        "
+        placeholder="Select end date"
+      />
+    </div>
 
+    {/* Cancellation Reason */}
+    <div className="mt-[14px]">
+      <label className="block text-[12px] text-[#344054] mb-[5px] text-left">
+        Cancellation Reason
+      </label>
+
+      <input
+        type="text"
+        value={activationReason}
+        onChange={(e) => setActivationReason(e.target.value)}
+        placeholder="Enter cancellation reason"
+        className="
+          w-full
+          h-[40px]
+          border
+          border-[#D0D5DD]
+          rounded-[7px]
+          px-[10px]
+          text-[13px]
+          text-[#344054]
+          outline-none
+          focus:border-[#2952F3]
+        "
+      />
+    </div>
+  </>
+)}
+{!kycEnableStatus && (
+  <div className="mt-[14px]">
+    <input
+      type="text"
+      value={activationReason}
+      onChange={(e) => setActivationReason(e.target.value)}
+      placeholder="Enter activation reason"
+      className="
+        w-full
+        h-[40px]
+        border
+        border-[#D0D5DD]
+        rounded-[7px]
+        px-[10px]
+        text-[13px]
+        text-[#344054]
+        outline-none
+        focus:border-[#2952F3]
+      "
+    />
+  </div>
+)}
       
       <div
         className="
@@ -2211,24 +2651,188 @@ onPageChange={(page, newSize) => {
 
 
         
-        <button
+        {/* <button
           type="button"
           onClick={handleKycEnableDisable}
           className="
             h-[46px]
-            min-w-[132px]
+            min-w-[102px]
             px-[18px]
             rounded-[7px]
-            bg-[#2952F3]
-            text-white
+            border
+            border-[#D0D5DD]
+            bg-white
+            text-[#101828]
             text-[14px]
             cursor-pointer
           "
         >
-          {kycEnableStatus
-            ? "Disable KYC"
-            : "Enable KYC"
-          }
+          save
+        </button> */}
+        <button
+  type="button"
+  onClick={handleKycEnableDisable}
+  className="
+    h-[46px]
+    min-w-[102px]
+    px-[18px]
+    rounded-[7px]
+    border
+    border-[#D0D5DD]
+    bg-white
+    text-[#101828]
+    text-[14px]
+    cursor-pointer
+  "
+>
+  {kycEnableStatus ? "Disable KYC" : "Enable KYC"}
+</button>
+
+      </div>
+
+    </div>
+  </div>
+)}
+{showLimitModal && (
+  <div
+    className="
+      fixed
+      inset-0
+      z-[3000]
+      bg-black/30
+      flex
+      items-center
+      justify-center
+    "
+    onClick={() => {
+      if (!limitLoading) {
+        setShowLimitModal(false);
+      }
+    }}
+  >
+    <div
+      className="
+        w-[420px]
+        bg-white
+        rounded-[8px]
+        shadow-xl
+        p-[18px]
+      "
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      <div className="text-[16px] font-medium text-[#182230]">
+        Set Monthly KYC Limit
+      </div>
+
+      <div className="mt-[5px] text-[12px] text-[#667085]">
+        Set the maximum number of KYC requests allowed per month.
+      </div>
+
+      <div className="mt-[16px]">
+        <label className="block text-[12px] text-[#344054] mb-[5px] text-left">
+          Monthly Limit
+        </label>
+
+      {!isUnlimited && (
+  <>
+    <input
+      type="number"
+      min="1"
+      value={monthlyLimit}
+      onChange={(e) => {
+        setMonthlyLimit(e.target.value);
+        setMonthlyLimitError("");
+      }}
+      placeholder="Enter monthly limit"
+      className={`
+        w-full
+        h-[42px]
+        border
+        rounded-[7px]
+        px-[12px]
+        text-[13px]
+        outline-none
+        ${
+          monthlyLimitError
+            ? "border-red-500"
+            : "border-[#D9DDE7]"
+        }
+      `}
+    />
+
+    {/* {monthlyLimitError && (
+      <p className="text-[11px] text-red-500 mt-[4px]">
+        {monthlyLimitError}
+      </p>
+    )} */}
+       {monthlyLimitError && (
+                      <ErrorMessage message={monthlyLimitError} type="error" />
+                    )}
+  </>
+)}
+      </div>
+<div className="flex items-center gap-[8px] mb-[12px]">
+  <input
+    type="checkbox"
+    id="unlimited"
+    checked={isUnlimited}
+    onChange={(e) => {
+      setIsUnlimited(e.target.checked);
+
+      if (e.target.checked) {
+        setMonthlyLimit("");
+      }
+    }}
+    className="w-[15px] h-[15px] cursor-pointer"
+  />
+
+  <label
+    htmlFor="unlimited"
+    className="text-[13px] text-[#333] cursor-pointer"
+  >
+    Unlimited
+  </label>
+</div>
+      <div className="flex justify-end gap-[10px] mt-[20px]">
+
+        <button
+          type="button"
+          disabled={limitLoading}
+          onClick={() => setShowLimitModal(false)}
+          className="
+            h-[40px]
+            min-w-[90px]
+            rounded-[7px]
+            border
+            border-[#D0D5DD]
+            bg-white
+            text-[#101828]
+            text-[13px]
+            cursor-pointer
+            disabled:opacity-50
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          disabled={limitLoading}
+          onClick={handleSetMonthlyLimit}
+          className="
+            h-[40px]
+            min-w-[100px]
+            rounded-[7px]
+            bg-[#2952F3]
+            hover:bg-[#2146DD]
+            text-white
+            text-[13px]
+            cursor-pointer
+            disabled:bg-gray-400
+          "
+        >
+          Save
         </button>
 
       </div>

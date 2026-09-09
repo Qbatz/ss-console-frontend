@@ -45,8 +45,6 @@ const isEditMode = mode === "edit";
   const [search, setSearch] = useState("");
   const [hostels, setHostels] = useState([]);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
-
-
   const [ownersList, setOwnersList] = useState([]);
   const [showOwnerPopup, setShowOwnerPopup] = useState(false);
   const [showOwnerDropdown, setShowOwnerDropdown] = useState(false);
@@ -97,6 +95,32 @@ const [unsavedItemIds, setUnsavedItemIds] = useState([]);
 const [initialFormData, setInitialFormData] = useState(null);
   console.log("ownersList", ownersList)
 const [hasSavedItemChanges, setHasSavedItemChanges] = useState(false);
+
+const itemCtaLinkRefs = useRef({});
+const itemTypeRefs = useRef({});
+const itemTitleRefs = useRef({});
+const itemDescriptionRefs = useRef({});
+const itemModuleRefs = useRef({});
+const itemCtaRefs = useRef({});
+useEffect(() => {
+  const firstErrorIndex = Object.keys(itemCtaLinkErrors)[0];
+
+  if (firstErrorIndex === undefined) return;
+
+  const errorElement =
+    itemCtaLinkRefs.current[firstErrorIndex];
+
+  if (!errorElement) return;
+
+  setTimeout(() => {
+    errorElement.focus({ preventScroll: true });
+
+    errorElement.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, 100);
+}, [itemCtaLinkErrors]);
 const markItemAsUnsaved = (itemId) => {
   if (!itemId) return;
 
@@ -808,6 +832,7 @@ setExpiryDateError("");
 
       updateItems.forEach((item, index) => {
 
+        
 
         if (!item.itemType) {
           typeErrors[index] = "Item Type is required";
@@ -839,10 +864,25 @@ setExpiryDateError("");
         }
 
 
-        if (!item.ctaLink?.trim()) {
-          ctaLinkErrors[index] = "CTA Link is required";
-          valid = false;
-        }
+        const ctaLink = item.ctaLink?.trim();
+
+if (!ctaLink) {
+  ctaLinkErrors[index] = "CTA Link is required";
+  valid = false;
+} else {
+  const isValidPath = /^\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9._-]+)*$/.test(
+    ctaLink
+  );
+
+  const isValidExternalUrl =
+    /^https:\/\/[^\s]+$/i.test(ctaLink);
+
+  if (!isValidPath && !isValidExternalUrl) {
+    ctaLinkErrors[index] =
+      "Enter a valid path (e.g. /dashboard) or URL (e.g. https://example.com/help)";
+    valid = false;
+  }
+}
 
 
       });
@@ -968,7 +1008,60 @@ if (isScheduleSelected) {
     valid = false;
   }
 }
+if (!valid) {
+  setTimeout(() => {
+    let errorElement = null;
 
+    // Main form errors
+    if (titleError) {
+      errorElement = document.querySelector("[data-field='update-title']");
+    }
+
+    // Item errors
+    if (!errorElement) {
+      for (let index = 0; index < updateItems.length; index++) {
+        if (typeErrors[index]) {
+          errorElement = itemTypeRefs.current[index];
+          break;
+        }
+
+        if (titleErrors[index]) {
+          errorElement = itemTitleRefs.current[index];
+          break;
+        }
+
+        if (descriptionErrors[index]) {
+          errorElement = itemDescriptionRefs.current[index];
+          break;
+        }
+
+        if (moduleErrors[index]) {
+          errorElement = itemModuleRefs.current[index];
+          break;
+        }
+
+       if (ctaLinkErrors[index]) {
+  errorElement = itemCtaLinkRefs.current[index];
+  break;
+}
+
+if (ctaErrors[index]) {
+  errorElement = itemCtaRefs.current[index];
+  break;
+}
+      }
+    }
+
+if (errorElement) {
+  errorElement.focus({ preventScroll: true });
+
+  errorElement.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
+}
+  }, 100);
+}
 
     return valid;
   };
@@ -2056,6 +2149,9 @@ const handleCreateItem = async (item) => {
 
                             <select
                               value={item.itemType}
+                              ref={(el) => {
+  itemTypeRefs.current[index] = el;
+}}
                              onChange={(e) => {
   const value = e.target.value;
 
@@ -2124,7 +2220,9 @@ setUpdateItems((prev) =>
                             <input
                               type="text"
                               value={item.title}
-                             
+                             ref={(el) => {
+  itemTitleRefs.current[index] = el;
+}}
                               onChange={(e) => {
   const value = e.target.value;
 
@@ -2182,6 +2280,9 @@ setUpdateItems((prev) =>
 
                           <textarea
                             value={item.description}
+                            ref={(el) => {
+  itemDescriptionRefs.current[index] = el;
+}}
                           onChange={(e) => {
   const value = e.target.value;
 
@@ -2242,6 +2343,9 @@ setUpdateItems((prev) =>
 
                             <select
                               value={item.relatedModule}
+                              ref={(el) => {
+  itemModuleRefs.current[index] = el;
+}}
                              onChange={(e) => {
   const value = e.target.value;
 
@@ -2313,6 +2417,9 @@ setUpdateItems((prev) =>
 
                             <select
                               value={item.cta}
+                              ref={(el) => {
+  itemCtaRefs.current[index] = el;
+}}
                              onChange={(e) => {
   const value = e.target.value;
 
@@ -2386,7 +2493,12 @@ setUpdateItems((prev) =>
 
                             <input
                               type="text"
+                              
                               value={item.ctaLink}
+                              
+                               ref={(el) => {
+    itemCtaLinkRefs.current[index] = el;
+  }}
                              onChange={(e) => {
   const value = e.target.value;
 
