@@ -1371,7 +1371,7 @@ const AddEditPlan = () => {
                   />
                 </div>
                  <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-black-500 text-left">Set Limit</label>
+                  <label className="text-xs font-medium text-black-500 text-left">KYC Month Limit</label>
                   <input
                     type="text"
                    value={limit}
