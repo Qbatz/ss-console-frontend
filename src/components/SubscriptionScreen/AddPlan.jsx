@@ -64,6 +64,7 @@ const AddEditPlan = () => {
   const [priceError, setPriceError] = useState("")
   const [durationError, setDurationError] = useState("")
   const [gstPercentage, setGstPercentage] = useState("")
+  const [limit, setLimit] = useState("");
   const [finalAmount, setFinalAmount] = useState(0);
   const [smartstayFeatures, setSmartstayFeatures] = useState([]);
   const [deletedFeatures, setDeletedFeatures] = useState([]);
@@ -114,6 +115,7 @@ const AddEditPlan = () => {
       setShouldShow(editData.shouldShow);
       setGstPercentage(editData.gst)
       setFinalAmount(editData.finalPrice)
+      setLimit(editData.kycPerMonthLimit ?? "");
 
 
       const addonData = editData.planFeatures.map(f => ({
@@ -529,6 +531,7 @@ const AddEditPlan = () => {
       price: Number(price),
       discountPercentage: Number(discount),
       gstPercentage,
+      kycPerMonthLimit: Number(limit),
       shouldShow,
       canCustomize,
       planFeatures
@@ -577,6 +580,7 @@ const AddEditPlan = () => {
         Number(duration) === Number(editData.duration) &&
         Number(discount) === Number(editData.discountPercentage) &&
         Number(gstPercentage) === Number(editData.gst) &&
+        Number(limit) === Number(editData.kycPerMonthLimit) &&
         shouldShow === editData.shouldShow &&
         canCustomize === editData.canCustomize &&
         oldFeatures === newFeatures;
@@ -1363,6 +1367,19 @@ const AddEditPlan = () => {
                     value={gstPercentage}
                     onChange={(e) => setGstPercentage(e.target.value)}
                     placeholder="Enter Gst"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                 <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-black-500 text-left">Set Limit</label>
+                  <input
+                    type="text"
+                   value={limit}
+  onChange={(e) => {
+    const value = e.target.value.replace(/[^0-9]/g, "");
+    setLimit(value);
+  }}
+                    placeholder="Enter Limit"
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
