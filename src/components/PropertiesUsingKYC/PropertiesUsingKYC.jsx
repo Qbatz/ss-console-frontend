@@ -327,6 +327,15 @@ const handleKycEnableDisable = async () => {
       
       lastRequestRef.current = "";
       await loadHostels();
+      await loadTenantKYC(
+  hostelId,
+  tenantPage,
+  tenantPageSize,
+  tenantSearch,
+  tenantKycStatus,
+  tenantDateFilter,
+  tenantDateRange
+);
 
       setModalType("success");
       setMessage(
@@ -373,7 +382,15 @@ const result = await disableHostelKYC(
     
     lastRequestRef.current = "";
     await loadHostels();
-
+await loadTenantKYC(
+  hostelId,
+  tenantPage,
+  tenantPageSize,
+  tenantSearch,
+  tenantKycStatus,
+  tenantDateFilter,
+  tenantDateRange
+);
     setModalType("success");
     setMessage(
       result?.data || "KYC disabled successfully"
@@ -764,6 +781,15 @@ const handleSetMonthlyLimit = async () => {
     setShowSuccess(true);
 
     await loadHostels();
+    await loadTenantKYC(
+  selectedProperty?.hostelId || selectedProperty?.id,
+  tenantPage,
+  tenantPageSize,
+  tenantSearch,
+  tenantKycStatus,
+  tenantDateFilter,
+  tenantDateRange
+);
 
     setTimeout(() => {
       setShowSuccess(false);
