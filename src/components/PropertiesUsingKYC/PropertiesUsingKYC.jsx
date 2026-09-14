@@ -316,6 +316,9 @@ const handleKycEnableDisable = async () => {
           result?.message || "Failed to enable KYC"
         );
         setShowSuccess(true);
+        setTimeout(() => {
+    setShowSuccess(false);
+  }, 1500);
         return;
       }
 
@@ -371,6 +374,9 @@ const result = await disableHostelKYC(
         result?.message || "Failed to disable KYC"
       );
       setShowSuccess(true);
+      setTimeout(() => {
+    setShowSuccess(false);
+  }, 1500);
       return;
     }
 
@@ -412,7 +418,16 @@ await loadTenantKYC(
       error?.message || "Something went wrong"
     );
     setShowSuccess(true);
+     setTimeout(() => {
+    setShowSuccess(false);
+  }, 1500);
   }
+};
+
+const closeKycConfirm = () => {
+  setShowKycConfirm(false);
+  setActivationReason("");
+  setDisableEndDate(dayjs());
 };
 // const handleKycEnableDisable = async () => {
 //   try {
@@ -721,7 +736,7 @@ const handleView = async (property) => {
   setTenantDateFilter("ALL");
   setTenantDateRange([]);
   setTenantKycStatus("");
-
+setDisableEndDate(dayjs());
   
   setTenantSearch("");
   setTenantPage(1);
@@ -1503,19 +1518,19 @@ const handleSetMonthlyLimit = async () => {
             <div className="px-[18px] grid grid-cols-3 gap-[7px]">
 
              <StatCard
-  title="Total Tenants"
-  value={selectedProperty?.totalTenants ?? 0}
+  title="Total Requested"
+  value={selectedProperty?.totalKycRequestedTenants ?? 0}
   subtitle="Invoices to create"
 />
 
 <StatCard
-  title="Total Requested"
+  title="Requested"
   value={selectedProperty?.totalRequested ?? 0}
   subtitle="Selected"
 />
 
 <StatCard
-  title="Total Verified"
+  title="Verified"
   value={selectedProperty?.totalVerified ?? 0}
   subtitle="Selected"
 />
@@ -2513,7 +2528,7 @@ onPageChange={(page, newSize) => {
 
       {showKycConfirm && (
    <div
-    onClick={() => setShowKycConfirm(false)}
+   onClick={closeKycConfirm}
     className="fixed inset-0 z-[2000] bg-black/30 flex items-center justify-center"
   >
     <div
@@ -2658,7 +2673,7 @@ onPageChange={(page, newSize) => {
         
         <button
           type="button"
-          onClick={() => setShowKycConfirm(false)}
+          onClick={closeKycConfirm}
           className="
             h-[46px]
             min-w-[102px]

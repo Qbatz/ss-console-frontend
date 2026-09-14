@@ -1720,6 +1720,34 @@ const getHostelNotes = async (hostelId) => {
 
 //   }
 // };
+// const getTenantSettlement = async (customerId, date) => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.post(
+//       `/v2/tenants/settlement/${customerId}`,
+//       {
+//         date,
+//       }
+//     );
+
+//     return {
+//       success: true,
+//       data: res.data,
+//     };
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+//     setErrorMsg(msg);
+
+//     return {
+//       success: false,
+//       message: msg,
+//     };
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 const getTenantSettlement = async (customerId, date) => {
   try {
     setLoading(true);
@@ -1737,7 +1765,11 @@ const getTenantSettlement = async (customerId, date) => {
       data: res.data,
     };
   } catch (error) {
-    const msg = getErrorMessage(error);
+    const msg =
+      error?.response?.status === 500
+        ? "Internal Server Error"
+        : getErrorMessage(error);
+
     setErrorMsg(msg);
 
     return {
