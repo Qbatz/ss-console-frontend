@@ -17,7 +17,7 @@ const SettlementSummary = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const tenantData = location.state?.tenantData;
-  
+
   const { getTenantSettlement, generateTenantSettlement } = useHostel();
   const { customerId } = useParams();
   const [showUnpaid, setShowUnpaid] = useState(false);
@@ -42,7 +42,7 @@ const SettlementSummary = () => {
   const [customerWallet, setCustomerWallet] = useState({})
   const [customerAdvance, setCustomerAdvance] = useState({})
   const [customerBooking, setCustomerBooking] = useState({})
-  const [customerRetainer,setCustomerRetainer] = useState({})
+  const [customerRetainer, setCustomerRetainer] = useState({})
   const [deductionType, setDeductionType] = useState("");
   const [deductionRows, setDeductionRows] = useState([]);
   const [deductionAmount, setDeductionAmount] = useState("");
@@ -60,12 +60,20 @@ const SettlementSummary = () => {
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [showOtherCharges, setShowOtherCharges] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showOtherInvoices, setShowOtherInvoices] = useState(false);
+  const [showAdditionalAdvance, setShowAdditionalAdvance] = useState(false);
+  const [additionalAdvance, setAdditionalAdvance] = useState({});
 
 
-  
+
   const sections = [
     { title: "Unpaid Invoices", amount: `₹${unPaidInvoice?.unpaidAmount || 0}` },
-  
+     {
+    title: "Other Invoices",
+    amount: `₹${customerRentInfo?.otherInvoicesInfo?.totalPendingAmount || 0}`
+  },
+
+
     {
       title:
         Number(customerRentInfo?.currentMonthPendingAmount || 0) >= 0
@@ -79,8 +87,9 @@ const SettlementSummary = () => {
     { title: "Electricity Bill", amount: `₹${customerEbInfo?.pendingEbAmount || 0}` },
     { title: "Wallet", amount: `₹${customerWallet?.walletAmount || 0}` },
     { title: "Refundable Advance", amount: `₹${customerAdvance?.availableBalance || 0}` },
+    {title: "Additional Advance",amount: `₹${additionalAdvance?.advanceBalance || 0}`},
     { title: "Refundable Bookings", amount: `₹${customerBooking?.availableBalance || 0}` },
-     { title: "Retainer Invoice", amount: `₹${customerRetainer?.totalBalanceAmount || 0}` },
+    { title: "Retainer Invoice", amount: `₹${customerRetainer?.totalBalanceAmount || 0}` },
     { title: "Deductions", amount: `₹${customerDeductions?.pendingAmount || 0}` },
   ];
 
@@ -92,7 +101,7 @@ const SettlementSummary = () => {
     0
   );
 
- 
+
 
   const payableRentAmount =
     collectFullRent && isRentSet
@@ -107,16 +116,18 @@ const SettlementSummary = () => {
     Number(customerDeductions?.pendingAmount || 0) +
     Number(additionalDeductionAmount || 0);
 
- 
+
   const outstandingAmount =
     totalRent -
     Number(customerFinalSettlement?.discountAmount || 0) +
     Number(customerFinalSettlement?.ebAmount || 0) +
     Number(unPaidInvoice?.unpaidAmount || 0) +
     Number(customerRentInfo?.otherItemAmount || 0) +
+    Number(customerFinalSettlement?.currentMonthOtherInvoicePendingAmount || 0) +
     totalDeductions +
     Number(customerFinalSettlement?.walletAmount || 0) -
-    Number(customerFinalSettlement?.refundableAdvance || 0)-
+    Number(customerFinalSettlement?.refundableAdvance || 0) -
+     Number(customerFinalSettlement?.additionalAdvanceBalanceAmount || 0) -
     Number(customerRetainer?.totalBalanceAmount || 0);
   const handleSettlement = async (selectedDate) => {
     if (!customerId) return;
@@ -139,6 +150,7 @@ const SettlementSummary = () => {
         setCustomerDeductions(res?.data?.customerDeductionsInfo);
         setCustomerFinalSettlement(res?.data?.customerFinalSettlementInfo)
         setStayList(res?.data?.customerStayInfo)
+        setAdditionalAdvance(res?.data?.additionalAdvanceInfo);
 
       }
       else {
@@ -265,7 +277,7 @@ const SettlementSummary = () => {
 
                       <div>
 
-   
+
                         <div className="flex items-center justify-start gap-2 w-full text-left">
                           <h2
                             className="max-w-[180px] text-[18px] font-semibold truncate"
@@ -389,7 +401,7 @@ const SettlementSummary = () => {
 
                     </div>
 
-                   
+
                     <div
                       className={`mt-2 rounded-xl py-2 text-center text-[14px] ${outstandingAmount >= 0
                         ? "bg-[#FFF1F3] text-red-500"
@@ -434,7 +446,9 @@ const SettlementSummary = () => {
                             if (item.title === "Unpaid Invoices") {
                               setShowUnpaid(!showUnpaid);
                             }
-
+if (item.title === "Other Invoices") {
+  setShowOtherInvoices(!showOtherInvoices);
+}
                             if (item.title === "Refundable Rent" ||
                               item.title === "Payable Rent") {
                               setShowRentSection(!showRentSection);
@@ -451,12 +465,15 @@ const SettlementSummary = () => {
                             if (item.title === "Refundable Advance") {
                               setShowAdvance(!showAdvance);
                             }
+                            if (item.title === "Additional Advance") {
+  setShowAdditionalAdvance(!showAdditionalAdvance);
+}
 
                             if (item.title === "Refundable Bookings") {
                               setShowBooking(!showBooking);
                             }
 
-                             if (item.title === "Retainer Invoice") {
+                            if (item.title === "Retainer Invoice") {
                               setShowRetainer(!showRetainer);
                             }
 
@@ -472,6 +489,10 @@ const SettlementSummary = () => {
                                 ? showUnpaid
                                   ? "rotate-[270deg]"
                                   : "rotate-90"
+                                    : item.title === "Other Invoices"
+    ? showOtherInvoices
+      ? "rotate-[270deg]"
+      : "rotate-90"
                                 : item.title === "Refundable Rent" ||
                                   item.title === "Payable Rent"
                                   ? showRentSection
@@ -489,17 +510,21 @@ const SettlementSummary = () => {
                                         ? showAdvance
                                           ? "rotate-[270deg]"
                                           : "rotate-90"
+                                          : item.title === "Additional Advance"
+  ? showAdditionalAdvance
+    ? "rotate-[270deg]"
+    : "rotate-90"
                                         : item.title === "Refundable Bookings"
                                           ? showBooking
                                             ? "rotate-[270deg]"
-                                            : "rotate-90" 
-                                            : item.title === "Retainer Invoice"
-                                          ? showRetainer
-                                            ? "rotate-[270deg]"
-                                            : "rotate-90" 
-                                          : showDeduction
-                                            ? "rotate-[270deg]"
                                             : "rotate-90"
+                                          : item.title === "Retainer Invoice"
+                                            ? showRetainer
+                                              ? "rotate-[270deg]"
+                                              : "rotate-90"
+                                            : showDeduction
+                                              ? "rotate-[270deg]"
+                                              : "rotate-90"
                                 }`}
                             />
 
@@ -608,7 +633,63 @@ const SettlementSummary = () => {
                           </div>
                         )}
 
+{item.title === "Other Invoices" && showOtherInvoices && (
+  <div className="px-4 pb-4">
+    <div className="overflow-hidden rounded border border-[#EAECF0] text-left">
 
+      {/* Header */}
+      <div className="grid grid-cols-4 bg-[#F9FAFB] px-4 py-4 font-semibold text-[#667085] text-[11px]">
+        <div>INVOICE NO</div>
+        <div>DATE</div>
+        <div className="text-right">INVOICE AMOUNT</div>
+        <div className="text-right">PENDING AMOUNT</div>
+      </div>
+
+      {/* Invoice Rows */}
+      {customerRentInfo?.otherInvoicesInfo?.otherInvoices?.length > 0 ? (
+        customerRentInfo.otherInvoicesInfo.otherInvoices.map(
+          (invoice, index) => (
+            <div
+              key={invoice.invoiceId || index}
+              className="grid grid-cols-4 px-4 py-4 border-t border-[#EAECF0] text-[13px]"
+            >
+              <div className="text-[#3158F5] underline cursor-pointer">
+                {invoice.invoiceNumber}
+              </div>
+
+              <div className="text-[#344054]">
+                {invoice.invoiceDate}
+              </div>
+
+              <div className="text-right text-[#101828]">
+                ₹{invoice.invoiceAmount}
+              </div>
+
+              <div className="text-right font-medium text-[#101828]">
+                ₹{invoice.pendingAmount}
+              </div>
+            </div>
+          )
+        )
+      ) : (
+        <div className="py-6 text-center text-[#667085] text-[14px]">
+          No other invoices available
+        </div>
+      )}
+
+      {/* Total */}
+      <div className="border-t border-gray-300 bg-[#F9FAFB] grid grid-cols-4 px-4 py-4 font-medium text-[13px]">
+        <div>Total</div>
+        <div></div>
+        <div></div>
+        <div className="text-right">
+          ₹{customerRentInfo?.otherInvoicesInfo?.totalPendingAmount || 0}
+        </div>
+      </div>
+
+    </div>
+  </div>
+)}
 
                         {
                           (item.title === "Refundable Rent" ||
@@ -913,6 +994,65 @@ const SettlementSummary = () => {
 
                           </div>
                         )}
+ {item.title === "Additional Advance" && showAdditionalAdvance && (
+  <div className="px-4 pb-4">
+    <div className="overflow-hidden rounded border border-[#EAECF0] text-left">
+
+      <div className="grid grid-cols-4 bg-[#F9FAFB] px-4 py-4 font-semibold text-[#667085] text-[11px]">
+        <div>INVOICE NO</div>
+        <div>INVOICE AMOUNT</div>
+        <div>PAID AMOUNT</div>
+        <div className="text-right">BALANCE AMOUNT</div>
+      </div>
+
+      {additionalAdvance?.advanceInvoices?.length > 0 ? (
+        additionalAdvance.advanceInvoices.map((invoice, index) => (
+          <div
+            key={invoice.invoiceId || index}
+            className="grid grid-cols-4 px-4 py-4 border-t border-[#EAECF0] text-[13px]"
+          >
+            <div className="text-[#3158F5] underline cursor-pointer">
+              {invoice.invoiceNumber}
+            </div>
+
+            <div>
+              ₹{invoice.invoiceAmount}
+            </div>
+
+            <div>
+              ₹{invoice.paidAmount}
+            </div>
+
+            <div className="text-right font-medium">
+              ₹{invoice.invoiceBalance}
+            </div>
+          </div>
+        ))
+      ) : (
+        <div className="py-6 text-center text-[#667085] text-[14px]">
+          No additional advance invoices available
+        </div>
+      )}
+
+      <div className="border-t border-gray-300 bg-[#F9FAFB] grid grid-cols-4 px-4 py-4 font-medium text-[13px]">
+        <div>Total</div>
+
+        <div>
+          ₹{additionalAdvance?.totalAmount || 0}
+        </div>
+
+        <div>
+          ₹{additionalAdvance?.paidAmount || 0}
+        </div>
+
+        <div className="text-right">
+          ₹{additionalAdvance?.advanceBalance || 0}
+        </div>
+      </div>
+
+    </div>
+  </div>
+)}
                         {item.title === "Refundable Bookings" && showBooking && (
                           <div className="border-t border-[#EAECF0]">
 
@@ -953,54 +1093,54 @@ const SettlementSummary = () => {
                           </div>
                         )}
 
- {item.title === "Retainer Invoice" && showRetainer && (
-<>
-<div className="grid grid-cols-4 bg-[#F9FAFB] px-8 py-5 text-[11px] text-[#667085] font-medium">
-  <div className="text-left">INVOICE NUMBER</div>
-  <div className="text-left">INVOICE AMOUNT</div>
-  <div className="text-left">DATE</div>
-  <div className="text-left">AVAILABLE AMOUNT</div>
-</div>
+                        {item.title === "Retainer Invoice" && showRetainer && (
+                          <>
+                            <div className="grid grid-cols-4 bg-[#F9FAFB] px-8 py-5 text-[11px] text-[#667085] font-medium">
+                              <div className="text-left">INVOICE NUMBER</div>
+                              <div className="text-left">INVOICE AMOUNT</div>
+                              <div className="text-left">DATE</div>
+                              <div className="text-left">AVAILABLE AMOUNT</div>
+                            </div>
 
-{/* Only Rows Scroll */}
-<div className="max-h-[300px] overflow-y-auto">
-  {customerRetainer?.retainerInfos?.length > 0 ? (
-    customerRetainer.retainerInfos.map((booking, index) => (
-      <div
-        key={index}
-        className="grid grid-cols-4 px-8 py-6 border-t border-[#EAECF0] items-center"
-      >
-        {/* Invoice Number */}
-        <div className="text-[#3158F5] underline cursor-pointer text-[12px] text-left">
-          {booking.invoiceNumber}
-        </div>
+                            {/* Only Rows Scroll */}
+                            <div className="max-h-[300px] overflow-y-auto">
+                              {customerRetainer?.retainerInfos?.length > 0 ? (
+                                customerRetainer.retainerInfos.map((booking, index) => (
+                                  <div
+                                    key={index}
+                                    className="grid grid-cols-4 px-8 py-6 border-t border-[#EAECF0] items-center"
+                                  >
+                                    {/* Invoice Number */}
+                                    <div className="text-[#3158F5] underline cursor-pointer text-[12px] text-left">
+                                      {booking.invoiceNumber}
+                                    </div>
 
-        {/* Invoice Amount */}
-        <div className="text-[12px] text-left">
-          ₹ {booking.invoiceAmount}
-        </div>
+                                    {/* Invoice Amount */}
+                                    <div className="text-[12px] text-left">
+                                      ₹ {booking.invoiceAmount}
+                                    </div>
 
-        {/* Date */}
-        <div className="text-[12px] text-gray-500 text-left">
-          {booking.invoiceDate}
-        </div>
+                                    {/* Date */}
+                                    <div className="text-[12px] text-gray-500 text-left">
+                                      {booking.invoiceDate}
+                                    </div>
 
-        {/* Available Amount */}
-        <div className="text-[12px] font-medium text-left">
-          ₹ {booking.balanceAmount}
-        </div>
-      </div>
-    ))
-  ) : (
-    <div className="py-10 flex justify-center">
-      <span className="text-[#B54708] text-[14px]">
-        No booking transactions available
-      </span>
-    </div>
-  )}
-</div>
-</>
-)}
+                                    {/* Available Amount */}
+                                    <div className="text-[12px] font-medium text-left">
+                                      ₹ {booking.balanceAmount}
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="py-10 flex justify-center">
+                                  <span className="text-[#B54708] text-[14px]">
+                                    No booking transactions available
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
                         {item.title === "Deductions" && showDeduction && (
                           <div className="border-t border-[#EAECF0] px-8 py-6">
 
@@ -1287,7 +1427,7 @@ const SettlementSummary = () => {
                             </span>
                           </div>
 
-                          <div className="flex justify-between">
+                          {/* <div className="flex justify-between">
                             <span className=" font-inter font-normal">
                               Refundable Advance
                             </span>
@@ -1295,8 +1435,43 @@ const SettlementSummary = () => {
                             <span className="font-medium font-inter">
                               ₹{customerFinalSettlement?.refundableAdvance || 0}
                             </span>
-                          </div>
-                          
+                          </div> */}
+                          {/* <div className="flex justify-between">
+  <span className="font-inter font-normal">
+    Refundable Advance
+  </span>
+
+  <span className="font-medium font-inter">
+    ₹{customerFinalSettlement?.refundableAdvance || 0}
+  </span>
+</div>
+
+<div className="flex justify-between">
+  <span className="font-inter font-normal">
+    Additional Advance
+  </span>
+
+  <span className="font-medium font-inter">
+    ₹{customerFinalSettlement?.additionalAdvanceBalanceAmount || 0}
+  </span>
+</div> */}
+<div className="flex justify-between">
+  <span className="font-inter font-normal">
+    Refundable Advance (
+    ₹{Number(customerFinalSettlement?.refundableAdvance || 0)}
+    {" + "}
+    ₹{Number(customerFinalSettlement?.additionalAdvanceBalanceAmount || 0)}
+    )
+  </span>
+
+  <span className="font-medium font-inter">
+    ₹{(
+      Number(customerFinalSettlement?.refundableAdvance || 0) +
+      Number(customerFinalSettlement?.additionalAdvanceBalanceAmount || 0)
+    ).toFixed(2)}
+  </span>
+</div>
+
                           <div className="flex justify-between">
                             <span className=" font-inter font-normal">
                               Wallet
@@ -1307,7 +1482,7 @@ const SettlementSummary = () => {
                             </span>
                           </div>
 
-                          
+
                           <div className="flex justify-between">
                             <span className="font-normal font-inter">
                               Total Deductions
@@ -1341,8 +1516,17 @@ const SettlementSummary = () => {
                               ₹{unPaidInvoice?.unpaidAmount || 0}
                             </span>
                           </div>
+                           <div className="flex justify-between">
+                            <span className="font-normal font-inter">
+                              Other Invoices
+                            </span>
 
- <div className="flex justify-between">
+                            <span className="font-medium font-inter">
+                              ₹{customerFinalSettlement?.currentMonthOtherInvoicePendingAmount || 0}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between">
                             <span className="font-normal font-inter">
                               Retainer Invoices
                             </span>

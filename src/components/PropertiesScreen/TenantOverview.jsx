@@ -2011,16 +2011,16 @@ const handleApproveKYC = async (customerId) => {
         </div>
       )}
     {showJoiningModal && (
-  <div
-    className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]"
-   onClick={handleCloseJoiningModal}
-  >
+ <div
+  className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
+  onClick={handleCloseJoiningModal}
+>
     <div
       onClick={(e) => e.stopPropagation()}
-      className="bg-white rounded-2xl w-[550px] max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
+      className="bg-white rounded-2xl w-[500px] max-h-[80vh] overflow-hidden shadow-2xl flex flex-col"
     >
       {/* Header */}
-      <div className="flex justify-between items-start px-8 py-6 border-b flex-shrink-0">
+      <div className="flex justify-between items-start px-8 py-6 border-b border-gray-300 flex-shrink-0">
         <div className="flex gap-4">
           <div className="text-orange-500 text-4xl">⚠️</div>
 
@@ -2044,7 +2044,7 @@ const handleApproveKYC = async (customerId) => {
         </button>
       </div>
 
-      {/* Scrollable Body */}
+     
       <div className="flex-1 overflow-y-auto p-8">
 
         <div className="bg-[#F8F9FD] rounded-2xl p-5 flex justify-between items-center">
@@ -2079,13 +2079,13 @@ const handleApproveKYC = async (customerId) => {
 
         </div>
 
-        <div className="mt-8 text-left">
+        <div className="mt-2 text-left">
           <label className="font-medium">
             New Joining Date
             <span className="text-red-500">*</span>
           </label>
 
-          <div className="mt-3">
+          {/* <div className="mt-3">
             <DatePicker
               className="w-full h-[58px]"
               placeholder="Enter the Date want to change"
@@ -2093,7 +2093,22 @@ const handleApproveKYC = async (customerId) => {
               value={joiningDate}
               onChange={handleJoiningDateChange}
             />
-          </div>
+          </div> */}
+          <div className="mt-3">
+  <DatePicker
+  className="w-full h-[58px]"
+  placeholder="Enter the Date want to change"
+  format="DD-MM-YYYY"
+  value={joiningDate}
+  onChange={handleJoiningDateChange}
+  disabledDate={(current) =>
+    current && current > dayjs().endOf("day")
+  }
+  placement="bottomLeft"
+  getPopupContainer={() => document.body}
+  popupClassName="joining-date-picker"
+/>
+</div>
         </div>
 
         {/* Bills */}
@@ -2190,7 +2205,7 @@ const handleApproveKYC = async (customerId) => {
       </div>
 
       {/* Footer */}
-      <div className="border-t px-8 py-5 flex justify-end gap-4 flex-shrink-0">
+      <div className="border-t border-gray-300 px-8 py-5 flex justify-end gap-4 flex-shrink-0">
 
         <button
  onClick={handleCloseJoiningModal}
@@ -2224,7 +2239,7 @@ const handleApproveKYC = async (customerId) => {
       className="bg-white rounded-2xl w-[550px] overflow-hidden shadow-2xl"
     >
       {/* Header */}
-      <div className="flex justify-between items-start px-8 py-6 border-b">
+      <div className="flex justify-between items-start px-8 py-6 border-b border-gray-300">
         <div className="flex gap-4">
           <div className="text-orange-500 text-4xl">⚠️</div>
 
@@ -2304,7 +2319,7 @@ const handleApproveKYC = async (customerId) => {
       </div>
 
       {/* Footer */}
-      <div className="border-t px-8 py-5 flex justify-end gap-4">
+      <div className="border-t border-gray-300 px-8 py-5 flex justify-end gap-4">
 
         <button
           onClick={() => {

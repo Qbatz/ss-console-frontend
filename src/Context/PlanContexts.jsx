@@ -1232,7 +1232,8 @@ const deleteProductUpdate = async (productUpdateId) => {
   } finally {
     setLoading(false);
   }
-};const deleteProductUpdateItem = async (payload) => {
+};
+const deleteProductUpdateItem = async (payload) => {
   try {
     setLoading(true);
     setErrorMsg("");
@@ -1273,6 +1274,44 @@ const deleteProductUpdate = async (productUpdateId) => {
     setLoading(false);
   }
 };
+
+
+const unArchiveProductUpdate = async (productUpdateId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.put(
+      `/v2/product-update/un-archive/${productUpdateId}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+        message:
+          res.data?.message ||
+          "Product update unarchived successfully",
+      };
+    }
+
+    return {
+      success: false,
+      message: "Failed to unarchive product update",
+    };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <PlanContext.Provider
       value={{
@@ -1283,7 +1322,7 @@ const deleteProductUpdate = async (productUpdateId) => {
         getPlansDropdown,reactivatePlan,getSmartstayFeatures,createSmartstayFeature,updateSmartstayFeature,
         deleteSmartstayFeature,getPlanById,getProductUpdateTypes,getProductUpdatePlatforms,getProductUpdateModules,getProductUpdateCtas,getProductUpdatePublishStatuses,
         getProductUpdateAudiences,createProductUpdate,getProductUpdates,searchHostels,archiveProductUpdate,getProductUpdateById,updateProductUpdate,
-        updateProductUpdateItem,createProductUpdateItem,deleteProductUpdate,deleteProductUpdateItem
+        updateProductUpdateItem,createProductUpdateItem,deleteProductUpdate,deleteProductUpdateItem,unArchiveProductUpdate
       }}
     >
       {children}

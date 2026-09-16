@@ -45,6 +45,9 @@ import ProductUpdate from "../components/ProductUpdate/ProductUpdatesScreen";
 import CreateProductUpdate from "../components/ProductUpdate/CreateProductUpdate";
 import StayInfoScreen from "../components/StayInfo/StayInfoScreen";
 import PropertiesUsingKYC from "../components/PropertiesUsingKYC/PropertiesUsingKYC";
+import ServiceTokens from "../components/SecurityScreen/SecurityPage";
+import DataArchive from "../components/DataArchive/DataArchiveList";
+import { DataArchiveProvider } from "../Context/DataArchiveContext";
 
 
 const PrivateRoute = ({ children }) => {
@@ -56,7 +59,7 @@ const PrivateRoute = ({ children }) => {
     return <Navigate to="/" replace />;
   }
 
-  // ✅ token expiredனா reject
+
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
     const currentTime = Date.now() / 1000;
@@ -92,10 +95,10 @@ const PrivateRoutesScreen = () => {
               <DashboardProvider>
                 <SupportTicketsProvider>
                   <KYCProvider>
+                    <DataArchiveProvider>
                     <Routes>
                       <Route path="/home/:roleId" element={<Home />} />
                       <Route path="/proprietors/:roleId" element={<Proprietors />} />
-                      {/* <Route path="/iam-admin-user/:roleId" element={<IamAdminUser />} /> */}
                       <Route path="/iam-admin-user/:adminRoleId/:filterRoleId?" element={<IamAdminUser />} />
                       <Route path="/roles/:roleId" element={<Roles />} />
                       <Route path="/properties/:roleId" element={<Properties />} />
@@ -137,7 +140,10 @@ const PrivateRoutesScreen = () => {
 />
                       <Route path="/stayinfo/:roleId" element={<StayInfoScreen />} />
                        <Route path="/PropertyusingKyc/:roleId" element={<PropertiesUsingKYC />} />
+                         <Route path="/servicetoken/:roleId" element={<ServiceTokens />} />
+                          <Route path="/data-Archive/:roleId" element={<DataArchive/>} />
                     </Routes>
+                    </DataArchiveProvider>
                   </KYCProvider>
                 </SupportTicketsProvider>
               </DashboardProvider>
