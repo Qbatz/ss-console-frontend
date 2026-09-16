@@ -173,7 +173,7 @@ const DataArchive = () => {
               </div>
             </div>
           )}
-          <div className="overflow-auto max-h-[320px]">
+          <div className="overflow-auto max-h-[350px]">
 
             <table className="w-full min-w-[1600px] border-collapse table-fixed">
 
