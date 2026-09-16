@@ -59,6 +59,31 @@ const [limitLoading, setLimitLoading] = useState(false);
 const [monthlyLimitError, setMonthlyLimitError] = useState("");
 
   const approveLock = useRef(false);
+  const tenantDateDropdownRef = useRef(null);
+const tenantStatusDropdownRef = useRef(null);
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      tenantDateDropdownRef.current &&
+      !tenantDateDropdownRef.current.contains(event.target)
+    ) {
+      setIsTenantDateOpen(false);
+    }
+
+    if (
+      tenantStatusDropdownRef.current &&
+      !tenantStatusDropdownRef.current.contains(event.target)
+    ) {
+      setIsTenantStatusOpen(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
   const handleReminder = (tenant) => {
     setReminderTenant(tenant);
   };
@@ -1857,7 +1882,7 @@ const handleSetMonthlyLimit = async () => {
                   </span>
 
 
-                  <div className="relative">
+                  <div  ref={tenantDateDropdownRef} className="relative">
                  
                     <button
                       type="button"
@@ -2045,7 +2070,7 @@ const handleSetMonthlyLimit = async () => {
 
 
 
-                  <div className="relative">
+                  <div ref={tenantStatusDropdownRef} className="relative">
                    
                     <button
                       type="button"

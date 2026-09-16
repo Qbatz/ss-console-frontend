@@ -414,6 +414,11 @@ useEffect(() => {
 
             <SidebarItem title="Support Tickets" count="0" to={`/supportTicket/${adminDetails?.roleId}`} activeIcon={Support}
               inactiveIcon={Support} />
+              <SidebarItem title="Service Tokens" count="0" to={`/servicetoken/${adminDetails?.roleId}`} activeIcon={Users}
+              inactiveIcon={Users} />
+
+              <SidebarItem title="Data Archive" count="0" to={`/data-Archive/${adminDetails?.roleId}`} activeIcon={Users}
+              inactiveIcon={Users} />
               <div>
   {/* KYC Parent */}
   <div
@@ -474,6 +479,7 @@ useEffect(() => {
         // activeIcon={VerifyImg}
         // inactiveIcon={VerifyImg}
       />
+     
 
     </div>
   )}
