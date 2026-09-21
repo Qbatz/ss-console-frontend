@@ -1100,9 +1100,19 @@ const handleApproveKYC = async (customerId) => {
                           {item.invoiceNumber}
                         </td>
 
-                        <td className="px-4 py-4 text-left">
-                          {item.paymentStatus}
-                        </td>
+                       <td className="px-4 py-4 text-left">
+  <span
+    className={
+      item.isCancelled === true
+        ? "text-red-500 font-medium"
+        : "text-gray-700"
+    }
+  >
+    {item.isCancelled === true
+      ? "Cancelled"
+      : item.paymentStatus}
+  </span>
+</td>
 
                         <td className="px-4 py-4 text-left">
                           {item.invoiceMode}

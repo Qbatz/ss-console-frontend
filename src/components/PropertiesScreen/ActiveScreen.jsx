@@ -188,7 +188,7 @@ useEffect(() => {
           mt-3
         "
       >
-        Activities
+       Archive Activities
       </button>
     </div>
   {isMore && (
@@ -502,8 +502,14 @@ useEffect(() => {
       </h2>
 
       <p className="text-[13px] text-[#666] mt-3 leading-5">
-        Are you sure you want to archive the hostel activities?
-      </p>
+  Are you sure you want to archive the hostel activities?
+</p>
+
+
+  
+
+<p className="text-[11px] text-red-600 mt-2">⚠️ Data over 60 days will be deleted.</p>
+
 
       <div className="flex justify-end gap-3 mt-6">
 

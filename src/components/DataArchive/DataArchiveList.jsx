@@ -294,7 +294,7 @@ const DataArchive = () => {
               </thead>
 
               <tbody>
-                {archiveList.map((item) => (
+                {archiveList.map((item,index) => (
                   <tr
                     key={item.archiveId}
                     className="
@@ -317,7 +317,7 @@ const DataArchive = () => {
     group-hover:bg-[#FAFBFF]
   "
                     >
-                      {item.archiveId}
+                     {(page - 1) * size + index + 1}
                     </td>
 
                     <td

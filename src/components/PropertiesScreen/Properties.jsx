@@ -2363,8 +2363,7 @@ const handleAddNote = async () => {
                     <option value={100}>100</option>
                   </select>
 
-                  {/* Prev */}
-                  {/* PREV */}
+                  
 <button
   disabled={hostels?.currentPage <= 1}
   onClick={() => setPage(prev => prev - 1)}
@@ -2383,7 +2382,7 @@ const handleAddNote = async () => {
   &#8249;
 </button>
 
-{/* CURRENT PAGE */}
+
 <span
   className="
     border

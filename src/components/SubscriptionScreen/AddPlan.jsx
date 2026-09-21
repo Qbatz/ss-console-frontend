@@ -73,6 +73,8 @@ const AddEditPlan = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [featureError, setFeatureError] = useState("");
+ 
+const [isUnlimited, setIsUnlimited] = useState(false);
   const buttonRef = useRef(false)
   const [featureForm, setFeatureForm] = useState({
     labelText: "",
@@ -115,7 +117,17 @@ const AddEditPlan = () => {
       setShouldShow(editData.shouldShow);
       setGstPercentage(editData.gst)
       setFinalAmount(editData.finalPrice)
-      setLimit(editData.kycPerMonthLimit ?? "");
+      // setLimit(editData.kycPerMonthLimit ?? "");
+      const kycLimit = editData.kycPerMonthLimit;
+
+setIsUnlimited(kycLimit === -1);
+
+setLimit(
+  kycLimit === -1
+    ? ""
+    : kycLimit ?? ""
+);
+      
 
 
       const addonData = editData.planFeatures.map(f => ({
@@ -531,7 +543,11 @@ const AddEditPlan = () => {
       price: Number(price),
       discountPercentage: Number(discount),
       gstPercentage,
-      kycPerMonthLimit: Number(limit),
+     kycPerMonthLimit: isUnlimited
+  ? -1
+  : limit === ""
+    ? ""
+    : Number(limit),
       shouldShow,
       canCustomize,
       planFeatures
@@ -580,7 +596,15 @@ const AddEditPlan = () => {
         Number(duration) === Number(editData.duration) &&
         Number(discount) === Number(editData.discountPercentage) &&
         Number(gstPercentage) === Number(editData.gst) &&
-        Number(limit) === Number(editData.kycPerMonthLimit) &&
+        // Number(limit) === Number(editData.kycPerMonthLimit) &&
+        (isUnlimited ? -1 : limit === "" ? "" : Number(limit)) ===
+(
+  editData.kycPerMonthLimit === -1
+    ? -1
+    : editData.kycPerMonthLimit === "" || editData.kycPerMonthLimit == null
+      ? ""
+      : Number(editData.kycPerMonthLimit)
+) &&
         shouldShow === editData.shouldShow &&
         canCustomize === editData.canCustomize &&
         oldFeatures === newFeatures;
@@ -1370,19 +1394,45 @@ const AddEditPlan = () => {
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-black-500 text-left">KYC Month Limit</label>
-                  <input
-                    type="text"
-                   value={limit}
-  onChange={(e) => {
-    const value = e.target.value.replace(/[^0-9]/g, "");
-    setLimit(value);
-  }}
-                    placeholder="Enter Limit"
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+            <div className="flex flex-col gap-1">
+  <label className="text-xs font-medium text-black-500 text-left">
+    KYC Month Limit
+  </label>
+
+ {!isUnlimited && (
+  <input
+    type="text"
+    value={limit}
+    onChange={(e) => {
+      const value = e.target.value.replace(/[^0-9]/g, "");
+      setLimit(value);
+    }}
+    placeholder="Enter Limit"
+    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+)}
+
+ <label className="flex items-center gap-2 mt-1 cursor-pointer">
+  <input
+    type="checkbox"
+    checked={isUnlimited}
+    onChange={(e) => {
+      const checked = e.target.checked;
+
+      setIsUnlimited(checked);
+
+      if (checked) {
+        setLimit("");
+      }
+    }}
+    className="w-4 h-4 cursor-pointer"
+  />
+
+  <span className="text-xs text-gray-600">
+    Unlimited
+  </span>
+</label>
+</div>
 
                 {editData && (
                   <div className="flex flex-col gap-1">

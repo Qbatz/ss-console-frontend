@@ -65,6 +65,9 @@ const TransactionsPage = () => {
   const [isManual, setIsManual] = useState(false);
   const [invoiceFileError, setInvoiceFileError] = useState("");
   const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  
+const [fileLoading, setFileLoading] = useState(false);
   const handleSharePayment = async () => {
 
     if (!selectedTxn?.paymentUrl) {
@@ -255,13 +258,15 @@ console.log("currentData",currentData)
     setIsManual(false);
   };
   const handleUploadInvoice = async () => {
-    if (!invoiceFile) {
-      setInvoiceFileError("Please upload invoice");
-      return;
-    }
+  if (!invoiceFile) {
+    setInvoiceFileError("Please upload invoice");
+    return;
+  }
 
-    setInvoiceFileError("");
+  setInvoiceFileError("");
+  setUploadLoading(true);
 
+  try {
     const res = await uploadInvoice(
       selectedTxn.historyId,
       invoiceFile,
@@ -269,10 +274,7 @@ console.log("currentData",currentData)
     );
 
     if (res.success) {
-
-
       const updatedData = await fetchData();
-
 
       const updatedItem = [
         ...(updatedData?.paidHistories?.orderHistories || []),
@@ -295,7 +297,6 @@ console.log("currentData",currentData)
       }, 1500);
 
     } else {
-
       setModalType("error");
       setMessage(res.message);
       setShowSuccess(true);
@@ -304,7 +305,66 @@ console.log("currentData",currentData)
         setShowSuccess(false);
       }, 1500);
     }
-  };
+
+  } catch (error) {
+    setModalType("error");
+    setMessage("Invoice upload failed");
+    setShowSuccess(true);
+  } finally {
+    setUploadLoading(false);
+  }
+};
+  // const handleUploadInvoice = async () => {
+  //   if (!invoiceFile) {
+  //     setInvoiceFileError("Please upload invoice");
+  //     return;
+  //   }
+
+  //   setInvoiceFileError("");
+
+  //   const res = await uploadInvoice(
+  //     selectedTxn.historyId,
+  //     invoiceFile,
+  //     isManual
+  //   );
+
+  //   if (res.success) {
+
+
+  //     const updatedData = await fetchData();
+
+
+  //     const updatedItem = [
+  //       ...(updatedData?.paidHistories?.orderHistories || []),
+  //       ...(updatedData?.createdHistories?.orderHistories || [])
+  //     ].find(
+  //       (item) => item.historyId === selectedTxn.historyId
+  //     );
+
+  //     if (updatedItem) {
+  //       setSelectedTxn(updatedItem);
+  //     }
+
+  //     setModalType("success");
+  //     setMessage(res.data);
+  //     setShowSuccess(true);
+
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //       handleCloseUploadModal();
+  //     }, 1500);
+
+  //   } else {
+
+  //     setModalType("error");
+  //     setMessage(res.message);
+  //     setShowSuccess(true);
+
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 1500);
+  //   }
+  // };
   // const handleUploadInvoice = async () => {
   //   if (!invoiceFile) {
   //   setInvoiceFileError("Please upload invoice");
@@ -1843,60 +1903,108 @@ console.log("currentData",currentData)
                   <span className="text-red-500">*</span>
                 </label>
 
-                <label
-                  htmlFor="invoiceUpload"
-                  className="
-              w-full
-              h-[120px]
-              border-2
-              border-dashed
-              border-gray-300
-              rounded-xl
-              flex
-              flex-col
-              items-center
-              justify-center
-              cursor-pointer
-              hover:border-[#2952F3]
-              transition-all
-            "
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-10 h-10 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M7 16V8m0 0l5-5m-5 5l5 5M17 16V8"
-                    />
-                  </svg>
+<label
+  htmlFor="invoiceUpload"
+  className="
+    w-full
+    h-[120px]
+    border-2
+    border-dashed
+    border-gray-300
+    rounded-xl
+    flex
+    flex-col
+    items-center
+    justify-center
+    cursor-pointer
+    hover:border-[#2952F3]
+    transition-all
+  "
+>
+  {fileLoading ? (
+    <>
+      {/* Loader */}
+      <div className="w-8 h-8 border-4 border-gray-200 border-t-[#2952F3] rounded-full animate-spin" />
 
-                  <p className="mt-2 text-sm text-gray-500">
-                    Click to upload invoice
-                  </p>
+      <p className="mt-2 text-sm text-gray-500">
+        Loading file...
+      </p>
+    </>
+  ) : (
+    <>
+      {/* Upload Icon */}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-10 h-10 text-gray-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M7 16V8m0 0l5-5m-5 5l5 5M17 16V8"
+        />
+      </svg>
 
-                  {invoiceFile && (
-                    <p className="text-xs text-[#2952F3] mt-2">
-                      {invoiceFile.name}
-                    </p>
-                  )}
-                </label>
+      {invoiceFile ? (
+        <p
+          className="
+            mt-2
+            text-sm
+            text-[#2952F3]
+            font-medium
+            truncate
+            max-w-[90%]
+          "
+          title={invoiceFile.name}
+        >
+          {invoiceFile.name}
+        </p>
+      ) : selectedTxn?.subscriptionInvoiceUrl ? (
+        <p
+          className="
+            mt-2
+            text-sm
+            text-[#2952F3]
+            font-medium
+            truncate
+            max-w-[90%]
+          "
+          title={selectedTxn?.subscriptionInvoiceUrl}
+        >
+          {selectedTxn?.subscriptionInvoiceUrl.split("/").pop()}
+        </p>
+      ) : (
+        <p className="mt-2 text-sm text-gray-500">
+          Click to upload invoice
+        </p>
+      )}
+    </>
+  )}
+</label>
 
-                <input
-                  id="invoiceUpload"
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  hidden
-                  onChange={(e) => {
-                    setInvoiceFile(e.target.files?.[0] || null);
-                    setInvoiceFileError("");
-                  }}
-                />
+<input
+  id="invoiceUpload"
+  type="file"
+  accept=".pdf,.jpg,.jpeg,.png"
+  hidden
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    setFileLoading(true);
+    setInvoiceFile(null);
+    setInvoiceFileError("");
+
+    setTimeout(() => {
+      setInvoiceFile(file);
+      setFileLoading(false);
+    }, 800);
+  }}
+/>
               </div>
               {invoiceFileError && (
                 <ErrorMessage
@@ -1963,19 +2071,34 @@ console.log("currentData",currentData)
               </button>
 
               <button
-                onClick={handleUploadInvoice}
-                className="
-            px-6
-            py-2
-            bg-[#2952F3]
-            text-white
-            rounded-lg
-            hover:bg-[#1f46e5]
-            cursor-pointer
-          "
-              >
-                Upload
-              </button>
+  onClick={handleUploadInvoice}
+  disabled={uploadLoading}
+  className="
+    px-6
+    py-2
+    bg-[#2952F3]
+    text-white
+    rounded-lg
+    hover:bg-[#1f46e5]
+    cursor-pointer
+    disabled:opacity-60
+    disabled:cursor-not-allowed
+    flex
+    items-center
+    justify-center
+    gap-2
+    min-w-[100px]
+  "
+>
+  {uploadLoading ? (
+    <>
+      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+      Uploading...
+    </>
+  ) : (
+    "Upload"
+  )}
+</button>
             </div>
           </div>
         </div>
