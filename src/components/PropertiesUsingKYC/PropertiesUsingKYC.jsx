@@ -8,7 +8,7 @@ import Toast from "../SuccessModal/ToastDesign";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 const PropertiesUsingKYC = () => {
-  const { loading, getHostelKYCList, getHostelKYCDetails, approveKYC,sendKYCReminder } = useKyc();
+  const { loading, getHostelKYCList, getHostelKYCDetails, approveKYC, sendKYCReminder, enableHostelKYC, disableHostelKYC, setKycMonthlyLimit } = useKyc();
   const { RangePicker } = DatePicker;
   const [status, setStatus] = useState("Status");
   const [period, setPeriod] = useState("ALL");
@@ -39,7 +39,7 @@ const PropertiesUsingKYC = () => {
   const [isTenantDateOpen, setIsTenantDateOpen] = useState(false);
   const [isTenantStatusOpen, setIsTenantStatusOpen] = useState(false);
   const [reminderTenant, setReminderTenant] = useState(null);
-  console.log("reminderTenant",reminderTenant)
+  console.log("reminderTenant", reminderTenant)
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [selectedApproveTenant, setSelectedApproveTenant] = useState(null);
   const [approveLoading, setApproveLoading] = useState(false);
@@ -48,7 +48,40 @@ const PropertiesUsingKYC = () => {
   const [message, setMessage] = useState("");
   const [showKycConfirm, setShowKycConfirm] = useState(false);
   const [kycEnableStatus, setKycEnableStatus] = useState(false);
+  const [activationReason, setActivationReason] = useState("");
+  const [disableEndDate, setDisableEndDate] = useState(dayjs());
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [monthlyLimit, setMonthlyLimit] = useState("");
+  const [isUnlimited, setIsUnlimited] = useState(false);
+  const [limitLoading, setLimitLoading] = useState(false);
+  const [monthlyLimitError, setMonthlyLimitError] = useState("");
+
   const approveLock = useRef(false);
+  const tenantDateDropdownRef = useRef(null);
+  const tenantStatusDropdownRef = useRef(null);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        tenantDateDropdownRef.current &&
+        !tenantDateDropdownRef.current.contains(event.target)
+      ) {
+        setIsTenantDateOpen(false);
+      }
+
+      if (
+        tenantStatusDropdownRef.current &&
+        !tenantStatusDropdownRef.current.contains(event.target)
+      ) {
+        setIsTenantStatusOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   const handleReminder = (tenant) => {
     setReminderTenant(tenant);
   };
@@ -81,22 +114,22 @@ const PropertiesUsingKYC = () => {
           tenantDateFilter,
           tenantDateRange
         );
- setModalType("success");
-      setMessage(res?.data);
-      setShowSuccess(true);
+        setModalType("success");
+        setMessage(res?.data);
+        setShowSuccess(true);
 
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 1500);
-       
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
+
       } else {
-      setModalType("error");
-      setMessage(res?.message);
-      setShowSuccess(true);
+        setModalType("error");
+        setMessage(res?.message);
+        setShowSuccess(true);
 
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 1500);
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
       }
     } finally {
       setApproveLoading(false);
@@ -104,62 +137,62 @@ const PropertiesUsingKYC = () => {
     }
   };
   const sendTenantKYCReminder = async () => {
-  if (!reminderTenant?.tenantId) {
-    console.error("Customer ID missing");
-    return;
-  }
-
-  try {
-    setTenantLoading(true);
-
-    const res = await sendKYCReminder(
-      reminderTenant.tenantId
-    );
-
-    if (res?.success) {
-      setReminderTenant(null);
-
-      setModalType("success");
-      setMessage(
-        res?.data || "Reminder sent successfully"
-      );
-      setShowSuccess(true);
-
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 1500);
-
-     
-      await loadTenantKYC(
-        selectedProperty?.hostelId ||
-          selectedProperty?.id,
-        tenantPage,
-        tenantPageSize,
-        tenantSearch,
-        tenantKycStatus,
-        tenantDateFilter,
-        tenantDateRange
-      );
-    } else {
-      setModalType("error");
-      setMessage(
-        res?.message || "Failed to send reminder"
-      );
-      setShowSuccess(true);
-
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 1500);
+    if (!reminderTenant?.tenantId) {
+      console.error("Customer ID missing");
+      return;
     }
-  } catch (error) {
-    console.error(
-      "Send Tenant KYC Reminder Error:",
-      error
-    );
-  } finally {
-    setTenantLoading(false);
-  }
-};
+
+    try {
+      setTenantLoading(true);
+
+      const res = await sendKYCReminder(
+        reminderTenant.tenantId
+      );
+
+      if (res?.success) {
+        setReminderTenant(null);
+
+        setModalType("success");
+        setMessage(
+          res?.data || "Reminder sent successfully"
+        );
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
+
+
+        await loadTenantKYC(
+          selectedProperty?.hostelId ||
+          selectedProperty?.id,
+          tenantPage,
+          tenantPageSize,
+          tenantSearch,
+          tenantKycStatus,
+          tenantDateFilter,
+          tenantDateRange
+        );
+      } else {
+        setModalType("error");
+        setMessage(
+          res?.message || "Failed to send reminder"
+        );
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
+      }
+    } catch (error) {
+      console.error(
+        "Send Tenant KYC Reminder Error:",
+        error
+      );
+    } finally {
+      setTenantLoading(false);
+    }
+  };
   const loadHostels = async () => {
     try {
 
@@ -171,7 +204,7 @@ const PropertiesUsingKYC = () => {
         isEnabled = false;
       }
 
-     
+
       const dateFilter = period;
 
       let startDate;
@@ -231,7 +264,7 @@ const PropertiesUsingKYC = () => {
 
       const data = result?.data;
 
-      
+
       setDateFilters(data?.dateFilters || []);
 
       const hostelList = data?.hostelList || [];
@@ -279,51 +312,208 @@ const PropertiesUsingKYC = () => {
     }
   };
 
+  const handleKycEnableDisable = async () => {
+    try {
+      const hostelId =
+        selectedProperty?.hostelId ||
+        selectedProperty?.id;
 
-const handleKycEnableDisable = async () => {
-  try {
-    const hostelId =
-      selectedProperty?.hostelId ||
-      selectedProperty?.id;
+      console.log("KYC HOSTEL ID:", hostelId);
 
-    if (!hostelId) {
-      console.error("Missing hostelId");
-      return;
-    }
+      if (!hostelId) {
+        console.error("Missing hostelId");
+        return;
+      }
 
-    setLoading(true);
+      if (!kycEnableStatus) {
+        const result = await enableHostelKYC(
+          hostelId,
+          activationReason?.trim() || ""
+        );
 
-    
-    const newStatus = !kycEnableStatus;
+        console.log("ENABLE KYC API RESULT:", result);
 
-    const result = await updateHostelKYCStatus(
-      hostelId,
-      newStatus
-    );
+        if (!result?.success) {
+          setModalType("error");
+          setMessage(
+            result?.message || "Failed to enable KYC"
+          );
+          setShowSuccess(true);
+          setTimeout(() => {
+            setShowSuccess(false);
+          }, 1500);
+          return;
+        }
 
-    if (!result?.success) {
-      console.error(
-        "KYC Enable/Disable failed:",
-        result?.message
+
+        setKycEnableStatus(true);
+        setShowKycConfirm(false);
+        setActivationReason("");
+
+
+        lastRequestRef.current = "";
+        await loadHostels();
+        await loadTenantKYC(
+          hostelId,
+          tenantPage,
+          tenantPageSize,
+          tenantSearch,
+          tenantKycStatus,
+          tenantDateFilter,
+          tenantDateRange
+        );
+
+        setModalType("success");
+        setMessage(
+          result?.data || "KYC enabled successfully"
+        );
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
+
+        return;
+      }
+
+
+
+      const endDate = disableEndDate
+        ? disableEndDate.format("DD-MM-YYYY")
+        : "";
+
+      const result = await disableHostelKYC(
+        hostelId,
+        endDate,
+        false,
+        activationReason?.trim() || ""
       );
-      return;
+
+      console.log("DISABLE KYC API RESULT:", result);
+
+      if (!result?.success) {
+        setModalType("error");
+        setMessage(
+          result?.message || "Failed to disable KYC"
+        );
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
+        return;
+      }
+
+
+      setKycEnableStatus(false);
+      setShowKycConfirm(false);
+      setActivationReason("");
+
+
+      lastRequestRef.current = "";
+      await loadHostels();
+      await loadTenantKYC(
+        hostelId,
+        tenantPage,
+        tenantPageSize,
+        tenantSearch,
+        tenantKycStatus,
+        tenantDateFilter,
+        tenantDateRange
+      );
+      setModalType("success");
+      setMessage(
+        result?.data || "KYC disabled successfully"
+      );
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
+    } catch (error) {
+      console.error(
+        "KYC Enable/Disable Error:",
+        error
+      );
+
+      setModalType("error");
+      setMessage(
+        error?.message || "Something went wrong"
+      );
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
     }
+  };
 
-    // Update UI only after API success
-    setKycEnableStatus(newStatus);
-
-    // Close confirmation modal
+  const closeKycConfirm = () => {
     setShowKycConfirm(false);
+    setActivationReason("");
+    setDisableEndDate(dayjs());
+  };
+  // const handleKycEnableDisable = async () => {
+  //   try {
+  //     const hostelId =
+  //       selectedProperty?.hostelId ||
+  //       selectedProperty?.id;
 
-  } catch (error) {
-    console.error(
-      "KYC Enable/Disable Error:",
-      error
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+  //     console.log("ENABLE KYC HOSTEL ID:", hostelId);
+
+  //     if (!hostelId) {
+  //       console.error("Missing hostelId");
+  //       return;
+  //     }
+
+  //     if (!kycEnableStatus) {
+
+  //       const result = await enableHostelKYC(
+  //         hostelId,
+  //         activationReason?.trim() || ""
+  //       );
+
+  //       console.log("ENABLE KYC API RESULT:", result);
+
+  //       if (!result?.success) {
+  //         setModalType("error");
+  //         setMessage(
+  //           result?.message || "Failed to enable KYC"
+  //         );
+  //         setShowSuccess(true);
+  //         return;
+  //       }
+
+  //       // API success
+  //       setKycEnableStatus(true);
+  //       setShowKycConfirm(false);
+  //       setActivationReason("");
+
+  //       // Refresh getHostelKYCList
+  //       lastRequestRef.current = "";
+  //       await loadHostels();
+
+  //       setModalType("success");
+  //       setMessage(
+  //         result?.data || "KYC enabled successfully"
+  //       );
+  //       setShowSuccess(true);
+
+  //       setTimeout(() => {
+  //         setShowSuccess(false);
+  //       }, 1500);
+
+  //       return;
+  //     }
+
+  //     console.log("Disable KYC API not connected yet");
+
+  //   } catch (error) {
+  //     console.error(
+  //       "KYC Enable Error:",
+  //       error
+  //     );
+  //   }
+  // };
 
 
   useEffect(() => {
@@ -366,7 +556,7 @@ const handleKycEnableDisable = async () => {
       let startDate;
       let endDate;
 
-      // CUSTOM date
+
       if (
         dateFilter === "CUSTOM" &&
         dateRangeValue?.length === 2
@@ -420,53 +610,53 @@ const handleKycEnableDisable = async () => {
       setTenantKycStatuses(
         data?.kycStatus || []
       );
-const hostel = data?.hostel;
+      const hostel = data?.hostel;
 
-if (hostel) {
-  setSelectedProperty((prev) => ({
-    ...prev,
-    ...hostel,
+      if (hostel) {
+        setSelectedProperty((prev) => ({
+          ...prev,
+          ...hostel,
 
-    totalTenants: hostel?.totalTenants ?? 0,
-    totalRequested: hostel?.totalRequested ?? 0,
-    totalVerified: hostel?.totalVerified ?? 0,
-    totalWaitingForApproval:
-      hostel?.totalWaitingForApproval ?? 0,
-  }));
-}
+          totalTenants: hostel?.totalTenants ?? 0,
+          totalRequested: hostel?.totalRequested ?? 0,
+          totalVerified: hostel?.totalVerified ?? 0,
+          totalWaitingForApproval:
+            hostel?.totalWaitingForApproval ?? 0,
+        }));
+      }
       const tenants =
         data?.hostel?.tenants || [];
 
 
-     const formattedTenants = tenants.map((tenant) => ({
-  ...tenant,
+      const formattedTenants = tenants.map((tenant) => ({
+        ...tenant,
 
-  tenantId: tenant?.customerId || "",
+        tenantId: tenant?.customerId || "",
 
-  tenantName: tenant?.fullName?.trim() || "N/A",
+        tenantName: tenant?.fullName?.trim() || "N/A",
 
-  joinDate: tenant?.joiningDate || "",
+        joinDate: tenant?.joiningDate || "",
 
-  billingCycle:
-    tenant?.billingCycleStart &&
-    tenant?.billingCycleEnd
-      ? `${tenant.billingCycleStart} - ${tenant.billingCycleEnd}`
-      : "N/A",
+        billingCycle:
+          tenant?.billingCycleStart &&
+            tenant?.billingCycleEnd
+            ? `${tenant.billingCycleStart} - ${tenant.billingCycleEnd}`
+            : "N/A",
 
-  submittedDate: tenant?.kycCompletedDate || "",
-  submittedTime: tenant?.kycCompletedTime || "",
+        submittedDate: tenant?.kycCompletedDate || "",
+        submittedTime: tenant?.kycCompletedTime || "",
 
-  kycStatus:
-    tenant?.kycDetailsStatus?.trim()
-      ? tenant.kycDetailsStatus
-      : "NOT_AVAILABLE",
+        kycStatus:
+          tenant?.kycDetailsStatus?.trim()
+            ? tenant.kycDetailsStatus
+            : "NOT_AVAILABLE",
 
-  canSendReminder:
-    tenant?.canSendReminder ?? false,
+        canSendReminder:
+          tenant?.canSendReminder ?? false,
 
-  canApproveKyc:
-    tenant?.canApproveKyc ?? false,
-}));
+        canApproveKyc:
+          tenant?.canApproveKyc ?? false,
+      }));
 
       setTenantList(formattedTenants);
 
@@ -493,31 +683,37 @@ if (hostel) {
     }
   };
   useEffect(() => {
-  if (!isDrawerOpen || !selectedProperty) return;
+    if (!isDrawerOpen || !selectedProperty) return;
 
-  loadTenantKYC(
-    selectedProperty?.hostelId || selectedProperty?.id,
+    loadTenantKYC(
+      selectedProperty?.hostelId || selectedProperty?.id,
+      tenantPage,
+      tenantPageSize,
+      tenantSearch,
+      tenantKycStatus,
+      tenantDateFilter,
+      tenantDateRange
+    );
+  }, [
     tenantPage,
     tenantPageSize,
-    tenantSearch,
-    tenantKycStatus,
-    tenantDateFilter,
-    tenantDateRange
-  );
-}, [
-  tenantPage,
-  tenantPageSize,
-]);
+  ]);
+
   const handleView = async (property) => {
     console.log("VIEW CLICKED:", property);
-    console.log("HOSTEL ID:", property?.hostelId);
-    console.log("HOSTEL ID FROM ID:", property?.id);
-    console.log(
-      "getHostelKYCDetails:",
-      getHostelKYCDetails
-    );
 
     setSelectedProperty(property);
+    setKycEnableStatus(property?.kycEnableStatus === true);
+
+    // API kycHistoryEndDate -> DatePicker default value
+    if (property?.kycHistoryEndDate) {
+      setDisableEndDate(
+        dayjs(property.kycHistoryEndDate, "DD/MM/YYYY")
+      );
+    } else {
+      setDisableEndDate(dayjs());
+    }
+
     setIsDrawerOpen(true);
 
     setTenantPage(1);
@@ -531,40 +727,135 @@ if (hostel) {
       ""
     );
   };
+  //  const handleView = async (property) => {
+  //   console.log("VIEW CLICKED:", property);
+
+  //   setSelectedProperty(property);
+  //   setKycEnableStatus(property?.kycEnableStatus === true);
+  //   setIsDrawerOpen(true);
+
+  //   setTenantPage(1);
+  //   setTenantSearch("");
+  //   setTenantList([]);
+
+  //   await loadTenantKYC(
+  //     property?.hostelId || property?.id,
+  //     1,
+  //     tenantPageSize,
+  //     ""
+  //   );
+  // };
 
 
- const closeDrawer = () => {
-  setIsDrawerOpen(false);
-  setSelectedProperty(null);
+  const closeDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedProperty(null);
 
-  // Close dropdowns
-  setIsTenantDateOpen(false);
-  setIsTenantStatusOpen(false);
+    // Close dropdowns
+    setIsTenantDateOpen(false);
+    setIsTenantStatusOpen(false);
 
-  // Reset tenant filters
-  setTenantDateFilter("ALL");
-  setTenantDateRange([]);
-  setTenantKycStatus("");
+    // Reset tenant filters
+    setTenantDateFilter("ALL");
+    setTenantDateRange([]);
+    setTenantKycStatus("");
+    setDisableEndDate(dayjs());
 
-  
-  setTenantSearch("");
-  setTenantPage(1);
-};
-  
+    setTenantSearch("");
+    setTenantPage(1);
+  };
+
+
 
   const filteredProperties = properties;
 
+  const handleSetMonthlyLimit = async () => {
+    setMonthlyLimitError("");
+
+    if (!selectedProperty?.hostelId) {
+      setMonthlyLimitError("Hostel ID is missing");
+      return;
+    }
+
+    // const limit = isUnlimited ? -1 : Number(monthlyLimit);
+    const limit = isUnlimited ? -1 : Number(monthlyLimit);
+
+    if (!isUnlimited && (!monthlyLimit || limit <= 0)) {
+      setMonthlyLimitError("Please enter a valid monthly limit");
+      return;
+    }
+
+    try {
+      setLimitLoading(true);
+
+      const result = await setKycMonthlyLimit(
+        selectedProperty.hostelId,
+        limit
+      );
+
+      if (!result?.success) {
+        setMonthlyLimitError(
+          result?.message || "Failed to set monthly limit"
+        );
+        return;
+      }
+
+      setSelectedProperty((prev) => ({
+        ...prev,
+        kycLimitPerMonth: limit,
+      }));
+
+      setShowLimitModal(false);
+      setMonthlyLimit("");
+      setIsUnlimited(false);
+      setMonthlyLimitError("");
+
+      setMessage(
+        isUnlimited
+          ? "Monthly limit set to Unlimited"
+          : "Monthly limit updated successfully"
+      );
+
+      setModalType("success");
+      setShowSuccess(true);
+
+      await loadHostels();
+      await loadTenantKYC(
+        selectedProperty?.hostelId || selectedProperty?.id,
+        tenantPage,
+        tenantPageSize,
+        tenantSearch,
+        tenantKycStatus,
+        tenantDateFilter,
+        tenantDateRange
+      );
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1000);
+    } catch (error) {
+      setMonthlyLimitError(
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to set monthly limit"
+      );
+    } finally {
+      setLimitLoading(false);
+    }
+  };
+
+
   return (
     <DashboardLayout>
-       <Toast
-              show={showSuccess}
-              message={message}
-              type={modalType}
-      
-            />
+      <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
+
+      />
       <div className="w-full bg-white min-h-screen">
 
-        {/* ================= TITLE ================= */}
+
         <div className="h-[40px] px-[15px] flex items-center border-b border-[#E5E7EB]">
           <h1 className="text-[14px] font-medium text-[#202124]">
             Properties Using KYC
@@ -681,7 +972,7 @@ if (hostel) {
                 <RangePicker
                   value={dateRange}
                   onChange={(dates) => {
-                    
+
                     if (!dates || dates.length === 0) {
                       setDateRange([]);
                       setPeriod("THIS_MONTH");
@@ -811,7 +1102,7 @@ if (hostel) {
 
                   <th className="w-[14%] px-[8px] text-left flex-shrink-0">
                     <span className="text-[11px] font-medium text-[#555]">
-                      TOTAL TENANTS
+                      REQUESTS
                     </span>
                   </th>
 
@@ -897,7 +1188,7 @@ if (hostel) {
           "
                     >
 
-                   
+
                       <td className="w-[68px] px-[10px]">
                         <span className="text-[12px] text-[#222]">
                           {(currentPage - 1) * pageSize + index + 1}
@@ -971,12 +1262,12 @@ if (hostel) {
 
                       <td className="w-[14%] px-[8px] text-center flex-shrink-0 text-left">
                         <span className="text-[12px] text-[#333]">
-                          {item.tenants}
+                          {item.totalRequests}
                         </span>
                       </td>
 
 
-                    
+
                       <td className="w-[11%] px-[8px] text-center flex-shrink-0 text-left">
                         <span className="text-[12px] text-[#333]">
                           {item.verified}
@@ -984,7 +1275,7 @@ if (hostel) {
                       </td>
 
 
-                     
+
                       <td className="w-[14%] px-[8px] flex-shrink-0 text-left">
                         <span
                           className={`
@@ -1001,7 +1292,7 @@ if (hostel) {
                       </td>
 
 
-                      
+
                       <td className="w-[21%] px-[8px] flex-shrink-0 text-left">
                         <span className="text-[12px] text-[#333]">
                           {item.updated}
@@ -1009,7 +1300,7 @@ if (hostel) {
                       </td>
 
 
-                      
+
                       <td className="w-[14%] px-[8px] text-center flex-shrink-0">
 
                         <button
@@ -1061,7 +1352,7 @@ if (hostel) {
 
               <div className="flex items-center gap-5">
 
-               
+
                 <select
                   value={pageSize}
                   onChange={(e) => {
@@ -1069,16 +1360,16 @@ if (hostel) {
                     setCurrentPage(1);
                   }}
                   className="
-        w-[92px]
-        h-10
-        border
-        border-gray-300
-        rounded-lg
-        px-3
-        text-[12px]
-        outline-none
-        cursor-pointer
-      "
+      w-[92px]
+      h-10
+      border
+      border-gray-300
+      rounded-lg
+      px-3
+      text-[12px]
+      outline-none
+      cursor-pointer
+    "
                 >
                   <option value={10}>10</option>
                   <option value={20}>20</option>
@@ -1087,61 +1378,74 @@ if (hostel) {
                 </select>
 
 
+
                 <button
                   type="button"
-                  disabled={currentPage === 1}
-                  onClick={() =>
-                    setCurrentPage((prev) =>
-                      Math.max(prev - 1, 1)
-                    )
+                  disabled={
+                    currentPage <= 1 ||
+                    totalPages <= 1 ||
+                    !totalItems ||
+                    totalItems <= pageSize * (currentPage - 1)
                   }
+                  onClick={() => {
+                    if (currentPage > 1) {
+                      setCurrentPage((prev) => prev - 1);
+                    }
+                  }}
                   className="
-        text-[20px]
-        disabled:opacity-40
-        cursor-pointer
-      "
+      text-[20px]
+      disabled:opacity-40
+      disabled:cursor-not-allowed
+      cursor-pointer
+    "
                 >
                   ‹
                 </button>
 
 
+
                 <div
                   className="
-        w-10
-        h-10
-        rounded-full
-        bg-[#F5F7FB]
-        flex
-        items-center
-        justify-center
-        text-[12px]
-      "
+      w-10
+      h-10
+      rounded-full
+      bg-[#F5F7FB]
+      flex
+      items-center
+      justify-center
+      text-[12px]
+    "
                 >
                   {currentPage}
                 </div>
 
-                {/* Page Info */}
+
+
                 <span className="text-[12px]">
                   {currentPage} - {totalPages}
                 </span>
 
-                {/* Next */}
+
+
                 <button
                   type="button"
-                  disabled={currentPage >= totalPages}
-                  onClick={() =>
-                    setCurrentPage((prev) =>
-                      Math.min(
-                        prev + 1,
-                        totalPages
-                      )
-                    )
+                  disabled={
+                    currentPage >= totalPages ||
+                    totalPages <= 1 ||
+                    !totalItems ||
+                    totalItems <= pageSize * currentPage
                   }
+                  onClick={() => {
+                    if (currentPage < totalPages) {
+                      setCurrentPage((prev) => prev + 1);
+                    }
+                  }}
                   className="
-        text-[20px]
-        disabled:opacity-40
-        cursor-pointer
-      "
+      text-[20px]
+      disabled:opacity-40
+      disabled:cursor-not-allowed
+      cursor-pointer
+    "
                 >
                   ›
                 </button>
@@ -1158,7 +1462,7 @@ if (hostel) {
             className="
         fixed
         inset-0
-        bg-black/30
+        bg-black/50
         z-[999]
       "
             onClick={closeDrawer}
@@ -1171,7 +1475,7 @@ if (hostel) {
     top-[15px]
     right-[15px]
     bottom-[15px]
-    w-[420px]
+    w-[570px]
     bg-white
     z-[1000]
     rounded-[8px]
@@ -1237,39 +1541,38 @@ if (hostel) {
 
             <div className="px-[18px] grid grid-cols-3 gap-[7px]">
 
-             <StatCard
-  title="Total Tenants"
-  value={selectedProperty?.totalTenants ?? 0}
-  subtitle="Invoices to create"
-/>
+              <StatCard
+                title="Total Requested"
+                value={selectedProperty?.totalKycRequestedTenants ?? 0}
+                subtitle="Invoices to create"
+              />
 
-<StatCard
-  title="Total Requested"
-  value={selectedProperty?.totalRequested ?? 0}
-  subtitle="Selected"
-/>
+              <StatCard
+                title="Requested"
+                value={selectedProperty?.totalRequested ?? 0}
+                subtitle="Selected"
+              />
 
-<StatCard
-  title="Total Verified"
-  value={selectedProperty?.totalVerified ?? 0}
-  subtitle="Selected"
-/>
+              <StatCard
+                title="Verified"
+                value={selectedProperty?.totalVerified ?? 0}
+                subtitle="Selected"
+              />
 
-<StatCard
-  title="Waiting For Approval"
-  value={selectedProperty?.totalWaitingForApproval ?? 0}
-  subtitle="Selected"
-/>
+              <StatCard
+                title="Waiting For Approval"
+                value={selectedProperty?.totalWaitingForApproval ?? 0}
+                subtitle="Selected"
+              />
 
-             
+
 
             </div>
 
 
 
+
             <div className="px-[18px] mt-[10px]">
-
-
               <div
                 className="
       border
@@ -1282,67 +1585,157 @@ if (hostel) {
                   KYC Enable / Disable
                 </div>
 
-               <div
-  className="
-    h-[38px]
-    bg-[#F5F7FC]
+                {/* KYC Status */}
+                <div
+                  className="
+        h-[38px]
+        bg-[#F5F7FC]
+        rounded-[6px]
+        px-[12px]
+        flex
+        items-center
+        justify-between
+      "
+                >
+                  <span className="text-[10px] text-[#222]">
+                    {kycEnableStatus ? "Enabled" : "Disabled"}
+                  </span>
+
+                  <div className="flex items-center gap-[6px]">
+                    <span className="text-[9px] text-[#777]">
+                      {kycEnableStatus ? "On" : "Off"}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowKycConfirm(true)}
+                      className={`
+            w-[32px]
+            h-[18px]
+            rounded-full
+            relative
+            cursor-pointer
+            ${kycEnableStatus
+                          ? "bg-[#159947]"
+                          : "bg-[#B9BCC1]"
+                        }
+          `}
+                    >
+                      <div
+                        className={`
+              absolute
+              top-[3px]
+              w-[12px]
+              h-[12px]
+              rounded-full
+              bg-white
+              transition-all
+              ${kycEnableStatus
+                            ? "right-[3px]"
+                            : "left-[3px]"
+                          }
+            `}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+
+                <div className="grid grid-cols-3 gap-[7px] mt-[8px]">
+
+
+                  <div
+                    className="
+          bg-[#F8F9FC]
+          rounded-[6px]
+          px-[8px]
+          py-[7px]
+        "
+                  >
+                    <div className="text-[12px] text-[#777] mb-[3px]">
+                      Start Date
+                    </div>
+
+                    <div className="text-[11px] font-medium text-[#222]">
+                      {selectedProperty?.kycHistoryStartDate || "N/A"}
+                    </div>
+                  </div>
+
+                  {/* End Date */}
+                  <div
+                    className="
+          bg-[#F8F9FC]
+          rounded-[6px]
+          px-[8px]
+          py-[7px]
+        "
+                  >
+                    <div className="text-[12px] text-[#777] mb-[3px]">
+                      End Date
+                    </div>
+
+                    <div className="text-[11px] font-medium text-[#222]">
+                      {selectedProperty?.kycHistoryEndDate || "N/A"}
+                    </div>
+                  </div>
+
+
+                  <div
+                    className="
+    bg-[#F8F9FC]
     rounded-[6px]
-    px-[12px]
-    flex
-    items-center
-    justify-between
+    px-[8px]
+    py-[7px]
   "
->
-  <span className="text-[10px] text-[#222]">
-    {kycEnableStatus ? "Enabled" : "Disabled"}
-  </span>
+                  >
+                    <div className="text-[12px] text-[#777] mb-[3px]">
+                      Monthly Limit
+                    </div>
 
-  <div className="flex items-center gap-[6px]">
+                    <div className="flex items-center justify-between gap-[5px]">
+                      <div className="text-[11px] font-medium text-[#222]">
+                        {selectedProperty?.kycLimitPerMonth === -1
+                          ? "NO Limit"
+                          : selectedProperty?.kycLimitPerMonth ?? "N/A"}
+                      </div>
 
-    <span className="text-[9px] text-[#777]">
-      {kycEnableStatus ? "On" : "Off"}
-    </span>
+                      <button
+                        type="button"
+                       onClick={() => {
+  const currentLimit =
+    selectedProperty?.kycLimitPerMonth;
 
-    <button
-      type="button"
-      onClick={() => setShowKycConfirm(true)}
-      className={`
-        w-[32px]
-        h-[18px]
-        rounded-full
-        relative
+  setIsUnlimited(currentLimit === -1);
+
+  setMonthlyLimit(
+    currentLimit === -1
+      ? ""
+      : currentLimit ?? ""
+  );
+
+  setMonthlyLimitError("");
+  setShowLimitModal(true);
+}}
+                        className="
+        h-[24px]
+        px-[8px]
+        rounded-[4px]
+        bg-[#2952F3]
+        hover:bg-[#2146DD]
+        text-white
+        text-[7px]
+        font-medium whitespace-nowrap
         cursor-pointer
-        ${kycEnableStatus
-          ? "bg-[#159947]"
-          : "bg-[#B9BCC1]"
-        }
-      `}
-    >
-      <div
-        className={`
-          absolute
-          top-[3px]
-          w-[12px]
-          h-[12px]
-          rounded-full
-          bg-white
-          transition-all
-          ${kycEnableStatus
-            ? "right-[3px]"
-            : "left-[3px]"
-          }
-        `}
-      />
-    </button>
+      "
+                      >
+                        Set Limit
+                      </button>
+                    </div>
+                  </div>
 
-  </div>
-</div>
+                </div>
               </div>
-
-
             </div>
-
-
 
             <div className="px-[18px] mt-[10px] pb-[20px]">
 
@@ -1358,7 +1751,7 @@ if (hostel) {
 
                 <div className="flex items-center justify-between mb-[9px]">
 
-                  <span className="text-[11px] font-medium text-[#222]">
+                  <span className="text-[13px] font-medium text-[#222]">
                     Tenant KYC List
                   </span>
 
@@ -1375,7 +1768,7 @@ if (hostel) {
   "
                   >
                     <Search
-                      size={9}
+                      size={10}
                       className="text-[#999]"
                     />
 
@@ -1402,7 +1795,7 @@ if (hostel) {
                       className="
       ml-[4px]
       w-full
-      text-[9px]
+      text-[11px]
       outline-none
       text-[#333]
       placeholder:text-[#AAA]
@@ -1415,28 +1808,28 @@ if (hostel) {
 
                 <div className="flex items-center gap-[5px] mb-[8px]">
 
-                  <span className="text-[9px] text-[#888]">
+                  <span className="text-[10px] text-[#888]">
                     Filter by:
                   </span>
 
 
-                  <div className="relative">
-                 
+                  <div ref={tenantDateDropdownRef} className="relative">
+
                     <button
                       type="button"
-                     onClick={() => {
-  setIsTenantDateOpen((prev) => !prev);
-  setIsTenantStatusOpen(false);
-}}
+                      onClick={() => {
+                        setIsTenantDateOpen((prev) => !prev);
+                        setIsTenantStatusOpen(false);
+                      }}
                       className="
-      h-[18px]
+      h-[20px]
       min-w-[95px]
       px-[8px]
       pr-[18px]
       rounded-[4px]
       bg-[#2952F3]
       text-white
-      text-[9px]
+      text-[12px]
       text-left
       relative
       cursor-pointer
@@ -1463,7 +1856,7 @@ if (hostel) {
                       />
                     </button>
 
-                    
+
                     {isTenantDateOpen && (
                       <div
                         className="
@@ -1492,12 +1885,12 @@ if (hostel) {
                               setTenantPage(1);
                               setIsTenantDateOpen(false);
 
-                              
+
                               if (value !== "CUSTOM") {
                                 setTenantDateRange([]);
                               }
 
-                              
+
                               if (value === "CUSTOM") {
                                 return;
                               }
@@ -1517,7 +1910,7 @@ if (hostel) {
             h-[20px]
             px-[8px]
             text-left
-            text-[9px]
+            text-[10px]
             cursor-pointer
             ${tenantDateFilter === filter.key
                                 ? "bg-[#F3F6FF] text-[#2952F3]"
@@ -1608,16 +2001,16 @@ if (hostel) {
 
 
 
-                  <div className="relative">
-                   
+                  <div ref={tenantStatusDropdownRef} className="relative">
+
                     <button
                       type="button"
-                     onClick={() => {
-  setIsTenantStatusOpen((prev) => !prev);
-  setIsTenantDateOpen(false);
-}}
+                      onClick={() => {
+                        setIsTenantStatusOpen((prev) => !prev);
+                        setIsTenantDateOpen(false);
+                      }}
                       className="
-      h-[18px]
+      h-[20px]
       min-w-[90px]
       px-[8px]
       pr-[18px]
@@ -1626,7 +2019,7 @@ if (hostel) {
       border-[#E1E4EA]
       bg-white
       text-[#333]
-      text-[9px]
+      text-[12px]
       text-left
       relative
       cursor-pointer
@@ -1654,7 +2047,7 @@ if (hostel) {
                       />
                     </button>
 
-               
+
                     {isTenantStatusOpen && (
                       <div
                         className="
@@ -1672,7 +2065,7 @@ if (hostel) {
         shadow-md
       "
                       >
-                        {/* STATUS */}
+
                         <button
                           type="button"
                           onClick={() => {
@@ -1695,7 +2088,7 @@ if (hostel) {
           h-[20px]
           px-[8px]
           text-left
-          text-[9px]
+          text-[11px]
           text-[#333]
           cursor-pointer
           hover:bg-[#F3F6FF]
@@ -1704,7 +2097,7 @@ if (hostel) {
                           Status
                         </button>
 
-                        {/* API STATUS OPTIONS */}
+
                         {tenantKycStatuses.map((status) => (
                           <button
                             key={status.key}
@@ -1731,7 +2124,7 @@ if (hostel) {
             h-[20px]
             px-[8px]
             text-left
-            text-[9px]
+            text-[11px]
             cursor-pointer
             hover:bg-[#F3F6FF]
             ${tenantKycStatus === status.key
@@ -1752,7 +2145,7 @@ if (hostel) {
                 <div className="relative min-h-[100px]">
 
 
-              
+
                   <TenantKycTable
                     tenants={tenantList}
                     loading={tenantLoading}
@@ -1769,12 +2162,12 @@ if (hostel) {
                       setShowApproveModal(true);
                     }}
 
-onPageChange={(page, newSize) => {
-  const size = newSize ?? tenantPageSize;
+                    onPageChange={(page, newSize) => {
+                      const size = newSize ?? tenantPageSize;
 
-  setTenantPage(page);
-  setTenantPageSize(size);
-}}
+                      setTenantPage(page);
+                      setTenantPageSize(size);
+                    }}
                   />
 
 
@@ -1840,7 +2233,7 @@ onPageChange={(page, newSize) => {
             onClick={(e) => e.stopPropagation()}
           >
 
-            {/* TITLE */}
+
             <div className="text-[20px] font-medium text-[#101828]">
               Send KYC update reminder to
               <span className="ml-[4px]">
@@ -1849,7 +2242,7 @@ onPageChange={(page, newSize) => {
               ?
             </div>
 
-            {/* TENANT INFO */}
+
             <div
               className="
           mt-[20px]
@@ -1862,7 +2255,7 @@ onPageChange={(page, newSize) => {
         "
             >
 
-              {/* PROFILE */}
+
               <div
                 className="
             w-[44px]
@@ -1880,7 +2273,7 @@ onPageChange={(page, newSize) => {
                 </span>
               </div>
 
-              {/* DETAILS */}
+
               <div className="ml-[14px]">
 
                 <div className="flex items-center gap-[8px]">
@@ -1900,7 +2293,7 @@ onPageChange={(page, newSize) => {
               </div>
             </div>
 
-            {/* BUTTONS */}
+
             <div className="flex justify-end gap-[10px] mt-[24px]">
 
               <button
@@ -1921,11 +2314,11 @@ onPageChange={(page, newSize) => {
                 Cancel
               </button>
 
-             <button
-  type="button"
-  onClick={sendTenantKYCReminder}
-  disabled={tenantLoading}
-  className={`
+              <button
+                type="button"
+                onClick={sendTenantKYCReminder}
+                disabled={tenantLoading}
+                className={`
     h-[46px]
     w-[178px]
     rounded-[7px]
@@ -1936,17 +2329,16 @@ onPageChange={(page, newSize) => {
     items-center
     justify-center
     gap-[6px]
-    ${
-      tenantLoading
-        ? "bg-gray-400 cursor-not-allowed"
-        : "bg-[#2952F3] hover:bg-[#2146DD]"
-    }
+    ${tenantLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-[#2952F3] hover:bg-[#2146DD]"
+                  }
   `}
->
-  {tenantLoading ? (
-    <>
-      <div
-        className="
+              >
+                {tenantLoading ? (
+                  <>
+                    <div
+                      className="
           w-[13px]
           h-[13px]
           border-[2px]
@@ -1955,15 +2347,15 @@ onPageChange={(page, newSize) => {
           rounded-full
           animate-spin
         "
-      />
-      Sending...
-    </>
-  ) : (
-    <>
-      ➤&nbsp; Send Reminder
-    </>
-  )}
-</button>
+                    />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    ➤&nbsp; Send Reminder
+                  </>
+                )}
+              </button>
 
             </div>
 
@@ -1981,6 +2373,12 @@ onPageChange={(page, newSize) => {
       items-center
       justify-center
     "
+          onClick={() => {
+            if (approveLoading) return;
+
+            setShowApproveModal(false);
+            setSelectedApproveTenant(null);
+          }}
         >
           <div
             className="
@@ -2001,7 +2399,6 @@ onPageChange={(page, newSize) => {
               Upon your approval, the KYC process will be completed.
             </p>
 
-            {/* TENANT INFO */}
             <div className="bg-[#f5f7fb] rounded-xl p-4 mt-6 flex items-center gap-4">
 
               <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center">
@@ -2014,7 +2411,6 @@ onPageChange={(page, newSize) => {
 
               <div>
                 <div className="flex items-center gap-2">
-
                   <h3 className="font-semibold text-[20px]">
                     {selectedApproveTenant?.tenantName}
                   </h3>
@@ -2022,7 +2418,6 @@ onPageChange={(page, newSize) => {
                   <span className="text-[#2952F3]">
                     ↗
                   </span>
-
                 </div>
 
                 <p className="text-sm text-gray-500 mt-1">
@@ -2032,7 +2427,6 @@ onPageChange={(page, newSize) => {
 
             </div>
 
-            {/* BUTTONS */}
             <div className="flex justify-end gap-3 mt-8">
 
               <button
@@ -2087,31 +2481,18 @@ onPageChange={(page, newSize) => {
       )}
 
       {showKycConfirm && (
-  <div
-    className="
-      fixed
-      inset-0
-      z-[2000]
-      bg-black/30
-      flex
-      items-center
-      justify-center
-    "
-  >
-    <div
-      className="
-        w-[560px]
-        bg-white
-        rounded-[8px]
-        shadow-xl
-        px-[14px]
-        py-[12px]
-      "
-    >
+        <div
+          onClick={closeKycConfirm}
+          className="fixed inset-0 z-[2000] bg-black/30 flex items-center justify-center"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-[560px] bg-white rounded-[8px] shadow-xl px-[14px] py-[12px]"
+          >
 
-      {/* TITLE */}
-      <div
-        className="
+
+            <div onClick={(e) => e.stopPropagation()}
+              className="
           flex
           items-center
           gap-[8px]
@@ -2119,64 +2500,155 @@ onPageChange={(page, newSize) => {
           font-medium
           text-[#182230]
         "
-      >
+            >
 
-        <span className="text-[#F5A623] text-[20px]">
-          !
-        </span>
+              <span className="text-[#F5A623] text-[20px]">
+                !
+              </span>
 
-        {kycEnableStatus
-          ? `Disable KYC for “${selectedProperty?.name}” ?`
-          : `Enable KYC for “${selectedProperty?.name}” ?`
-        }
+              {kycEnableStatus
+                ? `Disable KYC for “${selectedProperty?.name}” ?`
+                : `Enable KYC for “${selectedProperty?.name}” ?`
+              }
 
-      </div>
+            </div>
 
 
-      {/* DESCRIPTION */}
-      <div
-        className="
+
+            <div
+              className="
           mt-[8px]
           text-[13px]
           text-[#475467]
           leading-[18px]
+          text-left
         "
-      >
+            >
 
-        {kycEnableStatus ? (
-          <>
-            New tenants will no longer be asked to submit KYC
-            for this property.
-            <br />
-            Existing KYC records will be retained.
-          </>
-        ) : (
-          <>
-            New tenants will be asked to submit KYC
-            for this property.
-            <br />
-            Existing KYC records will be retained.
-          </>
-        )}
+              {kycEnableStatus ? (
+                <>
+                  New tenants will no longer be asked to submit KYC
+                  for this property.
+                  <br />
+                  Existing KYC records will be retained.
+                </>
+              ) : (
+                <>
+                  New tenants will be asked to submit KYC
+                  for this property.
+                  <br />
+                  Existing KYC records will be retained.
+                </>
+              )}
 
-      </div>
+            </div>
+            {kycEnableStatus && (
+              <>
+                {/* End Date */}
+                <div className="mt-[14px]">
+                  <label className="block text-[12px] text-[#344054] mb-[5px] text-left">
+                    End Date
+                  </label>
 
+                  <DatePicker
+                    value={disableEndDate}
+                    onChange={(date) => setDisableEndDate(date)}
+                    format="DD-MM-YYYY"
+                    className="
+          !w-full
+          !h-[40px]
+          !rounded-[7px]
+          !text-[13px]
+        "
+                    placeholder="Select end date"
+                  />
+                </div>
 
-      {/* BUTTONS */}
-      <div
-        className="
+                {/* Cancellation Reason */}
+                <div className="mt-[14px]">
+                  <label className="block text-[12px] text-[#344054] mb-[5px] text-left">
+                    Cancellation Reason
+                  </label>
+
+                  <input
+                    type="text"
+                    value={activationReason}
+                    onChange={(e) => setActivationReason(e.target.value)}
+                    placeholder="Enter cancellation reason"
+                    className="
+          w-full
+          h-[40px]
+          border
+          border-[#D0D5DD]
+          rounded-[7px]
+          px-[10px]
+          text-[13px]
+          text-[#344054]
+          outline-none
+          focus:border-[#2952F3]
+        "
+                  />
+                </div>
+              </>
+            )}
+            {!kycEnableStatus && (
+              <div className="mt-[14px]">
+                <input
+                  type="text"
+                  value={activationReason}
+                  onChange={(e) => setActivationReason(e.target.value)}
+                  placeholder="Enter activation reason"
+                  className="
+        w-full
+        h-[40px]
+        border
+        border-[#D0D5DD]
+        rounded-[7px]
+        px-[10px]
+        text-[13px]
+        text-[#344054]
+        outline-none
+        focus:border-[#2952F3]
+      "
+                />
+              </div>
+            )}
+
+            <div
+              className="
           flex
           justify-end
           items-center
           gap-[12px]
           mt-[14px]
         "
-      >
+            >
 
-        {/* CANCEL */}
-        <button
+
+              <button
+                type="button"
+                onClick={closeKycConfirm}
+                className="
+            h-[46px]
+            min-w-[102px]
+            px-[18px]
+            rounded-[7px]
+            border
+            border-[#D0D5DD]
+            bg-white
+            text-[#101828]
+            text-[14px]
+            cursor-pointer
+          "
+              >
+                Cancel
+              </button>
+
+
+
+              {/* <button
           type="button"
-          onClick={() => setShowKycConfirm(false)}
+          onClick={handleKycEnableDisable}
           className="
             h-[46px]
             min-w-[102px]
@@ -2190,36 +2662,172 @@ onPageChange={(page, newSize) => {
             cursor-pointer
           "
         >
-          Cancel
-        </button>
+          save
+        </button> */}
+              <button
+                type="button"
+                onClick={handleKycEnableDisable}
+                className="
+    h-[46px]
+    min-w-[102px]
+    px-[18px]
+    rounded-[7px]
+    border
+    border-[#D0D5DD]
+    bg-white
+    text-[#101828]
+    text-[14px]
+    cursor-pointer
+  "
+              >
+                {kycEnableStatus ? "Disable KYC" : "Enable KYC"}
+              </button>
 
+            </div>
 
-        {/* ENABLE / DISABLE */}
-        <button
-          type="button"
-          onClick={handleKycEnableDisable}
+          </div>
+        </div>
+      )}
+      {showLimitModal && (
+        <div
           className="
-            h-[46px]
-            min-w-[132px]
-            px-[18px]
+      fixed
+      inset-0
+      z-[3000]
+      bg-black/30
+      flex
+      items-center
+      justify-center
+    "
+          onClick={() => {
+            if (!limitLoading) {
+              setShowLimitModal(false);
+            }
+          }}
+        >
+          <div
+            className="
+        w-[420px]
+        bg-white
+        rounded-[8px]
+        shadow-xl
+        p-[18px]
+      "
+            onClick={(e) => e.stopPropagation()}
+          >
+
+            <div className="text-[16px] font-medium text-[#182230]">
+              Set Monthly KYC Limit
+            </div>
+
+            <div className="mt-[5px] text-[12px] text-[#667085]">
+              Set the maximum number of KYC requests allowed per month.
+            </div>
+
+            <div className="mt-[16px]">
+              <label className="block text-[12px] text-[#344054] mb-[5px] text-left">
+                Monthly Limit
+              </label>
+
+              {!isUnlimited && (
+                <>
+                 <input
+  type="number"
+  value={monthlyLimit}
+  onChange={(e) => {
+    setMonthlyLimit(e.target.value);
+    setMonthlyLimitError("");
+  }}
+  disabled={isUnlimited}
+  placeholder="Enter monthly limit"
+  className="
+    w-full
+    h-[38px]
+    rounded-[6px]
+    border
+    border-[#E1E4EA]
+    px-[10px]
+    text-[11px]
+    outline-none
+    disabled:bg-[#F5F5F5]
+    disabled:text-[#999]
+  "
+/>
+     
+                  {monthlyLimitError && (
+                    <ErrorMessage message={monthlyLimitError} type="error" />
+                  )}
+                </>
+              )}
+            </div>
+         <label className="mt-[6px] flex items-center gap-[6px] cursor-pointer">
+
+  <input
+    type="checkbox"
+    checked={isUnlimited}
+    onChange={(e) => {
+      const checked = e.target.checked;
+
+      setIsUnlimited(checked);
+
+      if (checked) {
+        setMonthlyLimit("");
+      }
+    }}
+    className="w-[14px] h-[14px] cursor-pointer"
+  />
+
+  <span className="text-[11px] text-[#333]">
+    Unlimited
+  </span>
+
+</label>
+            <div className="flex justify-end gap-[10px] mt-[20px]">
+
+              <button
+                type="button"
+                disabled={limitLoading}
+                onClick={() => setShowLimitModal(false)}
+                className="
+            h-[40px]
+            min-w-[90px]
+            rounded-[7px]
+            border
+            border-[#D0D5DD]
+            bg-white
+            text-[#101828]
+            text-[13px]
+            cursor-pointer
+            disabled:opacity-50
+          "
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={limitLoading}
+                onClick={handleSetMonthlyLimit}
+                className="
+            h-[40px]
+            min-w-[100px]
             rounded-[7px]
             bg-[#2952F3]
+            hover:bg-[#2146DD]
             text-white
-            text-[14px]
+            text-[13px]
             cursor-pointer
+            disabled:bg-gray-400
           "
-        >
-          {kycEnableStatus
-            ? "Disable KYC"
-            : "Enable KYC"
-          }
-        </button>
+              >
+                Save
+              </button>
 
-      </div>
+            </div>
 
-    </div>
-  </div>
-)}
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };
@@ -2288,7 +2896,7 @@ const TenantKycTable = ({
   onApprove,
 }) => {
 
-  
+
   const hasAction = tenants.some(
     (tenant) =>
       tenant.canSendReminder === true ||
@@ -2298,199 +2906,160 @@ const TenantKycTable = ({
     <>
 
 
-<div className="w-full">
+      <div className="w-full">
 
-  {/* ========================================================= */}
-  {/* TABLE */}
-  {/* ========================================================= */}
-  <div className="relative w-full">
-
-    <div
-      className="
-        max-h-[174px]
-        overflow-y-auto
-        scrollbar-thin
-      "
-    >
-
-      <div className="flex w-full relative">
-
-        {/* ===================================================== */}
-        {/* LEFT FIXED : ID + TENANT NAME */}
-        {/* ===================================================== */}
         <div
           className="
-            flex-shrink-0
-            w-[127px]
-            bg-white
-            z-[30]
-          "
+      max-h-[174px]
+      overflow-x-auto
+      overflow-y-auto
+      scrollbar-thin
+    "
         >
 
-          {/* LEFT HEADER */}
-          <div
-            className="
-              h-[30px]
-              grid
-              grid-cols-[32px_95px]
-              items-center
-              bg-white
-              border-b
-              border-[#E5E7EB]
-              sticky
-              top-0
-              z-[50]
-            "
-          >
+          <div className="min-w-[500px] w-max">
 
-            {/* ID */}
+           
+
             <div
               className="
-                h-full
-                flex
-                items-center
-                px-[4px]
-                bg-white
-              "
+          grid
+          grid-cols-[32px_85px_125px_135px_100px_65px]
+          h-[30px]
+          items-center
+          bg-white
+          border-b
+          border-[#E5E7EB]
+          sticky
+          top-0
+          z-[100]
+        "
             >
-              <TableHeader text="ID" />
-            </div>
 
-            {/* TENANT NAME */}
-            <div
-              className="
-                h-full
-                flex
-                items-center
-                px-[4px]
-                bg-white
-              "
-            >
-              <TableHeader text="Tenant Name" />
-            </div>
+              
+              <div
+                className="
+            h-[30px]
+            flex
+            items-center
+            px-[4px]
+            bg-white
+            sticky
+            left-0
+            z-[110]
+          "
+              >
+                <TableHeader text="ID" />
+              </div>
 
-          </div>
 
+             
+              <div
+                className="
+            h-[30px]
+            flex
+            items-center
+            px-[4px]
+            bg-white
+            sticky
+            left-[32px]
+            z-[110]
+          "
+              >
+                <TableHeader text="Tenant" />
+              </div>
 
-          {/* LEFT DATA */}
-          {loading ? (
-
-            <div className="h-[50px]" />
-
-          ) : tenants.length > 0 ? (
-
-            tenants.map((tenant, index) => (
 
               <div
-                key={tenant.tenantId || index}
                 className="
-                  h-[30px]
-                  grid
-                  grid-cols-[32px_95px]
-                  items-center
-                  bg-white
-                  border-b
-                  border-[#F0F0F0]
-                "
-              >
-
-                {/* ID */}
-                <div className="px-[4px] min-w-0 text-left">
-
-                  <TableText
-                    text={
-                      (currentPage - 1) *
-                        pageSize +
-                      index +
-                      1
-                    }
-                  />
-
-                </div>
-
-
-                {/* TENANT NAME */}
-                <div className="px-[4px] min-w-0 text-left">
-
-                  <TableText
-                    text={
-                      tenant.tenantName ||
-                      "N/A"
-                    }
-                  />
-
-                </div>
-
-              </div>
-
-            ))
-
-          ) : (
-
-            <div className="h-[50px]" />
-
-          )}
-
-        </div>
-
-
-        {/* ===================================================== */}
-        {/* MIDDLE SCROLL : ONLY DATA COLUMNS */}
-        {/* ===================================================== */}
-        <div
-          className="
-            flex-1
+            h-[30px]
+            flex
+            items-center
+            px-[5px]
             min-w-0
-            overflow-x-auto
-            scrollbar-thin
           "
-        >
-
-          <div className="min-w-[430px]">
-
-            {/* MIDDLE HEADER */}
-            <div
-              className="
-                h-[30px]
-                grid
-                grid-cols-[75px_110px_120px_100px]
-                items-center
-                bg-white
-                border-b
-                border-[#E5E7EB]
-                sticky
-                top-0
-                z-[40]
-              "
-            >
-
-              {/* JOIN DATE */}
-              <div className="px-[5px] text-left">
-                <TableHeader text="Join Date" />
+              >
+                <TableHeader text="Current Status" />
               </div>
-
-              {/* BILLING */}
-              <div className="px-[5px] text-left">
-                <TableHeader text="Billing Cycle" />
-              </div>
-
-              {/* SUBMITTED */}
-              <div className="px-[5px] text-left">
-                <TableHeader text="Submitted on" />
-              </div>
-
-              {/* KYC */}
-              <div className="px-[5px] text-left">
+              <div
+                className="
+            h-[30px]
+            flex
+            items-center
+            px-[5px]
+            min-w-0
+          "
+              >
                 <TableHeader text="KYC Status" />
               </div>
 
+
+
+
+
+
+          
+              <div
+                className="
+            h-[30px]
+            flex
+            items-center
+            px-[5px]
+            min-w-0
+          "
+              >
+                <TableHeader text="Submitted on" />
+              </div>
+
+
+              {/* ACTION */}
+              {hasAction && (
+                <div
+                  className="
+              h-[30px]
+              flex
+              items-center
+              px-[4px]
+              bg-white
+              sticky
+              right-0
+              z-[110]
+            "
+                >
+                  <TableHeader text="Action" />
+                </div>
+              )}
+
             </div>
 
 
-            {/* MIDDLE DATA */}
+            
+
             {loading ? (
 
-              <div className="h-[50px]" />
+              <div
+                className="
+            h-[50px]
+            flex
+            items-center
+            justify-center
+            bg-white
+          "
+              >
+
+                <div
+                  className="
+              w-[18px]
+              h-[18px]
+              border-[2px]
+              border-[#E5E7EB]
+              border-t-[#2952F3]
+              rounded-full
+              animate-spin
+            "
+                />
+
+              </div>
 
             ) : tenants.length > 0 ? (
 
@@ -2499,86 +3068,235 @@ const TenantKycTable = ({
                 <div
                   key={tenant.tenantId || index}
                   className="
-                    h-[30px]
-                    grid
-                    grid-cols-[75px_110px_120px_100px]
-                    items-center
-                    bg-white
-                    border-b
-                    border-[#F0F0F0]
-                  "
+              grid
+             grid-cols-[32px_85px_125px_135px_100px_65px]
+              min-h-[45px]
+              items-center
+              border-b
+              border-[#F0F0F0]
+              bg-white
+            "
                 >
 
-                 
-                  <div className="px-[5px] min-w-0">
+                  {/* ================= ID ================= */}
+
+                  <div
+                    className="
+                min-h-[45px]
+                flex
+                items-center
+                px-[4px]
+                bg-white
+                sticky
+                left-0
+                z-[20]
+              "
+                  >
 
                     <TableText
                       text={
-                        tenant.joinDate &&
-                        typeof tenant.joinDate ===
-                          "string" &&
-                        tenant.joinDate.trim() &&
-                        dayjs(
-                          tenant.joinDate,
-                          "DD/MM/YYYY",
-                          true
-                        ).isValid()
+                        (currentPage - 1) * pageSize +
+                        index +
+                        1
+                      }
+                    />
+
+                  </div>
+
+
+
+
+                  <div
+                    className="
+                min-h-[45px]
+                flex
+                items-center
+                px-[4px]
+                min-w-0
+                bg-white
+                sticky
+                left-[32px]
+                z-[20]
+                text-left
+              "
+                  >
+
+                    <div
+                      className="
+                  flex
+                  flex-col
+                  justify-center
+                  min-w-0
+                  w-full
+                "
+                    >
+
+
+                      <span
+                        className="
+                    block
+                    text-[11px]
+                    text-[#333]
+                    truncate
+                    leading-[13px]
+                  "
+                        title={tenant.tenantName || "N/A"}
+                      >
+                        {tenant.tenantName || "N/A"}
+                      </span>
+
+
+                      {/* JOIN DATE */}
+                      <span
+                        className="
+                    block
+                    text-[9px]
+                    text-[#777]
+                    truncate
+                    leading-[11px]
+                  "
+                      >
+                        {tenant.joinDate &&
+                          typeof tenant.joinDate === "string" &&
+                          tenant.joinDate.trim() &&
+                          dayjs(
+                            tenant.joinDate,
+                            "DD/MM/YYYY",
+                            true
+                          ).isValid()
                           ? dayjs(
-                              tenant.joinDate,
-                              "DD/MM/YYYY"
-                            ).format("MMM D")
-                          : "N/A"
+                            tenant.joinDate,
+                            "DD/MM/YYYY"
+                          ).format("MMM D")
+                          : "N/A"}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                  <div
+                    className="
+                min-h-[45px]
+                flex
+                items-center
+                px-[5px]
+                min-w-0
+                text-left
+              "
+                  >
+
+                    <span
+                      className="
+                  block
+                  w-full
+                  text-[11px]
+                  text-[#333]
+                  truncate
+                "
+                      title={
+                        tenant?.tenantCurrentStatus || "N/A"
                       }
-                    />
+                    >
+                      {tenant?.tenantCurrentStatus || "N/A"}
+                    </span>
 
                   </div>
 
 
-                  {/* BILLING */}
-                  <div className="px-[5px] min-w-0">
+                  <div
+                    className="
+                min-h-[45px]
+                flex
+                items-center text-left
+                px-[5px]
+                min-w-0
+              "
+                  >
 
-                    <TableText
-                      text={
-                        tenant.billingCycle ||
-                        "N/A"
+                    <span
+                      className="
+                  block
+                  w-full
+                  text-[11px]
+                  text-[#333]
+                  truncate
+                "
+                      title={
+                        tenant?.kycDetailsStatus?.trim()
+                          ? tenant.kycDetailsStatus
+                          : "NOT_AVAILABLE"
                       }
-                    />
+                    >
+                      {tenant?.kycDetailsStatus?.trim()
+                        ? tenant.kycDetailsStatus
+                        : "NOT_AVAILABLE"}
+                    </span>
 
                   </div>
 
 
-                
-                  <div className="px-[5px] min-w-0">
+
+
+
+
+
+
+
+                  <div
+                    className="
+                min-h-[45px]
+                flex
+                items-center
+                px-[5px]
+                min-w-0
+              "
+                  >
 
                     {tenant.submittedDate ||
-                    tenant.submittedTime ? (
+                      tenant.submittedTime ? (
 
-                      <div className="flex flex-col">
+                      <div
+                        className="
+                    flex
+                    flex-col
+                    justify-center
+                    min-w-0
+                    w-full
+                  "
+                      >
 
                         {tenant.submittedDate && (
+
                           <span
                             className="
-                              text-[7px]
-                              text-[#333]
-                              truncate
-                              leading-[9px]
-                            "
+                        block
+                        text-[10px]
+                        text-[#333]
+                        truncate
+                        leading-[11px]
+                      "
                           >
                             {tenant.submittedDate}
                           </span>
+
                         )}
 
+
                         {tenant.submittedTime && (
+
                           <span
                             className="
-                              text-[7px]
-                              text-[#777]
-                              truncate
-                              leading-[8px]
-                            "
+                        block
+                        text-[9px]
+                        text-[#777]
+                        truncate
+                        leading-[10px]
+                      "
                           >
                             {tenant.submittedTime}
                           </span>
+
                         )}
 
                       </div>
@@ -2587,9 +3305,9 @@ const TenantKycTable = ({
 
                       <span
                         className="
-                          text-[8px]
-                          text-[#777]
-                        "
+                    text-[11px]
+                    text-[#777]
+                  "
                       >
                         N/A
                       </span>
@@ -2599,23 +3317,107 @@ const TenantKycTable = ({
                   </div>
 
 
-                  {/* KYC STATUS */}
-                  <div className="px-[5px] min-w-0">
 
-                    <span
+
+                  {hasAction && (
+
+                    <div
                       className="
-                        block
-                        text-[8px]
-                        text-[#333]
-                        truncate
-                      "
+                  min-h-[45px]
+                  flex
+                  items-center
+                  px-[2px]
+                  bg-white
+                  sticky
+                  right-0
+                  z-[20]
+                  text-center
+                "
                     >
-                      {tenant?.kycDetailsStatus?.trim()
-                        ? tenant.kycDetailsStatus
-                        : "NOT_AVAILABLE"}
-                    </span>
 
-                  </div>
+                      <div
+                        className="
+                    flex
+                    items-center
+                    gap-[3px]
+                  "
+                      >
+
+                        {/* REMINDER */}
+
+                        {tenant.canSendReminder === true && (
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onReminder(tenant)
+                            }
+                            className="
+                        h-[18px]
+                        min-w-[42px]
+                        px-[4px]
+                        rounded-[4px]
+                        bg-[#2952F3]
+                        text-white
+                        text-[10px]
+                        cursor-pointer
+                        whitespace-nowrap
+                      "
+                          >
+                            Reminder
+                          </button>
+
+                        )}
+
+
+                        {/* APPROVE */}
+
+                        {tenant.canApproveKyc === true && (
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onApprove(tenant)
+                            }
+                            className="
+                        h-[18px]
+                        min-w-[42px]
+                        px-[4px]
+                        rounded-[4px]
+                        bg-[#159947]
+                        text-white
+                        text-[10px]
+                        cursor-pointer
+                        whitespace-nowrap
+                      "
+                          >
+                            Approve
+                          </button>
+
+                        )}
+
+
+                        {/* NO ACTION */}
+
+                        {tenant.canSendReminder !== true &&
+                          tenant.canApproveKyc !== true && (
+
+                            <span
+                              className="
+                          text-[12px]
+                          text-[#777]
+                        "
+                            >
+                              N/A
+                            </span>
+
+                          )}
+
+                      </div>
+
+                    </div>
+
+                  )}
 
                 </div>
 
@@ -2625,13 +3427,14 @@ const TenantKycTable = ({
 
               <div
                 className="
-                  h-[50px]
-                  flex
-                  items-center
-                  justify-center
-                  text-[8px]
-                  text-[#999]
-                "
+            h-[50px]
+            flex
+            items-center
+            justify-center
+            text-[8px]
+            text-[#999]
+            bg-white
+          "
               >
                 No tenants found
               </div>
@@ -2642,148 +3445,11 @@ const TenantKycTable = ({
 
         </div>
 
-
-    
-        {hasAction && (
-
-          <div
-            className="
-              flex-shrink-0
-              w-[72px]
-              bg-white
-              z-[30]
-            "
-          >
-
-           
-            <div
-              className="
-                h-[30px]
-                flex
-                items-center
-                px-[4px]
-                bg-white
-                border-b
-                border-[#E5E7EB]
-                sticky
-                top-0
-                z-[50]
-              "
-            >
-
-              <TableHeader text="Action" />
-
-            </div>
-
-
-          
-            {loading ? (
-
-              <div className="h-[50px]" />
-
-            ) : tenants.length > 0 ? (
-
-              tenants.map((tenant, index) => (
-
-                <div
-                  key={tenant.tenantId || index}
-                  className="
-                    h-[30px]
-                    flex
-                    items-center
-                    px-[2px]
-                    bg-white
-                    border-b
-                    border-[#F0F0F0]
-                  "
-                >
-
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-[3px]
-                    "
-                  >
-
-                    
-                    {tenant.canSendReminder === true && (
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onReminder(tenant)
-                        }
-                        className="
-                          h-[18px]
-                          min-w-[42px]
-                          px-[4px]
-                          rounded-[4px]
-                          bg-[#2952F3]
-                          text-white
-                          text-[7px]
-                          cursor-pointer
-                          whitespace-nowrap
-                        "
-                      >
-                        Reminder
-                      </button>
-
-                    )}
-
-
-                    
-                    {tenant.canApproveKyc === true && (
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onApprove(tenant)
-                        }
-                        className="
-                          h-[18px]
-                          min-w-[42px]
-                          px-[4px]
-                          rounded-[4px]
-                          bg-[#159947]
-                          text-white
-                          text-[7px]
-                          cursor-pointer
-                          whitespace-nowrap
-                        "
-                      >
-                        Approve
-                      </button>
-
-                    )}
-
-                  </div>
-
-                </div>
-
-              ))
-
-            ) : (
-
-              <div className="h-[50px]" />
-
-            )}
-
-          </div>
-
-        )}
-
       </div>
 
-    </div>
-
-  </div>
-
-</div>
-      
-   {!loading && totalItems > 0 && (
-  <div
-    className="
+      {!loading && totalItems > 0 && (
+        <div
+          className="
       flex
       items-center
       justify-between
@@ -2791,29 +3457,29 @@ const TenantKycTable = ({
       mt-[8px]
       pt-[6px]
     "
-  >
-
-   
-    <div className="text-[9px] text-[#475467]">
-      Total Record Count:
-      <span className="ml-[3px] text-[#2952F3] font-medium">
-        {tenants.length}
-      </span>
-    </div>
+        >
 
 
-    
-    <div className="flex items-center gap-[6px]">
+          <div className="text-[11px] text-[#475467]">
+            Total Record Count:
+            <span className="ml-[3px] text-[#2952F3] font-medium">
+              {tenants.length}
+            </span>
+          </div>
 
-      
-   <select
-  value={pageSize}
-  onChange={(e) => {
-    const newSize = Number(e.target.value);
 
-    onPageChange(1, newSize);
-  }}
-  className="
+
+          <div className="flex items-center gap-[6px]">
+
+
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                const newSize = Number(e.target.value);
+
+                onPageChange(1, newSize);
+              }}
+              className="
     w-[52px]
     h-[28px]
     rounded-[8px]
@@ -2826,25 +3492,25 @@ const TenantKycTable = ({
     outline-none
     cursor-pointer
   "
->
-  <option value={10}>10</option>
-  <option value={20}>20</option>
-  <option value={50}>50</option>
-  <option value={100}>100</option>
-</select>
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
 
 
-      {/* PREVIOUS */}
-      <button
-        type="button"
-        disabled={currentPage <= 1}
-        onClick={() =>
-          onPageChange(
-            currentPage - 1,
-            pageSize
-          )
-        }
-        className="
+
+            <button
+              type="button"
+              disabled={currentPage <= 1}
+              onClick={() =>
+                onPageChange(
+                  currentPage - 1,
+                  pageSize
+                )
+              }
+              className="
           w-[18px]
           h-[28px]
           flex
@@ -2856,14 +3522,14 @@ const TenantKycTable = ({
           disabled:cursor-not-allowed
           cursor-pointer
         "
-      >
-        ‹
-      </button>
+            >
+              ‹
+            </button>
 
 
-      
-      <div
-        className="
+
+            <div
+              className="
           w-[36px]
           h-[36px]
           rounded-full
@@ -2875,37 +3541,37 @@ const TenantKycTable = ({
           text-[#333]
           flex-shrink-0
         "
-      >
-        {currentPage}
-      </div>
+            >
+              {currentPage}
+            </div>
 
 
-      {/* RANGE */}
-      <span
-        className="
+
+            <span
+              className="
           text-[7px]
           text-[#333]
           whitespace-nowrap
           min-w-[28px]
           text-center
         "
-      >
-     
-        {currentPage} - {totalPages}
-      </span>
+            >
+
+              {currentPage} - {totalPages}
+            </span>
 
 
-      {/* NEXT */}
-      <button
-        type="button"
-        disabled={currentPage >= totalPages}
-        onClick={() =>
-          onPageChange(
-            currentPage + 1,
-            pageSize
-          )
-        }
-        className="
+
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() =>
+                onPageChange(
+                  currentPage + 1,
+                  pageSize
+                )
+              }
+              className="
           w-[18px]
           h-[28px]
           flex
@@ -2917,21 +3583,21 @@ const TenantKycTable = ({
           disabled:cursor-not-allowed
           cursor-pointer
         "
-      >
-        ›
-      </button>
+            >
+              ›
+            </button>
 
-    </div>
+          </div>
 
-  </div>
-)}
+        </div>
+      )}
     </>
   );
 };
 
 const TableHeader = ({ text }) => {
   return (
-    <div className="text-[9px] text-[#777] px-[2px] whitespace-nowrap">
+    <div className="text-[12px] text-[#777] px-[2px] whitespace-nowrap">
       {text}
     </div>
   );
@@ -2941,7 +3607,7 @@ const TableText = ({ text }) => {
   return (
     <div
       className="
-        text-[9px]
+        text-[11px]
         text-[#333]
         px-[2px]
         truncate

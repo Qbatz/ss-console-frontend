@@ -5,6 +5,7 @@ import SearchImg from "../../assets/Search.png";
 import Occupied from "../../assets/occupiedBed.png";
 import EmptyBed from "../../assets/empty_bed.png";
 import Notice from "../../assets/overdueimg.png";
+import Toast from "../SuccessModal/ToastDesign";
 
 const StayInfoScreen = () => {
     const { getHostelBedInfo, updateBedCurrentStatus } = useDashboard();
@@ -20,6 +21,9 @@ const StayInfoScreen = () => {
     const [showBedConfirm, setShowBedConfirm] = useState(false);
     const [selectedBed, setSelectedBed] = useState(null);
     const [updatingBed, setUpdatingBed] = useState(false);
+     const [modalType, setModalType] = useState("success");
+      const [showSuccess, setShowSuccess] = useState(false);
+      const [message, setMessage] = useState("");
     const handleBedClick = (bed) => {
         setSelectedBed(bed);
         setShowBedConfirm(true);
@@ -169,26 +173,58 @@ const StayInfoScreen = () => {
                 setSelectedBed(null);
 
                 await fetchBeds(page, pageSize, search);
+                 setModalType("success");
+      setMessage(res?.data);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+       
+
+      }, 800);
 
             } else {
-                console.log(
-                    "Bed status update failed:",
-                    res?.message
-                );
+               setModalType("error");
+      setMessage(res?.message);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+       
+
+      }, 800);
             }
 
         } catch (error) {
-            console.log(
-                "Bed status update error:",
-                error
-            );
-        } finally {
-            setUpdatingBed(false);
-        }
+        console.log("Bed status update error:", error);
+
+        const message =
+            error?.response?.status === 500
+                ? "Internal Server Error"
+                : error?.response?.data?.message ||
+                  error?.message ||
+                  "Something went wrong";
+
+        setModalType("error");
+        setMessage(message);
+        setShowSuccess(true);
+
+        setTimeout(() => {
+            setShowSuccess(false);
+        }, 800);
+    } finally {
+        setUpdatingBed(false);
+    }
     };
 
     return (
         <DashboardLayout>
+            <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
+
+      />
             <div className="min-h-screen  p-5">
 
 
@@ -260,27 +296,27 @@ const StayInfoScreen = () => {
                                 <thead>
                                     <tr className="bg-[#F8F9FB] border-b border-gray-200">
 
-                                        <th className="px-4 py-3 text-left text-[11px] font-semibold text-gray-600">
+                                        <th className="px-4 py-3 text-left text-[12px] font-semibold text-gray-600">
                                             Hostel Name
                                         </th>
 
-                                        <th className="px-4 py-3 text-left text-[11px] font-semibold text-gray-600">
+                                        <th className="px-4 py-3 text-left text-[12px] font-semibold text-gray-600">
                                             Mobile
                                         </th>
 
-                                        <th className="px-4 py-3 text-left text-[11px] font-semibold text-gray-600">
+                                        <th className="px-4 py-3 text-left text-[12px] font-semibold text-gray-600">
                                             Address
                                         </th>
 
-                                        <th className="px-2 py-3 text-center text-[11px] font-semibold text-gray-600">
+                                        <th className="px-2 py-3 text-center text-[12px] font-semibold text-gray-600">
                                             Floors
                                         </th>
 
-                                        <th className="px-2 py-3 text-center text-[11px] font-semibold text-gray-600">
+                                        <th className="px-2 py-3 text-center text-[12px] font-semibold text-gray-600">
                                             Rooms
                                         </th>
 
-                                        <th className="px-2 py-3 text-center text-[11px] font-semibold text-gray-600">
+                                        <th className="px-2 py-3 text-center text-[12px] font-semibold text-gray-600">
                                             Beds
                                         </th>
 

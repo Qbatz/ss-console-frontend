@@ -16,7 +16,7 @@ import PropertyActive from "./ActiveScreen";
 import swap from "../../assets/arrowswap.png";
 import Star from "../../assets/star.png"
 import dayjs from "dayjs";
-import { DatePicker,TimePicker} from "antd";
+import { DatePicker, TimePicker } from "antd";
 import PropertyAmenities from "./PropertyAmenities";
 import { useHostel } from "../../Context/HostelListContext";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
@@ -43,9 +43,9 @@ import Share from "../../assets/share.png";
 import Maxmize from "../../assets/maximize.png"
 
 const PropertyOverview = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory, sharePaymentLink, getTenantDeductions } = useHostel();
-  const {owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
-  const {adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory, sharePaymentLink, getTenantDeductions,recalculateTenant } = useHostel();
+  const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
+  const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription, getTrialDaysExtReason } = useSubscription();
   const [hostelData, setHostelData] = useState(null);
   const [dropdownPlans, setDropdownPlans] = useState([]);
@@ -64,36 +64,38 @@ const PropertyOverview = () => {
   const [trialReasons, setTrialReasons] = useState([]);
   const [showCustomDays, setShowCustomDays] = useState(false);
   const [reasonError, setReasonError] = useState("")
-    const [selectedTenant, setSelectedTenant] = useState(null);
-  const [remarks, setRemarks] =useState("");
+  const [selectedTenant, setSelectedTenant] = useState(null);
+  const [remarks, setRemarks] = useState("");
   const [selectedReason, setSelectedReason] = useState("");
   const [showReasonDropdown, setShowReasonDropdown] = useState(false);
   const [generateLoading, setGenerateLoading] = useState(false);
   const [isPaymentGenerated, setIsPaymentGenerated] = useState(false);
   const generateLock = useRef(false);
   const [showApproveModal, setShowApproveModal] =
-  useState(false);
- const { getKYCList, approveKYC } = useKyc();
- const [selectedCustomerId, setSelectedCustomerId] = useState(null);
- const [showSummary, setShowSummary] = useState(false);
-const approveLock = useRef(false);
-const [activeFilter, setActiveFilter] = useState("All");
-const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+    useState(false);
+  const { getKYCList, approveKYC } = useKyc();
+  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+  const [showSummary, setShowSummary] = useState(false);
+  const approveLock = useRef(false);
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
 
-const [showAllMenu, setShowAllMenu] = useState(false);
-const [showStatusMenu, setShowStatusMenu] = useState(false);
-const [showViewMenu, setShowViewMenu] = useState(false);
+  const [showAllMenu, setShowAllMenu] = useState(false);
+  const [showStatusMenu, setShowStatusMenu] = useState(false);
+  const [showViewMenu, setShowViewMenu] = useState(false);
 
-const [selectedType, setSelectedType] = useState("All");
-const [selectedStatus, setSelectedStatus] = useState("All");
-const [selectedView, setSelectedView] = useState("Select");
-const [paidAtDate, setPaidAtDate] = useState(null);
-const [paidAtTime, setPaidAtTime] = useState(null);
-const [paidAtDateError, setPaidAtDateError] = useState("");
-const [paidAtTimeError, setPaidAtTimeError] = useState("");
- console.log("selectedCustomerId",selectedCustomerId)
-const [approveLoading, setApproveLoading] =
-  useState(false);
+  const [selectedType, setSelectedType] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState("All");
+  const [selectedView, setSelectedView] = useState("Select");
+  const [paidAtDate, setPaidAtDate] = useState(null);
+  const [paidAtTime, setPaidAtTime] = useState(null);
+  const [paidAtDateError, setPaidAtDateError] = useState("");
+  const [paidAtTimeError, setPaidAtTimeError] = useState("");
+  console.log("selectedCustomerId", selectedCustomerId)
+  const [approveLoading, setApproveLoading] = useState(false);
+  const [showRecalculateModal, setShowRecalculateModal] = useState(false);
+const [selectedRecalculateCustomerId, setSelectedRecalculateCustomerId] = useState(null);
+const [recalculateLoading, setRecalculateLoading] = useState(false);
   useEffect(() => {
 
     const fetchReasons = async () => {
@@ -125,7 +127,7 @@ const [approveLoading, setApproveLoading] =
 
   const { canWrite: canResetWrite } = usePermission("Reset hostel");
   const { plans, getPlans, getPlansDropdown } = usePlan();
- 
+
   console.log("paidBy", paidBy)
   useEffect(() => {
     getPlansDropdown().then((res) => {
@@ -297,15 +299,15 @@ const [approveLoading, setApproveLoading] =
 
 
     }
-else{
+    else {
       setModalType("error");
-    setMessage(res.message);
-    setShowSuccess(true);
+      setMessage(res.message);
+      setShowSuccess(true);
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
-}
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+    }
   };
 
   const handleTrialOnly = async () => {
@@ -427,6 +429,68 @@ else{
       }, 1000);
     }
   };
+
+
+  const handleRecalculate = async () => {
+  if (!selectedRecalculateCustomerId || recalculateLoading) {
+    return;
+  }
+
+  try {
+    setRecalculateLoading(true);
+
+    const res = await recalculateTenant(
+      selectedRecalculateCustomerId
+    );
+
+    if (res?.success) {
+      setModalType("success");
+      setMessage(
+        res?.message || "Recalculated successfully"
+      );
+      setShowSuccess(true);
+
+      setShowRecalculateModal(false);
+
+      // Refresh tenant data
+      const updated = await getHostelById(hostelId);
+
+      if (updated?.success) {
+        setHostelData(updated.data);
+      }
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+    } else {
+      setModalType("error");
+      setMessage(
+        res?.message || "Recalculate failed"
+      );
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+    }
+  } catch (error) {
+    console.error("Recalculate Error:", error);
+
+    setModalType("error");
+    setMessage(
+      error?.response?.data?.message ||
+      error?.message ||
+      "Something went wrong"
+    );
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+  } finally {
+    setRecalculateLoading(false);
+  }
+};
   // const handleTrialOnly = async () => {
 
   //   // if (!selectedPlanCode) {
@@ -591,14 +655,14 @@ else{
       hasError = true;
     }
     if (!paidAtDate) {
-  setPaidAtDateError("Please select date");
-  hasError = true;
-}
+      setPaidAtDateError("Please select date");
+      hasError = true;
+    }
 
-if (!paidAtTime) {
-  setPaidAtTimeError("Please select time");
-  hasError = true;
-}
+    if (!paidAtTime) {
+      setPaidAtTimeError("Please select time");
+      hasError = true;
+    }
 
     if (hasError) return;
 
@@ -612,14 +676,14 @@ if (!paidAtTime) {
         paidAmount: Number(paidAmount),
         discountAmount: Number(discountAmount || 0),
         paidBy,
-         paidAtDate: paidAtDate
-    ? paidAtDate.format("DD-MM-YYYY")
-    : "",
+        paidAtDate: paidAtDate
+          ? paidAtDate.format("DD-MM-YYYY")
+          : "",
 
-  paidAtTime: paidAtTime
-    ? paidAtTime.format("HH:mm")
-    : "",
-        
+        paidAtTime: paidAtTime
+          ? paidAtTime.format("HH:mm")
+          : "",
+
       };
 
       const res = await createSubscription(
@@ -767,50 +831,50 @@ if (!paidAtTime) {
     }
   };
 
-const handleApproveKYC = async (customerId) => {
-  if (
-    approveLock.current ||
-    approveLoading
-  ) {
-    return;
-  }
-
-  approveLock.current = true;
-
-  try {
-    setApproveLoading(true);
-
-    const res = await approveKYC(customerId);
-
-    if (res?.success) {
-      setModalType("success");
-      setMessage(
-        res?.data ||
-          "KYC approved successfully"
-      );
-
-      setShowSuccess(true);
-      setShowApproveModal(false);
-
-    } else {
-      setModalType("error");
-      setMessage(
-        res?.message ||
-          "Approval failed"
-      );
-
-      setShowSuccess(true);
+  const handleApproveKYC = async (customerId) => {
+    if (
+      approveLock.current ||
+      approveLoading
+    ) {
+      return;
     }
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
+    approveLock.current = true;
 
-  } finally {
-    setApproveLoading(false);
-    approveLock.current = false;
-  }
-};
+    try {
+      setApproveLoading(true);
+
+      const res = await approveKYC(customerId);
+
+      if (res?.success) {
+        setModalType("success");
+        setMessage(
+          res?.data ||
+          "KYC approved successfully"
+        );
+
+        setShowSuccess(true);
+        setShowApproveModal(false);
+
+      } else {
+        setModalType("error");
+        setMessage(
+          res?.message ||
+          "Approval failed"
+        );
+
+        setShowSuccess(true);
+      }
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
+    } finally {
+      setApproveLoading(false);
+      approveLock.current = false;
+    }
+  };
   //   const handleGeneratePayment = async () => {
 
   //   let hasError = false;
@@ -1036,88 +1100,88 @@ const handleApproveKYC = async (customerId) => {
 
   const handleGeneratePayment = async () => {
 
-  if (
-    generateLock.current ||
-    generateLoading ||
-    isPaymentGenerated
-  ) {
-    return;
-  }
-
-  generateLock.current = true;
-
-  let hasError = false;
-
-  if (!paymentPlan) {
-    setPaymentPlanError("Please select plan");
-    hasError = true;
-  }
-
-  if (!paidBy) {
-    setPaidByError("Please select Paid By");
-    hasError = true;
-  }
-
-  if (!paymentDiscount) {
-    setPaymentDiscountError("Please enter discount");
-    hasError = true;
-  }
-
-  if (hasError) {
-    generateLock.current = false;
-    return;
-  }
-
-  try {
-
-    setGenerateLoading(true);
-
-    const payload = {
-      planCode: paymentPlan,
-      discountAmount: Number(paymentDiscount || 0),
-      paidBy
-    };
-
-    const res = await generateOrderHistory(
-      hostelId,
-      payload
-    );
-
-    if (res?.success) {
-
-      setIsPaymentGenerated(true);
-
-      setGeneratedPaymentUrl(
-        res?.data?.paymentUrl || ""
-      );
-
-      setModalType("success");
-      setMessage(
-        "Payment generated successfully"
-      );
-      setShowSuccess(true);
-
-    } else {
-
-      setModalType("error");
-      setMessage(
-        res?.message || "Something went wrong"
-      );
-      setShowSuccess(true);
-
+    if (
+      generateLock.current ||
+      generateLoading ||
+      isPaymentGenerated
+    ) {
+      return;
     }
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
+    generateLock.current = true;
 
-  } finally {
+    let hasError = false;
 
-    setGenerateLoading(false);
+    if (!paymentPlan) {
+      setPaymentPlanError("Please select plan");
+      hasError = true;
+    }
 
-    generateLock.current = false;
-  }
-};
+    if (!paidBy) {
+      setPaidByError("Please select Paid By");
+      hasError = true;
+    }
+
+    if (!paymentDiscount) {
+      setPaymentDiscountError("Please enter discount");
+      hasError = true;
+    }
+
+    if (hasError) {
+      generateLock.current = false;
+      return;
+    }
+
+    try {
+
+      setGenerateLoading(true);
+
+      const payload = {
+        planCode: paymentPlan,
+        discountAmount: Number(paymentDiscount || 0),
+        paidBy
+      };
+
+      const res = await generateOrderHistory(
+        hostelId,
+        payload
+      );
+
+      if (res?.success) {
+
+        setIsPaymentGenerated(true);
+
+        setGeneratedPaymentUrl(
+          res?.data?.paymentUrl || ""
+        );
+
+        setModalType("success");
+        setMessage(
+          "Payment generated successfully"
+        );
+        setShowSuccess(true);
+
+      } else {
+
+        setModalType("error");
+        setMessage(
+          res?.message || "Something went wrong"
+        );
+        setShowSuccess(true);
+
+      }
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+
+    } finally {
+
+      setGenerateLoading(false);
+
+      generateLock.current = false;
+    }
+  };
   const handleSharePayment = async () => {
 
     if (!generatedPaymentUrl) {
@@ -1394,7 +1458,7 @@ const handleApproveKYC = async (customerId) => {
                       </button>
 
 
-                     
+
                       <button
                         disabled={!canSubscriptionWrite}
                         onClick={() => {
@@ -1492,21 +1556,21 @@ const handleApproveKYC = async (customerId) => {
                         className="object-contain"
                       />
                     </button> */}
-  <div className="relative inline-block group">
-  {/* View Icon */}
-  <button
-    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
-  >
-    <img
-      src={ViewImg}
-      alt="view"
-      className="w-[18px] h-[18px] cursor-pointer"
-    />
-  </button>
+                    <div className="relative inline-block group">
+                      {/* View Icon */}
+                      <button
+                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+                      >
+                        <img
+                          src={ViewImg}
+                          alt="view"
+                          className="w-[18px] h-[18px] cursor-pointer"
+                        />
+                      </button>
 
-  {/* Hover Card */}
-  <div
-    className="
+                      {/* Hover Card */}
+                      <div
+                        className="
       absolute
       top-10
       right-0
@@ -1526,10 +1590,10 @@ const handleApproveKYC = async (customerId) => {
       transition-all
       duration-200
     "
-  >
-    {/* Arrow */}
-    <div
-      className="
+                      >
+                        {/* Arrow */}
+                        <div
+                          className="
         absolute
         -top-2
         right-4
@@ -1541,42 +1605,42 @@ const handleApproveKYC = async (customerId) => {
         border-[#E8EAF3]
         rotate-45
       "
-    />
+                        />
 
-    {/* Mail */}
-    <p className="text-[10px] text-[#9CA3AF] font-medium uppercase text-left">
-      MAIL ID
-    </p>
+                        {/* Mail */}
+                        <p className="text-[10px] text-[#9CA3AF] font-medium uppercase text-left">
+                          MAIL ID
+                        </p>
 
-    <div className="flex items-center justify-between mt-1">
-      <p className="text-[14px] text-[#374151] truncate">
-        {hostelData?.emailId || "N/A"}
-      </p>
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-[14px] text-[#374151] truncate">
+                            {hostelData?.emailId || "N/A"}
+                          </p>
 
-      <img
-        src={CopyImg}
-        className="w-4 h-4 cursor-pointer"
-        onClick={() =>
-          navigator.clipboard.writeText(hostelData?.emailId || "")
-        }
-      />
-    </div>
+                          <img
+                            src={CopyImg}
+                            className="w-4 h-4 cursor-pointer"
+                            onClick={() =>
+                              navigator.clipboard.writeText(hostelData?.emailId || "")
+                            }
+                          />
+                        </div>
 
-    <div className="border-t border-[#F1F3F9] my-3"></div>
+                        <div className="border-t border-[#F1F3F9] my-3"></div>
 
-    {/* Created */}
-    <p className="text-[10px] text-[#9CA3AF] font-medium uppercase text-left">
-      CREATED ON
-    </p>
+                        {/* Created */}
+                        <p className="text-[10px] text-[#9CA3AF] font-medium uppercase text-left">
+                          CREATED ON
+                        </p>
 
-    <p className="text-[14px] text-[#374151] mt-1 text-left">
-      {hostelData?.createdAtDate}
-    </p>
-  </div>
-</div>
+                        <p className="text-[14px] text-[#374151] mt-1 text-left">
+                          {hostelData?.createdAtDate}
+                        </p>
+                      </div>
+                    </div>
 
 
-                    
+
                     <button
                       className="
               w-8
@@ -1863,7 +1927,7 @@ const handleApproveKYC = async (customerId) => {
 
             </div>
 
-         
+
             <div className="flex items-start gap-3">
 
               <div>
@@ -1921,7 +1985,7 @@ const handleApproveKYC = async (customerId) => {
 
             </div>
 
-            
+
             <div className="flex items-start gap-3">
 
               <button
@@ -2174,7 +2238,7 @@ const handleApproveKYC = async (customerId) => {
     "
           >
 
-          
+
             <div
               className="
         flex
@@ -2223,12 +2287,12 @@ const handleApproveKYC = async (customerId) => {
 
             </div>
             {activeTab === "Invoice" && (
-<div className="flex items-center gap-1 pb-4">
- 
+              <div className="flex items-center gap-1 pb-4">
 
-  <button
-  onClick={() => setShowFilterDrawer(true)}
-  className="
+
+                <button
+                  onClick={() => setShowFilterDrawer(true)}
+                  className="
     h-7
     px-4
     border
@@ -2239,26 +2303,26 @@ const handleApproveKYC = async (customerId) => {
     bg-white
     cursor-pointer
   "
->
-  Filters
-  <img
-    src={ArrowSelect}
-    alt=""
-    className="w-3 h-3"
-  />
-</button>
-</div>
+                >
+                  Filters
+                  <img
+                    src={ArrowSelect}
+                    alt=""
+                    className="w-3 h-3"
+                  />
+                </button>
+              </div>
             )}
 
- {showFilterDrawer && (
-  <>
-    <div
-      className="fixed inset-0 bg-black/30 z-40"
-      onClick={() => setShowFilterDrawer(false)}
-    />
+            {showFilterDrawer && (
+              <>
+                <div
+                  className="fixed inset-0 bg-black/30 z-40"
+                  onClick={() => setShowFilterDrawer(false)}
+                />
 
-   <div
-  className="
+                <div
+                  className="
     fixed
     top-4
     right-4
@@ -2272,36 +2336,36 @@ const handleApproveKYC = async (customerId) => {
     flex-col
     overflow-hidden
   "
->
-  <div className="flex-1 overflow-y-auto p-5">
-     <div className="flex justify-between items-center mb-5">
-    <h3 className="text-lg font-semibold">
-      Filters
-    </h3>
+                >
+                  <div className="flex-1 overflow-y-auto p-5">
+                    <div className="flex justify-between items-center mb-5">
+                      <h3 className="text-lg font-semibold">
+                        Filters
+                      </h3>
 
-    <button
-      onClick={() => setShowFilterDrawer(false)}
-    >
-      ✕
-    </button>
-  </div>
+                      <button
+                        onClick={() => setShowFilterDrawer(false)}
+                      >
+                        ✕
+                      </button>
+                    </div>
 
-     <div className="space-y-3">
+                    <div className="space-y-3">
 
-  {/* ALL */}
-  {/* All Dropdown */}
-<div className="relative">
-  <button
-    onClick={() => setShowAllMenu(!showAllMenu)}
-    className="w-full h-[60px] px-5 border-soft rounded-2xl flex items-center justify-between"
-  >
-    <span>{selectedType}</span>
-    <img src={ArrowSelect} className="w-4 h-4"/>
-  </button>
+                      {/* ALL */}
+                      {/* All Dropdown */}
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowAllMenu(!showAllMenu)}
+                          className="w-full h-[60px] px-5 border-soft rounded-2xl flex items-center justify-between"
+                        >
+                          <span>{selectedType}</span>
+                          <img src={ArrowSelect} className="w-4 h-4" />
+                        </button>
 
-  {showAllMenu && (
-    <div
-      className="
+                        {showAllMenu && (
+                          <div
+                            className="
         absolute
         top-[70px]
         left-0
@@ -2314,45 +2378,45 @@ const handleApproveKYC = async (customerId) => {
         max-h-[250px]
         overflow-y-auto
       "
-    >
-      {[
-        "Rent",
-        "Advance",
-        "Booking",
-        "Retainer",
-        "EB",
-        "Manual",
-      ].map((item) => (
-        <div
-          key={item}
-          onClick={() => {
-            setSelectedType(item);
-            setShowAllMenu(false);
-          }}
-          className="px-5 py-4 cursor-pointer hover:bg-[#F2F4F7]"
-        >
-          {item}
-        </div>
-      ))}
-    </div>
-  )}
-</div>
+                          >
+                            {[
+                              "Rent",
+                              "Advance",
+                              "Booking",
+                              "Retainer",
+                              "EB",
+                              "Manual",
+                            ].map((item) => (
+                              <div
+                                key={item}
+                                onClick={() => {
+                                  setSelectedType(item);
+                                  setShowAllMenu(false);
+                                }}
+                                className="px-5 py-4 cursor-pointer hover:bg-[#F2F4F7]"
+                              >
+                                {item}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
-  {/* STATUS */}
-  <div className="relative">
-  <div className="border-soft rounded-xl">
-    <button
-      onClick={() => setShowStatusMenu(!showStatusMenu)}
-      className="w-full flex justify-between items-center p-3"
-    >
-      <span>{selectedStatus}</span>
-       <img src={ArrowSelect} className="w-4 h-4"/>
-    </button>
-  </div>
+                      {/* STATUS */}
+                      <div className="relative">
+                        <div className="border-soft rounded-xl">
+                          <button
+                            onClick={() => setShowStatusMenu(!showStatusMenu)}
+                            className="w-full flex justify-between items-center p-3"
+                          >
+                            <span>{selectedStatus}</span>
+                            <img src={ArrowSelect} className="w-4 h-4" />
+                          </button>
+                        </div>
 
-  {showStatusMenu && (
-    <div
-      className="
+                        {showStatusMenu && (
+                          <div
+                            className="
         absolute
         top-[60px]
         left-0
@@ -2365,44 +2429,44 @@ const handleApproveKYC = async (customerId) => {
         max-h-[220px]
         overflow-y-auto
       "
-    >
-      {["All", "Paid", "Unpaid", "Partial Paid", "Cancelled"].map(
-        (item) => (
-          <div
-            key={item}
-            onClick={() => {
-              setSelectedStatus(item);
-              setShowStatusMenu(false);
-            }}
-            className="
+                          >
+                            {["All", "Paid", "Unpaid", "Partial Paid", "Cancelled"].map(
+                              (item) => (
+                                <div
+                                  key={item}
+                                  onClick={() => {
+                                    setSelectedStatus(item);
+                                    setShowStatusMenu(false);
+                                  }}
+                                  className="
               px-4
               py-3
               cursor-pointer
               hover:bg-[#F2F4F7]
             "
-          >
-            {item}
-          </div>
-        )
-      )}
-    </div>
-  )}
-</div>
+                                >
+                                  {item}
+                                </div>
+                              )
+                            )}
+                          </div>
+                        )}
+                      </div>
 
- <div className="relative">
-  <div className="border-soft rounded-xl">
-    <button
-      onClick={() => setShowViewMenu(!showViewMenu)}
-      className="w-full flex items-center justify-between p-3"
-    >
-      <span>{selectedView}</span>
-       <img src={ArrowSelect} className="w-4 h-4"/>
-    </button>
-  </div>
+                      <div className="relative">
+                        <div className="border-soft rounded-xl">
+                          <button
+                            onClick={() => setShowViewMenu(!showViewMenu)}
+                            className="w-full flex items-center justify-between p-3"
+                          >
+                            <span>{selectedView}</span>
+                            <img src={ArrowSelect} className="w-4 h-4" />
+                          </button>
+                        </div>
 
-  {showViewMenu && (
-    <div
-      className="
+                        {showViewMenu && (
+                          <div
+                            className="
         absolute
         top-[60px]
         left-0
@@ -2413,34 +2477,34 @@ const handleApproveKYC = async (customerId) => {
         shadow-lg
         z-50
       "
-    >
-      {["Room View", "List View"].map((item) => (
-        <div
-          key={item}
-          onClick={() => {
-            setSelectedView(item);
-            setShowViewMenu(false);
-          }}
-          className="
+                          >
+                            {["Room View", "List View"].map((item) => (
+                              <div
+                                key={item}
+                                onClick={() => {
+                                  setSelectedView(item);
+                                  setShowViewMenu(false);
+                                }}
+                                className="
             px-4
             py-3
             cursor-pointer
             hover:bg-[#F2F4F7]
           "
-        >
-          {item}
-        </div>
-      ))}
-    </div>
-  )}
-</div>
+                              >
+                                {item}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
-</div>
-    </div>
+                    </div>
+                  </div>
 
 
-<div
-  className="
+                  <div
+                    className="
     border-t
     border-gray-300
     px-5
@@ -2450,18 +2514,18 @@ const handleApproveKYC = async (customerId) => {
     bg-white
     shrink-0
   "
->
-  <button
-    onClick={() => {
-      setSelectedType("All");
-      setSelectedStatus("All");
-      setSelectedView("List View");
+                  >
+                    <button
+                      onClick={() => {
+                        setSelectedType("All");
+                        setSelectedStatus("All");
+                        setSelectedView("List View");
 
-      setShowAllMenu(false);
-      setShowStatusMenu(false);
-      setShowViewMenu(false);
-    }}
-    className="
+                        setShowAllMenu(false);
+                        setShowStatusMenu(false);
+                        setShowViewMenu(false);
+                      }}
+                      className="
       flex-1
       h-11
       border
@@ -2469,15 +2533,15 @@ const handleApproveKYC = async (customerId) => {
       rounded-xl
       font-medium
     "
-  >
-    Clear
-  </button>
+                    >
+                      Clear
+                    </button>
 
-  <button
-    onClick={() => {
-      setShowFilterDrawer(false);
-    }}
-    className="
+                    <button
+                      onClick={() => {
+                        setShowFilterDrawer(false);
+                      }}
+                      className="
       flex-1
       h-11
       bg-blue-600
@@ -2485,14 +2549,14 @@ const handleApproveKYC = async (customerId) => {
       rounded-xl
       font-medium
     "
-  >
-    OK
-  </button>
-</div>
-    </div>
-  </>
-  
-)}
+                    >
+                      OK
+                    </button>
+                  </div>
+                </div>
+              </>
+
+            )}
           </div>
 
           {/* TENANTS */}
@@ -2643,14 +2707,14 @@ const handleApproveKYC = async (customerId) => {
                               {item.fullName || item.firstName || "N/A"}
                             </td> */}
                             <td
-  className="
+                              className="
     px-4
     py-3
     text-left
   "
->
-  <div
-    className="
+                            >
+                              <div
+                                className="
       w-[80px]
       truncate
       text-primaryBlue
@@ -2659,14 +2723,14 @@ const handleApproveKYC = async (customerId) => {
       cursor-pointer
       hover:underline
     "
-    title={item.fullName || item.firstName || "N/A"}
-    onClick={() =>
-      navigate(`/tenant-overview/${item.customerId}`)
-    }
-  >
-    {item.fullName || item.firstName || "N/A"}
-  </div>
-</td>
+                                title={item.fullName || item.firstName || "N/A"}
+                                onClick={() =>
+                                  navigate(`/tenant-overview/${item.customerId}`)
+                                }
+                              >
+                                {item.fullName || item.firstName || "N/A"}
+                              </div>
+                            </td>
 
                             {/* MAIL */}
                             {/* <td
@@ -2682,25 +2746,25 @@ const handleApproveKYC = async (customerId) => {
                               {item.emailId || "N/A"}
                             </td> */}
                             <td
-  className="
+                              className="
     px-4
     py-3
     text-left
   "
->
-  <div
-    className="
+                            >
+                              <div
+                                className="
       w-[80px]
       truncate
       font-medium
       text-tableCell
       text-textDark
     "
-    title={item.emailId || "N/A"}
-  >
-    {item.emailId || "N/A"}
-  </div>
-</td>
+                                title={item.emailId || "N/A"}
+                              >
+                                {item.emailId || "N/A"}
+                              </div>
+                            </td>
 
                             {/* MOBILE */}
                             <td
@@ -2741,17 +2805,17 @@ const handleApproveKYC = async (customerId) => {
                             >
                               {item.kycDetailsStatus || "NOT_AVAILABLE"}
                             </td> */}
-                           <td className="px-4 py-3 text-left font-medium">
-  <span
-    className={
-      item.kycDetailsStatus === "NOT_AVAILABLE" || !item.kycDetailsStatus
-        ? "text-orange-500"
-        : "text-green-500"
-    }
-  >
-    {item.kycDetailsStatus || "NOT_AVAILABLE"}
-  </span>
-</td>
+                            <td className="px-4 py-3 text-left font-medium">
+                              <span
+                                className={
+                                  item.kycDetailsStatus === "NOT_AVAILABLE" || !item.kycDetailsStatus
+                                    ? "text-orange-500"
+                                    : "text-green-500"
+                                }
+                              >
+                                {item.kycDetailsStatus || "NOT_AVAILABLE"}
+                              </span>
+                            </td>
                             <td
                               className="
                         px-4
@@ -2853,40 +2917,7 @@ const handleApproveKYC = async (customerId) => {
                                     }}
                                   >
 
-                                    {/* <button
-      // onClick={() => {
-      //   setSelectedTenantId(item.customerId);
-      //   setShowDetectionsModal(true);
-      //   setOpenMenu(null);
-      // }}
-       onClick={() => {
 
-    navigate(
-      `/tenant-deductions/${item.customerId}`,
-      {
-        state: {
-          tenantData: item,
-          hostelData: hostelData
-        }
-      }
-    );
-
-    setOpenMenu(null);
-
-  }}
-      className="
-      
-        text-left
-        px-4
-        py-1
-        text-cardTitle
-        hover:bg-cardBg
-        text-gray-700
-        cursor-pointer
-      "
-    >
-      Deductions
-    </button> */}
 
                                     <button
                                       disabled={!canDelete}
@@ -2918,7 +2949,7 @@ const handleApproveKYC = async (customerId) => {
                                     </button>
 
 
-{/* {
+                                    {/* {
   item?.canGenerateSettlement === true &&(
      <button onClick={() =>
   navigate(
@@ -2943,30 +2974,45 @@ const handleApproveKYC = async (customerId) => {
                                     </button>
   )
 } */}
-{item?.canGenerateSettlement === true && (
-  <button
-    disabled={!canWrite}
-    onClick={() => {
-      if (!canWrite) return;
+                                    {item?.canGenerateSettlement === true && (
+                                      <button
+                                        disabled={!canWrite}
+                                        onClick={() => {
+                                          if (!canWrite) return;
 
-      navigate(`/settlement-summary/${item.customerId}`, {
-        state: {
-          tenantData: item,
-        },
-      });
-    }}
-    className={`text-left px-4 py-2 ${
-      canWrite
-        ? "text-cardTitle hover:bg-cardBg cursor-pointer"
-        : "text-gray-400 cursor-not-allowed"
-    }`}
-  >
-    Generate
-  </button>
-)}
-                                   
- 
-{/* {item?.canApproveKyc === true && (
+                                          navigate(`/settlement-summary/${item.customerId}`, {
+                                            state: {
+                                              tenantData: item,
+                                            },
+                                          });
+                                        }}
+                                        className={`text-left px-4 py-2 ${canWrite
+                                            ? "text-cardTitle hover:bg-cardBg cursor-pointer"
+                                            : "text-gray-400 cursor-not-allowed"
+                                          }`}
+                                      >
+                                        Generate
+                                      </button>
+                                    )}
+<button
+  disabled={!canWrite}
+  onClick={() => {
+    if (!canWrite) return;
+
+    setSelectedRecalculateCustomerId(item.customerId);
+    setShowRecalculateModal(true);
+    setOpenMenu(null);
+  }}
+  className={`text-left px-4 py-2 ${
+    canWrite
+      ? "text-cardTitle hover:bg-cardBg cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+>
+  Recalculate Eb
+</button>
+
+                                    {/* {item?.canApproveKyc === true && (
   <button
     onClick={() => {
       setSelectedCustomerId(
@@ -2988,26 +3034,25 @@ const handleApproveKYC = async (customerId) => {
     Approve KYC
   </button>
 )} */}
-{item?.canApproveKyc === true && (
-  <button
-    disabled={!canWrite}
-    onClick={() => {
-      if (!canWrite) return;
+                                    {item?.canApproveKyc === true && (
+                                      <button
+                                        disabled={!canWrite}
+                                        onClick={() => {
+                                          if (!canWrite) return;
 
-      setSelectedCustomerId(item.customerId);
-      setShowApproveModal(true);
-      setOpenMenu(null);
-      setSelectedTenant(item);
-    }}
-    className={`text-left px-4 py-2 ${
-      canWrite
-        ? "text-cardTitle hover:bg-cardBg cursor-pointer"
-        : "text-gray-400 cursor-not-allowed"
-    }`}
-  >
-    Approve KYC
-  </button>
-)}
+                                          setSelectedCustomerId(item.customerId);
+                                          setShowApproveModal(true);
+                                          setOpenMenu(null);
+                                          setSelectedTenant(item);
+                                        }}
+                                        className={`text-left px-4 py-2 ${canWrite
+                                            ? "text-cardTitle hover:bg-cardBg cursor-pointer"
+                                            : "text-gray-400 cursor-not-allowed"
+                                          }`}
+                                      >
+                                        Approve KYC
+                                      </button>
+                                    )}
                                   </div>
 
                                 )}
@@ -3104,19 +3149,19 @@ const handleApproveKYC = async (customerId) => {
               refreshHostel={fetchData}
             />
           )} */}
-         {activeTab === "Invoice" && (
-  selectedView === "Room View" ? (
-    <RoomView
-      hostelData={hostelData}
-      refreshHostel={fetchData}
-    />
-  ) : (
-    <InvoiceView
-      hostelData={hostelData}
-      refreshHostel={fetchData}
-    />
-  )
-)}
+          {activeTab === "Invoice" && (
+            selectedView === "Room View" ? (
+              <RoomView
+                hostelData={hostelData}
+                refreshHostel={fetchData}
+              />
+            ) : (
+              <InvoiceView
+                hostelData={hostelData}
+                refreshHostel={fetchData}
+              />
+            )
+          )}
 
           {activeTab === "Invoice Redemption" && (
             <InvoicesRedemption
@@ -4476,9 +4521,9 @@ const handleApproveKYC = async (customerId) => {
         </div>
 
       )}
-     {showPlanModal && (
-  <div
-    className="
+      {showPlanModal && (
+        <div
+          className="
       fixed
       inset-0
       bg-black/40
@@ -4488,13 +4533,13 @@ const handleApproveKYC = async (customerId) => {
       z-50
       px-4
     "
-    onClick={() => {
-      setShowPlanModal(false);
-      resetPlanForm();
-    }}
-  >
-    <div
-      className="
+          onClick={() => {
+            setShowPlanModal(false);
+            resetPlanForm();
+          }}
+        >
+          <div
+            className="
         bg-white-common
         rounded-modal
         shadow-modal
@@ -4506,18 +4551,18 @@ const handleApproveKYC = async (customerId) => {
         overflow-hidden
         animate-fadeIn
       "
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* HEADER */}
-      <div className="shrink-0 p-6 pb-4 border-b border-[#EAECF0]">
-        <h2 className="text-cardTitle font-semibold text-headingDark text-left">
-          Buy Subscription Plan
-        </h2>
-      </div>
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* HEADER */}
+            <div className="shrink-0 p-6 pb-4 border-b border-[#EAECF0]">
+              <h2 className="text-cardTitle font-semibold text-headingDark text-left">
+                Buy Subscription Plan
+              </h2>
+            </div>
 
-      {/* SCROLLABLE CONTENT */}
-      <div
-        className="
+            {/* SCROLLABLE CONTENT */}
+            <div
+              className="
           flex-1
           overflow-y-auto
           p-6
@@ -4537,18 +4582,18 @@ const handleApproveKYC = async (customerId) => {
           [scrollbar-width:thin]
           [scrollbar-color:#bfd3ff_transparent]
         "
-      >
-  <div
-              className="
+            >
+              <div
+                className="
           relative
           w-full
           text-left
         "
-              ref={dropdownRef}
-            >
+                ref={dropdownRef}
+              >
 
-              <label
-                className="
+                <label
+                  className="
             block
             text-cardTitle
             text-textDark/70
@@ -4556,16 +4601,16 @@ const handleApproveKYC = async (customerId) => {
             text-left
             font-medium
           "
-              >
-                Plan Name
-              </label>
+                >
+                  Plan Name
+                </label>
 
-              <div
-                onClick={() => {
-                  setShowDropdown(!showDropdown);
-                  setShowPaidByDropdown(false);
-                }}
-                className="
+                <div
+                  onClick={() => {
+                    setShowDropdown(!showDropdown);
+                    setShowPaidByDropdown(false);
+                  }}
+                  className="
             border
             border-borderSoft
             rounded-card
@@ -4578,50 +4623,50 @@ const handleApproveKYC = async (customerId) => {
             justify-between
             bg-white-common
           "
-              >
+                >
 
-                <span
-                  className={`
+                  <span
+                    className={`
               text-cardTitle
               ${planCode
-                      ? "text-textDark"
-                      : "text-textDark/40"
-                    }
+                        ? "text-textDark"
+                        : "text-textDark/40"
+                      }
             `}
-                >
-                  {
-                    dropdownPlans?.otherPlans?.find(
-                      p => p.planCode === planCode
-                    )?.planName || "Select Plan"
-                  }
-                </span>
+                  >
+                    {
+                      dropdownPlans?.otherPlans?.find(
+                        p => p.planCode === planCode
+                      )?.planName || "Select Plan"
+                    }
+                  </span>
 
-                <svg
-                  className={`
+                  <svg
+                    className={`
               w-4
               h-4
               text-textDark/50
               transition-transform
               ${showDropdown
-                      ? "rotate-180"
-                      : ""
-                    }
+                        ? "rotate-180"
+                        : ""
+                      }
             `}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
 
-              </div>
+                </div>
 
-              {/* DROPDOWN */}
-              {showDropdown && (
+                {/* DROPDOWN */}
+                {showDropdown && (
 
-                <div
-                  className="
+                  <div
+                    className="
               absolute
               z-10
               mt-1
@@ -4634,24 +4679,24 @@ const handleApproveKYC = async (customerId) => {
               max-h-40
               overflow-y-auto
             "
-                >
+                  >
 
-                  {dropdownPlans?.otherPlans?.length > 0 ? (
+                    {dropdownPlans?.otherPlans?.length > 0 ? (
 
-                    dropdownPlans.otherPlans.map((plan) => (
+                      dropdownPlans.otherPlans.map((plan) => (
 
-                      <div
-                        key={plan.planId}
-                        onClick={() => {
+                        <div
+                          key={plan.planId}
+                          onClick={() => {
 
-                          setPlanCode(plan.planCode);
-                          setShowDropdown(false);
-                          setPlanError("");
+                            setPlanCode(plan.planCode);
+                            setShowDropdown(false);
+                            setPlanError("");
 
 
 
-                        }}
-                        className={`
+                          }}
+                          className={`
                     px-3
                     py-2.5
                     cursor-pointer
@@ -4661,65 +4706,65 @@ const handleApproveKYC = async (customerId) => {
                     items-center
 
                     ${plan.planCode === planCode
-                            ? "bg-primarySoft text-primaryBlue"
-                            : "hover:bg-cardBg"
-                          }
+                              ? "bg-primarySoft text-primaryBlue"
+                              : "hover:bg-cardBg"
+                            }
                   `}
-                      >
+                        >
 
-                        <span>{plan.planName}</span>
+                          <span>{plan.planName}</span>
 
-                        {plan.planCode === planCode && (
-                          <span className="text-primaryBlue">
-                            ✔
-                          </span>
-                        )}
+                          {plan.planCode === planCode && (
+                            <span className="text-primaryBlue">
+                              ✔
+                            </span>
+                          )}
 
-                      </div>
+                        </div>
 
-                    ))
+                      ))
 
-                  ) : (
+                    ) : (
 
-                    <div
-                      className="
+                      <div
+                        className="
                   px-3
                   py-2
                   text-cardTitle
                   text-textDark/40
                 "
-                    >
-                      No Plans Available
-                    </div>
+                      >
+                        No Plans Available
+                      </div>
 
-                  )}
+                    )}
 
-                </div>
+                  </div>
 
+                )}
+
+              </div>
+
+              {/* PLAN ERROR */}
+              {planError && (
+                <ErrorMessage
+                  message={planError}
+                  type="error"
+                />
               )}
 
-            </div>
-
-            {/* PLAN ERROR */}
-            {planError && (
-              <ErrorMessage
-                message={planError}
-                type="error"
-              />
-            )}
-
-            {/* STAFFS */}
-            <div
-              className="
+              {/* STAFFS */}
+              <div
+                className="
           relative
           w-full
           text-left
           mt-3
         "
-            >
+              >
 
-              <label
-                className="
+                <label
+                  className="
             block
             text-cardTitle
             text-textDark/70
@@ -4727,16 +4772,16 @@ const handleApproveKYC = async (customerId) => {
             text-left
             font-medium
           "
-              >
-                Staffs
-              </label>
+                >
+                  Staffs
+                </label>
 
-              <div
-                onClick={() => {
-                  setShowPaidByDropdown(!showPaidByDropdown);
-                  setShowDropdown(false);
-                }}
-                className="
+                <div
+                  onClick={() => {
+                    setShowPaidByDropdown(!showPaidByDropdown);
+                    setShowDropdown(false);
+                  }}
+                  className="
             border
             border-borderSoft
             rounded-card
@@ -4748,50 +4793,50 @@ const handleApproveKYC = async (customerId) => {
             justify-between
             bg-white-common
           "
-              >
+                >
 
-                <span
-                  className={`
+                  <span
+                    className={`
               text-cardTitle
               ${paidBy
-                      ? "text-textDark"
-                      : "text-textDark/40"
-                    }
+                        ? "text-textDark"
+                        : "text-textDark/40"
+                      }
             `}
-                >
-                  {
-                    paidByUsers.find(
-                      u => u.id === paidBy
-                    )?.name || "Select Paid By"
-                  }
-                </span>
+                  >
+                    {
+                      paidByUsers.find(
+                        u => u.id === paidBy
+                      )?.name || "Select Paid By"
+                    }
+                  </span>
 
-                <svg
-                  className={`
+                  <svg
+                    className={`
               w-4
               h-4
               text-textDark/50
               transition-transform
               ${showPaidByDropdown
-                      ? "rotate-180"
-                      : ""
-                    }
+                        ? "rotate-180"
+                        : ""
+                      }
             `}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
 
-              </div>
+                </div>
 
-              {/* DROPDOWN */}
-              {showPaidByDropdown && (
+                {/* DROPDOWN */}
+                {showPaidByDropdown && (
 
-                <div
-                  className="
+                  <div
+                    className="
               absolute
               w-full
               bg-white-common
@@ -4804,21 +4849,21 @@ const handleApproveKYC = async (customerId) => {
               overflow-y-auto
               z-[9999]
             "
-                >
+                  >
 
-                  {paidByUsers.map((user) => (
+                    {paidByUsers.map((user) => (
 
-                    <div
-                      key={user.id}
-                      onClick={() => {
+                      <div
+                        key={user.id}
+                        onClick={() => {
 
-                        setPaidBy(user.id);
-                        setShowPaidByDropdown(false);
-                        setPaidByError("");
+                          setPaidBy(user.id);
+                          setShowPaidByDropdown(false);
+                          setPaidByError("");
 
 
-                      }}
-                      className={`
+                        }}
+                        className={`
                   px-3
                   py-2.5
                   cursor-pointer
@@ -4828,97 +4873,43 @@ const handleApproveKYC = async (customerId) => {
                   items-center
 
                   ${paidBy === user.id
-                          ? "bg-primarySoft text-primaryBlue"
-                          : "hover:bg-cardBg"
-                        }
+                            ? "bg-primarySoft text-primaryBlue"
+                            : "hover:bg-cardBg"
+                          }
                 `}
-                    >
+                      >
 
-                      <span>
-                        {user.name} ({user.role})
-                      </span>
+                        <span>
+                          {user.name} ({user.role})
+                        </span>
 
-                      {paidBy === user.id && (
-                        <span>✔</span>
-                      )}
+                        {paidBy === user.id && (
+                          <span>✔</span>
+                        )}
 
-                    </div>
+                      </div>
 
-                  ))}
+                    ))}
 
-                </div>
+                  </div>
 
-              )}
+                )}
 
-            </div>
+              </div>
 
-            {/* STAFF ERROR */}
-            {paidByError && (
-              <ErrorMessage
-                message={paidByError}
-                type="error"
-              />
-            )}
-
-            {/* PAID AMOUNT */}
-            <div className="w-full mt-4">
-
-              <label
-                className="
-            block
-            text-cardTitle
-            text-textDark/70
-            mb-1
-            text-left
-            font-medium
-          "
-              >
-                Paid Amount
-              </label>
-
-              <input
-                type="number"
-                placeholder={
-                  selectedPlanothers
-                    ? `₹${selectedPlanothers.finalPrice}`
-                    : "Paid Amount"
-                }
-                value={paidAmount}
-                onChange={(e) => {
-
-                  setPaidAmount(e.target.value);
-                  setPaidAmountError("");
-                  setShowDropdown(false);
-                  setShowPaidByDropdown(false)
-
-                }}
-                className="
-            w-full
-            border
-            border-borderSoft
-            rounded-card
-            px-3
-            py-2.5
-            text-cardTitle
-            outline-none
-            focus:border-primaryBlue
-          "
-              />
-
-              {paidAmountError && (
+              {/* STAFF ERROR */}
+              {paidByError && (
                 <ErrorMessage
-                  message={paidAmountError}
+                  message={paidByError}
                   type="error"
                 />
               )}
 
-            </div>
+              {/* PAID AMOUNT */}
+              <div className="w-full mt-4">
 
-            {/* DISCOUNT */}
-            <div className="w-full mt-4">
-
-              <label
-                className="
+                <label
+                  className="
             block
             text-cardTitle
             text-textDark/70
@@ -4926,16 +4917,27 @@ const handleApproveKYC = async (customerId) => {
             text-left
             font-medium
           "
-              >
-                Discount Amount
-              </label>
+                >
+                  Paid Amount
+                </label>
 
-              <input
-                type="number"
-                placeholder="Discount Amount"
-                value={discountAmount}
-                onChange={(e) => setDiscountAmount(e.target.value)}
-                className="
+                <input
+                  type="number"
+                  placeholder={
+                    selectedPlanothers
+                      ? `₹${selectedPlanothers.finalPrice}`
+                      : "Paid Amount"
+                  }
+                  value={paidAmount}
+                  onChange={(e) => {
+
+                    setPaidAmount(e.target.value);
+                    setPaidAmountError("");
+                    setShowDropdown(false);
+                    setShowPaidByDropdown(false)
+
+                  }}
+                  className="
             w-full
             border
             border-borderSoft
@@ -4946,16 +4948,59 @@ const handleApproveKYC = async (customerId) => {
             outline-none
             focus:border-primaryBlue
           "
-              />
+                />
 
-            </div>
-{/* PAID DATE & TIME */}
-<div className="grid grid-cols-2 gap-4 mt-4">
+                {paidAmountError && (
+                  <ErrorMessage
+                    message={paidAmountError}
+                    type="error"
+                  />
+                )}
 
-  {/* Paid Date */}
-  <div>
-    <label
-      className="
+              </div>
+
+              {/* DISCOUNT */}
+              <div className="w-full mt-4">
+
+                <label
+                  className="
+            block
+            text-cardTitle
+            text-textDark/70
+            mb-1
+            text-left
+            font-medium
+          "
+                >
+                  Discount Amount
+                </label>
+
+                <input
+                  type="number"
+                  placeholder="Discount Amount"
+                  value={discountAmount}
+                  onChange={(e) => setDiscountAmount(e.target.value)}
+                  className="
+            w-full
+            border
+            border-borderSoft
+            rounded-card
+            px-3
+            py-2.5
+            text-cardTitle
+            outline-none
+            focus:border-primaryBlue
+          "
+                />
+
+              </div>
+              {/* PAID DATE & TIME */}
+              <div className="grid grid-cols-2 gap-4 mt-4">
+
+                {/* Paid Date */}
+                <div>
+                  <label
+                    className="
         block
         text-cardTitle
         text-textDark/70
@@ -4963,34 +5008,34 @@ const handleApproveKYC = async (customerId) => {
         font-medium
         text-left
       "
-    >
-      Paid Date
-    </label>
+                  >
+                    Paid Date
+                  </label>
 
-    <DatePicker
-      className="w-full h-[44px]"
-      format="DD-MM-YYYY"
-      placeholder="Select Paid Date"
-      
-      value={paidAtDate}
-       onChange={(date) => {
-    setPaidAtDate(date);
-    setPaidAtDateError("");
-  }}
-      
-    />
-    {paidAtDateError && (
-              <ErrorMessage
-                message={paidAtDateError}
-                type="error"
-              />
-            )}
-  </div>
+                  <DatePicker
+                    className="w-full h-[44px]"
+                    format="DD-MM-YYYY"
+                    placeholder="Select Paid Date"
 
-  {/* Paid Time */}
-  <div>
-    <label
-      className="
+                    value={paidAtDate}
+                    onChange={(date) => {
+                      setPaidAtDate(date);
+                      setPaidAtDateError("");
+                    }}
+
+                  />
+                  {paidAtDateError && (
+                    <ErrorMessage
+                      message={paidAtDateError}
+                      type="error"
+                    />
+                  )}
+                </div>
+
+                {/* Paid Time */}
+                <div>
+                  <label
+                    className="
         block
         text-cardTitle
         text-textDark/70
@@ -4998,34 +5043,34 @@ const handleApproveKYC = async (customerId) => {
         font-medium
         text-left
       "
-    >
-      Paid Time
-    </label>
+                  >
+                    Paid Time
+                  </label>
 
-   <TimePicker
-  className="w-full h-[44px]"
-  placeholder="Select Time"
-  format="HH:mm"
-  value={paidAtTime}
-  onChange={(time) => {
-    setPaidAtTime(time);
-    setPaidAtTimeError("");
-  }}
-/>
-{paidAtTimeError && (
-              <ErrorMessage
-                message={paidAtTimeError}
-                type="error"
-              />
-            )}
-  </div>
+                  <TimePicker
+                    className="w-full h-[44px]"
+                    placeholder="Select Time"
+                    format="HH:mm"
+                    value={paidAtTime}
+                    onChange={(time) => {
+                      setPaidAtTime(time);
+                      setPaidAtTimeError("");
+                    }}
+                  />
+                  {paidAtTimeError && (
+                    <ErrorMessage
+                      message={paidAtTimeError}
+                      type="error"
+                    />
+                  )}
+                </div>
 
-</div>
-            {/* FILE UPLOAD */}
-            <div className="w-full mt-5">
+              </div>
+              {/* FILE UPLOAD */}
+              <div className="w-full mt-5">
 
-              <label
-                className="
+                <label
+                  className="
             flex
             flex-col
             items-center
@@ -5040,110 +5085,110 @@ const handleApproveKYC = async (customerId) => {
             hover:bg-cardBg
             transition
           "
-              >
+                >
 
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={(e) => {
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={(e) => {
 
-                    setPaymentProof(e.target.files[0]);
-                    setProofError("");
+                      setPaymentProof(e.target.files[0]);
+                      setProofError("");
 
-                  }}
-                />
+                    }}
+                  />
 
-                <div
-                  className="
+                  <div
+                    className="
               flex
               flex-col
               items-center
               justify-center
             "
-                >
+                  >
 
-                  <svg
-                    className="
+                    <svg
+                      className="
                 w-8
                 h-8
                 mb-2
                 text-textDark/30
               "
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M7 16V4m0 0l-4 4m4-4l4 4M17 8v12m0 0l-4-4m4 4l4-4" />
-                  </svg>
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M7 16V4m0 0l-4 4m4-4l4 4M17 8v12m0 0l-4-4m4 4l4-4" />
+                    </svg>
 
-                  <p
-                    className="
+                    <p
+                      className="
                 text-cardTitle
                 text-textDark/70
               "
-                  >
-                    <span
-                      className="
+                    >
+                      <span
+                        className="
                   font-medium
                   text-primaryBlue
                 "
-                    >
-                      Choose Image
-                    </span>
+                      >
+                        Choose Image
+                      </span>
 
-                    {" "}to Upload
-                  </p>
+                      {" "}to Upload
+                    </p>
 
-                  <p
-                    className="
+                    <p
+                      className="
                 text-tableCell
                 text-textDark/40
                 mt-1
               "
-                  >
-                    JPG/JPEG Format
-                  </p>
+                    >
+                      JPG/JPEG Format
+                    </p>
 
-                </div>
+                  </div>
 
-              </label>
+                </label>
 
-              {/* FILE NAME */}
-              {paymentProof && (
+                {/* FILE NAME */}
+                {paymentProof && (
 
-                <p
-                  className="
+                  <p
+                    className="
               text-cardTitle
               text-successGreen
               mt-2
             "
-                >
-                  Selected: {paymentProof.name}
-                </p>
+                  >
+                    Selected: {paymentProof.name}
+                  </p>
 
+                )}
+
+              </div>
+
+
+              {proofError && (
+                <ErrorMessage
+                  message={proofError}
+                  type="error"
+                />
               )}
-
             </div>
 
-        
-            {proofError && (
-              <ErrorMessage
-                message={proofError}
-                type="error"
-              />
-            )}
-      </div>
 
-     
-      <div className="shrink-0 border-t border-[#EAECF0] p-6">
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={() => {
-              setShowPlanModal(false);
-              resetPlanForm();
-            }}
-            className="
+            <div className="shrink-0 border-t border-[#EAECF0] p-6">
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setShowPlanModal(false);
+                    resetPlanForm();
+                  }}
+                  className="
               px-4
               py-2
               border
@@ -5153,32 +5198,31 @@ const handleApproveKYC = async (customerId) => {
               hover:bg-cardBg
               cursor-pointer
             "
-          >
-            Cancel
-          </button>
+                >
+                  Cancel
+                </button>
 
-          <button
-            disabled={subscriptionLoading}
-            onClick={handleSubscription}
-            className={`
+                <button
+                  disabled={subscriptionLoading}
+                  onClick={handleSubscription}
+                  className={`
               px-4
               py-2
               rounded-card
               text-white
-              ${
-                subscriptionLoading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-primaryBlue cursor-pointer hover:bg-blue-700"
-              }
+              ${subscriptionLoading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-primaryBlue cursor-pointer hover:bg-blue-700"
+                    }
             `}
-          >
-            {subscriptionLoading ? "Submit..." : "Submit"}
-          </button>
+                >
+                  {subscriptionLoading ? "Submit..." : "Submit"}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
       {/* {showTrialConfirm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
@@ -6602,30 +6646,30 @@ const handleApproveKYC = async (customerId) => {
               </button> */}
 
               <button
-  onClick={handleGeneratePayment}
-  disabled={
-    generateLoading ||
-    isPaymentGenerated
-  }
-  onMouseDown={(e) => {
-    if (generateLock.current) {
-      e.preventDefault();
-    }
-  }}
-  className={`
+                onClick={handleGeneratePayment}
+                disabled={
+                  generateLoading ||
+                  isPaymentGenerated
+                }
+                onMouseDown={(e) => {
+                  if (generateLock.current) {
+                    e.preventDefault();
+                  }
+                }}
+                className={`
     px-6 py-2.5 rounded-card text-white
     ${generateLoading || isPaymentGenerated
-      ? "bg-gray-400 cursor-not-allowed"
-      : "bg-primaryBlue hover:bg-blue-700 cursor-pointer"
-    }
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-primaryBlue hover:bg-blue-700 cursor-pointer"
+                  }
   `}
->
-  {generateLoading
-    ? "Generating..."
-    : isPaymentGenerated
-      ? "Generated"
-      : "Generate"}
-</button>
+              >
+                {generateLoading
+                  ? "Generating..."
+                  : isPaymentGenerated
+                    ? "Generated"
+                    : "Generate"}
+              </button>
               {generatedPaymentUrl && (
 
                 <button
@@ -6669,124 +6713,180 @@ const handleApproveKYC = async (customerId) => {
 
       )}
       {showApproveModal && (
-  // <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-  //   <div className="bg-white rounded-2xl w-[500px] p-6 shadow-xl">
+        // <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        //   <div className="bg-white rounded-2xl w-[500px] p-6 shadow-xl">
 
-  //     <h2 className="text-[20px] font-medium text-left">
-  //       Do you want to approve this Property?
-  //     </h2>
+        //     <h2 className="text-[20px] font-medium text-left">
+        //       Do you want to approve this Property?
+        //     </h2>
 
-  //     <p className="text-gray-500 mt-2 text-sm text-left">
-  //       Upon your approval, the property approval process will be completed.
-  //     </p>
+        //     <p className="text-gray-500 mt-2 text-sm text-left">
+        //       Upon your approval, the property approval process will be completed.
+        //     </p>
 
-  //     <div className="flex justify-end gap-3 mt-8">
+        //     <div className="flex justify-end gap-3 mt-8">
 
-  //       <button
-  //         onClick={() => setShowApproveModal(false)}
-  //         className="border border-gray-300 px-8 py-3 rounded-xl"
-  //       >
-  //         Cancel
-  //       </button>
+        //       <button
+        //         onClick={() => setShowApproveModal(false)}
+        //         className="border border-gray-300 px-8 py-3 rounded-xl"
+        //       >
+        //         Cancel
+        //       </button>
 
-  //       <button
-  //        onClick={() => {
-  //   handleApproveKYC(selectedCustomerId);
-  //   setShowApproveModal(false);
-  // }}
-  //         disabled={approveLoading}
-  //         className={`
-  //           px-8 py-3 rounded-xl text-white
-  //           ${
-  //             approveLoading
-  //               ? "bg-gray-400 cursor-not-allowed"
-  //               : "bg-[#2952F3]"
-  //           }
-  //         `}
-  //       >
-  //         {approveLoading
-  //           ? "Approving..."
-  //           : "Confirm"}
-  //       </button>
+        //       <button
+        //        onClick={() => {
+        //   handleApproveKYC(selectedCustomerId);
+        //   setShowApproveModal(false);
+        // }}
+        //         disabled={approveLoading}
+        //         className={`
+        //           px-8 py-3 rounded-xl text-white
+        //           ${
+        //             approveLoading
+        //               ? "bg-gray-400 cursor-not-allowed"
+        //               : "bg-[#2952F3]"
+        //           }
+        //         `}
+        //       >
+        //         {approveLoading
+        //           ? "Approving..."
+        //           : "Confirm"}
+        //       </button>
 
-  //     </div>
+        //     </div>
 
-  //   </div>
-  // </div>
-   <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white-common rounded-2xl w-[500px] p-6 shadow-xl">
-  
-              <h2 className="text-[20px] font-medium text-[#1f2937] text-left">
-                Do you wanna approve KYC for this Tenant ?
-              </h2>
-  
-              <p className="text-gray-500 mt-2 text-sm text-left">
-                Upon your approval, the KYC process will be completed.
-              </p>
-  
-              <div className="bg-[#f5f7fb] rounded-xl p-4 mt-6 flex items-center gap-4">
-  
-                <div className="w-14 h-14 rounded-full bg-white-common flex items-center justify-center">
-                  <img src={User} className="w-5 h-6" />
-                </div>
-  
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-[20px]">
-                      {selectedTenant?.fullName}
-                    </h3>
-  
-                    <img src={Maxmize} className="w-4 h-4"/>
-                  </div>
-  
-                  <p className="text-sm text-gray-500 mt-1">
-                    SM{selectedTenant?.kycDetailsId} |
-                    {" "}
-                    +91 {selectedTenant?.mobile}
-                  </p>
-                </div>
+        //   </div>
+        // </div>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white-common rounded-2xl w-[500px] p-6 shadow-xl">
+
+            <h2 className="text-[20px] font-medium text-[#1f2937] text-left">
+              Do you wanna approve KYC for this Tenant ?
+            </h2>
+
+            <p className="text-gray-500 mt-2 text-sm text-left">
+              Upon your approval, the KYC process will be completed.
+            </p>
+
+            <div className="bg-[#f5f7fb] rounded-xl p-4 mt-6 flex items-center gap-4">
+
+              <div className="w-14 h-14 rounded-full bg-white-common flex items-center justify-center">
+                <img src={User} className="w-5 h-6" />
               </div>
-  
-              <div className="flex justify-end gap-3 mt-8">
-  
-                <button
-                  onClick={() =>
-                    setShowApproveModal(false)
-                  }
-                  className="border border-gray-300 px-8 py-3 rounded-xl text-gray-700"
-                >
-                  Cancel
-                </button>
-  
-                <button
-  type="button"
-  onClick={() =>
-    handleApproveKYC(selectedCustomerId)
-  }
-  disabled={approveLoading}
-  className={`
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-[20px]">
+                    {selectedTenant?.fullName}
+                  </h3>
+
+                  <img src={Maxmize} className="w-4 h-4" />
+                </div>
+
+                <p className="text-sm text-gray-500 mt-1">
+                  SM{selectedTenant?.kycDetailsId} |
+                  {" "}
+                  +91 {selectedTenant?.mobile}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-8">
+
+              <button
+                onClick={() =>
+                  setShowApproveModal(false)
+                }
+                className="border border-gray-300 px-8 py-3 rounded-xl text-gray-700"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  handleApproveKYC(selectedCustomerId)
+                }
+                disabled={approveLoading}
+                className={`
     px-8 py-3 rounded-xl
     flex items-center gap-2 text-white
-    ${
-      approveLoading
-        ? "bg-gray-400 cursor-not-allowed"
-        : "bg-[#2952F3] hover:bg-[#1f46e5]"
-    }
+    ${approveLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-[#2952F3] hover:bg-[#1f46e5]"
+                  }
   `}
->
-  <img src={Share} className="w-4 h-4"/>
+              >
+                <img src={Share} className="w-4 h-4" />
 
-  {approveLoading
-    ? "Approving..."
-    : "Confirm"}
-</button>
-  
-              </div>
-  
+                {approveLoading
+                  ? "Approving..."
+                  : "Confirm"}
+              </button>
+
             </div>
-          </div>
-)}
 
+          </div>
+        </div>
+      )}
+{showRecalculateModal && (
+  <div
+    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+    onClick={() => {
+      if (!recalculateLoading) {
+        setShowRecalculateModal(false);
+        setSelectedRecalculateCustomerId(null);
+      }
+    }}
+  >
+
+    <div
+      className="bg-white-common rounded-2xl w-[500px] p-6 shadow-xl"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      <h2 className="text-[20px] font-medium text-[#1f2937] text-left">
+        Recalculate Electricity
+      </h2>
+
+      <p className="text-gray-500 mt-2 text-sm text-left">
+        Are you sure you want to recalculate?
+      </p>
+
+      <div className="flex justify-end gap-3 mt-8">
+
+        {/* CANCEL */}
+        <button
+          onClick={() => {
+            setShowRecalculateModal(false);
+            setSelectedRecalculateCustomerId(null);
+          }}
+          disabled={recalculateLoading}
+          className="border border-gray-300 px-8 py-3 rounded-xl text-gray-700 cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        {/* CONFIRM */}
+        <button
+          onClick={handleRecalculate}
+          disabled={recalculateLoading}
+          className={`px-8 py-3 rounded-xl text-white ${
+            recalculateLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-primaryBlue hover:bg-blue-700 cursor-pointer"
+          }`}
+        >
+          {recalculateLoading
+            ? "Recalculating..."
+            : "Confirm"}
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
 
     </DashboardLayout>
   );

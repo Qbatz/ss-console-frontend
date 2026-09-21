@@ -232,12 +232,113 @@ const sendKYCReminder = async (customerId) => {
     setLoading(false);
   }
 };
+
+const enableHostelKYC = async (
+  hostelId,
+  activationReason
+) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.post(
+      `/v2/kyc/enable/${hostelId}`,
+      {
+        activationReason,
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+
+  } catch (error) {
+    console.error(
+      "Enable Hostel KYC Error:",
+      error
+    );
+
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+const disableHostelKYC = async (
+  hostelId,
+  endDate,
+  cancelledDueToPlan,
+  cancellationReason
+) => {
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.post(
+      `/v2/kyc/disable/${hostelId}`,
+      {
+        endDate,
+        cancelledDueToPlan,
+        cancellationReason,
+      }
+    );
+
+    return {
+      success: true,
+      data: res.data,
+    };
+  } catch (error) {
+    console.error(
+      "Disable Hostel KYC Error:",
+      error
+    );
+
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const setKycMonthlyLimit = async (hostelId, perMonthLimit) => {
+  try {
+    const response = await axiosInstance.post(
+      `/v2/kyc/month-limit/${hostelId}`,
+      {
+        perMonthLimit: Number(perMonthLimit),
+      }
+    );
+
+    console.log("MONTH LIMIT API RESPONSE:", response.data);
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error(
+      "MONTH LIMIT API ERROR:",
+      error?.response?.data || error
+    );
+
+    return {
+      success: false,
+      message:
+        error?.response?.data?.message ||
+        "Failed to set monthly limit",
+    };
+  }
+};
   return (
     <KYCContext.Provider
       value={{
         loading,
         accessError,
-        getKYCList,approveKYC,getHostelKYCList,getHostelKYCDetails,sendKYCReminder
+        getKYCList,approveKYC,getHostelKYCList,getHostelKYCDetails,sendKYCReminder,
+        enableHostelKYC,disableHostelKYC,setKycMonthlyLimit
       }}
     >
       {children}

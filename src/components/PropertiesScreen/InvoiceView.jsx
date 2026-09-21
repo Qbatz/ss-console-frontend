@@ -476,7 +476,7 @@ const [activeFilter, setActiveFilter] = useState("All");
 
   </div>
 </td> */}
-                                            <td className="w-[150px] py-1 px-2 whitespace-nowrap overflow-hidden text-[11px] font-medium text-start">
+                                            {/* <td className="w-[150px] py-1 px-2 whitespace-nowrap overflow-hidden text-[11px] font-medium text-start">
 
                                                 {item?.paymentStatus === "PAID" && (
                                                     <span className="bg-[#B3E5BB4D] text-green-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
@@ -526,7 +526,66 @@ const [activeFilter, setActiveFilter] = useState("All");
                                                     </span>
                                                 )}
 
-                                            </td>
+                                            </td> */}
+                                            <td className="w-[150px] py-1 px-2 whitespace-nowrap overflow-hidden text-[11px] font-medium text-start">
+
+    {item?.isCancelled === true ? (
+        <span className="bg-[#FFE6B3] text-yellow-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+            Cancelled
+        </span>
+    ) : (
+        <>
+            {item?.paymentStatus === "PAID" && (
+                <span className="bg-[#B3E5BB4D] text-green-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                    Paid
+                </span>
+            )}
+
+            {item?.paymentStatus === "PENDING" && (
+                <span className="bg-[#FFD9D9] text-red-600 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                    Pending
+                </span>
+            )}
+
+            {item?.paymentStatus === "PARTIAL_PAYMENT" && (
+                <span className="bg-[#FFE5B4] text-orange-600 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                    Partial Payment
+                </span>
+            )}
+
+            {item?.paymentStatus === "ADVANCE_IN_HAND" && (
+                <span className="bg-[#D9E8FF] text-blue-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                    Advance in hand
+                </span>
+            )}
+
+            {item?.paymentStatus === "CANCELLED" && (
+                <span className="bg-[#FFE6B3] text-yellow-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                    Cancelled
+                </span>
+            )}
+
+            {item?.paymentStatus === "PENDING_REFUND" && (
+                <span className="bg-[#FFF3CD] text-amber-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                    Refund
+                </span>
+            )}
+
+            {item?.paymentStatus === "PARTIAL_REFUND" && (
+                <span className="bg-[#FDE2FF] text-pink-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                    Partial Refund
+                </span>
+            )}
+
+            {item?.paymentStatus === "REFUNDED" && (
+                <span className="bg-[#E2F7E1] text-green-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                    Refunded
+                </span>
+            )}
+        </>
+    )}
+
+</td>
                                             <td
                                                 className="
     px-1 py-3

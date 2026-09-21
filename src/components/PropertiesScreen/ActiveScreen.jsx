@@ -3,11 +3,14 @@ import { useHostel } from "../../Context/HostelListContext";
 import LoginImg from "../../assets/LoginImg.png";
 import { usePermission } from "../../Utils/permissionHelper";
 import msgBox from "../../assets/message-2.png";
-import Arrow from "../../assets/arrow-right.png"
+import Arrow from "../../assets/arrow-right.png";
+import { useArchive } from "../../Context/DataArchiveContext";
+import Toast from "../../components/SuccessModal/ToastDesign";
 
 function PropertyActive({ hostelData }) {
 
   const { getHostelActivities } = useHostel();
+  const { ArchiveActivities } = useArchive();
  const { canRead, canWrite, canUpdate, canDelete } =
       usePermission("Hostel Activities");
   const defaultActivities = hostelData?.activities || [];
@@ -18,10 +21,14 @@ console.log("canRead",canRead)
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
   const [search, setSearch] = useState("");
-
+const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+const [archiveLoading, setArchiveLoading] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [modalType, setModalType] = useState("success");
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [message, setMessage] = useState("");
 
   const fetchActivities = async (page = 1, searchText = "") => {
 
@@ -72,8 +79,74 @@ useEffect(() => {
   const start = (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
 
+ const handleArchiveActivities = async () => {
+  if (!hostelData?.hostelId) return;
+
+  try {
+    setArchiveLoading(true);
+
+    const res = await ArchiveActivities(
+      hostelData.hostelId
+    );
+
+    if (res?.success) {
+      setShowArchiveConfirm(false);
+
+      setModalType("success");
+      setMessage(
+        res?.data?.message ||
+        res?.data ||
+        "Activities archived successfully"
+      );
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 800);
+
+      await fetchActivities(1, "");
+    } else {
+      setModalType("error");
+      setMessage(
+        res?.message ||
+        "Failed to archive activities"
+      );
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 800);
+    }
+  } catch (error) {
+    console.error(
+      "Archive activities error:",
+      error
+    );
+
+    setModalType("error");
+    setMessage(
+      error?.response?.data?.message ||
+      error?.message ||
+      "Something went wrong"
+    );
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 800);
+  } finally {
+    setArchiveLoading(false);
+  }
+};
+
   return (
     <>
+      <Toast
+        show={showSuccess}
+        message={message}
+        type={modalType}
+
+      />
 {canRead === false ? (
 
   <div className="flex flex-col items-center justify-center h-[350px] gap-4">
@@ -95,6 +168,29 @@ useEffect(() => {
 
       
   <>
+  
+    <div className="flex justify-end mb-3">
+      <button
+      onClick={() => setShowArchiveConfirm(true)}
+        type="button"
+       
+        className="
+          h-[30px]
+          px-4
+          rounded-[5px]
+          bg-[#2952F3]
+          text-white
+          text-[11px]
+          font-medium
+          hover:bg-[#1F45D8]
+          transition
+          cursor-pointer
+          mt-3
+        "
+      >
+       Archive Activities
+      </button>
+    </div>
   {isMore && (
 
         <div className="flex justify-end mb-3">
@@ -388,7 +484,79 @@ useEffect(() => {
         </div>
 
       )}
+{showArchiveConfirm && (
+  <div
+    className="fixed inset-0 z-[2000] bg-black/40 flex items-center justify-center"
+    onClick={() => {
+      if (!archiveLoading) {
+        setShowArchiveConfirm(false);
+      }
+    }}
+  >
+    <div
+      className="bg-white w-[380px] rounded-xl shadow-xl p-5"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-[16px] font-semibold text-[#222]">
+        Archive Activities
+      </h2>
 
+      <p className="text-[13px] text-[#666] mt-3 leading-5">
+  Are you sure you want to archive the hostel activities?
+</p>
+
+
+  
+
+<p className="text-[11px] text-red-600 mt-2">⚠️ Data over 60 days will be deleted.</p>
+
+
+      <div className="flex justify-end gap-3 mt-6">
+
+        <button
+          type="button"
+          disabled={archiveLoading}
+          onClick={() => setShowArchiveConfirm(false)}
+          className="
+            h-[32px]
+            px-4
+            rounded-[5px]
+            border
+            border-[#D9DDE5]
+            text-[11px]
+            text-[#555]
+            hover:bg-[#F5F6F8]
+            cursor-pointer
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          disabled={archiveLoading}
+          onClick={handleArchiveActivities}
+          className="
+            h-[32px]
+            px-4
+            rounded-[5px]
+            bg-[#2952F3]
+            text-white
+            text-[11px]
+            font-medium
+            hover:bg-[#1F45D8]
+            disabled:opacity-60
+            disabled:cursor-not-allowed
+            cursor-pointer
+          "
+        >
+          {archiveLoading ? "Processing..." : "Confirm"}
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
     </>
   );
 }
