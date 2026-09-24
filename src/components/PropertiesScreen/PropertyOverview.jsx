@@ -40,10 +40,11 @@ import { useKyc } from "../../Context/KYCContext";
 import User from "../../assets/userblack.png";
 import RoomView from "./RoomView";
 import Share from "../../assets/share.png";
-import Maxmize from "../../assets/maximize.png"
+import Maxmize from "../../assets/maximize.png";
+import EnableImg from "../../assets/enableImg.png"
 
 const PropertyOverview = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory, sharePaymentLink, getTenantDeductions,recalculateTenant } = useHostel();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory, sharePaymentLink, getTenantDeductions,recalculateTenant,updateRecurringConfig } = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription, getTrialDaysExtReason } = useSubscription();
@@ -96,6 +97,19 @@ const PropertyOverview = () => {
   const [showRecalculateModal, setShowRecalculateModal] = useState(false);
 const [selectedRecalculateCustomerId, setSelectedRecalculateCustomerId] = useState(null);
 const [recalculateLoading, setRecalculateLoading] = useState(false);
+const [showFeatureControls, setShowFeatureControls] = useState(false);
+const [showEnableBillReview, setShowEnableBillReview] = useState(false);
+const [showDisableBillReview, setShowDisableBillReview] = useState(false);
+const [showFeatureStatusPopup, setShowFeatureStatusPopup] = useState(false);
+
+const [isFeatureEnabled, setIsFeatureEnabled] = useState(
+  hostelData?.recurringConfiguration?.shouldVerify === true
+);
+useEffect(() => {
+  setIsFeatureEnabled(
+    hostelData?.recurringConfiguration?.shouldVerify === true
+  );
+}, [hostelData?.recurringConfiguration?.shouldVerify]);
   useEffect(() => {
 
     const fetchReasons = async () => {
@@ -207,6 +221,7 @@ const [recalculateLoading, setRecalculateLoading] = useState(false);
   const [paymentAmountError, setPaymentAmountError] = useState("");
   const [paymentDiscountError, setPaymentDiscountError] = useState("");
   const loginType = localStorage.getItem("login_type");
+
   const showInvoices = loginType === "normal";
   const { hostelId } = useParams();
   const [activeTab, setActiveTab] =
@@ -1221,6 +1236,71 @@ const [recalculateLoading, setRecalculateLoading] = useState(false);
     );
   }
 
+const handleFeatureStatusUpdate = async () => {
+  if (!hostelData?.hostelId) return;
+
+  try {
+    const result = await updateRecurringConfig(
+      hostelData.hostelId,
+      isFeatureEnabled
+    );
+
+    if (result?.success) {
+      setModalType("success");
+
+      setMessage(
+        result?.data?.message ||
+        result?.message ||
+        (
+          isFeatureEnabled
+            ? "Pre-Generation Bill Review enabled successfully"
+            : "Pre-Generation Bill Review disabled successfully"
+        )
+      );
+
+      setShowSuccess(true);
+
+      await fetchData();
+
+      setTimeout(() => {
+        setShowSuccess(false);
+        setShowFeatureStatusPopup(false);
+      }, 1500);
+    } else {
+      setModalType("error");
+
+      setMessage(
+        result?.message ||
+        "Failed to update feature status"
+      );
+
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 2000);
+    }
+  } catch (error) {
+    console.error(
+      "FEATURE STATUS UPDATE ERROR:",
+      error
+    );
+
+    setModalType("error");
+
+    setMessage(
+      error?.response?.data?.message ||
+      "Failed to update feature status"
+    );
+
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 2000);
+  }
+};
+
   return (
     <DashboardLayout>
       <Toast
@@ -1529,7 +1609,52 @@ const [recalculateLoading, setRecalculateLoading] = useState(false);
                       <span className="whitespace-nowrap text-textDark text-[13px] font-inter">
                         {hostelData.createdAtDate}
                       </span>
+<div className="relative inline-flex items-center group">
+<button
+  type="button"
+  onClick={() => {
+    setIsFeatureEnabled(
+      hostelData?.recurringConfiguration?.shouldVerify === true
+    );
 
+    setShowFeatureStatusPopup(true);
+  }}
+  className="cursor-pointer"
+>
+  <img
+    src={EnableImg}
+    className="w-6 h-6 object-contain"
+    alt="Feature Controls"
+  />
+</button>
+
+  {/* Tooltip */}
+  <div
+    className="
+      absolute
+      top-10
+      right-0
+      whitespace-nowrap
+      bg-[#4A4A4A]
+      text-white
+      text-[10px]
+      px-2
+      py-1
+      rounded
+      shadow-md
+      z-[9999]
+      opacity-0
+      invisible
+      group-hover:opacity-100
+      group-hover:visible
+      transition-all
+      duration-150
+      pointer-events-none
+    "
+  >
+    Feature Controls
+  </div>
+</div>
                     </div>
 
 
@@ -1568,7 +1693,7 @@ const [recalculateLoading, setRecalculateLoading] = useState(false);
                         />
                       </button>
 
-                      {/* Hover Card */}
+                      
                       <div
                         className="
       absolute
@@ -6880,6 +7005,399 @@ const [recalculateLoading, setRecalculateLoading] = useState(false);
           {recalculateLoading
             ? "Recalculating..."
             : "Confirm"}
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
+{showEnableBillReview && (
+  <div
+    className="fixed inset-0 z-[999999] bg-black/70 flex items-center justify-center"
+    onClick={() => setShowEnableBillReview(false)}
+  >
+    <div
+      className="w-[395px] bg-white rounded-lg shadow-2xl overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      <div className="px-4 py-3 flex items-start gap-3 border-b border-[#E5E7EB]">
+
+        <span className="text-orange-500 text-[20px]">
+          ⚠
+        </span>
+
+        <div className="flex-1">
+
+          <h2 className="text-[13px] font-semibold text-[#222]">
+            Enable Pre-Generation Bill Review?
+          </h2>
+
+          <p className="text-[8px] text-[#555] mt-1">
+            This will enable the pre-generation invoice review workflow for
+            "{hostelData?.hostelName || "this property"}".
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowEnableBillReview(false)}
+          className="text-red-500 text-[14px] cursor-pointer"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div className="px-4 py-3">
+
+        <div className="bg-[#F8F9FC] rounded-md p-3">
+
+          <p className="text-[8px] text-[#333]">
+            The property admin will be able to:
+          </p>
+
+          <ul className="mt-2 pl-4 list-disc space-y-1 text-[8px] text-[#555]">
+            <li>
+              Review recurring invoice calculations
+            </li>
+
+            <li>
+              View all invoices before generation
+            </li>
+
+            <li>
+              Select specific invoices to generate
+            </li>
+
+            <li>
+              Generate all eligible invoices
+            </li>
+
+            <li>
+              Review billing exceptions before generation
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+
+      <div className="bg-[#FAFAFA] px-4 py-3 flex justify-end gap-2">
+
+        <button
+          type="button"
+          onClick={() =>
+            setShowEnableBillReview(false)
+          }
+          className="
+            px-4
+            py-2
+            border
+            border-[#D9DDE5]
+            rounded-md
+            text-[9px]
+            text-[#444]
+            cursor-pointer
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          onClick={handleEnableBillReview}
+          className="
+            px-4
+            py-2
+            rounded-md
+            bg-[#2952F3]
+            text-white
+            text-[9px]
+            cursor-pointer
+          "
+        >
+          Enable Feature
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
+{showDisableBillReview && (
+  <div
+    className="fixed inset-0 z-[999999] bg-black/70 flex items-center justify-center"
+    onClick={() => setShowDisableBillReview(false)}
+  >
+    <div
+      className="w-[395px] bg-white rounded-lg shadow-2xl overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      <div className="px-4 py-3 flex items-start gap-3 border-b border-[#E5E7EB]">
+
+        <span className="text-orange-500 text-[20px]">
+          ⚠
+        </span>
+
+        <div className="flex-1">
+
+          <h2 className="text-[13px] font-semibold text-[#222]">
+            Disable Property Bill Review?
+          </h2>
+
+          <p className="text-[8px] text-[#555] mt-1">
+            Recurring invoices for this property will no longer go through
+            the pre-generation review workflow.
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          onClick={() =>
+            setShowDisableBillReview(false)
+          }
+          className="text-red-500 text-[14px] cursor-pointer"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div className="px-4 py-3">
+
+        <div className="bg-[#F8F9FC] rounded-md p-3">
+
+          <p className="text-[8px] text-[#555] leading-4">
+            Disabling this feature does not affect previously generated
+            invoices or existing billing records.
+          </p>
+
+        </div>
+
+      </div>
+
+      <div className="bg-[#FAFAFA] px-4 py-3 flex justify-end gap-2">
+
+        <button
+          type="button"
+          onClick={() =>
+            setShowDisableBillReview(false)
+          }
+          className="
+            px-4
+            py-2
+            border
+            border-[#D9DDE5]
+            rounded-md
+            text-[9px]
+            text-[#444]
+            cursor-pointer
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          onClick={handleDisableBillReview}
+          className="
+            px-4
+            py-2
+            rounded-md
+            bg-[#2952F3]
+            text-white
+            text-[9px]
+            cursor-pointer
+          "
+        >
+          Disable Feature
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
+{showFeatureStatusPopup && (
+  <div
+    className="fixed inset-0 z-[999999] bg-black/70 flex items-center justify-center"
+    onClick={() => setShowFeatureStatusPopup(false)}
+  >
+    <div
+      className="w-[395px] bg-white rounded-lg shadow-2xl overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      {/* Header */}
+      <div className="px-4 py-3 flex items-start gap-3 border-b border-[#E5E7EB]">
+
+        <div className="text-orange-500 text-[20px]">
+          ⚠
+        </div>
+
+        <div className="flex-1">
+
+          <h2 className="text-[13px] font-semibold text-[#222]">
+            {isFeatureEnabled
+              ? "Disable Property Bill Review?"
+              : "Enable Pre-Generation Bill Review?"}
+          </h2>
+
+          <p className="text-[8px] text-[#555] mt-1 leading-4">
+            {isFeatureEnabled
+              ? "Recurring invoices for this property will no longer go through the pre-generation review workflow."
+              : `This will enable the pre-generation invoice review workflow for "${hostelData?.hostelName || "this property"}".`}
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowFeatureStatusPopup(false)}
+          className="text-red-500 text-[14px] cursor-pointer"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      {/* Content */}
+      <div className="px-4 py-3">
+
+        {!isFeatureEnabled ? (
+          <div className="bg-[#F8F9FC] rounded-md p-3">
+
+            <p className="text-[8px] text-[#333]">
+              The property admin will be able to:
+            </p>
+
+            <ul className="mt-2 pl-4 list-disc space-y-1.5 text-[8px] text-[#555]">
+              <li>Review recurring invoice calculations</li>
+              <li>View all invoices before generation</li>
+              <li>Select specific invoices to generate</li>
+              <li>Generate all eligible invoices</li>
+              <li>Review billing exceptions before generation</li>
+            </ul>
+
+          </div>
+        ) : (
+          <div className="bg-[#F8F9FC] rounded-md p-3">
+
+            <p className="text-[8px] text-[#555] leading-4">
+              Disabling this feature does not affect previously generated
+              invoices or existing billing records.
+            </p>
+
+          </div>
+        )}
+
+
+        {/* SWITCH */}
+        <div className="flex items-center justify-between mt-4">
+
+          <span className="text-[10px] font-semibold text-[#333]">
+            {isFeatureEnabled ? "Enabled" : "Disabled"}
+          </span>
+
+          <div className="flex items-center gap-2">
+
+            <span className="text-[8px] text-[#555]">
+              {isFeatureEnabled ? "On" : "Off"}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsFeatureEnabled((prev) => !prev);
+              }}
+              className={`
+                relative
+                w-[38px]
+                h-[21px]
+                rounded-full
+                transition-colors
+                duration-200
+                cursor-pointer
+                ${
+                  isFeatureEnabled
+                    ? "bg-[#168A16]"
+                    : "bg-[#C9CDD4]"
+                }
+              `}
+            >
+
+              <span
+                className={`
+                  absolute
+                  top-[2px]
+                  w-[17px]
+                  h-[17px]
+                  bg-white
+                  rounded-full
+                  shadow-sm
+                  transition-all
+                  duration-200
+                  ${
+                    isFeatureEnabled
+                      ? "right-[2px]"
+                      : "left-[2px]"
+                  }
+                `}
+              />
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+    
+      <div className="bg-[#FAFAFA] px-4 py-3 flex justify-end gap-2">
+
+        <button
+          type="button"
+          onClick={() => setShowFeatureStatusPopup(false)}
+          className="
+            h-[30px]
+            px-4
+            border
+            border-[#D9DDE5]
+            bg-white
+            rounded-md
+            text-[9px]
+            text-[#444]
+            cursor-pointer
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          onClick={handleFeatureStatusUpdate}
+          className="
+            h-[30px]
+            px-4
+            rounded-md
+            bg-[#2952F3]
+            text-white
+            text-[9px]
+            font-medium
+            cursor-pointer
+          "
+        >
+          {isFeatureEnabled
+            ? "Disable Feature"
+            : "Enable Feature"}
         </button>
 
       </div>

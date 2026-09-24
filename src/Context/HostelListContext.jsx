@@ -2135,6 +2135,175 @@ const recalculateTenant = async (customerId) => {
     setLoading(false);
   }
 };
+
+const getHostelFollowUpStatus = async () => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.get(
+      "/v2/hostel-follow-up/status"
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const updateRecurringConfig = async (hostelId, shouldVerify) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      "/v2/hostels/recurring-config",
+      {
+        hostelId,
+        shouldVerify,
+      }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const updateHostelFollowUpStatus = async (payload) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const res = await axiosInstance.post(
+      "/v2/hostel-follow-up/update-status",
+      payload
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+const getHostelFollowUp = async (hostelId) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    console.log("Follow Up Hostel ID:", hostelId);
+
+    const res = await axiosInstance.get(
+      `/v2/hostel-follow-up/${hostelId}`
+    );
+
+    console.log("Follow Up API Response:", res);
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+
+  } catch (error) {
+    console.log("Follow Up API Error:", error);
+    console.log("Status:", error?.response?.status);
+    console.log("Response:", error?.response?.data);
+
+    const msg =
+      error?.response?.data?.message ||
+      error?.response?.data ||
+      getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+// const getHostelFollowUp = async (hostelId) => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.get(
+//       `/v2/hostel-follow-up/${hostelId}`
+//     );
+
+//     if (res.status === 200) {
+//       return {
+//         success: true,
+//         data: res.data,
+//       };
+//     }
+
+//     return { success: false };
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+
+//     setErrorMsg(msg);
+
+//     return {
+//       success: false,
+//       message: msg,
+//     };
+//   } finally {
+//     setLoading(false);
+//   }
+// };
   return (
     <HostelContext.Provider
       value={{
@@ -2148,7 +2317,8 @@ const recalculateTenant = async (customerId) => {
         deleteInvoiceRedemption,resetUserPin,getInvoicesByHostelId,deleteInvoice,
         generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions,getInvoiceReceipt,updateInvoiceBalance,
         getTenantById,updateAdvanceAmount, createHostelNote,getHostelNotes,getTenantSettlement,generateTenantSettlement,updateJoiningDate,
-        verifyTenantMobile,getJoiningDateImpact,deleteReceiptUrl,deleteInvoiceUrl,getTableColumnFilterOptions,updateTableColumnFilterOption,recalculateTenant
+        verifyTenantMobile,getJoiningDateImpact,deleteReceiptUrl,deleteInvoiceUrl,getTableColumnFilterOptions,updateTableColumnFilterOption,recalculateTenant,
+        getHostelFollowUpStatus,updateRecurringConfig,updateHostelFollowUpStatus,getHostelFollowUp
       }}
     >
       {children}
