@@ -44,7 +44,9 @@ import Maxmize from "../../assets/maximize.png";
 import EnableImg from "../../assets/enableImg.png"
 
 const PropertyOverview = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory, sharePaymentLink, getTenantDeductions,recalculateTenant,updateRecurringConfig } = useHostel();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, generateOrderHistory, sharePaymentLink, getTenantDeductions,recalculateTenant,updateRecurringConfig,  getHostelFollowUpStatus,
+  updateHostelFollowUpStatus,
+  getHostelFollowUp } = useHostel();
   const { owners, totalItems, totalPages, getOwners, getOwnerById, deleteTenant } = useOwners();
   const { adminDetails, agentRoles, getAgentRoles, getAgentRoleById, deleteAgentRole, } = useRole();
   const { createSubscription, getTrialDaysExtReason } = useSubscription();
@@ -57,6 +59,18 @@ const PropertyOverview = () => {
   const [paidAmountError, setPaidAmountError] = useState("");
   const [showTrialPlanDropdown, setShowTrialPlanDropdown] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
+  const [showUpdateStatusModal, setShowUpdateStatusModal] = useState(false);
+const [updateStatus, setUpdateStatus] = useState("");
+const [additionalComments, setAdditionalComments] = useState("");
+const [updateReason, setUpdateReason] = useState("");
+
+const [followUpStatuses, setFollowUpStatuses] = useState([]);
+const [followUpHistory, setFollowUpHistory] = useState([]);
+
+const [statusError, setStatusError] = useState("");
+
+
+const [latestdata, setLatestData] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedTenantId, setSelectedTenantId] = useState(null);
   const [phone, setPhone] = useState("");
@@ -99,12 +113,33 @@ const [selectedRecalculateCustomerId, setSelectedRecalculateCustomerId] = useSta
 const [recalculateLoading, setRecalculateLoading] = useState(false);
 const [showFeatureControls, setShowFeatureControls] = useState(false);
 const [showEnableBillReview, setShowEnableBillReview] = useState(false);
-const [showDisableBillReview, setShowDisableBillReview] = useState(false);
+
 const [showFeatureStatusPopup, setShowFeatureStatusPopup] = useState(false);
 
 const [isFeatureEnabled, setIsFeatureEnabled] = useState(
   hostelData?.recurringConfiguration?.shouldVerify === true
 );
+useEffect(() => {
+  if (!showUpdateStatusModal) return;
+
+  const fetchFollowUpStatuses = async () => {
+    const res = await getHostelFollowUpStatus();
+
+    if (res?.success) {
+      const statuses = Array.isArray(res?.data)
+        ? res.data
+        : res?.data?.statuses ||
+          res?.data?.data ||
+          [];
+
+      setFollowUpStatuses(statuses);
+    } else {
+      setFollowUpStatuses([]);
+    }
+  };
+
+  fetchFollowUpStatuses();
+}, [showUpdateStatusModal]);
 useEffect(() => {
   setIsFeatureEnabled(
     hostelData?.recurringConfiguration?.shouldVerify === true
@@ -1301,6 +1336,74 @@ const handleFeatureStatusUpdate = async () => {
   }
 };
 
+const handleUpdateStatus = async () => {
+  setStatusError("");
+  setReasonError("");
+
+  if (!hostelData?.hostelId) {
+    setMessage("Hostel ID is required");
+    setModalType("error");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+
+    return;
+  }
+
+  let hasError = false;
+
+  if (!updateStatus) {
+    setStatusError("Please select status");
+    hasError = true;
+  }
+
+  if (!updateReason) {
+    setReasonError("Please select reason");
+    hasError = true;
+  }
+
+  if (hasError) return;
+
+  const payload = {
+    hostelId: hostelData.hostelId,
+    status: updateStatus,
+    reason: updateReason,
+    comments: additionalComments.trim(),
+  };
+
+  const res = await updateHostelFollowUpStatus(payload);
+
+  if (res?.success) {
+    setShowUpdateStatusModal(false);
+
+    setUpdateStatus("");
+    setUpdateReason("");
+    setAdditionalComments("");
+    setStatusError("");
+    setReasonError("");
+
+    setModalType("success");
+    setMessage(res?.message || "Status updated successfully");
+    setShowSuccess(true);
+
+    await fetchData();
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+  } else {
+    setModalType("error");
+    setMessage(res?.message || "Failed to update status");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+  }
+};
+
   return (
     <DashboardLayout>
       <Toast
@@ -1628,7 +1731,7 @@ const handleFeatureStatusUpdate = async () => {
   />
 </button>
 
-  {/* Tooltip */}
+  
   <div
     className="
       absolute
@@ -1766,7 +1869,7 @@ const handleFeatureStatusUpdate = async () => {
 
 
 
-                    <button
+                    {/* <button
                       className="
               w-8
               h-8
@@ -1783,7 +1886,99 @@ const handleFeatureStatusUpdate = async () => {
             "
                     >
                       ⋮
-                    </button>
+                    </button> */}
+   <div className="relative menu-container">
+
+ 
+  <button
+    type="button"
+    onClick={() =>
+      setOpenMenu(
+        openMenu === "property-status"
+          ? null
+          : "property-status"
+      )
+    }
+    className="
+      w-8
+      h-8
+      flex
+      items-center
+      justify-center
+      rounded-full
+      text-gray-400
+      hover:bg-cardBg
+      hover:text-textDark
+      transition-all
+      duration-200
+      cursor-pointer
+    "
+  >
+    ⋮
+  </button>
+
+ 
+  {openMenu === "property-status" && (
+    <div
+      className="
+        absolute
+        right-0
+        top-10
+        w-[150px]
+        bg-white
+        rounded-lg
+        border
+        border-[#E8EAF3]
+        shadow-[0_6px_20px_rgba(0,0,0,0.12)]
+        p-1
+        z-[9999]
+      "
+    >
+      <button
+        type="button"
+        onClick={async () => {
+          setOpenMenu(null);
+
+          setUpdateStatus("");
+          setUpdateReason("");
+          setAdditionalComments("");
+          setStatusError("");
+          setReasonError("");
+
+          const res = await getHostelFollowUp(
+            hostelData.hostelId
+          );
+
+          if (res?.success) {
+            setFollowUpHistory(
+              res?.data?.hostelFollowUpHistory || []
+            );
+
+            setLatestData(res?.data);
+          } else {
+            setFollowUpHistory([]);
+          }
+
+          setShowUpdateStatusModal(true);
+        }}
+        className="
+          w-full
+          px-3
+          py-2
+          text-left
+          text-[13px]
+          text-[#374151]
+          rounded-md
+          hover:bg-[#F5F7FA]
+          transition-all cursor-pointer
+        "
+      >
+        Update Status
+      </button>
+    </div>
+  )}
+
+</div>
 
                   </div>
 
@@ -7022,7 +7217,7 @@ const handleFeatureStatusUpdate = async () => {
       onClick={(e) => e.stopPropagation()}
     >
 
-      <div className="px-4 py-3 flex items-start gap-3 border-b border-[#E5E7EB]">
+      <div className="px-4 py-3 flex items-start gap-3 border-b border-[#E5E7EB] text-left" >
 
         <span className="text-orange-500 text-[20px]">
           ⚠
@@ -7030,11 +7225,11 @@ const handleFeatureStatusUpdate = async () => {
 
         <div className="flex-1">
 
-          <h2 className="text-[13px] font-semibold text-[#222]">
+          <h2 className="text-[13px] font-semibold text-[#222] text-left">
             Enable Pre-Generation Bill Review?
           </h2>
 
-          <p className="text-[8px] text-[#555] mt-1">
+          <p className="text-[12px] text-[#555] mt-1 text-left">
             This will enable the pre-generation invoice review workflow for
             "{hostelData?.hostelName || "this property"}".
           </p>
@@ -7127,102 +7322,7 @@ const handleFeatureStatusUpdate = async () => {
     </div>
   </div>
 )}
-{showDisableBillReview && (
-  <div
-    className="fixed inset-0 z-[999999] bg-black/70 flex items-center justify-center"
-    onClick={() => setShowDisableBillReview(false)}
-  >
-    <div
-      className="w-[395px] bg-white rounded-lg shadow-2xl overflow-hidden"
-      onClick={(e) => e.stopPropagation()}
-    >
 
-      <div className="px-4 py-3 flex items-start gap-3 border-b border-[#E5E7EB]">
-
-        <span className="text-orange-500 text-[20px]">
-          ⚠
-        </span>
-
-        <div className="flex-1">
-
-          <h2 className="text-[13px] font-semibold text-[#222]">
-            Disable Property Bill Review?
-          </h2>
-
-          <p className="text-[8px] text-[#555] mt-1">
-            Recurring invoices for this property will no longer go through
-            the pre-generation review workflow.
-          </p>
-
-        </div>
-
-        <button
-          type="button"
-          onClick={() =>
-            setShowDisableBillReview(false)
-          }
-          className="text-red-500 text-[14px] cursor-pointer"
-        >
-          ×
-        </button>
-
-      </div>
-
-      <div className="px-4 py-3">
-
-        <div className="bg-[#F8F9FC] rounded-md p-3">
-
-          <p className="text-[8px] text-[#555] leading-4">
-            Disabling this feature does not affect previously generated
-            invoices or existing billing records.
-          </p>
-
-        </div>
-
-      </div>
-
-      <div className="bg-[#FAFAFA] px-4 py-3 flex justify-end gap-2">
-
-        <button
-          type="button"
-          onClick={() =>
-            setShowDisableBillReview(false)
-          }
-          className="
-            px-4
-            py-2
-            border
-            border-[#D9DDE5]
-            rounded-md
-            text-[9px]
-            text-[#444]
-            cursor-pointer
-          "
-        >
-          Cancel
-        </button>
-
-        <button
-          type="button"
-          onClick={handleDisableBillReview}
-          className="
-            px-4
-            py-2
-            rounded-md
-            bg-[#2952F3]
-            text-white
-            text-[9px]
-            cursor-pointer
-          "
-        >
-          Disable Feature
-        </button>
-
-      </div>
-
-    </div>
-  </div>
-)}
 {showFeatureStatusPopup && (
   <div
     className="fixed inset-0 z-[999999] bg-black/70 flex items-center justify-center"
@@ -7233,7 +7333,7 @@ const handleFeatureStatusUpdate = async () => {
       onClick={(e) => e.stopPropagation()}
     >
 
-      {/* Header */}
+     
       <div className="px-4 py-3 flex items-start gap-3 border-b border-[#E5E7EB]">
 
         <div className="text-orange-500 text-[20px]">
@@ -7242,13 +7342,13 @@ const handleFeatureStatusUpdate = async () => {
 
         <div className="flex-1">
 
-          <h2 className="text-[13px] font-semibold text-[#222]">
+          <h2 className="text-[13px] font-semibold text-[#222] text-left">
             {isFeatureEnabled
-              ? "Disable Property Bill Review?"
-              : "Enable Pre-Generation Bill Review?"}
+              ? "Enable Pre-Generation Bill Review?" 
+              : "Disable Property Bill Review?"}
           </h2>
 
-          <p className="text-[8px] text-[#555] mt-1 leading-4">
+          <p className="text-[10px] text-[#555] mt-1 leading-4 text-left">
             {isFeatureEnabled
               ? "Recurring invoices for this property will no longer go through the pre-generation review workflow."
               : `This will enable the pre-generation invoice review workflow for "${hostelData?.hostelName || "this property"}".`}
@@ -7271,13 +7371,13 @@ const handleFeatureStatusUpdate = async () => {
       <div className="px-4 py-3">
 
         {!isFeatureEnabled ? (
-          <div className="bg-[#F8F9FC] rounded-md p-3">
+          <div className="bg-[#F8F9FC] rounded-md p-3 text-left">
 
-            <p className="text-[8px] text-[#333]">
+            <p className="text-[12px] text-[#333]">
               The property admin will be able to:
             </p>
 
-            <ul className="mt-2 pl-4 list-disc space-y-1.5 text-[8px] text-[#555]">
+            <ul className="mt-2 pl-4 list-disc space-y-1.5  text-[#555] text-[12px]">
               <li>Review recurring invoice calculations</li>
               <li>View all invoices before generation</li>
               <li>Select specific invoices to generate</li>
@@ -7287,7 +7387,7 @@ const handleFeatureStatusUpdate = async () => {
 
           </div>
         ) : (
-          <div className="bg-[#F8F9FC] rounded-md p-3">
+          <div className="bg-[#F8F9FC] rounded-md p-3 text-left">
 
             <p className="text-[8px] text-[#555] leading-4">
               Disabling this feature does not affect previously generated
@@ -7395,9 +7495,7 @@ const handleFeatureStatusUpdate = async () => {
             cursor-pointer
           "
         >
-          {isFeatureEnabled
-            ? "Disable Feature"
-            : "Enable Feature"}
+         Save
         </button>
 
       </div>
@@ -7405,7 +7503,422 @@ const handleFeatureStatusUpdate = async () => {
     </div>
   </div>
 )}
+{showUpdateStatusModal && (
+  <div
+    className="fixed inset-0 z-[999999] bg-black/50"
+    onClick={() => setShowUpdateStatusModal(false)}
+  >
+    <div
+      className="
+        fixed
+        top-4
+        right-4
+        bottom-4
+        w-[525px]
+        bg-white
+        rounded-2xl
+        shadow-2xl
+        overflow-hidden
+        flex
+        flex-col
+      "
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E7EB] shrink-0">
+        <h2 className="text-[16px] font-semibold text-[#222]">
+          Update Status
+        </h2>
 
+        <button
+          type="button"
+          onClick={() => setShowUpdateStatusModal(false)}
+          className="
+            w-6
+            h-6
+            rounded-full
+            border
+            border-[#444]
+            flex
+            items-center
+            justify-center
+            text-[13px]
+            text-[#333]
+            cursor-pointer
+            hover:bg-gray-100
+          "
+        >
+          ×
+        </button>
+      </div>
+
+      {/* MAIN CONTENT */}
+      <div className="flex-1 overflow-y-auto px-5 py-4">
+
+        {/* PROPERTY INFO */}
+        <div className="bg-[#F8F9FB] px-3 py-3 rounded-sm mb-4">
+
+          <p className="text-[11px] font-semibold text-[#667085] mb-3 text-left">
+            PROPERTY INFO
+          </p>
+
+          <div className="space-y-2 text-[11px] text-left">
+
+            <div className="flex">
+              <span className="w-[115px] text-[#667085]">
+                ♙ Customer Name
+              </span>
+
+              <span className="font-semibold text-[#333]">
+                {hostelData?.owner?.fullName || "N/A"}
+              </span>
+            </div>
+
+            <div className="flex">
+              <span className="w-[115px] text-[#667085]">
+                ♧ Property Name
+              </span>
+
+              <span className="font-semibold text-blue-600">
+               {hostelData?.hostelName || "N/A"}
+              </span>
+            </div>
+
+            <div className="flex">
+              <span className="w-[115px] text-[#667085]">
+                ♧ Location
+              </span>
+
+              <span className="font-semibold text-[#333]">
+                {hostelData?.location || "N/A"}
+              </span>
+            </div>
+
+            <div className="flex">
+              <span className="w-[115px] text-[#667085]">
+                ♧ Mobile
+              </span>
+
+              <span className="font-semibold text-[#333]">
+                {hostelData?.mobile || "N/A"}
+              </span>
+            </div>
+
+            <div className="flex">
+              <span className="w-[115px] text-[#667085]">
+                ◷ Current Status
+              </span>
+
+              <span className="font-semibold text-[#333]">
+                {latestdata?.latestStatus || "N/A"}
+              </span>
+            </div>
+            <div className="flex">
+              <span className="w-[115px] text-[#667085]">
+                ◷ Current Reason
+              </span>
+
+              <span className="font-semibold text-[#333]">
+                {latestdata?.latestReason || "N/A"}
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+        {/* UPDATE STATUS */}
+     <div className="grid grid-cols-[145px_1fr] gap-3 items-start mb-4">
+
+  <label className="text-[11px] text-[#333] pt-2 text-start whitespace-nowrap">
+    Update Status
+  </label>
+
+  <div>
+    <select
+      value={updateStatus}
+      onChange={(e) => {
+        setUpdateStatus(e.target.value);
+        setUpdateReason("");
+        setStatusError("");
+      }}
+      className="
+        w-full
+        h-[42px]
+        border
+        border-[#D9DDE5]
+        rounded-lg
+        px-3
+        text-[13px]
+        text-[#444]
+        outline-none
+        focus:border-blue-500
+        bg-white
+      "
+    >
+      <option value="">Select Status</option>
+
+      {followUpStatuses.map((status) => (
+        <option
+          key={status.key}
+          value={status.key}
+        >
+          {status.value}
+        </option>
+      ))}
+    </select>
+
+    {statusError && (
+      <ErrorMessage
+        message={statusError}
+        type="error"
+      />
+    )}
+  </div>
+
+</div>
+
+     
+   <div className="grid grid-cols-[145px_1fr] gap-3 items-start mb-4">
+
+  <label className="text-[11px] text-[#333] pt-2 text-left">
+    Reason <span className="text-red-500">*</span>
+  </label>
+
+  <div>
+    <select
+      value={updateReason}
+      onChange={(e) => {
+        setUpdateReason(e.target.value);
+        setReasonError("");
+      }}
+      disabled={!updateStatus}
+      className="
+        w-full
+        h-[42px]
+        border
+        border-[#D9DDE5]
+        rounded-lg
+        px-3
+        text-[13px]
+        text-[#444]
+        outline-none
+        focus:border-blue-500
+        bg-white
+        disabled:bg-gray-100
+        disabled:cursor-not-allowed
+      "
+    >
+      <option value="">Select Reason</option>
+
+      {followUpStatuses
+        ?.find(
+          (status) => status?.key === updateStatus
+        )
+        ?.reasons?.map((reason) => (
+          <option
+            key={reason}
+            value={reason}
+          >
+            {reason}
+          </option>
+        ))}
+    </select>
+
+    {reasonError && (
+      <ErrorMessage
+        message={reasonError}
+        type="error"
+      />
+    )}
+  </div>
+
+</div>
+
+          
+<div className="grid grid-cols-[145px_1fr] gap-3 items-center mb-4">
+
+  <label className="text-[11px] text-[#333] text-left whitespace-nowrap">Additional Comments</label>
+
+  <textarea
+    value={additionalComments}
+    onChange={(e) => setAdditionalComments(e.target.value)}
+    placeholder="..."
+    className="
+      w-full
+      h-[42px]
+      border
+      border-[#D9DDE5]
+      rounded-lg
+      px-3
+      py-2
+      text-[13px]
+      outline-none
+      resize-none
+      focus:border-blue-500
+    "
+  />
+
+</div>
+
+        <div
+        className="
+          border-t
+          border-[#E5E7EB]
+          px-5
+          py-4
+          flex
+          justify-end
+          items-center
+          gap-8
+          shrink-0
+          bg-white
+        "
+      >
+
+        <button
+          type="button"
+          onClick={() =>
+            setShowUpdateStatusModal(false)
+          }
+          className="
+            text-[12px]
+            text-[#444]
+            cursor-pointer
+            hover:text-black
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleUpdateStatus}
+          type="button"
+          className="
+            h-[36px]
+            w-[122px]
+            rounded-lg
+            bg-[#2952F3]
+            text-white
+            text-[12px]
+            font-medium
+            cursor-pointer
+            hover:bg-[#1F45D8]
+          "
+        >
+          Submit
+        </button>
+
+      </div>
+        <div className="mt-5">
+
+          <div className="flex items-center justify-between mb-2">
+
+            <h3 className="text-[14px] font-semibold text-[#222]">
+              Follow-Up History
+            </h3>
+
+            <span className="text-[11px] text-[#6B7280]">
+              {followUpHistory.length} Records
+            </span>
+
+          </div>
+
+          {/* FIXED HEIGHT HISTORY */}
+          <div className="h-[150px] overflow-y-auto pr-1 space-y-2">
+
+            {followUpHistory.length > 0 ? (
+
+              followUpHistory.map((item, index) => (
+
+                <div
+                  key={item.followUpId || index}
+                  className="
+                    border
+                    border-[#E5E7EB]
+                    rounded-xl
+                    p-2.5
+                    bg-white
+                  "
+                >
+
+                  {/* STATUS + DATE */}
+                  <div className="flex items-center justify-between mb-1">
+
+                    <span className="text-[12px] font-semibold text-[#374151]">
+                      {item.status}
+                    </span>
+
+                    <span className="text-[10px] text-[#6B7280]">
+                      {item.createdAtDate}{" "}
+                      {item.createdAtTime}
+                    </span>
+
+                  </div>
+
+                  {/* REASON */}
+                  <div className="text-[11px] text-[#6B7280] mb-1">
+
+                    <span className="font-medium text-[#374151]">
+                      Reason:
+                    </span>{" "}
+
+                    {item.reason}
+
+                  </div>
+
+                
+                  <div className="bg-[#F8F9FB] rounded-lg px-2 py-1.5 text-[11px] text-[#4B5563]">
+                    {item.comments || "No comments"}
+                  </div>
+
+                  {/* CREATED BY */}
+                  <div className="mt-1 text-[10px] text-[#6B7280]">
+
+                    Created by:{" "}
+
+                    <span className="font-medium text-[#374151]">
+                      {item.createdBy}
+                    </span>
+
+                  </div>
+
+                </div>
+
+              ))
+
+            ) : (
+
+              <div
+                className="
+                  h-full
+                  flex
+                  items-center
+                  justify-center
+                  text-[12px]
+                  text-[#9CA3AF]
+                  border
+                  border-dashed
+                  border-[#D1D5DB]
+                  rounded-xl
+                "
+              >
+                No follow-up history found
+              </div>
+
+            )}
+
+          </div>
+
+        </div>
+
+      </div>
+
+     
+     
+
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 };
