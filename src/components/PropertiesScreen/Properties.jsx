@@ -2534,12 +2534,12 @@ const handleUpdateStatusClick = async (item) => {
                       {hostels?.currentPage}
                     </span>
 
-                    {/* TOTAL */}
+                   
                     <span className="text-textDark/60 text-cardTitle">
                       {hostels?.currentPage ?? 1} - {hostels?.totalPages ?? 1}
                     </span>
 
-                    {/* NEXT */}
+                   
                     <button
                       disabled={
                         hostels?.currentPage >= hostels?.totalPages
@@ -3216,10 +3216,10 @@ const handleUpdateStatusClick = async (item) => {
         </button>
       </div>
 
-      {/* MAIN CONTENT */}
+     
       <div className="flex-1 overflow-y-auto px-5 py-4">
 
-        {/* PROPERTY INFO */}
+       
         <div className="bg-[#F8F9FB] px-3 py-3 rounded-sm mb-4">
 
           <p className="text-[11px] font-semibold text-[#667085] mb-3 text-left">
@@ -3248,15 +3248,19 @@ const handleUpdateStatusClick = async (item) => {
               </span>
             </div>
 
+            
             <div className="flex">
-              <span className="w-[115px] text-[#667085]">
-                ♧ Location
-              </span>
+  <span className="w-[115px] shrink-0 text-[#667085]">
+    ♧ Location
+  </span>
 
-              <span className="font-semibold text-[#333]">
-                {selectedHostel?.location || "N/A"}
-              </span>
-            </div>
+  <span
+    className="font-semibold text-[#333] w-[280px] truncate cursor-pointer"
+    title={selectedHostel?.fullAddress || "N/A"}
+  >
+    {selectedHostel?.fullAddress || "N/A"}
+  </span>
+</div>
 
             <div className="flex">
               <span className="w-[115px] text-[#667085]">
@@ -3290,7 +3294,7 @@ const handleUpdateStatusClick = async (item) => {
           </div>
         </div>
 
-        {/* UPDATE STATUS */}
+        
      <div className="grid grid-cols-[145px_1fr] gap-3 items-start mb-4">
 
   <label className="text-[11px] text-[#333] pt-2 text-start whitespace-nowrap">
@@ -3505,7 +3509,7 @@ const handleUpdateStatusClick = async (item) => {
                   "
                 >
 
-                  {/* STATUS + DATE */}
+                  
                   <div className="flex items-center justify-between mb-1">
 
                     <span className="text-[12px] font-semibold text-[#374151]">
@@ -3519,7 +3523,7 @@ const handleUpdateStatusClick = async (item) => {
 
                   </div>
 
-                  {/* REASON */}
+                 
                   <div className="text-[11px] text-[#6B7280] mb-1">
 
                     <span className="font-medium text-[#374151]">
@@ -3535,7 +3539,7 @@ const handleUpdateStatusClick = async (item) => {
                     {item.comments || "No comments"}
                   </div>
 
-                  {/* CREATED BY */}
+                 
                   <div className="mt-1 text-[10px] text-[#6B7280]">
 
                     Created by:{" "}

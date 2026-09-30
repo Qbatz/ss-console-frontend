@@ -49,6 +49,8 @@ import ServiceTokens from "../components/SecurityScreen/SecurityPage";
 import DataArchive from "../components/DataArchive/DataArchiveList";
 import { DataArchiveProvider } from "../Context/DataArchiveContext";
 import { ServiceTokenProvider } from "../Context/ServiceTokenContext";
+import RevenueInsights from "../components/TransactionList/RevenueInsights ";
+
 
 
 const PrivateRoute = ({ children }) => {
@@ -144,6 +146,10 @@ const PrivateRoutesScreen = () => {
                        <Route path="/PropertyusingKyc/:roleId" element={<PropertiesUsingKYC />} />
                          <Route path="/servicetoken/:roleId" element={<ServiceTokens />} />
                           <Route path="/data-Archive/:roleId" element={<DataArchive/>} />
+                          <Route
+  path="/revenue-insights"
+  element={<RevenueInsights />}
+/>
                     </Routes>
                     </ServiceTokenProvider>
                     </DataArchiveProvider>
