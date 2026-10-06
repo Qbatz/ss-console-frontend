@@ -1812,39 +1812,44 @@ const TenantRecurring = () => {
                     </div>
 
                     {/* STATUS BADGES */}
-                    <div className="flex gap-2 mb-3">
+                  <div className="flex gap-2 mb-3">
 
-                      {/* Subscription Status */}
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full
-      ${selectedItem?.isSubscriptionActive
-                            ? "bg-green-100 text-green-600"
-                            : "bg-red-100 text-red-600"
-                          }`}
-                      >
-                        {selectedItem?.recurringStatus ? "Active" : "Expired"}
-                      </span>
+  {/* Subscription Status */}
+  <span
+    className={`px-2 py-1 text-xs rounded-full ${
+      selectedItem?.isSubscriptionActive
+        ? "bg-green-100 text-green-600"
+        : "bg-red-100 text-red-600"
+    }`}
+  >
+    {selectedItem?.isSubscriptionActive ? "Active" : "Expired"}
+  </span>
 
-                      {/* Recurring Status */}
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full
-      ${selectedItem?.recurringStatus
-                            ? "bg-green-100 text-green-600"
-                            : "bg-yellow-100 text-yellow-600"
-                          }`}
-                      >
-                        {selectedItem?.recurringStatus ? "Generated" : "Pending"}
-                      </span>
+  {/* Recurring Status */}
+  <span
+    className={`px-2 py-1 text-xs rounded-full ${
+      selectedItem?.recurringStatus
+        ? "bg-green-100 text-green-600"
+        : "bg-yellow-100 text-yellow-600"
+    }`}
+  >
+    {selectedItem?.recurringStatus ? "Generated" : "Not Generated"}
+  </span>
 
-                    </div>
+</div>
 
-                    {/* ALERT */}
-                    {!selectedItem.recurringStatus && (
-                      <div className="bg-orange-100 text-orange-600 text-xs p-3 rounded-lg mb-4 text-left">
-                        Recurring invoices were not generated for this property.
-                        Subscription is expired.
-                      </div>
-                    )}
+{/* ALERT */}
+{(!selectedItem?.recurringStatus || !selectedItem?.isSubscriptionActive) && (
+  <div className="bg-orange-100 text-orange-600 text-xs p-3 rounded-lg mb-4 text-left">
+    {!selectedItem?.recurringStatus && (
+      <p>Recurring invoices were not generated for this property.</p>
+    )}
+
+    {!selectedItem?.isSubscriptionActive && (
+      <p>Subscription is expired.</p>
+    )}
+  </div>
+)}
 
                     {/* HISTORY TABLE */}
                     <div>

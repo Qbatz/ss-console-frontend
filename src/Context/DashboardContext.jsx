@@ -12,32 +12,68 @@ export const DashboardProvider = ({ children }) => {
     error?.response?.data?.message ||
     error?.response?.data ||
     "Something went wrong";
+    const getDashboard = async (regionGraphDateFilter = "THIS_MONTH") => {
+  try {
+    setLoading(true);
 
-  const getDashboard = async () => {
-    try {
-      setLoading(true);
+    const res = await axiosInstance.get("/v2/dashboard", {
+      params: {
+        regionGraphDateFilter,
+      },
+    });
 
-      const res = await axiosInstance.get("/v2/dashboard");
+    if (res.status === 200) {
+      setDashboardData(res.data);
 
-      if (res.status === 200) {
-        setDashboardData(res.data);
-        return { success: true, data: res.data };
-      }
-
-      return { success: false };
-
-    } catch (error) {
-      const msg = getErrorMessage(error);
-
-      setAccessError(msg);
-      console.log("Dashboard Error 👉", msg);
-
-      return { success: false, message: msg };
-
-    } finally {
-      setLoading(false);
+      return {
+        success: true,
+        data: res.data,
+      };
     }
-  };
+
+    return { success: false };
+
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setAccessError(msg);
+    console.log("Dashboard Error 👉", msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // const getDashboard = async () => {
+  //   try {
+  //     setLoading(true);
+
+  //     const res = await axiosInstance.get("/v2/dashboard");
+
+  //     if (res.status === 200) {
+  //       setDashboardData(res.data);
+  //       return { success: true, data: res.data };
+  //     }
+
+  //     return { success: false };
+
+  //   } catch (error) {
+  //     const msg = getErrorMessage(error);
+
+  //     setAccessError(msg);
+  //     console.log("Dashboard Error 👉", msg);
+
+  //     return { success: false, message: msg };
+
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 const getHostelBedInfo = async (
   page = 1,
   size = 10,
