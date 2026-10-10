@@ -6,6 +6,7 @@ import ErrorMessage from "../../components/ErrorMessage/ErrorMessage";
 import Toast from "../SuccessModal/ToastDesign";
 import { usePermission } from "../../Utils/permissionHelper";
 import LoginImg from "../../assets/LoginImg.png";
+import { createPortal } from "react-dom";
 
 const InvoiceRedemption = () => {
   const { getInvoiceRedemption, loading, updateInvoiceRedemption,deleteInvoiceRedemption } = useHostel();
@@ -387,60 +388,59 @@ setModalType("success");
     <img
       src={Circle}
       className="w-5 h-5 cursor-pointer"
-     onClick={(e) => {
-
+ onClick={(e) => {
   e.stopPropagation();
 
-  const rect =
-    e.currentTarget.getBoundingClientRect();
-
-  const viewportHeight =
-    window.innerHeight;
+  const rect = e.currentTarget.getBoundingClientRect();
 
   const menuHeight = 90;
-
-  const spaceBelow =
-    viewportHeight - rect.bottom;
+  const menuWidth = 128;
+  const spaceBelow = window.innerHeight - rect.bottom;
 
   setMenuPos({
-
     top:
-      spaceBelow < menuHeight
-        ? rect.top - menuHeight + 40
-        : rect.bottom + 8,
+      spaceBelow >= menuHeight
+        ? rect.bottom + 8
+        : Math.max(8, rect.top - menuHeight - 8),
 
-    left: rect.left - 100
-
+    left: Math.max(
+      8,
+      Math.min(
+        rect.right - menuWidth,
+        window.innerWidth - menuWidth - 8
+      )
+    ),
   });
 
-  setOpenMenuId(
-    openMenuId === item.id
-      ? null
-      : item.id
+  setOpenMenuId((prev) =>
+    prev === item.id ? null : item.id
   );
 }}
     />
 
   </div>
 
-  {openMenuId === item.id && (
-
-  <div
-    ref={menuRef}
-    className="
-      fixed w-28 bg-white-common rounded-xl
-      border border-gray-100
-      shadow-[0_12px_35px_rgba(0,0,0,0.18)]
-      overflow-hidden
-      z-[99999]
-    "
-    style={{
-      top: menuPos.top,
-      left: menuPos.left
-    }}
-  >
-
+  {openMenuId === item.id &&
+  createPortal(
+    <div
+      ref={menuRef}
+      className="
+        fixed
+        w-32
+        bg-white
+        rounded-xl
+        border border-gray-100
+        shadow-[0_12px_35px_rgba(0,0,0,0.18)]
+        overflow-hidden
+        z-[99999]
+      "
+      style={{
+        top: menuPos.top,
+        left: menuPos.left,
+      }}
+    >
       <button
+        type="button"
         className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
         onClick={() => {
           setSelectedItem(item);
@@ -453,6 +453,7 @@ setModalType("success");
       </button>
 
       <button
+        type="button"
         className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 cursor-pointer"
         onClick={() => {
           setDeleteId(item.id);
@@ -462,9 +463,8 @@ setModalType("success");
       >
         Delete
       </button>
-
-    </div>
-
+    </div>,
+    document.body
   )}
 
 </td>

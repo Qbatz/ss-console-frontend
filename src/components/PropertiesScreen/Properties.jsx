@@ -1003,15 +1003,36 @@ const handleUpdateStatusClick = async (item) => {
 
 
 
-                {/* Header */}
-                <div className="flex-between mb-6">
+             
+<div className="flex items-center justify-between mb-6">
 
-                  <h1 className="text-xl font-semibold font-inter">
-                    Properties
-                  </h1>
+  <div className="flex items-center gap-4">
+    <h1 className="text-xl font-semibold font-inter">
+      Properties
+    </h1>
 
-                  <button
-                    className="
+   <button
+  type="button"
+  onClick={() => navigate("/onboarding-insights")}
+  className="
+    flex items-center gap-1.5
+    text-primaryBlue
+    text-[10px]
+    font-inter
+    transition-all duration-200
+    hover:underline
+    cursor-pointer
+  "
+>
+  <span>View Onboarding Insights</span>
+  <span className="text-xs">↗</span>
+</button>
+  </div>
+
+ 
+  <button
+    type="button"
+    className="
       flex items-center gap-2
       text-primaryBlue
       px-4 py-2
@@ -1023,17 +1044,16 @@ const handleUpdateStatusClick = async (item) => {
       hover:text-white
       cursor-pointer
     "
-                  >
-                    <img
-                      src={AddBtn}
-                      alt="add"
-                      className="w-4 h-4 object-contain"
-                    />
+  >
+    <img
+      src={AddBtn}
+      alt="add"
+      className="w-4 h-4 object-contain"
+    />
 
-                    Add Property
-                  </button>
-
-                </div>
+    Add Property
+  </button>
+</div>
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
@@ -2103,14 +2123,6 @@ const handleUpdateStatusClick = async (item) => {
 
 
 
-
-
-                              {/* <td className="px-1 py-2">
-  <div className="flex flex-col">
-    <span>{item.lastUpdateDate}</span>
-    <span>{item.lastUpdateTime}</span>
-  </div>
-</td> */}
                               <td className="px-1 py-2">
                                 {item.lastUpdateDate || item.lastUpdateTime ? (
                                   <div className="flex flex-col">
@@ -2125,41 +2137,7 @@ const handleUpdateStatusClick = async (item) => {
                               <td className="px-4 py-2 text-center">
                                 {item.platform || "----"}
                               </td>
-                              {/* <td
-  className="
-    px-4
-    py-2
-    text-center
-    text-left
-    whitespace-nowrap
-  "
->
 
-  {item?.relationalAgents?.[0]?.agentId ? (
-
-    <span
-      onClick={() =>
-        navigate(
-          `/iam-user/${item.relationalAgents[0].agentId}`
-        )
-      }
-      className="
-        text-blue-600
-        cursor-pointer
-        hover:underline
-        font-medium
-      "
-    >
-      {item.relationalAgents[0].agentName}
-    </span>
-
-  ) : (
-
-    "----"
-
-  )}
-
-</td> */}
                               <td
                                 className="
     px-4

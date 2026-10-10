@@ -2274,6 +2274,36 @@ const getHostelFollowUp = async (hostelId) => {
     setLoading(false);
   }
 };
+const getHostelGraph = async (onboardedDateFilter = "MONTH") => {
+  try {
+    const res = await axiosInstance.get("/v2/hostels/graph", {
+      params: {
+        onboardedDateFilter,
+      },
+    });
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg =
+      error?.response?.status >= 500
+        ? "Internal Server Error"
+        : getErrorMessage(error);
+
+    setErrorMsg(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  }
+};
 // const getHostelFollowUp = async (hostelId) => {
 //   try {
 //     setLoading(true);
@@ -2318,7 +2348,7 @@ const getHostelFollowUp = async (hostelId) => {
         generateOrderHistory,sharePaymentLink,getTenantDeductions,updateTenantDeductions,getInvoiceReceipt,updateInvoiceBalance,
         getTenantById,updateAdvanceAmount, createHostelNote,getHostelNotes,getTenantSettlement,generateTenantSettlement,updateJoiningDate,
         verifyTenantMobile,getJoiningDateImpact,deleteReceiptUrl,deleteInvoiceUrl,getTableColumnFilterOptions,updateTableColumnFilterOption,recalculateTenant,
-        getHostelFollowUpStatus,updateRecurringConfig,updateHostelFollowUpStatus,getHostelFollowUp
+        getHostelFollowUpStatus,updateRecurringConfig,updateHostelFollowUpStatus,getHostelFollowUp,getHostelGraph
       }}
     >
       {children}

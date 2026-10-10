@@ -84,7 +84,7 @@ const Home = () => {
               Dashboard
             </h1>
 
-            <p className="text-[10px] text-[#98A2B3] mt-1 text-left">
+            <p className="text-[12px] text-[#98A2B3] mt-1 text-left">
               Overview of SmartStay properties, customers and usage.
             </p>
           </div>
@@ -102,36 +102,20 @@ const Home = () => {
           {stats.map((item, index) => (
             <div
               key={index}
-              className={`rounded-lg border px-3.5 py-3 h-[83px] ${item.active
-                  ? "bg-[#2448E8] border-[#2448E8] text-white"
-                  : "bg-white border-[#D9DDE5]"
-                }`}
+             className="rounded-lg border px-3.5 py-3 h-[83px] bg-white border-[#D9DDE5]"
             >
 
-              <p
-                className={`text-[11px] tracking-[1.2px] font-medium ${item.active
-                    ? "text-blue-100"
-                    : "text-[#98A2B3]"
-                  }`}
-              >
+              <p className="text-[11px] tracking-[1.2px] font-medium text-[#98A2B3]">
                 {item.title}
               </p>
 
               <h2
-                className={`text-[23px] leading-7 font-semibold mt-1 ${item.active
-                    ? "text-white"
-                    : "text-[#111827]"
-                  }`}
+                className="text-[23px] leading-7 font-semibold mt-1 text-[#111827]"
               >
                 {item.value}
               </h2>
 
-              <p
-                className={`text-[10px] mt-1 ${item.active
-                    ? "text-blue-100"
-                    : "text-[#98A2B3]"
-                  }`}
-              >
+              <p className="text-[10px] mt-1 text-[#98A2B3]">
                 {item.subtitle}
               </p>
 
@@ -164,7 +148,7 @@ const Home = () => {
 
               <div className="flex items-center justify-between">
 
-                <p className="text-[10px] text-[#98A2B3] mt-1">
+                <p className="text-[11px] text-[#98A2B3] mt-1">
                   {item.subtitle}
                 </p>
 
@@ -199,7 +183,7 @@ const Home = () => {
                   New Customers & Properties by Region
                 </h2>
 
-                <p className="text-[8px] text-[#98A2B3] mt-1 text-left">
+                <p className="text-[12px] text-[#98A2B3] mt-1 text-left">
                   Where SmartStay is gaining new customers
                 </p>
               </div>
@@ -287,23 +271,23 @@ const regionDetails = dashboardData?.regionData?.find(
   >
 
     
-    <p className="text-[8px] font-semibold text-[#344054] mb-2">
+    <p className="text-[8px] font-semibold text-[#344054] mb-2 text-left">
       {region.city}
     </p>
 
-    <div className="flex items-center justify-between mb-1">
+    {/* <div className="flex items-center justify-between mb-1">
       <div className="flex items-center gap-1.5">
         <span className="w-[6px] h-[6px] rounded-full bg-[#2448FF]" />
 
         <span className="text-[7px] text-[#667085]">
-          New Customers
+         Count
         </span>
       </div>
 
       <span className="text-[7px] font-semibold text-[#344054]">
-        {regionDetails?.ownerCount || 0}
+        {region?.count || 0}
       </span>
-    </div>
+    </div> */}
 
    
     <div className="flex items-center justify-between">
@@ -316,7 +300,7 @@ const regionDetails = dashboardData?.regionData?.find(
       </div>
 
       <span className="text-[7px] font-semibold text-[#344054]">
-        {regionDetails?.hostelCount || 0}
+       {region?.count || 0}
       </span>
     </div>
 
@@ -428,7 +412,7 @@ const regionDetails = dashboardData?.regionData?.find(
       Largest Customers
     </h2>
 
-    <p className="text-[8px] text-[#98A2B3] mt-1">
+    <p className="text-[12px] text-[#98A2B3] mt-1">
       Customers with the highest number of properties
     </p>
   </div>

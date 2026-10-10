@@ -1058,18 +1058,30 @@ const deleteInvoice = async (orderHistoryId) => {
   }
 };
 
-const getOrderHistoryGraph = async (comparisonFilter = "MONTH") => {
+const getOrderHistoryGraph = async (
+  comparisonFilter = "CUSTOM_MONTH",
+  customMonth,
+  customYear
+) => {
   try {
     setLoading(true);
     setErrorMsg("");
 
+    const params = { comparisonFilter };
+
+   
+    if (
+      comparisonFilter === "CUSTOM_MONTH" &&
+      customMonth &&
+      customYear
+    ) {
+      params.customMonth = customMonth;
+      params.customYear = customYear;
+    }
+
     const res = await axiosInstance.get(
       "/v2/order-history/graph",
-      {
-        params: {
-          comparisonFilter,
-        },
-      }
+      { params }
     );
 
     if (res.status === 200) {
@@ -1080,7 +1092,6 @@ const getOrderHistoryGraph = async (comparisonFilter = "MONTH") => {
     }
 
     return { success: false };
-
   } catch (error) {
     const msg = getErrorMessage(error);
 
@@ -1091,11 +1102,49 @@ const getOrderHistoryGraph = async (comparisonFilter = "MONTH") => {
       success: false,
       message: msg,
     };
-
   } finally {
     setLoading(false);
   }
 };
+
+// const getOrderHistoryGraph = async (comparisonFilter = "MONTH") => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.get(
+//       "/v2/order-history/graph",
+//       {
+//         params: {
+//           comparisonFilter,
+//         },
+//       }
+//     );
+
+//     if (res.status === 200) {
+//       return {
+//         success: true,
+//         data: res.data,
+//       };
+//     }
+
+//     return { success: false };
+
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+
+//     setErrorMsg(msg);
+//     setAccessError(msg);
+
+//     return {
+//       success: false,
+//       message: msg,
+//     };
+
+//   } finally {
+//     setLoading(false);
+//   }
+// };
   return (
     <SubscriptionContext.Provider
       value={{
