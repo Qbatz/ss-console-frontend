@@ -538,7 +538,7 @@ const StayInfoScreen = () => {
                                 Total Record Count :
 
                                 <span className="text-[#2952F3] font-semibold ml-1">
-                                    {totalRecords}
+                                    {hostels.length}
                                 </span>
 
                             </div>
@@ -620,12 +620,7 @@ const StayInfoScreen = () => {
 
 
                                 <span className="text-[13px] text-gray-500 whitespace-nowrap">
-                                    {totalRecords === 0
-                                        ? "0 - 0"
-                                        : `${(page - 1) * pageSize + 1} - ${Math.min(
-                                            page * pageSize,
-                                            totalRecords
-                                        )}`}
+                                   {page} - {totalPages}
                                 </span>
 
 

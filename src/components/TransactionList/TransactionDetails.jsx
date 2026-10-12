@@ -23,6 +23,7 @@ import Trash from "../../assets/trash.png";
 import Download from "../../assets/download-arrow (1).png";
 
 
+
 const TransactionsPage = () => {
   const { roleId } = useParams();
   const [totalItems, setTotalItems] = useState(0);
@@ -697,12 +698,27 @@ console.log("currentData",currentData)
           </div>
 
           <div className="flex gap-4 mb-4">
-            <div className="bg-white-common border-soft rounded-lg p-4 w-64">
-              <p className="text-sm text-gray-500">Total Revenue</p>
-              <h2 className="text-xl font-semibold">₹{totalRevenue}</h2>
-            </div>
+            <div className="bg-white border border-[#D9DDE5] rounded-lg p-3 w-48 h-[75px] text-left">
+    
+    <p className="text-[11px] text-gray-500 mb-0.5">
+      Total Revenue
+    </p>
 
-            <div className="bg-white-common border-soft rounded-lg p-4 w-64">
+    <h2 className="text-[17px] font-semibold text-[#111827] mb-0.5">
+      ₹ {totalRevenue}
+    </h2>
+
+    <button
+      type="button"
+      onClick={() => navigate("/revenue-insights")}
+      className="text-[9px] text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
+    >
+      ↗ View Revenue Insights
+    </button>
+
+  </div>
+
+            <div className="bg-white-common border-soft rounded-lg p-4 w-64 text-left">
               <p className="text-sm text-gray-500">Refunded Amount</p>
               <h2 className="text-xl font-semibold">0</h2>
             </div>
