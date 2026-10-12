@@ -87,7 +87,7 @@ const navigate = useNavigate();
 </div>
 
 
-          {/* Summary Cards */}
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
 
             <div className="rounded-lg border border-gray-200 bg-white p-4 text-left">

@@ -9,6 +9,7 @@ const RevenueInsights = () => {
     const [graphData, setGraphData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [hoveredPoint, setHoveredPoint] = useState(null);
+    const [showCompareDropdown, setShowCompareDropdown] = useState(false);
     
     const today = new Date();
 
@@ -108,6 +109,9 @@ const RevenueInsights = () => {
             ? graphData?.comparison?.records || []
             : [];
 
+const isSameMonth =
+  compare === "THIS_MONTH" &&
+  graphData?.current?.label === graphData?.comparison?.label;
 
     const allRevenueValues = [
         ...currentData.map((item) => Number(item?.revenue || 0)),
@@ -398,81 +402,116 @@ const RevenueInsights = () => {
                                 ))}
                             </select>
                         </div> */}
-                        <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-gray-500">
-                                Compare with
-                            </span>
+                      
+<div className="relative flex items-center justify-end gap-2">
+  <span className="text-[10px] text-gray-500 whitespace-nowrap">
+    Compare with
+  </span>
 
-                           <select
-    value={compare}
-    onChange={handleComparisonChange}
-    className="h-[28px] border border-[#D9DDE5] rounded-md px-2 text-[10px] outline-none bg-white"
->
-    <option value="">Select month</option>
-    <option value="THIS_MONTH">This Month Only</option>
+  <button
+    type="button"
+    onClick={() => setShowCompareDropdown((prev) => !prev)}
+    className="h-[28px] min-w-[140px] flex items-center justify-between gap-3
+      border border-gray-300 rounded-md px-2.5 text-[10px]
+      bg-white text-gray-600 hover:border-gray-400 transition-colors"
+  >
+    <span>
+      {compare === "THIS_MONTH"
+        ? "This Month Only"
+        : compare === "CUSTOM_MONTH"
+          ? new Date(Number(customYear), Number(customMonth) - 1)
+              .toLocaleString("en-US", { month: "short", year: "numeric" })
+          : compare === "MONTH"
+            ? "Previous Month"
+            : compare === "QUARTER"
+              ? "Previous Quarter"
+              : "Select month"}
+    </span>
 
-    {graphData?.comparisonFilters?.map((filter) => (
-        <option key={filter.key} value={filter.key}>
-            {filter.key === "MONTH"
-                ? "Previous Month"
-                : filter.key === "QUARTER"
-                    ? "Previous Quarter"
-                    : filter.key === "CUSTOM_MONTH"
-                        ? "Custom Month"
-                        : filter.key}
-        </option>
-    ))}
-</select>
-                            {showCustomMonth && (
-                                <div className="flex items-center gap-2 mt-2">
-                                    {/* Month */}
-                                    <select
-                                        value={customMonth}
-                                        onChange={(e) =>
-                                            handleCustomMonthChange(
-                                                e.target.value,
-                                                customYear
-                                            )
-                                        }
-                                        className="h-[28px] border border-[#D9DDE5] rounded-md px-2 text-[10px] bg-white"
-                                    >
-                                        <option value="">Select month</option>
+    <svg
+      className={`w-3 h-3 transition-transform cursor-pointer ${
+        showCompareDropdown ? "rotate-180" : ""
+      }`}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  </button>
 
-                                        {Array.from({ length: 12 }, (_, index) => (
-                                            <option key={index + 1} value={String(index + 1)}>
-                                                {new Date(2026, index).toLocaleString("en-US", {
-                                                    month: "short",
-                                                })}
-                                            </option>
-                                        ))}
-                                    </select>
+  {showCompareDropdown && (
+    <div className="absolute right-0 top-full mt-1 z-50
+      w-[136px] max-h-[250px] overflow-y-auto
+      rounded-md border border-gray-200 bg-white
+      shadow-lg py-1">
 
-                                    {/* Year */}
-                                    <select
-                                        value={customYear}
-                                        onChange={(e) =>
-                                            handleCustomMonthChange(
-                                                customMonth,
-                                                e.target.value
-                                            )
-                                        }
-                                        className="h-[28px] border border-[#D9DDE5] rounded-md px-2 text-[10px] bg-white"
-                                    >
-                                        <option value="">Select year</option>
+      <button
+        type="button"
+        onClick={async () => {
+          setShowCompareDropdown(false);
+          await handleComparisonChange({
+            target: { value: "THIS_MONTH" },
+          });
+        }}
+        className={`w-full text-left px-3 py-2 text-[10px]
+          hover:bg-gray-50 ${
+            compare === "THIS_MONTH"
+              ? "bg-indigo-50 text-blue-700"
+              : "text-gray-600"
+          }`}
+      >
+        This Month Only
+      </button>
 
-                                        {Array.from({ length: 5 }, (_, index) => {
-                                            const year = new Date().getFullYear() - index;
+      <div className="border-t border-gray-100 my-1" />
 
-                                            return (
-                                                <option key={year} value={String(year)}>
-                                                    {year}
-                                                </option>
-                                            );
-                                        })}
-                                    </select>
-                                </div>
-                            )}
-                        </div>
+     {Array.from({ length: 12 }, (_, index) => {
+  const today = new Date();
+  const monthDate = new Date(
+    today.getFullYear(),
+    today.getMonth() - index - 1,
+    1
+  );
+
+  const month = String(monthDate.getMonth() + 1);
+  const year = String(monthDate.getFullYear());
+
+  const label = monthDate.toLocaleString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+
+  return (
+    <button
+      key={`${year}-${month}`}
+      type="button"
+      onClick={async () => {
+        setCompare("CUSTOM_MONTH");
+        setCustomMonth(month);
+        setCustomYear(year);
+        setShowCustomMonth(false);
+        setShowCompareDropdown(false);
+
+        await loadRevenueGraph("CUSTOM_MONTH", month, year);
+      }}
+      className={`w-full text-left px-3 py-2 text-[10px] hover:bg-gray-50 ${
+        customMonth === month &&
+        customYear === year &&
+        compare === "CUSTOM_MONTH"
+          ? "bg-indigo-50 text-blue-700"
+          : "text-gray-600"
+      }`}
+    >
+      {label}
+    </button>
+  );
+})}
+    </div>
+  )}
+</div>
+
 
                     </div>
 
@@ -516,154 +555,65 @@ const RevenueInsights = () => {
                                     ))}
                                 </div>
 
-                                {/* Bars */}
-                                <div className="absolute inset-0 flex items-end justify-between gap-2 px-2">
-
-                                    {currentData.map((item, index) => {
-                                        const revenue = Number(item?.revenue || 0);
-
-                                        const barHeight =
-                                            yAxisMax > 0
-                                                ? (revenue / yAxisMax) * 100
-                                                : 0;
-
-                                        const comparisonRevenue =
-                                            Number(comparisonData[index]?.revenue || 0);
-
-                                        const comparisonBarHeight =
-                                            yAxisMax > 0
-                                                ? (comparisonRevenue / yAxisMax) * 100
-                                                : 0;
-
-                                        return (
-                                            <div
-                                                key={index}
-                                                className="flex-1 h-full flex items-end justify-center gap-1"
-                                            >
+                              
+  
 
 
-                                                {compare !== "NONE" && comparisonData.length > 0 && (
-                                                    <div
-                                                        className="relative w-[35%] max-w-[28px] bg-gray-300 rounded-t-sm cursor-pointer transition-all duration-200 hover:bg-gray-400"
-                                                        style={{
-                                                            height: `${comparisonBarHeight}%`,
-                                                            minHeight: "3px",
-                                                        }}
-                                                        onMouseEnter={() => {
-                                                            setHoveredPoint({
-                                                                index,
-                                                                data: item,
-                                                                type: "comparison",
-                                                                revenue,
-                                                                comparisonRevenue,
-                                                            });
-                                                        }}
-                                                        onMouseLeave={() => {
-                                                            setHoveredPoint(null);
-                                                        }}
-                                                    />
-                                                )}
+<div className="absolute inset-0 flex items-stretch justify-around px-4">
+  {[
+    ...(isSameMonth ? [] : comparisonData).map((item, index) => ({
+      key: `comparison-${index}`,
+      label: graphData?.comparison?.label || item?.label,
+      value: Number(item?.revenue || 0),
+      color: "bg-[#C7D2FE]",
+      type: "comparison",
+    })),
+    ...currentData.map((item, index) => ({
+      key: `current-${index}`,
+      label: graphData?.current?.label || item?.label,
+      value: Number(item?.revenue || 0),
+      color: "bg-[#2448FF]",
+      type: "current",
+    })),
+  ].map((bar) => {
+    const height =
+      yAxisMax > 0 ? (bar.value / yAxisMax) * 100 : 0;
+
+    return (
+      <div
+        key={bar.key}
+        className="flex-1 h-full flex flex-col items-center justify-end min-w-0"
+      >
+        {/* Bar */}
+        <div className="w-full flex-1 flex items-end justify-center">
+          <div
+            className={`w-10 md:w-11 max-w-full rounded-t-md ${bar.color}`}
+            style={{
+              height: `${height}%`,
+              minHeight: bar.value > 0 ? "3px" : "0",
+            }}
+            title={`${bar.label}: ₹${formatRevenue(bar.value)}`}
+          />
+        </div>
+
+      
+        <div className="w-full h-7 flex justify-center items-start pt-1">
+          <span
+            className={`text-[9px] text-center whitespace-nowrap ${
+              bar.type === "current"
+                ? "text-[#2448FF]"
+                : "text-gray-500"
+            }`}
+          >
+            {bar.label}
+          </span>
+        </div>
+      </div>
+    );
+  })}
+</div>
 
 
-                                                <div
-                                                    className="relative w-[45%] max-w-[34px] bg-[#2448FF] rounded-t-sm cursor-pointer transition-all duration-200 hover:bg-[#1938D8]"
-                                                    style={{
-                                                        height: `${barHeight}%`,
-                                                        minHeight: "3px",
-                                                    }}
-                                                    onMouseEnter={() => {
-                                                        setHoveredPoint({
-                                                            index,
-                                                            data: item,
-                                                            type: "current",
-                                                            revenue,
-                                                            comparisonRevenue,
-                                                        });
-                                                    }}
-                                                    onMouseLeave={() => {
-                                                        setHoveredPoint(null);
-                                                    }}
-                                                >
-
-
-                                                    {hoveredPoint?.index === index && (
-                                                        <div
-                                                            className="absolute z-50 bg-white border border-[#E5E7EB] rounded-lg shadow-lg px-3 py-2 pointer-events-none"
-                                                            style={{
-                                                                left: "50%",
-                                                                bottom: "calc(100% + 8px)",
-                                                                transform: "translateX(-50%)",
-                                                                minWidth: "125px",
-                                                            }}
-                                                        >
-                                                            <p className="text-[9px] text-gray-500 mb-1">
-                                                                {item?.label}
-                                                            </p>
-
-
-                                                            <div className="flex items-center justify-between gap-3">
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <span className="w-[6px] h-[6px] rounded-full bg-[#2448FF]" />
-
-                                                                    <span className="text-[9px] text-gray-600">
-                                                                        {graphData?.current?.label || "Current"}
-                                                                    </span>
-                                                                </div>
-
-                                                                <span className="text-[9px] font-semibold text-[#2448FF]">
-                                                                    ₹{formatRevenue(revenue)}
-                                                                </span>
-                                                            </div>
-
-
-                                                            {compare !== "NONE" &&
-                                                                comparisonData.length > 0 && (
-                                                                    <div className="flex items-center justify-between gap-3 mt-1">
-                                                                        <div className="flex items-center gap-1.5">
-                                                                            <span className="w-[6px] h-[6px] rounded-full bg-gray-400" />
-
-                                                                            <span className="text-[9px] text-gray-600">
-                                                                                {graphData?.comparison?.label ||
-                                                                                    "Comparison"}
-                                                                            </span>
-                                                                        </div>
-
-                                                                        <span className="text-[9px] font-semibold text-gray-500">
-                                                                            ₹{formatRevenue(comparisonRevenue)}
-                                                                        </span>
-                                                                    </div>
-                                                                )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                
-                                {/* <div className="absolute left-0 right-0 -bottom-6 flex justify-between text-[9px] text-gray-400">
-                                    {currentData.map((item, index) => (
-                                        <span
-                                            key={index}
-                                            className="flex-1 text-center truncate"
-                                        >
-                                            {item?.label}
-                                        </span>
-                                    ))}
-                                </div> */}
-                                {compare !== "" && (
-    <div className="absolute left-0 right-0 -bottom-6 flex justify-between text-[9px] text-gray-400">
-        {currentData.map((item, index) => (
-            <span
-                key={index}
-                className="flex-1 text-center truncate"
-            >
-                {item?.label}
-            </span>
-        ))}
-    </div>
-)}
                             </div>
                         </div>
                     )}
@@ -674,18 +624,11 @@ const RevenueInsights = () => {
 
 
                     {compare !== "NONE" &&
-                        comparisonData.length > 0 && (
+  comparisonData.length > 0 &&
+  !isSameMonth && (
                             <div className="flex justify-center items-center gap-5 mt-7">
 
-                                <div className="flex items-center gap-1.5">
-
-                                    <span className="w-5 h-[2px] bg-[#2448FF]" />
-
-                                    <span className="text-[9px] text-gray-500">
-                                        {graphData?.current?.label || "Current"}
-                                    </span>
-
-                                </div>
+                               
 
                                 <div className="flex items-center gap-1.5">
 
@@ -693,6 +636,15 @@ const RevenueInsights = () => {
 
                                     <span className="text-[9px] text-gray-500">
                                         {graphData?.comparison?.label || "Comparison"}
+                                    </span>
+
+                                </div>
+                                 <div className="flex items-center gap-1.5">
+
+                                    <span className="w-5 h-[2px] bg-[#2448FF]" />
+
+                                    <span className="text-[9px] text-gray-500">
+                                        {graphData?.current?.label || "Current"}
                                     </span>
 
                                 </div>
