@@ -23,6 +23,7 @@ import Trash from "../../assets/trash.png";
 import Download from "../../assets/download-arrow (1).png";
 
 
+
 const TransactionsPage = () => {
   const { roleId } = useParams();
   const [totalItems, setTotalItems] = useState(0);
@@ -152,29 +153,7 @@ const [fileLoading, setFileLoading] = useState(false);
     fetchData();
   }, [page, size, search, dateRange]);
 
-  // const fetchData = async () => {
-  //   let start = "";
-  //   let end = "";
-
-  //   if (dateRange && dateRange.length === 2) {
-  //     start = dateRange[0].format("DD-MM-YYYY");
-  //     end = dateRange[1].format("DD-MM-YYYY");
-  //   }
-
-  //   const res = await getOrderHistory(
-  //     page,
-  //     size,
-  //     search,
-  //     start,
-  //     end
-  //   );
-
-  //   if (res.success) {
-  //     setResData(res.data);
-  //     setTotalItems(res.data?.totalItems || 0);
-  //     setTotalRevenue(res.data?.totalRevenue || 0);
-  //   }
-  // };
+ 
   const fetchData = async () => {
     let start = "";
     let end = "";
@@ -197,7 +176,7 @@ const [fileLoading, setFileLoading] = useState(false);
       setTotalItems(res.data?.totalItems || 0);
       setTotalRevenue(res.data?.totalRevenue || 0);
 
-      // IMPORTANT
+      
       return res.data;
     }
 
@@ -210,31 +189,7 @@ const [fileLoading, setFileLoading] = useState(false);
 
 console.log("currentData",currentData)
 
-  // const fetchData = async () => {
 
-  //   let start = "";
-  //   let end = "";
-
-  //   if (dateRange && dateRange.length === 2) {
-  //     start = dateRange[0].format("DD-MM-YYYY");
-  //     end = dateRange[1].format("DD-MM-YYYY");
-  //   }
-
-  //   const res = await getOrderHistory(
-  //     page,
-  //     size,
-  //     search,
-  //     start,
-  //     end
-  //   );
-
-  //   if (res.success) {
-  //     setData(res.data?.paidHistories || []);
-  //     setTotalItems(res.data?.totalItems || 0);
-  //     setTotalRevenue(res?.data?.totalRevenue || 0);
-  //     setResData(res.data);
-  //   }
-  // };
 
   const start = totalItems === 0 ? 0 : (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);
@@ -697,12 +652,27 @@ console.log("currentData",currentData)
           </div>
 
           <div className="flex gap-4 mb-4">
-            <div className="bg-white-common border-soft rounded-lg p-4 w-64">
-              <p className="text-sm text-gray-500">Total Revenue</p>
-              <h2 className="text-xl font-semibold">₹{totalRevenue}</h2>
-            </div>
+            <div className="bg-white border border-[#D9DDE5] rounded-lg p-3 w-48 h-[75px] text-left">
+    
+    <p className="text-[11px] text-gray-500 mb-0.5">
+      Total Revenue
+    </p>
 
-            <div className="bg-white-common border-soft rounded-lg p-4 w-64">
+    <h2 className="text-[17px] font-semibold text-[#111827] mb-0.5">
+      ₹ {totalRevenue}
+    </h2>
+
+    <button
+      type="button"
+      onClick={() => navigate("/revenue-insights")}
+      className="text-[9px] text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
+    >
+      ↗ View Revenue Insights
+    </button>
+
+  </div>
+
+            <div className="bg-white-common border-soft rounded-lg p-4 w-64 text-left">
               <p className="text-sm text-gray-500">Refunded Amount</p>
               <h2 className="text-xl font-semibold">0</h2>
             </div>

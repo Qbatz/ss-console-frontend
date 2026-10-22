@@ -1057,6 +1057,94 @@ const deleteInvoice = async (orderHistoryId) => {
     };
   }
 };
+
+const getOrderHistoryGraph = async (
+  comparisonFilter = "CUSTOM_MONTH",
+  customMonth,
+  customYear
+) => {
+  try {
+    setLoading(true);
+    setErrorMsg("");
+
+    const params = { comparisonFilter };
+
+   
+    if (
+      comparisonFilter === "CUSTOM_MONTH" &&
+      customMonth &&
+      customYear
+    ) {
+      params.customMonth = customMonth;
+      params.customYear = customYear;
+    }
+
+    const res = await axiosInstance.get(
+      "/v2/order-history/graph",
+      { params }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        data: res.data,
+      };
+    }
+
+    return { success: false };
+  } catch (error) {
+    const msg = getErrorMessage(error);
+
+    setErrorMsg(msg);
+    setAccessError(msg);
+
+    return {
+      success: false,
+      message: msg,
+    };
+  } finally {
+    setLoading(false);
+  }
+};
+
+// const getOrderHistoryGraph = async (comparisonFilter = "MONTH") => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.get(
+//       "/v2/order-history/graph",
+//       {
+//         params: {
+//           comparisonFilter,
+//         },
+//       }
+//     );
+
+//     if (res.status === 200) {
+//       return {
+//         success: true,
+//         data: res.data,
+//       };
+//     }
+
+//     return { success: false };
+
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+
+//     setErrorMsg(msg);
+//     setAccessError(msg);
+
+//     return {
+//       success: false,
+//       message: msg,
+//     };
+
+//   } finally {
+//     setLoading(false);
+//   }
+// };
   return (
     <SubscriptionContext.Provider
       value={{
@@ -1064,7 +1152,8 @@ const deleteInvoice = async (orderHistoryId) => {
         errorMsg,
         createSubscription, getSubscriptions, getDemoRequests, getAgentsDropdown, createDemoRequest, updateDemoRequestStatus, 
         getDemoRequestStatus,getOrderHistory,accessError,addDemoRequestComment,verifyPayment,deleteDemoRequest,getDemoType,getDropReasons,getDemoRequestComments,
-        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes,getTrialDaysExtReason,deleteTransaction,getTrialSubscriptions,uploadInvoice,downloadInvoice,exportInvoicePdf,deleteInvoice
+        dropDemoRequest,getOwnerByMobile,addSupportTicketNotes,getTrialDaysExtReason,deleteTransaction,getTrialSubscriptions,uploadInvoice,downloadInvoice,exportInvoicePdf,
+        deleteInvoice,getOrderHistoryGraph
       }}
     >
       {children}
