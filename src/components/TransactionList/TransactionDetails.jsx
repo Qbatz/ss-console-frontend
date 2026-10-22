@@ -153,29 +153,7 @@ const [fileLoading, setFileLoading] = useState(false);
     fetchData();
   }, [page, size, search, dateRange]);
 
-  // const fetchData = async () => {
-  //   let start = "";
-  //   let end = "";
-
-  //   if (dateRange && dateRange.length === 2) {
-  //     start = dateRange[0].format("DD-MM-YYYY");
-  //     end = dateRange[1].format("DD-MM-YYYY");
-  //   }
-
-  //   const res = await getOrderHistory(
-  //     page,
-  //     size,
-  //     search,
-  //     start,
-  //     end
-  //   );
-
-  //   if (res.success) {
-  //     setResData(res.data);
-  //     setTotalItems(res.data?.totalItems || 0);
-  //     setTotalRevenue(res.data?.totalRevenue || 0);
-  //   }
-  // };
+ 
   const fetchData = async () => {
     let start = "";
     let end = "";
@@ -198,7 +176,7 @@ const [fileLoading, setFileLoading] = useState(false);
       setTotalItems(res.data?.totalItems || 0);
       setTotalRevenue(res.data?.totalRevenue || 0);
 
-      // IMPORTANT
+      
       return res.data;
     }
 
@@ -211,31 +189,7 @@ const [fileLoading, setFileLoading] = useState(false);
 
 console.log("currentData",currentData)
 
-  // const fetchData = async () => {
 
-  //   let start = "";
-  //   let end = "";
-
-  //   if (dateRange && dateRange.length === 2) {
-  //     start = dateRange[0].format("DD-MM-YYYY");
-  //     end = dateRange[1].format("DD-MM-YYYY");
-  //   }
-
-  //   const res = await getOrderHistory(
-  //     page,
-  //     size,
-  //     search,
-  //     start,
-  //     end
-  //   );
-
-  //   if (res.success) {
-  //     setData(res.data?.paidHistories || []);
-  //     setTotalItems(res.data?.totalItems || 0);
-  //     setTotalRevenue(res?.data?.totalRevenue || 0);
-  //     setResData(res.data);
-  //   }
-  // };
 
   const start = totalItems === 0 ? 0 : (page - 1) * size + 1;
   const end = Math.min(page * size, totalItems);

@@ -364,7 +364,7 @@ const isSameMonth =
                                             {graphData.cardData.revenuePercentageDifference}%
                                         </span>
 
-                                        {/* Comparison Label */}
+                                        
                                         <span
                                             className={`text-[9px] ${Number(graphData.cardData.revenuePercentageDifference) >= 0
                                                 ? "text-green-600"
@@ -378,30 +378,7 @@ const isSameMonth =
                                 )}
                         </div>
 
-                        {/* <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-gray-500">
-                                Compare with
-                            </span>
-
-                            <select
-                                value={compare}
-                                onChange={handleComparisonChange}
-                                className="h-[28px] border border-[#D9DDE5] rounded-md px-2 text-[10px] outline-none bg-white"
-                            >
-                                {graphData?.comparisonFilters?.map((filter) => (
-                                    <option
-                                        key={filter.key}
-                                        value={filter.key}
-                                    >
-                                        {filter.key === "MONTH"
-                                            ? "Previous Month"
-                                            : filter.key === "QUARTER"
-                                                ? "Previous Quarter"
-                                                : filter.key}
-                                    </option>
-                                ))}
-                            </select>
-                        </div> */}
+                       
                       
 <div className="relative flex items-center justify-end gap-2">
   <span className="text-[10px] text-gray-500 whitespace-nowrap">
@@ -584,7 +561,7 @@ const isSameMonth =
         key={bar.key}
         className="flex-1 h-full flex flex-col items-center justify-end min-w-0"
       >
-        {/* Bar */}
+        
         <div className="w-full flex-1 flex items-end justify-center">
           <div
             className={`w-10 md:w-11 max-w-full rounded-t-md ${bar.color}`}

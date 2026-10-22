@@ -179,7 +179,7 @@ const Home = () => {
             <div className="flex items-start justify-between">
 
               <div>
-                <h2 className="text-[12px] font-semibold text-[#111827] text-left">
+                <h2 className="text-[14px] font-semibold text-[#111827] text-left">
                   New Customers & Properties by Region
                 </h2>
 
@@ -238,7 +238,7 @@ const regionDetails = dashboardData?.regionData?.find(
       >
 
         
-        <span className="w-[80px] text-right text-[11px] text-[#475467] truncate">
+        <span className="w-[80px] text-right text-[12px] text-[#475467] truncate">
           {region.city}
         </span>
 
@@ -294,7 +294,7 @@ const regionDetails = dashboardData?.regionData?.find(
       <div className="flex items-center gap-1.5">
         <span className="w-[6px] h-[6px] rounded-full bg-[#91A2E9]" />
 
-        <span className="text-[7px] text-[#667085]">
+        <span className="text-[8px] text-[#667085]">
           New Properties
         </span>
       </div>
@@ -339,7 +339,7 @@ const regionDetails = dashboardData?.regionData?.find(
 
               <div className="flex items-center gap-1.5">
                 <span className="w-[11px] h-[11px] rounded-full bg-[#91A2E9]" />
-                <span className="text-[8px] text-[#667085]">
+                <span className="text-[10px] text-[#667085]">
                   New Properties
                 </span>
               </div>
@@ -354,7 +354,7 @@ const regionDetails = dashboardData?.regionData?.find(
 
             <div className="flex items-center justify-between mb-3">
 
-              <h2 className="text-[12px] font-semibold text-[#111827]">
+              <h2 className="text-[14px] font-semibold text-[#111827]">
                 Recently Added Regions
               </h2>
 
@@ -374,15 +374,15 @@ const regionDetails = dashboardData?.regionData?.find(
     </div>
 
     <div className="text-left">
-      <p className="text-[10px] font-semibold text-[#344054]">
+      <p className="text-[12px] font-semibold text-[#344054]">
         {region.city}, {region.state}
       </p>
 
-      <p className="text-[9px] text-[#98A2B3] mt-0.5">
+      <p className="text-[11px] text-[#98A2B3] mt-0.5">
         {region.ownerCount} customers · {region.hostelCount} properties
       </p>
 
-      <p className="text-[8px] text-[#B0B7C3] mt-0.5">
+      <p className="text-[10px] text-[#B0B7C3] mt-0.5">
         {region.latestDateDisplay}
       </p>
     </div>
@@ -408,7 +408,7 @@ const regionDetails = dashboardData?.regionData?.find(
 
   
   <div className="mb-3">
-    <h2 className="text-[12px] font-semibold text-[#111827]">
+    <h2 className="text-[14px] font-semibold text-[#111827]">
       Largest Customers
     </h2>
 
@@ -420,15 +420,15 @@ const regionDetails = dashboardData?.regionData?.find(
  
   <div className="grid grid-cols-[1.5fr_0.55fr_0.55fr_0.55fr] px-1 pb-2 border-b border-[#EEF2F6]">
 
-    <span className="text-[9px] tracking-[1px] text-[#98A2B3]">
+    <span className="text-[11px] tracking-[1px] text-[#98A2B3]">
       CUSTOMER
     </span>
 
-    <span className="text-[9px] tracking-[1px] text-[#98A2B3]">
+    <span className="text-[11px] tracking-[1px] text-[#98A2B3]">
       PROPERTIES
     </span>
 
-    <span className="text-[9px] tracking-[1px] text-[#98A2B3]">
+    <span className="text-[11px] tracking-[1px] text-[#98A2B3]">
       CITIES
     </span>
 
@@ -443,15 +443,15 @@ const regionDetails = dashboardData?.regionData?.find(
         className="grid grid-cols-[1.5fr_0.55fr_0.55fr_0.55fr] items-center px-1 py-2.5 border-b border-[#F2F4F7] last:border-0"
       >
 
-        <span className="text-[10px] text-[#344054]">
+        <span className="text-[12px] text-[#344054]">
           {customer.ownerName}
         </span>
 
-        <span className="text-[10px] font-semibold text-blue-600">
+        <span className="text-[12px] font-semibold text-blue-600">
           {customer.hostelCount}
         </span>
 
-        <span className="text-[10px] text-[#667085]">
+        <span className="text-[12px] text-[#667085]">
           {customer.cityCount}
         </span>
 
@@ -468,7 +468,7 @@ const regionDetails = dashboardData?.regionData?.find(
 
             <div className="flex items-center justify-between mb-3">
 
-              <h2 className="text-[12px] font-semibold text-[#111827]">
+              <h2 className="text-[14px] font-semibold text-[#111827]">
                 Recent Activity
               </h2>
 
@@ -502,27 +502,27 @@ const regionDetails = dashboardData?.regionData?.find(
       <div className="text-left min-w-0">
 
         {/* Activity */}
-        <p className="text-[10px] font-semibold text-[#344054]">
+        <p className="text-[12px] font-semibold text-[#344054]">
           {activity?.description || "Activity updated"}
         </p>
 
         {/* Hostel Name */}
-        <p className="text-[9px] text-[#667085] mt-0.5">
+        <p className="text-[10px] text-[#667085] mt-0.5">
           {activity?.hostelName || "N/A"}
         </p>
 
         {/* Source */}
-        <p className="text-[8px] text-[#98A2B3] mt-0.5">
+        <p className="text-[9px] text-[#98A2B3] mt-0.5">
           {activity?.source || "N/A"}
         </p>
 
         {/* Address */}
-        <p className="text-[8px] text-[#98A2B3] mt-0.5 truncate">
+        <p className="text-[9px] text-[#98A2B3] mt-0.5 truncate">
           {activity?.hostelAddress || "N/A"}
         </p>
 
         {/* Time */}
-        <p className="text-[8px] text-[#B0B7C3] mt-0.5">
+        <p className="text-[9px] text-[#B0B7C3] mt-0.5">
           ◷ {activity?.dateDisplay || ""}
         </p>
 

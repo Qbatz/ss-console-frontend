@@ -33,10 +33,7 @@ const ProductUpdate = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [hoveredRow, setHoveredRow] = useState(null);
   const [openActionId, setOpenActionId] = useState(null);
-  const [actionMenuPosition, setActionMenuPosition] = useState({
-    top: 0,
-    left: 0,
-  });
+  const [actionMenuPosition, setActionMenuPosition] = useState({ top: 0, left: 0, });
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [selectedUpdate, setSelectedUpdate] = useState(null);
   const [archiveLoading, setArchiveLoading] = useState(false);
@@ -49,12 +46,12 @@ const ProductUpdate = () => {
   const [viewProductUpdate, setViewProductUpdate] = useState(null);
   const [viewLoading, setViewLoading] = useState(false);
   const [showUnarchiveModal, setShowUnarchiveModal] = useState(false);
-const [selectedProductUpdateId, setSelectedProductUpdateId] = useState(null);
-const [unarchiveLoading, setUnarchiveLoading] = useState(false);
+  const [selectedProductUpdateId, setSelectedProductUpdateId] = useState(null);
+  const [unarchiveLoading, setUnarchiveLoading] = useState(false);
   const navigate = useNavigate();
 
   const { adminDetails } = useRole();
-  const { getProductUpdates, archiveProductUpdate, getProductUpdateById, deleteProductUpdate,unArchiveProductUpdate } = usePlan();
+  const { getProductUpdates, archiveProductUpdate, getProductUpdateById, deleteProductUpdate, unArchiveProductUpdate } = usePlan();
 
   useEffect(() => {
     fetchProductUpdates();
@@ -102,7 +99,7 @@ const [unarchiveLoading, setUnarchiveLoading] = useState(false);
         );
 
         setSummary({
-          totalItems: data?.totalItems || 0,
+          totalItems: data?.totalCount || 0,
           draftCount: data?.draftCount || 0,
           scheduledCount: data?.scheduledCount || 0,
           publishedCount: data?.publishedCount || 0,
@@ -224,67 +221,67 @@ const [unarchiveLoading, setUnarchiveLoading] = useState(false);
     }
   };
   const handleUnarchive = async () => {
-  if (
-    !selectedProductUpdateId ||
-    unarchiveLoading
-  ) {
-    return;
-  }
-
-  try {
-    setUnarchiveLoading(true);
-
-    const res = await unArchiveProductUpdate(
-      selectedProductUpdateId
-    );
-
-    if (res?.success) {
-      setShowUnarchiveModal(false);
-      setSelectedProductUpdateId(null);
-
-      setModalType("success");
-
-      setMessage(res.data);
-
-      setShowSuccess(true);
-
-      await fetchProductUpdates();
-
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 1500);
-
-    } 
-    else {
-      setModalType("error");
-      setMessage(res.message);
-
-      setShowSuccess(true);
-        setTimeout(() => {
-        setShowSuccess(false);
-      }, 1500);
+    if (
+      !selectedProductUpdateId ||
+      unarchiveLoading
+    ) {
+      return;
     }
 
-  } catch (error) {
-    console.error(
-      "Unarchive Error:",
-      error
-    );
+    try {
+      setUnarchiveLoading(true);
 
-    setModalType("error");
+      const res = await unArchiveProductUpdate(
+        selectedProductUpdateId
+      );
 
-    setMessage(
-      error?.response?.data?.message ||
-      error?.message ||
-      "Something went wrong"
-    );
+      if (res?.success) {
+        setShowUnarchiveModal(false);
+        setSelectedProductUpdateId(null);
 
-    setShowSuccess(true);
+        setModalType("success");
 
-  } finally {
-    setUnarchiveLoading(false);
-  }
-};
+        setMessage(res.data);
+
+        setShowSuccess(true);
+
+        await fetchProductUpdates();
+
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
+
+      }
+      else {
+        setModalType("error");
+        setMessage(res.message);
+
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
+      }
+
+    } catch (error) {
+      console.error(
+        "Unarchive Error:",
+        error
+      );
+
+      setModalType("error");
+
+      setMessage(
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong"
+      );
+
+      setShowSuccess(true);
+
+    } finally {
+      setUnarchiveLoading(false);
+    }
+  };
   const handleDelete = async (productUpdateId) => {
     if (!productUpdateId) return;
 
@@ -1364,15 +1361,15 @@ const [unarchiveLoading, setUnarchiveLoading] = useState(false);
                             Archive
                           </button>
                         )}
-       {item?.publishStatus === "ARCHIVED" && (
-  <button
-    type="button"
-    onClick={() => {
-      setSelectedProductUpdateId(item.productUpdateId);
-      setShowUnarchiveModal(true);
-      setOpenActionId(null);
-    }}
-    className="
+                        {item?.publishStatus === "ARCHIVED" && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedProductUpdateId(item.productUpdateId);
+                              setShowUnarchiveModal(true);
+                              setOpenActionId(null);
+                            }}
+                            className="
       w-full
       px-3
       py-2
@@ -1384,10 +1381,10 @@ const [unarchiveLoading, setUnarchiveLoading] = useState(false);
       transition
       cursor-pointer
     "
-  >
-    UnArchive
-  </button>
-)}
+                          >
+                            UnArchive
+                          </button>
+                        )}
 
                       </React.Fragment>
 
@@ -1447,15 +1444,15 @@ const [unarchiveLoading, setUnarchiveLoading] = useState(false);
               </select>
 
               <button
-  type="button"
-  disabled={!totalPages || currentPage === 1}
-  onClick={() =>
-    setCurrentPage((prev) => Math.max(prev - 1, 1))
-  }
-  className="text-[20px] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
->
-  ‹
-</button>
+                type="button"
+                disabled={!totalPages || currentPage === 1}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.max(prev - 1, 1))
+                }
+                className="text-[20px] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                ‹
+              </button>
 
               <div
                 className="
@@ -1476,18 +1473,18 @@ const [unarchiveLoading, setUnarchiveLoading] = useState(false);
                 {currentPage} - {totalPages}
               </span>
 
-            <button
-  type="button"
-  disabled={!totalPages || currentPage >= totalPages}
-  onClick={() =>
-    setCurrentPage((prev) =>
-      Math.min(prev + 1, totalPages)
-    )
-  }
-  className="text-[20px] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
->
-  ›
-</button>
+              <button
+                type="button"
+                disabled={!totalPages || currentPage >= totalPages}
+                onClick={() =>
+                  setCurrentPage((prev) =>
+                    Math.min(prev + 1, totalPages)
+                  )
+                }
+                className="text-[20px] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                ›
+              </button>
 
             </div>
 
@@ -2188,9 +2185,9 @@ const [unarchiveLoading, setUnarchiveLoading] = useState(false);
           </div>
         </>
       )}
-{showUnarchiveModal && (
-  <div
-    className="
+      {showUnarchiveModal && (
+        <div
+          className="
       fixed inset-0
       z-[9999]
       bg-black/40
@@ -2199,9 +2196,9 @@ const [unarchiveLoading, setUnarchiveLoading] = useState(false);
       justify-center
       p-4
     "
-  >
-    <div
-      className="
+        >
+          <div
+            className="
         w-[380px]
         max-w-full
         bg-white
@@ -2211,53 +2208,52 @@ const [unarchiveLoading, setUnarchiveLoading] = useState(false);
         px-7
         py-6
       "
-    >
-      {/* TITLE */}
-      <h2 className="text-[20px] font-medium text-[#1f2937] text-center">
-        Unarchive Product Update
-      </h2>
+          >
+            {/* TITLE */}
+            <h2 className="text-[20px] font-medium text-[#1f2937] text-center">
+              Unarchive Product Update
+            </h2>
 
-      {/* MESSAGE */}
-      <p className="text-gray-500 mt-3 text-sm text-center">
-        Are you sure you want to unarchive this product update?
-      </p>
+            {/* MESSAGE */}
+            <p className="text-gray-500 mt-3 text-sm text-center">
+              Are you sure you want to unarchive this product update?
+            </p>
 
-      {/* BUTTONS */}
-      <div className="flex justify-end gap-3 mt-8">
-        <button
-          onClick={() => {
-            setShowUnarchiveModal(false);
-            setSelectedProductUpdateId(null);
-          }}
-          disabled={unarchiveLoading}
-          className="
+            {/* BUTTONS */}
+            <div className="flex justify-end gap-3 mt-8">
+              <button
+                onClick={() => {
+                  setShowUnarchiveModal(false);
+                  setSelectedProductUpdateId(null);
+                }}
+                disabled={unarchiveLoading}
+                className="
             border border-gray-300
             px-8 py-3
             rounded-xl
             text-gray-700
             cursor-pointer
           "
-        >
-          Cancel
-        </button>
+              >
+                Cancel
+              </button>
 
-      <button
-  onClick={handleUnarchive}
-  disabled={unarchiveLoading}
-  className={`px-8 py-3 rounded-xl text-white ${
-    unarchiveLoading
-      ? "bg-gray-400 cursor-not-allowed"
-      : "bg-primaryBlue hover:bg-blue-700 cursor-pointer"
-  }`}
->
-  {unarchiveLoading
-    ? "Unarchiving..."
-    : "Confirm"}
-</button>
-      </div>
-    </div>
-  </div>
-)}
+              <button
+                onClick={handleUnarchive}
+                disabled={unarchiveLoading}
+                className={`px-8 py-3 rounded-xl text-white ${unarchiveLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-primaryBlue hover:bg-blue-700 cursor-pointer"
+                  }`}
+              >
+                {unarchiveLoading
+                  ? "Unarchiving..."
+                  : "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };
