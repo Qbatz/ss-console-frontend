@@ -343,7 +343,7 @@ const ProductUpdate = () => {
         type={modalType} />
       <div className="min-h-screen bg-[#F8F9FB] px-5 py-5">
 
-        {/* Header */}
+       
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-[18px] font-semibold text-[#202938] text-left">
@@ -377,7 +377,7 @@ const ProductUpdate = () => {
           </button>
         </div>
 
-        {/* Summary Cards */}
+        
         <div className="grid grid-cols-4 gap-4 mb-5">
 
           <SummaryCard
@@ -385,10 +385,7 @@ const ProductUpdate = () => {
             value={summary.totalItems}
           />
 
-          {/* <SummaryCard
-  title="Published"
-  value={summary.publishedCount}
-/> */}
+     
           <SummaryCard
             title="Published"
             value={summary.publishedCount}
@@ -421,7 +418,7 @@ const ProductUpdate = () => {
 
         </div>
 
-        {/* Main Card */}
+     
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden relative">
 
           {loading && (
@@ -475,22 +472,7 @@ const ProductUpdate = () => {
               >
                 All Updates
 
-                {/* <span
-      className={`
-        ml-1.5
-        px-1.5
-        py-[1px]
-        rounded-full
-        text-[8px]
-        ${
-          activeTab === "ALL"
-            ? "bg-[#EAF0FF] text-[#2952F3]"
-            : "bg-gray-100 text-gray-400"
-        }
-      `}
-    >
-      {summary.totalItems}
-    </span> */}
+            
               </button>
 
 
@@ -707,7 +689,7 @@ const ProductUpdate = () => {
                     Version
                   </th>
 
-                  {/* TYPE */}
+                 
                   <th
                     className="
             sticky
@@ -726,7 +708,7 @@ const ProductUpdate = () => {
                     Type
                   </th>
 
-                  {/* PLATFORM */}
+                
                   <th
                     className="
             sticky
@@ -745,7 +727,7 @@ const ProductUpdate = () => {
                     Platform
                   </th>
 
-                  {/* AUDIENCE */}
+                  
                   <th
                     className="
             sticky
@@ -764,7 +746,7 @@ const ProductUpdate = () => {
                     Audience
                   </th>
 
-                  {/* STATUS */}
+                  
                   <th
                     className="
             sticky
@@ -783,7 +765,6 @@ const ProductUpdate = () => {
                     Status
                   </th>
 
-                  {/* PUBLISHED DATE */}
                   <th
                     className="
             sticky
@@ -803,7 +784,7 @@ const ProductUpdate = () => {
                     Published Date
                   </th>
 
-                  {/* CREATED BY */}
+                 
                   <th
                     className="
             sticky
@@ -1194,7 +1175,7 @@ const ProductUpdate = () => {
                                 strokeWidth={1.8}
                               />
                             </button>
-                            {/* MORE */}
+                           
                             <button
                               type="button"
                               title="More"
@@ -1515,7 +1496,7 @@ const ProductUpdate = () => {
       "
           >
 
-            {/* HEADER */}
+            
             <div
               className="
           px-5 py-4
@@ -1529,7 +1510,7 @@ const ProductUpdate = () => {
             </div>
 
 
-            {/* CONTENT */}
+          
             <div className="px-5 py-5">
 
               <p className="text-[11px] text-gray-500 leading-5">
@@ -1545,7 +1526,7 @@ const ProductUpdate = () => {
             </div>
 
 
-            {/* FOOTER */}
+            
             <div
               className="
           px-5 py-3
@@ -1557,7 +1538,7 @@ const ProductUpdate = () => {
         "
             >
 
-              {/* CANCEL */}
+              
               <button
                 type="button"
                 disabled={archiveLoading}
@@ -1580,7 +1561,7 @@ const ProductUpdate = () => {
               </button>
 
 
-              {/* ARCHIVE */}
+              
               <button
                 type="button"
                 disabled={archiveLoading}
@@ -1654,7 +1635,7 @@ const ProductUpdate = () => {
             onMouseDown={(e) => e.stopPropagation()}
           >
 
-            {/* HEADER */}
+            
             <div
               className="
           px-5 py-4
@@ -1686,7 +1667,7 @@ const ProductUpdate = () => {
             </div>
 
 
-            {/* CONTENT */}
+            
             <div className="px-5 py-5">
 
               <p className="text-[11px] text-gray-500 leading-5">
@@ -1741,7 +1722,7 @@ const ProductUpdate = () => {
               </button>
 
 
-              {/* DELETE */}
+             
               <button
                 type="button"
                 disabled={deleteLoading}
