@@ -7590,7 +7590,7 @@ const handleUpdateStatus = async () => {
               </span>
 
               <span className="font-semibold text-[#333]">
-                {hostelData?.location || "N/A"}
+                {hostelData?.fullAddress || "N/A"}
               </span>
             </div>
 
