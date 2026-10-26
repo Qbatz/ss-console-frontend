@@ -7584,7 +7584,7 @@ const handleUpdateStatus = async () => {
               </span>
             </div>
 
-            <div className="flex">
+            {/* <div className="flex">
               <span className="w-[115px] text-[#667085]">
                 ♧ Location
               </span>
@@ -7592,7 +7592,19 @@ const handleUpdateStatus = async () => {
               <span className="font-semibold text-[#333]">
                 {hostelData?.fullAddress || "N/A"}
               </span>
-            </div>
+            </div> */}
+              <div className="flex">
+  <span className="w-[115px] shrink-0 text-[#667085]">
+    ♧ Location
+  </span>
+
+  <span
+    className="font-semibold text-[#333] w-[280px] truncate cursor-pointer"
+    title={hostelData?.fullAddress || "N/A"}
+  >
+    {hostelData?.fullAddress || "N/A"}
+  </span>
+</div>
 
             <div className="flex">
               <span className="w-[115px] text-[#667085]">
