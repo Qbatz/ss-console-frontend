@@ -639,10 +639,10 @@ if (item.title === "Other Invoices") {
 
       {/* Header */}
       <div className="grid grid-cols-4 bg-[#F9FAFB] px-4 py-4 font-semibold text-[#667085] text-[11px]">
-        <div>INVOICE NO</div>
-        <div>DATE</div>
-        <div className="text-right">INVOICE AMOUNT</div>
-        <div className="text-right">PENDING AMOUNT</div>
+        <div className="text-left">INVOICE NO</div>
+        <div className="text-left">DATE</div>
+        <div className="text-left">INVOICE TYPE</div>
+        <div className="text-left">PENDING AMOUNT</div>
       </div>
 
       {/* Invoice Rows */}
@@ -653,19 +653,19 @@ if (item.title === "Other Invoices") {
               key={invoice.invoiceId || index}
               className="grid grid-cols-4 px-4 py-4 border-t border-[#EAECF0] text-[13px]"
             >
-              <div className="text-[#3158F5] underline cursor-pointer">
+              <div className="text-[#3158F5] underline cursor-pointer text-left">
                 {invoice.invoiceNumber}
               </div>
 
-              <div className="text-[#344054]">
+              <div className="text-[#344054] text-left">
                 {invoice.invoiceDate}
               </div>
 
-              <div className="text-right text-[#101828]">
-                ₹{invoice.invoiceAmount}
+              <div className="text-[#101828] text-left">
+                ₹{invoice.invoiceType}
               </div>
 
-              <div className="text-right font-medium text-[#101828]">
+              <div className="text-left font-medium text-[#101828]">
                 ₹{invoice.pendingAmount}
               </div>
             </div>

@@ -174,74 +174,72 @@ useEffect(() => {
         </div>
 
         {/* Filters */}
-        <div className="flex justify-between items-center mb-3">
+      <div className="flex justify-between items-center mb-3">
+  {/* Both dropdowns */}
+  <div className="flex items-center gap-3">
+    <select
+      value={filterBy}
+      onChange={(e) => {
+        setFilterBy(e.target.value);
+        setCurrentPage(1);
+      }}
+      className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+    >
+      <option value="ALL">ALL</option>
+      <option value="TRIAL">TRIAL</option>
+      <option value="EXPANDABLE_TRIAL">EXPANDABLE TRIAL</option>
+    </select>
 
-          <div className="flex gap-2">
-           <select
-  value={filterBy}
-  onChange={(e) => {
-    setFilterBy(e.target.value);
-    setCurrentPage(1);
-  }}
-  className="border border-gray-300 rounded px-3 py-1 text-sm"
->
-  <option value="ALL">ALL</option>
-  <option value="TRIAL">TRIAL</option>
-  <option value="EXPANDABLE_TRIAL">
-    EXPANDABLE TRIAL
-  </option>
-</select>
+    <div className="relative">
+      <select
+        value={isActive === null ? "" : isActive.toString()}
+        onChange={(e) => {
+          const value = e.target.value;
+          setIsActive(value === "" ? null : value === "true");
+          setCurrentPage(1);
+        }}
+        className="border border-gray-300 px-4 py-2 pr-10 rounded-lg text-sm bg-white min-w-[150px] appearance-none"
+      >
+        <option value="">All Status</option>
+        <option value="true">Active</option>
+        <option value="false">Inactive</option>
+      </select>
 
-           
-          </div>
-  <div className="relative">
-  <select
-    value={isActive === null ? "" : isActive.toString()}
-    onChange={(e) => {
-      const value = e.target.value;
+      <img
+        src={Arrow}
+        alt="arrow"
+        className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+      />
+    </div>
+  </div>
 
-      setIsActive(
-        value === ""
-          ? null
-          : value === "true"
-      );
+  {/* Refresh and Search */}
+  <div className="flex items-center gap-2">
+    <button
+      type="button"
+      className="bg-blue-500 text-white p-2 rounded"
+      onClick={() => {
+        setSearchValue("");
+        setFilterBy("ALL");
+        setIsActive(null);
+        setCurrentPage(1);
+        fetchTrialUsers();
+      }}
+    >
+      🔄
+    </button>
 
-      setCurrentPage(1);
-    }}
-    className="border border-gray-300 px-4 py-2 pr-10 rounded-lg text-sm bg-white-common min-w-[150px] appearance-none"
-  >
-    <option value="">All Status</option>
-    <option value="true">Active</option>
-    <option value="false">Inactive</option>
-  </select>
-
-  <img
-    src={Arrow}
-    alt="arrow"
-    className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-  />
+    <input
+      value={searchValue}
+      onChange={(e) => {
+        setSearchValue(e.target.value);
+        setCurrentPage(1);
+      }}
+      placeholder="Search Property..."
+      className="border border-gray-300 rounded px-3 py-2 text-sm"
+    />
+  </div>
 </div>
-          <div className="flex items-center gap-2">
-            <button className="bg-blue-500 text-white p-2 rounded" onClick={() => {
-  setSearchValue("");
-  setFilterBy("ALL");
-  setCurrentPage(1);
-  fetchTrialUsers();
-}}>
-              🔄
-            </button>
-
-          <input
-  value={searchValue}
-  onChange={(e) => {
-    setSearchValue(e.target.value);
-    setCurrentPage(1);
-  }}
-  placeholder="Search Property..."
-  className="border border-gray-300 rounded px-3 py-1 text-sm"
-/>
-          </div>
-        </div>
 
        
         <div className="bg-white-common border-soft-light rounded-2xl shadow-sm relative overflow-hidden">
