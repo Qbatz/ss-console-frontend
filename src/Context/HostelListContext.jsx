@@ -46,7 +46,8 @@ export const HostelProvider = ({ children }) => {
   endDate = "",
   subActive = "",
   agentId = "",
-  filterOption = "TOTAL_PROPERTIES"
+  filterOption = "TOTAL_PROPERTIES",
+  followUpStatus = ""
 ) => {
 
   try {
@@ -74,6 +75,7 @@ export const HostelProvider = ({ children }) => {
           ...(subActive !== "" && {
             subActive,
           }),
+           ...(followUpStatus !== "" && { followUpStatus }),
 
         },
       }
@@ -156,23 +158,52 @@ export const HostelProvider = ({ children }) => {
 //   }
 // };
 // GET /v2/hostels/{hostelId}
-const getHostelById = async (hostelId) => {
+// const getHostelById = async (hostelId) => {
+//   try {
+//     setLoading(true);
+//     setErrorMsg("");
+
+//     const res = await axiosInstance.get(`/v2/hostels/${hostelId}`, {
+//       params: {
+//         hostelId: hostelId   
+//       }
+//     });
+
+//     if (res.status === 200) {
+//       return { success: true, data: res.data };
+//     }
+
+//     return { success: false };
+
+//   } catch (error) {
+//     const msg = getErrorMessage(error);
+//     setErrorMsg(msg);
+//     return { success: false, message: msg };
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+const getHostelById = async (hostelId, tenantName = "") => {
   try {
     setLoading(true);
     setErrorMsg("");
 
-    const res = await axiosInstance.get(`/v2/hostels/${hostelId}`, {
-      params: {
-        hostelId: hostelId   
+    const res = await axiosInstance.get(
+      `/v2/hostels/${hostelId}`,
+      {
+        params: {
+          ...(tenantName.trim() && {
+            tenantName: tenantName.trim(),
+          }),
+        },
       }
-    });
+    );
 
     if (res.status === 200) {
       return { success: true, data: res.data };
     }
 
     return { success: false };
-
   } catch (error) {
     const msg = getErrorMessage(error);
     setErrorMsg(msg);

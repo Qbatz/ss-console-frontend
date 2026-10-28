@@ -29,8 +29,8 @@ import CommentBox from "../../assets/message-2.png";
 
 
 const Properties = () => {
-  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, deleteHostelExpense, exportHostels, deleteHostel, createHostelNote, getHostelNotes,getHostelFollowUpStatus,updateHostelFollowUpStatus,getHostelFollowUp } = useHostel();
-  const { createSubscription, getAgentsDropdown,getDropReasons } = useSubscription();
+  const { hostels, getHostels, loading, getHostelById, hardResetHostel, errorMsg, accessError, deleteHostelExpense, exportHostels, deleteHostel, createHostelNote, getHostelNotes, getHostelFollowUpStatus, updateHostelFollowUpStatus, getHostelFollowUp } = useHostel();
+  const { createSubscription, getAgentsDropdown, getDropReasons } = useSubscription();
   const { getPlansDropdown } = usePlan();
   const [dropdownPlans, setDropdownPlans] = useState([]);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -44,16 +44,16 @@ const Properties = () => {
   const [filterOption, setFilterOption] = useState("TOTAL_PROPERTIES");
   const [hostelError, setHostelError] = useState("");
   const [showUpdateStatusModal, setShowUpdateStatusModal] = useState(false);
-const [updateStatus, setUpdateStatus] = useState("");
-const [additionalComments, setAdditionalComments] = useState("");
-const [updateReason, setUpdateReason] = useState("");
+  const [updateStatus, setUpdateStatus] = useState("");
+  const [additionalComments, setAdditionalComments] = useState("");
+  const [updateReason, setUpdateReason] = useState("");
 
-const [followUpStatuses, setFollowUpStatuses] = useState([]);
-const [followUpHistory, setFollowUpHistory] = useState([]);
-const [statusError, setStatusError] = useState("");
-const [reasonError, setReasonError] = useState("");
-
-const [submitError, setSubmitError] = useState("");
+  const [followUpStatuses, setFollowUpStatuses] = useState([]);
+  const [followUpHistory, setFollowUpHistory] = useState([]);
+  const [statusError, setStatusError] = useState("");
+  const [reasonError, setReasonError] = useState("");
+const [followUpStatusFilter, setFollowUpStatusFilter] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
 
 
@@ -95,29 +95,29 @@ const [submitError, setSubmitError] = useState("");
 
 
   useEffect(() => {
-  if (!showUpdateStatusModal) return;
+    if (!showUpdateStatusModal) return;
 
-  const fetchFollowUpStatuses = async () => {
-    const res = await getHostelFollowUpStatus();
+    const fetchFollowUpStatuses = async () => {
+      const res = await getHostelFollowUpStatus();
 
-    console.log("FOLLOW UP STATUS API RESPONSE:", res);
+      console.log("FOLLOW UP STATUS API RESPONSE:", res);
 
-    if (res?.success) {
-      const statuses = Array.isArray(res?.data)
-        ? res.data
-        : res?.data?.statuses ||
+      if (res?.success) {
+        const statuses = Array.isArray(res?.data)
+          ? res.data
+          : res?.data?.statuses ||
           res?.data?.data ||
           [];
 
-      setFollowUpStatuses(statuses);
-      console.log("setFollowUpStatuses",followUpStatuses)
-    } else {
-      setFollowUpStatuses([]);
-    }
-  };
+        setFollowUpStatuses(statuses);
+        console.log("setFollowUpStatuses", followUpStatuses)
+      } else {
+        setFollowUpStatuses([]);
+      }
+    };
 
-  fetchFollowUpStatuses();
-}, [showUpdateStatusModal]);
+    fetchFollowUpStatuses();
+  }, [showUpdateStatusModal]);
   useEffect(() => {
     getPlansDropdown().then((res) => {
       if (res?.success) {
@@ -464,7 +464,7 @@ const [submitError, setSubmitError] = useState("");
 
       agentFilter,
 
-      filterOption
+      filterOption,followUpStatusFilter
     );
 
   }, [
@@ -473,10 +473,11 @@ const [submitError, setSubmitError] = useState("");
     debouncedSearch,
     dateRange,
     statusFilter,
-    agentFilter, filterOption
+    agentFilter, filterOption,followUpStatusFilter
   ]);
 
-
+const followUpStatusOptions =
+  hostels?.followUpStatusFilters || [];
   console.log("hostels", hostels);
 
 
@@ -624,7 +625,8 @@ const [submitError, setSubmitError] = useState("");
       start,
       end,
       agentFilter,
-      filterOption
+      filterOption,
+      followUpStatusFilter
     );
 
   };
@@ -838,114 +840,114 @@ const [submitError, setSubmitError] = useState("");
     }
 
   };
-const handleUpdateStatus = async () => {
-  setStatusError("");
-  setReasonError("");
-
-  if (!selectedHostel?.hostelId) {
-    setMessage("Hostel ID is required");
-    setModalType("error");
-    setShowSuccess(true);
-
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
-
-    return;
-  }
-
-  let hasError = false;
-
-  if (!updateStatus) {
-    setStatusError("Please select status");
-    hasError = true;
-  }
-
-  if (!updateReason) {
-    setReasonError("Please select reason");
-    hasError = true;
-  }
-
-  if (hasError) {
-    return;
-  }
-
-  const payload = {
-    hostelId: selectedHostel.hostelId,
-    status: updateStatus,
-    reason: updateReason,
-    comments: additionalComments.trim(),
-  };
-
-  console.log("UPDATE STATUS PAYLOAD:", payload);
-
-  const res = await updateHostelFollowUpStatus(payload);
-
-  if (res?.success) {
-    setShowUpdateStatusModal(false);
-
-    setUpdateStatus("");
-    setUpdateReason("");
-    setAdditionalComments("");
-
+  const handleUpdateStatus = async () => {
     setStatusError("");
     setReasonError("");
 
-    setModalType("success");
-    setMessage(res?.message || "Status updated successfully");
-    setShowSuccess(true);
+    if (!selectedHostel?.hostelId) {
+      setMessage("Hostel ID is required");
+      setModalType("error");
+      setShowSuccess(true);
 
-    await getHostels(
-      page,
-      pageSize,
-      debouncedSearch,
-      startDate,
-      endDate,
-      "",
-      agentFilter,
-      filterOption
-    );
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
-  } else {
-    setModalType("error");
-    setMessage(res?.message || "Failed to update status");
-    setShowSuccess(true);
+      return;
+    }
 
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 1500);
-  }
-};
-const [latestdata,setLatestData] = useState("")
-const handleUpdateStatusClick = async (item) => {
-  setSelectedHostelId(item.hostelId);
-  setSelectedHostel(item);
-  setOpenMenu(null);
+    let hasError = false;
 
-  setUpdateStatus("");
-  setUpdateReason("");
-  setStatusError("")
-  setReasonError("")
- 
+    if (!updateStatus) {
+      setStatusError("Please select status");
+      hasError = true;
+    }
 
-  const res = await getHostelFollowUp(item.hostelId);
+    if (!updateReason) {
+      setReasonError("Please select reason");
+      hasError = true;
+    }
 
-  if (res?.success) {
-    setFollowUpHistory(
-      res?.data?.hostelFollowUpHistory || []
-      
-    );
-    setLatestData(res?.data)
-    console.log("setFollowUpHistory",res?.data)
-  } else {
-    setFollowUpHistory([]);
-  }
+    if (hasError) {
+      return;
+    }
 
-  setShowUpdateStatusModal(true);
-};
+    const payload = {
+      hostelId: selectedHostel.hostelId,
+      status: updateStatus,
+      reason: updateReason,
+      comments: additionalComments.trim(),
+    };
+
+    console.log("UPDATE STATUS PAYLOAD:", payload);
+
+    const res = await updateHostelFollowUpStatus(payload);
+
+    if (res?.success) {
+      setShowUpdateStatusModal(false);
+
+      setUpdateStatus("");
+      setUpdateReason("");
+      setAdditionalComments("");
+
+      setStatusError("");
+      setReasonError("");
+
+      setModalType("success");
+      setMessage(res?.message || "Status updated successfully");
+      setShowSuccess(true);
+
+      await getHostels(
+        page,
+        pageSize,
+        debouncedSearch,
+        startDate,
+        endDate,
+        "",
+        agentFilter,
+        filterOption,followUpStatusFilter
+      );
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+    } else {
+      setModalType("error");
+      setMessage(res?.message || "Failed to update status");
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500);
+    }
+  };
+  const [latestdata, setLatestData] = useState("")
+  const handleUpdateStatusClick = async (item) => {
+    setSelectedHostelId(item.hostelId);
+    setSelectedHostel(item);
+    setOpenMenu(null);
+
+    setUpdateStatus("");
+    setUpdateReason("");
+    setStatusError("")
+    setReasonError("")
+
+
+    const res = await getHostelFollowUp(item.hostelId);
+
+    if (res?.success) {
+      setFollowUpHistory(
+        res?.data?.hostelFollowUpHistory || []
+
+      );
+      setLatestData(res?.data)
+      console.log("setFollowUpHistory", res?.data)
+    } else {
+      setFollowUpHistory([]);
+    }
+
+    setShowUpdateStatusModal(true);
+  };
   return (
     <>
 
@@ -1003,18 +1005,18 @@ const handleUpdateStatusClick = async (item) => {
 
 
 
-             
-<div className="flex items-center justify-between mb-6">
 
-  <div className="flex items-center gap-4">
-    <h1 className="text-xl font-semibold font-inter">
-      Properties
-    </h1>
+                <div className="flex items-center justify-between mb-6">
 
-   <button
-  type="button"
-  onClick={() => navigate("/onboarding-insights")}
-  className="
+                  <div className="flex items-center gap-4">
+                    <h1 className="text-xl font-semibold font-inter">
+                      Properties
+                    </h1>
+
+                    <button
+                      type="button"
+                      onClick={() => navigate("/onboarding-insights")}
+                      className="
     flex items-center gap-1.5
     text-primaryBlue
     text-[10px]
@@ -1023,16 +1025,16 @@ const handleUpdateStatusClick = async (item) => {
     hover:underline
     cursor-pointer
   "
->
-  <span>View Onboarding Insights</span>
-  <span className="text-xs">↗</span>
-</button>
-  </div>
+                    >
+                      <span>View Onboarding Insights</span>
+                      <span className="text-xs">↗</span>
+                    </button>
+                  </div>
 
- 
-  <button
-    type="button"
-    className="
+
+                  <button
+                    type="button"
+                    className="
       flex items-center gap-2
       text-primaryBlue
       px-4 py-2
@@ -1044,18 +1046,18 @@ const handleUpdateStatusClick = async (item) => {
       hover:text-white
       cursor-pointer
     "
-  >
-    <img
-      src={AddBtn}
-      alt="add"
-      className="w-4 h-4 object-contain"
-    />
+                  >
+                    <img
+                      src={AddBtn}
+                      alt="add"
+                      className="w-4 h-4 object-contain"
+                    />
 
-    Add Property
-  </button>
-</div>
+                    Add Property
+                  </button>
+                </div>
 
-                {/* Stats Cards */}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
 
 
@@ -1107,7 +1109,7 @@ const handleUpdateStatusClick = async (item) => {
                   </div>
 
 
-                  {/* CARD 2 */}
+
 
                   <div
                     className={`
@@ -1137,9 +1139,7 @@ const handleUpdateStatusClick = async (item) => {
                           {hostels?.activeHostels}
                         </h2>
 
-                        {/* <span className="badge-primary">
-          ↑ 12%
-        </span> */}
+
 
                       </div>
 
@@ -1158,7 +1158,7 @@ const handleUpdateStatusClick = async (item) => {
                   </div>
 
 
-                  {/* CARD 3 */}
+
 
                   <div
                     className={`
@@ -1201,7 +1201,7 @@ const handleUpdateStatusClick = async (item) => {
                   </div>
 
 
-                  {/* CARD 4 */}
+
 
                   <div
                     className={`
@@ -1244,7 +1244,7 @@ const handleUpdateStatusClick = async (item) => {
                   </div>
 
 
-                  {/* CARD 5 */}
+
 
                   <div
                     className={`
@@ -1287,7 +1287,7 @@ const handleUpdateStatusClick = async (item) => {
                   </div>
 
 
-                  {/* CARD 6 */}
+
 
                   <div
                     className={`
@@ -1360,9 +1360,6 @@ const handleUpdateStatusClick = async (item) => {
                           {hostels?.used15To30DaysCount}
                         </h2>
 
-                        {/* <span className="badge-primary">
-          ↑ 12%
-        </span> */}
 
                       </div>
 
@@ -1381,7 +1378,7 @@ const handleUpdateStatusClick = async (item) => {
                   </div>
 
 
-                  {/* CARD 8 */}
+
 
                   <div
                     className={`
@@ -1424,7 +1421,7 @@ const handleUpdateStatusClick = async (item) => {
                   </div>
 
 
-                  {/* CARD 9 */}
+
 
                   <div
                     className={`
@@ -1467,7 +1464,7 @@ const handleUpdateStatusClick = async (item) => {
                   </div>
 
 
-                  {/* CARD 10 */}
+
 
                   <div
                     className={`
@@ -1525,40 +1522,7 @@ const handleUpdateStatusClick = async (item) => {
   "
                   >
 
-                    {/* <div className="flex gap-3">
 
-      <select
-        value={statusFilter}
-        onChange={(e) => {
-          setStatusFilter(e.target.value);
-          setPage(1);
-        }}
-        className="
-          border border-gray-300
-          rounded-lg
-          px-3 py-2
-          text-xs
-          font-medium
-          text-gray-700
-          outline-none h-[42px]
-        "
-      >
-
-        <option value="">
-          All
-        </option>
-
-        <option value="active">
-          Active
-        </option>
-
-        <option value="inactive">
-          Inactive
-        </option>
-
-      </select>
-
-    </div> */}
                     <div
                       className="
     relative
@@ -1568,7 +1532,7 @@ const handleUpdateStatusClick = async (item) => {
                       ref={agentDropdownRef}
                     >
 
-                      {/* SELECT BOX */}
+
                       <button
                         type="button"
                         onClick={() =>
@@ -1626,7 +1590,7 @@ const handleUpdateStatusClick = async (item) => {
                       </button>
 
 
-                      {/* DROPDOWN */}
+                     
                       {openAgentDropdown && (
 
                         <div
@@ -1652,7 +1616,7 @@ const handleUpdateStatusClick = async (item) => {
         "
                           >
 
-                            {/* ALL */}
+
                             <button
                               type="button"
                               onClick={() => {
@@ -1681,7 +1645,7 @@ const handleUpdateStatusClick = async (item) => {
                             </button>
 
 
-                            {/* AGENTS */}
+
                             {agentList.map((agent) => (
 
                               <button
@@ -1728,6 +1692,45 @@ const handleUpdateStatusClick = async (item) => {
                       )}
 
                     </div>
+                    
+<div className="flex flex-col w-[200px] shrink-0">
+  <label className="text-xs text-gray-500 mb-1 text-left font-inter">
+    Follow Up Status
+  </label>
+
+  <select
+    value={followUpStatusFilter}
+    onChange={(e) => {
+      setFollowUpStatusFilter(e.target.value);
+      setPage(1);
+    }}
+    className="
+      w-full
+      h-[42px]
+      px-4
+      rounded-xl
+      border border-gray-300
+      bg-white
+      text-sm
+      font-medium
+      text-gray-700
+      shadow-sm
+      hover:border-blue-400
+      focus:outline-none
+      focus:border-blue-500
+      cursor-pointer
+    "
+  >
+    <option value="">All Follow Up Status</option>
+
+    {followUpStatusOptions.map((status) => (
+      <option key={status.key} value={status.key}>
+        {status.label}
+      </option>
+    ))}
+  </select>
+</div>
+
                     <div className="flex items-end gap-3">
 
                       <div className="flex flex-col">
@@ -1836,6 +1839,9 @@ const handleUpdateStatusClick = async (item) => {
                           </th>
                           <th className="px-4 py-3 w-[120px] text-left">
                             Status
+                          </th>
+                          <th className="px-4 py-3 w-[150px] whitespace-nowrap">
+                            FollowUpStatus
                           </th>
                           <th className="px-4 py-3 w-[150px] whitespace-nowrap">
                             SubActiveDays
@@ -2080,6 +2086,9 @@ const handleUpdateStatusClick = async (item) => {
                                   </div>
                                 </div>
                               </td>
+
+
+                              
                               <td className="px-4 py-2 text-center">
                                 <span
                                   className={`flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap w-fit mx-auto ${item.subscriptionIsActive
@@ -2095,6 +2104,9 @@ const handleUpdateStatusClick = async (item) => {
                                   ></span>
                                   {item.subscriptionIsActive ? "Active" : "Inactive"}
                                 </span>
+                              </td>
+                              <td className="px-4 py-2">
+                                {item.latestFollowUp?.status || "----"}
                               </td>
                               <td className="px-4 py-2">
                                 {item.noOfdaysSubscriptionActive || "----"}
@@ -2339,24 +2351,23 @@ const handleUpdateStatusClick = async (item) => {
                                               setOpenMenu(null);
                                             }}
                                             className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${canWrite
-                                                ? "hover:bg-gray-50 cursor-pointer"
-                                                : "opacity-50 cursor-not-allowed"
+                                              ? "hover:bg-gray-50 cursor-pointer"
+                                              : "opacity-50 cursor-not-allowed"
                                               }`}
                                           >
                                             Add Notes
                                           </button>
 
-                                         <button
-  disabled={!canWrite}
- onClick={() => handleUpdateStatusClick(item)}
-  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-    canWrite
-      ? "hover:bg-gray-50 cursor-pointer"
-      : "opacity-50 cursor-not-allowed"
-  }`}
->
-  Update Status
-</button>
+                                          <button
+                                            disabled={!canWrite}
+                                            onClick={() => handleUpdateStatusClick(item)}
+                                            className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${canWrite
+                                              ? "hover:bg-gray-50 cursor-pointer"
+                                              : "opacity-50 cursor-not-allowed"
+                                              }`}
+                                          >
+                                            Update Status
+                                          </button>
 
                                           <button
                                             disabled={!canWriteExpenses}
@@ -2366,8 +2377,8 @@ const handleUpdateStatusClick = async (item) => {
                                               setOpenMenu(null);
                                             }}
                                             className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${canWriteExpenses
-                                                ? "hover:bg-gray-50 cursor-pointer"
-                                                : "opacity-50 cursor-not-allowed"
+                                              ? "hover:bg-gray-50 cursor-pointer"
+                                              : "opacity-50 cursor-not-allowed"
                                               }`}
                                           >
                                             Reset Expense
@@ -2381,8 +2392,8 @@ const handleUpdateStatusClick = async (item) => {
                                               setOpenMenu(null);
                                             }}
                                             className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${canDelete
-                                                ? "hover:bg-gray-50 cursor-pointer"
-                                                : "opacity-50 cursor-not-allowed"
+                                              ? "hover:bg-gray-50 cursor-pointer"
+                                              : "opacity-50 cursor-not-allowed"
                                               }`}
                                           >
                                             Delete
@@ -2512,12 +2523,12 @@ const handleUpdateStatusClick = async (item) => {
                       {hostels?.currentPage}
                     </span>
 
-                   
+
                     <span className="text-textDark/60 text-cardTitle">
                       {hostels?.currentPage ?? 1} - {hostels?.totalPages ?? 1}
                     </span>
 
-                   
+
                     <button
                       disabled={
                         hostels?.currentPage >= hostels?.totalPages
@@ -3145,13 +3156,13 @@ const handleUpdateStatusClick = async (item) => {
 
           </div>
         )}
-{showUpdateStatusModal && (
-  <div
-    className="fixed inset-0 z-[999999] bg-black/50"
-    onClick={() => setShowUpdateStatusModal(false)}
-  >
-    <div
-      className="
+        {showUpdateStatusModal && (
+          <div
+            className="fixed inset-0 z-[999999] bg-black/50"
+            onClick={() => setShowUpdateStatusModal(false)}
+          >
+            <div
+              className="
         fixed
         top-4
         right-4
@@ -3164,18 +3175,18 @@ const handleUpdateStatusClick = async (item) => {
         flex
         flex-col
       "
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* HEADER */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E7EB] shrink-0">
-        <h2 className="text-[16px] font-semibold text-[#222]">
-          Update Status
-        </h2>
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* HEADER */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E7EB] shrink-0">
+                <h2 className="text-[16px] font-semibold text-[#222]">
+                  Update Status
+                </h2>
 
-        <button
-          type="button"
-          onClick={() => setShowUpdateStatusModal(false)}
-          className="
+                <button
+                  type="button"
+                  onClick={() => setShowUpdateStatusModal(false)}
+                  className="
             w-6
             h-6
             rounded-full
@@ -3189,105 +3200,105 @@ const handleUpdateStatusClick = async (item) => {
             cursor-pointer
             hover:bg-gray-100
           "
-        >
-          ×
-        </button>
-      </div>
+                >
+                  ×
+                </button>
+              </div>
 
-     
-      <div className="flex-1 overflow-y-auto px-5 py-4">
 
-       
-        <div className="bg-[#F8F9FB] px-3 py-3 rounded-sm mb-4">
+              <div className="flex-1 overflow-y-auto px-5 py-4">
 
-          <p className="text-[11px] font-semibold text-[#667085] mb-3 text-left">
-            PROPERTY INFO
-          </p>
 
-          <div className="space-y-2 text-[11px] text-left">
+                <div className="bg-[#F8F9FB] px-3 py-3 rounded-sm mb-4">
 
-            <div className="flex">
-              <span className="w-[115px] text-[#667085]">
-                ♙ Customer Name
-              </span>
+                  <p className="text-[11px] font-semibold text-[#667085] mb-3 text-left">
+                    PROPERTY INFO
+                  </p>
 
-              <span className="font-semibold text-[#333]">
-                {selectedHostel?.ownerInfo?.fullName || "N/A"}
-              </span>
-            </div>
+                  <div className="space-y-2 text-[11px] text-left">
 
-            <div className="flex">
-              <span className="w-[115px] text-[#667085]">
-                ♧ Property Name
-              </span>
+                    <div className="flex">
+                      <span className="w-[115px] text-[#667085]">
+                        ♙ Customer Name
+                      </span>
 
-              <span className="font-semibold text-blue-600">
-                {selectedHostel?.hostelName || "N/A"}
-              </span>
-            </div>
+                      <span className="font-semibold text-[#333]">
+                        {selectedHostel?.ownerInfo?.fullName || "N/A"}
+                      </span>
+                    </div>
 
-            
-            <div className="flex">
-  <span className="w-[115px] shrink-0 text-[#667085]">
-    ♧ Location
-  </span>
+                    <div className="flex">
+                      <span className="w-[115px] text-[#667085]">
+                        ♧ Property Name
+                      </span>
 
-  <span
-    className="font-semibold text-[#333] w-[280px] truncate cursor-pointer"
-    title={selectedHostel?.fullAddress || "N/A"}
-  >
-    {selectedHostel?.fullAddress || "N/A"}
-  </span>
-</div>
+                      <span className="font-semibold text-blue-600">
+                        {selectedHostel?.hostelName || "N/A"}
+                      </span>
+                    </div>
 
-            <div className="flex">
-              <span className="w-[115px] text-[#667085]">
-                ♧ Mobile
-              </span>
 
-              <span className="font-semibold text-[#333]">
-                {selectedHostel?.ownerInfo?.mobile || "N/A"}
-              </span>
-            </div>
+                    <div className="flex">
+                      <span className="w-[115px] shrink-0 text-[#667085]">
+                        ♧ Location
+                      </span>
 
-            <div className="flex">
-              <span className="w-[115px] text-[#667085]">
-                ◷ Current Status
-              </span>
+                      <span
+                        className="font-semibold text-[#333] w-[280px] truncate cursor-pointer"
+                        title={selectedHostel?.fullAddress || "N/A"}
+                      >
+                        {selectedHostel?.fullAddress || "N/A"}
+                      </span>
+                    </div>
 
-              <span className="font-semibold text-[#333]">
-                {latestdata?.latestStatus || "N/A"}
-              </span>
-            </div>
-            <div className="flex">
-              <span className="w-[115px] text-[#667085]">
-                ◷ Current Reason
-              </span>
+                    <div className="flex">
+                      <span className="w-[115px] text-[#667085]">
+                        ♧ Mobile
+                      </span>
 
-              <span className="font-semibold text-[#333]">
-                {latestdata?.latestReason || "N/A"}
-              </span>
-            </div>
+                      <span className="font-semibold text-[#333]">
+                        {selectedHostel?.ownerInfo?.mobile || "N/A"}
+                      </span>
+                    </div>
 
-          </div>
-        </div>
+                    <div className="flex">
+                      <span className="w-[115px] text-[#667085]">
+                        ◷ Current Status
+                      </span>
 
-        
-     <div className="grid grid-cols-[145px_1fr] gap-3 items-start mb-4">
+                      <span className="font-semibold text-[#333]">
+                        {latestdata?.latestStatus || "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex">
+                      <span className="w-[115px] text-[#667085]">
+                        ◷ Current Reason
+                      </span>
 
-  <label className="text-[11px] text-[#333] pt-2 text-start whitespace-nowrap">
-    Update Status
-  </label>
+                      <span className="font-semibold text-[#333]">
+                        {latestdata?.latestReason || "N/A"}
+                      </span>
+                    </div>
 
-  <div>
-    <select
-      value={updateStatus}
-      onChange={(e) => {
-        setUpdateStatus(e.target.value);
-        setUpdateReason("");
-        setStatusError("");
-      }}
-      className="
+                  </div>
+                </div>
+
+
+                <div className="grid grid-cols-[145px_1fr] gap-3 items-start mb-4">
+
+                  <label className="text-[11px] text-[#333] pt-2 text-start whitespace-nowrap">
+                    Update Status
+                  </label>
+
+                  <div>
+                    <select
+                      value={updateStatus}
+                      onChange={(e) => {
+                        setUpdateStatus(e.target.value);
+                        setUpdateReason("");
+                        setStatusError("");
+                      }}
+                      className="
         w-full
         h-[42px]
         border
@@ -3300,45 +3311,45 @@ const handleUpdateStatusClick = async (item) => {
         focus:border-blue-500
         bg-white
       "
-    >
-      <option value="">Select Status</option>
+                    >
+                      <option value="">Select Status</option>
 
-      {followUpStatuses.map((status) => (
-        <option
-          key={status.key}
-          value={status.key}
-        >
-          {status.value}
-        </option>
-      ))}
-    </select>
+                      {followUpStatuses.map((status) => (
+                        <option
+                          key={status.key}
+                          value={status.key}
+                        >
+                          {status.value}
+                        </option>
+                      ))}
+                    </select>
 
-    {statusError && (
-      <ErrorMessage
-        message={statusError}
-        type="error"
-      />
-    )}
-  </div>
+                    {statusError && (
+                      <ErrorMessage
+                        message={statusError}
+                        type="error"
+                      />
+                    )}
+                  </div>
 
-</div>
+                </div>
 
-     
-   <div className="grid grid-cols-[145px_1fr] gap-3 items-start mb-4">
 
-  <label className="text-[11px] text-[#333] pt-2 text-left">
-    Reason <span className="text-red-500">*</span>
-  </label>
+                <div className="grid grid-cols-[145px_1fr] gap-3 items-start mb-4">
 
-  <div>
-    <select
-      value={updateReason}
-      onChange={(e) => {
-        setUpdateReason(e.target.value);
-        setReasonError("");
-      }}
-      disabled={!updateStatus}
-      className="
+                  <label className="text-[11px] text-[#333] pt-2 text-left">
+                    Reason <span className="text-red-500">*</span>
+                  </label>
+
+                  <div>
+                    <select
+                      value={updateReason}
+                      onChange={(e) => {
+                        setUpdateReason(e.target.value);
+                        setReasonError("");
+                      }}
+                      disabled={!updateStatus}
+                      className="
         w-full
         h-[42px]
         border
@@ -3353,43 +3364,43 @@ const handleUpdateStatusClick = async (item) => {
         disabled:bg-gray-100
         disabled:cursor-not-allowed
       "
-    >
-      <option value="">Select Reason</option>
+                    >
+                      <option value="">Select Reason</option>
 
-      {followUpStatuses
-        ?.find(
-          (status) => status?.key === updateStatus
-        )
-        ?.reasons?.map((reason) => (
-          <option
-            key={reason}
-            value={reason}
-          >
-            {reason}
-          </option>
-        ))}
-    </select>
+                      {followUpStatuses
+                        ?.find(
+                          (status) => status?.key === updateStatus
+                        )
+                        ?.reasons?.map((reason) => (
+                          <option
+                            key={reason}
+                            value={reason}
+                          >
+                            {reason}
+                          </option>
+                        ))}
+                    </select>
 
-    {reasonError && (
-      <ErrorMessage
-        message={reasonError}
-        type="error"
-      />
-    )}
-  </div>
+                    {reasonError && (
+                      <ErrorMessage
+                        message={reasonError}
+                        type="error"
+                      />
+                    )}
+                  </div>
 
-</div>
+                </div>
 
-          
-<div className="grid grid-cols-[145px_1fr] gap-3 items-center mb-4">
 
-  <label className="text-[11px] text-[#333] text-left whitespace-nowrap">Additional Comments</label>
+                <div className="grid grid-cols-[145px_1fr] gap-3 items-center mb-4">
 
-  <textarea
-    value={additionalComments}
-    onChange={(e) => setAdditionalComments(e.target.value)}
-    placeholder="..."
-    className="
+                  <label className="text-[11px] text-[#333] text-left whitespace-nowrap">Additional Comments</label>
+
+                  <textarea
+                    value={additionalComments}
+                    onChange={(e) => setAdditionalComments(e.target.value)}
+                    placeholder="..."
+                    className="
       w-full
       h-[42px]
       border
@@ -3402,12 +3413,12 @@ const handleUpdateStatusClick = async (item) => {
       resize-none
       focus:border-blue-500
     "
-  />
+                  />
 
-</div>
+                </div>
 
-        <div
-        className="
+                <div
+                  className="
           border-t
           border-[#E5E7EB]
           px-5
@@ -3419,27 +3430,27 @@ const handleUpdateStatusClick = async (item) => {
           shrink-0
           bg-white
         "
-      >
+                >
 
-        <button
-          type="button"
-          onClick={() =>
-            setShowUpdateStatusModal(false)
-          }
-          className="
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowUpdateStatusModal(false)
+                    }
+                    className="
             text-[12px]
             text-[#444]
             cursor-pointer
             hover:text-black
           "
-        >
-          Cancel
-        </button>
+                  >
+                    Cancel
+                  </button>
 
-        <button
-          onClick={handleUpdateStatus}
-          type="button"
-          className="
+                  <button
+                    onClick={handleUpdateStatus}
+                    type="button"
+                    className="
             h-[36px]
             w-[122px]
             rounded-lg
@@ -3450,92 +3461,92 @@ const handleUpdateStatusClick = async (item) => {
             cursor-pointer
             hover:bg-[#1F45D8]
           "
-        >
-          Submit
-        </button>
+                  >
+                    Submit
+                  </button>
 
-      </div>
-        <div className="mt-5">
+                </div>
+                <div className="mt-5">
 
-          <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-2">
 
-            <h3 className="text-[14px] font-semibold text-[#222]">
-              Follow-Up History
-            </h3>
+                    <h3 className="text-[14px] font-semibold text-[#222]">
+                      Follow-Up History
+                    </h3>
 
-            <span className="text-[11px] text-[#6B7280]">
-              {followUpHistory.length} Records
-            </span>
+                    <span className="text-[11px] text-[#6B7280]">
+                      {followUpHistory.length} Records
+                    </span>
 
-          </div>
+                  </div>
 
-          {/* FIXED HEIGHT HISTORY */}
-          <div className="h-[150px] overflow-y-auto pr-1 space-y-2">
+                  {/* FIXED HEIGHT HISTORY */}
+                  <div className="h-[150px] overflow-y-auto pr-1 space-y-2">
 
-            {followUpHistory.length > 0 ? (
+                    {followUpHistory.length > 0 ? (
 
-              followUpHistory.map((item, index) => (
+                      followUpHistory.map((item, index) => (
 
-                <div
-                  key={item.followUpId || index}
-                  className="
+                        <div
+                          key={item.followUpId || index}
+                          className="
                     border
                     border-[#E5E7EB]
                     rounded-xl
                     p-2.5
                     bg-white
                   "
-                >
+                        >
 
-                  
-                  <div className="flex items-center justify-between mb-1">
 
-                    <span className="text-[12px] font-semibold text-[#374151]">
-                      {item.status}
-                    </span>
+                          <div className="flex items-center justify-between mb-1">
 
-                    <span className="text-[10px] text-[#6B7280]">
-                      {item.createdAtDate}{" "}
-                      {item.createdAtTime}
-                    </span>
+                            <span className="text-[12px] font-semibold text-[#374151]">
+                              {item.status}
+                            </span>
 
-                  </div>
+                            <span className="text-[10px] text-[#6B7280]">
+                              {item.createdAtDate}{" "}
+                              {item.createdAtTime}
+                            </span>
 
-                 
-                  <div className="text-[11px] text-[#6B7280] mb-1">
+                          </div>
 
-                    <span className="font-medium text-[#374151]">
-                      Reason:
-                    </span>{" "}
 
-                    {item.reason}
+                          <div className="text-[11px] text-[#6B7280] mb-1">
 
-                  </div>
+                            <span className="font-medium text-[#374151]">
+                              Reason:
+                            </span>{" "}
 
-                
-                  <div className="bg-[#F8F9FB] rounded-lg px-2 py-1.5 text-[11px] text-[#4B5563]">
-                    {item.comments || "No comments"}
-                  </div>
+                            {item.reason}
 
-                 
-                  <div className="mt-1 text-[10px] text-[#6B7280]">
+                          </div>
 
-                    Created by:{" "}
 
-                    <span className="font-medium text-[#374151]">
-                      {item.createdBy}
-                    </span>
+                          <div className="bg-[#F8F9FB] rounded-lg px-2 py-1.5 text-[11px] text-[#4B5563]">
+                            {item.comments || "No comments"}
+                          </div>
 
-                  </div>
 
-                </div>
+                          <div className="mt-1 text-[10px] text-[#6B7280]">
 
-              ))
+                            Created by:{" "}
 
-            ) : (
+                            <span className="font-medium text-[#374151]">
+                              {item.createdBy}
+                            </span>
 
-              <div
-                className="
+                          </div>
+
+                        </div>
+
+                      ))
+
+                    ) : (
+
+                      <div
+                        className="
                   h-full
                   flex
                   items-center
@@ -3547,24 +3558,24 @@ const handleUpdateStatusClick = async (item) => {
                   border-[#D1D5DB]
                   rounded-xl
                 "
-              >
-                No follow-up history found
+                      >
+                        No follow-up history found
+                      </div>
+
+                    )}
+
+                  </div>
+
+                </div>
+
               </div>
 
-            )}
 
+
+
+            </div>
           </div>
-
-        </div>
-
-      </div>
-
-     
-     
-
-    </div>
-  </div>
-)}
+        )}
       </DashboardLayout>
     </>
   );

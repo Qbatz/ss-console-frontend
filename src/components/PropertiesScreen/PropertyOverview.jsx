@@ -63,7 +63,7 @@ const PropertyOverview = () => {
 const [updateStatus, setUpdateStatus] = useState("");
 const [additionalComments, setAdditionalComments] = useState("");
 const [updateReason, setUpdateReason] = useState("");
-
+const [tenantSearch, setTenantSearch] = useState("");
 const [followUpStatuses, setFollowUpStatuses] = useState([]);
 const [followUpHistory, setFollowUpHistory] = useState([]);
 
@@ -115,7 +115,7 @@ const [showFeatureControls, setShowFeatureControls] = useState(false);
 const [showEnableBillReview, setShowEnableBillReview] = useState(false);
 
 const [showFeatureStatusPopup, setShowFeatureStatusPopup] = useState(false);
-
+const searchTimer = useRef(null);
 const [isFeatureEnabled, setIsFeatureEnabled] = useState(
   hostelData?.recurringConfiguration?.shouldVerify === true
 );
@@ -165,6 +165,7 @@ useEffect(() => {
     fetchReasons();
 
   }, []);
+
   const { canRead, canWrite, canUpdate, canDelete } =
     usePermission("Tenants");
   const {
@@ -205,12 +206,13 @@ useEffect(() => {
       role: "Staff"
     }))
   ];
+
   const trialPlans = dropdownPlans?.trialPlans || [];
   console.log("dropdownPlans", dropdownPlans)
   useEffect(() => {
     getPlans()
   }, [])
-  // const [activeTab, setActiveTab] = useState("tenants");
+ 
 
 
   const [showSharing, setShowSharing] = useState(false);
@@ -245,7 +247,7 @@ useEffect(() => {
   const [showPlanDropdown, setShowPlanDropdown] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [showAgentModal, setShowAgentModal] = useState(false);
-  {/* STATE */ }
+ 
   const [showPaymentDrawer, setShowPaymentDrawer] = useState(false);
 
   const [paymentPlan, setPaymentPlan] = useState("");
@@ -264,6 +266,8 @@ useEffect(() => {
       location.state?.activeTab ||
       "tenants"
     );
+
+
   useEffect(() => {
     if (location.state?.activeTab) {
       setActiveTab(
@@ -272,15 +276,15 @@ useEffect(() => {
     }
   }, [location.state]);
 
-  const fetchData = async () => {
-    if (!hostelId) return;
+ const fetchData = async (search = "") => {
+  if (!hostelId) return;
 
-    const res = await getHostelById(hostelId);
+  const res = await getHostelById(hostelId, search);
 
-    if (res?.success) {
-      setHostelData(res.data);
-    }
-  };
+  if (res?.success) {
+    setHostelData(res.data);
+  }
+};
   const selectedPaymentPlan = dropdownPlans?.otherPlans?.find(
     (plan) => plan.planCode === paymentPlan
   );
@@ -2879,13 +2883,32 @@ const handleUpdateStatus = async () => {
             )}
           </div>
 
-          {/* TENANTS */}
+         
           {activeTab === "tenants" && (
 
             canRead === true ? (
 
               <div className="overflow-x-auto p-4">
+<div className="flex justify-end mb-3">
+  
+<input
+  type="text"
+  value={tenantSearch}
+  onChange={(e) => {
+    const value = e.target.value;
+    setTenantSearch(value);
 
+    clearTimeout(searchTimer.current);
+
+    searchTimer.current = setTimeout(() => {
+      fetchData(value);
+    }, 500);
+  }}
+  placeholder="Search tenant name..."
+  className="w-[240px] h-[34px] border border-borderSoft rounded-lg px-3 text-sm outline-none focus:border-blue-500"
+/>
+
+</div>
                 <div
                   className="
             max-h-[300px]
