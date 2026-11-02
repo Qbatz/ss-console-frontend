@@ -17,14 +17,16 @@ import { useNavigate } from "react-router-dom";
 import { usePermission } from "../../Utils/permissionHelper";
 
 
-const InvoiceView = ({ hostelData, refreshHostel }) => {
+const InvoiceView = ({ hostelData, refreshHostel, onSearch }) => {
     const navigate = useNavigate();
     const { getInvoicesByHostelId, deleteInvoice, updateAdvanceAmount } = useHostel();
     const defaultInvoices = hostelData?.invoices || [];
     const [expandedInvoice, setExpandedInvoice] = useState(null);
     const [invoiceData, setInvoiceData] = useState([]);
- const { canRead, canWrite, canUpdate, canDelete } =
-      usePermission("Invoices");
+    const [search, setSearch] = useState("");
+    const [appliedSearch, setAppliedSearch] = useState("");
+    const { canRead, canWrite, canUpdate, canDelete } =
+        usePermission("Invoices");
     const [isMore, setIsMore] = useState(false);
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(10);
@@ -42,7 +44,7 @@ const InvoiceView = ({ hostelData, refreshHostel }) => {
     const [showSuccess, setShowSuccess] = useState(false);
     const [message, setMessage] = useState("");
     const [showFilterDrawer, setShowFilterDrawer] = useState(false);
-const [activeFilter, setActiveFilter] = useState("All");
+    const [activeFilter, setActiveFilter] = useState("All");
     const [menuPosition, setMenuPosition] = useState({
         top: 0,
         left: 0,
@@ -50,6 +52,7 @@ const [activeFilter, setActiveFilter] = useState("All");
     const [showAmountModal, setShowAmountModal] = useState(false);
 
     const menuRef = useRef(null);
+    const invoiceSearchTimer = useRef(null);
 
     useEffect(() => {
 
@@ -71,29 +74,52 @@ const [activeFilter, setActiveFilter] = useState("All");
         };
 
     }, []);
-    const invoices = isMore
-        ? invoiceData
-        : defaultInvoices;
+    const invoices = isMore ? invoiceData : defaultInvoices;
+    const handleSearch = () => {
+        const value = search.trim();
 
-    const fetchInvoices = async (pageNo = 0) => {
+        if (isMore) {
+            setPage(1);
+            setAppliedSearch(value);
+        } else {
+            onSearch?.(value);
+        }
+    };
 
-        console.log("PAGE NO", pageNo);
-
+    const fetchInvoices = async (pageNo = 0, searchValue = search) => {
         const res = await getInvoicesByHostelId(
             hostelData?.hostelId,
             pageNo,
-            size
+            size,
+            searchValue
         );
 
-        console.log("API RESPONSE", res);
+        console.log("Search response:", res);
 
         setInvoiceData(res?.invoiceList || []);
-
         setTotalItems(res?.totalItems || 0);
-
         setTotalPages(res?.totalPages || 0);
-
     };
+
+    // const fetchInvoices = async (pageNo = 0) => {
+
+    //     console.log("PAGE NO", pageNo);
+
+    //     const res = await getInvoicesByHostelId(
+    //         hostelData?.hostelId,
+    //         pageNo,
+    //         size
+    //     );
+
+    //     console.log("API RESPONSE", res);
+
+    //     setInvoiceData(res?.invoiceList || []);
+
+    //     setTotalItems(res?.totalItems || 0);
+
+    //     setTotalPages(res?.totalPages || 0);
+
+    // };
 
     // MORE BUTTON
     const handleMoreClick = () => {
@@ -105,14 +131,12 @@ const [activeFilter, setActiveFilter] = useState("All");
 
     };
 
-    // API CALL
     useEffect(() => {
+        if (!isMore) return;
 
-        if (isMore) {
-            fetchInvoices(page);
-        }
+        fetchInvoices(page - 1, appliedSearch);
+    }, [page, size, isMore, appliedSearch, hostelData?.hostelId]);
 
-    }, [page, size, isMore]);
     const handleDeleteInvoice = async () => {
         if (!deletePhone) {
             setAmountError("Mobile number is required");
@@ -201,6 +225,56 @@ const [activeFilter, setActiveFilter] = useState("All");
                 type={modalType}
 
             />
+            <div className="flex justify-end px-5 pt-4">
+                <div className="relative w-full sm:w-[280px]">
+                    <input
+                        type="text"
+                        placeholder="Search invoice..."
+                        value={search}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            setSearch(value);
+
+                            clearTimeout(invoiceSearchTimer.current);
+
+                            invoiceSearchTimer.current = setTimeout(() => {
+                                if (isMore) {
+                                    setPage(1);
+                                    setAppliedSearch(value.trim());
+                                } else {
+                                    onSearch?.(value.trim());
+                                }
+                            }, 500);
+                        }}
+                        className="
+        w-full
+        h-10
+        pl-10 pr-4
+        text-sm
+        border border-gray-200
+        rounded-xl
+        bg-white
+        shadow-sm
+        outline-none
+        transition-all
+        focus:border-blue-400
+        focus:ring-2
+        focus:ring-blue-100
+      "
+                    />
+
+                    <svg
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="m20 20-4-4" />
+                    </svg>
+                </div>
+            </div>
             <div className="p-5">
 
                 <div
@@ -236,9 +310,9 @@ const [activeFilter, setActiveFilter] = useState("All");
                                         Invoice
                                     </th>
 
-                                  <th className="px-5 py-3 text-left text-xs font-semibold w-[120px] min-w-[120px] max-w-[120px] text-gray-500">
-  TENANT
-</th>
+                                    <th className="px-5 py-3 text-left text-xs font-semibold w-[120px] min-w-[120px] max-w-[120px] text-gray-500">
+                                        TENANT
+                                    </th>
 
                                     <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                                         Type
@@ -252,9 +326,9 @@ const [activeFilter, setActiveFilter] = useState("All");
                                         Due Date
                                     </th>
 
-                                   <th className="px-5 py-4 text-left text-[12px] font-semibold text-[#6b7280] w-[150px] min-w-[150px] max-w-[150px]">
-  STATUS
-</th>
+                                    <th className="px-5 py-4 text-left text-[12px] font-semibold text-[#6b7280] w-[150px] min-w-[150px] max-w-[150px]">
+                                        STATUS
+                                    </th>
                                     <th
                                         className="
     px-1 py-4
@@ -276,8 +350,8 @@ const [activeFilter, setActiveFilter] = useState("All");
 
                             {/* BODY */}
                             <tbody>
-
-                                {invoices?.map((item) => (
+ {invoices?.length > 0 ? (
+    invoices.map((item) => (
 
                                     <React.Fragment key={item.invoiceId}>
 
@@ -289,44 +363,12 @@ const [activeFilter, setActiveFilter] = useState("All");
                     "
                                         >
 
-                                            {/* INVOICE */}
+                                            
                                             <td className="px-5 py-2">
 
                                                 <div className="flex items-center gap-3">
 
-                                                    {/* DROPDOWN */}
-                                                    {/* <div
-                                                        onClick={() =>
-                                                            setExpandedInvoice(
-                                                                expandedInvoice === item.invoiceId
-                                                                    ? null
-                                                                    : item.invoiceId
-                                                            )
-                                                        }
-                                                        className="
-                            w-7 h-7
-                            rounded-full
-                            bg-gray-100
-                            hover:bg-blue-100
-                            flex items-center justify-center
-                            cursor-pointer
-                            transition-all duration-200
-                          "
-                                                    >
 
-                                                        <div
-                                                            className={`
-                              transition-transform duration-300
-                              ${expandedInvoice === item.invoiceId
-                                                                    ? "rotate-180"
-                                                                    : ""
-                                                                }
-                            `}
-                                                        >
-                                                            <img src={ArrowDown2} className="w-3 h-3" />
-                                                        </div>
-
-                                                    </div> */}
 
 
                                                     <div
@@ -343,7 +385,7 @@ const [activeFilter, setActiveFilter] = useState("All");
                                                         />
                                                     </div>
 
-                                                    {/* INFO */}
+                                                    
                                                     <div>
 
                                                         <p
@@ -371,221 +413,90 @@ const [activeFilter, setActiveFilter] = useState("All");
 
                                             </td>
 
-                                            {/* TENANT */}
-                                           <td className="px-5 py-2 text-left text-sm w-[120px] min-w-[120px] max-w-[120px]">
-  <div
-    className="w-full truncate"
-    title={item?.tenantName || "N/A"}
-  >
-    {item?.tenantName || "N/A"}
-  </div>
-</td>
+                                         
+                                            <td className="px-5 py-2 text-left text-sm w-[120px] min-w-[120px] max-w-[120px]">
+                                                <div
+                                                    className="w-full truncate"
+                                                    title={item?.tenantName || "N/A"}
+                                                >
+                                                    {item?.tenantName || "N/A"}
+                                                </div>
+                                            </td>
 
-                                            {/* TYPE */}
+                                            
                                             <td className="px-5 py-2 text-xs text-start">
                                                 {item.invoiceType}
                                             </td>
 
-                                            {/* GENERATED */}
+                                            
                                             <td className="px-5 py-2 text-xs text-start">
                                                 {item.invoiceStartDate}
                                             </td>
 
-                                            {/* DUE */}
+                                            
                                             <td className="px-5 py-2 text-xs text-start">
                                                 {item.invoiceDueDate}
                                             </td>
 
-                                            {/* STATUS */}
-                                            {/* <td className="px-5 py-2 text-xs text-start">
+                                            <td className="w-[150px] py-1 px-2 whitespace-nowrap overflow-hidden text-[11px] font-medium text-start">
 
-                                            <span
-                                                className={`
-                          px-3 py-1 rounded-full text-xs font-semibold
-                          ${item.paymentStatus === "PAID"
-                                                        ? "bg-green-50 text-green-700"
-                                                        : "bg-red-50 text-red-700"
-                                                    }
-                        `}
-                                            >
-                                                {item.paymentStatus}
-                                            </span>
-
-                                        </td> */}
-                                            {/* <td className="w-[270px] py-1 px-2 whitespace-nowrap overflow-hidden">
-          {(item?.paymentStatus === "PENDING" ||
-        item?.paymentStatus === "PARTIAL_PAYMENT") && (
-            <span className="bg-[#FFD9D9] rounded-[13px] px-3 py-1">
-              {item?.paymentStatus}
-            </span>
-          )}
-
-          {item?.paymentStatus === "PAID" && (
-            <span className="cursor-pointer bg-[#B3E5BB4D] rounded-[14px] px-3 py-1">
-              {item?.paymentStatus}
-            </span>
-          )}
-
-          {(item?.paymentStatus === "Refunded" ||
-            item?.paymentStatus === "Partially Refunded") && (
-            <span className="bg-[#FFF3CD] rounded-[14px] px-3 py-1">
-              {item?.paymentStatus}
-            </span>
-          )}
-
-          {item?.paymentStatus === "PENDING_REFUND" && (
-            <span className="bg-[#FFE6B3] rounded-[14px] px-3 py-1">
-              {item?.paymentStatus}
-            </span>
-          )}
-          {item?.isCancelled && (
-            <span className="bg-[#FFE6B3] rounded-[14px] px-3 py-1">
-              Cancelled
-            </span>
-          )}
-        </td> */}
-                                            {/* <td className="w-[270px] py-1 px-2 ">
-  <div className="flex items-center gap-2 whitespace-nowrap overflow-x-auto scrollbar-hide">
-
-    {item?.isCancelled ? (
-
-      <span className="bg-[#FFE5E5] text-[#C62828] rounded-[14px] px-3 py-1 shrink-0 font-[11px]">
-        Cancelled
-      </span>
-
-    ) : item?.paymentStatus === "PENDING" ||
-      item?.paymentStatus === "PARTIAL_PAYMENT" ? (
-
-      <span className="bg-[#FFD9D9] text-[#D32F2F] rounded-[13px] px-3 py-1 shrink-0 font-[11px]">
-        {item?.paymentStatus}
-      </span>
-
-    ) : item?.paymentStatus === "PAID" ? (
-
-      <span className="bg-[#E6F7EA] text-[#1B8A3D] rounded-[14px] px-3 py-1 shrink-0 font-[11px]">
-        PAID
-      </span>
-
-    ) : item?.paymentStatus === "PENDING_REFUND" ? (
-
-      <span className="bg-[#FFF3CD] text-[#B78103] rounded-[14px] px-3 py-1 shrink-0 font-[11px]">
-        PENDING_REFUND
-      </span>
-
-    ) : null}
-
-  </div>
-</td> */}
-                                            {/* <td className="w-[150px] py-1 px-2 whitespace-nowrap overflow-hidden text-[11px] font-medium text-start">
-
-                                                {item?.paymentStatus === "PAID" && (
-                                                    <span className="bg-[#B3E5BB4D] text-green-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                                                        Paid
-                                                    </span>
-                                                )}
-
-                                                {item?.paymentStatus === "PENDING" && (
-                                                    <span className="bg-[#FFD9D9] text-red-600 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                                                        Pending
-                                                    </span>
-                                                )}
-
-                                                {item?.paymentStatus === "PARTIAL_PAYMENT" && (
-                                                    <span className="bg-[#FFE5B4] text-orange-600 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                                                        Partial Payment
-                                                    </span>
-                                                )}
-
-                                                {item?.paymentStatus === "ADVANCE_IN_HAND" && (
-                                                    <span className="bg-[#D9E8FF] text-blue-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                                                        Advance in hand
-                                                    </span>
-                                                )}
-
-                                                {item?.paymentStatus === "CANCELLED" && (
+                                                {item?.isCancelled === true ? (
                                                     <span className="bg-[#FFE6B3] text-yellow-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
                                                         Cancelled
                                                     </span>
+                                                ) : (
+                                                    <>
+                                                        {item?.paymentStatus === "PAID" && (
+                                                            <span className="bg-[#B3E5BB4D] text-green-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                                                                Paid
+                                                            </span>
+                                                        )}
+
+                                                        {item?.paymentStatus === "PENDING" && (
+                                                            <span className="bg-[#FFD9D9] text-red-600 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                                                                Pending
+                                                            </span>
+                                                        )}
+
+                                                        {item?.paymentStatus === "PARTIAL_PAYMENT" && (
+                                                            <span className="bg-[#FFE5B4] text-orange-600 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                                                                Partial Payment
+                                                            </span>
+                                                        )}
+
+                                                        {item?.paymentStatus === "ADVANCE_IN_HAND" && (
+                                                            <span className="bg-[#D9E8FF] text-blue-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                                                                Advance in hand
+                                                            </span>
+                                                        )}
+
+                                                        {item?.paymentStatus === "CANCELLED" && (
+                                                            <span className="bg-[#FFE6B3] text-yellow-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                                                                Cancelled
+                                                            </span>
+                                                        )}
+
+                                                        {item?.paymentStatus === "PENDING_REFUND" && (
+                                                            <span className="bg-[#FFF3CD] text-amber-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                                                                Refund
+                                                            </span>
+                                                        )}
+
+                                                        {item?.paymentStatus === "PARTIAL_REFUND" && (
+                                                            <span className="bg-[#FDE2FF] text-pink-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                                                                Partial Refund
+                                                            </span>
+                                                        )}
+
+                                                        {item?.paymentStatus === "REFUNDED" && (
+                                                            <span className="bg-[#E2F7E1] text-green-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
+                                                                Refunded
+                                                            </span>
+                                                        )}
+                                                    </>
                                                 )}
 
-                                                {item?.paymentStatus === "PENDING_REFUND" && (
-                                                    <span className="bg-[#FFF3CD] text-amber-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                                                        Refund
-                                                    </span>
-                                                )}
-
-                                                {item?.paymentStatus === "PARTIAL_REFUND" && (
-                                                    <span className="bg-[#FDE2FF] text-pink-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                                                        Partial Refund
-                                                    </span>
-                                                )}
-
-                                                {item?.paymentStatus === "REFUNDED" && (
-                                                    <span className="bg-[#E2F7E1] text-green-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                                                        Refunded
-                                                    </span>
-                                                )}
-
-                                            </td> */}
-                                            <td className="w-[150px] py-1 px-2 whitespace-nowrap overflow-hidden text-[11px] font-medium text-start">
-
-    {item?.isCancelled === true ? (
-        <span className="bg-[#FFE6B3] text-yellow-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-            Cancelled
-        </span>
-    ) : (
-        <>
-            {item?.paymentStatus === "PAID" && (
-                <span className="bg-[#B3E5BB4D] text-green-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                    Paid
-                </span>
-            )}
-
-            {item?.paymentStatus === "PENDING" && (
-                <span className="bg-[#FFD9D9] text-red-600 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                    Pending
-                </span>
-            )}
-
-            {item?.paymentStatus === "PARTIAL_PAYMENT" && (
-                <span className="bg-[#FFE5B4] text-orange-600 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                    Partial Payment
-                </span>
-            )}
-
-            {item?.paymentStatus === "ADVANCE_IN_HAND" && (
-                <span className="bg-[#D9E8FF] text-blue-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                    Advance in hand
-                </span>
-            )}
-
-            {item?.paymentStatus === "CANCELLED" && (
-                <span className="bg-[#FFE6B3] text-yellow-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                    Cancelled
-                </span>
-            )}
-
-            {item?.paymentStatus === "PENDING_REFUND" && (
-                <span className="bg-[#FFF3CD] text-amber-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                    Refund
-                </span>
-            )}
-
-            {item?.paymentStatus === "PARTIAL_REFUND" && (
-                <span className="bg-[#FDE2FF] text-pink-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                    Partial Refund
-                </span>
-            )}
-
-            {item?.paymentStatus === "REFUNDED" && (
-                <span className="bg-[#E2F7E1] text-green-700 rounded-[14px] px-3 py-1 text-[11px] font-medium">
-                    Refunded
-                </span>
-            )}
-        </>
-    )}
-
-</td>
+                                            </td>
                                             <td
                                                 className="
     px-1 py-3
@@ -602,13 +513,7 @@ const [activeFilter, setActiveFilter] = useState("All");
                                                         src={Circle}
                                                         className="w-4 h-4 cursor-pointer"
                                                         alt="menu"
-                                                        // onClick={() =>
-                                                        //     setOpenMenu(
-                                                        //         openMenu === item.invoiceId
-                                                        //             ? null
-                                                        //             : item.invoiceId
-                                                        //     )
-                                                        // }
+                                                        
                                                         onClick={(e) => {
 
                                                             e.stopPropagation();
@@ -675,105 +580,45 @@ const [activeFilter, setActiveFilter] = useState("All");
                                                                 Invoice Receipt
                                                             </button>
                                                         )}
-                                                        {/* <button  onClick={() =>
-    navigate(
-      `/invoice-receipt/${hostelData?.hostelId}/${item.invoiceId}`,
-      {
-        state: {
-          hostelData,
-          invoiceData: item,
-        },
-      }
-    )
-  }
-                                                            className="
-          w-full text-left
-          px-3 py-2 text-sm
-          
-           cursor-pointer whitespace-nowrap
-        "
-
-                                                        >
-                                                            Invoice Receipt
-                                                        </button> */}
-                                                        {/* <button
-                                                            className="
-          w-full text-left
-          px-3 py-2 text-sm
-          hover:bg-red-50
-          text-red-600 cursor-pointer
-        "
+                  
+                                                        <button
+                                                            disabled={!canDelete}
                                                             onClick={() => {
+                                                                if (!canDelete) return;
 
                                                                 setSelectedInvoice(item);
-
                                                                 setShowDeleteModal(true);
-
                                                                 setOpenMenu(null);
-
                                                             }}
+                                                            className={`w-full text-left px-3 py-2 text-sm ${canDelete
+                                                                    ? "text-red-600 hover:bg-red-50 cursor-pointer"
+                                                                    : "text-gray-400 cursor-not-allowed"
+                                                                }`}
                                                         >
                                                             Delete
-                                                        </button> */}
-                                                        <button
-  disabled={!canDelete}
-  onClick={() => {
-    if (!canDelete) return;
-
-    setSelectedInvoice(item);
-    setShowDeleteModal(true);
-    setOpenMenu(null);
-  }}
-  className={`w-full text-left px-3 py-2 text-sm ${
-    canDelete
-      ? "text-red-600 hover:bg-red-50 cursor-pointer"
-      : "text-gray-400 cursor-not-allowed"
-  }`}
->
-  Delete
-</button>
+                                                        </button>
 
 
 
-                                                        {/* <button
-                                                            className="w-full text-left px-3 py-2 text-sm cursor-pointer whitespace-nowrap"
-                                                            onClick={() => {
-                                                                setSelectedInvoice(item);
-
-                                                                setShowAmountModal(true);
-                                                                setOpenMenu(null);
-                                                            }}
-                                                        >
-                                                            Update Amount
-                                                        </button> */}
+                                                      
                                                         {item?.canUpdateAmount === true && (
-                                                            // <button
-                                                            //     className="w-full text-left px-3 py-2 text-sm cursor-pointer whitespace-nowrap"
-                                                            //     onClick={() => {
-                                                            //         setSelectedInvoice(item);
-                                                            //         setShowAmountModal(true);
-                                                            //         setOpenMenu(null);
-                                                            //     }}
-                                                            // >
-                                                            //     Update Amount
-                                                            // </button>
+                                                           
                                                             <button
-  disabled={!canUpdate}
-  onClick={() => {
-    if (!canUpdate) return;
+                                                                disabled={!canUpdate}
+                                                                onClick={() => {
+                                                                    if (!canUpdate) return;
 
-    setSelectedInvoice(item);
-    setShowAmountModal(true);
-    setOpenMenu(null);
-  }}
-  className={`w-full text-left px-3 py-2 text-sm whitespace-nowrap ${
-    canUpdate
-      ? "cursor-pointer hover:bg-gray-100"
-      : "text-gray-400 cursor-not-allowed"
-  }`}
->
-  Update Amount
-</button>
+                                                                    setSelectedInvoice(item);
+                                                                    setShowAmountModal(true);
+                                                                    setOpenMenu(null);
+                                                                }}
+                                                                className={`w-full text-left px-3 py-2 text-sm whitespace-nowrap ${canUpdate
+                                                                        ? "cursor-pointer hover:bg-gray-100"
+                                                                        : "text-gray-400 cursor-not-allowed"
+                                                                    }`}
+                                                            >
+                                                                Update Amount
+                                                            </button>
                                                         )}
                                                     </div>
 
@@ -783,7 +628,7 @@ const [activeFilter, setActiveFilter] = useState("All");
 
                                         </tr>
 
-                                        {/* INNER TABLE */}
+                                        
                                         {expandedInvoice === item.invoiceId && (
 
                                             <tr>
@@ -804,7 +649,7 @@ const [activeFilter, setActiveFilter] = useState("All");
 
                                                         <table className="w-full">
 
-                                                            {/* INNER HEADER */}
+                                                          
                                                             <thead className="bg-violet-50">
 
                                                                 <tr>
@@ -852,7 +697,7 @@ const [activeFilter, setActiveFilter] = useState("All");
 
                                                             </thead>
 
-                                                            {/* INNER BODY */}
+                                                           
                                                             <tbody>
 
                                                                 {item.invoiceItems?.length > 0 ? (
@@ -969,7 +814,14 @@ const [activeFilter, setActiveFilter] = useState("All");
 
                                     </React.Fragment>
 
-                                ))}
+                                ))): (<tr>
+      <td
+        colSpan={7}
+        className="py-10 text-center text-sm font-medium text-gray-400"
+      >
+        No Data Found
+      </td>
+    </tr> )}
 
                             </tbody>
 
@@ -1122,7 +974,7 @@ const [activeFilter, setActiveFilter] = useState("All");
                             onChange={(e) => {
                                 const value = e.target.value;
 
-                                
+
                                 if (/^\d*$/.test(value)) {
                                     setDeletePhone(value);
                                     setAmountError("");

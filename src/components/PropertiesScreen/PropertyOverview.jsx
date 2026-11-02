@@ -276,10 +276,17 @@ useEffect(() => {
     }
   }, [location.state]);
 
- const fetchData = async (search = "") => {
+const fetchData = async (
+  tenantName = "",
+  invoiceNumber = ""
+) => {
   if (!hostelId) return;
 
-  const res = await getHostelById(hostelId, search);
+  const res = await getHostelById(
+    hostelId,
+    tenantName,
+    invoiceNumber
+  );
 
   if (res?.success) {
     setHostelData(res.data);
@@ -3499,10 +3506,11 @@ const handleUpdateStatus = async () => {
                 refreshHostel={fetchData}
               />
             ) : (
-              <InvoiceView
-                hostelData={hostelData}
-                refreshHostel={fetchData}
-              />
+<InvoiceView
+  hostelData={hostelData}
+  refreshHostel={fetchData}
+  onSearch={(value) => fetchData("", value)}
+/>
             )
           )}
 

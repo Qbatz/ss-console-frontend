@@ -1721,7 +1721,7 @@ const followUpStatusOptions =
       cursor-pointer
     "
   >
-    <option value="">All Follow Up Status</option>
+    <option value="">All</option>
 
     {followUpStatusOptions.map((status) => (
       <option key={status.key} value={status.key}>
@@ -1817,7 +1817,7 @@ const followUpStatusOptions =
     table-scroll
     relative
     overflow-auto
-    max-h-[420px]
+    max-h-[310px]
     rounded-2xl
   "
                   >

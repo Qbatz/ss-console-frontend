@@ -712,11 +712,11 @@ const handleViewToken = async (item) => {
 
         </div>
 
-        {/* ================= MAIN CARD ================= */}
+    
 
         <div className="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
 
-          {/* ================= TABS ================= */}
+         
 
           <div className="flex h-[37px] items-center border-b border-gray-100 px-4">
 
@@ -826,7 +826,7 @@ const handleViewToken = async (item) => {
 
               </div>
 
-              {/* REFRESH */}
+            
 
               <button
                 type="button"
@@ -942,7 +942,7 @@ const handleViewToken = async (item) => {
 
                             <div>
                               <p className="text-[12px] font-semibold capitalize text-[#303846]">
-                                {item.service ||
+                                {item.serviceName ||
                                   "—"}
                               </p>
 
@@ -1427,7 +1427,7 @@ const handleViewToken = async (item) => {
       key={index}
       value={item.service}
     >
-      {item.service}
+      {item.serviceName}
     </option>
   ))}
 </select>

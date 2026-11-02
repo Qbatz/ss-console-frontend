@@ -183,7 +183,11 @@ export const HostelProvider = ({ children }) => {
 //     setLoading(false);
 //   }
 // };
-const getHostelById = async (hostelId, tenantName = "") => {
+const getHostelById = async (
+  hostelId,
+  tenantName = "",
+  invoiceNumber = ""
+) => {
   try {
     setLoading(true);
     setErrorMsg("");
@@ -192,9 +196,8 @@ const getHostelById = async (hostelId, tenantName = "") => {
       `/v2/hostels/${hostelId}`,
       {
         params: {
-          ...(tenantName.trim() && {
-            tenantName: tenantName.trim(),
-          }),
+          tenantName: tenantName.trim(),
+          invoiceNumber: invoiceNumber.trim(),
         },
       }
     );
@@ -204,6 +207,7 @@ const getHostelById = async (hostelId, tenantName = "") => {
     }
 
     return { success: false };
+
   } catch (error) {
     const msg = getErrorMessage(error);
     setErrorMsg(msg);
@@ -1293,38 +1297,87 @@ const resetUserPin = async (userId) => {
 const getInvoicesByHostelId = async (
   hostelId,
   page = 0,
-  size = 10
+  size = 10,
+  search = ""
 ) => {
-
   try {
+    const response = await api.get(`/v2/invoice/${hostelId}`, {
+      params: {
+        page,
+        size,
+        invoiceNumber: search.trim(),
+      },
+    });
 
-    const response = await api.get(
-      `/v2/invoice/${hostelId}`,
-      {
-        params: {
-          page,
-          size,
-        },
-      }
-    );
-  console.log("response.data",response.data)
     return response.data;
-  
-
   } catch (error) {
-
-    console.log("getInvoicesByHostelId error", error);
-
+    console.log("Invoice API Error:", error);
     return {
       success: false,
-      message:
-        error?.response?.data?.message ||
-        "Something went wrong",
+      message: error?.response?.data?.message || "Something went wrong",
     };
-
   }
-
 };
+
+// const getInvoicesByHostelId = async (
+//   hostelId,
+//   page = 0,
+//   size = 10,
+//   search = ""
+// ) => {
+//   try {
+//     const response = await api.get(
+//       `/v2/invoice/${hostelId}`,
+//       {
+//         params: {
+//           page,
+//           size,
+//           invoiceNumber: search.trim(),
+//         },
+//       }
+//     );
+
+//     console.log("Invoice API:", response.data);
+//     return response.data;
+
+//   } catch (error) {
+//     console.log("Invoice API Error:", error);
+//     return {
+//       success: false,
+//       message: error?.response?.data?.message || "Something went wrong",
+//     };
+//   }
+// };
+// const getInvoicesByHostelId = async (
+//   hostelId,
+//   page = 0,
+//   size = 10,
+//   search = ""
+// ) => {
+//   try {
+//     const response = await api.get(
+//       `/v2/invoice/${hostelId}`,
+//       {
+//         params: {
+//           page,
+//           size,
+//           search: search.trim(),
+//         },
+//       }
+//     );
+
+//     console.log("Invoice API:", response.data);
+//     return response.data;
+
+//   } catch (error) {
+//     console.log("Invoice API Error:", error);
+
+//     return {
+//       success: false,
+//       message: error?.response?.data?.message || "Something went wrong",
+//     };
+//   }
+// };
 const deleteInvoice = async (payload) => {
   try {
 
